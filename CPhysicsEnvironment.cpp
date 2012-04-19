@@ -5,6 +5,8 @@
 #include "CShadowController.h"
 #include "CPlayerController.h"
 #include "convert.h"
+#include "CPhysicsFluidController.h"
+#include "vphysics_interface.h"
 
 class IDeleteQueueItem {
 public:
@@ -189,7 +191,7 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject 
 	return NULL;
 }
 
-IPhysicsConstraint* CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
+IPhysicsConstraint* CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {	
 	NOT_IMPLEMENTED;
 	return NULL;
 }
@@ -404,7 +406,8 @@ IPhysicsObject* CPhysicsEnvironment::UnserializeObjectFromBuffer(void *pGameData
 }
 
 void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
-	NOT_IMPLEMENTED;
+	//NOT_IMPLEMENTED; // Unsure what this functions is supposed to do its not documentated anywhere so for the moment it shall just be disabled
+	return;
 }
 
 void CPhysicsEnvironment::DebugCheckContacts(void) {
