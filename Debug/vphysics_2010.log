@@ -1,0 +1,44 @@
+﻿Build started 4/19/2012 8:07:47 PM.
+     1>Project "P:\vphysics\dll\vphysics_2010.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\vphysics_2010.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /IC:\SourceGame\src\public /IC:\SourceGame\src\public\tier0 /IC:\SourceGame\src\public\tier1 /I..\bullet\src /ZI /nologo /W3 /WX- /Od /Oy- /D _WINDLL /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"StdAfx.h" /Fp"Debug\vphysics.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt StfAfx.cpp
+         StfAfx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /IC:\SourceGame\src\public /IC:\SourceGame\src\public\tier0 /IC:\SourceGame\src\public\tier1 /I..\bullet\src /ZI /nologo /W3 /WX- /Od /Oy- /D _WINDLL /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\vphysics.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt CPhysics.cpp CPhysicsCollision.cpp CPhysicsEnvironment.cpp CPhysicsFluidController.cpp CPhysicsFrictionSnapshot.cpp CPhysicsObject.cpp CPhysicsSurfaceProps.cpp CPlayerController.cpp CShadowController.cpp convert.cpp
+         convert.cpp
+         CShadowController.cpp
+         CPlayerController.cpp
+         CPhysicsSurfaceProps.cpp
+         CPhysicsObject.cpp
+         CPhysicsFrictionSnapshot.cpp
+         CPhysicsFluidController.cpp
+         CPhysicsEnvironment.cpp
+         CPhysicsCollision.cpp
+         CPhysics.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"P:\vphysics\dll\Debug\vphysics.dll" /NOLOGO /LIBPATH:C:\SourceGame\src\lib\public /LIBPATH:..\bullet\lib tier0.lib tier1.lib vstdlib.lib BulletDynamics.lib BulletCollision.lib LinearMath.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB:LIBCMT /MANIFEST /ManifestFile:"Debug\vphysics.dll.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"P:\vphysics\dll\Debug\vphysics.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"P:\vphysics\dll\Debug\vphysics.lib" /MACHINE:X86 /DLL Debug\convert.obj
+         Debug\CPhysics.obj
+         Debug\CPhysicsCollision.obj
+         Debug\CPhysicsEnvironment.obj
+         Debug\CPhysicsFluidController.obj
+         Debug\CPhysicsFrictionSnapshot.obj
+         Debug\CPhysicsObject.obj
+         Debug\CPhysicsSurfaceProps.obj
+         Debug\CPlayerController.obj
+         Debug\CShadowController.obj
+         Debug\StfAfx.obj
+         LINK : P:\vphysics\dll\Debug\vphysics.dll not found or not built by the last incremental link; performing full link
+            Creating library P:\vphysics\dll\Debug\vphysics.lib and object P:\vphysics\dll\Debug\vphysics.exp
+         vphysics_2010.vcxproj -> P:\vphysics\dll\Debug\vphysics.dll
+       Manifest:
+         c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"P:\vphysics\dll\Debug\vphysics.dll;#2" /manifest Debug\vphysics.dll.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "Debug\vphysics_2010.unsuccessfulbuild".
+         Touching "Debug\vphysics_2010.lastbuildstate".
+     1>Done Building Project "P:\vphysics\dll\vphysics_2010.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:06.96
