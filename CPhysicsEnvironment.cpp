@@ -375,10 +375,10 @@ void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const V
 }
 
 void CPhysicsEnvironment::GetPerformanceSettings(physics_performanceparams_t *pOutput) const {
-	NOT_IMPLEMENTED;
+	memcpy(pOutput, &m_physics_peformanceparams, sizeof(physics_performanceparams_t));
 }
 void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams_t *pSettings) {
-	NOT_IMPLEMENTED;
+	memcpy((void *)&m_physics_peformanceparams, pSettings, sizeof(physics_performanceparams_t));
 }
 
 void CPhysicsEnvironment::ReadStats(physics_stats_t *pOutput) {
