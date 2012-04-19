@@ -76,8 +76,9 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
-
 	m_pDeleteQueue = new CDeleteQueue;
+
+	m_physics_peformanceparams.Defaults();
 
 }
 
