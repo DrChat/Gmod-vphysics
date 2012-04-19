@@ -8,6 +8,7 @@ class btConstraintSolver;
 class btDynamicsWorld;
 class CDeleteQueue;
 class CCollisionSolver;
+class CPhysicsFluidController;
 
 class CPhysicsEnvironment : public IPhysicsEnvironment {
 public:
@@ -125,6 +126,8 @@ private:
 	IPhysicsObjectEvent* m_pObjectEvent;
 	IPhysicsConstraintEvent* m_pConstraintEvent;
 	CDeleteQueue *m_pDeleteQueue;
+	physics_performanceparams_t * m_physics_peformanceparams;
+	CUtlVector<CPhysicsFluidController *> m_fluids;
 	bool m_deleteQuick;
 	float m_timestep;
 };

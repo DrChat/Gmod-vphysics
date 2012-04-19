@@ -24,7 +24,11 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	btMotionState* motionstate = new btDefaultMotionState(transform);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
+
 	info.m_linearDamping = pParams->damping;
+	info.m_angularDamping = pParams->rotdamping;
+	info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
+
 	btRigidBody* body = new btRigidBody(info);
 
 	pEnvironment->GetBulletEnvironment()->addRigidBody(body);
@@ -32,6 +36,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body);
 	pObject->SetGameData(pParams->pGameData);
+	pObject->EnableCollisions(pParams->enableCollisions);
+	
 	return pObject;
 }
 
@@ -52,7 +58,7 @@ CPhysicsObject::~CPhysicsObject() {
 }
 
 bool CPhysicsObject::IsStatic() const {
-	return GetMass() == 0.0;
+	return (m_pObject->getCollisionFlags() &  btCollisionObject::CF_STATIC_OBJECT);
 }
 
 bool CPhysicsObject::IsAsleep() const {
@@ -65,7 +71,7 @@ bool CPhysicsObject::IsTrigger() const {
 }
 
 bool CPhysicsObject::IsFluid() const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED;// based on material index??
 	return false;
 }
 
@@ -75,22 +81,25 @@ bool CPhysicsObject::IsHinged() const {
 }
 
 bool CPhysicsObject::IsCollisionEnabled() const {
-	NOT_IMPLEMENTED;
-	return false;
+	return !(m_pObject->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
 
 bool CPhysicsObject::IsGravityEnabled() const {
-	NOT_IMPLEMENTED;
-	return false;
+	return !(m_pObject->getFlags() & BT_DISABLE_WORLD_GRAVITY);
 }
 
 bool CPhysicsObject::IsDragEnabled() const {
+	//return (bool)(m_pObject->getLinearDamping() + m_pObject->getAngularDamping());
 	NOT_IMPLEMENTED;
-	return false;
 }
 
 bool CPhysicsObject::IsMotionEnabled() const {
-	return m_pObject->getActivationState() != DISABLE_SIMULATION;
+
+	return (
+		(m_pObject->getActivationState() != DISABLE_SIMULATION) || 
+		(!(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT)) ||
+		IsAsleep()
+	); // it doesn't have to be simulation disabled to be motion disabled
 }
 
 bool CPhysicsObject::IsMoveable() const {
@@ -104,19 +113,28 @@ bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
 }
 
 void CPhysicsObject::EnableCollisions(bool enable) {
-	NOT_IMPLEMENTED;
+	if (IsCollisionEnabled() != enable)
+	{
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	}
 }
 
 void CPhysicsObject::EnableGravity(bool enable) {
-	NOT_IMPLEMENTED;
+	if (IsGravityEnabled() != enable)
+	{
+		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
+	}
 }
 
 void CPhysicsObject::EnableDrag(bool enable) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED; // Damping
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
-	NOT_IMPLEMENTED;
+	if((m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != enable)
+	{
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT); // disabling simuation will make it not respond to other objects rather then being unable to move
+	}
 }
 
 void CPhysicsObject::SetGameData(void* pGameData) {
@@ -157,7 +175,7 @@ void CPhysicsObject::Wake() {
 }
 
 void CPhysicsObject::Sleep() {
-	NOT_IMPLEMENTED;
+	m_pObject->setActivationState(ISLAND_SLEEPING);
 }
 
 void CPhysicsObject::RecheckCollisionFilter() {
@@ -169,7 +187,7 @@ void CPhysicsObject::RecheckContactPoints() {
 }
 
 void CPhysicsObject::SetMass(float mass) {
-	NOT_IMPLEMENTED;
+	m_pObject->setMassProps(mass, m_pObject->getInvInertiaDiagLocal()); // not sure about this one
 }
 
 float CPhysicsObject::GetMass() const {
@@ -188,20 +206,26 @@ Vector CPhysicsObject::GetInertia() const {
 }
 
 Vector CPhysicsObject::GetInvInertia() const {
-	NOT_IMPLEMENTED;
-	return Vector();
+	btVector3 vec = m_pObject->getInvInertiaDiagLocal();
+	Vector hl2vec;
+	ConvertPosToHL(vec, hl2vec);
+	return hl2vec;
 }
 
 void CPhysicsObject::SetInertia(const Vector& inertia) {
-	NOT_IMPLEMENTED;
+	btVector3 bull_inertia;
+	ConvertPosToBull(inertia, bull_inertia);
+	m_pObject->setInvInertiaDiagLocal(bull_inertia);
+	m_pObject->updateInertiaTensor();
 }
 
 void CPhysicsObject::SetDamping(const float* speed, const float* rot) {
-	NOT_IMPLEMENTED;
+	m_pObject->setDamping(*speed, *rot);
 }
 
 void CPhysicsObject::GetDamping(float* speed, float* rot) const {
-	NOT_IMPLEMENTED;
+	*speed = m_pObject->getLinearDamping();
+	*rot = m_pObject->getAngularDamping();
 }
 
 void CPhysicsObject::SetDragCoefficient(float* pDrag, float* pAngularDrag) {
@@ -230,13 +254,17 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 }
 
 float CPhysicsObject::GetSphereRadius() const {
-	NOT_IMPLEMENTED;
-	return 0;
+	btCollisionShape * shape = m_pObject->getCollisionShape();
+	if (shape->getShapeType() != CYLINDER_SHAPE_PROXYTYPE)
+		return 0;
+	btCylinderShape * Cylinder_shape = (btCylinderShape *)shape;
+	return Cylinder_shape->getRadius();
 }
 
 float CPhysicsObject::GetEnergy() const {
-	NOT_IMPLEMENTED;
-	return 0;
+	float e = 0.5 * GetMass() * m_pObject->getLinearVelocity().dot(m_pObject->getLinearVelocity());
+	e =+ 0.5 * GetMass() * m_pObject->getAngularVelocity().dot(m_pObject->getAngularVelocity());
+	return ConvertEnergyToHL(e);
 }
 
 Vector CPhysicsObject::GetMassCenterLocalSpace() const {
@@ -286,15 +314,20 @@ void CPhysicsObject::SetVelocityInstantaneous(const Vector* velocity, const Angu
 }
 
 void CPhysicsObject::GetVelocity(Vector* velocity, AngularImpulse* angularVelocity) const {
-	NOT_IMPLEMENTED;
+	ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
+	ConvertPosToHL(m_pObject->getAngularVelocity(), *angularVelocity);
 }
 
 void CPhysicsObject::AddVelocity(const Vector* velocity, const AngularImpulse* angularVelocity) {
-	NOT_IMPLEMENTED;
+	Vector CurrentVel, CurrentAngVel;
+	GetVelocity(&CurrentVel, &CurrentAngVel);
+	SetVelocity(&(CurrentVel + *velocity), &(CurrentAngVel + *angularVelocity));
 }
 
 void CPhysicsObject::GetVelocityAtPoint(const Vector& worldPosition, Vector* pVelocity) const {
-	NOT_IMPLEMENTED;
+	btVector3 vec;
+	ConvertPosToBull(worldPosition, vec);
+	ConvertPosToHL(m_pObject->getVelocityInLocalPoint(vec), *pVelocity);
 }
 
 void CPhysicsObject::GetImplicitVelocity(Vector* velocity, AngularImpulse* angularVelocity) const {

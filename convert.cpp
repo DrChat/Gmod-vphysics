@@ -59,3 +59,7 @@ void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl) {
 	temp.setRotation(quat);
 	ConvertRotationToHL(temp, hl);
 }
+float ConvertEnergyToHL( float energy )
+{
+	return energy * HL2BULL_INSQR_PER_METERSQR;
+}

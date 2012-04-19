@@ -9,6 +9,7 @@
 #include <vphysics/performance.h>
 #include <vphysics/player_controller.h>
 #include <vphysics/virtualmesh.h>
+#include <vphysics/constraints.h>
 #include <cmodel.h>
 
 #include <btBulletDynamicsCommon.h>
