@@ -64,6 +64,12 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	return true;
 }
 
+void CPhysicsEnvironment_TickCallBack(btDynamicsWorld *world, btScalar timeStep)
+{
+	CPhysicsEnvironment * phy = (CPhysicsEnvironment *)(world->getWorldUserInfo());
+	phy->BulletTick(timeStep);
+}
+
 CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick = false;
 	m_queueDeleteObject = false;
@@ -77,10 +83,13 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
+
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
+	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
+
 	m_pDeleteQueue = new CDeleteQueue;
 
-	m_physics_peformanceparams.Defaults();
+	m_physics_peformanceparams->Defaults();
 
 }
 
@@ -416,4 +425,9 @@ void CPhysicsEnvironment::DebugCheckContacts(void) {
 
 btDynamicsWorld* CPhysicsEnvironment::GetBulletEnvironment() {
 	return m_pBulletEnvironment;
+}
+void CPhysicsEnvironment::BulletTick(btScalar dt)
+{
+
+
 }

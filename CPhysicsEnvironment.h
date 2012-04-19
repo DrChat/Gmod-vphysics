@@ -111,6 +111,7 @@ public:
 	virtual void DebugCheckContacts(void);
 public:
 	btDynamicsWorld* GetBulletEnvironment();
+	void BulletTick(btScalar timeStep);
 private:
 	bool m_inSimulation;
 	bool m_queueDeleteObject;
