@@ -150,12 +150,13 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject* pObject) {
 }
 
 IPhysicsFluidController* CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	CPhysicsFluidController *pFluid = ::CreateFluidController( static_cast<CPhysicsObject *>(pFluidObject), pParams );
+	m_fluids.AddToTail( pFluid );
+	return pFluid;
 }
 
-void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController*) {
-	NOT_IMPLEMENTED;
+void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController* tbr) {
+	m_fluids.FindAndRemove((CPhysicsFluidController * )tbr);
 }
 
 IPhysicsSpring* CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, IPhysicsObject *pObjectEnd, springparams_t *pParams) {
