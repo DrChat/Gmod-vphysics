@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="tier0.lib tier1.lib vstdlib.lib BulletDynamics.lib BulletCollision.lib LinearMath.lib"
+				AdditionalDependencies="tier0.lib tier1.lib vstdlib.lib mathlib.lib BulletDynamics_debug.lib BulletCollision_debug.lib LinearMath_debug.lib"
 				AdditionalLibraryDirectories="C:\SourceGame\src\lib\public;..\bullet\lib"
 				IgnoreDefaultLibraryNames="LIBCMT"
 				GenerateDebugInformation="true"
@@ -134,7 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="tier0.lib tier1.lib vstdlib.lib BulletDynamics.lib BulletCollision.lib LinearMath.lib"
+				AdditionalDependencies="tier0.lib tier1.lib vstdlib.lib mathlib.lib BulletDynamics.lib BulletCollision.lib LinearMath.lib"
 				AdditionalLibraryDirectories="C:\SourceGame\src\lib\public;..\bullet\lib"
 				GenerateDebugInformation="true"
 				SubSystem="0"

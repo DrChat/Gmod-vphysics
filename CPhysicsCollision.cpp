@@ -191,7 +191,47 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide,
 }
 
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
-	NOT_IMPLEMENTED;
+	btVector3 btvec;
+	btMatrix3x3 btmatrix;
+	btCollisionObject* object = new btCollisionObject;
+	btCompoundShape* shape = (btCompoundShape*)pCollide;
+	object->setCollisionShape(shape);
+	btTransform transform;
+	ConvertPosToBull(collideOrigin, btvec);
+	ConvertRotationToBull(collideAngles, btmatrix);
+	transform.setOrigin(btvec);
+	transform.setBasis(btmatrix);
+	object->setWorldTransform(transform);
+
+	btVector3 startv, endv;
+	ConvertPosToBull(ray.m_Start, startv);
+	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
+	btTransform startt = btTransform::getIdentity();
+	btTransform endt = btTransform::getIdentity();
+	startt.setOrigin(startv);
+	endt.setOrigin(endv);
+
+	if (ray.m_IsRay) {
+		btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
+		btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
+
+		ptr->fraction = cb.m_closestHitFraction;
+		ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
+		ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+	} else {
+	
+		ConvertPosToBull(ray.m_Extents, btvec);
+		btBoxShape* box = new btBoxShape(btvec);
+
+		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
+		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0);
+
+		ptr->fraction = cb.m_closestHitFraction;
+		ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
+		ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+		delete box;
+	}
+	delete object;
 }
 
 void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, const CPhysCollide *pSweepCollide, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {

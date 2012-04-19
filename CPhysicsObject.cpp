@@ -169,13 +169,13 @@ void CPhysicsObject::RecheckContactPoints() {
 }
 
 void CPhysicsObject::SetMass(float mass) {
-	NOT_IMPLEMENTED;
+	Vector inertia = GetInertia();
+	m_pObject->setMassProps(mass, btVector3(inertia.x, inertia.z, inertia.y));
 }
 
 float CPhysicsObject::GetMass() const {
 	btScalar invmass = m_pObject->getInvMass();
-	if (invmass == 0) return 0;
-	return 1.0/invmass;
+	return invmass ? 1.0 / invmass : 0;
 }
 
 float CPhysicsObject::GetInvMass() const {
@@ -183,17 +183,18 @@ float CPhysicsObject::GetInvMass() const {
 }
 
 Vector CPhysicsObject::GetInertia() const {
-	NOT_IMPLEMENTED;
-	return Vector();
+	btVector3 i = m_pObject->getInvInertiaDiagLocal();
+	return Vector(i.x() ? 1.0 / i.x() : 0, i.z() ? 1.0 / i.z() : 0, i.y() ? 1.0 / i.y() : 0);
 }
 
 Vector CPhysicsObject::GetInvInertia() const {
-	NOT_IMPLEMENTED;
-	return Vector();
+	btVector3 i = m_pObject->getInvInertiaDiagLocal();
+	return Vector(i.x(), i.z(), i.y());
 }
 
 void CPhysicsObject::SetInertia(const Vector& inertia) {
-	NOT_IMPLEMENTED;
+	float mass = GetMass();
+	m_pObject->setMassProps(mass, btVector3(inertia.x, inertia.z, inertia.y));
 }
 
 void CPhysicsObject::SetDamping(const float* speed, const float* rot) {
@@ -266,7 +267,8 @@ void CPhysicsObject::GetPosition(Vector* worldPosition, QAngle* angles) const {
 }
 
 void CPhysicsObject::GetPositionMatrix(matrix3x4_t* positionMatrix) const {
-	NOT_IMPLEMENTED;
+	btTransform transform = m_pObject->getWorldTransform();
+	ConvertMatrixToHL(transform, *positionMatrix);
 }
 
 void CPhysicsObject::SetVelocity(const Vector* velocity, const AngularImpulse* angularVelocity) {
@@ -306,7 +308,9 @@ void CPhysicsObject::LocalToWorld(Vector* worldPosition, const Vector& localPosi
 }
 
 void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosition) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorITransform(Vector(worldPosition), matrix, *localPosition);
 }
 
 void CPhysicsObject::LocalToWorldVector(Vector* worldVector, const Vector& localVector) const {
