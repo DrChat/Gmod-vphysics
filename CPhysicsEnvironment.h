@@ -9,6 +9,7 @@ class btDynamicsWorld;
 class CDeleteQueue;
 class CCollisionSolver;
 class CPhysicsFluidController;
+class CPhysicsDragController;
 
 class CPhysicsEnvironment : public IPhysicsEnvironment {
 public:
@@ -129,6 +130,7 @@ private:
 	CDeleteQueue* m_pDeleteQueue;
 	physics_performanceparams_t* m_physics_performanceparams;
 	CUtlVector<CPhysicsFluidController*> m_fluids;
+	CPhysicsDragController * m_pPhysicsDragController;
 	bool m_deleteQuick;
 	float m_timestep;
 };

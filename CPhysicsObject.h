@@ -110,6 +110,9 @@ public:
 public:
 	void Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject);
 	btRigidBody* GetObject();
+	float GetDragInDirection(btVector3 * direction) const; // Function is not interfaced anymore
+	float GetAngularDragInDirection(btVector3 * direction) const;
+
 private:
 	CPhysicsEnvironment* m_pEnv;
 	void* m_pGameData;
@@ -118,6 +121,11 @@ private:
 	unsigned short m_gameFlags;
 	unsigned int m_contents;
 	CShadowController *m_pShadow;
+
+	btVector3 m_dragBasis;
+	btVector3 m_angDragBasis;
+	float m_dragCoefficient;
+	float m_angDragCoefficient;
 };
 
 CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment* pEnvironment, const CPhysCollide* pCollisionModel, int materialIndex, const Vector& position, const QAngle& angles, objectparams_t* pParams, bool isStatic);

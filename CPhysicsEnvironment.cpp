@@ -6,6 +6,7 @@
 #include "CPlayerController.h"
 #include "convert.h"
 #include "CPhysicsFluidController.h"
+#include "CPhysicsDragController.h"
 #include "vphysics_interface.h"
 
 class IDeleteQueueItem {
@@ -89,6 +90,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pDeleteQueue = new CDeleteQueue;
 
+	m_pPhysicsDragController = new CPhysicsDragController;
+
 	m_physics_performanceparams = new physics_performanceparams_t;
 	m_physics_performanceparams->Defaults();
 
@@ -134,12 +137,11 @@ void CPhysicsEnvironment::GetGravity(Vector* pGravityVector) const {
 }
 
 void CPhysicsEnvironment::SetAirDensity(float density) {
-	NOT_IMPLEMENTED;
+	m_pPhysicsDragController->SetAirDensity(density);
 }
 
 float CPhysicsEnvironment::GetAirDensity() const {
-	NOT_IMPLEMENTED;
-	return 0;
+	return m_pPhysicsDragController->GetAirDensity();
 }
 
 IPhysicsObject* CPhysicsEnvironment::CreatePolyObject(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams) {
@@ -431,6 +433,5 @@ btDynamicsWorld* CPhysicsEnvironment::GetBulletEnvironment() {
 }
 void CPhysicsEnvironment::BulletTick(btScalar dt)
 {
-
-
+	m_pPhysicsDragController->Tick(dt);
 }

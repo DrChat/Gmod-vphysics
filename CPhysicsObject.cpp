@@ -1,11 +1,13 @@
 #include "StdAfx.h"
 
+#include "math.h"
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 #include "CPhysicsCollision.h"
 #include "CPhysicsFrictionSnapshot.h"
 #include "CShadowController.h"
 #include "convert.h"
+
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
@@ -136,7 +138,8 @@ void CPhysicsObject::EnableGravity(bool enable) {
 }
 
 void CPhysicsObject::EnableDrag(bool enable) {
-	NOT_IMPLEMENTED; // Damping
+
+	NOT_IMPLEMENTED;
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
@@ -264,10 +267,17 @@ void CPhysicsObject::GetDamping(float* speed, float* rot) const {
 	if (rot) *rot = m_pObject->getAngularDamping();
 }
 
-void CPhysicsObject::SetDragCoefficient(float* pDrag, float* pAngularDrag) {
-	NOT_IMPLEMENTED;
+void CPhysicsObject::SetDragCoefficient( float *pDrag, float *pAngularDrag )
+{
+	if ( pDrag )
+	{
+		m_dragCoefficient = *pDrag;
+	}
+	if ( pAngularDrag )
+	{
+		m_angDragCoefficient = *pAngularDrag;
+	}
 }
-
 void CPhysicsObject::SetBuoyancyRatio(float ratio) {
 	NOT_IMPLEMENTED;
 }
@@ -415,13 +425,15 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector& forceVector, const Ve
 }
 
 float CPhysicsObject::CalculateLinearDrag(const Vector& unitDirection) const {
-	NOT_IMPLEMENTED;
-	return 0;
+	btVector3 * bull_unitDirection = new btVector3;
+	ConvertDirectionToBull(unitDirection,*bull_unitDirection);
+	return GetDragInDirection( bull_unitDirection );
 }
 
 float CPhysicsObject::CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const {
-	NOT_IMPLEMENTED;
-	return 0;
+	btVector3 * bull_unitDirection = new btVector3;
+	ConvertDirectionToBull(objectSpaceRotationAxis,*bull_unitDirection);
+	return GetAngularDragInDirection( bull_unitDirection ) * DEG2RAD(1.0);
 }
 
 bool CPhysicsObject::GetContactPoint(Vector* contactPoint, IPhysicsObject* *contactObject) const {
@@ -511,8 +523,61 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject) {
 	m_pGameData = NULL;
 	m_gameFlags = 0;
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
+
+	// Drag calculations converted from  2003 source code
+	if (!IsStatic() && GetCollide() )
+	{
+		btCollisionShape * shape = m_pObject->getCollisionShape();
+
+		btVector3 min, max, delta;
+		btTransform t;
+		delta = min, max;
+		delta = delta.absolute();
+
+		shape->getAabb( t, min, max);
+
+		m_dragBasis.setX(delta.y() * delta.z());
+		m_dragBasis.setY(delta.x() * delta.z());
+		m_dragBasis.setZ(delta.x() * delta.y());
+
+		btVector3 ang = m_pObject->getInvInertiaDiagLocal();
+		delta *= 0.5;
+
+		m_angDragBasis.setX(AngDragIntegral( ang[0], delta.x(), delta.y(), delta.z() ) + AngDragIntegral( ang[0], delta.x(), delta.z(), delta.y() ));
+		m_angDragBasis.setY(AngDragIntegral( ang[1], delta.y(), delta.x(), delta.z() ) + AngDragIntegral( ang[1], delta.y(), delta.z(), delta.x() ));
+		m_angDragBasis.setZ(AngDragIntegral( ang[2], delta.z(), delta.x(), delta.y() ) + AngDragIntegral( ang[2], delta.z(), delta.y(), delta.x() ));
+
+				
+	}
+	m_dragCoefficient = 1;
+	m_angDragCoefficient = 1;
+	
 }
 
 btRigidBody* CPhysicsObject::GetObject() {
 	return m_pObject;
+}
+
+float CPhysicsObject::GetDragInDirection(btVector3  * dir) const
+{
+	/*
+	IVP_U_Float_Point local;
+
+    const IVP_U_Matrix *m_world_f_core = m_pObject->get_core()->get_m_world_f_core_PSI();
+    m_world_f_core->vimult3( &velocity, &local );
+
+	return m_dragCoefficient * IVP_Inline_Math::fabsd( local.k[0] * m_dragBasis.x ) + 
+		IVP_Inline_Math::fabsd( local.k[1] * m_dragBasis.y ) + 
+		IVP_Inline_Math::fabsd( local.k[2] * m_dragBasis.z );
+	*/
+	return 0.0;
+}
+float CPhysicsObject::GetAngularDragInDirection(btVector3 * dir) const
+{
+	/*
+	return m_angDragCoefficient * IVP_Inline_Math::fabsd( angVelocity.k[0] * m_angDragBasis.x ) + 
+		IVP_Inline_Math::fabsd( angVelocity.k[1] * m_angDragBasis.y ) + 
+		IVP_Inline_Math::fabsd( angVelocity.k[2] * m_angDragBasis.z );
+	*/
+	return 0.0;
 }
