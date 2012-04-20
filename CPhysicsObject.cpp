@@ -122,18 +122,18 @@ bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
 
 void CPhysicsObject::EnableCollisions(bool enable) {
 	if (enable) {
-		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-	} else {
 		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	} else {
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 	}
 }
 
 void CPhysicsObject::EnableGravity(bool enable) {
 	if (IsStatic()) return;
 	if (enable) {
-		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
-	} else {
 		m_pObject->setFlags(m_pObject->getFlags() & ~BT_DISABLE_WORLD_GRAVITY);
+	} else {
+		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
 	}
 }
 
