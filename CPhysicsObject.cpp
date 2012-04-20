@@ -143,9 +143,13 @@ void CPhysicsObject::EnableDrag(bool enable) {
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
-	if((m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != enable)
+	if(enable)
 	{
-		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT); // disabling simuation will make it not respond to other objects rather then being unable to move
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btRigidBody::CF_STATIC_OBJECT);	
+	}
+	else
+	{
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);	
 	}
 }
 
