@@ -44,4 +44,5 @@ void CPhysicsFluidController::WakeAllSleepingObjects()
 int	CPhysicsFluidController::GetContents() const
 {
 	NOT_IMPLEMENTED;
+	return 0;
 }
