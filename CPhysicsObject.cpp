@@ -7,6 +7,8 @@
 #include "CShadowController.h"
 #include "convert.h"
 
+#define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
+
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
 	btCompoundShape* shape = (btCompoundShape*)pCollisionModel;
 	
@@ -58,7 +60,7 @@ CPhysicsObject::~CPhysicsObject() {
 }
 
 bool CPhysicsObject::IsStatic() const {
-	return (m_pObject->getCollisionFlags() &  btCollisionObject::CF_STATIC_OBJECT);
+	return (m_pObject->isStaticObject());
 }
 
 bool CPhysicsObject::IsAsleep() const {
@@ -85,12 +87,16 @@ bool CPhysicsObject::IsCollisionEnabled() const {
 }
 
 bool CPhysicsObject::IsGravityEnabled() const {
-	return !(m_pObject->getFlags() & BT_DISABLE_WORLD_GRAVITY);
+	if (!IsStatic()) {
+		return !(m_pObject->getFlags() & BT_DISABLE_WORLD_GRAVITY);
+	}
+	return false;
 }
 
 bool CPhysicsObject::IsDragEnabled() const {
 	//return (bool)(m_pObject->getLinearDamping() + m_pObject->getAngularDamping());
 	NOT_IMPLEMENTED;
+	return false;
 }
 
 bool CPhysicsObject::IsMotionEnabled() const {
@@ -113,16 +119,19 @@ bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
 }
 
 void CPhysicsObject::EnableCollisions(bool enable) {
-	if (IsCollisionEnabled() != enable)
-	{
+	if (enable) {
 		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	} else {
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
 	}
 }
 
 void CPhysicsObject::EnableGravity(bool enable) {
-	if (IsGravityEnabled() != enable)
-	{
+	if (IsStatic()) return;
+	if (enable) {
 		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
+	} else {
+		m_pObject->setFlags(m_pObject->getFlags() & ~BT_DISABLE_WORLD_GRAVITY);
 	}
 }
 
@@ -187,13 +196,19 @@ void CPhysicsObject::RecheckContactPoints() {
 }
 
 void CPhysicsObject::SetMass(float mass) {
-	m_pObject->setMassProps(mass, m_pObject->getInvInertiaDiagLocal()); // not sure about this one
+	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
+
+	// Invert the inverse intertia to get inertia
+	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+
+	m_pObject->setMassProps(mass, btvec);
 }
 
 float CPhysicsObject::GetMass() const {
 	btScalar invmass = m_pObject->getInvMass();
-	if (invmass == 0) return 0;
-	return 1.0/invmass;
+	return SAFE_DIVIDE(1.0, invmass);
 }
 
 float CPhysicsObject::GetInvMass() const {
@@ -201,31 +216,52 @@ float CPhysicsObject::GetInvMass() const {
 }
 
 Vector CPhysicsObject::GetInertia() const {
-	NOT_IMPLEMENTED;
-	return Vector();
+	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
+
+	// Invert the inverse intertia to get inertia
+	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+
+	Vector hlvec;
+	ConvertDirectionToHL(btvec, hlvec);
+	VectorAbs(hlvec, hlvec);
+	return hlvec;
 }
 
 Vector CPhysicsObject::GetInvInertia() const {
-	btVector3 vec = m_pObject->getInvInertiaDiagLocal();
-	Vector hl2vec;
-	ConvertPosToHL(vec, hl2vec);
-	return hl2vec;
+	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
+	Vector hlvec;
+	ConvertDirectionToHL(btvec, hlvec);
+	VectorAbs(hlvec, hlvec);
+	return hlvec;
 }
 
 void CPhysicsObject::SetInertia(const Vector& inertia) {
-	btVector3 bull_inertia;
-	ConvertPosToBull(inertia, bull_inertia);
-	m_pObject->setInvInertiaDiagLocal(bull_inertia);
+	btVector3 btvec;
+	ConvertDirectionToBull(inertia, btvec);
+	btvec = btvec.absolute();
+
+	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+
+	m_pObject->setInvInertiaDiagLocal(btvec);
 	m_pObject->updateInertiaTensor();
 }
 
 void CPhysicsObject::SetDamping(const float* speed, const float* rot) {
-	m_pObject->setDamping(*speed, *rot);
+	if (speed && rot) {
+		m_pObject->setDamping(*speed, *rot);
+		return;
+	}
+	if (speed) m_pObject->setDamping(*speed, m_pObject->getAngularDamping());
+	if (rot) m_pObject->setDamping(m_pObject->getLinearDamping(), *rot);
 }
 
 void CPhysicsObject::GetDamping(float* speed, float* rot) const {
-	*speed = m_pObject->getLinearDamping();
-	*rot = m_pObject->getAngularDamping();
+	if (speed) *speed = m_pObject->getLinearDamping();
+	if (rot) *rot = m_pObject->getAngularDamping();
 }
 
 void CPhysicsObject::SetDragCoefficient(float* pDrag, float* pAngularDrag) {
@@ -255,10 +291,9 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 
 float CPhysicsObject::GetSphereRadius() const {
 	btCollisionShape * shape = m_pObject->getCollisionShape();
-	if (shape->getShapeType() != CYLINDER_SHAPE_PROXYTYPE)
-		return 0;
-	btCylinderShape * Cylinder_shape = (btCylinderShape *)shape;
-	return Cylinder_shape->getRadius();
+	if (shape->getShapeType() != SPHERE_SHAPE_PROXYTYPE) return 0;
+	btSphereShape* sphere = (btSphereShape*)shape;
+	return ConvertDistanceToHL(sphere->getRadius());
 }
 
 float CPhysicsObject::GetEnergy() const {
@@ -294,7 +329,8 @@ void CPhysicsObject::GetPosition(Vector* worldPosition, QAngle* angles) const {
 }
 
 void CPhysicsObject::GetPositionMatrix(matrix3x4_t* positionMatrix) const {
-	NOT_IMPLEMENTED;
+	btTransform transform = m_pObject->getWorldTransform();
+	ConvertMatrixToHL(transform, *positionMatrix);
 }
 
 void CPhysicsObject::SetVelocity(const Vector* velocity, const AngularImpulse* angularVelocity) {
@@ -304,7 +340,7 @@ void CPhysicsObject::SetVelocity(const Vector* velocity, const AngularImpulse* a
 		m_pObject->setLinearVelocity(vel);
 	}
 	if (angularVelocity) {
-		ConvertPosToBull(*angularVelocity, angvel);
+		ConvertAngularImpulseToBull(*angularVelocity, angvel);
 		m_pObject->setAngularVelocity(angvel);
 	}
 }
@@ -314,14 +350,20 @@ void CPhysicsObject::SetVelocityInstantaneous(const Vector* velocity, const Angu
 }
 
 void CPhysicsObject::GetVelocity(Vector* velocity, AngularImpulse* angularVelocity) const {
-	ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
-	ConvertPosToHL(m_pObject->getAngularVelocity(), *angularVelocity);
+	if (velocity) ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
+	if (angularVelocity) ConvertAngularImpulseToHL(m_pObject->getAngularVelocity(), *angularVelocity);
 }
 
 void CPhysicsObject::AddVelocity(const Vector* velocity, const AngularImpulse* angularVelocity) {
-	Vector CurrentVel, CurrentAngVel;
-	GetVelocity(&CurrentVel, &CurrentAngVel);
-	SetVelocity(&(CurrentVel + *velocity), &(CurrentAngVel + *angularVelocity));
+	btVector3 btvelocity, btangular;
+	if (velocity) {
+		ConvertPosToBull(*velocity, btvelocity);
+		m_pObject->setLinearVelocity(m_pObject->getLinearVelocity() + btvelocity);
+	}
+	if (angularVelocity) {
+		ConvertAngularImpulseToBull(*angularVelocity, btangular);
+		m_pObject->setAngularVelocity(m_pObject->getAngularVelocity() + btangular);
+	}
 }
 
 void CPhysicsObject::GetVelocityAtPoint(const Vector& worldPosition, Vector* pVelocity) const {
@@ -339,7 +381,9 @@ void CPhysicsObject::LocalToWorld(Vector* worldPosition, const Vector& localPosi
 }
 
 void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosition) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorITransform(Vector(worldPosition), matrix, *localPosition);
 }
 
 void CPhysicsObject::LocalToWorldVector(Vector* worldVector, const Vector& localVector) const {

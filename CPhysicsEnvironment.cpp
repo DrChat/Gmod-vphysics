@@ -89,7 +89,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pDeleteQueue = new CDeleteQueue;
 
-	m_physics_peformanceparams->Defaults();
+	m_physics_performanceparams = new physics_performanceparams_t;
+	m_physics_performanceparams->Defaults();
 
 }
 
@@ -111,6 +112,8 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pBulletBroadphase;
 	delete m_pBulletDispatcher;
 	delete m_pBulletConfiguration;
+
+	delete m_physics_performanceparams;
 }
 
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
@@ -231,8 +234,8 @@ IPhysicsShadowController* CPhysicsEnvironment::CreateShadowController(IPhysicsOb
 	return new CShadowController((CPhysicsObject*)pObject, allowTranslation, allowRotation);
 }
 
-void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController*) {
-	NOT_IMPLEMENTED;
+void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController* pShadow) {
+	delete pShadow;
 }
 
 IPhysicsPlayerController* CPhysicsEnvironment::CreatePlayerController(IPhysicsObject* pObject) {
@@ -387,10 +390,10 @@ void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const V
 }
 
 void CPhysicsEnvironment::GetPerformanceSettings(physics_performanceparams_t *pOutput) const {
-	memcpy(pOutput, &m_physics_peformanceparams, sizeof(physics_performanceparams_t));
+	memcpy(pOutput, m_physics_performanceparams, sizeof(physics_performanceparams_t));
 }
 void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams_t *pSettings) {
-	memcpy((void *)&m_physics_peformanceparams, pSettings, sizeof(physics_performanceparams_t));
+	memcpy((void *)m_physics_performanceparams, pSettings, sizeof(physics_performanceparams_t));
 }
 
 void CPhysicsEnvironment::ReadStats(physics_stats_t *pOutput) {

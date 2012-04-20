@@ -193,6 +193,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsFluidController.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsFrictionSnapshot.cpp"
 				>
 			</File>
@@ -252,6 +256,10 @@
 			</File>
 			<File
 				RelativePath=".\CPhysicsEnvironment.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsFluidController.h"
 				>
 			</File>
 			<File

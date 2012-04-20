@@ -72,6 +72,18 @@ void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl) {
 	ConvertRotationToHL(temp, hl);
 }
 
+void ConvertAngularImpulseToBull(const AngularImpulse& angularimp, btVector3& bull) {
+	bull.setX(-DEG2RAD(angularimp.x));
+	bull.setY(DEG2RAD(angularimp.z));
+	bull.setZ(DEG2RAD(angularimp.y));
+}
+
+void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl) {
+	hl.x = -RAD2DEG(angularimp.x());
+	hl.y = RAD2DEG(angularimp.z());
+	hl.z = RAD2DEG(angularimp.y());
+}
+
 void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	Vector forward, left, up, pos;
 
@@ -96,6 +108,11 @@ void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	hl[1][3] = pos.y;
 	hl[2][3] = pos.z;
 }
+
+float ConvertDistanceToHL(float distance) {
+	return BULL2HL(distance);
+}
+
 float ConvertEnergyToHL( float energy )
 {
 	return energy * HL2BULL_INSQR_PER_METERSQR;

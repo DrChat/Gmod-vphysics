@@ -17,8 +17,11 @@ void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull);
 void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull);
 void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl);
 void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl);
+void ConvertAngularImpulseToBull(const AngularImpulse& angularimp, btVector3& bull);
+void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl);
 void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl);
 
-float ConvertEnergyToHL( float energy );
+float ConvertDistanceToHL(float distance);
+float ConvertEnergyToHL(float energy);
 
 #endif
