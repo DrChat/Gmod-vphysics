@@ -31,7 +31,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	info.m_linearDamping = pParams->damping;
 	info.m_angularDamping = pParams->rotdamping;
-	info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
+	//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
 
 	btRigidBody* body = new btRigidBody(info);
 
