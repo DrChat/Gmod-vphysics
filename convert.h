@@ -21,8 +21,8 @@ void ConvertAngularImpulseToBull(const AngularImpulse& angularimp, btVector3& bu
 void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl);
 void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl);
 
-btVector3 * inline_ConvertPosToBull(const Vector& pos);
-Vector * inline_ConvertPosToHL(const btVector3& pos);
+btVector3& inline_ConvertPosToBull(const Vector& pos);
+Vector& inline_ConvertPosToHL(const btVector3& pos);
 
 float ConvertDistanceToHL(float distance);
 float ConvertEnergyToHL(float energy);
