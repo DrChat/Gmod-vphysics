@@ -13,6 +13,7 @@ public:
 	void AddPhysicsObject(CPhysicsObject *);
 	void RemovePhysicsObject(CPhysicsObject *);
 	void Tick(btScalar dt);
+	bool IsControlling(const CPhysicsObject *) const;
 
 private:
 	float m_airDensity;

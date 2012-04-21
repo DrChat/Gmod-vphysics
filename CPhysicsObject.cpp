@@ -7,6 +7,7 @@
 #include "CPhysicsFrictionSnapshot.h"
 #include "CShadowController.h"
 #include "convert.h"
+#include "CPhysicsDragController.h"
 
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
@@ -93,8 +94,10 @@ bool CPhysicsObject::IsGravityEnabled() const {
 }
 
 bool CPhysicsObject::IsDragEnabled() const {
-	//return (bool)(m_pObject->getLinearDamping() + m_pObject->getAngularDamping());
-	NOT_IMPLEMENTED;
+	if ( !IsStatic() )
+	{
+		return m_pEnv->GetDragController()->IsControlling(this); // Expensive function
+	}
 	return false;
 }
 
@@ -134,9 +137,22 @@ void CPhysicsObject::EnableGravity(bool enable) {
 	}
 }
 
-void CPhysicsObject::EnableDrag(bool enable) {
+void CPhysicsObject::EnableDrag(bool enable) 
+{
+	if ( IsStatic() )
+		return;
 
-	NOT_IMPLEMENTED;
+	if (enable != IsDragEnabled())
+	{
+		if(enable)
+		{
+			m_pEnv->GetDragController()->AddPhysicsObject(this);
+		}
+		else
+		{
+			m_pEnv->GetDragController()->RemovePhysicsObject(this);
+		}
+	}
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
@@ -559,24 +575,23 @@ btRigidBody* CPhysicsObject::GetObject() {
 
 float CPhysicsObject::GetDragInDirection(btVector3  * dir) const
 {
-	/*
-	IVP_U_Float_Point local;
+	btVector3 out;
+	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis(); // const IVP_U_Matrix *m_world_f_core = m_pObject->get_core()->get_m_world_f_core_PSI();
+	BtMatrix_vimult(&mat, dir, &out); // m_world_f_core->vimult3( &velocity, &local );
 
-    const IVP_U_Matrix *m_world_f_core = m_pObject->get_core()->get_m_world_f_core_PSI();
-    m_world_f_core->vimult3( &velocity, &local );
-
-	return m_dragCoefficient * IVP_Inline_Math::fabsd( local.k[0] * m_dragBasis.x ) + 
-		IVP_Inline_Math::fabsd( local.k[1] * m_dragBasis.y ) + 
-		IVP_Inline_Math::fabsd( local.k[2] * m_dragBasis.z );
-	*/
-	return 0.0;
+	return m_dragCoefficient * fabs(out.getX() * m_dragBasis.getX()) +	// Maybe the fabs need to be calculated first AND THEN be multiplied with the m_dragCoefficient
+		fabs(out.getY() * m_dragBasis.getY()) +							// However this is the way its done in the 2003 code.
+		fabs(out.getZ() * m_dragBasis.getZ());
+	
 }
 float CPhysicsObject::GetAngularDragInDirection(btVector3 * dir) const
 {
+	return m_angDragCoefficient * fabs(dir->getX() * m_angDragBasis.getX()) +
+		fabs(dir->getY() * m_angDragBasis.getY()) +
+		fabs(dir->getZ() * m_angDragBasis.getZ());
 	/*
 	return m_angDragCoefficient * IVP_Inline_Math::fabsd( angVelocity.k[0] * m_angDragBasis.x ) + 
 		IVP_Inline_Math::fabsd( angVelocity.k[1] * m_angDragBasis.y ) + 
 		IVP_Inline_Math::fabsd( angVelocity.k[2] * m_angDragBasis.z );
 	*/
-	return 0.0;
 }

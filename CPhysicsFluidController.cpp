@@ -4,19 +4,17 @@
 
 CPhysicsFluidController * CreateFluidController(CPhysicsObject *pFluidObject, fluidparams_t *pParams )
 {
-	CPhysicsFluidController *pFluid = new CPhysicsFluidController( pFluidObject );
+	CPhysicsFluidController *pFluid = new CPhysicsFluidController( pFluidObject, pParams );
 	pFluid->SetGameData( pParams->pGameData );
-
 	return pFluid;
 }
 
-CPhysicsFluidController::CPhysicsFluidController(CPhysicsObject *pFluidObject)
+CPhysicsFluidController::CPhysicsFluidController(CPhysicsObject *pFluidObject, fluidparams_t * pParams)
 {
-	NOT_IMPLEMENTED;
+	m_pGameData = NULL;
 }
 CPhysicsFluidController::~CPhysicsFluidController( void ) 
 {
-	NOT_IMPLEMENTED;
 }
 
 void CPhysicsFluidController::SetGameData( void *pGameData ) 

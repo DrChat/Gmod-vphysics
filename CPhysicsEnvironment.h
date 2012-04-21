@@ -113,6 +113,7 @@ public:
 public:
 	btDynamicsWorld* GetBulletEnvironment();
 	void BulletTick(btScalar timeStep);
+	CPhysicsDragController * GetDragController();
 private:
 	bool m_inSimulation;
 	bool m_queueDeleteObject;

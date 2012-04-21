@@ -434,3 +434,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 {
 	m_pPhysicsDragController->Tick(dt);
 }
+CPhysicsDragController * CPhysicsEnvironment::GetDragController()
+{
+	return m_pPhysicsDragController;
+}

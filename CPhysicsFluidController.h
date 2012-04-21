@@ -6,7 +6,7 @@ class CPhysicsObject;
 class CPhysicsFluidController : public IPhysicsFluidController
 {
 public:
-	CPhysicsFluidController(CPhysicsObject *pFluidObject);
+	CPhysicsFluidController(CPhysicsObject *pFluidObject, fluidparams_t * pParams);
 	virtual ~CPhysicsFluidController( void );
 
 	virtual void	SetGameData( void *pGameData ) ;
@@ -16,6 +16,8 @@ public:
 	virtual float	GetDensity() const;
 	virtual void	WakeAllSleepingObjects();
 	virtual int		GetContents() const;
+public:
+	// Extended functions
 private:
 	void * m_pGameData;
 };
