@@ -419,7 +419,8 @@ IPhysicsObject* CPhysicsEnvironment::UnserializeObjectFromBuffer(void *pGameData
 }
 
 void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
-	//NOT_IMPLEMENTED; // Unsure what this functions is supposed to do its not documentated anywhere so for the moment it shall just be disabled
+	NOT_IMPLEMENTED; // UNDONE: Unsure what this functions is supposed to do its not documentated anywhere so for the moment it shall just be disabled
+	// Andrew; this tells the physics environment to handle a callback whenever a physics object is removed that was attached to a constraint
 	return;
 }
 
