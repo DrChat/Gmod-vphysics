@@ -34,9 +34,9 @@ btVector3 * inline_ConvertPosToBull(const Vector& pos)
 }
 
 void ConvertPosToBull(const Vector& pos, btVector3& bull) {
-	bull.setX(-HL2BULL(pos.x));
+	bull.setX(HL2BULL(pos.x));
 	bull.setY(HL2BULL(pos.z));
-	bull.setZ(HL2BULL(pos.y));
+	bull.setZ(-HL2BULL(pos.y));
 }
 
 Vector * inline_ConvertPosToHL(const btVector3& pos)
@@ -47,15 +47,15 @@ Vector * inline_ConvertPosToHL(const btVector3& pos)
 }
 
 void ConvertPosToHL(const btVector3& pos, Vector& hl) {
-	hl.x = -BULL2HL(pos.x());
-	hl.y = BULL2HL(pos.z());
+	hl.x = BULL2HL(pos.x());
+	hl.y = -BULL2HL(pos.z());
 	hl.z = BULL2HL(pos.y());
 }
 
 void ConvertDirectionToBull(const Vector& dir, btVector3& bull) {
-	bull.setX(-dir.x);
+	bull.setX(dir.x);
 	bull.setY(dir.z);
-	bull.setZ(dir.y);
+	bull.setZ(-dir.y);
 }
 
 void ConvertDirectionToHL(const btVector3& dir, Vector& hl) {
@@ -66,35 +66,46 @@ void ConvertDirectionToHL(const btVector3& dir, Vector& hl) {
 
 void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull) {
 	RadianEuler radian(angles);
-	bull.setEulerZYX(radian.y, radian.x, radian.z);
+	btQuaternion q1;
+	q1.setEulerZYX(radian.z, radian.y, radian.x);
+	btQuaternion q2(q1.getX(), q1.getZ(), -q1.getY(), q1.getW());
+	bull.setRotation(q2);
 }
 
 void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull) {
 	RadianEuler radian(angles);
-	bull.setEulerZYX(radian.y, radian.x, radian.z);
+	btQuaternion q;
+	q.setEulerZYX(radian.z, radian.y, radian.x);
+	bull.setX(q.getX());
+	bull.setY(q.getZ());
+	bull.setZ(-q.getY());
+	bull.setW(q.getW());
 }
 
 void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl) {
-	RadianEuler radian;
-	matrix.getEulerZYX(radian.y, radian.x, radian.z);
+	btQuaternion quat;
+	matrix.getRotation(quat);
+	Quaternion q(quat.getX(), -quat.getZ(), quat.getY(), quat.getW());
+	RadianEuler radian(q);
 	hl = radian.ToQAngle();
 }
 
-void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl) {
-	btMatrix3x3 temp;
-	temp.setRotation(quat);
-	ConvertRotationToHL(temp, hl);
+void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl)
+{
+	Quaternion q(quat.getX(), -quat.getZ(), quat.getY(), quat.getW());
+	RadianEuler radian(q);
+	hl = radian.ToQAngle();
 }
 
 void ConvertAngularImpulseToBull(const AngularImpulse& angularimp, btVector3& bull) {
-	bull.setX(-DEG2RAD(angularimp.x));
+	bull.setX(DEG2RAD(angularimp.x));
 	bull.setY(DEG2RAD(angularimp.z));
-	bull.setZ(DEG2RAD(angularimp.y));
+	bull.setZ(-DEG2RAD(angularimp.y));
 }
 
 void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl) {
-	hl.x = -RAD2DEG(angularimp.x());
-	hl.y = RAD2DEG(angularimp.z());
+	hl.x = RAD2DEG(angularimp.x());
+	hl.y = -RAD2DEG(angularimp.z());
 	hl.z = RAD2DEG(angularimp.y());
 }
 

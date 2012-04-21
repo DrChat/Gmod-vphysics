@@ -528,7 +528,12 @@ void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot* pSnapshot
 }
 
 void CPhysicsObject::OutputDebugInfo() const {
-	NOT_IMPLEMENTED;
+	Msg( "-----------------\n" );
+	// FIXME: requires CBaseEntity!!
+	// Msg( "Object: %s\n", (CBaseEntity *)GetGameData()->GetModelName() );
+	Msg( "Mass: %f (inv %f)\n", GetMass(), GetInvMass() );
+	// FIXME: complete this function via format noted on
+	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
 void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject) {
