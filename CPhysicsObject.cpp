@@ -440,15 +440,15 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector& forceVector, const Ve
 }
 
 float CPhysicsObject::CalculateLinearDrag(const Vector& unitDirection) const {
-	btVector3 * bull_unitDirection = new btVector3;
-	ConvertDirectionToBull(unitDirection,*bull_unitDirection);
-	return GetDragInDirection( bull_unitDirection );
+	btVector3 bull_unitDirection;
+	ConvertDirectionToBull(unitDirection,bull_unitDirection);
+	return GetDragInDirection( &bull_unitDirection );
 }
 
 float CPhysicsObject::CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const {
-	btVector3 * bull_unitDirection = new btVector3;
-	ConvertDirectionToBull(objectSpaceRotationAxis,*bull_unitDirection);
-	return GetAngularDragInDirection( bull_unitDirection ) * DEG2RAD(1.0);
+	btVector3 bull_unitDirection;
+	ConvertDirectionToBull(objectSpaceRotationAxis,bull_unitDirection);
+	return GetAngularDragInDirection( &bull_unitDirection ) * DEG2RAD(1.0);
 }
 
 bool CPhysicsObject::GetContactPoint(Vector* contactPoint, IPhysicsObject* *contactObject) const {

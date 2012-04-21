@@ -42,7 +42,11 @@ void CPhysicsDragController::Tick(btScalar dt)
 		AngularImpulse ang;
 		object->GetVelocity(&vel, &ang);
 
-		float dragForce = -0.5 * object->GetDragInDirection( inline_ConvertPosToBull(vel) ) * m_airDensity * dt;
+		btVector3 bull_vel;
+
+		ConvertPosToBull(vel, bull_vel);
+
+		float dragForce = -0.5 * object->GetDragInDirection( &bull_vel ) * m_airDensity * dt;
 		if ( dragForce < -1.0f )
 		{
 			dragForce = -1.0f;
@@ -53,6 +57,7 @@ void CPhysicsDragController::Tick(btScalar dt)
 		}
 		btVector3 bull_angimpulse;
 		ConvertAngularImpulseToBull(ang, bull_angimpulse);
+
 		float angDragForce = -object->GetAngularDragInDirection(&bull_angimpulse) * m_airDensity * dt;
 		if ( angDragForce < -1.0f )
 		{

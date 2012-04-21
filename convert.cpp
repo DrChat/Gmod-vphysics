@@ -26,24 +26,10 @@ btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	return bull;
 }
 
-btVector3 * inline_ConvertPosToBull(const Vector& pos)
-{
-	btVector3 * bull = new btVector3;
-	ConvertPosToBull(pos, *bull);
-	return bull;
-}
-
 void ConvertPosToBull(const Vector& pos, btVector3& bull) {
 	bull.setX(HL2BULL(pos.x));
 	bull.setY(HL2BULL(pos.z));
 	bull.setZ(-HL2BULL(pos.y));
-}
-
-Vector * inline_ConvertPosToHL(const btVector3& pos)
-{
-	Vector * hl = new Vector;
-	ConvertPosToHL(pos, *hl);
-	return hl;
 }
 
 void ConvertPosToHL(const btVector3& pos, Vector& hl) {
