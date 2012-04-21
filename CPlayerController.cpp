@@ -52,6 +52,7 @@ int CPlayerController::GetShadowPosition( Vector* position, QAngle* angles ) {
 		ConvertRotationToHL(btmatrix, *angles);
 	}
 	// FIXME: what is this?
+	// Andrew; this needs to return the amount of ticks since the last Update()
 	return 0;
 }
 
