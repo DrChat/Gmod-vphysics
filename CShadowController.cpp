@@ -17,14 +17,12 @@ CShadowController::~CShadowController() {
 
 void CShadowController::Update(const Vector &position, const QAngle &angles, float timeOffset) {
 	btVector3 btvec;
-	btQuaternion btquat;
+	btMatrix3x3 matrix;
 
 	ConvertPosToBull(position, btvec);
-	ConvertRotationToBull(angles, btquat);
+	ConvertRotationToBull(angles, matrix);
 
-	btTransform transform;
-	transform.setOrigin(btvec);
-	transform.setRotation(btquat);
+	btTransform transform(matrix, btvec);
 	m_pObject->GetObject()->getMotionState()->setWorldTransform(transform);
 }
 

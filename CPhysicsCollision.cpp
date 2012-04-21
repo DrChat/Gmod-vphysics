@@ -124,11 +124,9 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 	btVector3 pos, mins, maxs;
 	btMatrix3x3 rot;
 
-	btTransform transform = btTransform::getIdentity();
 	ConvertPosToBull(collideOrigin, pos);
 	ConvertRotationToBull(collideAngles, rot);
-	transform.setBasis(rot);
-	transform.setOrigin(pos);
+	btTransform transform(rot, pos);
 
 	shape->getAabb(transform, mins, maxs);
 
@@ -169,8 +167,7 @@ CPhysCollide* CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 	btBoxShape* box = new btBoxShape(halfsize);
 	btCompoundShape* shape = new btCompoundShape;
 
-	btTransform transform = btTransform::getIdentity();
-	transform.setOrigin(btmins + halfsize);
+	btTransform transform(btMatrix3x3::getIdentity(), btmins + halfsize);
 
 	shape->addChildShape(transform, box);
 
@@ -196,20 +193,16 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	btCollisionObject* object = new btCollisionObject;
 	btCompoundShape* shape = (btCompoundShape*)pCollide;
 	object->setCollisionShape(shape);
-	btTransform transform;
 	ConvertPosToBull(collideOrigin, btvec);
 	ConvertRotationToBull(collideAngles, btmatrix);
-	transform.setOrigin(btvec);
-	transform.setBasis(btmatrix);
+	btTransform transform(btmatrix, btvec);
 	object->setWorldTransform(transform);
 
 	btVector3 startv, endv;
 	ConvertPosToBull(ray.m_Start, startv);
 	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
-	btTransform startt = btTransform::getIdentity();
-	btTransform endt = btTransform::getIdentity();
-	startt.setOrigin(startv);
-	endt.setOrigin(endv);
+	btTransform startt(btMatrix3x3::getIdentity(), startv);
+	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
 	if (ray.m_IsRay) {
 		btCollisionWorld::ClosestRayResultCallback cb(startv, endv);

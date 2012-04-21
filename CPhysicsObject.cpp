@@ -14,14 +14,11 @@
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
 	btCompoundShape* shape = (btCompoundShape*)pCollisionModel;
 	
-	btTransform transform;
-	transform.setIdentity();
-	btQuaternion quat;
-	ConvertRotationToBull(angles, quat);
-	transform.setRotation(quat);
 	btVector3 vector;
+	btMatrix3x3 matrix;
 	ConvertPosToBull(position, vector);
-	transform.setOrigin(vector);
+	ConvertRotationToBull(angles, matrix);
+	btTransform transform(matrix, vector);
 
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
@@ -323,12 +320,10 @@ Vector CPhysicsObject::GetMassCenterLocalSpace() const {
 
 void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport) {
 	btVector3 pos;
-	btQuaternion rot;
+	btMatrix3x3 matrix;
 	ConvertPosToBull(worldPosition, pos);
-	ConvertRotationToBull(angles, rot);
-	btTransform transform;
-	transform.setOrigin(pos);
-	transform.setRotation(rot);
+	ConvertRotationToBull(angles, matrix);
+	btTransform transform(matrix, pos);
 	m_pObject->setWorldTransform(transform);
 }
 

@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsDragController.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsEnvironment.cpp"
 				>
 			</File>
@@ -198,6 +202,10 @@
 			</File>
 			<File
 				RelativePath=".\CPhysicsFrictionSnapshot.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsMotionController.cpp"
 				>
 			</File>
 			<File
@@ -214,6 +222,10 @@
 			</File>
 			<File
 				RelativePath=".\CShadowController.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\math.cpp"
 				>
 			</File>
 			<File
@@ -255,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsDragController.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsEnvironment.h"
 				>
 			</File>
@@ -264,6 +280,10 @@
 			</File>
 			<File
 				RelativePath=".\CPhysicsFrictionSnapshot.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsMotionController.h"
 				>
 			</File>
 			<File
@@ -280,6 +300,10 @@
 			</File>
 			<File
 				RelativePath=".\CShadowController.h"
+				>
+			</File>
+			<File
+				RelativePath=".\math.h"
 				>
 			</File>
 			<File

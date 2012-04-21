@@ -4,10 +4,10 @@
 #include "CPhysicsObject.h"
 #include "CShadowController.h"
 #include "CPlayerController.h"
-#include "convert.h"
 #include "CPhysicsFluidController.h"
 #include "CPhysicsDragController.h"
-#include "vphysics_interface.h"
+#include "CPhysicsMotionController.h"
+#include "convert.h"
 
 class IDeleteQueueItem {
 public:
@@ -248,12 +248,11 @@ void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController* cont
 }
 
 IPhysicsMotionController* CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	return ::CreateMotionController(this, pHandler);
 }
 
 void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pController) {
-	NOT_IMPLEMENTED;
+	delete pController;
 }
 
 IPhysicsVehicleController* CPhysicsEnvironment::CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
