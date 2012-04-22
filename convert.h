@@ -13,6 +13,8 @@ void ConvertPosToBull(const Vector& pos, btVector3& bull);
 void ConvertPosToHL(const btVector3& pos, Vector& hl);
 void ConvertDirectionToBull(const Vector& dir, btVector3& bull);
 void ConvertDirectionToHL(const btVector3& dir, Vector& hl);
+#define ConvertForceImpulseToBull ConvertPosToBull
+#define ConvertForceImpulseToHL ConvertPosToHL
 void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull);
 void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull);
 void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl);

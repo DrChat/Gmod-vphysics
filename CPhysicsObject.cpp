@@ -21,10 +21,14 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
+	btVector3 masscenterv(0, 0, 0);
+	if (pParams->massCenterOverride) ConvertPosToBull(*pParams->massCenterOverride, masscenterv);
+	btTransform masscenter(btMatrix3x3::getIdentity(), masscenterv);
+
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
-	btMotionState* motionstate = new btDefaultMotionState(transform);
+	btMotionState* motionstate = new btDefaultMotionState(transform, masscenter);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
 
 	info.m_linearDamping = pParams->damping;
@@ -402,7 +406,9 @@ void CPhysicsObject::GetImplicitVelocity(Vector* velocity, AngularImpulse* angul
 }
 
 void CPhysicsObject::LocalToWorld(Vector* worldPosition, const Vector& localPosition) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorTransform(Vector(localPosition), matrix, *worldPosition);
 }
 
 void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosition) const {
@@ -412,23 +418,36 @@ void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosi
 }
 
 void CPhysicsObject::LocalToWorldVector(Vector* worldVector, const Vector& localVector) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorRotate(Vector(localVector), matrix, *worldVector);
 }
 
 void CPhysicsObject::WorldToLocalVector(Vector* localVector, const Vector& worldVector) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorIRotate(Vector(worldVector), matrix, *localVector);
 }
 
 void CPhysicsObject::ApplyForceCenter(const Vector& forceVector) {
-	NOT_IMPLEMENTED;
+	btVector3 force;
+	ConvertForceImpulseToBull(forceVector, force);
+	m_pObject->applyCentralForce(force);
 }
 
 void CPhysicsObject::ApplyForceOffset(const Vector& forceVector, const Vector& worldPosition) {
-	NOT_IMPLEMENTED;
+	Vector local;
+	WorldToLocal(&local, worldPosition);
+	btVector3 force, offset;
+	ConvertForceImpulseToBull(forceVector, force);
+	ConvertPosToBull(local, offset);
+	m_pObject->applyForce(force, offset);
 }
 
 void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse& torque) {
-	NOT_IMPLEMENTED;
+	btVector3 bullTorque;
+	ConvertAngularImpulseToBull(torque, bullTorque);
+	m_pObject->applyTorque(bullTorque);
 }
 
 void CPhysicsObject::CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector* centerForce, AngularImpulse* centerTorque) const {
