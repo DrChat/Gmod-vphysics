@@ -83,7 +83,7 @@ CPhysCollide* CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pCon
 }
 
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
-	btCompoundShape* shape = (btCompoundShape*)pCollide;
+	btCollisionShape* shape = (btCollisionShape*)pCollide;
 	delete shape;
 }
 
@@ -119,7 +119,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 
 void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles) {
 	// Bullet returns very different AABBs than Havok.
-	btCompoundShape* shape = (btCompoundShape*)pCollide;
+	btCollisionShape* shape = (btCollisionShape*)pCollide;
 
 	btVector3 pos, mins, maxs;
 	btMatrix3x3 rot;
@@ -191,7 +191,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	btVector3 btvec;
 	btMatrix3x3 btmatrix;
 	btCollisionObject* object = new btCollisionObject;
-	btCompoundShape* shape = (btCompoundShape*)pCollide;
+	btCollisionShape* shape = (btCollisionShape*)pCollide;
 	object->setCollisionShape(shape);
 	ConvertPosToBull(collideOrigin, btvec);
 	ConvertRotationToBull(collideAngles, btmatrix);
@@ -247,7 +247,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
-		btCompoundShape* shape = (btCompoundShape*)pVCollide->solids[i];
+		btCollisionShape* shape = (btCollisionShape*)pVCollide->solids[i];
 		delete shape;
 	}
 }
