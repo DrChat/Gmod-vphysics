@@ -53,6 +53,11 @@ CPhysicsObject::CPhysicsObject() {
 }
 
 CPhysicsObject::~CPhysicsObject() {
+	if (m_pEnv)
+	{
+		m_pEnv->GetDragController()->RemovePhysicsObject(this);	
+	}
+	
 	if (m_pEnv && m_pObject) {
 		m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
 		delete m_pObject;
