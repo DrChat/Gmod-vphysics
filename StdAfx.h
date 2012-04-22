@@ -15,6 +15,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btMaterial.h>
 
+#define COLLISION_MARGIN 0.004
+
 extern IPhysics* g_ValvePhysics;
 extern IPhysicsCollision* g_ValvePhysicsCollision;
 #ifdef _DEBUG

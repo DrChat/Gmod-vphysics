@@ -8,9 +8,11 @@ btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	ICollisionQuery* query = g_ValvePhysicsCollision->CreateQueryModel(ivp);
 	int convexcount = query->ConvexCount();
 	btCompoundShape* bull = new btCompoundShape;
+	bull->setMargin(COLLISION_MARGIN);
 	for (int convex = 0; convex < convexcount; convex++) {
 		int triangles = query->TriangleCount(convex);
 		btConvexHullShape* btconvex = new btConvexHullShape;
+		btconvex->setMargin(COLLISION_MARGIN);
 		for (int i = 0; i < triangles; i++) {
 			query->GetTriangleVerts(convex, i, hlvec);
 			ConvertPosToBull(hlvec[0], btvec);
