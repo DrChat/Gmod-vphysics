@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
 #include "CPhysicsMotionController.h"
+#include "CPhysicsObject.h"
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler) {
 	if (!pHandler) return NULL;
@@ -21,20 +22,31 @@ void CPhysicsMotionController::SetEventHandler(IMotionEvent* handler) {
 }
 
 void CPhysicsMotionController::AttachObject(IPhysicsObject* pObject, bool checkIfAlreadyAttached) {
-	NOT_IMPLEMENTED;
+	Assert(pObject);
+	if (!pObject || pObject->IsStatic()) return;
+
+	CPhysicsObject *pPhys = (CPhysicsObject*)pObject;
+	btRigidBody* body = pPhys->GetObject();
+	m_objectList.AddToTail(body);
 }
 
 void CPhysicsMotionController::DetachObject(IPhysicsObject* pObject) {
-	NOT_IMPLEMENTED;
+	CPhysicsObject *pPhys = (CPhysicsObject*)pObject;
+	btRigidBody* body = pPhys->GetObject();
+
+	int index = m_objectList.Find(body);
+	if (!m_objectList.IsValidIndex(index)) return;
+	m_objectList.Remove(index);
 }
 
 int CPhysicsMotionController::CountObjects() {
-	NOT_IMPLEMENTED;
-	return 0;
+	return m_objectList.Count();
 }
 
 void CPhysicsMotionController::GetObjects(IPhysicsObject** pObjectList) {
-	NOT_IMPLEMENTED;
+	for (int i = 0; i < m_objectList.Count(); i++) {
+		pObjectList[i] = (IPhysicsObject*)m_objectList[i]->getUserPointer();
+	}
 }
 
 void CPhysicsMotionController::ClearObjects() {
@@ -42,7 +54,9 @@ void CPhysicsMotionController::ClearObjects() {
 }
 
 void CPhysicsMotionController::WakeObjects() {
-	NOT_IMPLEMENTED;
+	for (int i = 0; i < m_objectList.Count(); i++) {
+		m_objectList[i]->setActivationState(ACTIVE_TAG);
+	}
 }
 
 void CPhysicsMotionController::SetPriority(priority_t priority) {

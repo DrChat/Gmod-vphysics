@@ -21,10 +21,14 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
+	btVector3 masscenterv(0, 0, 0);
+	if (pParams->massCenterOverride) ConvertPosToBull(*pParams->massCenterOverride, masscenterv);
+	btTransform masscenter(btMatrix3x3::getIdentity(), masscenterv);
+
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
-	btMotionState* motionstate = new btDefaultMotionState(transform);
+	btMotionState* motionstate = new btDefaultMotionState(transform, masscenter);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
 
 	info.m_linearDamping = pParams->damping;
@@ -402,7 +406,9 @@ void CPhysicsObject::GetImplicitVelocity(Vector* velocity, AngularImpulse* angul
 }
 
 void CPhysicsObject::LocalToWorld(Vector* worldPosition, const Vector& localPosition) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorTransform(Vector(localPosition), matrix, *worldPosition);
 }
 
 void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosition) const {
