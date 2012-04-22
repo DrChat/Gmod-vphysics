@@ -14,7 +14,6 @@ public:
 	void RemovePhysicsObject(CPhysicsObject *);
 	void Tick(btScalar dt);
 	bool IsControlling(const CPhysicsObject *) const;
-
 private:
 	float m_airDensity;
 	CUtlVector<CPhysicsObject*> m_ents;

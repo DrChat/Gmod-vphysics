@@ -19,11 +19,14 @@ float CPhysicsDragController::GetAirDensity()
 }
 void CPhysicsDragController::RemovePhysicsObject(CPhysicsObject * obj)
 {
-	m_ents.AddToTail(obj);
+	m_ents.FindAndRemove(obj);
 }
 void CPhysicsDragController::AddPhysicsObject(CPhysicsObject * obj)
 {
-	m_ents.FindAndRemove(obj);
+	if (!m_ents.Find(obj))
+	{
+		m_ents.AddToTail(obj);
+	}
 }
 bool CPhysicsDragController::IsControlling(const CPhysicsObject * obj) const
 {

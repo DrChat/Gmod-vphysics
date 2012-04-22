@@ -1,3 +1,16 @@
++vphysics.sln
++vphysics.vcproj
+
+*.ipch
+*.sdf
+*.sln
+*.suo
+*.vcproj
+*.vcxproj
+*.filters
+*.user
+*.exe
+*.dll
 
 /Debug
 /Release
