@@ -157,8 +157,9 @@ IPhysicsObject* CPhysicsEnvironment::CreatePolyObjectStatic(const CPhysCollide *
 }
 
 IPhysicsObject* CPhysicsEnvironment::CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	IPhysicsObject *pObject = CreatePhysicsObject(this, (CPhysCollide*)new btSphereShape(HL2BULL(radius)), materialIndex, position, angles, pParams, false);
+	m_objects.AddToTail(pObject);
+	return pObject;
 }
 
 void CPhysicsEnvironment::DestroyObject(IPhysicsObject* pObject) {
