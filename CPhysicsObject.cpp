@@ -418,23 +418,36 @@ void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosi
 }
 
 void CPhysicsObject::LocalToWorldVector(Vector* worldVector, const Vector& localVector) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorRotate(Vector(localVector), matrix, *worldVector);
 }
 
 void CPhysicsObject::WorldToLocalVector(Vector* localVector, const Vector& worldVector) const {
-	NOT_IMPLEMENTED;
+	matrix3x4_t matrix;
+	GetPositionMatrix(&matrix);
+	VectorIRotate(Vector(worldVector), matrix, *localVector);
 }
 
 void CPhysicsObject::ApplyForceCenter(const Vector& forceVector) {
-	NOT_IMPLEMENTED;
+	btVector3 force;
+	ConvertForceImpulseToBull(forceVector, force);
+	m_pObject->applyCentralForce(force);
 }
 
 void CPhysicsObject::ApplyForceOffset(const Vector& forceVector, const Vector& worldPosition) {
-	NOT_IMPLEMENTED;
+	Vector local;
+	WorldToLocal(&local, worldPosition);
+	btVector3 force, offset;
+	ConvertForceImpulseToBull(forceVector, force);
+	ConvertPosToBull(local, offset);
+	m_pObject->applyForce(force, offset);
 }
 
 void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse& torque) {
-	NOT_IMPLEMENTED;
+	btVector3 bullTorque;
+	ConvertAngularImpulseToBull(torque, bullTorque);
+	m_pObject->applyTorque(bullTorque);
 }
 
 void CPhysicsObject::CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector* centerForce, AngularImpulse* centerTorque) const {
