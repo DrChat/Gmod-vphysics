@@ -134,10 +134,13 @@ void CPhysicsObject::EnableCollisions(bool enable) {
 
 void CPhysicsObject::EnableGravity(bool enable) {
 	if (IsStatic()) return;
-	if (enable)
+	if (enable) {
 		m_pObject->setGravity(m_pEnv->GetBulletEnvironment()->getGravity());
+		m_pObject->setFlags(m_pObject->getFlags() & ~BT_DISABLE_WORLD_GRAVITY);
+	}
 	else {
 		m_pObject->setGravity(btVector3(0,0,0));
+		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
 	}
 }
 
