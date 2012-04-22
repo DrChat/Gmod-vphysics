@@ -28,7 +28,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
-	btMotionState* motionstate = new btDefaultMotionState(transform, masscenter);
+	btMotionState* motionstate = new btDefaultMotionState(transform/*, masscenter*/);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
 
 	info.m_linearDamping = pParams->damping;
@@ -134,10 +134,10 @@ void CPhysicsObject::EnableCollisions(bool enable) {
 
 void CPhysicsObject::EnableGravity(bool enable) {
 	if (IsStatic()) return;
-	if (enable) {
-		m_pObject->setFlags(m_pObject->getFlags() & ~BT_DISABLE_WORLD_GRAVITY);
-	} else {
-		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
+	if (enable)
+		m_pObject->setGravity(m_pEnv->GetBulletEnvironment()->getGravity());
+	else {
+		m_pObject->setGravity(btVector3(0,0,0));
 	}
 }
 
