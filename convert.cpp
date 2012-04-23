@@ -122,6 +122,10 @@ void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	hl[2][3] = pos.z;
 }
 
+float ConvertDistanceToBull(float distance) {
+	return HL2BULL(distance);
+}
+
 float ConvertDistanceToHL(float distance) {
 	return BULL2HL(distance);
 }

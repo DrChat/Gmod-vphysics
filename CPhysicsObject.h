@@ -108,7 +108,7 @@ public:
 
 	virtual void OutputDebugInfo() const;
 public:
-	void Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject);
+	void Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride);
 	btRigidBody* GetObject();
 	float GetDragInDirection(btVector3 * direction) const; // Function is not interfaced anymore
 	float GetAngularDragInDirection(btVector3 * direction) const;
@@ -117,17 +117,23 @@ private:
 	CPhysicsEnvironment* m_pEnv;
 	void* m_pGameData;
 	btRigidBody* m_pObject;
+
+	unsigned short m_materialIndex;
+
 	unsigned short m_callbacks;
 	unsigned short m_gameFlags;
 	unsigned int m_contents;
-	CShadowController *m_pShadow;
 
-	btVector3 m_dragBasis;
-	btVector3 m_angDragBasis;
+	float m_volume;
 	float m_dragCoefficient;
 	float m_angDragCoefficient;
+	btVector3 m_dragBasis;
+	btVector3 m_angDragBasis;
+	Vector m_massCenterOverride;
+	CShadowController *m_pShadow;
 };
 
 CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment* pEnvironment, const CPhysCollide* pCollisionModel, int materialIndex, const Vector& position, const QAngle& angles, objectparams_t* pParams, bool isStatic);
+CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic);
 
 #endif

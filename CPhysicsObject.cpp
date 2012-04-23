@@ -12,7 +12,7 @@
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
-CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
+CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
 	btCollisionShape* shape = (btCollisionShape*)pCollisionModel;
 	
 	btVector3 vector;
@@ -40,10 +40,43 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	pEnvironment->GetBulletEnvironment()->addRigidBody(body);
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body);
+	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->massCenterOverride);
 	pObject->SetGameData(pParams->pGameData);
 	pObject->EnableCollisions(pParams->enableCollisions);
+	if (!isStatic && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
 	
+	return pObject;
+}
+
+CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
+	btSphereShape* shape = new btSphereShape(ConvertDistanceToBull(radius));
+	
+	btVector3 vector;
+	btMatrix3x3 matrix;
+	ConvertPosToBull(position, vector);
+	ConvertRotationToBull(angles, matrix);
+	btTransform transform(matrix, vector);
+
+	float mass = pParams->mass;
+	if (isStatic) mass = 0;
+
+	btMotionState* motionstate = new btDefaultMotionState(transform);
+	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
+
+	btRigidBody* body = new btRigidBody(info);
+
+	pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+
+	float volume = pParams->volume;
+	if (volume <= 0) {
+		volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
+	}
+
+	CPhysicsObject *pObject = new CPhysicsObject();
+	pObject->Init(pEnvironment, body, materialIndex, volume, 0, 0, NULL);
+	pObject->SetGameData(pParams->pGameData);
+	pObject->EnableCollisions(pParams->enableCollisions);
+
 	return pObject;
 }
 
@@ -563,8 +596,9 @@ void CPhysicsObject::OutputDebugInfo() const {
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
-void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject) {
+void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride) {
 	m_pEnv = pEnv;
+	m_materialIndex = materialIndex;
 	m_pObject = pObject;
 	pObject->setUserPointer(this);
 	m_pGameData = NULL;
@@ -595,10 +629,12 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject) {
 		m_angDragBasis.setZ(AngDragIntegral( ang[2], delta.z(), delta.x(), delta.y() ) + AngDragIntegral( ang[2], delta.z(), delta.y(), delta.x() ));
 
 				
+	} else {
+		drag = 0;
+		angDrag = 0;
 	}
-	m_dragCoefficient = 1;
-	m_angDragCoefficient = 1;
-	
+	m_dragCoefficient = drag;
+	m_angDragCoefficient = angDrag;
 }
 
 btRigidBody* CPhysicsObject::GetObject() {
