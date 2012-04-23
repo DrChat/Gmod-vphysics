@@ -113,6 +113,8 @@ public:
 	float GetDragInDirection(btVector3 * direction) const; // Function is not interfaced anymore
 	float GetAngularDragInDirection(btVector3 * direction) const;
 
+	int m_iLastActivationState;
+
 private:
 	CPhysicsEnvironment* m_pEnv;
 	void* m_pGameData;

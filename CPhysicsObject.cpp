@@ -569,6 +569,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject) {
 	pObject->setUserPointer(this);
 	m_pGameData = NULL;
 	m_gameFlags = 0;
+	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
 
 	// Drag calculations converted from  2003 source code

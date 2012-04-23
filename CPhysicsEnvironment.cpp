@@ -279,6 +279,31 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
 		m_pBulletEnvironment->stepSimulation(deltaTime, 1, m_timestep);
+
+		if (m_pObjectEvent)
+		{
+			// FIXME: This got very messy, must be a better way to do this
+			int numObjects = m_pBulletEnvironment->getNumCollisionObjects();
+			btCollisionObjectArray collisionObjects = m_pBulletEnvironment->getCollisionObjectArray();
+			for (int i = 0; i < numObjects; i++)
+			{
+				btCollisionObject *obj = collisionObjects[i];
+				CPhysicsObject *physobj = (CPhysicsObject*)collisionObjects[i]->getUserPointer();
+				if (physobj->m_iLastActivationState != obj->getActivationState())
+				{
+					switch (obj->getActivationState())
+					{
+					case ACTIVE_TAG:
+						m_pObjectEvent->ObjectWake(physobj);
+						break;
+					case ISLAND_SLEEPING:
+						m_pObjectEvent->ObjectSleep(physobj);
+						break;
+					}
+					physobj->m_iLastActivationState = obj->getActivationState();
+				}
+			}
+		}
 	}
 	m_inSimulation = false;
 	if (!m_queueDeleteObject) {
@@ -434,6 +459,9 @@ btDynamicsWorld* CPhysicsEnvironment::GetBulletEnvironment() {
 }
 void CPhysicsEnvironment::BulletTick(btScalar dt)
 {
+	// FIXME: Maybe this should be in CPhysicsEnvironment:Simulate instead?
+	if (m_pCollisionEvent)
+		m_pCollisionEvent->PostSimulationFrame();
 	m_pPhysicsDragController->Tick(dt);
 }
 CPhysicsDragController * CPhysicsEnvironment::GetDragController()
