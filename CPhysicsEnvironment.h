@@ -114,6 +114,7 @@ public:
 	btDynamicsWorld* GetBulletEnvironment();
 	void BulletTick(btScalar timeStep);
 	CPhysicsDragController * GetDragController();
+	IPhysicsObjectEvent* m_pObjectEvent;
 private:
 	bool m_inSimulation;
 	bool m_queueDeleteObject;
@@ -126,7 +127,6 @@ private:
 	CUtlVector<IPhysicsObject*> m_deadObjects;
 	CCollisionSolver* m_pCollisionSolver;
 	IPhysicsCollisionEvent* m_pCollisionEvent;
-	IPhysicsObjectEvent* m_pObjectEvent;
 	IPhysicsConstraintEvent* m_pConstraintEvent;
 	CDeleteQueue* m_pDeleteQueue;
 	physics_performanceparams_t* m_physics_performanceparams;

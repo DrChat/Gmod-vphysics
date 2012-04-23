@@ -28,8 +28,11 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
+	btVector3 inertia;
+
+	shape->calculateLocalInertia(mass, inertia);
 	btMotionState* motionstate = new btDefaultMotionState(transform/*, masscenter*/);
-	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
+	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
 
 	info.m_linearDamping = pParams->damping;
 	info.m_angularDamping = pParams->rotdamping;
@@ -603,6 +606,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	pObject->setUserPointer(this);
 	m_pGameData = NULL;
 	m_gameFlags = 0;
+	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
 
 	// Drag calculations converted from  2003 source code

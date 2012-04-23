@@ -4,25 +4,24 @@
 
 btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	Vector hlvec[3];
-	btVector3 btvec;
+	btVector3 btvec[3];
 	ICollisionQuery* query = g_ValvePhysicsCollision->CreateQueryModel(ivp);
 	int convexcount = query->ConvexCount();
-	btCompoundShape* bull = new btCompoundShape;
+	btCompoundShape* bull = new btCompoundShape();
 	bull->setMargin(COLLISION_MARGIN);
 	for (int convex = 0; convex < convexcount; convex++) {
 		int triangles = query->TriangleCount(convex);
-		btConvexHullShape* btconvex = new btConvexHullShape;
-		btconvex->setMargin(COLLISION_MARGIN);
+		btTriangleMesh* trimesh = new btTriangleMesh();
 		for (int i = 0; i < triangles; i++) {
 			query->GetTriangleVerts(convex, i, hlvec);
-			ConvertPosToBull(hlvec[0], btvec);
-			btconvex->addPoint(btvec);
-			ConvertPosToBull(hlvec[1], btvec);
-			btconvex->addPoint(btvec);
-			ConvertPosToBull(hlvec[2], btvec);
-			btconvex->addPoint(btvec);
+			ConvertPosToBull(hlvec[0], btvec[0]);
+			ConvertPosToBull(hlvec[1], btvec[1]);
+			ConvertPosToBull(hlvec[2], btvec[2]);
+			trimesh->addTriangle(btvec[0], btvec[1], btvec[2]);
 		}
-		bull->addChildShape(btTransform::getIdentity(), btconvex);
+		btConvexShape *shape = new btConvexTriangleMeshShape(trimesh);
+		shape->setMargin(COLLISION_MARGIN);
+		bull->addChildShape(btTransform::getIdentity(), shape);
 	}
 	g_ValvePhysicsCollision->DestroyQueryModel(query);
 	return bull;
