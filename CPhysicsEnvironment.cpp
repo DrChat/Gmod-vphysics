@@ -255,10 +255,13 @@ void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController* cont
 }
 
 IPhysicsMotionController* CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
-	return ::CreateMotionController(this, pHandler);
+	CPhysicsMotionController* controller = (CPhysicsMotionController*)::CreateMotionController(this, pHandler);
+	m_controllers.AddToTail(controller);
+	return controller;
 }
 
 void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pController) {
+	m_controllers.FindAndRemove((CPhysicsMotionController*)pController);
 	delete pController;
 }
 
@@ -469,6 +472,9 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 	if (m_pCollisionEvent)
 		m_pCollisionEvent->PostSimulationFrame();
 	m_pPhysicsDragController->Tick(dt);
+	for (int i = 0; i < m_controllers.Count(); i++) {
+		m_controllers[i]->Tick(dt);
+	}
 }
 CPhysicsDragController * CPhysicsEnvironment::GetDragController()
 {

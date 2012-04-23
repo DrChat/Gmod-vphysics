@@ -303,6 +303,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IController.h"
+				>
+			</File>
+			<File
 				RelativePath=".\math.h"
 				>
 			</File>

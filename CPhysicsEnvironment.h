@@ -6,6 +6,7 @@ class btDispatcher;
 class btBroadphaseInterface;
 class btConstraintSolver;
 class btDynamicsWorld;
+class IController;
 class CDeleteQueue;
 class CCollisionSolver;
 class CPhysicsFluidController;
@@ -131,7 +132,8 @@ private:
 	CDeleteQueue* m_pDeleteQueue;
 	physics_performanceparams_t* m_physics_performanceparams;
 	CUtlVector<CPhysicsFluidController*> m_fluids;
-	CPhysicsDragController * m_pPhysicsDragController;
+	CPhysicsDragController* m_pPhysicsDragController;
+	CUtlVector<IController*> m_controllers;
 	bool m_deleteQuick;
 	float m_timestep;
 };

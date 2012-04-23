@@ -2,6 +2,7 @@
 
 #include "CPhysicsMotionController.h"
 #include "CPhysicsObject.h"
+#include "convert.h"
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler) {
 	if (!pHandler) return NULL;
@@ -15,6 +16,49 @@ CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhys
 
 CPhysicsMotionController::~CPhysicsMotionController() {
 
+}
+
+void CPhysicsMotionController::Tick(float deltaTime) {
+	if (!m_handler) return;
+	for (int i = 0; i < m_objectList.Count(); i++) {
+		Vector speed;
+		AngularImpulse rot;
+		btVector3 bullSpeed, bullRot;
+
+		btRigidBody* body = btRigidBody::upcast(m_objectList[i]);
+		IPhysicsObject* pObject = (IPhysicsObject*)body->getUserPointer();
+		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
+		switch(ret) {
+			case IMotionEvent::SIM_NOTHING: {
+				break;
+			}
+			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
+				ConvertForceImpulseToBull(speed, bullSpeed);
+				ConvertAngularImpulseToBull(rot, bullRot);
+				btTransform transform = body->getWorldTransform();
+				body->setLinearVelocity(body->getLinearVelocity() + transform.getBasis()*bullSpeed);
+				body->setAngularVelocity(body->getAngularVelocity() + bullRot);
+				break;
+			}
+			case IMotionEvent::SIM_LOCAL_FORCE: {
+				ConvertForceImpulseToBull(speed, bullSpeed);
+				ConvertAngularImpulseToBull(rot, bullRot);
+				btTransform transform = body->getWorldTransform();
+				body->applyCentralForce(transform.getBasis()*bullSpeed);
+				body->applyTorque(bullRot);
+				break;
+			}
+			case IMotionEvent::SIM_GLOBAL_ACCELERATION: {
+				pObject->AddVelocity(&speed, &rot);
+				break;
+			}
+			case IMotionEvent::SIM_GLOBAL_FORCE: {
+				pObject->ApplyForceCenter(speed);
+				pObject->ApplyTorqueCenter(rot);
+				break;
+			}
+		}
+	}
 }
 
 void CPhysicsMotionController::SetEventHandler(IMotionEvent* handler) {

@@ -1,9 +1,11 @@
 #ifndef CPHYSICSMOTIONCONTROLLER_H
 #define CPHYSICSMOTIONCONTROLLER_H
 
+#include "IController.h"
+
 class CPhysicsEnvironment;
 
-class CPhysicsMotionController : public IPhysicsMotionController {
+class CPhysicsMotionController : public IController, public IPhysicsMotionController {
 public:
 	CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv);
 	virtual ~CPhysicsMotionController();
@@ -17,6 +19,8 @@ public:
 	virtual void WakeObjects();
 
 	virtual void SetPriority(priority_t priority);
+public:
+	virtual void Tick(float deltaTime);
 private:
 	IMotionEvent* m_handler;
 	CUtlVector<btCollisionObject*> m_objectList;
