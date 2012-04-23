@@ -163,8 +163,14 @@ IPhysicsObject* CPhysicsEnvironment::CreateSphereObject(float radius, int materi
 }
 
 void CPhysicsEnvironment::DestroyObject(IPhysicsObject* pObject) {
+	if (!pObject) return;
 	m_objects.FindAndRemove(pObject);
-	delete pObject;
+	if (m_inSimulation || m_queueDeleteObject) {
+		pObject->SetCallbackFlags(pObject->GetCallbackFlags() | CALLBACK_MARKED_FOR_DELETE);
+		m_deadObjects.AddToTail(pObject);
+	} else {
+		delete pObject;
+	}
 }
 
 IPhysicsFluidController* CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
