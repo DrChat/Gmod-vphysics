@@ -28,8 +28,11 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
+	btVector3 inertia;
+
+	shape->calculateLocalInertia(mass, inertia);
 	btMotionState* motionstate = new btDefaultMotionState(transform/*, masscenter*/);
-	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
+	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
 
 	info.m_linearDamping = pParams->damping;
 	info.m_angularDamping = pParams->rotdamping;
