@@ -348,12 +348,11 @@ void CPhysicsObject::SetBuoyancyRatio(float ratio) {
 }
 
 int CPhysicsObject::GetMaterialIndex() const {
-	NOT_IMPLEMENTED;
-	return 0;
+	return m_materialIndex;
 }
 
 void CPhysicsObject::SetMaterialIndex(int materialIndex) {
-	NOT_IMPLEMENTED;
+	m_materialIndex = materialIndex;
 }
 
 unsigned int CPhysicsObject::GetContents() const {
@@ -419,7 +418,8 @@ void CPhysicsObject::SetVelocity(const Vector* velocity, const AngularImpulse* a
 }
 
 void CPhysicsObject::SetVelocityInstantaneous(const Vector* velocity, const AngularImpulse* angularVelocity) {
-	NOT_IMPLEMENTED;
+	// FIXME: what is different from SetVelocity?
+	SetVelocity(velocity, angularVelocity);
 }
 
 void CPhysicsObject::GetVelocity(Vector* velocity, AngularImpulse* angularVelocity) const {
@@ -583,7 +583,7 @@ void CPhysicsObject::RemoveHinged() {
 }
 
 IPhysicsFrictionSnapshot* CPhysicsObject::CreateFrictionSnapshot() {
-	return new CPhysicsFrictionSnapshot;
+	return new CPhysicsFrictionSnapshot(this);
 }
 
 void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot* pSnapshot) {
@@ -639,6 +639,10 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	}
 	m_dragCoefficient = drag;
 	m_angDragCoefficient = angDrag;
+}
+
+CPhysicsEnvironment* CPhysicsObject::GetVPhysicsEnvironment() {
+	return m_pEnv;
 }
 
 btRigidBody* CPhysicsObject::GetObject() {

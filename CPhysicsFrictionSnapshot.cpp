@@ -1,9 +1,28 @@
 #include "StdAfx.h"
 
 #include "CPhysicsFrictionSnapshot.h"
+#include "CPhysicsObject.h"
+#include "CPhysicsEnvironment.h"
 
-CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot() {
-
+CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject* pObject) {
+	// Didn't really get anywhere with this
+	/*
+	m_pObject = pObject;
+	m_manifold = 0;
+	m_contactpoint = 0;
+	btRigidBody* body = pObject->GetObject();
+	btDynamicsWorld* pEnv = pObject->GetVPhysicsEnvironment()->GetBulletEnvironment();
+	btDispatcher* dispatch = pEnv->getDispatcher();
+	int count = dispatch->getNumManifolds();
+	for (int i = 0; i < count; i++) {
+		btPersistentManifold* manifold = dispatch->getManifoldByIndexInternal(i);
+		void* body0 = manifold->getBody0();
+		void* body1 = manifold->getBody1();
+		if (body0 == body || body1 == body) {
+			m_manifolds.AddToTail(manifold);
+		}
+	}
+	*/
 }
 
 CPhysicsFrictionSnapshot::~CPhysicsFrictionSnapshot() {
@@ -11,6 +30,7 @@ CPhysicsFrictionSnapshot::~CPhysicsFrictionSnapshot() {
 }
 
 bool CPhysicsFrictionSnapshot::IsValid() {
+	//return m_manifold < m_manifolds.Count();
 	NOT_IMPLEMENTED;
 	return false;
 }
@@ -60,7 +80,13 @@ void CPhysicsFrictionSnapshot::DeleteAllMarkedContacts(bool wakeObjects) {
 }
 
 void CPhysicsFrictionSnapshot::NextFrictionData() {
-	NOT_IMPLEMENTED;
+	/*
+	m_contactpoint++;
+	if (m_contactpoint >= m_manifolds[m_manifold]->getNumContacts()) {
+		m_manifold++;
+		m_contactpoint = 0;
+	}
+	*/
 }
 
 float CPhysicsFrictionSnapshot::GetFrictionCoefficient() {

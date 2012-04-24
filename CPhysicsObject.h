@@ -109,6 +109,7 @@ public:
 	virtual void OutputDebugInfo() const;
 public:
 	void Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride);
+	CPhysicsEnvironment* GetVPhysicsEnvironment();
 	btRigidBody* GetObject();
 	float GetDragInDirection(btVector3 * direction) const; // Function is not interfaced anymore
 	float GetAngularDragInDirection(btVector3 * direction) const;
