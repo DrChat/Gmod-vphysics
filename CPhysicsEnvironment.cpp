@@ -9,6 +9,12 @@
 #include "CPhysicsMotionController.h"
 #include "convert.h"
 
+//#define DEBUG_DRAW
+
+#ifdef DEBUG_DRAW
+#include "GLDebugDrawer.h"
+#endif
+
 class IDeleteQueueItem {
 public:
 	virtual void Delete() = 0;
@@ -95,9 +101,15 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_physics_performanceparams = new physics_performanceparams_t;
 	m_physics_performanceparams->Defaults();
 
+#ifdef DEBUG_DRAW
+	m_debugdraw = new GLDebugDrawer(m_pBulletEnvironment);
+#endif
 }
 
 CPhysicsEnvironment::~CPhysicsEnvironment() {
+#ifdef DEBUG_DRAW
+	delete m_debugdraw;
+#endif
 	SetQuickDelete(true);
 
 	for (int i = m_objects.Count()-1; i >= 0; --i) {
@@ -288,7 +300,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
 		m_pBulletEnvironment->stepSimulation(deltaTime, 1, m_timestep);
-
+		/*
 		if (m_pObjectEvent)
 		{
 			// FIXME: This got very messy, must be a better way to do this
@@ -313,11 +325,15 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 				}
 			}
 		}
+		*/
 	}
 	m_inSimulation = false;
 	if (!m_queueDeleteObject) {
 		CleanupDeleteList();
 	}
+#ifdef DEBUG_DRAW
+	m_debugdraw->DrawWorld();
+#endif
 }
 
 bool CPhysicsEnvironment::IsInSimulation() const {

@@ -11,15 +11,16 @@ btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	bull->setMargin(COLLISION_MARGIN);
 	for (int convex = 0; convex < convexcount; convex++) {
 		int triangles = query->TriangleCount(convex);
-		btTriangleMesh* trimesh = new btTriangleMesh();
+		btConvexHullShape* shape = new btConvexHullShape;
 		for (int i = 0; i < triangles; i++) {
 			query->GetTriangleVerts(convex, i, hlvec);
 			ConvertPosToBull(hlvec[0], btvec[0]);
 			ConvertPosToBull(hlvec[1], btvec[1]);
 			ConvertPosToBull(hlvec[2], btvec[2]);
-			trimesh->addTriangle(btvec[0], btvec[1], btvec[2]);
+			shape->addPoint(btvec[0]);
+			shape->addPoint(btvec[1]);
+			shape->addPoint(btvec[2]);
 		}
-		btConvexShape *shape = new btConvexTriangleMeshShape(trimesh);
 		shape->setMargin(COLLISION_MARGIN);
 		bull->addChildShape(btTransform::getIdentity(), shape);
 	}

@@ -12,6 +12,8 @@ class CCollisionSolver;
 class CPhysicsFluidController;
 class CPhysicsDragController;
 
+class GLDebugDrawer;
+
 class CPhysicsEnvironment : public IPhysicsEnvironment {
 public:
 	CPhysicsEnvironment();
@@ -136,6 +138,8 @@ private:
 	CUtlVector<IController*> m_controllers;
 	bool m_deleteQuick;
 	float m_timestep;
+
+	GLDebugDrawer* m_debugdraw;
 };
 
 #endif
