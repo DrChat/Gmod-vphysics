@@ -17,7 +17,7 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pT
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
 	for (KeyValues* surface = surfprops; surface; surface = surface->GetNextKey()) {
 		CSurface prop;
-		int baseMaterial = GetSurfaceIndex("Default");
+		int baseMaterial = GetSurfaceIndex("default");
 
 		memset(&prop.data, 0, sizeof(prop.data));
 		prop.m_name = m_strings.AddString(surface->GetName());
@@ -140,7 +140,7 @@ void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float* den
 
 surfacedata_t* CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
 	CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
-	if (!pSurface) pSurface = GetInternalSurface(GetSurfaceIndex("Default"));
+	if (!pSurface) pSurface = GetInternalSurface(GetSurfaceIndex("default"));
 	assert(pSurface);
 	return &pSurface->data;
 }

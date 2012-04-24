@@ -8,7 +8,9 @@
 #include "CShadowController.h"
 #include "convert.h"
 #include "CPhysicsDragController.h"
+#include "CPhysicsSurfaceProps.h"
 
+extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
@@ -608,6 +610,14 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	m_gameFlags = 0;
 	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
+
+	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
+	if (surface)
+	{
+		m_pObject->setFriction(surface->physics.friction);
+		// Note to self: using these dampening values = breakdancing fridges http://dl.dropbox.com/u/4838268/gm_construct%202012-4-24%2004-50-26.webm
+		//m_pObject->setDamping(surface->physics.dampening, surface->physics.dampening);
+	}
 
 	// Drag calculations converted from  2003 source code
 	if (!IsStatic() && GetCollide() )
