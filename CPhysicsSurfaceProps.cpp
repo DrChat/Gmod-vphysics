@@ -118,7 +118,12 @@ int CPhysicsSurfaceProps::GetSurfaceIndex(const char* pSurfacePropName) const {
 		if (index >= 0) return index;
 	}
 
-	CUtlSymbol id = m_strings.Find(pSurfacePropName);
+	// HACKHACK: Ignore case
+	char *newSurfacePropName = new char[strlen(pSurfacePropName)+1];
+	for (int i = 0; i < strlen(pSurfacePropName)+1; i++)
+		newSurfacePropName[i] = tolower(pSurfacePropName[i]);
+	CUtlSymbol id = m_strings.Find(newSurfacePropName);
+	delete newSurfacePropName;
 	if (id.IsValid()) {
 		for (int i = 0; i < m_props.Size(); i++) {
 			if (m_props[i].m_name == id) return i;
