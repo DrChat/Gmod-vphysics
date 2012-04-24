@@ -35,7 +35,8 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
 				ConvertForceImpulseToBull(speed, bullSpeed);
 				ConvertAngularImpulseToBull(rot, bullRot);
-				btTransform transform = body->getWorldTransform();
+				btTransform transform;
+				((btMassCenterMotionState*)body->getMotionState())->getGraphicTransform(transform);
 				body->setLinearVelocity(body->getLinearVelocity() + transform.getBasis()*bullSpeed);
 				body->setAngularVelocity(body->getAngularVelocity() + bullRot);
 				break;
@@ -43,7 +44,8 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 			case IMotionEvent::SIM_LOCAL_FORCE: {
 				ConvertForceImpulseToBull(speed, bullSpeed);
 				ConvertAngularImpulseToBull(rot, bullRot);
-				btTransform transform = body->getWorldTransform();
+				btTransform transform;
+				((btMassCenterMotionState*)body->getMotionState())->getGraphicTransform(transform);
 				body->applyCentralForce(transform.getBasis()*bullSpeed);
 				body->applyTorque(bullRot);
 				break;

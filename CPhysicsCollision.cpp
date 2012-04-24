@@ -130,6 +130,12 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	shape->getAabb(transform, mins, maxs);
 
+	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
+	if (shapeInfo)
+	{
+		// FIXME: correct the AABB's after the mass center here
+	}
+
 	ConvertPosToHL(mins, *pMins);
 	ConvertPosToHL(maxs, *pMaxs);
 }

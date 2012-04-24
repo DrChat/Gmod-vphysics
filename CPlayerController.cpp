@@ -17,9 +17,10 @@ void CPlayerController::Update(const Vector& position, const Vector& velocity, f
 	ConvertPosToBull(position, pos);
 	ConvertPosToBull(velocity, vel);
 	btRigidBody* object = m_pObject->GetObject();
-	btTransform transform = object->getWorldTransform();
+	btTransform transform;
+	((btMassCenterMotionState*)object->getMotionState())->getGraphicTransform(transform);
 	transform.setOrigin(pos);
-	object->setWorldTransform(transform);
+	((btMassCenterMotionState*)object->getMotionState())->setGraphicTransform(transform);
 	object->setInterpolationLinearVelocity(vel);	
 }
 
@@ -28,7 +29,7 @@ void CPlayerController::SetEventHandler(IPhysicsPlayerControllerEvent* handler) 
 }
 
 bool CPlayerController::IsInContact() {
-	NOT_IMPLEMENTED;
+	//NOT_IMPLEMENTED;
 	return false;
 }
 
@@ -42,7 +43,8 @@ void CPlayerController::SetObject(IPhysicsObject* pObject) {
 
 int CPlayerController::GetShadowPosition( Vector* position, QAngle* angles ) {
 	btRigidBody* pObject = m_pObject->GetObject();
-	btTransform transform = pObject->getWorldTransform();
+	btTransform transform;
+	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
 	if (position) {
 		btVector3 btvec = transform.getOrigin();
 		ConvertPosToHL(btvec, *position);
@@ -60,7 +62,8 @@ void CPlayerController::StepUp(float height) {
 	btVector3 step;
 	ConvertPosToBull(Vector(0, 0, height), step);
 	btRigidBody* pObject = m_pObject->GetObject();
-	btTransform transform = pObject->getWorldTransform();
+	btTransform transform;
+	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
 	transform.setOrigin(transform.getOrigin()+step);
 }
 

@@ -91,7 +91,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
 
-	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
+	//m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
 
 	m_pDeleteQueue = new CDeleteQueue;

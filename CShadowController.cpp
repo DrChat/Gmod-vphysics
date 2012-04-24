@@ -23,7 +23,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 	ConvertRotationToBull(angles, matrix);
 
 	btTransform transform(matrix, btvec);
-	m_pObject->GetObject()->getMotionState()->setWorldTransform(transform);
+	((btMassCenterMotionState*)m_pObject->GetObject()->getMotionState())->setGraphicTransform(transform);
 }
 
 void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {

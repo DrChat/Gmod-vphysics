@@ -31,7 +31,7 @@ CPhysicsFrictionSnapshot::~CPhysicsFrictionSnapshot() {
 
 bool CPhysicsFrictionSnapshot::IsValid() {
 	//return m_manifold < m_manifolds.Count();
-	NOT_IMPLEMENTED;
+	//NOT_IMPLEMENTED;
 	return false;
 }
 

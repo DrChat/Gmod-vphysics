@@ -23,9 +23,9 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
-	btVector3 masscenterv(0, 0, 0);
-	if (pParams->massCenterOverride) ConvertPosToBull(*pParams->massCenterOverride, masscenterv);
-	btTransform masscenter(btMatrix3x3::getIdentity(), masscenterv);
+	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
+	btTransform masscenter(btMatrix3x3::getIdentity());
+	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
 
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
@@ -33,7 +33,7 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btVector3 inertia;
 
 	shape->calculateLocalInertia(mass, inertia);
-	btMotionState* motionstate = new btDefaultMotionState(transform/*, masscenter*/);
+	btMotionState* motionstate = new btMassCenterMotionState(transform, masscenter);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
 
 	info.m_linearDamping = pParams->damping;
@@ -65,7 +65,7 @@ CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
-	btMotionState* motionstate = new btDefaultMotionState(transform);
+	btMotionState* motionstate = new btMassCenterMotionState(transform);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
 
 	btRigidBody* body = new btRigidBody(info);
@@ -389,7 +389,7 @@ void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angl
 	ConvertPosToBull(worldPosition, pos);
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, pos);
-	m_pObject->setWorldTransform(transform);
+	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(transform);
 }
 
 void CPhysicsObject::SetPositionMatrix(const matrix3x4_t&matrix, bool isTeleport) {
@@ -397,13 +397,15 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t&matrix, bool isTeleport
 }
 
 void CPhysicsObject::GetPosition(Vector* worldPosition, QAngle* angles) const {
-	btTransform transform = m_pObject->getWorldTransform();
+	btTransform transform;
+	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (worldPosition) ConvertPosToHL(transform.getOrigin(), *worldPosition);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 }
 
 void CPhysicsObject::GetPositionMatrix(matrix3x4_t* positionMatrix) const {
-	btTransform transform = m_pObject->getWorldTransform();
+	btTransform transform;
+	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	ConvertMatrixToHL(transform, *positionMatrix);
 }
 

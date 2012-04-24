@@ -22,5 +22,28 @@ extern IPhysicsCollision* g_ValvePhysicsCollision;
 #ifdef _DEBUG
 #define NOT_IMPLEMENTED __asm {int 3}
 #else
-#define NOT_IMPLEMENTED
+#define NOT_IMPLEMENTED Msg("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #endif
+
+// Putting these in here because I dont want to make a header just for them
+struct btMassCenterMotionState : public btMotionState
+{
+	btTransform	m_centerOfMassOffset;
+	btTransform m_worldTrans;
+	void*		m_userPointer;
+
+	btMassCenterMotionState(const btTransform& startTrans = btTransform::getIdentity(),const btTransform& centerOfMassOffset = btTransform::getIdentity())
+		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(startTrans * centerOfMassOffset), m_userPointer(0)
+	{
+	}
+
+	virtual void getWorldTransform(btTransform& worldTrans) const { worldTrans = m_worldTrans; }
+	virtual void setWorldTransform(const btTransform& worldTrans) { m_worldTrans = worldTrans; }
+	virtual void getGraphicTransform(btTransform& graphTrans) const { graphTrans = m_worldTrans * m_centerOfMassOffset.inverse(); }
+	virtual void setGraphicTransform(const btTransform& graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }
+};
+
+struct PhysicsShapeInfo
+{
+	btVector3 massCenter;
+};
