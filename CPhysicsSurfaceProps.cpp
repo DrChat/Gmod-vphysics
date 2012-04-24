@@ -3,11 +3,11 @@
 #include "CPhysicsSurfaceProps.h"
 
 CPhysicsSurfaceProps::CPhysicsSurfaceProps() {
-
+	m_strings = new CUtlSymbolTable(0, 32, true);
 }
 
 CPhysicsSurfaceProps::~CPhysicsSurfaceProps() {
-
+	delete m_strings;
 }
 
 int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pTextfile) {
@@ -20,7 +20,7 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pT
 		int baseMaterial = GetSurfaceIndex("default");
 
 		memset(&prop.data, 0, sizeof(prop.data));
-		prop.m_name = m_strings.AddString(surface->GetName());
+		prop.m_name = m_strings->AddString(surface->GetName());
 		prop.data.game.material = 0;
 		prop.data.game.maxSpeedFactor = 1.0f;
 		prop.data.game.jumpFactor = 1.0f;
@@ -67,40 +67,40 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pT
 					prop.data.game.material = data->GetInt();
 				}
 			} else if (!strcmpi(key, "stepleft")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.stepleft = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "stepright")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.stepright = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "impactsoft")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.impactSoft = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "impacthard")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.impactHard = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "scrapesmooth")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.scrapeSmooth = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "scraperough")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.scrapeRough = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "bulletimpact")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.bulletImpact = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "break")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.breakSound = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "strain")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.strainSound = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "rolling")) {
-				CUtlSymbol sym = m_strings.AddString(data->GetString());
+				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.rolling = m_soundList.AddToTail(sym);
 			} else {
 				AssertMsg2(0, "Bad surfaceprop key %s (%s)\n", key, data->GetString());
 			}
 		}
-		if (GetSurfaceIndex(m_strings.String(prop.m_name)) >= 0) break;
+		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0) break;
 
 		m_props.AddToTail(prop);
 	}
@@ -118,12 +118,7 @@ int CPhysicsSurfaceProps::GetSurfaceIndex(const char* pSurfacePropName) const {
 		if (index >= 0) return index;
 	}
 
-	// HACKHACK: Ignore case
-	char *newSurfacePropName = new char[strlen(pSurfacePropName)+1];
-	for (int i = 0; i < strlen(pSurfacePropName)+1; i++)
-		newSurfacePropName[i] = tolower(pSurfacePropName[i]);
-	CUtlSymbol id = m_strings.Find(newSurfacePropName);
-	delete newSurfacePropName;
+	CUtlSymbol id = m_strings->Find(pSurfacePropName);
 	if (id.IsValid()) {
 		for (int i = 0; i < m_props.Size(); i++) {
 			if (m_props[i].m_name == id) return i;
@@ -152,7 +147,7 @@ surfacedata_t* CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
 
 const char* CPhysicsSurfaceProps::GetString(unsigned short stringTableIndex) const {
 	CUtlSymbol index = m_soundList[stringTableIndex];
-	return m_strings.String( index );
+	return m_strings->String(index);
 }
 
 const char* CPhysicsSurfaceProps::GetPropName(int surfaceDataIndex) const {
@@ -202,7 +197,7 @@ void CPhysicsSurfaceProps::CopyPhysicsProperties(CSurface *pOut, int baseIndex) 
 }
 
 bool CPhysicsSurfaceProps::AddFileToDatabase(const char *pFilename) {
-	CUtlSymbol id = m_strings.AddString(pFilename);
+	CUtlSymbol id = m_strings->AddString(pFilename);
 
 	for (int i = 0; i < m_fileList.Size(); i++) {
 		if (m_fileList[i] == id) return false;

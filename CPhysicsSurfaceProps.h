@@ -38,7 +38,7 @@ private:
 	void CopyPhysicsProperties(CSurface *pOut, int baseIndex);
 	bool AddFileToDatabase(const char *pFilename);
 private:
-	CUtlSymbolTable m_strings;
+	CUtlSymbolTable* m_strings;
 	CUtlVector<CUtlSymbol> m_soundList;
 	CUtlVector<CSurface> m_props;
 	CUtlVector<CUtlSymbol> m_fileList;
