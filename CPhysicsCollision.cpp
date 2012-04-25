@@ -357,7 +357,6 @@ CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 
 	virtualmeshlist_t *pList = new virtualmeshlist_t;
 	handler->GetVirtualMesh(params.userData, pList);
-	Msg("Virtual mesh: %i vertecies %i triangles\n", pList->vertexCount, pList->triangleCount);
 
 	btTriangleMesh* btmesh= new btTriangleMesh;
 	btVector3 btvec[3];
