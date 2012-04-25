@@ -243,9 +243,40 @@ bool CPhysicsCollision::IsBoxIntersectingCone( const Vector &boxAbsMins, const V
 }
 
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int size, bool swap) {
+	pOutput->solidCount = solidCount;
+	pOutput->solids = new CPhysCollide*[solidCount];
+
+	int position = 0; 
+	for (int i = 0; i < solidCount; i++) {
+		uint32 size = *(uint32*)(pBuffer + position);
+		pOutput->solids[i] = (CPhysCollide*)malloc(size);
+		memcpy(pOutput->solids[i], pBuffer+4, size);
+		position += size+4;
+	}
+	assert(size > position);
+	char *keyValues = (char*)malloc(size-position);
+	memcpy(keyValues, pBuffer + position, size-position);
+	pOutput->pKeyValues = keyValues;
+
+	for (int i = 0; i < solidCount; i++) { // TODO: Stop coding at 3 AM (someone make this cleaner please)
+		char *data = (char*)pOutput->solids[i];
+		assert(*(uint32*)data == 0x59485056); // VPHY
+		short version = *(uint16*)(data+4), type = *(uint16*)(data+6);
+		uint32 surfaceSize = *(uint32*)(data+8);
+		btVector3 dragAxisAreas(*(float*)(data+12), *(float*)(data+16), *(float*)(data+20));
+		int axisMapSize = *(uint32*)(data+24);
+		assert(version == 0x100); // TODO: Support other versions of the format? (Portal 2 models had a crash inside VPhysics, they probably use another version. investigate)
+		assert(type == 0x0); // TODO: Support other things such as spheres
+
+		Msg("VPHY version %d type %d surface size %d\n", (int)version, (int)type, surfaceSize);
+
+		delete (void*)pOutput->solids[i];
+		pOutput->solids[i] = (CPhysCollide*)new btCompoundShape;
+	}
+
 	g_ValvePhysicsCollision->VCollideLoad(pOutput, solidCount, pBuffer, size, swap);
 	for (int i = 0; i < solidCount; i++) {
-		CPhysCollide* ivp = pOutput->solids[i];
+		CPhysCollide *ivp = pOutput->solids[i];
 		pOutput->solids[i] = (CPhysCollide*)ConvertMeshToBull(ivp);
 		g_ValvePhysicsCollision->DestroyCollide(ivp);
 	}
@@ -256,6 +287,7 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 		btCollisionShape* shape = (btCollisionShape*)pVCollide->solids[i];
 		delete shape;
 	}
+	delete pVCollide->pKeyValues;
 }
 
 IVPhysicsKeyParser* CPhysicsCollision::VPhysicsKeyParserCreate(const char *pKeyData) {
@@ -294,7 +326,6 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContex) {
 }
 
 CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
-	// This doesn't appear to work.
 	CPhysCollide* ivp = g_ValvePhysicsCollision->CreateVirtualMesh(params);
 
 	Vector hlvec[3];
@@ -317,7 +348,7 @@ CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	}
 
 	g_ValvePhysicsCollision->DestroyCollide(ivp);
-	return NULL;
+	return (CPhysCollide*)bull;
 }
 
 bool CPhysicsCollision::SupportsVirtualMesh() {
