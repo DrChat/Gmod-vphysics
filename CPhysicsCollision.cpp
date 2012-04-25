@@ -243,11 +243,8 @@ bool CPhysicsCollision::IsBoxIntersectingCone( const Vector &boxAbsMins, const V
 }
 
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int size, bool swap) {
-	// TODO: Finish this, its almost working
 	/*pOutput->solidCount = solidCount;
 	pOutput->solids = new CPhysCollide*[solidCount];
-	pOutput->isPacked = 0;
-	pOutput->descSize = 0;
 
 	int position = 0; 
 	for (int i = 0; i < solidCount; i++) {
@@ -275,38 +272,32 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		assert(*(uint32*)(data + 72) == 0x53505649); // IVPS
 		char *convexes = data + 76;
-		float *vertecies = (float*)(data + 76 + *(int*)(data + 76));
-		int maxVerts = (int(surfaceSize - 48) - *(int*)(data + 76)) >> 4;
-
-		btCompoundShape *bull = new btCompoundShape();
-		bull->setUserPointer(NULL);
 
 		int position = 0, remaining = 0, tris = 0;
 		do
 		{
-			Msg("Found convex\n");
 			remaining = *(int*)(convexes + position), tris = *(short*)(convexes + position + 12);
+			float *vertecies = (float*)(convexes + position + remaining);
+			Msg("Found convex with %i tris %i bytes remaining\n", tris, remaining);
 			assert(tris * 16 + 16 <= remaining);
 			position += 16;
-			btConvexHullShape *hull = new btConvexHullShape();
-			hull->setUserPointer(NULL);
 			for (int j = 0; j < tris; j++)
 			{
 				int index1 = *(short*)(convexes + position + 4), index2 = *(short*)(convexes + position + 8), index3 = *(short*)(convexes + position + 12);
-				if (index1 <= maxVerts && index2 <= maxVerts && index3 <= maxVerts) // FIXME: Some indecies flip a complete shit so I have to do this for now
+				if (index1 < 256 && index2 < 256 && index3 < 256) // TODO: Figure out why some polys get messed up
 				{
-					hull->addPoint(btVector3(vertecies[index1*4], -vertecies[index1*4+1], -vertecies[index1*4+2]));
-					hull->addPoint(btVector3(vertecies[index2*4], -vertecies[index2*4+1], -vertecies[index2*4+2]));
-					hull->addPoint(btVector3(vertecies[index3*4], -vertecies[index3*4+1], -vertecies[index3*4+2]));
+					btVector3 v1(vertecies[index1*4], vertecies[index1*4+1], vertecies[index1*4+2]),
+						v2(vertecies[index2*4], vertecies[index2*4+1], vertecies[index2*4+2]),
+						v3(vertecies[index3*4], vertecies[index3*4+1], vertecies[index3*4+2]);
+					Msg("%f %f %f : %f %f %f : %f %f %f\n", v1.x(), -v1.y(), -v1.z(), v2.x(), -v2.y(), -v2.z(), v3.x(), -v3.y(), -v3.z());
 				}
 				position += 16;
 			}
-			bull->addChildShape(btTransform::getIdentity(), hull);
 			assert(position <= int(surfaceSize - 48));
 		} while (remaining != tris * 16 + 16);
 
 		delete (void*)pOutput->solids[i];
-		pOutput->solids[i] = (CPhysCollide*)bull;
+		pOutput->solids[i] = (CPhysCollide*)new btCompoundShape;
 	}*/
 
 	g_ValvePhysicsCollision->VCollideLoad(pOutput, solidCount, pBuffer, size, swap);
@@ -362,28 +353,23 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContex) {
 }
 
 CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
-	CPhysCollide* ivp = g_ValvePhysicsCollision->CreateVirtualMesh(params);
+	IVirtualMeshEvent *handler = params.pMeshEventHandler;
 
-	Vector hlvec[3];
+	virtualmeshlist_t *pList = new virtualmeshlist_t;
+	handler->GetVirtualMesh(params.userData, pList);
+	Msg("Virtual mesh: %i vertecies %i triangles\n", pList->vertexCount, pList->triangleCount);
+
+	btTriangleMesh* btmesh= new btTriangleMesh;
 	btVector3 btvec[3];
-	ICollisionQuery* query = g_ValvePhysicsCollision->CreateQueryModel(ivp);
-	int convexcount = query->ConvexCount();
-	btCompoundShape* bull = new btCompoundShape;
-	for (int convex = 0; convex < convexcount; convex++) {
-		btTriangleMesh* btmesh= new btTriangleMesh;
-		int triangles = query->TriangleCount(convex);
-		for (int i = 0; i < triangles; i++) {
-			query->GetTriangleVerts(convex, i, hlvec);
-			ConvertPosToBull(hlvec[0], btvec[0]);
-			ConvertPosToBull(hlvec[1], btvec[1]);
-			ConvertPosToBull(hlvec[2], btvec[2]);
-			btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
-		}
-		btBvhTriangleMeshShape* btmeshshape = new btBvhTriangleMeshShape(btmesh, true);
-		bull->addChildShape(btTransform::getIdentity(), btmeshshape);
+	for (int i = 0; i < pList->triangleCount; i++)
+	{
+		ConvertPosToBull(pList->pVerts[pList->indices[i*3+0]], btvec[0]);
+		ConvertPosToBull(pList->pVerts[pList->indices[i*3+1]], btvec[1]);
+		ConvertPosToBull(pList->pVerts[pList->indices[i*3+2]], btvec[2]);
+		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
 	}
-
-	g_ValvePhysicsCollision->DestroyCollide(ivp);
+	btBvhTriangleMeshShape* bull = new btBvhTriangleMeshShape(btmesh, true);
+	bull->setMargin(COLLISION_MARGIN);
 	return (CPhysCollide*)bull;
 }
 
