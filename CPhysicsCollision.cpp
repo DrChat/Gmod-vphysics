@@ -294,7 +294,6 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContex) {
 }
 
 CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
-	// This doesn't appear to work.
 	CPhysCollide* ivp = g_ValvePhysicsCollision->CreateVirtualMesh(params);
 
 	Vector hlvec[3];
@@ -317,7 +316,7 @@ CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	}
 
 	g_ValvePhysicsCollision->DestroyCollide(ivp);
-	return NULL;
+	return (CPhysCollide*)bull;
 }
 
 bool CPhysicsCollision::SupportsVirtualMesh() {
