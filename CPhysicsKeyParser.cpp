@@ -33,7 +33,7 @@ const char *CPhysicsKeyParser::GetCurrentBlockName(void)
 
 bool CPhysicsKeyParser::Finished(void)
 {
-	return true;
+	return m_pCurrentBlockName == NULL;
 }
 
 void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknownKeyHandler)
@@ -66,7 +66,14 @@ void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unkno
 
 void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler)
 {
-	NOT_IMPLEMENTED;
+	if (unknownKeyHandler)
+		unknownKeyHandler->SetDefaults(pCustom);
+	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		const char* value = data->GetString();
+		if (unknownKeyHandler)
+			unknownKeyHandler->ParseKeyValue(pCustom, key, value);
+	}
 	NextBlock();
 }
 
