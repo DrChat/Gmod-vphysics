@@ -367,6 +367,7 @@ CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 		ConvertPosToBull(pList->pVerts[pList->indices[i*3+2]], btvec[2]);
 		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
 	}
+
 	btBvhTriangleMeshShape* bull = new btBvhTriangleMeshShape(btmesh, true);
 	bull->setMargin(COLLISION_MARGIN);
 	return (CPhysCollide*)bull;

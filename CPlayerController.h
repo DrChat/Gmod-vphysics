@@ -3,7 +3,7 @@
 
 class CPhysicsObject;
 
-class CPlayerController : public btMassCenterMotionState, public IPhysicsPlayerController {
+class CPlayerController : public IPhysicsPlayerController {
 public:
 	CPlayerController(CPhysicsObject* pObject);
 	virtual ~CPlayerController();
