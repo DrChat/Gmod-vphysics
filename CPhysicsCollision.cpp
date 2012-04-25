@@ -243,8 +243,11 @@ bool CPhysicsCollision::IsBoxIntersectingCone( const Vector &boxAbsMins, const V
 }
 
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int size, bool swap) {
-	pOutput->solidCount = solidCount;
+	// TODO: Finish this, its almost working
+	/*pOutput->solidCount = solidCount;
 	pOutput->solids = new CPhysCollide*[solidCount];
+	pOutput->isPacked = 0;
+	pOutput->descSize = 0;
 
 	int position = 0; 
 	for (int i = 0; i < solidCount; i++) {
@@ -268,11 +271,43 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		assert(version == 0x100); // TODO: Support other versions of the format? (Portal 2 models had a crash inside VPhysics, they probably use another version. investigate)
 		assert(type == 0x0); // TODO: Support other things such as spheres
 
-		Msg("VPHY version %d type %d surface size %d\n", (int)version, (int)type, surfaceSize);
+		Msg("VPHY version %i type %i surface size %i\n", (int)version, (int)type, surfaceSize);
+
+		assert(*(uint32*)(data + 72) == 0x53505649); // IVPS
+		char *convexes = data + 76;
+		float *vertecies = (float*)(data + 76 + *(int*)(data + 76));
+		int maxVerts = (int(surfaceSize - 48) - *(int*)(data + 76)) >> 4;
+
+		btCompoundShape *bull = new btCompoundShape();
+		bull->setUserPointer(NULL);
+
+		int position = 0, remaining = 0, tris = 0;
+		do
+		{
+			Msg("Found convex\n");
+			remaining = *(int*)(convexes + position), tris = *(short*)(convexes + position + 12);
+			assert(tris * 16 + 16 <= remaining);
+			position += 16;
+			btConvexHullShape *hull = new btConvexHullShape();
+			hull->setUserPointer(NULL);
+			for (int j = 0; j < tris; j++)
+			{
+				int index1 = *(short*)(convexes + position + 4), index2 = *(short*)(convexes + position + 8), index3 = *(short*)(convexes + position + 12);
+				if (index1 <= maxVerts && index2 <= maxVerts && index3 <= maxVerts) // FIXME: Some indecies flip a complete shit so I have to do this for now
+				{
+					hull->addPoint(btVector3(vertecies[index1*4], -vertecies[index1*4+1], -vertecies[index1*4+2]));
+					hull->addPoint(btVector3(vertecies[index2*4], -vertecies[index2*4+1], -vertecies[index2*4+2]));
+					hull->addPoint(btVector3(vertecies[index3*4], -vertecies[index3*4+1], -vertecies[index3*4+2]));
+				}
+				position += 16;
+			}
+			bull->addChildShape(btTransform::getIdentity(), hull);
+			assert(position <= int(surfaceSize - 48));
+		} while (remaining != tris * 16 + 16);
 
 		delete (void*)pOutput->solids[i];
-		pOutput->solids[i] = (CPhysCollide*)new btCompoundShape;
-	}
+		pOutput->solids[i] = (CPhysCollide*)bull;
+	}*/
 
 	g_ValvePhysicsCollision->VCollideLoad(pOutput, solidCount, pBuffer, size, swap);
 	for (int i = 0; i < solidCount; i++) {
@@ -287,7 +322,8 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 		btCollisionShape* shape = (btCollisionShape*)pVCollide->solids[i];
 		delete shape;
 	}
-	delete pVCollide->pKeyValues;
+	// FIXME: Uncomment when no longer relying on havok
+	//free(pVCollide->pKeyValues);
 }
 
 IVPhysicsKeyParser* CPhysicsCollision::VPhysicsKeyParserCreate(const char *pKeyData) {
