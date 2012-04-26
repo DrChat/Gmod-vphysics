@@ -227,7 +227,7 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *p
 	weld->setAngularLowerLimit(btVector3(0,0,0));
 	weld->setAngularUpperLimit(btVector3(0,0,0));
 	m_pBulletEnvironment->addConstraint(weld, false);
-	return new CPhysicsConstraint(obj1, obj2, weld);
+	return new CPhysicsConstraint(this, obj1, obj2, weld);
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {

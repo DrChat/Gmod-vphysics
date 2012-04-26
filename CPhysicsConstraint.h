@@ -1,9 +1,11 @@
 #ifndef CCONSTRAINT_H
 #define CCONSTRAINT_H
 
+class CPhysicsEnvironment;
+
 class CPhysicsConstraint : public IPhysicsConstraint {
 public:
-	CPhysicsConstraint(CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint);
+	CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint);
 	~CPhysicsConstraint();
 
 	virtual void Activate();
@@ -30,6 +32,7 @@ private:
 	CPhysicsObject *m_pObject2;
 	btTypedConstraint *m_pConstraint;
 	void *m_pGameData;
+	CPhysicsEnvironment *m_pEnv;
 };
 
 #endif
