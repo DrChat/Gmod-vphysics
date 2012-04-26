@@ -151,8 +151,7 @@ const char* CPhysicsSurfaceProps::GetString(unsigned short stringTableIndex) con
 }
 
 const char* CPhysicsSurfaceProps::GetPropName(int surfaceDataIndex) const {
-	NOT_IMPLEMENTED;
-	return NULL;
+	return m_strings->String(m_props[surfaceDataIndex].m_name);
 }
 
 void CPhysicsSurfaceProps::SetWorldMaterialIndexTable(int* pMapArray, int mapSize) {

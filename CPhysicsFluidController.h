@@ -20,6 +20,9 @@ public:
 	// Extended functions
 private:
 	void * m_pGameData;
+	int m_iContents;
+	float m_fDensity;
+	Vector4D m_vSurfacePlane;
 };
 
 CPhysicsFluidController * CreateFluidController(CPhysicsObject *pFluidObject, fluidparams_t *pParams );

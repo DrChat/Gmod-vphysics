@@ -88,6 +88,7 @@ CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 CPhysicsObject::CPhysicsObject() {
 	m_contents = 0;
 	m_pShadow = NULL;
+	m_pFluidController = NULL;
 }
 
 CPhysicsObject::~CPhysicsObject() {
@@ -120,8 +121,7 @@ bool CPhysicsObject::IsTrigger() const {
 }
 
 bool CPhysicsObject::IsFluid() const {
-	NOT_IMPLEMENTED;// based on material index??
-	return false;
+	return m_pFluidController != NULL;
 }
 
 bool CPhysicsObject::IsHinged() const {
@@ -152,8 +152,7 @@ bool CPhysicsObject::IsMotionEnabled() const {
 
 	return (
 		(m_pObject->getActivationState() != DISABLE_SIMULATION) || 
-		(!(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT)) ||
-		IsAsleep()
+		(!(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT))
 	); // it doesn't have to be simulation disabled to be motion disabled
 }
 

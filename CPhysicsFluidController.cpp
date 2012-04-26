@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
 #include "CPhysicsFluidController.h"
+#include "CPhysicsObject.h"
 
 CPhysicsFluidController * CreateFluidController(CPhysicsObject *pFluidObject, fluidparams_t *pParams )
 {
@@ -11,7 +12,13 @@ CPhysicsFluidController * CreateFluidController(CPhysicsObject *pFluidObject, fl
 
 CPhysicsFluidController::CPhysicsFluidController(CPhysicsObject *pFluidObject, fluidparams_t * pParams)
 {
-	m_pGameData = NULL;
+	m_pGameData = pParams->pGameData;
+	m_iContents = pParams->contents;
+	m_fDensity = 1000.0f; // Density of water (1000 kg/m^3), used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
+	m_vSurfacePlane = pParams->surfacePlane;
+	pFluidObject->EnableCollisions(false);
+	pFluidObject->SetContents(m_iContents); // Do we really need to do this?
+	pFluidObject->SetFluidController(this);
 }
 CPhysicsFluidController::~CPhysicsFluidController( void ) 
 {
@@ -28,13 +35,15 @@ void * CPhysicsFluidController::GetGameData( void ) const
 
 void CPhysicsFluidController::GetSurfacePlane( Vector *pNormal, float *pDist ) const
 {
-	NOT_IMPLEMENTED;
+	*pNormal = m_vSurfacePlane.AsVector3D();
+	*pDist = m_vSurfacePlane.w;
 }
-float	CPhysicsFluidController::GetDensity() const
+
+float CPhysicsFluidController::GetDensity() const
 {
-	NOT_IMPLEMENTED;
-	return 0;
+	return m_fDensity;
 }
+
 void CPhysicsFluidController::WakeAllSleepingObjects()
 {
 	NOT_IMPLEMENTED;

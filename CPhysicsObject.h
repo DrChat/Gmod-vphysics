@@ -3,6 +3,7 @@
 
 class CPhysicsEnvironment;
 class CShadowController;
+class CPhysicsFluidController;
 
 class CPhysicsObject : public IPhysicsObject {
 public:
@@ -107,6 +108,9 @@ public:
 	virtual void DestroyFrictionSnapshot(IPhysicsFrictionSnapshot* pSnapshot);
 
 	virtual void OutputDebugInfo() const;
+
+	virtual CPhysicsFluidController *GetFluidController(void) { return m_pFluidController; }
+	virtual void SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 public:
 	void Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride);
 	CPhysicsEnvironment* GetVPhysicsEnvironment();
@@ -134,6 +138,7 @@ private:
 	btVector3 m_angDragBasis;
 	Vector m_massCenterOverride;
 	CShadowController *m_pShadow;
+	CPhysicsFluidController *m_pFluidController;
 };
 
 CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment* pEnvironment, const CPhysCollide* pCollisionModel, int materialIndex, const Vector& position, const QAngle& angles, objectparams_t* pParams, bool isStatic);

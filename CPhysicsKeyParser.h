@@ -17,7 +17,7 @@ public:
 	virtual void ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unknownKeyHandler);
 	virtual void ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler);
 	virtual void ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHandler *unknownKeyHandler);
-	virtual void SkipBlock(void) { ParseCustom(NULL, NULL); };
+	virtual void SkipBlock(void) { NextBlock(); };
 
 private:
 	KeyValues* m_pKeyValues;

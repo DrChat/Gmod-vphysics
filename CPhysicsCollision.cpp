@@ -2,6 +2,7 @@
 
 #include "CPhysicsCollision.h"
 #include "convert.h"
+#include "CPhysicsKeyParser.h"
 
 IPhysicsCollision* g_ValvePhysicsCollision = NULL;
 
@@ -128,13 +129,11 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 	ConvertRotationToBull(collideAngles, rot);
 	btTransform transform(rot, pos);
 
-	shape->getAabb(transform, mins, maxs);
-
 	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
 	if (shapeInfo)
-	{
-		// FIXME: correct the AABB's after the mass center here
-	}
+		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
+
+	shape->getAabb(transform, mins, maxs);
 
 	ConvertPosToHL(mins, *pMins);
 	ConvertPosToHL(maxs, *pMaxs);
@@ -202,7 +201,12 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	ConvertPosToBull(collideOrigin, btvec);
 	ConvertRotationToBull(collideAngles, btmatrix);
 	btTransform transform(btmatrix, btvec);
-	object->setWorldTransform(transform);
+
+	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
+	if (shapeInfo)
+		object->setWorldTransform(transform * btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter));
+	else
+		object->setWorldTransform(transform);
 
 	btVector3 startv, endv;
 	ConvertPosToBull(ray.m_Start, startv);
@@ -319,10 +323,12 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 
 IVPhysicsKeyParser* CPhysicsCollision::VPhysicsKeyParserCreate(const char *pKeyData) {
 	return g_ValvePhysicsCollision->VPhysicsKeyParserCreate(pKeyData);
+	//return new CPhysicsKeyParser(pKeyData);
 }
 
 void CPhysicsCollision::VPhysicsKeyParserDestroy(IVPhysicsKeyParser *pParser) {
 	g_ValvePhysicsCollision->VPhysicsKeyParserDestroy(pParser);
+	//delete (CPhysicsKeyParser*)pParser;
 }
 
 int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vector **outVerts) {
