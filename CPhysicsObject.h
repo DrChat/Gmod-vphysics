@@ -132,6 +132,7 @@ private:
 	unsigned int m_contents;
 
 	float m_volume;
+	float m_fMass;
 	float m_dragCoefficient;
 	float m_angDragCoefficient;
 	btVector3 m_dragBasis;

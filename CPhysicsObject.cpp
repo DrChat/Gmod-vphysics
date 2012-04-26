@@ -108,7 +108,7 @@ CPhysicsObject::~CPhysicsObject() {
 }
 
 bool CPhysicsObject::IsStatic() const {
-	return (m_pObject->isStaticObject());
+	return m_pObject->getInvMass() == 0;
 }
 
 bool CPhysicsObject::IsAsleep() const {
@@ -150,10 +150,7 @@ bool CPhysicsObject::IsDragEnabled() const {
 
 bool CPhysicsObject::IsMotionEnabled() const {
 
-	return (
-		(m_pObject->getActivationState() != DISABLE_SIMULATION) || 
-		(!(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT))
-	); // it doesn't have to be simulation disabled to be motion disabled
+	return !(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT);
 }
 
 bool CPhysicsObject::IsMoveable() const {
