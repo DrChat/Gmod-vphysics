@@ -4,18 +4,20 @@
 #include <tier1/utlsymbol.h>
 #include <vphysics_interface.h>
 #include <vphysics/collision_set.h>
+#include <vphysics/constraints.h>
 #include <vphysics/friction.h>
 #include <vphysics/object_hash.h>
 #include <vphysics/performance.h>
 #include <vphysics/player_controller.h>
+#include <vphysics/stats.h>
+#include <vphysics/vehicles.h>
 #include <vphysics/virtualmesh.h>
-#include <vphysics/constraints.h>
 #include <vcollide_parse.h>
 #include <cmodel.h>
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btMaterial.h>
-#include <BulletCollision\CollisionDispatch\btGhostObject.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 #define COLLISION_MARGIN 0.004
 

@@ -322,13 +322,13 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 }
 
 IVPhysicsKeyParser* CPhysicsCollision::VPhysicsKeyParserCreate(const char *pKeyData) {
-	return g_ValvePhysicsCollision->VPhysicsKeyParserCreate(pKeyData);
-	//return new CPhysicsKeyParser(pKeyData);
+	//return g_ValvePhysicsCollision->VPhysicsKeyParserCreate(pKeyData);
+	return new CPhysicsKeyParser(pKeyData);
 }
 
 void CPhysicsCollision::VPhysicsKeyParserDestroy(IVPhysicsKeyParser *pParser) {
-	g_ValvePhysicsCollision->VPhysicsKeyParserDestroy(pParser);
-	//delete (CPhysicsKeyParser*)pParser;
+	//g_ValvePhysicsCollision->VPhysicsKeyParserDestroy(pParser);
+	delete (CPhysicsKeyParser*)pParser;
 }
 
 int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vector **outVerts) {

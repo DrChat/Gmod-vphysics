@@ -205,6 +205,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsKeyParser.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsMotionController.cpp"
 				>
 			</File>
@@ -280,6 +284,10 @@
 			</File>
 			<File
 				RelativePath=".\CPhysicsFrictionSnapshot.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsKeyParser.h"
 				>
 			</File>
 			<File

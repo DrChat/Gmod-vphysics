@@ -22,7 +22,6 @@ public:
 private:
 	KeyValues* m_pKeyValues;
 	KeyValues* m_pCurrentBlock;
-	char m_pCurrentBlockName[256];
 };
 
 #endif

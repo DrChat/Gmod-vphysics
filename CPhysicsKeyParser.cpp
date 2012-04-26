@@ -47,15 +47,14 @@ const char *CPhysicsKeyParser::GetCurrentBlockName(void)
 {
 	if (m_pCurrentBlock)
 	{
-		strcpy_s(m_pCurrentBlockName, m_pCurrentBlock->GetName());
-		return m_pCurrentBlockName;
+		return m_pCurrentBlock->GetName();
 	}
 	return NULL;
 }
 
 bool CPhysicsKeyParser::Finished(void)
 {
-	return m_pCurrentBlockName == NULL;
+	return m_pCurrentBlock == NULL;
 }
 
 void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknownKeyHandler)
@@ -69,7 +68,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 		const char* key = data->GetName();
 		if (!stricmp(key, "index"))
 			pSolid->index = data->GetInt();
-		if (!stricmp(key, "surfaceprop"))
+		else if (!stricmp(key, "surfaceprop"))
 			strncpy(pSolid->surfaceprop, data->GetString(), sizeof pSolid->surfaceprop);
 		else if (!stricmp(key, "name"))
 			strncpy(pSolid->name, data->GetString(), sizeof pSolid->name);
@@ -109,18 +108,16 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 		const char* key = data->GetName();
 		if (!stricmp(key, "index"))
 			pFluid->index = data->GetInt();
-		if (!stricmp(key, "surfaceprop"))
+		else if (!stricmp(key, "surfaceprop"))
 			strncpy(pFluid->surfaceprop, data->GetString(), sizeof pFluid->surfaceprop);
-		if (!stricmp(key, "conents"))
+		else if (!stricmp(key, "contents"))
 			pFluid->params.contents = data->GetInt();
 		//if (!stricmp(key, "density")) // In the 2003 leak this existed, in the current code pFluid->params.density does not
-		if (!stricmp(key, "damping"))
+		else if (!stricmp(key, "damping"))
 			pFluid->params.damping = data->GetFloat();
-		if (!stricmp(key, "surfaceplane"))
-			pFluid->params.damping = data->GetFloat();
-		if (!stricmp(key, "currentvelocity"))
+		else if (!stricmp(key, "surfaceplane"))
 			ReadVector4D(data->GetString(), pFluid->params.surfacePlane);
-		if (!stricmp(key, "currentvelocity"))
+		else if (!stricmp(key, "currentvelocity"))
 			ReadVector(data->GetString(), pFluid->params.currentVelocity);
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pFluid, key, data->GetString());
