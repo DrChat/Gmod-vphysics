@@ -19,6 +19,11 @@ public:
 	virtual void ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHandler *unknownKeyHandler);
 	virtual void SkipBlock(void) { NextBlock(); };
 
+	virtual void ParseVehicleAxle(vehicleparams_t *pVehicle, KeyValues *kv);
+	virtual void ParseVehicleBody(vehicleparams_t *pVehicle, KeyValues *kv);
+	virtual void ParseVehicleEngine(vehicleparams_t *pVehicle, KeyValues *kv);
+	virtual void ParseVehicleSteering(vehicleparams_t *pVehicle, KeyValues *kv);
+
 private:
 	KeyValues* m_pKeyValues;
 	KeyValues* m_pCurrentBlock;

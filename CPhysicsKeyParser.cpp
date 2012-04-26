@@ -127,7 +127,51 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 
 void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pConstraint, IVPhysicsKeyHandler *unknownKeyHandler)
 {
-	Error("shit1");
+	if (unknownKeyHandler)
+		unknownKeyHandler->SetDefaults(pConstraint);
+	else
+	{
+		memset(pConstraint, 0, sizeof*pConstraint);
+		pConstraint->childIndex = -1;
+		pConstraint->parentIndex = -1;
+	}
+
+	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		if (!stricmp(key, "parent"))
+			pConstraint->parentIndex = data->GetInt();
+		if (!stricmp(key, "child"))
+			pConstraint->childIndex = data->GetInt();
+		else if (!stricmp(key, "xmin"))
+			pConstraint->axes[0].minRotation = data->GetFloat();
+		else if (!stricmp(key, "xmax"))
+			pConstraint->axes[0].maxRotation = data->GetFloat();
+		else if (!stricmp(key, "xfriction"))
+		{
+			pConstraint->axes[0].angularVelocity = 0;
+			pConstraint->axes[0].torque = data->GetFloat();
+		}
+		else if (!stricmp(key, "ymin"))
+			pConstraint->axes[1].minRotation = data->GetFloat();
+		else if (!stricmp(key, "ymax"))
+			pConstraint->axes[1].maxRotation = data->GetFloat();
+		else if (!stricmp(key, "yfriction"))
+		{
+			pConstraint->axes[1].angularVelocity = 0;
+			pConstraint->axes[1].torque = data->GetFloat();
+		}
+		else if (!stricmp(key, "zmin"))
+			pConstraint->axes[2].minRotation = data->GetFloat();
+		else if (!stricmp(key, "zmax"))
+			pConstraint->axes[2].maxRotation = data->GetFloat();
+		else if (!stricmp(key, "zfriction"))
+		{
+			pConstraint->axes[2].angularVelocity = 0;
+			pConstraint->axes[2].torque = data->GetFloat();
+		}
+		else if (unknownKeyHandler)
+			unknownKeyHandler->ParseKeyValue(pConstraint, key, data->GetString());
+	}
 	NextBlock();
 }
 
@@ -155,6 +199,47 @@ void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownK
 
 void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHandler *unknownKeyHandler)
 {
-	Error("shit2");
+	if (unknownKeyHandler)
+		unknownKeyHandler->SetDefaults(pVehicle);
+	else
+		memset(pVehicle, 0, sizeof*pVehicle);
+
+	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		if (!stricmp(key, "axle"))
+		{
+			ParseVehicleAxle(pVehicle, data);
+			pVehicle->axleCount++;
+		}
+		else if (!stricmp(key, "body"))
+			ParseVehicleBody(pVehicle, data);
+		else if (!stricmp(key, "engine"))
+			ParseVehicleEngine(pVehicle, data);
+		else if (!stricmp(key, "steering"))
+			ParseVehicleSteering(pVehicle, data);
+		else if (!stricmp(key, "wheelsperaxle"))
+			pVehicle->wheelsPerAxle = data->GetInt();
+	}
 	NextBlock();
+}
+
+
+void CPhysicsKeyParser::ParseVehicleAxle(vehicleparams_t *pVehicle, KeyValues *kv)
+{
+	NOT_IMPLEMENTED;
+}
+
+void CPhysicsKeyParser::ParseVehicleBody(vehicleparams_t *pVehicle, KeyValues *kv)
+{
+	NOT_IMPLEMENTED;
+}
+
+void CPhysicsKeyParser::ParseVehicleEngine(vehicleparams_t *pVehicle, KeyValues *kv)
+{
+	NOT_IMPLEMENTED;
+}
+
+void CPhysicsKeyParser::ParseVehicleSteering(vehicleparams_t *pVehicle, KeyValues *kv)
+{
+	NOT_IMPLEMENTED;
 }
