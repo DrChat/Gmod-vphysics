@@ -10,10 +10,12 @@
 #include <vphysics/player_controller.h>
 #include <vphysics/virtualmesh.h>
 #include <vphysics/constraints.h>
+#include <vcollide_parse.h>
 #include <cmodel.h>
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btMaterial.h>
+#include <BulletCollision\CollisionDispatch\btGhostObject.h>
 
 #define COLLISION_MARGIN 0.004
 
