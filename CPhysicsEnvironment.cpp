@@ -230,14 +230,20 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *p
 	return new CPhysicsConstraint(this, obj1, obj2, weld);
 }
 
-IPhysicsConstraint* CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
+IPhysicsConstraint* CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding)
+{
 	NOT_IMPLEMENTED;
 	return NULL;
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {	
-	NOT_IMPLEMENTED;
-	return NULL;
+	btVector3 obj1Pos, obj2Pos;
+	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
+	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
+	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos);
+	m_pBulletEnvironment->addConstraint(ballsock, false);
+	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreatePulleyConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
