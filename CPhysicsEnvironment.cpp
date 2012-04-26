@@ -8,6 +8,7 @@
 #include "CPhysicsDragController.h"
 #include "CPhysicsMotionController.h"
 #include "convert.h"
+#include "CPhysicsConstraint.h"
 
 //#define DEBUG_DRAW
 
@@ -205,7 +206,8 @@ void CPhysicsEnvironment::DestroySpring(IPhysicsSpring*) {
 	NOT_IMPLEMENTED;
 }
 
-IPhysicsConstraint* CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
+IPhysicsConstraint* CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) 
+{
 	NOT_IMPLEMENTED;
 	return NULL;
 }
@@ -215,9 +217,17 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateHingeConstraint(IPhysicsObject *p
 	return NULL;
 }
 
-IPhysicsConstraint* CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed) {
-	NOT_IMPLEMENTED;
-	return NULL;
+IPhysicsConstraint* CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed)
+{
+	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+	btGeneric6DofConstraint *weld = new btGeneric6DofConstraint(*obj1->GetObject(), *obj2->GetObject(),
+		obj1->GetObject()->getWorldTransform().inverse() * obj2->GetObject()->getWorldTransform(), btTransform::getIdentity(), true);
+	weld->setLinearLowerLimit(btVector3(0,0,0));
+	weld->setLinearUpperLimit(btVector3(0,0,0));
+	weld->setAngularLowerLimit(btVector3(0,0,0));
+	weld->setAngularUpperLimit(btVector3(0,0,0));
+	m_pBulletEnvironment->addConstraint(weld, false);
+	return new CPhysicsConstraint(obj1, obj2, weld);
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {

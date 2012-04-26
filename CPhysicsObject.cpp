@@ -112,7 +112,9 @@ bool CPhysicsObject::IsStatic() const {
 }
 
 bool CPhysicsObject::IsAsleep() const {
-	return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
+	return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
