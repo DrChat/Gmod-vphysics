@@ -11,9 +11,19 @@
 #include "CPhysicsConstraint.h"
 
 //#define DEBUG_DRAW
+// WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
+//#define MULTITHREAD // TODO: Mac and Linux support
 
 #ifdef DEBUG_DRAW
 #include "GLDebugDrawer.h"
+#endif
+
+#ifdef MULTITHREAD
+#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
+#include "BulletMultiThreaded/PlatformDefinitions.h"
+#include "BulletMultiThreaded/Win32ThreadSupport.h"
+#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+#pragma comment(lib,"BulletMultiThreaded.lib")
 #endif
 
 class IDeleteQueueItem {
@@ -85,12 +95,27 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pCollisionSolver = new CCollisionSolver;
 
+#ifndef MULTITHREAD
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
 	m_pBulletBroadphase = new btDbvtBroadphase();
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
+#else
+	int maxTasks = 4;
 
+	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+								"collision",
+								processCollisionTask,
+								createCollisionLocalStoreMemory,
+								maxTasks));
+
+	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
+	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
+	m_pBulletBroadphase = new btDbvtBroadphase();
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
+#endif
 
 	//m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	//m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
