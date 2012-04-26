@@ -21,9 +21,9 @@ public:
 	virtual void			SetLinearMotor(float speed, float maxLinearImpulse) { NOT_IMPLEMENTED; };
 	virtual void			SetAngularMotor(float rotSpeed, float maxAngularImpulse) { NOT_IMPLEMENTED; };
 
-	virtual void			UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached) { NOT_IMPLEMENTED_ERROR; };
-	virtual bool			GetConstraintTransform(matrix3x4_t *pConstraintToReference, matrix3x4_t *pConstraintToAttached) const { NOT_IMPLEMENTED_ERROR; return false; };
-	virtual bool			GetConstraintParams(constraint_breakableparams_t *pParams) const { NOT_IMPLEMENTED_ERROR; return false; };
+	virtual void			UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached) { NOT_IMPLEMENTED; };
+	virtual bool			GetConstraintTransform(matrix3x4_t *pConstraintToReference, matrix3x4_t *pConstraintToAttached) const { NOT_IMPLEMENTED; return false; };
+	virtual bool			GetConstraintParams(constraint_breakableparams_t *pParams) const { NOT_IMPLEMENTED; return false; };
 
 	virtual void			OutputDebugInfo() { NOT_IMPLEMENTED; };
 
