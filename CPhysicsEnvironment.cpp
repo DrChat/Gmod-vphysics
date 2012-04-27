@@ -9,6 +9,7 @@
 #include "CPhysicsMotionController.h"
 #include "convert.h"
 #include "CPhysicsConstraint.h"
+#include "CPhysicsVehicleController.h"
 
 //#define DEBUG_DRAW
 // WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
@@ -320,12 +321,11 @@ void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pCon
 }
 
 IPhysicsVehicleController* CPhysicsEnvironment::CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	return new CPhysicsVehicleController(this, (CPhysicsObject*)pVehicleBodyObject, params, nVehicleType);
 }
 
-void CPhysicsEnvironment::DestroyVehicleController(IPhysicsVehicleController*) {
-	NOT_IMPLEMENTED;
+void CPhysicsEnvironment::DestroyVehicleController(IPhysicsVehicleController *pController) {
+	delete (CPhysicsVehicleController*)pController;
 }
 
 void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
@@ -341,7 +341,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	}
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
-		m_pBulletEnvironment->stepSimulation(deltaTime, 4, m_timestep);
+		m_pBulletEnvironment->stepSimulation(deltaTime, 8, m_timestep/2.0f);
 		/*
 		if (m_pObjectEvent)
 		{
