@@ -10,7 +10,12 @@ btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	btCompoundShape* bull = new btCompoundShape();
 	bull->setMargin(COLLISION_MARGIN);
 
-	btConvexHullShape **shapes = new btConvexHullShape*[convexcount];
+	Vector hlMassCenter;
+	g_ValvePhysicsCollision->CollideGetMassCenter(ivp, &hlMassCenter);
+	PhysicsShapeInfo* info = (PhysicsShapeInfo*)malloc(sizeof(PhysicsShapeInfo));
+	ConvertPosToBull(hlMassCenter, info->massCenter);
+	bull->setUserPointer(info);
+	btTransform massCenterTrans(btMatrix3x3::getIdentity(), -info->massCenter);
 
 	for (int convex = 0; convex < convexcount; convex++) {
 		int triangles = query->TriangleCount(convex);
@@ -25,26 +30,8 @@ btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 			shape->addPoint(btvec[2]);
 		}
 		shape->setMargin(COLLISION_MARGIN);
-		shapes[convex] = shape;
+		bull->addChildShape(massCenterTrans, shape);
 	}
-
-	btVector3 massCenter(0, 0, 0);
-	for (int i = 0; i < convexcount; i++)
-	{
-		btVector3 mins, maxs;
-		shapes[i]->getAabb(btTransform::getIdentity(), mins, maxs);
-		massCenter += (maxs + mins)/2;
-	}
-	massCenter /= convexcount;
-
-	btTransform massCenterTrans(btMatrix3x3::getIdentity(), -massCenter);
-	PhysicsShapeInfo *shapeInfo = new PhysicsShapeInfo;
-	shapeInfo->massCenter = massCenter;
-	bull->setUserPointer(shapeInfo);
-
-	for (int i = 0; i < convexcount; i++)
-		bull->addChildShape(massCenterTrans, shapes[i]);
-
 	g_ValvePhysicsCollision->DestroyQueryModel(query);
 	return bull;
 }
