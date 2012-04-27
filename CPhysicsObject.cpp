@@ -50,7 +50,7 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	pObject->EnableCollisions(pParams->enableCollisions);
 	if (!isStatic && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
 
-	if (mass > 0)
+	/*if (mass > 0)
 	{
 		btVector3 mins, maxs;
 		shape->getAabb(btTransform::getIdentity(), mins, maxs);
@@ -59,7 +59,7 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 		float radius = min(maxradius,minradius)/2.0f;
 		body->setCcdMotionThreshold(radius*0.5f);
 		body->setCcdSweptSphereRadius(0.2f*radius);
-	}
+	}*/
 	
 	return pObject;
 }
