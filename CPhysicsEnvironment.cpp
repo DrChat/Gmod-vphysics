@@ -341,7 +341,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	}
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
-		m_pBulletEnvironment->stepSimulation(deltaTime, 8, m_timestep/2.0f);
+		m_pBulletEnvironment->stepSimulation(deltaTime, 4, m_timestep/2.0f);
 		/*
 		if (m_pObjectEvent)
 		{
