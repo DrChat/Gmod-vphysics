@@ -307,6 +307,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	g_ValvePhysicsCollision->VCollideLoad(pOutput, solidCount, pBuffer, size, swap);
 	for (int i = 0; i < solidCount; i++) {
 		CPhysCollide *ivp = pOutput->solids[i];
+		if (!ivp) continue;
 		pOutput->solids[i] = (CPhysCollide*)ConvertMeshToBull(ivp);
 		g_ValvePhysicsCollision->DestroyCollide(ivp);
 	}
