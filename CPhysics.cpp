@@ -2,6 +2,7 @@
 
 #include "CPhysics.h"
 #include "CPhysicsEnvironment.h"
+#include "CPhysicsObjectPairHash.h"
 
 IPhysics* g_ValvePhysics = NULL;
 
@@ -45,11 +46,11 @@ IPhysicsEnvironment* CPhysics::GetActiveEnvironmentByIndex(int index) {
 }
 
 IPhysicsObjectPairHash* CPhysics::CreateObjectPairHash() {
-	return g_ValvePhysics->CreateObjectPairHash();
+	return new CPhysicsObjectPairHash();
 }
 
 void CPhysics::DestroyObjectPairHash(IPhysicsObjectPairHash *pHash) {
-	g_ValvePhysics->DestroyObjectPairHash(pHash);
+	delete (CPhysicsObjectPairHash*)pHash;
 }
 
 IPhysicsCollisionSet* CPhysics::FindOrCreateCollisionSet(unsigned int id, int maxElementCount) {
