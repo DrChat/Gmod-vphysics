@@ -131,7 +131,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
 	if (shapeInfo)
-		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
+		transform *= btTransform(btMatrix3x3::getIdentity(), -shapeInfo->massCenter);
 
 	shape->getAabb(transform, mins, maxs);
 
