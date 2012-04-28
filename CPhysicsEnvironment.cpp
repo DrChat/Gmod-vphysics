@@ -300,10 +300,13 @@ void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup
 }
 
 IPhysicsShadowController* CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
-	return new CShadowController((CPhysicsObject*)pObject, allowTranslation, allowRotation);
+	CShadowController* controller = new CShadowController((CPhysicsObject*)pObject, allowTranslation, allowRotation);
+	m_controllers.AddToTail(controller);
+	return controller;
 }
 
 void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController* pShadow) {
+	m_controllers.FindAndRemove((CShadowController*)pShadow);
 	delete pShadow;
 }
 

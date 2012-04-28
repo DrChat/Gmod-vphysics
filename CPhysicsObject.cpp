@@ -573,8 +573,7 @@ void CPhysicsObject::RemoveShadowController() {
 }
 
 float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t& params, float secondsToArrival, float dt) {
-	NOT_IMPLEMENTED;
-	return 0;
+	return ComputeShadowControllerHL(this, params, secondsToArrival, dt);
 }
 
 const CPhysCollide* CPhysicsObject::GetCollide() const {

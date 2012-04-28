@@ -1,9 +1,25 @@
 #ifndef CSHADOWCONTROLLER_H
 #define CSHADOWCONTROLLER_H
 
+#include "IController.h"
+
 class CPhysicsObject;
 
-class CShadowController : public IPhysicsShadowController {
+float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
+
+struct shadowcontrol_params_t {
+	shadowcontrol_params_t() {lastPosition.setZero();}
+
+	btVector3 targetPosition;
+	btQuaternion targetRotation;
+	btVector3 maxSpeed;
+	btVector3 maxAngular;
+	btVector3 lastPosition;
+	float dampFactor;
+	float teleportDistance;
+};
+
+class CShadowController : public IController, public IPhysicsShadowController {
 public:
 	CShadowController(CPhysicsObject* pObject, bool allowTranslation, bool allowRotation);
 	virtual ~CShadowController();
@@ -21,8 +37,19 @@ public:
 	virtual float GetTargetPosition(Vector* pPositionOut, QAngle* pAnglesOut);
 	virtual float GetTeleportDistance();
 	virtual void GetMaxSpeed(float* pMaxSpeedOut, float* pMaxAngularSpeedOut);
+public:
+	virtual void Tick(float deltaTime);
 private:
+	void AttachObject();
+	void DetachObject();
+
 	CPhysicsObject* m_pObject;
+	float m_secondsToArrival;
+	btVector3 m_currentSpeed;
+	bool m_enable;
+	bool m_allowPhysicsMovement;
+	bool m_allowPhysicsRotation;
+	shadowcontrol_params_t m_shadow;
 };
 
 #endif
