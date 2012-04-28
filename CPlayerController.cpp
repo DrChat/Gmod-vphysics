@@ -6,6 +6,7 @@
 
 CPlayerController::CPlayerController(CPhysicsObject* pObject) {
 	m_pObject = pObject;
+	m_handler = NULL;
 }
 
 CPlayerController::~CPlayerController() {
@@ -45,14 +46,8 @@ int CPlayerController::GetShadowPosition( Vector* position, QAngle* angles ) {
 	btRigidBody* pObject = m_pObject->GetObject();
 	btTransform transform;
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
-	if (position) {
-		btVector3 btvec = transform.getOrigin();
-		ConvertPosToHL(btvec, *position);
-	}
-	if (angles) {
-		btMatrix3x3 btmatrix = transform.getBasis();
-		ConvertRotationToHL(btmatrix, *angles);
-	}
+	if (position) ConvertPosToHL(transform.getOrigin(), *position);
+	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 	// FIXME: what is this?
 	// Andrew; this needs to return the amount of ticks since the last Update()
 	return 0;

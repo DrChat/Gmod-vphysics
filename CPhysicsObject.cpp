@@ -553,7 +553,14 @@ void CPhysicsObject::UpdateShadow(const Vector& targetPosition, const QAngle& ta
 }
 
 int CPhysicsObject::GetShadowPosition(Vector* position, QAngle* angles) const {
-	NOT_IMPLEMENTED;
+	btTransform transform;
+	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
+	if (position) {
+		ConvertPosToHL(transform.getOrigin(), *position);
+	}
+	if (angles) {
+		ConvertRotationToHL(transform.getBasis(), *angles);
+	}
 	return 0;
 }
 

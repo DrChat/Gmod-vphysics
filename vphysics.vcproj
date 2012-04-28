@@ -221,7 +221,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsObjectPairHash.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsSurfaceProps.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsVehicleController.cpp"
 				>
 			</File>
 			<File
@@ -307,7 +315,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsObjectPairHash.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsSurfaceProps.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsVehicleController.h"
 				>
 			</File>
 			<File

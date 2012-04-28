@@ -35,28 +35,39 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
 				ConvertForceImpulseToBull(speed, bullSpeed);
 				ConvertAngularImpulseToBull(rot, bullRot);
+
 				btTransform transform;
 				((btMassCenterMotionState*)body->getMotionState())->getGraphicTransform(transform);
-				body->setLinearVelocity(body->getLinearVelocity() + transform.getBasis()*bullSpeed);
-				body->setAngularVelocity(body->getAngularVelocity() + bullRot);
+				bullSpeed = transform.getBasis()*bullSpeed;
+
+				body->setLinearVelocity(body->getLinearVelocity() + bullSpeed * deltaTime);
+				body->setAngularVelocity(body->getAngularVelocity() + bullRot * deltaTime);
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_FORCE: {
 				ConvertForceImpulseToBull(speed, bullSpeed);
 				ConvertAngularImpulseToBull(rot, bullRot);
+
 				btTransform transform;
 				((btMassCenterMotionState*)body->getMotionState())->getGraphicTransform(transform);
-				body->applyCentralForce(transform.getBasis()*bullSpeed);
-				body->applyTorque(bullRot);
+				bullSpeed = transform.getBasis()*bullSpeed;
+
+				body->applyCentralForce(bullSpeed * deltaTime);
+				body->applyTorque(bullRot * deltaTime);
 				break;
 			}
 			case IMotionEvent::SIM_GLOBAL_ACCELERATION: {
-				pObject->AddVelocity(&speed, &rot);
+				ConvertForceImpulseToBull(speed, bullSpeed);
+				ConvertAngularImpulseToBull(rot, bullRot);
+				body->setLinearVelocity(body->getLinearVelocity() + bullSpeed * deltaTime);
+				body->setAngularVelocity(body->getAngularVelocity() + bullRot * deltaTime);
 				break;
 			}
 			case IMotionEvent::SIM_GLOBAL_FORCE: {
-				pObject->ApplyForceCenter(speed);
-				pObject->ApplyTorqueCenter(rot);
+				ConvertForceImpulseToBull(speed, bullSpeed);
+				ConvertAngularImpulseToBull(rot, bullRot);
+				body->applyCentralForce(bullSpeed * deltaTime);
+				body->applyTorque(bullRot * deltaTime);
 				break;
 			}
 		}
