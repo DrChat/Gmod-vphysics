@@ -204,9 +204,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 
 	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
 	if (shapeInfo)
-		object->setWorldTransform(transform * btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter));
-	else
-		object->setWorldTransform(transform);
+		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
+	object->setWorldTransform(transform);
 
 	btVector3 startv, endv;
 	ConvertPosToBull(ray.m_Start, startv);
