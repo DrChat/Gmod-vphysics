@@ -283,8 +283,18 @@ IPhysicsConstraint* CPhysicsEnvironment::CreatePulleyConstraint(IPhysicsObject *
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	btVector3 obj1Pos, obj2Pos;
+	ConvertPosToBull(length.objectPosition[0], obj1Pos);
+	ConvertPosToBull(length.objectPosition[1], obj2Pos);
+	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer(), *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+	if (shapeInfo1)
+		obj1Pos -= shapeInfo1->massCenter;
+	if (shapeInfo2)
+		obj2Pos -= shapeInfo2->massCenter;
+	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
+	m_pBulletEnvironment->addConstraint(constraint, false);
+	return new CPhysicsConstraint(this, obj1, obj2, constraint);
 }
 
 void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint*) {
