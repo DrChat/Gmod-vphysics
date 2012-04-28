@@ -267,6 +267,11 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObje
 	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
 	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer(), *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+	if (shapeInfo1)
+		obj1Pos -= shapeInfo1->massCenter;
+	if (shapeInfo2)
+		obj2Pos -= shapeInfo2->massCenter;
 	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos);
 	m_pBulletEnvironment->addConstraint(ballsock, false);
 	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
