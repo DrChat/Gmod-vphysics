@@ -476,7 +476,14 @@ void CPhysicsEnvironment::PostRestore() {
 }
 
 bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
-	NOT_IMPLEMENTED;
+	for (int i = 0; i < m_objects.Count(); i++) {
+		if (((CPhysicsObject*)m_objects[i])->GetObject()->getCollisionShape() == (btCollisionShape*)pCollide)
+			return true;
+	}
+	for (int i = 0; i < m_deadObjects.Count(); i++) {
+		if (((CPhysicsObject*)m_deadObjects[i])->GetObject()->getCollisionShape() == (btCollisionShape*)pCollide)
+			return true;
+	}
 	return false;
 }
 	
