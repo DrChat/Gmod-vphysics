@@ -114,8 +114,9 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 }
 
 Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction) {
+	if (!pCollide) return collideOrigin;
 	NOT_IMPLEMENTED;
-	return Vector();
+	return collideOrigin;
 }
 
 void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles) {
