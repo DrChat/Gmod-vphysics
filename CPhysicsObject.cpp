@@ -361,7 +361,7 @@ void CPhysicsObject::SetDragCoefficient( float *pDrag, float *pAngularDrag )
 	}
 }
 void CPhysicsObject::SetBuoyancyRatio(float ratio) {
-	NOT_IMPLEMENTED;
+	m_fBuoyancyRatio = ratio;
 }
 
 int CPhysicsObject::GetMaterialIndex() const {
@@ -634,6 +634,9 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
 	m_fVolume = volume;
+	float matdensity;
+	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
+	m_fBuoyancyRatio = (GetMass()/(GetVolume()*METERS_PER_INCH*METERS_PER_INCH*METERS_PER_INCH))/matdensity;
 
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
 	if (surface)

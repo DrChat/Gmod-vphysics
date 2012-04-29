@@ -363,6 +363,9 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
 		m_pBulletEnvironment->stepSimulation(deltaTime, 2, m_timestep/2.0f);
+		for (int i = 0; i < m_fluids.Count(); i++) {
+			m_fluids[i]->Tick(deltaTime);
+		}
 		/*
 		if (m_pObjectEvent)
 		{
@@ -559,9 +562,6 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 	m_pPhysicsDragController->Tick(dt);
 	for (int i = 0; i < m_controllers.Count(); i++) {
 		m_controllers[i]->Tick(dt);
-	}
-	for (int i = 0; i < m_fluids.Count(); i++) {
-		m_fluids[i]->Tick(dt);
 	}
 }
 CPhysicsDragController * CPhysicsEnvironment::GetDragController()

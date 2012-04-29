@@ -119,6 +119,7 @@ public:
 	float GetDragInDirection(btVector3 * direction) const; // Function is not interfaced anymore
 	float GetAngularDragInDirection(btVector3 * direction) const;
 	float GetVolume() const { return m_fVolume; }
+	float GetBuoyancyRatio() const { return m_fBuoyancyRatio; }
 
 	int m_iLastActivationState;
 private:
@@ -133,6 +134,7 @@ private:
 	unsigned int m_contents;
 
 	float m_fVolume;
+	float m_fBuoyancyRatio;
 	float m_dragCoefficient;
 	float m_angDragCoefficient;
 	btVector3 m_dragBasis;
