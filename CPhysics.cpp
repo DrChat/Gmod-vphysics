@@ -3,6 +3,7 @@
 #include "CPhysics.h"
 #include "CPhysicsEnvironment.h"
 #include "CPhysicsObjectPairHash.h"
+#include "CPhysicsCollisionSet.h"
 
 IPhysics* g_ValvePhysics = NULL;
 
@@ -54,12 +55,16 @@ void CPhysics::DestroyObjectPairHash(IPhysicsObjectPairHash *pHash) {
 }
 
 IPhysicsCollisionSet* CPhysics::FindOrCreateCollisionSet(unsigned int id, int maxElementCount) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	if (m_collisionSets.IsValidIndex(id))
+		return m_collisionSets[id];
+	CPhysicsCollisionSet *set = new CPhysicsCollisionSet(maxElementCount);
+	m_collisionSets.InsertBefore(id, set);
+	return set;
 }
 
 IPhysicsCollisionSet* CPhysics::FindCollisionSet(unsigned int id) {
-	NOT_IMPLEMENTED;
+	if (m_collisionSets.IsValidIndex(id))
+		return m_collisionSets[id];
 	return NULL;
 }
 

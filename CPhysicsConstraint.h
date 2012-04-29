@@ -79,4 +79,16 @@ public:
 	}
 };
 
+class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
+{
+public:
+	~CPhysicsConstraintGroup(void) {}
+	virtual void Activate() { NOT_IMPLEMENTED; };
+	virtual bool IsInErrorState() { NOT_IMPLEMENTED; return false; };
+	virtual void ClearErrorState() { NOT_IMPLEMENTED; };
+	virtual void GetErrorParams(constraint_groupparams_t *pParams) { NOT_IMPLEMENTED; };
+	virtual void SetErrorParams(const constraint_groupparams_t &params) { NOT_IMPLEMENTED; };
+	virtual void SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1) { NOT_IMPLEMENTED; };
+};
+
 #endif

@@ -1,6 +1,8 @@
 #ifndef CPHYSICS_H
 #define CPHYSICS_H
 
+class CPhysicsCollisionSet;
+
 class CPhysics : public CTier1AppSystem<IPhysics> {
 	typedef CTier1AppSystem<IPhysics> BaseClass;
 public:
@@ -20,6 +22,7 @@ public:
 	virtual void DestroyAllCollisionSets();
 private:
 	CUtlVector<IPhysicsEnvironment*> m_envList;
+	CUtlVector<CPhysicsCollisionSet*> m_collisionSets;
 	CSysModule* m_valvephysics;
 };
 
