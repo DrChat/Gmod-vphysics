@@ -76,7 +76,7 @@ void CPhysicsFluidController::Tick(float dt)
 		float dist = omaxs.y() - mins.y();
 		float p = clamp(dist/height, 0.0f, 1.0f);
 		float vol = (obj->GetVolume() * p)/64; 
-		body->applyForce((-body->getGravity() * m_fDensity * vol)*obj->GetBuoyancyRatio(), (maxs + mins - btVector3(0,height*(1-p),0) * 0.5f - body->getWorldTransform().getOrigin());
+		body->applyCentralForce((-body->getGravity() * m_fDensity * vol)*obj->GetBuoyancyRatio()/*, (maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f-(0.75f*dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f-(0.75f*dt)));
 		body->activate(true); // Stop it from freezing while mini-bouncing, it looks dumb
