@@ -71,8 +71,11 @@ private:
 };
 
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
-	btRigidBody* body0 = (btRigidBody*)proxy0->m_clientObject;
-	btRigidBody* body1 = (btRigidBody*)proxy1->m_clientObject;
+	btRigidBody* body0 = btRigidBody::upcast((btRigidBody*)proxy0->m_clientObject);
+	btRigidBody* body1 =  btRigidBody::upcast((btRigidBody*)proxy1->m_clientObject);
+	if (!body0 || !body1)
+		return true;
+	// FIXME: This is completely broken
 	CPhysicsObject* pObject0 = (CPhysicsObject*)body0->getUserPointer();
 	CPhysicsObject* pObject1 = (CPhysicsObject*)body1->getUserPointer();
 	if (pObject0 && pObject1) {
@@ -119,7 +122,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 #endif
 
 	//m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
-	//m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
 
 	m_pDeleteQueue = new CDeleteQueue;
@@ -214,7 +217,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject* pObject) {
 }
 
 IPhysicsFluidController* CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
-	CPhysicsFluidController *pFluid = ::CreateFluidController( static_cast<CPhysicsObject *>(pFluidObject), pParams );
+	CPhysicsFluidController *pFluid = ::CreateFluidController(this, static_cast<CPhysicsObject*>(pFluidObject), pParams);
 	m_fluids.AddToTail( pFluid );
 	return pFluid;
 }
@@ -439,13 +442,12 @@ void CPhysicsEnvironment::SetQuickDelete(bool bQuick) {
 }
 
 int CPhysicsEnvironment::GetActiveObjectCount() const {
-	return m_pBulletEnvironment->getNumCollisionObjects();
+	return m_objects.Size();
 }
 void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList ) const {
-	const btCollisionObjectArray objects = m_pBulletEnvironment->getCollisionObjectArray();
-	for (int i = 0; i < objects.size(); i++) {
-		pOutputObjectList[i] = (IPhysicsObject*)objects[i]->getUserPointer();
-	}
+	int size = m_objects.Size();
+	for (int i = 0; i < size; i++)
+		pOutputObjectList[i] = m_objects[i];
 }
 
 const IPhysicsObject** CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount ) const {
@@ -557,6 +559,9 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 	m_pPhysicsDragController->Tick(dt);
 	for (int i = 0; i < m_controllers.Count(); i++) {
 		m_controllers[i]->Tick(dt);
+	}
+	for (int i = 0; i < m_fluids.Count(); i++) {
+		m_fluids[i]->Tick(dt);
 	}
 }
 CPhysicsDragController * CPhysicsEnvironment::GetDragController()

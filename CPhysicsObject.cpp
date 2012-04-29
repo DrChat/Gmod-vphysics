@@ -42,7 +42,10 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	btRigidBody* body = new btRigidBody(info);
 
-	pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	if (mass > 0)
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	else
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->massCenterOverride);
@@ -81,7 +84,10 @@ CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 	btRigidBody* body = new btRigidBody(info);
 
-	pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	if (mass > 0)
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	else
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
 
 	float volume = pParams->volume;
 	if (volume <= 0) {
@@ -627,6 +633,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	m_gameFlags = 0;
 	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
+	m_fVolume = volume;
 
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
 	if (surface)

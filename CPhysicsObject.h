@@ -118,6 +118,7 @@ public:
 	btRigidBody* GetObject();
 	float GetDragInDirection(btVector3 * direction) const; // Function is not interfaced anymore
 	float GetAngularDragInDirection(btVector3 * direction) const;
+	float GetVolume() const { return m_fVolume; }
 
 	int m_iLastActivationState;
 private:
@@ -131,7 +132,7 @@ private:
 	unsigned short m_gameFlags;
 	unsigned int m_contents;
 
-	float m_volume;
+	float m_fVolume;
 	float m_dragCoefficient;
 	float m_angDragCoefficient;
 	btVector3 m_dragBasis;

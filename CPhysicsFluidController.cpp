@@ -2,23 +2,30 @@
 
 #include "CPhysicsFluidController.h"
 #include "CPhysicsObject.h"
+#include "CPhysicsEnvironment.h"
 
-CPhysicsFluidController * CreateFluidController(CPhysicsObject *pFluidObject, fluidparams_t *pParams )
+CPhysicsFluidController * CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams)
 {
-	CPhysicsFluidController *pFluid = new CPhysicsFluidController( pFluidObject, pParams );
+	CPhysicsFluidController *pFluid = new CPhysicsFluidController( pEnv, pFluidObject, pParams );
 	pFluid->SetGameData( pParams->pGameData );
 	return pFluid;
 }
 
-CPhysicsFluidController::CPhysicsFluidController(CPhysicsObject *pFluidObject, fluidparams_t * pParams)
+CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t * pParams)
 {
+	m_pEnv = pEnv;
 	m_pGameData = pParams->pGameData;
 	m_iContents = pParams->contents;
-	m_fDensity = 1000.0f; // Density of water (1000 kg/m^3), used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
+	m_fDensity = 1.0f; // Density of water, used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
 	m_vSurfacePlane = pParams->surfacePlane;
 	pFluidObject->EnableCollisions(false);
 	pFluidObject->SetContents(m_iContents); // Do we really need to do this?
 	pFluidObject->SetFluidController(this);
+	m_pGhostObject = new btGhostObject();
+	m_pGhostObject->setCollisionShape(pFluidObject->GetObject()->getCollisionShape());
+	m_pGhostObject->setWorldTransform(pFluidObject->GetObject()->getWorldTransform());
+	m_pGhostObject->setCollisionFlags(m_pGhostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_STATIC_OBJECT);
+	m_pEnv->GetBulletEnvironment()->addCollisionObject(m_pGhostObject, 2, ~2);
 }
 CPhysicsFluidController::~CPhysicsFluidController( void ) 
 {
@@ -48,8 +55,29 @@ void CPhysicsFluidController::WakeAllSleepingObjects()
 {
 	NOT_IMPLEMENTED;
 }
+
 int	CPhysicsFluidController::GetContents() const
 {
-	NOT_IMPLEMENTED;
-	return 0;
+	return m_iContents;
+}
+
+void CPhysicsFluidController::Tick(float dt)
+{
+	int count = m_pGhostObject->getNumOverlappingObjects();
+	for (int i = 0; i < count; i++)
+	{
+		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
+		if (!body) continue;
+		CPhysicsObject *obj = (CPhysicsObject*)body->getUserPointer();
+		btVector3 mins, maxs, omins, omaxs;
+		body->getAabb(mins, maxs);
+		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
+		m_pGhostObject->getCollisionShape()->getAabb(m_pGhostObject->getWorldTransform(), omins, omaxs);
+		float dist = omaxs.y() - mins.y();
+		float p = clamp(dist/height, 0.0f, 1.0f);
+		float vol = (obj->GetVolume() * p) / 1000.0f; 
+		body->setLinearVelocity((body->getLinearVelocity() + (-body->getGravity() * m_fDensity * vol)/obj->GetMass()*dt) * (1.0f-(0.75f*dt)));
+		body->setAngularVelocity(body->getAngularVelocity() * (1.0f-(0.75f*dt)));
+		body->forceActivationState(ACTIVE_TAG); // Stop it from freezing while mini-bouncing, it looks dumb
+	}
 }
