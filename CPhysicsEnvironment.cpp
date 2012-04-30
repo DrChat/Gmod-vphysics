@@ -11,7 +11,7 @@
 #include "CPhysicsConstraint.h"
 #include "CPhysicsVehicleController.h"
 
-#define DEBUG_DRAW
+//#define DEBUG_DRAW
 // WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
 //#define MULTITHREAD // TODO: Mac and Linux support
 
@@ -71,18 +71,26 @@ private:
 };
 
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
-	btRigidBody* body0 = btRigidBody::upcast((btRigidBody*)proxy0->m_clientObject);
-	btRigidBody* body1 =  btRigidBody::upcast((btRigidBody*)proxy1->m_clientObject);
+	btRigidBody* body0 = btRigidBody::upcast((btCollisionObject*)proxy0->m_clientObject);
+	btRigidBody* body1 =  btRigidBody::upcast((btCollisionObject*)proxy1->m_clientObject);
 	if (!body0 || !body1)
-		return true;
-	// FIXME: This is completely broken
+	{
+		if (body0)
+			return !(body0->isStaticObject() || body0->getInvMass() == 0.0f);
+		if (body1)
+			return !(body1->isStaticObject() || body1->getInvMass() == 0.0f);
+		return false;
+	}
 	CPhysicsObject* pObject0 = (CPhysicsObject*)body0->getUserPointer();
 	CPhysicsObject* pObject1 = (CPhysicsObject*)body1->getUserPointer();
-	if (pObject0 && pObject1) {
-		if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
-		if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
-		if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
-	}
+	if (!pObject0 || !pObject1)
+		return true;
+	if (!pObject0->IsMoveable() && !pObject1->IsMoveable())
+		return false;
+	if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
+	if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
+	// FIXME: This is completely broken
+	//if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
 	return true;
 }
 
@@ -121,7 +129,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 #endif
 
-	//m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
+	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 
 	m_pDeleteQueue = new CDeleteQueue;
@@ -241,8 +249,13 @@ void CPhysicsEnvironment::DestroySpring(IPhysicsSpring*) {
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) 
 {
+	btTransform obj1Pos, obj2Pos;
+	ConvertMatrixToBull(ragdoll.constraintToAttached, obj1Pos);
+	ConvertMatrixToBull(ragdoll.constraintToReference, obj2Pos);
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	return new CPhysicsConstraint(this, obj1, obj2, NULL);
+	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
+	m_pBulletEnvironment->addConstraint(ballsock, false);
+	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateHingeConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {

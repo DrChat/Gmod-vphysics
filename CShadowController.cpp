@@ -215,6 +215,7 @@ bool CShadowController::IsPhysicallyControlled() {
 
 void CShadowController::GetLastImpulse(Vector* pOut) {
 	NOT_IMPLEMENTED;
+	*pOut = Vector(0,0,0);
 }
 
 void CShadowController::UseShadowMaterial(bool bUseShadowMaterial) {
