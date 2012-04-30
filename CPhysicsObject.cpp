@@ -12,8 +12,6 @@
 
 extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
-#define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
-
 CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
 	btCollisionShape* shape = (btCollisionShape*)pCollisionModel;
 	

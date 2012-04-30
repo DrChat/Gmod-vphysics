@@ -123,7 +123,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	//m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
 
 	m_pDeleteQueue = new CDeleteQueue;
 
@@ -131,6 +130,11 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_physics_performanceparams = new physics_performanceparams_t;
 	m_physics_performanceparams->Defaults();
+
+	//m_simPSIs = 0;
+	//m_invPSIscale = 0;
+
+	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
 
 #ifdef DEBUG_DRAW
 	m_debugdraw = new GLDebugDrawer(m_pBulletEnvironment);
@@ -312,27 +316,30 @@ void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup
 }
 
 IPhysicsShadowController* CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
-	CShadowController* controller = new CShadowController((CPhysicsObject*)pObject, allowTranslation, allowRotation);
-	m_controllers.AddToTail(controller);
-	return controller;
+	CShadowController* pController = new CShadowController((CPhysicsObject*)pObject, allowTranslation, allowRotation);
+	m_controllers.AddToTail(pController);
+	return pController;
 }
 
-void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController* pShadow) {
-	m_controllers.FindAndRemove((CShadowController*)pShadow);
-	delete pShadow;
+void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController* pController) {
+	m_controllers.FindAndRemove((CShadowController*)pController);
+	delete pController;
 }
 
 IPhysicsPlayerController* CPhysicsEnvironment::CreatePlayerController(IPhysicsObject* pObject) {
-	return new CPlayerController((CPhysicsObject*)pObject);
+	CPlayerController* pController = new CPlayerController((CPhysicsObject*)pObject);
+	m_controllers.AddToTail(pController);
+	return pController;
 }
-void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController* controller) {
-	delete controller;
+void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController* pController) {
+	m_controllers.FindAndRemove((CPlayerController*)pController);
+	delete pController;
 }
 
 IPhysicsMotionController* CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
-	CPhysicsMotionController* controller = (CPhysicsMotionController*)::CreateMotionController(this, pHandler);
-	m_controllers.AddToTail(controller);
-	return controller;
+	CPhysicsMotionController* pController = (CPhysicsMotionController*)::CreateMotionController(this, pHandler);
+	m_controllers.AddToTail(pController);
+	return pController;
 }
 
 void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pController) {
@@ -359,6 +366,13 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	} else if ( deltaTime > 0.1 ) {
 		deltaTime = 0.1f;
 	}
+
+	//m_simPSIs = 0;
+
+	//FIXME: figure out simulation time
+
+	//m_simPSIcurrent = m_simPSIs;
+
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
 		m_pBulletEnvironment->stepSimulation(deltaTime, 2, m_timestep/2.0f);
@@ -553,6 +567,13 @@ void CPhysicsEnvironment::DebugCheckContacts(void) {
 btDynamicsWorld* CPhysicsEnvironment::GetBulletEnvironment() {
 	return m_pBulletEnvironment;
 }
+
+float CPhysicsEnvironment::GetInvPSIScale() {
+	//FIXME: get correct value
+	//return m_invPSIscale;
+	return 0.5;
+}
+
 void CPhysicsEnvironment::BulletTick(btScalar dt)
 {
 	// FIXME: Maybe this should be in CPhysicsEnvironment:Simulate instead?
@@ -562,6 +583,24 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 	for (int i = 0; i < m_controllers.Count(); i++) {
 		m_controllers[i]->Tick(dt);
 	}
+
+	m_inSimulation = false;
+	if (!m_queueDeleteObject) {
+		CleanupDeleteList();
+	}
+
+	//m_pCollisionSolver->EventPSI(this);
+	//m_pCollisionListener->EventPSI(this);
+
+	/*
+	if (m_simPSIcurrent) {
+		m_invPSIscale = 1.0f / (float)m_simPSIcurrent;
+		m_simPSIcurrent--;
+	} else {
+		m_invPSIscale = 0;
+	}
+	*/
+	m_inSimulation = true;
 }
 CPhysicsDragController * CPhysicsEnvironment::GetDragController()
 {

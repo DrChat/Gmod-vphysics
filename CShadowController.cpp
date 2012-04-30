@@ -1,23 +1,10 @@
 #include "StdAfx.h"
 
 #include "CShadowController.h"
+#include "CPlayerController.h"
 #include "CPhysicsObject.h"
+#include "CPhysicsSurfaceProps.h"
 #include "convert.h"
-
-void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping) {
-	btVector3 acceleration = delta * scaleDelta;
-	if (currentSpeed.length2() < 1e-6) {
-		currentSpeed.setZero();
-	}
-	acceleration += currentSpeed * -damping;
-
-	for(int i=2; i>=0; i--) {
-		if (fabs(acceleration[i]) < maxSpeed[i]) continue;
-		acceleration[i] = (acceleration[i] < 0) ? -maxSpeed[i] : maxSpeed[i];
-	}
-
-	currentSpeed += acceleration;
-}
 
 void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
 	btQuaternion q2 = q.inverse();
@@ -254,12 +241,29 @@ void CShadowController::GetMaxSpeed(float* pMaxSpeedOut, float* pMaxAngularSpeed
 
 void CShadowController::AttachObject() {
 	btRigidBody* body = m_pObject->GetObject();
+	m_savedMass = SAFE_DIVIDE(1, body->getInvMass());
+	m_savedMaterialIndex = m_pObject->GetMaterialIndex();
+
+	m_pObject->SetMaterialIndex(MATERIAL_INDEX_SHADOW);
+
+	if ( !m_allowPhysicsMovement ) {
+		m_pObject->SetMass(1e6f);
+		m_pObject->EnableGravity(false);
+	}
+
 	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
 
 void CShadowController::DetachObject() {
 	btRigidBody* body = m_pObject->GetObject();
+	btVector3 btvec = body->getInvInertiaDiagLocal();
+	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+	body->setMassProps(m_savedMass, btvec);
+	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
+
 	body->setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
 	body->setActivationState(ACTIVE_TAG);
 }

@@ -115,6 +115,7 @@ public:
 	virtual void DebugCheckContacts(void);
 public:
 	btDynamicsWorld* GetBulletEnvironment();
+	float GetInvPSIScale();
 	void BulletTick(btScalar timeStep);
 	CPhysicsDragController * GetDragController();
 	IPhysicsObjectEvent* m_pObjectEvent;

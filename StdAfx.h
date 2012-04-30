@@ -21,6 +21,8 @@
 
 #define COLLISION_MARGIN 0.004
 
+#define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
+
 extern IPhysics* g_ValvePhysics;
 extern IPhysicsCollision* g_ValvePhysicsCollision;
 #ifdef _DEBUG
