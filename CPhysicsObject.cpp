@@ -111,16 +111,15 @@ CPhysicsObject::CPhysicsObject() {
 CPhysicsObject::~CPhysicsObject() {
 	if (m_pEnv)
 	{
-		m_pEnv->GetDragController()->RemovePhysicsObject(this);	
+		m_pEnv->GetDragController()->RemovePhysicsObject(this);
+		if (m_pShadow)
+			m_pEnv->DestroyShadowController(m_pShadow);
+		m_pShadow = NULL;
 	}
 	
 	if (m_pEnv && m_pObject) {
 		m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
 		delete m_pObject;
-	}
-	if (m_pShadow) {
-		m_pObject->setMotionState(NULL);
-		delete m_pShadow;
 	}
 }
 
@@ -248,12 +247,11 @@ unsigned short CPhysicsObject::GetGameFlags() const {
 }
 
 void CPhysicsObject::SetGameIndex(unsigned short gameIndex) {
-	NOT_IMPLEMENTED;
+	m_iGameIndex = gameIndex;
 }
 
 unsigned short CPhysicsObject::GetGameIndex() const {
-	NOT_IMPLEMENTED;
-	return 0;
+	return m_iGameIndex;
 }
 
 void CPhysicsObject::SetCallbackFlags(unsigned short callbackflags) {
@@ -273,7 +271,7 @@ void CPhysicsObject::Sleep() {
 }
 
 void CPhysicsObject::RecheckCollisionFilter() {
-	NOT_IMPLEMENTED;
+	// Bullet caches nothing about what should collide with what
 }
 
 void CPhysicsObject::RecheckContactPoints() {
@@ -407,8 +405,10 @@ void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angl
 	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(transform);
 }
 
-void CPhysicsObject::SetPositionMatrix(const matrix3x4_t&matrix, bool isTeleport) {
-	NOT_IMPLEMENTED;
+void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTeleport) {
+	btTransform trans;
+	ConvertMatrixToBull(matrix, trans);
+	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(trans);
 }
 
 void CPhysicsObject::GetPosition(Vector* worldPosition, QAngle* angles) const {

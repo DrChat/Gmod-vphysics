@@ -113,21 +113,23 @@ void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	ConvertDirectionToHL(transform.getBasis().getColumn(1), up);
 	ConvertPosToHL(transform.getOrigin(), pos);
 
-	hl[0][0] = forward.x;
-	hl[1][0] = forward.y;
-	hl[2][0] = forward.z;
+	hl.Init(forward, left, up, pos);
+}
 
-	hl[0][1] = left.x;
-	hl[1][1] = left.y;
-	hl[2][1] = left.z;
+void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform)
+{
+	Vector xAxis, yAxis, zAxis, pos;
+	xAxis.x = hl[0][0]; yAxis.x = hl[0][1]; zAxis.x = hl[0][2]; pos.x = hl[0][3];
+	xAxis.y = hl[1][0]; yAxis.y = hl[1][1]; zAxis.y = hl[1][2]; pos.y = hl[1][3];
+	xAxis.z = hl[2][0]; yAxis.z = hl[2][1]; zAxis.z = hl[2][2]; pos.z = hl[2][3];
 
-	hl[0][2] = up.x;
-	hl[1][2] = up.y;
-	hl[2][2] = up.z;
-
-	hl[0][3] = pos.x;
-	hl[1][3] = pos.y;
-	hl[2][3] = pos.z;
+	btVector3 forward, left, up, origin;
+	ConvertDirectionToBull(xAxis, forward);
+	ConvertDirectionToBull(yAxis, left);
+	ConvertDirectionToBull(zAxis, up);
+	ConvertPosToBull(pos, origin);
+	transform.setBasis(btMatrix3x3(forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z(), left.x(), left.y(), left.z()));
+	transform.setOrigin(origin);
 }
 
 float ConvertDistanceToBull(float distance) {

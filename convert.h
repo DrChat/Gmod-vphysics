@@ -22,6 +22,7 @@ void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl);
 void ConvertAngularImpulseToBull(const AngularImpulse& angularimp, btVector3& bull);
 void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl);
 void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl);
+void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform);
 
 float ConvertDistanceToBull(float distance);
 float ConvertDistanceToHL(float distance);

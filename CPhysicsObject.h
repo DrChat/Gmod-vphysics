@@ -132,6 +132,7 @@ private:
 	unsigned short m_callbacks;
 	unsigned short m_gameFlags;
 	unsigned int m_contents;
+	unsigned short m_iGameIndex;
 
 	float m_fVolume;
 	float m_fBuoyancyRatio;
