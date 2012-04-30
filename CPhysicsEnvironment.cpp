@@ -11,7 +11,7 @@
 #include "CPhysicsConstraint.h"
 #include "CPhysicsVehicleController.h"
 
-//#define DEBUG_DRAW
+#define DEBUG_DRAW
 // WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
 //#define MULTITHREAD // TODO: Mac and Linux support
 
@@ -238,14 +238,7 @@ void CPhysicsEnvironment::DestroySpring(IPhysicsSpring*) {
 IPhysicsConstraint* CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) 
 {
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	btGeneric6DofConstraint *weld = new btGeneric6DofConstraint(*obj1->GetObject(), *obj2->GetObject(),
-		obj1->GetObject()->getWorldTransform().inverse() * obj2->GetObject()->getWorldTransform(), btTransform::getIdentity(), true);
-	weld->setLinearLowerLimit(btVector3(0,0,0));
-	weld->setLinearUpperLimit(btVector3(0,0,0));
-	weld->setAngularLowerLimit(btVector3(0,0,0));
-	weld->setAngularUpperLimit(btVector3(0,0,0));
-	m_pBulletEnvironment->addConstraint(weld, false);
-	return new CPhysicsConstraint(this, obj1, obj2, weld);
+	return new CPhysicsConstraint(this, obj1, obj2, NULL);
 }
 
 IPhysicsConstraint* CPhysicsEnvironment::CreateHingeConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
