@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CPhysicsCollisionSet.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CPhysicsConstraint.cpp"
 				>
 			</File>
@@ -280,6 +284,10 @@
 			</File>
 			<File
 				RelativePath=".\CPhysicsCollision.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CPhysicsCollisionSet.h"
 				>
 			</File>
 			<File

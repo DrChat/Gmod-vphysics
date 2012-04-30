@@ -46,6 +46,8 @@ private:
 	CPhysicsObject* m_pObject;
 	float m_secondsToArrival;
 	btVector3 m_currentSpeed;
+	float m_savedMass;
+	int m_savedMaterialIndex;
 	bool m_enable;
 	bool m_allowPhysicsMovement;
 	bool m_allowPhysicsRotation;
