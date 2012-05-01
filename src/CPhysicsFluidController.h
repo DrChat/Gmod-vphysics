@@ -4,7 +4,9 @@
 class CPhysicsObject;
 class CPhysicsEnvironment;
 
-class CPhysicsFluidController : public IPhysicsFluidController
+#include "IController.h"
+
+class CPhysicsFluidController : public IPhysicsFluidController, public IController
 {
 public:
 	CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t * pParams);
@@ -17,8 +19,7 @@ public:
 	virtual float	GetDensity() const;
 	virtual void	WakeAllSleepingObjects();
 	virtual int		GetContents() const;
-public:
-	virtual void Tick(float dt);
+	virtual void	Tick(float deltaTime);
 private:
 	void * m_pGameData;
 	int m_iContents;
