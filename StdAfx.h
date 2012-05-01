@@ -23,8 +23,8 @@
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
-extern IPhysics* g_ValvePhysics;
-extern IPhysicsCollision* g_ValvePhysicsCollision;
+//extern IPhysics* g_ValvePhysics;
+//extern IPhysicsCollision* g_ValvePhysicsCollision;
 #ifdef _DEBUG
 #define NOT_IMPLEMENTED __asm {int 3}
 #else

@@ -5,7 +5,7 @@
 #include "CPhysicsObjectPairHash.h"
 #include "CPhysicsCollisionSet.h"
 
-IPhysics* g_ValvePhysics = NULL;
+//IPhysics* g_ValvePhysics = NULL;
 
 void *CPhysics::QueryInterface(const char *pInterfaceName) {
 	CreateInterfaceFn func = Sys_GetFactoryThis();
@@ -15,12 +15,12 @@ void *CPhysics::QueryInterface(const char *pInterfaceName) {
 InitReturnVal_t CPhysics::Init() {
 	InitReturnVal_t nRetVal = BaseClass::Init();
 	if (nRetVal != INIT_OK) return nRetVal;
-	m_valvephysics = Sys_LoadModule("vphysics_valve");
+	/*m_valvephysics = Sys_LoadModule("vphysics_valve");
 	CreateInterfaceFn factory = Sys_GetFactory(m_valvephysics);
 	if (!factory) return INIT_FAILED;
 	g_ValvePhysics = (IPhysics*)factory(VPHYSICS_INTERFACE_VERSION, NULL);
 	g_ValvePhysicsCollision = (IPhysicsCollision*)factory(VPHYSICS_COLLISION_INTERFACE_VERSION, NULL);
-	if (!g_ValvePhysicsCollision) return INIT_FAILED;
+	if (!g_ValvePhysicsCollision) return INIT_FAILED;*/
 	return INIT_OK;
 }
 

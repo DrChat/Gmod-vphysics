@@ -7,7 +7,7 @@
 #define BULL2HL(x) (float)(x * (1.0f/HL2BULL_FACTOR))
 #define HL2BULL(x) (float)(x * HL2BULL_FACTOR)
 
-btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp);
+//btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp);
 
 void ConvertPosToBull(const Vector& pos, btVector3& bull);
 void ConvertPosToHL(const btVector3& pos, Vector& hl);

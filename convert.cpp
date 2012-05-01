@@ -2,7 +2,7 @@
 
 #include "convert.h"
 
-btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
+/*btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	Vector hlvec[3];
 	btVector3 btvec[3];
 	ICollisionQuery* query = g_ValvePhysicsCollision->CreateQueryModel(ivp);
@@ -34,7 +34,7 @@ btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp) {
 	}
 	g_ValvePhysicsCollision->DestroyQueryModel(query);
 	return bull;
-}
+}*/
 
 void ConvertPosToBull(const Vector& pos, btVector3& bull) {
 	bull.setX(HL2BULL(pos.x));
@@ -108,8 +108,8 @@ void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl) 
 void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	Vector forward, left, up, pos;
 
-	ConvertDirectionToHL(transform.getBasis().getColumn(0), forward);
-	ConvertDirectionToHL(transform.getBasis().getColumn(2), left);
+	ConvertDirectionToHL(transform.getBasis().getColumn(0), left);
+	ConvertDirectionToHL(transform.getBasis().getColumn(2), forward);
 	ConvertDirectionToHL(transform.getBasis().getColumn(1), up);
 	ConvertPosToHL(transform.getOrigin(), pos);
 
@@ -124,11 +124,12 @@ void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform)
 	xAxis.z = hl[2][0]; yAxis.z = hl[2][1]; zAxis.z = hl[2][2]; pos.z = hl[2][3];
 
 	btVector3 forward, left, up, origin;
-	ConvertDirectionToBull(xAxis, forward);
-	ConvertDirectionToBull(yAxis, left);
+	ConvertDirectionToBull(xAxis, left);
+	ConvertDirectionToBull(yAxis, forward);
 	ConvertDirectionToBull(zAxis, up);
 	ConvertPosToBull(pos, origin);
 	transform.setBasis(btMatrix3x3(forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z(), left.x(), left.y(), left.z()));
+	Msg("%f %f %f\n", origin.x(), origin.y(), origin.z());
 	transform.setOrigin(origin);
 }
 
