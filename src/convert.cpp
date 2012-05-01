@@ -55,27 +55,22 @@ void ConvertDirectionToBull(const Vector& dir, btVector3& bull) {
 }
 
 void ConvertDirectionToHL(const btVector3& dir, Vector& hl) {
-	hl.x = -dir.x();
-	hl.y = dir.z();
+	hl.x = dir.x();
+	hl.y = -dir.z();
 	hl.z = dir.y();
 }
 
 void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull) {
 	RadianEuler radian(angles);
-	btQuaternion q1;
-	q1.setEulerZYX(radian.z, radian.y, radian.x);
-	btQuaternion q2(q1.getX(), q1.getZ(), -q1.getY(), q1.getW());
-	bull.setRotation(q2);
+	Quaternion q(radian);
+	btQuaternion quat(q.x, q.z, -q.y, q.w);
+	bull.setRotation(quat);
 }
 
 void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull) {
 	RadianEuler radian(angles);
-	btQuaternion q;
-	q.setEulerZYX(radian.z, radian.y, radian.x);
-	bull.setX(q.getX());
-	bull.setY(q.getZ());
-	bull.setZ(-q.getY());
-	bull.setW(q.getW());
+	Quaternion q(radian);
+	bull.setValue(q.x, q.z, -q.y, q.w);
 }
 
 void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl) {
@@ -109,7 +104,7 @@ void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	Vector forward, left, up, pos;
 
 	ConvertDirectionToHL(transform.getBasis().getColumn(0), forward);
-	ConvertDirectionToHL(transform.getBasis().getColumn(2), left);
+	ConvertDirectionToHL(-transform.getBasis().getColumn(2), left);
 	ConvertDirectionToHL(transform.getBasis().getColumn(1), up);
 	ConvertPosToHL(transform.getOrigin(), pos);
 
@@ -118,17 +113,31 @@ void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 
 void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform)
 {
-	Vector xAxis, yAxis, zAxis, pos;
-	xAxis.x = hl[0][0]; yAxis.x = hl[0][1]; zAxis.x = hl[0][2]; pos.x = hl[0][3];
-	xAxis.y = hl[1][0]; yAxis.y = hl[1][1]; zAxis.y = hl[1][2]; pos.y = hl[1][3];
-	xAxis.z = hl[2][0]; yAxis.z = hl[2][1]; zAxis.z = hl[2][2]; pos.z = hl[2][3];
+	Vector forward, left, up, pos;
 
-	btVector3 forward, left, up, origin;
-	ConvertDirectionToBull(xAxis, forward);
-	ConvertDirectionToBull(yAxis, left);
-	ConvertDirectionToBull(zAxis, up);
+	forward.x = hl[0][0];
+	forward.y = hl[1][0];
+	forward.z = hl[2][0];
+
+	left.x = hl[0][1];
+	left.y = hl[1][1];
+	left.z = hl[2][1];
+
+	up.x = hl[0][2];
+	up.y = hl[1][2];
+	up.z = hl[2][2];
+
+	pos.x = hl[0][3];
+	pos.y = hl[1][3];
+	pos.z = hl[2][3];
+
+	btVector3 bullForward, bullLeft, bullUp, origin;
+	ConvertDirectionToBull(forward, bullForward);
+	ConvertDirectionToBull(-left, bullLeft);
+	ConvertDirectionToBull(up, bullUp);
 	ConvertPosToBull(pos, origin);
-	transform.setBasis(btMatrix3x3(forward.x(), forward.y(), forward.z(), up.x(), up.y(), up.z(), left.x(), left.y(), left.z()));
+
+	transform.setBasis(btMatrix3x3(bullForward.x(), bullUp.x(), bullLeft.x(), bullForward.y(), bullUp.y(), bullLeft.y(), bullForward.z(), bullUp.z(), bullLeft.z()));
 	transform.setOrigin(origin);
 }
 
