@@ -2,6 +2,7 @@
 +vphysics.vcproj
 
 *.ipch
+*.ncb
 *.sdf
 *.sln
 *.suo
@@ -14,4 +15,6 @@
 
 /Debug
 /Release
+/test/Debug
+/test/Release
 /ipch

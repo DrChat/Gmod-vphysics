@@ -2,6 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vphysics", "vphysics.vcproj", "{D14B5456-0069-453D-A86A-D5B4CB35C6DD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", "{CA2EBDBA-FC4D-48CD-AA60-F2811BE777BA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D14B5456-0069-453D-A86A-D5B4CB35C6DD} = {D14B5456-0069-453D-A86A-D5B4CB35C6DD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -12,6 +17,10 @@ Global
 		{D14B5456-0069-453D-A86A-D5B4CB35C6DD}.Debug|Win32.Build.0 = Debug|Win32
 		{D14B5456-0069-453D-A86A-D5B4CB35C6DD}.Release|Win32.ActiveCfg = Release|Win32
 		{D14B5456-0069-453D-A86A-D5B4CB35C6DD}.Release|Win32.Build.0 = Release|Win32
+		{CA2EBDBA-FC4D-48CD-AA60-F2811BE777BA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CA2EBDBA-FC4D-48CD-AA60-F2811BE777BA}.Debug|Win32.Build.0 = Debug|Win32
+		{CA2EBDBA-FC4D-48CD-AA60-F2811BE777BA}.Release|Win32.ActiveCfg = Release|Win32
+		{CA2EBDBA-FC4D-48CD-AA60-F2811BE777BA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

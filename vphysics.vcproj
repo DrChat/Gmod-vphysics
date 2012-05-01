@@ -177,79 +177,79 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\convert.cpp"
+				RelativePath=".\src\convert.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysics.cpp"
+				RelativePath=".\src\CPhysics.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsCollision.cpp"
+				RelativePath=".\src\CPhysicsCollision.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsCollisionSet.cpp"
+				RelativePath=".\src\CPhysicsCollisionSet.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsConstraint.cpp"
+				RelativePath=".\src\CPhysicsConstraint.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsDragController.cpp"
+				RelativePath=".\src\CPhysicsDragController.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsEnvironment.cpp"
+				RelativePath=".\src\CPhysicsEnvironment.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsFluidController.cpp"
+				RelativePath=".\src\CPhysicsFluidController.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsFrictionSnapshot.cpp"
+				RelativePath=".\src\CPhysicsFrictionSnapshot.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsKeyParser.cpp"
+				RelativePath=".\src\CPhysicsKeyParser.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsMotionController.cpp"
+				RelativePath=".\src\CPhysicsMotionController.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsObject.cpp"
+				RelativePath=".\src\CPhysicsObject.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsObjectPairHash.cpp"
+				RelativePath=".\src\CPhysicsObjectPairHash.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsSurfaceProps.cpp"
+				RelativePath=".\src\CPhysicsSurfaceProps.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsVehicleController.cpp"
+				RelativePath=".\src\CPhysicsVehicleController.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CPlayerController.cpp"
+				RelativePath=".\src\CPlayerController.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\CShadowController.cpp"
+				RelativePath=".\src\CShadowController.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\math.cpp"
+				RelativePath=".\src\math.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\StfAfx.cpp"
+				RelativePath=".\src\StfAfx.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -275,83 +275,83 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\convert.h"
+				RelativePath=".\src\convert.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysics.h"
+				RelativePath=".\src\CPhysics.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsCollision.h"
+				RelativePath=".\src\CPhysicsCollision.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsCollisionSet.h"
+				RelativePath=".\src\CPhysicsCollisionSet.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsConstraint.h"
+				RelativePath=".\src\CPhysicsConstraint.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsDragController.h"
+				RelativePath=".\src\CPhysicsDragController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsEnvironment.h"
+				RelativePath=".\src\CPhysicsEnvironment.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsFluidController.h"
+				RelativePath=".\src\CPhysicsFluidController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsFrictionSnapshot.h"
+				RelativePath=".\src\CPhysicsFrictionSnapshot.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsKeyParser.h"
+				RelativePath=".\src\CPhysicsKeyParser.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsMotionController.h"
+				RelativePath=".\src\CPhysicsMotionController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsObject.h"
+				RelativePath=".\src\CPhysicsObject.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsObjectPairHash.h"
+				RelativePath=".\src\CPhysicsObjectPairHash.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsSurfaceProps.h"
+				RelativePath=".\src\CPhysicsSurfaceProps.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPhysicsVehicleController.h"
+				RelativePath=".\src\CPhysicsVehicleController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CPlayerController.h"
+				RelativePath=".\src\CPlayerController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\CShadowController.h"
+				RelativePath=".\src\CShadowController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\IController.h"
+				RelativePath=".\src\IController.h"
 				>
 			</File>
 			<File
-				RelativePath=".\math.h"
+				RelativePath=".\src\math.h"
 				>
 			</File>
 			<File
-				RelativePath=".\StdAfx.h"
+				RelativePath=".\src\StdAfx.h"
 				>
 			</File>
 		</Filter>
