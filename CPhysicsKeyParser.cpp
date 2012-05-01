@@ -206,17 +206,14 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 
 	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char* key = data->GetName();
-		if (!stricmp(key, "axle"))
-		{
-			ParseVehicleAxle(pVehicle, data);
-			pVehicle->axleCount++;
-		}
+		if (!stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
+			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
 		else if (!stricmp(key, "body"))
-			ParseVehicleBody(pVehicle, data);
+			ParseVehicleBody(pVehicle->body, data);
 		else if (!stricmp(key, "engine"))
-			ParseVehicleEngine(pVehicle, data);
+			ParseVehicleEngine(pVehicle->engine, data);
 		else if (!stricmp(key, "steering"))
-			ParseVehicleSteering(pVehicle, data);
+			ParseVehicleSteering(pVehicle->steering, data);
 		else if (!stricmp(key, "wheelsperaxle"))
 			pVehicle->wheelsPerAxle = data->GetInt();
 	}
@@ -224,22 +221,100 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 }
 
 
-void CPhysicsKeyParser::ParseVehicleAxle(vehicleparams_t *pVehicle, KeyValues *kv)
+void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *kv)
 {
 	NOT_IMPLEMENTED;
 }
 
-void CPhysicsKeyParser::ParseVehicleBody(vehicleparams_t *pVehicle, KeyValues *kv)
+void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *kv)
 {
-	NOT_IMPLEMENTED;
+	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		if (!stricmp(key, "massCenterOverride"))
+			ReadVector(data->GetString(), body.massCenterOverride);
+		else if (!stricmp(key, "addgravity"))
+			body.addGravity = data->GetFloat();
+		else if (!stricmp(key, "massOverride"))
+			body.massOverride = data->GetFloat();
+		else if (!stricmp(key, "tiltforce"))
+			body.tiltForce = data->GetFloat();
+		else if (!stricmp(key, "tiltforceheight"))
+			body.tiltForceHeight = data->GetFloat();
+		else if (!stricmp(key, "countertorquefactor"))
+			body.counterTorqueFactor = data->GetFloat();
+		else if (!stricmp(key, "keepuprighttorque"))
+			body.keepUprightTorque = data->GetFloat();
+	}
 }
 
-void CPhysicsKeyParser::ParseVehicleEngine(vehicleparams_t *pVehicle, KeyValues *kv)
+void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyValues *kv)
 {
-	NOT_IMPLEMENTED;
+	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		if (!stricmp(key, "boost"))
+			ParseVehicleEngineBoost(engine, data);
+		else if (!stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)
+			engine.gearRatio[engine.gearCount++] = data->GetFloat();
+		else if (!stricmp(key, "horsepower"))
+			engine.horsepower = data->GetFloat();
+		else if (!stricmp(key, "maxSpeed"))
+			engine.maxSpeed = data->GetFloat();
+		else if (!stricmp(key, "maxReverseSpeed"))
+			engine.maxRevSpeed = data->GetFloat();
+		else if (!stricmp(key, "axleratio"))
+			engine.axleRatio = data->GetFloat();
+		else if (!stricmp(key, "maxRPM"))
+			engine.maxRPM = data->GetFloat();
+		else if (!stricmp(key, "throttleTime"))
+			engine.throttleTime = data->GetFloat();
+		else if (!stricmp(key, "AutoTransmission"))
+			engine.isAutoTransmission = data->GetInt() > 0;
+		else if (!stricmp(key, "shiftUpRPM"))
+			engine.shiftUpRPM = data->GetFloat();
+		else if (!stricmp(key, "shiftDownRPM"))
+			engine.shiftDownRPM = data->GetFloat();
+	}
 }
 
-void CPhysicsKeyParser::ParseVehicleSteering(vehicleparams_t *pVehicle, KeyValues *kv)
+void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, KeyValues *kv)
 {
-	NOT_IMPLEMENTED;
+	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		if (!stricmp(key, "force"))
+			engine.boostForce = data->GetFloat();
+		else if (!stricmp(key, "duration"))
+			engine.boostDuration = data->GetFloat();
+		else if (!stricmp(key, "delay"))
+			engine.boostDelay = data->GetFloat();
+		else if (!stricmp(key, "maxspeed"))
+			engine.boostMaxSpeed = data->GetFloat();
+		else if (!stricmp(key, "torqueboost"))
+			engine.torqueBoost = data->GetInt() > 0;
+	}
+}
+
+void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering, KeyValues *kv)
+{
+	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char* key = data->GetName();
+		if (!stricmp(key, "degrees")) // FIXME: Bit unsure here, in the 2003 code it just set "degrees" which does not exist anymore
+		{
+			steering.degreesBoost = data->GetFloat();
+			steering.degreesFast = data->GetFloat();
+			steering.degreesSlow = data->GetFloat();
+		}
+		if (!stricmp(key, "fastcarspeed"))
+			steering.speedFast = data->GetFloat();
+		if (!stricmp(key, "slowcarspeed"))
+			steering.speedSlow = data->GetFloat();
+		else if (!stricmp(key, "slowsteeringrate"))
+			steering.steeringRateSlow = data->GetFloat();
+		else if (!stricmp(key, "faststeeringrate"))
+			steering.steeringRateFast = data->GetFloat();
+		//else if (!stricmp(key, "steeringRestFactor")) // This one was in the 2003 leak, its used in some vehicle scripts but I dont know which variable it should set
+		else if (!stricmp(key, "skidallowed"))
+			steering.isSkidAllowed = data->GetInt() > 0;
+		else if (!stricmp(key, "dustcloud"))
+			steering.dustCloud = data->GetInt() > 0;
+	}
 }
