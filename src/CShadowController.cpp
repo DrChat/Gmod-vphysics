@@ -12,18 +12,6 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
-void QuaternionAxisAngle(const btQuaternion &q, btVector3 &axis, float &angle)
-{
-	angle = 2 * acos(q.w());
-	if ( angle > M_PI )
-	{
-		angle -= 2*M_PI;
-	}
-
-	axis.setValue(q.x(), q.y(), q.z());
-	axis.normalize();
-}
-
 float ComputeShadowControllerBull(btRigidBody* object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -67,9 +55,8 @@ float ComputeShadowControllerBull(btRigidBody* object, shadowcontrol_params_t &p
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
 
-	btVector3 axis;
-	float angle;
-	QuaternionAxisAngle(deltaRotation, axis, angle);
+	btVector3 axis = deltaRotation.getAxis();
+	float angle = deltaRotation.getAngle();
 	axis.normalize();
 
 	deltaAngles.setX(axis.x() * angle);
@@ -153,7 +140,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 }
 
 void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
-	btRigidBody* body = m_pObject->GetObject();
+	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
 
 	btVector3 bullSpeed;
 	ConvertPosToBull(maxSpeed, bullSpeed);
@@ -241,7 +228,7 @@ void CShadowController::GetMaxSpeed(float* pMaxSpeedOut, float* pMaxAngularSpeed
 }
 
 void CShadowController::AttachObject() {
-	btRigidBody* body = m_pObject->GetObject();
+	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
 	m_savedMass = SAFE_DIVIDE(1, body->getInvMass());
 	m_savedMaterialIndex = m_pObject->GetMaterialIndex();
 
@@ -257,7 +244,7 @@ void CShadowController::AttachObject() {
 }
 
 void CShadowController::DetachObject() {
-	btRigidBody* body = m_pObject->GetObject();
+	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
 	btVector3 btvec = body->getInvInertiaDiagLocal();
 	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
 	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));

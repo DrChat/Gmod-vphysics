@@ -71,12 +71,10 @@ bool BasicAngle() {
 	QAngle rot;
 	matrix3x4_t matrix1, matrix2;
 	rot.Random(-180, 180);
-	SetIdentityMatrix(matrix1);
-	AngleMatrix(rot, matrix1);
+	AngleMatrix(rot, Vector(0,0,0), matrix1);
 	g_Object1->SetPosition(Vector(0,0,0), rot, true);
 	g_Object1->GetPosition(NULL, &rot);
-	SetIdentityMatrix(matrix2);
-	AngleMatrix(rot, matrix2);
+	AngleMatrix(rot, Vector(0,0,0), matrix2);
 	return MatricesAreEqual(matrix1, matrix2);
 }
 

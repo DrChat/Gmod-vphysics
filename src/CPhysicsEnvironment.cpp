@@ -175,10 +175,11 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 }
 
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
+	m_DebugOverlay = (IVPhysicsDebugOverlay*)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
 }
 
 IVPhysicsDebugOverlay* CPhysicsEnvironment::GetDebugOverlay() {
-	return NULL;
+	return m_DebugOverlay;
 }
 
 void CPhysicsEnvironment::SetGravity(const Vector& gravityVector) {

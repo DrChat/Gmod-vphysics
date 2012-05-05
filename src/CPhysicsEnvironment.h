@@ -139,6 +139,7 @@ private:
 	CUtlVector<IController*> m_controllers;
 	bool m_deleteQuick;
 	float m_timestep;
+	IVPhysicsDebugOverlay* m_DebugOverlay;
 
 	GLDebugDrawer* m_debugdraw;
 };
