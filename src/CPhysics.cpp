@@ -69,7 +69,9 @@ IPhysicsCollisionSet* CPhysics::FindCollisionSet(unsigned int id) {
 }
 
 void CPhysics::DestroyAllCollisionSets() {
-	NOT_IMPLEMENTED;
+	for (int i = 0; i < m_collisionSets.Count(); i++)
+		delete (CPhysicsCollisionSet*)m_collisionSets[i];
+	m_collisionSets.RemoveAll();
 }
 
 static CPhysics g_MainDLLInterface;
