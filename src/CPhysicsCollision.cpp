@@ -343,12 +343,29 @@ void CPhysicsCollision::VPhysicsKeyParserDestroy(IVPhysicsKeyParser *pParser) {
 }
 
 int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vector **outVerts) {
-	NOT_IMPLEMENTED;
-	return 0;
+	int count = 0;
+	btCompoundShape *compound = (btCompoundShape*)pCollisionModel;
+	for (int i = 0; i < compound->getNumChildShapes(); i++)
+	{
+		count += ((btConvexHullShape*)compound->getChildShape(i))->getNumVertices();
+	}
+	*outVerts = new Vector[count];
+	int k = 0;
+	for (int i = 0; i < compound->getNumChildShapes(); i++)
+	{
+		btConvexHullShape *hull = (btConvexHullShape*)compound->getChildShape(i);
+		for (int j = hull->getNumVertices()-1; j >= 0; j--) // ugh, source wants the vertecies in this order or shit begins to draw improperly
+		{
+			btVector3 pos;
+			hull->getVertex(j, pos);
+			ConvertPosToHL(pos, (*outVerts)[k++]);
+		}
+	}
+	return count;
 }
 
 void CPhysicsCollision::DestroyDebugMesh(int vertCount, Vector *outVerts) {
-	NOT_IMPLEMENTED;
+	delete outVerts;
 }
 
 ICollisionQuery* CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {
