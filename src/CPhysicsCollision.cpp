@@ -295,8 +295,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			assert(convexes + position < vertecies);
 			Msg("Convex with %i triangles and %i vertex offset\n", (int)tricount, (int)vertexoffset);
 			position += 16;
-			btConvexHullShape *hull = new btConvexHullShape();
-			hull->setMargin(COLLISION_MARGIN);
+			btConvexHullShape *mesh = new btConvexHullShape();
+			mesh->setMargin(COLLISION_MARGIN);
 			for (int j = 0; j < tricount; j++)
 			{
 				short index1 = *(short*)(convexes + position + 4), index2 = *(short*)(convexes + position + 8), index3 = *(short*)(convexes + position + 12);
@@ -304,13 +304,21 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				btVector3 vertex2(*(float*)(vertecies + index2 * 16), -*(float*)(vertecies + index2 * 16 + 4), -*(float*)(vertecies + index2 * 16 + 8));
 				btVector3 vertex3(*(float*)(vertecies + index3 * 16), -*(float*)(vertecies + index3 * 16 + 4), -*(float*)(vertecies + index3 * 16 + 8));
 
-				hull->addPoint(vertex1);
-				hull->addPoint(vertex2);
-				hull->addPoint(vertex3);
+				mesh->addPoint(vertex1);
+				mesh->addPoint(vertex2);
+				mesh->addPoint(vertex3);
 
 				position += 16;
 			}
-			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), hull);
+
+			btShapeHull* hull = new btShapeHull(mesh);
+			btScalar margin = mesh->getMargin();
+			hull->buildHull(margin);
+			delete mesh;
+			mesh = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
+			mesh->setMargin(COLLISION_MARGIN);
+
+			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
 			if (convexes + position >= vertecies)
 				break;
 		}
