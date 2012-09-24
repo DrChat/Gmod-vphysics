@@ -10,10 +10,13 @@
 #include "CPhysicsDragController.h"
 #include "CPhysicsSurfaceProps.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+////#include "tier0/memdbgon.h"
+
 extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
-CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
-	btCollisionShape* shape = (btCollisionShape*)pCollisionModel;
+CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
+	btCollisionShape *shape = (btCollisionShape*)pCollisionModel;
 	
 	btVector3 vector;
 	btMatrix3x3 matrix;
@@ -31,14 +34,14 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btVector3 inertia;
 
 	shape->calculateLocalInertia(mass, inertia);
-	btMotionState* motionstate = new btMassCenterMotionState(transform, masscenter);
+	btMotionState *motionstate = new btMassCenterMotionState(transform, masscenter);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
 
 	info.m_linearDamping = pParams->damping;
 	info.m_angularDamping = pParams->rotdamping;
 	//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
 
-	btRigidBody* body = new btRigidBody(info);
+	btRigidBody *body = new btRigidBody(info);
 
 	if (mass > 0)
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
@@ -65,8 +68,8 @@ CPhysicsObject* CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	return pObject;
 }
 
-CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
-	btSphereShape* shape = new btSphereShape(ConvertDistanceToBull(radius));
+CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
+	btSphereShape *shape = new btSphereShape(ConvertDistanceToBull(radius));
 	
 	btVector3 vector;
 	btMatrix3x3 matrix;
@@ -77,10 +80,10 @@ CPhysicsObject* CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	float mass = pParams->mass;
 	if (isStatic) mass = 0;
 
-	btMotionState* motionstate = new btMassCenterMotionState(transform);
+	btMotionState *motionstate = new btMassCenterMotionState(transform);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
 
-	btRigidBody* body = new btRigidBody(info);
+	btRigidBody *body = new btRigidBody(info);
 
 	if (mass > 0)
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
@@ -126,9 +129,9 @@ bool CPhysicsObject::IsStatic() const {
 }
 
 bool CPhysicsObject::IsAsleep() const {
-	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	return false;
+	//return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
@@ -165,7 +168,6 @@ bool CPhysicsObject::IsDragEnabled() const {
 }
 
 bool CPhysicsObject::IsMotionEnabled() const {
-
 	return !(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT);
 }
 
@@ -206,33 +208,27 @@ void CPhysicsObject::EnableDrag(bool enable)
 
 	if (enable != IsDragEnabled())
 	{
-		if(enable)
-		{
+		if (enable) {
 			m_pEnv->GetDragController()->AddPhysicsObject(this);
-		}
-		else
-		{
+		} else {
 			m_pEnv->GetDragController()->RemovePhysicsObject(this);
 		}
 	}
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
-	if(enable)
-	{
+	if (enable) {
 		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btRigidBody::CF_STATIC_OBJECT);	
-	}
-	else
-	{
+	} else {
 		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);	
 	}
 }
 
-void CPhysicsObject::SetGameData(void* pGameData) {
+void CPhysicsObject::SetGameData(void *pGameData) {
 	m_pGameData = pGameData;
 }
 
-void* CPhysicsObject::GetGameData() const {
+void *CPhysicsObject::GetGameData() const {
 	return m_pGameData;
 }
 
@@ -331,7 +327,7 @@ void CPhysicsObject::SetInertia(const Vector& inertia) {
 	m_pObject->updateInertiaTensor();
 }
 
-void CPhysicsObject::SetDamping(const float* speed, const float* rot) {
+void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
 	if (speed && rot) {
 		m_pObject->setDamping(*speed, *rot);
 		return;
@@ -340,7 +336,7 @@ void CPhysicsObject::SetDamping(const float* speed, const float* rot) {
 	if (rot) m_pObject->setDamping(m_pObject->getLinearDamping(), *rot);
 }
 
-void CPhysicsObject::GetDamping(float* speed, float* rot) const {
+void CPhysicsObject::GetDamping(float *speed, float *rot) const {
 	if (speed) *speed = m_pObject->getLinearDamping();
 	if (rot) *rot = m_pObject->getAngularDamping();
 }
@@ -356,6 +352,7 @@ void CPhysicsObject::SetDragCoefficient( float *pDrag, float *pAngularDrag )
 		m_angDragCoefficient = *pAngularDrag;
 	}
 }
+
 void CPhysicsObject::SetBuoyancyRatio(float ratio) {
 	m_fBuoyancyRatio = ratio;
 }
@@ -377,9 +374,9 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 }
 
 float CPhysicsObject::GetSphereRadius() const {
-	btCollisionShape * shape = m_pObject->getCollisionShape();
+	btCollisionShape  *shape = m_pObject->getCollisionShape();
 	if (shape->getShapeType() != SPHERE_SHAPE_PROXYTYPE) return 0;
-	btSphereShape* sphere = (btSphereShape*)shape;
+	btSphereShape *sphere = (btSphereShape*)shape;
 	return ConvertDistanceToHL(sphere->getRadius());
 }
 
@@ -409,20 +406,20 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTelepor
 	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(trans);
 }
 
-void CPhysicsObject::GetPosition(Vector* worldPosition, QAngle* angles) const {
+void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 	btTransform transform;
 	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (worldPosition) ConvertPosToHL(transform.getOrigin(), *worldPosition);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 }
 
-void CPhysicsObject::GetPositionMatrix(matrix3x4_t* positionMatrix) const {
+void CPhysicsObject::GetPositionMatrix(matrix3x4_t *positionMatrix) const {
 	btTransform transform;
 	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	ConvertMatrixToHL(transform, *positionMatrix);
 }
 
-void CPhysicsObject::SetVelocity(const Vector* velocity, const AngularImpulse* angularVelocity) {
+void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	btVector3 vel, angvel;
 	if (velocity) {
 		ConvertPosToBull(*velocity, vel);
@@ -434,17 +431,17 @@ void CPhysicsObject::SetVelocity(const Vector* velocity, const AngularImpulse* a
 	}
 }
 
-void CPhysicsObject::SetVelocityInstantaneous(const Vector* velocity, const AngularImpulse* angularVelocity) {
+void CPhysicsObject::SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	// FIXME: what is different from SetVelocity?
 	SetVelocity(velocity, angularVelocity);
 }
 
-void CPhysicsObject::GetVelocity(Vector* velocity, AngularImpulse* angularVelocity) const {
+void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
 	if (velocity) ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
 	if (angularVelocity) ConvertAngularImpulseToHL(m_pObject->getAngularVelocity(), *angularVelocity);
 }
 
-void CPhysicsObject::AddVelocity(const Vector* velocity, const AngularImpulse* angularVelocity) {
+void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	btVector3 btvelocity, btangular;
 	if (velocity) {
 		ConvertPosToBull(*velocity, btvelocity);
@@ -456,35 +453,35 @@ void CPhysicsObject::AddVelocity(const Vector* velocity, const AngularImpulse* a
 	}
 }
 
-void CPhysicsObject::GetVelocityAtPoint(const Vector& worldPosition, Vector* pVelocity) const {
+void CPhysicsObject::GetVelocityAtPoint(const Vector& worldPosition, Vector *pVelocity) const {
 	btVector3 vec;
 	ConvertPosToBull(worldPosition, vec);
 	ConvertPosToHL(m_pObject->getVelocityInLocalPoint(vec), *pVelocity);
 }
 
-void CPhysicsObject::GetImplicitVelocity(Vector* velocity, AngularImpulse* angularVelocity) const {
+void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
 	NOT_IMPLEMENTED;
 }
 
-void CPhysicsObject::LocalToWorld(Vector* worldPosition, const Vector& localPosition) const {
+void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector& localPosition) const {
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorTransform(Vector(localPosition), matrix, *worldPosition);
 }
 
-void CPhysicsObject::WorldToLocal(Vector* localPosition, const Vector& worldPosition) const {
+void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector& worldPosition) const {
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorITransform(Vector(worldPosition), matrix, *localPosition);
 }
 
-void CPhysicsObject::LocalToWorldVector(Vector* worldVector, const Vector& localVector) const {
+void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector& localVector) const {
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorRotate(Vector(localVector), matrix, *worldVector);
 }
 
-void CPhysicsObject::WorldToLocalVector(Vector* localVector, const Vector& worldVector) const {
+void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector& worldVector) const {
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorIRotate(Vector(worldVector), matrix, *localVector);
@@ -511,11 +508,11 @@ void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse& torque) {
 	m_pObject->applyTorque(bullTorque);
 }
 
-void CPhysicsObject::CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector* centerForce, AngularImpulse* centerTorque) const {
+void CPhysicsObject::CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const {
 	NOT_IMPLEMENTED;
 }
 
-void CPhysicsObject::CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector* centerVelocity, AngularImpulse* centerAngularVelocity) const {
+void CPhysicsObject::CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	NOT_IMPLEMENTED;
 }
 
@@ -531,7 +528,7 @@ float CPhysicsObject::CalculateAngularDrag(const Vector& objectSpaceRotationAxis
 	return GetAngularDragInDirection( &bull_unitDirection ) * DEG2RAD(1.0);
 }
 
-bool CPhysicsObject::GetContactPoint(Vector* contactPoint, IPhysicsObject* *contactObject) const {
+bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
 	NOT_IMPLEMENTED;
 	return false;
 }
@@ -556,7 +553,7 @@ void CPhysicsObject::UpdateShadow(const Vector& targetPosition, const QAngle& ta
 	}
 }
 
-int CPhysicsObject::GetShadowPosition(Vector* position, QAngle* angles) const {
+int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 	btTransform transform;
 	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (position) {
@@ -568,7 +565,7 @@ int CPhysicsObject::GetShadowPosition(Vector* position, QAngle* angles) const {
 	return 0;
 }
 
-IPhysicsShadowController* CPhysicsObject::GetShadowController() const {
+IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
 	return m_pShadow;
 }
 
@@ -580,11 +577,11 @@ float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t& param
 	return ComputeShadowControllerHL(this, params, secondsToArrival, dt);
 }
 
-const CPhysCollide* CPhysicsObject::GetCollide() const {
+const CPhysCollide *CPhysicsObject::GetCollide() const {
 	return (CPhysCollide*)m_pObject->getCollisionShape();
 }
 
-const char* CPhysicsObject::GetName() const {
+const char *CPhysicsObject::GetName() const {
 	NOT_IMPLEMENTED;
 	return NULL;
 }
@@ -605,24 +602,68 @@ void CPhysicsObject::RemoveHinged() {
 	NOT_IMPLEMENTED;
 }
 
-IPhysicsFrictionSnapshot* CPhysicsObject::CreateFrictionSnapshot() {
+IPhysicsFrictionSnapshot *CPhysicsObject::CreateFrictionSnapshot() {
 	return new CPhysicsFrictionSnapshot(this);
 }
 
-void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot* pSnapshot) {
+void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot) {
 	delete pSnapshot;
 }
 
 void CPhysicsObject::OutputDebugInfo() const {
 	Msg( "-----------------\n" );
+	// TODO: Use a sigscanner for GetModelName()?
+
+	// SIGNATURES FOR GetModelName()
+	// Windows: 55 8B EC 8B 45 08 8B 89 CC 01 00 00 89 08 5D C2 04 00
+	// Linux: 8B 44 24 04 8B 54 24 08 8B 92 18 02 00 00 89 10 C2 04 00
+
+
 	// FIXME: requires CBaseEntity!!
-	// Msg( "Object: %s\n", (CBaseEntity *)GetGameData()->GetModelName() );
+	//Msg( "Object: %s\n", ((CBaseEntity *)GetGameData())->GetModelName() );
 	Msg( "Mass: %f (inv %f)\n", GetMass(), GetInvMass() );
+
+	Vector inertia = GetInertia();
+	Vector invinertia = GetInvInertia();
+	Msg("Inertia: %f %f %f (inv %f %f %f)\n", inertia.x, inertia.y, inertia.z, invinertia.x, invinertia.y, invinertia.z);
+
+	Vector vel;
+	AngularImpulse angvel;
+	GetVelocity(&vel, &angvel);
+	Msg("Velocity: %f, %f, %f\nAng Velocity: %f, %f, %f\n", vel.x, vel.y, vel.z, angvel.x, angvel.y, angvel.z);
+
+	float dampspeed, damprot;
+	GetDamping(&dampspeed, &damprot);
+	Msg("Damping %f linear, %f angular\n", dampspeed, damprot);
+
+	Vector dragBasis;
+	Vector angDragBasis;
+	ConvertPosToHL(m_dragBasis, dragBasis);
+	ConvertDirectionToHL(m_angDragBasis, angDragBasis);
+	Msg("Linear Drag: %f, %f, %f (factor %f)\n", dragBasis.x, dragBasis.y, dragBasis.z, m_dragCoefficient);
+	Msg("Angular Drag: %f, %f, %f (factor %f)\n", angDragBasis.x, angDragBasis.y, angDragBasis.z, m_angDragCoefficient);
+
+	// Attached to x controllers
+
+
+
+	Msg("State: %s, Collision %s, Motion %s, Flags %04X (game %04x, index %d)\n", 
+		IsAsleep() ? "Asleep" : "Awake",
+		IsCollisionEnabled() ? "Enabled" : "Disabled",
+		IsStatic() ? "Static" : IsMotionEnabled() ? "Enabled" : "Disabled",
+		m_pObject->getFlags(),
+		GetGameFlags(),
+		GetGameIndex()
+	);
+
+	
+
+
 	// FIXME: complete this function via format noted on
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
-void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride) {
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride) {
 	m_pEnv = pEnv;
 	m_materialIndex = materialIndex;
 	m_pObject = pObject;
@@ -647,7 +688,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	// Drag calculations converted from  2003 source code
 	if (!IsStatic() && GetCollide() )
 	{
-		btCollisionShape * shape = m_pObject->getCollisionShape();
+		btCollisionShape  *shape = m_pObject->getCollisionShape();
 
 		btVector3 min, max, delta;
 		btTransform t;
@@ -676,15 +717,15 @@ void CPhysicsObject::Init(CPhysicsEnvironment* pEnv, btRigidBody* pObject, int m
 	m_angDragCoefficient = angDrag;
 }
 
-CPhysicsEnvironment* CPhysicsObject::GetVPhysicsEnvironment() {
+CPhysicsEnvironment *CPhysicsObject::GetVPhysicsEnvironment() {
 	return m_pEnv;
 }
 
-btRigidBody* CPhysicsObject::GetObject() {
+btRigidBody *CPhysicsObject::GetObject() {
 	return m_pObject;
 }
 
-float CPhysicsObject::GetDragInDirection(btVector3  * dir) const
+float CPhysicsObject::GetDragInDirection(btVector3 *dir) const
 {
 	btVector3 out;
 	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis(); // const IVP_U_Matrix *m_world_f_core = m_pObject->get_core()->get_m_world_f_core_PSI();
@@ -695,7 +736,7 @@ float CPhysicsObject::GetDragInDirection(btVector3  * dir) const
 		fabs(out.getZ() * m_dragBasis.getZ());
 	
 }
-float CPhysicsObject::GetAngularDragInDirection(btVector3 * dir) const
+float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const
 {
 	return m_angDragCoefficient * fabs(dir->getX() * m_angDragBasis.getX()) +
 		fabs(dir->getY() * m_angDragBasis.getY()) +

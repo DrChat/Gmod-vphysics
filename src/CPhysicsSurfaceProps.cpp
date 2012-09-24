@@ -2,6 +2,9 @@
 
 #include "CPhysicsSurfaceProps.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 CPhysicsSurfaceProps::CPhysicsSurfaceProps() {
 	m_strings = new CUtlSymbolTable(0, 32, true);
 }

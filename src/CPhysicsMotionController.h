@@ -22,9 +22,11 @@ public:
 public:
 	virtual void Tick(float deltaTime);
 private:
-	IMotionEvent* m_handler;
-	CUtlVector<btCollisionObject*> m_objectList;
-	CPhysicsEnvironment* m_pEnv;
+	IMotionEvent *					m_handler;
+	CUtlVector<btCollisionObject*>	m_objectList;
+	CPhysicsEnvironment *			m_pEnv;
+
+	int		m_priority;
 };
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler);

@@ -120,28 +120,28 @@ public:
 	CPhysicsDragController * GetDragController();
 	IPhysicsObjectEvent* m_pObjectEvent;
 private:
-	bool m_inSimulation;
-	bool m_queueDeleteObject;
-	btCollisionConfiguration* m_pBulletConfiguration;
-	btDispatcher* m_pBulletDispatcher;
-	btBroadphaseInterface* m_pBulletBroadphase;
-	btConstraintSolver* m_pBulletSolver;
-	btDynamicsWorld* m_pBulletEnvironment;
-	CUtlVector<IPhysicsObject*> m_objects;
-	CUtlVector<IPhysicsObject*> m_deadObjects;
-	CCollisionSolver* m_pCollisionSolver;
-	IPhysicsCollisionEvent* m_pCollisionEvent;
-	IPhysicsConstraintEvent* m_pConstraintEvent;
-	CDeleteQueue* m_pDeleteQueue;
-	physics_performanceparams_t* m_physics_performanceparams;
-	CUtlVector<CPhysicsFluidController*> m_fluids;
-	CPhysicsDragController* m_pPhysicsDragController;
-	CUtlVector<IController*> m_controllers;
-	bool m_deleteQuick;
-	float m_timestep;
-	IVPhysicsDebugOverlay* m_DebugOverlay;
+	bool			m_inSimulation;
+	bool			m_queueDeleteObject;
+	btCollisionConfiguration *				m_pBulletConfiguration;
+	btDispatcher *							m_pBulletDispatcher;
+	btBroadphaseInterface *					m_pBulletBroadphase;
+	btConstraintSolver *					m_pBulletSolver;
+	btDynamicsWorld *						m_pBulletEnvironment;
+	CUtlVector<IPhysicsObject*>				m_objects;
+	CUtlVector<IPhysicsObject*>				m_deadObjects;
+	CCollisionSolver *						m_pCollisionSolver;
+	IPhysicsCollisionEvent *				m_pCollisionEvent;
+	IPhysicsConstraintEvent *				m_pConstraintEvent;
+	CDeleteQueue *							m_pDeleteQueue;
+	physics_performanceparams_t *			m_physics_performanceparams;
+	CUtlVector<CPhysicsFluidController*>	m_fluids;
+	CPhysicsDragController *				m_pPhysicsDragController;
+	CUtlVector<IController*>				m_controllers;
+	bool			m_deleteQuick;
+	float			m_timestep;
+	IVPhysicsDebugOverlay *					m_DebugOverlay;
 
-	GLDebugDrawer* m_debugdraw;
+	GLDebugDrawer *							m_debugdraw;
 };
 
 #endif

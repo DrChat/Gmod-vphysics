@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D14B5456-0069-453D-A86A-D5B4CB35C6DD}</ProjectGuid>
+    <RootNamespace>vphysics</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50214.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>F:\Dev\Libraries\SDL-1.2.15\include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;F:\Dev\Libraries\bullet\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;mathlib.lib;BulletDynamics_vs2010_debug.lib;BulletCollision_vs2010_debug.lib;LinearMath_vs2010_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;F:\Dev\Libraries\bullet\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>NotSet</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <CustomBuildStep>
+      <Command>echo RUNNING COMMAND
+if exist "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll"
+if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll"
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\"
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Copying dll</Message>
+      <Outputs>C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll;%(Outputs)</Outputs>
+      <Inputs>$(TargetPath)</Inputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Dev\Libraries\SDL-1.2.15\include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;F:\Dev\Libraries\bullet\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;mathlib.lib;BulletDynamics_vs2010.lib;BulletCollision_vs2010.lib;LinearMath_vs2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;F:\Dev\Libraries\bullet\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>NotSet</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <CustomBuildStep>
+      <Command>echo RUNNING COMMAND
+if exist "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll"
+if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll"
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\"
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Copying dll</Message>
+      <Outputs>C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll;%(Outputs)</Outputs>
+      <Inputs>$(TargetPath)</Inputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Garry%27s Mod\gmvphysics\src\CPhysicsTrace.cpp" />
+    <ClCompile Include="..\..\Garry%27s Mod\gmvphysics\src\GLDebugDrawer.cpp" />
+    <ClCompile Include="src\convert.cpp" />
+    <ClCompile Include="src\CPhysics.cpp" />
+    <ClCompile Include="src\CPhysicsCollision.cpp" />
+    <ClCompile Include="src\CPhysicsCollisionSet.cpp" />
+    <ClCompile Include="src\CPhysicsConstraint.cpp" />
+    <ClCompile Include="src\CPhysicsDragController.cpp" />
+    <ClCompile Include="src\CPhysicsEnvironment.cpp" />
+    <ClCompile Include="src\CPhysicsFluidController.cpp" />
+    <ClCompile Include="src\CPhysicsFrictionSnapshot.cpp" />
+    <ClCompile Include="src\CPhysicsKeyParser.cpp" />
+    <ClCompile Include="src\CPhysicsMotionController.cpp" />
+    <ClCompile Include="src\CPhysicsObject.cpp" />
+    <ClCompile Include="src\CPhysicsObjectPairHash.cpp" />
+    <ClCompile Include="src\CPhysicsSurfaceProps.cpp" />
+    <ClCompile Include="src\CPhysicsVehicleController.cpp" />
+    <ClCompile Include="src\CPlayerController.cpp" />
+    <ClCompile Include="src\CShadowController.cpp" />
+    <ClCompile Include="src\math.cpp" />
+    <ClCompile Include="src\StfAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Garry%27s Mod\gmvphysics\src\CPhysicsTrace.h" />
+    <ClInclude Include="..\..\Garry%27s Mod\gmvphysics\src\GLDebugDrawer.h" />
+    <ClInclude Include="src\convert.h" />
+    <ClInclude Include="src\CPhysics.h" />
+    <ClInclude Include="src\CPhysicsCollision.h" />
+    <ClInclude Include="src\CPhysicsCollisionSet.h" />
+    <ClInclude Include="src\CPhysicsConstraint.h" />
+    <ClInclude Include="src\CPhysicsDragController.h" />
+    <ClInclude Include="src\CPhysicsEnvironment.h" />
+    <ClInclude Include="src\CPhysicsFluidController.h" />
+    <ClInclude Include="src\CPhysicsFrictionSnapshot.h" />
+    <ClInclude Include="src\CPhysicsKeyParser.h" />
+    <ClInclude Include="src\CPhysicsMotionController.h" />
+    <ClInclude Include="src\CPhysicsObject.h" />
+    <ClInclude Include="src\CPhysicsObjectPairHash.h" />
+    <ClInclude Include="src\CPhysicsSurfaceProps.h" />
+    <ClInclude Include="src\CPhysicsVehicleController.h" />
+    <ClInclude Include="src\CPlayerController.h" />
+    <ClInclude Include="src\CShadowController.h" />
+    <ClInclude Include="src\IController.h" />
+    <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\StdAfx.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

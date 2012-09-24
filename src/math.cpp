@@ -2,6 +2,9 @@
 
 #include "math.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 float AngDragIntegral( float invInertia, float l, float w, float h )
 {
 	float w2 = w*w;

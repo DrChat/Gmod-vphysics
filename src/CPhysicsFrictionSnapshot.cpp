@@ -4,6 +4,9 @@
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject* pObject) {
 	// Didn't really get anywhere with this
 	/*

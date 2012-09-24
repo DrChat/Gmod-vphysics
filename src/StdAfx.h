@@ -17,7 +17,10 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btMaterial.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+
+#define DEBUG_DRAW 0
 
 #define COLLISION_MARGIN 0.004
 
@@ -26,7 +29,9 @@
 //extern IPhysics* g_ValvePhysics;
 //extern IPhysicsCollision* g_ValvePhysicsCollision;
 #ifdef _DEBUG
-#define NOT_IMPLEMENTED __asm {int 3}
+//#define NOT_IMPLEMENTED __asm {int 3}
+
+#define NOT_IMPLEMENTED Msg("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #else
 #define NOT_IMPLEMENTED Msg("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #endif

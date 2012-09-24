@@ -5,6 +5,9 @@
 #include "CPhysicsEnvironment.h"
 #include "convert.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping) {
 	btVector3 acceleration = delta * scaleDelta;
 	if (currentSpeed.length2() < 1e-6) {
@@ -23,7 +26,7 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 CPlayerController::CPlayerController(CPhysicsObject* pObject) {
 	m_pObject = pObject;
 	m_handler = NULL;
-	m_maxDeltaPosition = ConvertDistanceToBull(24);
+	m_maxDeltaPosition = HL2BULL(24);
 	m_dampFactor = 1.0f;
 	AttachObject();
 }
@@ -85,15 +88,17 @@ void CPlayerController::MaxSpeed(const Vector& maxVelocity) {
 	m_maxSpeed = available.absolute();
 }
 
-void CPlayerController::SetObject(IPhysicsObject* pObject) {
-	if (pObject == m_pObject) return;
+void CPlayerController::SetObject(IPhysicsObject *pObject) {
+	if (pObject == m_pObject)
+		return;
+
 	DetachObject();
-	m_pObject = (CPhysicsObject*)pObject;
+	m_pObject = (CPhysicsObject *)pObject;
 	AttachObject();
 }
 
 int CPlayerController::GetShadowPosition( Vector* position, QAngle* angles ) {
-	btRigidBody* pObject = m_pObject->GetObject();
+	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
 	if (position) ConvertPosToHL(transform.getOrigin(), *position);
@@ -106,14 +111,14 @@ int CPlayerController::GetShadowPosition( Vector* position, QAngle* angles ) {
 void CPlayerController::StepUp(float height) {
 	btVector3 step;
 	ConvertPosToBull(Vector(0, 0, height), step);
-	btRigidBody* pObject = m_pObject->GetObject();
+	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
 	transform.setOrigin(transform.getOrigin()+step);
 }
 
 void CPlayerController::Jump() {
-	NOT_IMPLEMENTED;
+	return;
 }
 
 void CPlayerController::GetShadowVelocity(Vector* velocity) {
@@ -123,11 +128,11 @@ void CPlayerController::GetShadowVelocity(Vector* velocity) {
 }
 
 IPhysicsObject* CPlayerController::GetObject() {
-	NOT_IMPLEMENTED;
-	return NULL;
+	return m_pObject;
 }
 
-void CPlayerController::GetLastImpulse(Vector* pOut) {
+// Called with NPCs
+void CPlayerController::GetLastImpulse(Vector *pOut) {
 	NOT_IMPLEMENTED;
 }
 
@@ -152,27 +157,35 @@ bool CPlayerController::WasFrozen() {
 	return false;
 }
 
+// TODO: Players walking ontop of physical objects causes players
+// to fly off. About 90% reproducible in gm_construct white room
+// when walking
+// Goes in -x +y direction when near front doors of white room
+// At back, -x -y
 void CPlayerController::Tick(float deltaTime) {
-	if (!m_enable) return;
+	if (!m_enable)
+		return;
 
-	btRigidBody* body = m_pObject->GetObject();
-	CPhysicsEnvironment* pEnv = m_pObject->GetVPhysicsEnvironment();
-	btDynamicsWorld* world = pEnv->GetBulletEnvironment();
+	btRigidBody *body = m_pObject->GetObject();
+	CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
+	btDynamicsWorld *world = pEnv->GetBulletEnvironment();
 
 	float psiScale = pEnv->GetInvPSIScale();
 	if (!psiScale) return;
 
 	btTransform transform;
-	((btMassCenterMotionState*)body->getMotionState())->getGraphicTransform(transform);
+	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 	btVector3 cur_pos = transform.getOrigin();
 
 	btVector3 delta_position = m_targetPosition - cur_pos;
 
 	//FIXME: figure out what shift_core_f_object is
+	// shift_core_f_object is a floating point vector3
+	// shift core from object (displacement of core from object)?
 
 	btScalar qdist = delta_position.length2();
-	if (qdist > m_maxDeltaPosition * m_maxDeltaPosition) {
-		if (TryTeleportObject()) return;
+	if (qdist > m_maxDeltaPosition * m_maxDeltaPosition && TryTeleportObject()) {
+		return;
 	}
 
 	if (m_onground) {

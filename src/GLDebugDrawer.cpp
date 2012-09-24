@@ -5,6 +5,10 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
+#if DEBUG_DRAW == 1
 #pragma comment(lib, "SDL")
 #pragma comment(lib, "OpenGL32")
 #pragma comment(lib, "Glu32")
@@ -147,4 +151,4 @@ void GLDebugDrawer::DrawWorld() {
 	glFlush();
 	SDL_GL_SwapBuffers();
 }
-
+#endif // DEBUG_DRAW

@@ -6,13 +6,22 @@
 #include "CPhysicsSurfaceProps.h"
 #include "convert.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
 	btQuaternion q2 = q.inverse();
 	qt = q2 * p;
 	qt.normalize();
 }
 
-float ComputeShadowControllerBull(btRigidBody* object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
+// BUG WITH OBJECTS: Improper angle conversion?
+// Object at QAngle(0, -180, 0) when PhysWake()'d will flip to
+// QAngle(0, -133, 179)
+// Occurs from QAngle(0, -70, 0) (on all 3 axis, not just y)
+// to QAngle(0, 70, 0)
+// Reproduce by rotating an object with the physgun. Most likely related to shadow controllers.
+float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
 		fraction *= dt / secondsToArrival;
@@ -182,13 +191,11 @@ void CShadowController::SetTeleportDistance(float teleportDistance) {
 }
 
 bool CShadowController::AllowsTranslation() {
-	NOT_IMPLEMENTED;
-	return false;
+	return m_allowPhysicsMovement;
 }
 
 bool CShadowController::AllowsRotation() {
-	NOT_IMPLEMENTED;
-	return false;
+	return m_allowPhysicsRotation;
 }
 
 void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {

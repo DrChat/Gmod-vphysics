@@ -1,20 +1,17 @@
-+vphysics.sln
-+vphysics.vcproj
-
 *.ipch
 *.ncb
 *.sdf
-*.sln
 *.suo
-*.vcproj
-*.vcxproj
-*.filters
 *.user
 *.exe
 *.dll
+*.exp
+*.ilk
+*.lib
+*.pdb
 
-/Debug
-/Release
+/bin/Debug
+/bin/Release
 /test/Debug
 /test/Release
 /ipch

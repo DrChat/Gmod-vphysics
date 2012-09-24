@@ -4,6 +4,9 @@
 #include "CPhysicsConstraint.h"
 #include "CPhysicsEnvironment.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint)
 {
 	m_pObject1 = pObject1;

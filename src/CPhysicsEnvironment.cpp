@@ -11,11 +11,10 @@
 #include "CPhysicsConstraint.h"
 #include "CPhysicsVehicleController.h"
 
-//#define DEBUG_DRAW
 // WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
 //#define MULTITHREAD // TODO: Mac and Linux support
 
-#ifdef DEBUG_DRAW
+#if DEBUG_DRAW == 1
 #include "GLDebugDrawer.h"
 #endif
 
@@ -26,6 +25,9 @@
 #include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 #pragma comment(lib,"BulletMultiThreaded.lib")
 #endif
+
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
 
 class IDeleteQueueItem {
 public:
@@ -144,13 +146,13 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
 
-#ifdef DEBUG_DRAW
+#if DEBUG_DRAW == 1
 	m_debugdraw = new GLDebugDrawer(m_pBulletEnvironment);
 #endif
 }
 
 CPhysicsEnvironment::~CPhysicsEnvironment() {
-#ifdef DEBUG_DRAW
+#if DEBUG_DRAW == 1
 	delete m_debugdraw;
 #endif
 	SetQuickDelete(true);
@@ -175,7 +177,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 }
 
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
-	m_DebugOverlay = (IVPhysicsDebugOverlay*)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
+	m_DebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
 }
 
 IVPhysicsDebugOverlay* CPhysicsEnvironment::GetDebugOverlay() {
@@ -185,8 +187,11 @@ IVPhysicsDebugOverlay* CPhysicsEnvironment::GetDebugOverlay() {
 void CPhysicsEnvironment::SetGravity(const Vector& gravityVector) {
 	btVector3 temp;
 	ConvertPosToBull(gravityVector, temp);
+
+	// There's unusually low gravity at default!
 	m_pBulletEnvironment->setGravity(temp);
 }
+
 void CPhysicsEnvironment::GetGravity(Vector* pGravityVector) const {
 	btVector3 temp = m_pBulletEnvironment->getGravity();
 	ConvertPosToHL(temp, *pGravityVector);
@@ -254,6 +259,7 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject 
 	ConvertMatrixToBull(ragdoll.constraintToAttached, obj1Pos);
 	ConvertMatrixToBull(ragdoll.constraintToReference, obj2Pos);
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+
 	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
 	m_pBulletEnvironment->addConstraint(ballsock, false);
 	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
@@ -274,6 +280,7 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *p
 	weld->setAngularLowerLimit(btVector3(0,0,0));
 	weld->setAngularUpperLimit(btVector3(0,0,0));
 	m_pBulletEnvironment->addConstraint(weld, false);
+
 	return new CPhysicsConstraint(this, obj1, obj2, weld);
 }
 
@@ -287,12 +294,16 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObje
 	btVector3 obj1Pos, obj2Pos;
 	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
 	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
+
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer(), *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+
 	if (shapeInfo1)
 		obj1Pos -= shapeInfo1->massCenter;
 	if (shapeInfo2)
 		obj2Pos -= shapeInfo2->massCenter;
+
 	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos);
 	m_pBulletEnvironment->addConstraint(ballsock, false);
 	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
@@ -303,30 +314,37 @@ IPhysicsConstraint* CPhysicsEnvironment::CreatePulleyConstraint(IPhysicsObject *
 	return NULL;
 }
 
+// TODO: Ropes are rigid ALWAYS! Read length.minlength
 IPhysicsConstraint* CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length) {
 	btVector3 obj1Pos, obj2Pos;
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);
 	ConvertPosToBull(length.objectPosition[1], obj2Pos);
+
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer(), *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+
 	if (shapeInfo1)
 		obj1Pos -= shapeInfo1->massCenter;
 	if (shapeInfo2)
 		obj2Pos -= shapeInfo2->massCenter;
+
 	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
 	m_pBulletEnvironment->addConstraint(constraint, false);
 	return new CPhysicsConstraint(this, obj1, obj2, constraint);
 }
 
-void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint*) {
-	NOT_IMPLEMENTED;
+void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
+	CPhysicsConstraint *constraint = (CPhysicsConstraint *)pConstraint;
+	delete constraint;
 }
 
 IPhysicsConstraintGroup* CPhysicsEnvironment::CreateConstraintGroup(const constraint_groupparams_t &groupParams) {
 	return new CPhysicsConstraintGroup();
 }
+
 void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup) {
-	NOT_IMPLEMENTED;
+	delete (CPhysicsConstraintGroup *)pGroup;
 }
 
 IPhysicsShadowController* CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
@@ -335,17 +353,17 @@ IPhysicsShadowController* CPhysicsEnvironment::CreateShadowController(IPhysicsOb
 	return pController;
 }
 
-void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController* pController) {
+void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController *pController) {
 	m_controllers.FindAndRemove((CShadowController*)pController);
 	delete pController;
 }
 
-IPhysicsPlayerController* CPhysicsEnvironment::CreatePlayerController(IPhysicsObject* pObject) {
-	CPlayerController* pController = new CPlayerController((CPhysicsObject*)pObject);
+IPhysicsPlayerController* CPhysicsEnvironment::CreatePlayerController(IPhysicsObject *pObject) {
+	CPlayerController* pController = new CPlayerController((CPhysicsObject *)pObject);
 	m_controllers.AddToTail(pController);
 	return pController;
 }
-void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController* pController) {
+void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController *pController) {
 	m_controllers.FindAndRemove((CPlayerController*)pController);
 	delete pController;
 }
@@ -362,17 +380,18 @@ void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pCon
 }
 
 IPhysicsVehicleController* CPhysicsEnvironment::CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
-	return new CPhysicsVehicleController(this, (CPhysicsObject*)pVehicleBodyObject, params, nVehicleType);
+	return ::CreateVehicleController(this, (CPhysicsObject *)pVehicleBodyObject, params, nVehicleType, pGameTrace);
 }
 
 void CPhysicsEnvironment::DestroyVehicleController(IPhysicsVehicleController *pController) {
-	delete (CPhysicsVehicleController*)pController;
+	delete (CPhysicsVehicleController *)pController;
 }
 
 void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
+ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of Simulation substeps to do", true, 0, true, 1);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {
@@ -389,7 +408,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
-		m_pBulletEnvironment->stepSimulation(deltaTime, 2, m_timestep/2.0f);
+		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_numsubsteps.GetInt(), m_timestep/2.0f);
 		for (int i = 0; i < m_fluids.Count(); i++) {
 			m_fluids[i]->Tick(deltaTime);
 		}
@@ -424,7 +443,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_queueDeleteObject) {
 		CleanupDeleteList();
 	}
-#ifdef DEBUG_DRAW
+#if DEBUG_DRAW == 1
 	m_debugdraw->DrawWorld();
 #endif
 }
@@ -474,15 +493,19 @@ void CPhysicsEnvironment::SetQuickDelete(bool bQuick) {
 int CPhysicsEnvironment::GetActiveObjectCount() const {
 	return m_objects.Size();
 }
-void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList ) const {
+
+void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList) const {
 	int size = m_objects.Size();
 	for (int i = 0; i < size; i++)
 		pOutputObjectList[i] = m_objects[i];
 }
 
-const IPhysicsObject** CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount ) const {
-	NOT_IMPLEMENTED;
-	return NULL;
+const IPhysicsObject** CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount) const {
+	if (pOutputObjectCount) {
+		*pOutputObjectCount = m_objects.Count();
+	}
+
+	return (const IPhysicsObject **)m_objects.Base();
 }
 
 bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment) {

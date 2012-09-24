@@ -4,6 +4,9 @@
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 CPhysicsFluidController * CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams)
 {
 	CPhysicsFluidController *pFluid = new CPhysicsFluidController( pEnv, pFluidObject, pParams );

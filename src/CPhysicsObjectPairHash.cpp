@@ -1,6 +1,9 @@
 #include "StdAfx.h"
 #include "CPhysicsObjectPairHash.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 CPhysicsObjectPairHash::CPhysicsObjectPairHash()
 {
 	for (int i = 0; i < 256; i++)

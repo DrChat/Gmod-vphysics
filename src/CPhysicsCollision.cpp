@@ -4,7 +4,10 @@
 #include "convert.h"
 #include "CPhysicsKeyParser.h"
 
-IPhysicsCollision* g_ValvePhysicsCollision = NULL;
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
+//IPhysicsCollision* g_ValvePhysicsCollision = NULL;
 
 CPhysicsCollision::CPhysicsCollision() {
 
@@ -14,12 +17,12 @@ CPhysicsCollision::~CPhysicsCollision() {
 
 }
 
-CPhysConvex* CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
+CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
 	NOT_IMPLEMENTED;
 	return NULL;
 }
 
-CPhysConvex* CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance) {
+CPhysConvex *CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance) {
 	NOT_IMPLEMENTED;
 	return NULL;
 }
@@ -42,11 +45,11 @@ void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
 	NOT_IMPLEMENTED;
 }
 
-CPhysConvex* CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &maxs) {
+CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &maxs) {
 	NOT_IMPLEMENTED;
 	return NULL;
 }
-CPhysConvex* CPhysicsCollision::ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron) {
+CPhysConvex *CPhysicsCollision::ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron) {
 	NOT_IMPLEMENTED;
 	return NULL;
 }
@@ -55,7 +58,7 @@ void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, con
 	NOT_IMPLEMENTED;
 }
 
-CPhysPolysoup* CPhysicsCollision::PolysoupCreate() {
+CPhysPolysoup *CPhysicsCollision::PolysoupCreate() {
 	NOT_IMPLEMENTED;
 	return NULL;
 }
@@ -114,9 +117,10 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 }
 
 Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction) {
-	if (!pCollide) return collideOrigin;
-	NOT_IMPLEMENTED;
-	return collideOrigin;
+	if (!pCollide)
+		return collideOrigin;
+
+	return m_traceapi.GetExtent((btCollisionShape *)pCollide, collideOrigin, collideAngles, direction);
 }
 
 void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles) {
@@ -246,63 +250,108 @@ bool CPhysicsCollision::IsBoxIntersectingCone( const Vector &boxAbsMins, const V
 	return false;
 }
 
-void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int size, bool swap) {
+struct compactsurfaceheader_t {
+	int		size;			// Size of the content after this byte
+	int		vphysicsID;		// Generally the ASCII for "VPHY" in newer files
+	short	version;
+	short	modelType;
+	int		surfaceSize;
+	Vector	dragAxisAreas;
+	int		axisMapSize;
+};
+
+// old style phy format
+struct legacysurfaceheader_t {
+	//int		size;
+	float	mass_center[3];
+	float	rotation_inertia[3];
+	float	upper_limit_radius;
+	int		max_deviation : 8;
+	int		byte_size : 24;
+	int		offset_ledgetree_root;
+	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
+};
+
+// Purpose: Parses a .phy file's collision
+// TODO: This function is really expensive! In the future, should we
+// generate the data we need and then save it to a mdl.bphy?
+void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
+	memset(pOutput, 0, sizeof(*pOutput));
 	pOutput->solidCount = solidCount;
-	pOutput->isPacked = 0;
-	pOutput->descSize = 0;
-	pOutput->solids = new CPhysCollide*[solidCount];
+	pOutput->solids = new CPhysCollide *[solidCount];
 
 	int position = 0;
 	for (int i = 0; i < solidCount; i++)
 	{
-		uint32 size = *(uint32*)(pBuffer + position);
-		const char *solid = pBuffer + position + 4;
-		pOutput->solids[i] = (CPhysCollide*)solid;
-		position += size + 4;
+		int size = *(int*)(pBuffer + position);
+
+		const char *solid = pBuffer + position;
+		pOutput->solids[i] = (CPhysCollide *)solid;
+		position += size + 4; // size + sizeof(int)
 	}
-	pOutput->pKeyValues = (char*)malloc(size - position);
-	memcpy(pOutput->pKeyValues, pBuffer + position, size - position);
+	pOutput->pKeyValues = (char*)malloc(bufferSize - position);
+	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
 
-
+	// Now for the fun part:
+	// We have to convert every solid into a bullet solid
+	// because havoc solids are saved into a phy file.
 	for (int i = 0; i < solidCount; i++)
 	{
 		const char *solid = (const char*)pOutput->solids[i];
+
+		compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
+		legacysurfaceheader_t legacyheader = *(legacysurfaceheader_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
+
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
+
+		/*
 		assert(*(uint32*)solid == 0x59485056); // VPHY
 		short version = *(unsigned short*)(solid + 4), type = *(unsigned short*)(solid + 6);
 		assert(version == 0x100);
 		unsigned long surfacesize = *(uint32*)(solid + 8);
+		*/
+		
+		assert(surfaceheader.vphysicsID == 0x59485056); // == "VPHY"
+		assert(surfaceheader.version == 0x100);
 
-		if (type != 0x0)
+		if (surfaceheader.modelType != 0x0)
 		{
 			pOutput->solids[i] = NULL;
 			continue;
 		}
 
+		/*
 		info->massCenter = btVector3(*(float*)(solid + 28), -*(float*)(solid + 32), -*(float*)(solid + 36));
 		assert(*(uint32*)(solid + 72) == 0x53505649); // IVPS
 		const char *convexes = solid + 76;
+		*/
+		
+		info->massCenter = btVector3(legacyheader.mass_center[0], -legacyheader.mass_center[1], -legacyheader.mass_center[2]);
+		assert(legacyheader.dummy[2] == 0x53505649); // == "IVPS"
+		const char *convexes = solid + 80;
+
 		Msg("Mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
 		btCompoundShape *bull = new btCompoundShape();
 		bull->setMargin(COLLISION_MARGIN);
 		bull->setUserPointer(info);
 		int position = 0;
-		for (;;)
-		{
+		for (;;) {
 			short tricount = *(short*)(convexes + position + 12);
 			uint32 vertexoffset = *(uint32*)(convexes + position);
-			const char *vertecies = convexes + position + vertexoffset;
-			assert(convexes + position < vertecies);
-			Msg("Convex with %i triangles and %i vertex offset\n", (int)tricount, (int)vertexoffset);
+			const char *vertices = convexes + position + vertexoffset;
+			assert(convexes + position < vertices);
+
+			//Msg("Convex with %i triangles and %i vertex offset\n", (int)tricount, (int)vertexoffset);
+
 			position += 16;
 			btConvexHullShape *mesh = new btConvexHullShape();
 			mesh->setMargin(COLLISION_MARGIN);
 			for (int j = 0; j < tricount; j++)
 			{
 				short index1 = *(short*)(convexes + position + 4), index2 = *(short*)(convexes + position + 8), index3 = *(short*)(convexes + position + 12);
-				btVector3 vertex1(*(float*)(vertecies + index1 * 16), -*(float*)(vertecies + index1 * 16 + 4), -*(float*)(vertecies + index1 * 16 + 8));
-				btVector3 vertex2(*(float*)(vertecies + index2 * 16), -*(float*)(vertecies + index2 * 16 + 4), -*(float*)(vertecies + index2 * 16 + 8));
-				btVector3 vertex3(*(float*)(vertecies + index3 * 16), -*(float*)(vertecies + index3 * 16 + 4), -*(float*)(vertecies + index3 * 16 + 8));
+				btVector3 vertex1(*(float*)(vertices + index1 * 16), -*(float*)(vertices + index1 * 16 + 4), -*(float*)(vertices + index1 * 16 + 8));
+				btVector3 vertex2(*(float*)(vertices + index2 * 16), -*(float*)(vertices + index2 * 16 + 4), -*(float*)(vertices + index2 * 16 + 8));
+				btVector3 vertex3(*(float*)(vertices + index3 * 16), -*(float*)(vertices + index3 * 16 + 4), -*(float*)(vertices + index3 * 16 + 8));
 
 				mesh->addPoint(vertex1);
 				mesh->addPoint(vertex2);
@@ -313,13 +362,13 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 			btShapeHull* hull = new btShapeHull(mesh);
 			btScalar margin = mesh->getMargin();
-			hull->buildHull(margin);
+			hull->buildHull(margin); // HOLY FUCK THIS FUNCTION IS EXPENSIVE
 			delete mesh;
 			mesh = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
 			mesh->setMargin(COLLISION_MARGIN);
 
 			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
-			if (convexes + position >= vertecies)
+			if (convexes + position >= vertices)
 				break;
 		}
 		pOutput->solids[i] = (CPhysCollide*)bull;
@@ -362,7 +411,7 @@ int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vect
 	for (int i = 0; i < compound->getNumChildShapes(); i++)
 	{
 		btConvexHullShape *hull = (btConvexHullShape*)compound->getChildShape(i);
-		for (int j = hull->getNumVertices()-1; j >= 0; j--) // ugh, source wants the vertecies in this order or shit begins to draw improperly
+		for (int j = hull->getNumVertices()-1; j >= 0; j--) // ugh, source wants the vertices in this order or shit begins to draw improperly
 		{
 			btVector3 pos;
 			hull->getVertex(j, pos);

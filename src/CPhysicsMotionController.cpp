@@ -4,6 +4,9 @@
 #include "CPhysicsObject.h"
 #include "convert.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler) {
 	if (!pHandler) return NULL;
 	return new CPhysicsMotionController(pHandler, pEnv);
@@ -12,6 +15,8 @@ IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMot
 CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv) {
 	m_handler = pHandler;
 	m_pEnv = pEnv;
+
+	SetPriority(MEDIUM_PRIORITY);
 }
 
 CPhysicsMotionController::~CPhysicsMotionController() {
@@ -117,5 +122,15 @@ void CPhysicsMotionController::WakeObjects() {
 }
 
 void CPhysicsMotionController::SetPriority(priority_t priority) {
+	switch (priority) {
+		case LOW_PRIORITY:
+			break;
+		default:
+		case MEDIUM_PRIORITY:
+			break;
+		case HIGH_PRIORITY:
+			break;
+	}
+
 	NOT_IMPLEMENTED;
 }

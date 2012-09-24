@@ -2,6 +2,9 @@
 
 #include "CPhysicsCollisionSet.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+//#include "tier0/memdbgon.h"
+
 CPhysicsCollisionSet::CPhysicsCollisionSet(int iMaxEntries)
 {
 	m_iMaxEntries = iMaxEntries;
