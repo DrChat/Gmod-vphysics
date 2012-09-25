@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 
 #include "math.h"
-#include "sigscan.h"
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 #include "CPhysicsCollision.h"
@@ -50,7 +49,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->inertia, pParams->massCenterOverride);
+	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->pName, pParams->massCenterOverride);
 	pObject->SetGameData(pParams->pGameData);
 	pObject->EnableCollisions(pParams->enableCollisions);
 	if (!isStatic && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
@@ -97,7 +96,7 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->inertia, pParams->massCenterOverride);
+	pObject->Init(pEnvironment, body, materialIndex, volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->pName, pParams->massCenterOverride);
 	pObject->SetGameData(pParams->pGameData);
 	pObject->EnableCollisions(pParams->enableCollisions);
 
@@ -586,8 +585,10 @@ const CPhysCollide *CPhysicsObject::GetCollide() const {
 }
 
 const char *CPhysicsObject::GetName() const {
-	NOT_IMPLEMENTED;
-	return NULL;
+	//NOT_IMPLEMENTED;
+	//return NULL;
+
+	return m_pName;
 }
 
 void CPhysicsObject::BecomeTrigger() {
@@ -617,8 +618,10 @@ void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot
 void CPhysicsObject::OutputDebugInfo() const {
 	Msg( "-----------------\n" );
 
-	// FIXME: requires CBaseEntity!!
-	//Msg( "Object: %s\n", ((CBaseEntity *)GetGameData())->GetModelName() );
+	if (m_pName) {
+		Msg("Object: %s\n", m_pName);
+	}
+
 	Msg( "Mass: %f (inv %f)\n", GetMass(), GetInvMass() );
 
 	Vector inertia = GetInertia();
@@ -666,13 +669,13 @@ void CPhysicsObject::OutputDebugInfo() const {
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
-// TODO: intertia
-void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, float inertia, const Vector *massCenterOverride) {
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, const char *pName, const Vector *massCenterOverride) {
 	m_pEnv = pEnv;
 	m_materialIndex = materialIndex;
 	m_pObject = pObject;
 	pObject->setUserPointer(this);
 	m_pGameData = NULL;
+	m_pName = pName;
 	m_gameFlags = 0;
 	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
@@ -696,10 +699,11 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 
 		btVector3 min, max, delta;
 		btTransform t;
-		delta = min, max;
-		delta = delta.absolute();
 
 		shape->getAabb( t, min, max);
+
+		delta = min, max;
+		delta = delta.absolute();
 
 		m_dragBasis.setX(delta.y() * delta.z());
 		m_dragBasis.setY(delta.x() * delta.z());
