@@ -5,28 +5,29 @@
 
 class CPhysicsEnvironment;
 
-class CPhysicsMotionController : public IController, public IPhysicsMotionController {
-public:
-	CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv);
-	virtual ~CPhysicsMotionController();
-	virtual void SetEventHandler(IMotionEvent* handler);
-	virtual void AttachObject(IPhysicsObject* pObject, bool checkIfAlreadyAttached);
-	virtual void DetachObject(IPhysicsObject* pObject);
+class CPhysicsMotionController : public IController, public IPhysicsMotionController
+{
+	public:
+										CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv);
+										~CPhysicsMotionController();
+		void							SetEventHandler(IMotionEvent* handler);
+		void							AttachObject(IPhysicsObject* pObject, bool checkIfAlreadyAttached);
+		void							DetachObject(IPhysicsObject* pObject);
 
-	virtual int CountObjects();
-	virtual void GetObjects(IPhysicsObject** pObjectList);
-	virtual void ClearObjects();
-	virtual void WakeObjects();
+		int								CountObjects();
+		void							GetObjects(IPhysicsObject** pObjectList);
+		void							ClearObjects();
+		void							WakeObjects();
 
-	virtual void SetPriority(priority_t priority);
-public:
-	virtual void Tick(float deltaTime);
-private:
-	IMotionEvent *					m_handler;
-	CUtlVector<btCollisionObject*>	m_objectList;
-	CPhysicsEnvironment *			m_pEnv;
+		void							SetPriority(priority_t priority);
+	public:
+		void							Tick(float deltaTime);
+	private:
+		IMotionEvent *					m_handler;
+		CUtlVector<btCollisionObject*>	m_objectList;
+		CPhysicsEnvironment *			m_pEnv;
 
-	int		m_priority;
+		int								m_priority;
 };
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler);

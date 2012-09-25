@@ -68,12 +68,14 @@ IPhysicsCollisionSet* CPhysics::FindOrCreateCollisionSet(unsigned int id, int ma
 IPhysicsCollisionSet* CPhysics::FindCollisionSet(unsigned int id) {
 	if (m_collisionSets.IsValidIndex(id))
 		return m_collisionSets[id];
+
 	return NULL;
 }
 
 void CPhysics::DestroyAllCollisionSets() {
 	for (int i = 0; i < m_collisionSets.Count(); i++)
 		delete (CPhysicsCollisionSet*)m_collisionSets[i];
+
 	m_collisionSets.RemoveAll();
 }
 

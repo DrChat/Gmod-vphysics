@@ -12,54 +12,51 @@ struct vehicle_debugcarsystem_t;
 
 class CPhysicsVehicleController : public IPhysicsVehicleController
 {
-public:
-	CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
-	~CPhysicsVehicleController();
+	public:
+											CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
+											~CPhysicsVehicleController();
 
-	const vehicle_operatingparams_t &	GetOperatingParams() { return m_vehicleState; };
-	const vehicleparams_t &				GetVehicleParams() { return m_vehicleParams; }
-	vehicleparams_t &					GetVehicleParamsForChange() { return m_vehicleParams; }
+		const vehicle_operatingparams_t &	GetOperatingParams() { return m_vehicleState; };
+		const vehicleparams_t &				GetVehicleParams() { return m_vehicleParams; }
+		vehicleparams_t &					GetVehicleParamsForChange() { return m_vehicleParams; }
 
-	void				Update(float dt, vehicle_controlparams_t &controls);
-	float				UpdateBooster(float dt);
-	int					GetWheelCount(void);
-	IPhysicsObject *	GetWheel(int index);
-	bool				GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps);
-	void				SetSpringLength(int wheelIndex, float length);
-	void				SetWheelFriction(int wheelIndex, float friction);
+		void								Update(float dt, vehicle_controlparams_t &controls);
+		float								UpdateBooster(float dt);
+		int									GetWheelCount(void);
+		IPhysicsObject *					GetWheel(int index);
+		bool								GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps);
+		void								SetSpringLength(int wheelIndex, float length);
+		void								SetWheelFriction(int wheelIndex, float friction);
 
-	void				OnVehicleEnter(void) { m_bOccupied = true; }
-	void				OnVehicleExit(void) { m_bOccupied = false; }
+		void								OnVehicleEnter(void) { m_bOccupied = true; }
+		void								OnVehicleExit(void) { m_bOccupied = false; }
 
-	void				SetEngineDisabled(bool bDisable) { m_bEngineDisabled = bDisable; }
-	bool				IsEngineDisabled(void) { return m_bEngineDisabled; }
+		void								SetEngineDisabled(bool bDisable) { m_bEngineDisabled = bDisable; }
+		bool								IsEngineDisabled(void) { return m_bEngineDisabled; }
 
-	// Debug
-	void				GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem);
-	void				VehicleDataReload() { NOT_IMPLEMENTED; }
+		// Debug
+		void								GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem);
+		void								VehicleDataReload() { NOT_IMPLEMENTED; }
 
-	// Unexposed functions
-	void				InitCarWheels();
-	CPhysicsObject *	CreateWheel(int wheelIndex, vehicle_axleparams_t &axle);
+		// Unexposed functions
+		void								InitCarWheels();
+		CPhysicsObject *					CreateWheel(int wheelIndex, vehicle_axleparams_t &axle);
 
-	void				UpdateSteering(float dt, vehicle_controlparams_t &controls);
-	float				CalcSteering(float dt, float steering);
+	private:
+		vehicleparams_t						m_vehicleParams;
+		vehicle_operatingparams_t			m_vehicleState;
+		CPhysicsObject *					m_pBody;
+		CPhysicsEnvironment *				m_pEnv;
+		unsigned int						m_iVehicleType;
+		bool								m_bEngineDisabled;
+		bool								m_bOccupied;
+		CPhysicsObject *					m_pWheels[VEHICLE_MAX_WHEEL_COUNT];
+		int									m_iWheelCount;
+		bool								m_bSlipperyWheels;
 
-private:
-	vehicleparams_t				m_vehicleParams;
-	vehicle_operatingparams_t	m_vehicleState;
-	CPhysicsObject *			m_pBody;
-	CPhysicsEnvironment *		m_pEnv;
-	unsigned int				m_iVehicleType;
-	bool						m_bEngineDisabled;
-	bool						m_bOccupied;
-	CPhysicsObject *			m_pWheels[VEHICLE_MAX_WHEEL_COUNT];
-	int							m_iWheelCount;
-	bool						m_bSlipperyWheels;
-
-	btVehicleRaycaster *		m_pRaycaster;
-	btRaycastVehicle *			m_pRaycastVehicle;
-	btRaycastVehicle::btVehicleTuning	m_tuning;
+		btVehicleRaycaster *				m_pRaycaster;
+		btRaycastVehicle *					m_pRaycastVehicle;
+		btRaycastVehicle::btVehicleTuning	m_tuning;
 };
 
 IPhysicsVehicleController *CreateVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);

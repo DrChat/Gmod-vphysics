@@ -46,59 +46,83 @@ void CPhysicsVehicleController::InitCarWheels()
 
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
 		for ( int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++ ) {
-			CPhysicsObject *wheel = CreateWheel(wheelIndex, m_vehicleParams.axles[i]);
+			CPhysicsObject *pWheel = CreateWheel(wheelIndex, m_vehicleParams.axles[i]);
+			if (pWheel) {
+				m_pWheels[i] = pWheel;
+			}
 		}
 	}
 }
 
+// Purpose: Create wheel on source side (CPhysicsObject *)
 CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_axleparams_t &axle)
 {
 	if (wheelIndex >= VEHICLE_MAX_WHEEL_COUNT)
 		return NULL;
 
-	// TODO: bullet takes an argument bIsFrontWheel, should we use this, or does it matter if we do or don't?
+	Vector position = axle.offset;
 
-	return NULL;
+	Vector bodyPosition;
+	QAngle bodyAngles;
+	m_pBody->GetPosition( &bodyPosition, &bodyAngles );
+	matrix3x4_t matrix;
+	AngleMatrix( bodyAngles, bodyPosition, matrix );
+
+	// Note: This will only work with vehicles that have 2 wheels per axle
+	if (wheelIndex & 1) {
+		position += axle.wheelOffset;
+	} else {
+		position -= axle.wheelOffset;
+	}
+
+	QAngle angles = vec3_angle;
+	Vector wheelPositionHL;
+	VectorTransform( position, matrix, wheelPositionHL );
+
+	objectparams_t params;
+	memset(&params, 0, sizeof(params));
+
+	params.damping = axle.wheels.damping;
+	params.dragCoefficient = 0;
+	params.enableCollisions = false;
+	params.inertia = axle.wheels.inertia;
+	params.mass = axle.wheels.mass;
+	params.pGameData = m_pBody->GetGameData();
+	params.pName = "VehicleWheel";
+	params.rotdamping = axle.wheels.rotdamping;
+	params.rotInertiaLimit = 0;
+	params.massCenterOverride = NULL;
+	// needs to be in HL units because we're calling through the "outer" interface to create
+	// the wheels
+	float radius = ConvertDistanceToHL( axle.wheels.radius );
+	float r3 = radius * radius * radius;
+	params.volume = (4 / 3) * M_PI * r3;
+
+	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject( radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params, false );
+	pWheel->Wake();
+
+	// UNDONE: only mask off some of these flags?
+	unsigned int flags = pWheel->GetCallbackFlags();
+	flags = 0;
+	pWheel->SetCallbackFlags( flags );
+
+	// cache the wheel object pointer
+	m_pWheels[wheelIndex] = pWheel;
+
+	pWheel->SetCallbackFlags( pWheel->GetCallbackFlags() | CALLBACK_IS_VEHICLE_WHEEL );
+
+	return pWheel;
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls)
 {
-	float flThrottle = controls.throttle;
-	bool bHandbrake = controls.handbrake;
-	float flBrake = controls.brake;
-	bool bPowerSlide = bHandbrake;
-
-	if ( bPowerSlide ) {
-		flThrottle = 0.0f;
-	}
-
-	if ( flThrottle == 0.0f && flBrake == 0.0f && !bHandbrake ) {
-		flBrake = 0.1f;
-	}
-
-	UpdateSteering(dt, controls);
-
-	// HELP ME, THE SPAM, IT'S TOO MUCH!
-	//NOT_IMPLEMENTED
+	m_pRaycastVehicle->updateVehicle(dt);
 }
 
 float CPhysicsVehicleController::UpdateBooster(float dt)
 {
 	NOT_IMPLEMENTED
 	return 0.0f;
-}
-
-void CPhysicsVehicleController::UpdateSteering(float dt, vehicle_controlparams_t &controls)
-{
-	float flSteeringAngle = CalcSteering(dt, controls.steering);
-	//NOT_IMPLEMENTED
-}
-
-float CPhysicsVehicleController::CalcSteering(float dt, float steering)
-{
-	// TODO: Determine angle based on vehicle speed
-	// steering *= m_vehicleParams.steering.degre;
-	return steering;
 }
 
 int CPhysicsVehicleController::GetWheelCount()
@@ -108,9 +132,9 @@ int CPhysicsVehicleController::GetWheelCount()
 
 IPhysicsObject *CPhysicsVehicleController::GetWheel(int index)
 {
-	// if (m_iVehicleType = VEHICLE_TYPE_CAR_WHEELS) {
-	// 	return m_pWheels[index];
-	// }
+	if (m_iVehicleType = VEHICLE_TYPE_CAR_WHEELS) {
+		return m_pWheels[index];
+	}
 
 	NOT_IMPLEMENTED
 	return m_pBody;

@@ -138,8 +138,8 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 	btQuaternion targetRotation = m_shadow.targetRotation;
 
 	ConvertPosToBull(position, m_shadow.targetPosition);
-	m_secondsToArrival = timeOffset < 0 ? 0 : timeOffset;
 	ConvertRotationToBull(angles, m_shadow.targetRotation);
+	m_secondsToArrival = timeOffset < 0 ? 0 : timeOffset;
 
 	m_enable = true;
 
@@ -149,7 +149,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 }
 
 void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
-	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
+	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 
 	btVector3 bullSpeed;
 	ConvertPosToBull(maxSpeed, bullSpeed);
@@ -230,12 +230,12 @@ float CShadowController::GetTeleportDistance() {
 	return 0;
 }
 
-void CShadowController::GetMaxSpeed(float* pMaxSpeedOut, float* pMaxAngularSpeedOut) {
+void CShadowController::GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut) {
 	NOT_IMPLEMENTED;
 }
 
 void CShadowController::AttachObject() {
-	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
+	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	m_savedMass = SAFE_DIVIDE(1, body->getInvMass());
 	m_savedMaterialIndex = m_pObject->GetMaterialIndex();
 
@@ -251,7 +251,7 @@ void CShadowController::AttachObject() {
 }
 
 void CShadowController::DetachObject() {
-	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
+	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	btVector3 btvec = body->getInvInertiaDiagLocal();
 	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
 	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));

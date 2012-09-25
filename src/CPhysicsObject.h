@@ -113,7 +113,7 @@ class CPhysicsObject : public IPhysicsObject {
 		virtual CPhysicsFluidController *	GetFluidController(void) { return m_pFluidController; }
 		virtual void						SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	public:
-		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride);
+		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, float inertia, const Vector *massCenterOverride);
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
 		btRigidBody *						GetObject();
 		float								GetDragInDirection(btVector3  *direction) const; // Function is not interfaced anymore

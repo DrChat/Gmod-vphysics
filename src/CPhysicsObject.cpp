@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
 #include "math.h"
+#include "sigscan.h"
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 #include "CPhysicsCollision.h"
@@ -49,7 +50,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->massCenterOverride);
+	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->inertia, pParams->massCenterOverride);
 	pObject->SetGameData(pParams->pGameData);
 	pObject->EnableCollisions(pParams->enableCollisions);
 	if (!isStatic && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
@@ -96,7 +97,7 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, volume, 0, 0, NULL);
+	pObject->Init(pEnvironment, body, materialIndex, volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->inertia, pParams->massCenterOverride);
 	pObject->SetGameData(pParams->pGameData);
 	pObject->EnableCollisions(pParams->enableCollisions);
 
@@ -128,6 +129,9 @@ bool CPhysicsObject::IsStatic() const {
 	return m_pObject->getInvMass() == 0;
 }
 
+// Possible that the lag shitfest is caused by the engine processing collision?
+// Returning true will cause the object to completely stop colliding with anything
+// Including traces such as with physics_debug_entity
 bool CPhysicsObject::IsAsleep() const {
 	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
@@ -612,12 +616,6 @@ void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot
 
 void CPhysicsObject::OutputDebugInfo() const {
 	Msg( "-----------------\n" );
-	// TODO: Use a sigscanner for GetModelName()?
-
-	// SIGNATURES FOR GetModelName()
-	// Windows: 55 8B EC 8B 45 08 8B 89 CC 01 00 00 89 08 5D C2 04 00
-	// Linux: 8B 44 24 04 8B 54 24 08 8B 92 18 02 00 00 89 10 C2 04 00
-
 
 	// FIXME: requires CBaseEntity!!
 	//Msg( "Object: %s\n", ((CBaseEntity *)GetGameData())->GetModelName() );
@@ -657,13 +655,19 @@ void CPhysicsObject::OutputDebugInfo() const {
 	);
 
 	
-
+	const char *pMaterialStr = g_SurfaceDatabase.GetPropName(m_materialIndex);
+	surfacedata_t *surfaceData = g_SurfaceDatabase.GetSurfaceData(m_materialIndex);
+	if (surfaceData) {
+		Msg("Material: %s : density(%f), thickness(%f), friction(%f), elasticity(%f)\n", 
+			pMaterialStr, surfaceData->physics.density, surfaceData->physics.thickness, surfaceData->physics.friction, surfaceData->physics.elasticity);
+	}
 
 	// FIXME: complete this function via format noted on
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
-void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, const Vector *massCenterOverride) {
+// TODO: intertia
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, float inertia, const Vector *massCenterOverride) {
 	m_pEnv = pEnv;
 	m_materialIndex = materialIndex;
 	m_pObject = pObject;

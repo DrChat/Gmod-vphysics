@@ -26,7 +26,7 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 CPlayerController::CPlayerController(CPhysicsObject* pObject) {
 	m_pObject = pObject;
 	m_handler = NULL;
-	m_maxDeltaPosition = HL2BULL(24);
+	m_maxDeltaPosition = HL2BULL(24); // ConvertDistanceToBull(24);
 	m_dampFactor = 1.0f;
 	AttachObject();
 }
@@ -122,12 +122,12 @@ void CPlayerController::Jump() {
 }
 
 void CPlayerController::GetShadowVelocity(Vector* velocity) {
-	btRigidBody* body = m_pObject->GetObject();
+	btRigidBody *body = m_pObject->GetObject();
 	ConvertPosToHL(body->getLinearVelocity(), *velocity);
 	NOT_IMPLEMENTED;
 }
 
-IPhysicsObject* CPlayerController::GetObject() {
+IPhysicsObject *CPlayerController::GetObject() {
 	return m_pObject;
 }
 
