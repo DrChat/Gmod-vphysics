@@ -69,31 +69,23 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
+
 		if (!stricmp(key, "index"))
 			pSolid->index = data->GetInt();
-		else if (!stricmp(key, "surfaceprop"))
-			strncpy(pSolid->surfaceprop, data->GetString(), sizeof pSolid->surfaceprop);
 		else if (!stricmp(key, "name"))
 			strncpy(pSolid->name, data->GetString(), sizeof pSolid->name);
-		else if (!stricmp(key, "parent"))
-			strncpy(pSolid->parent, data->GetString(), sizeof pSolid->name);
-		else if (!stricmp(key, "surfaceprop"))
-			strncpy(pSolid->surfaceprop, data->GetString(), sizeof pSolid->name);
 		else if (!stricmp(key, "mass"))
 			pSolid->params.mass = data->GetFloat();
-		else if (!stricmp(key, "massCenterOverride"))
-			ReadVector(data->GetString(), pSolid->massCenterOverride);
-		else if (!stricmp(key, "inertia"))
-			pSolid->params.inertia = data->GetFloat();
+		else if (!stricmp(key, "surfaceprop"))
+			strncpy(pSolid->surfaceprop, data->GetString(), sizeof pSolid->surfaceprop);
 		else if (!stricmp(key, "damping"))
 			pSolid->params.damping = data->GetFloat();
 		else if (!stricmp(key, "rotdamping"))
 			pSolid->params.rotdamping = data->GetFloat();
+		else if (!stricmp(key, "inertia"))
+			pSolid->params.inertia = data->GetFloat();
 		else if (!stricmp(key, "volume"))
 			pSolid->params.volume = data->GetFloat();
-		else if (!stricmp(key, "drag"))
-			pSolid->params.dragCoefficient = data->GetFloat();
-		//else if (!stricmp(key, "rollingdrag")) // This goes to pSolid->params.rollingDrag in the 2003 source but I cant find it in here
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
 	}
@@ -109,15 +101,15 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
+
 		if (!stricmp(key, "index"))
 			pFluid->index = data->GetInt();
 		else if (!stricmp(key, "surfaceprop"))
 			strncpy(pFluid->surfaceprop, data->GetString(), sizeof pFluid->surfaceprop);
-		else if (!stricmp(key, "contents"))
-			pFluid->params.contents = data->GetInt();
-		//if (!stricmp(key, "density")) // In the 2003 leak this existed, in the current code pFluid->params.density does not
 		else if (!stricmp(key, "damping"))
 			pFluid->params.damping = data->GetFloat();
+		else if (!stricmp(key, "contents"))
+			pFluid->params.contents = data->GetInt();
 		else if (!stricmp(key, "surfaceplane"))
 			ReadVector4D(data->GetString(), pFluid->params.surfacePlane);
 		else if (!stricmp(key, "currentvelocity"))
@@ -141,6 +133,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
+
 		if (!stricmp(key, "parent"))
 			pConstraint->parentIndex = data->GetInt();
 		if (!stricmp(key, "child"))
@@ -193,6 +186,7 @@ void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownK
 		unknownKeyHandler->SetDefaults(pCustom);
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
+
 		const char *value = data->GetString();
 		if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pCustom, key, value);
@@ -210,16 +204,16 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
-			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
+		if (!stricmp(key, "wheelsperaxle"))
+			pVehicle->wheelsPerAxle = data->GetInt();
 		else if (!stricmp(key, "body"))
 			ParseVehicleBody(pVehicle->body, data);
 		else if (!stricmp(key, "engine"))
 			ParseVehicleEngine(pVehicle->engine, data);
 		else if (!stricmp(key, "steering"))
 			ParseVehicleSteering(pVehicle->steering, data);
-		else if (!stricmp(key, "wheelsperaxle"))
-			pVehicle->wheelsPerAxle = data->GetInt();
+		else if (!stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
+			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
 	}
 	NextBlock();
 }
@@ -328,8 +322,6 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 			engine.shiftDownRPM = data->GetFloat();
 		else if (!stricmp(key, "boost"))
 			ParseVehicleEngineBoost(engine, data);
-		else if (!stricmp(key, "throttleTime"))				// TODO: Verify if this is used.
-			engine.throttleTime = data->GetFloat();
 	}
 }
 
@@ -337,6 +329,7 @@ void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, 
 {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
+
 		if (!stricmp(key, "force"))
 			engine.boostForce = data->GetFloat();
 		else if (!stricmp(key, "duration"))
