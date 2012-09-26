@@ -74,8 +74,12 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 			pSolid->index = data->GetInt();
 		else if (!stricmp(key, "name"))
 			strncpy(pSolid->name, data->GetString(), sizeof pSolid->name);
+		else if (!stricmp(key, "parent"))
+			strncpy(pSolid->parent, data->GetString(), sizeof(pSolid->parent));
 		else if (!stricmp(key, "mass"))
 			pSolid->params.mass = data->GetFloat();
+		else if (!stricmp(key, "massCenterOverride"))
+			ReadVector(data->GetString(), pSolid->massCenterOverride);
 		else if (!stricmp(key, "surfaceprop"))
 			strncpy(pSolid->surfaceprop, data->GetString(), sizeof pSolid->surfaceprop);
 		else if (!stricmp(key, "damping"))
@@ -86,6 +90,9 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 			pSolid->params.inertia = data->GetFloat();
 		else if (!stricmp(key, "volume"))
 			pSolid->params.volume = data->GetFloat();
+		else if (!stricmp(key, "drag"))
+			pSolid->params.dragCoefficient = data->GetFloat();
+		//else if (!stricmp(key, "rollingdrag"))					// This is in vphysics.so but it doesn't seem to set any variables.
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
 	}
@@ -214,6 +221,8 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 			ParseVehicleSteering(pVehicle->steering, data);
 		else if (!stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
 			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
+		else if (unknownKeyHandler)
+			unknownKeyHandler->ParseKeyValue(pVehicle, key, data->GetString());
 	}
 	NextBlock();
 }
@@ -244,16 +253,20 @@ void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValue
 			wheel.radius = data->GetFloat();
 		else if (!stricmp(key, "mass"))
 			wheel.mass = data->GetFloat();
+		else if (!stricmp(key, "inertia"))
+			wheel.inertia = data->GetFloat();
 		else if (!stricmp(key, "damping"))
 			wheel.damping = data->GetFloat();
 		else if (!stricmp(key, "rotdamping"))
 			wheel.rotdamping = data->GetFloat();
+		else if (!stricmp(key, "frictionscale"))
+			wheel.frictionScale = data->GetFloat();
 		else if (!stricmp(key, "material"))
-			wheel.materialIndex = data->GetInt();		// TODO: Is this correct?
+			wheel.materialIndex = data->GetInt();
 		else if (!stricmp(key, "skidmaterial"))
-			wheel.skidMaterialIndex = data->GetInt();	// TODO: Is this correct?
+			wheel.skidMaterialIndex = data->GetInt();
 		else if (!stricmp(key, "brakematerial"))
-			wheel.brakeMaterialIndex = data->GetInt();	// TODO: Is this correct?
+			wheel.brakeMaterialIndex = data->GetInt();
 	}
 }
 
@@ -290,6 +303,12 @@ void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *
 			body.addGravity = data->GetFloat();
 		else if (!stricmp(key, "maxAngularVelocity"))
 			body.maxAngularVelocity = data->GetFloat();
+		else if (!stricmp(key, "tiltforce"))
+			body.tiltForce = data->GetFloat();
+		else if (!stricmp(key, "tiltforceheight"))
+			body.tiltForceHeight = data->GetFloat();
+		else if (!stricmp(key, "keepuprighttorque"))
+			body.keepUprightTorque = data->GetFloat();
 	}
 }
 
@@ -312,6 +331,8 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 			engine.autobrakeSpeedFactor = data->GetFloat();
 		else if (!stricmp(key, "autotransmission"))
 			engine.isAutoTransmission = data->GetInt() > 0;
+		else if (!stricmp(key, "throttletime"))
+			engine.throttleTime = data->GetFloat();
 		else if (!stricmp(key, "axleratio"))
 			engine.axleRatio = data->GetFloat();
 		else if (!stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)

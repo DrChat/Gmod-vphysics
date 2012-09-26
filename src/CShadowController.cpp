@@ -9,9 +9,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
-	btQuaternion q2 = q.inverse();
-	qt = q2 * p;
+void QuaternionDiff(const btQuaternion &q1, const btQuaternion &q2, btQuaternion &qt) {
+	btQuaternion q1inv = q1.inverse();
+	qt = q2 * q1inv;
 	qt.normalize();
 }
 
@@ -21,6 +21,7 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 // Occurs from QAngle(0, -70, 0) (on all 3 axis, not just y)
 // to QAngle(0, 70, 0)
 // Reproduce by rotating an object with the physgun. Most likely related to shadow controllers.
+ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -61,7 +62,13 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	params.lastPosition = posbull + speed * dt;
 
 	// BUG: Physgun rotation bug most likely caused here
-	// Set breakpoint w/ "object->m_angularVelocity.m_floats[1] > 1" WHILE holding object in spazout rotation
+	// Set breakpoint @ ComputeShadowControllerHL WHILE holding object in spazout rotation
+	// PATTERN NOTICED: Increases up to a certain value around 100, then instant reverts to lower value
+	// around 5-15
+	// Could it be originating from btMassCenterMotionState?
+	// DEBUG
+	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
+
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
@@ -75,9 +82,20 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setZ(axis.z() * angle);
 
 	btVector3 rot_speed = object->getAngularVelocity();
+	if (cvar_spewshadowdebuginfo.GetBool() && rot_speed.getX() > 0)
+		Msg("SPEED BEFORE: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
+
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
-	//object->setAngularVelocity(rot_speed);
-	object->setAngularVelocity(btVector3(0, 0, 0));	// TODO: Remove when physgun rotation issue is resolved.
+	object->setAngularVelocity(rot_speed);
+
+	if (cvar_spewshadowdebuginfo.GetBool() && rot_speed.getX() > 0)
+		Msg("SPEED AFTER: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
+
+	// For debugging purposes.
+	AngularImpulse rotspeedHL;
+	ConvertAngularImpulseToHL(rot_speed, rotspeedHL);
+
+	//object->setAngularVelocity(btVector3(0, 0, 0));	// TODO: Remove when physgun rotation issue is resolved.
 
 	return secondsToArrival;
 }

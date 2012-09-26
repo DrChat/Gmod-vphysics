@@ -30,46 +30,46 @@
 //#include "tier0/memdbgon.h"
 
 class IDeleteQueueItem {
-public:
-	virtual void Delete() = 0;
+	public:
+		virtual void Delete() = 0;
 };
 
 template <typename T>
 class CDeleteProxy : public IDeleteQueueItem {
-public:
-	CDeleteProxy(T* pItem) : m_pItem(pItem) {}
-	virtual void Delete() { delete m_pItem; }
-private:
-	T* m_pItem;
+	public:
+		CDeleteProxy(T* pItem) : m_pItem(pItem) {}
+		virtual void Delete() { delete m_pItem; }
+	private:
+		T* m_pItem;
 };
 
 class CDeleteQueue {
-public:
-	void Add(IDeleteQueueItem *pItem) {
-		m_list.AddToTail(pItem);
-	}
-	template <typename T>
-	void QueueForDelete(T* pItem) {
-		Add(new CDeleteProxy<T>(pItem));
-	}
-	void DeleteAll() {
-		for (int i = m_list.Count()-1; i >= 0; --i) {
-			m_list[i]->Delete();
-			delete m_list[i];
+	public:
+		void Add(IDeleteQueueItem *pItem) {
+			m_list.AddToTail(pItem);
 		}
-		m_list.RemoveAll();
-	}
-private:
-	CUtlVector<IDeleteQueueItem*> m_list;
+		template <typename T>
+		void QueueForDelete(T* pItem) {
+			Add(new CDeleteProxy<T>(pItem));
+		}
+		void DeleteAll() {
+			for (int i = m_list.Count()-1; i >= 0; --i) {
+				m_list[i]->Delete();
+				delete m_list[i];
+			}
+			m_list.RemoveAll();
+		}
+	private:
+		CUtlVector<IDeleteQueueItem*> m_list;
 };
 
 class CCollisionSolver : public btOverlapFilterCallback {
-public:
-	CCollisionSolver() {m_pSolver = NULL;}
-	void SetHandler(IPhysicsCollisionSolver *pSolver) {m_pSolver = pSolver;}
-	virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1) const;
-private:
-	IPhysicsCollisionSolver* m_pSolver;
+	public:
+		CCollisionSolver() {m_pSolver = NULL;}
+		void SetHandler(IPhysicsCollisionSolver *pSolver) {m_pSolver = pSolver;}
+		virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1) const;
+	private:
+		IPhysicsCollisionSolver* m_pSolver;
 };
 
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
@@ -363,6 +363,7 @@ IPhysicsPlayerController* CPhysicsEnvironment::CreatePlayerController(IPhysicsOb
 	m_controllers.AddToTail(pController);
 	return pController;
 }
+
 void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController *pController) {
 	m_controllers.FindAndRemove((CPlayerController*)pController);
 	delete pController;
@@ -522,6 +523,7 @@ void CPhysicsEnvironment::CleanupDeleteList(void) {
 	m_deadObjects.Purge();
 	m_pDeleteQueue->DeleteAll();
 }
+
 void CPhysicsEnvironment::EnableDeleteQueue(bool enable) {
 	m_queueDeleteObject = enable;
 }
@@ -539,6 +541,7 @@ bool CPhysicsEnvironment::Restore(const physrestoreparams_t &params) {
 	NOT_IMPLEMENTED;
 	return false;
 }
+
 void CPhysicsEnvironment::PostRestore() {
 	NOT_IMPLEMENTED;
 }
@@ -573,6 +576,7 @@ void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams
 void CPhysicsEnvironment::ReadStats(physics_stats_t *pOutput) {
 	NOT_IMPLEMENTED;
 }
+
 void CPhysicsEnvironment::ClearStats() {
 	NOT_IMPLEMENTED;
 }
@@ -639,6 +643,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 	*/
 	m_inSimulation = true;
 }
+
 CPhysicsDragController * CPhysicsEnvironment::GetDragController()
 {
 	return m_pPhysicsDragController;

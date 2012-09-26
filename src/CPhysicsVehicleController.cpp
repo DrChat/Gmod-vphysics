@@ -138,7 +138,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls)
 {
-	m_pRaycastVehicle->updateVehicle(dt);
+	//m_pRaycastVehicle->updateVehicle(dt);
 }
 
 float CPhysicsVehicleController::UpdateBooster(float dt)
