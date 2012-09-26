@@ -147,4 +147,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Garry%27s Mod\Gmod-vphysics\todo.txt" />
+  </ItemGroup>
 </Project>

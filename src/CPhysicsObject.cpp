@@ -49,9 +49,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams->volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->pName, pParams->massCenterOverride);
-	pObject->SetGameData(pParams->pGameData);
-	pObject->EnableCollisions(pParams->enableCollisions);
+	pObject->Init(pEnvironment, body, materialIndex, pParams);
 	if (!isStatic && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
 
 	/*if (mass > 0)
@@ -92,13 +90,11 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 	float volume = pParams->volume;
 	if (volume <= 0) {
-		volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
+		pParams->volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
 	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, volume, pParams->dragCoefficient, pParams->dragCoefficient, pParams->pName, pParams->massCenterOverride);
-	pObject->SetGameData(pParams->pGameData);
-	pObject->EnableCollisions(pParams->enableCollisions);
+	pObject->Init(pEnvironment, body, materialIndex, pParams);
 
 	return pObject;
 }
@@ -648,10 +644,11 @@ void CPhysicsObject::OutputDebugInfo() const {
 
 
 
-	Msg("State: %s, Collision %s, Motion %s, Flags %04X (game %04x, index %d)\n", 
+	Msg("State: %s, Collision %s, Motion %s, Drag %s, Flags %04X (game %04x, index %d)\n", 
 		IsAsleep() ? "Asleep" : "Awake",
 		IsCollisionEnabled() ? "Enabled" : "Disabled",
 		IsStatic() ? "Static" : IsMotionEnabled() ? "Enabled" : "Disabled",
+		IsDragEnabled() ? "Enabled" : "Disabled",
 		m_pObject->getFlags(),
 		GetGameFlags(),
 		GetGameIndex()
@@ -669,20 +666,24 @@ void CPhysicsObject::OutputDebugInfo() const {
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
-void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, float volume, float drag, float angDrag, const char *pName, const Vector *massCenterOverride) {
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams) {
+	if (!pParams) Assert(0);
+
 	m_pEnv = pEnv;
 	m_materialIndex = materialIndex;
 	m_pObject = pObject;
 	pObject->setUserPointer(this);
-	m_pGameData = NULL;
-	m_pName = pName;
+	m_pGameData = pParams->pGameData;
+	m_pName = pParams->pName;
 	m_gameFlags = 0;
 	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
-	m_fVolume = volume;
+	m_fVolume = pParams->volume;
 	float matdensity;
 	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
 	m_fBuoyancyRatio = (GetMass()/(GetVolume()*METERS_PER_INCH*METERS_PER_INCH*METERS_PER_INCH))/matdensity;
+
+	EnableCollisions(pParams->enableCollisions);
 
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
 	if (surface)
@@ -693,6 +694,9 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	}
 
 	// Drag calculations converted from  2003 source code
+	float drag = pParams->dragCoefficient;
+	float angDrag = pParams->dragCoefficient;
+
 	if (!IsStatic() && GetCollide() )
 	{
 		btCollisionShape  *shape = m_pObject->getCollisionShape();
@@ -715,12 +719,11 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		m_angDragBasis.setX(AngDragIntegral( ang[0], delta.x(), delta.y(), delta.z() ) + AngDragIntegral( ang[0], delta.x(), delta.z(), delta.y() ));
 		m_angDragBasis.setY(AngDragIntegral( ang[1], delta.y(), delta.x(), delta.z() ) + AngDragIntegral( ang[1], delta.y(), delta.z(), delta.x() ));
 		m_angDragBasis.setZ(AngDragIntegral( ang[2], delta.z(), delta.x(), delta.y() ) + AngDragIntegral( ang[2], delta.z(), delta.y(), delta.x() ));
-
-				
 	} else {
 		drag = 0;
 		angDrag = 0;
 	}
+
 	m_dragCoefficient = drag;
 	m_angDragCoefficient = angDrag;
 }

@@ -67,8 +67,8 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 	else
 		memset(pSolid, 0, sizeof*pSolid);
 
-	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
 		if (!stricmp(key, "index"))
 			pSolid->index = data->GetInt();
 		else if (!stricmp(key, "surfaceprop"))
@@ -107,8 +107,8 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 	else
 		memset(pFluid, 0, sizeof*pFluid);
 
-	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
 		if (!stricmp(key, "index"))
 			pFluid->index = data->GetInt();
 		else if (!stricmp(key, "surfaceprop"))
@@ -139,8 +139,8 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 		pConstraint->parentIndex = -1;
 	}
 
-	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
 		if (!stricmp(key, "parent"))
 			pConstraint->parentIndex = data->GetInt();
 		if (!stricmp(key, "child"))
@@ -180,7 +180,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 
 void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unknownKeyHandler)
 {
-	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		if (data->GetInt() < 128)
 			table[data->GetInt()] = g_SurfaceDatabase.GetSurfaceIndex(data->GetName());
 	}
@@ -191,9 +191,9 @@ void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownK
 {
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pCustom);
-	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
-		const char* value = data->GetString();
+	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
+		const char *value = data->GetString();
 		if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pCustom, key, value);
 	}
@@ -207,8 +207,9 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 	else
 		memset(pVehicle, 0, sizeof*pVehicle);
 
-	for (KeyValues* data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
+
 		if (!stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
 			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
 		else if (!stricmp(key, "body"))
@@ -226,13 +227,65 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 
 void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *kv)
 {
-	NOT_IMPLEMENTED;
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
+
+		if (!stricmp(key, "wheel"))
+			ParseVehicleWheel(axle.wheels, data);
+		else if (!stricmp(key, "suspension"))
+			ParseVehicleSuspension(axle.suspension, data);
+		else if (!stricmp(key, "torquefactor"))
+			axle.torqueFactor = data->GetFloat();
+		else if (!stricmp(key, "brakefactor"))
+			axle.brakeFactor = data->GetFloat();
+	}
+}
+
+void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValues *kv)
+{
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
+
+		if (!stricmp(key, "radius"))
+			wheel.radius = data->GetFloat();
+		else if (!stricmp(key, "mass"))
+			wheel.mass = data->GetFloat();
+		else if (!stricmp(key, "damping"))
+			wheel.damping = data->GetFloat();
+		else if (!stricmp(key, "rotdamping"))
+			wheel.rotdamping = data->GetFloat();
+		else if (!stricmp(key, "material"))
+			wheel.materialIndex = data->GetInt();		// TODO: Is this correct?
+		else if (!stricmp(key, "skidmaterial"))
+			wheel.skidMaterialIndex = data->GetInt();	// TODO: Is this correct?
+		else if (!stricmp(key, "brakematerial"))
+			wheel.brakeMaterialIndex = data->GetInt();	// TODO: Is this correct?
+	}
+}
+
+void CPhysicsKeyParser::ParseVehicleSuspension(vehicle_suspensionparams_t &suspension, KeyValues *kv)
+{
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
+
+		if (!stricmp(key, "springConstant"))
+			suspension.springConstant = data->GetFloat();
+		else if (!stricmp(key, "springDamping"))
+			suspension.springDamping = data->GetFloat();
+		else if (!stricmp(key, "stabilizerConstant"))
+			suspension.stabilizerConstant = data->GetFloat();
+		else if (!stricmp(key, "springDampingCompression"))
+			suspension.springDampingCompression = data->GetFloat();
+		else if (!stricmp(key, "maxBodyForce"))
+			suspension.maxBodyForce = data->GetFloat();
+	}
 }
 
 void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *kv)
 {
-	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
+
 		if (!stricmp(key, "massCenterOverride"))
 			ReadVector(data->GetString(), body.massCenterOverride);
 		else if (!stricmp(key, "addgravity"))
@@ -252,8 +305,8 @@ void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *
 
 void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyValues *kv)
 {
-	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
 		if (!stricmp(key, "boost"))
 			ParseVehicleEngineBoost(engine, data);
 		else if (!stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)
@@ -281,8 +334,8 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 
 void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, KeyValues *kv)
 {
-	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
 		if (!stricmp(key, "force"))
 			engine.boostForce = data->GetFloat();
 		else if (!stricmp(key, "duration"))
@@ -298,8 +351,8 @@ void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, 
 
 void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering, KeyValues *kv)
 {
-	for (KeyValues* data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char* key = data->GetName();
+	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
+		const char *key = data->GetName();
 		if (!stricmp(key, "degrees")) // FIXME: Bit unsure here, in the 2003 code it just set "degrees" which does not exist anymore
 		{
 			steering.degreesBoost = data->GetFloat();

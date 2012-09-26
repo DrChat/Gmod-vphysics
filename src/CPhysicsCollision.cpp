@@ -145,11 +145,29 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 }
 
 void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOutMassCenter) {
-	NOT_IMPLEMENTED;
+	if (!pOutMassCenter) return;
+
+	btCollisionShape *pShape = (btCollisionShape *)pCollide;
+	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
+
+	if (pInfo) {
+		Vector massCenter;
+		ConvertPosToHL(pInfo->massCenter, massCenter);
+
+		*pOutMassCenter = massCenter;
+	}
 }
 
 void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vector &massCenter) {
-	NOT_IMPLEMENTED;
+	btCollisionShape *pShape = (btCollisionShape *)pCollide;
+	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
+
+	if (pInfo) {
+		btVector3 bullMassCenter;
+		ConvertPosToBull(massCenter, bullMassCenter);
+
+		pInfo->massCenter = bullMassCenter;
+	}
 }
 
 Vector CPhysicsCollision::CollideGetOrthographicAreas(const CPhysCollide *pCollide) {
@@ -348,7 +366,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			mesh->setMargin(COLLISION_MARGIN);
 			for (int j = 0; j < tricount; j++)
 			{
-				short index1 = *(short*)(convexes + position + 4), index2 = *(short*)(convexes + position + 8), index3 = *(short*)(convexes + position + 12);
+				short index1 = *(short*)(convexes + position + 4);
+				short index2 = *(short*)(convexes + position + 8);
+				short index3 = *(short*)(convexes + position + 12);
+
 				btVector3 vertex1(*(float*)(vertices + index1 * 16), -*(float*)(vertices + index1 * 16 + 4), -*(float*)(vertices + index1 * 16 + 8));
 				btVector3 vertex2(*(float*)(vertices + index2 * 16), -*(float*)(vertices + index2 * 16 + 4), -*(float*)(vertices + index2 * 16 + 8));
 				btVector3 vertex3(*(float*)(vertices + index3 * 16), -*(float*)(vertices + index3 * 16 + 4), -*(float*)(vertices + index3 * 16 + 8));

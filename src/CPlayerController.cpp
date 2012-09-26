@@ -182,6 +182,8 @@ void CPlayerController::Tick(float deltaTime) {
 	//FIXME: figure out what shift_core_f_object is
 	// shift_core_f_object is a floating point vector3
 	// shift core from object (displacement of core from object)?
+	// IVP docs appear to confirm _f_ means from
+	// Source: (Note to the syntax used in the Ipion engine: ”m_world_f_object” means: Matrix which transforms into world space from object space.) 
 
 	btScalar qdist = delta_position.length2();
 	if (qdist > m_maxDeltaPosition * m_maxDeltaPosition && TryTeleportObject()) {

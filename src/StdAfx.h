@@ -31,9 +31,9 @@
 #ifdef _DEBUG
 //#define NOT_IMPLEMENTED __asm {int 3}
 
-#define NOT_IMPLEMENTED Msg("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #else
-#define NOT_IMPLEMENTED Msg("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #endif
 
 // Putting these in here because I dont want to make a header just for them

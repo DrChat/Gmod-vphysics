@@ -162,6 +162,9 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     <ClInclude Include="src\math.h" />
     <ClInclude Include="src\StdAfx.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Garry%27s Mod\Gmod-vphysics\todo.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

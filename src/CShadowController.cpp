@@ -60,6 +60,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	params.lastPosition = posbull + speed * dt;
 
+	// BUG: Physgun rotation bug most likely caused here
+	// Set breakpoint w/ "object->m_angularVelocity.m_floats[1] > 1" WHILE holding object in spazout rotation
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);

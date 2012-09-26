@@ -38,6 +38,11 @@ CPhysicsVehicleController::~CPhysicsVehicleController()
 
 	delete m_pRaycaster;
 	delete m_pRaycastVehicle;
+
+	for (int i = 0; i < m_iWheelCount; i++) {
+		m_pEnv->DestroyObject(m_pWheels[i]);
+		m_pWheels[i] = NULL;
+	}
 }
 
 void CPhysicsVehicleController::InitCarWheels()
@@ -111,6 +116,18 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	pWheel->SetCallbackFlags( pWheel->GetCallbackFlags() | CALLBACK_IS_VEHICLE_WHEEL );
 
+	// Create the wheel in bullet
+	btVector3 bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS;
+	btScalar bullSuspensionRestLength, bullWheelRadius;
+
+	ConvertPosToBull(position, bullConnectionPointCS0);
+	ConvertPosToBull(Vector(0, 0, 1), bullWheelDirectionCS0);	// TODO: Find out what this is
+	ConvertPosToBull(Vector(1, 0, 0), bullWheelAxleCS);			// TODO: Find out what this is
+	bullSuspensionRestLength = ConvertDistanceToBull(axle.suspension.springConstant);
+	bullWheelRadius = ConvertDistanceToBull(axle.wheels.radius);
+
+	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, false);
+
 	return pWheel;
 }
 
@@ -136,8 +153,7 @@ IPhysicsObject *CPhysicsVehicleController::GetWheel(int index)
 		return m_pWheels[index];
 	}
 
-	NOT_IMPLEMENTED
-	return m_pBody;
+	return NULL;
 }
 
 bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps)
