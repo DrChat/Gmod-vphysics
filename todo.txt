@@ -1,2 +1,3 @@
 - Bugs
 	- Player intersecting with an object causes FPS to GRADUALLY decrease. Removing the player from the object will make FPS GRADUALLY increase.
+	- Removing a vehicle will cause the game to crash about a second later (delay caused by remover tool deleting parented objects?) in materialsystem.dll

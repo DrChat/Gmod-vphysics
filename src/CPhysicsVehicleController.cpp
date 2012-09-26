@@ -57,6 +57,11 @@ void CPhysicsVehicleController::InitCarWheels()
 			}
 		}
 	}
+
+	// TODO: Disable collisions between two objects
+	// for (int i = 0; i < m_iWheelCount; i++) {
+	// 	m_pWheels[i]->EnableCollisions(true);
+	// }
 }
 
 // Purpose: Create wheel on source side (CPhysicsObject *)

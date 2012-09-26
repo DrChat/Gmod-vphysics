@@ -286,20 +286,16 @@ void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "massCenterOverride"))
+		if (!stricmp(key, "countertorquefactor"))
+			body.counterTorqueFactor = data->GetFloat();
+		else if (!stricmp(key, "massCenterOverride"))
 			ReadVector(data->GetString(), body.massCenterOverride);
-		else if (!stricmp(key, "addgravity"))
-			body.addGravity = data->GetFloat();
 		else if (!stricmp(key, "massOverride"))
 			body.massOverride = data->GetFloat();
-		else if (!stricmp(key, "tiltforce"))
-			body.tiltForce = data->GetFloat();
-		else if (!stricmp(key, "tiltforceheight"))
-			body.tiltForceHeight = data->GetFloat();
-		else if (!stricmp(key, "countertorquefactor"))
-			body.counterTorqueFactor = data->GetFloat();
-		else if (!stricmp(key, "keepuprighttorque"))
-			body.keepUprightTorque = data->GetFloat();
+		else if (!stricmp(key, "addgravity"))
+			body.addGravity = data->GetFloat();
+		else if (!stricmp(key, "maxAngularVelocity"))
+			body.maxAngularVelocity = data->GetFloat();
 	}
 }
 
@@ -307,28 +303,33 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
-		if (!stricmp(key, "boost"))
-			ParseVehicleEngineBoost(engine, data);
-		else if (!stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)
-			engine.gearRatio[engine.gearCount++] = data->GetFloat();
-		else if (!stricmp(key, "horsepower"))
+
+		if (!stricmp(key, "horsepower"))
 			engine.horsepower = data->GetFloat();
-		else if (!stricmp(key, "maxSpeed"))
+		else if (!stricmp(key, "maxrpm"))
+			engine.maxRPM = data->GetFloat();
+		else if (!stricmp(key, "maxspeed"))
 			engine.maxSpeed = data->GetFloat();
 		else if (!stricmp(key, "maxReverseSpeed"))
 			engine.maxRevSpeed = data->GetFloat();
+		else if (!stricmp(key, "autobrakeSpeedGain"))
+			engine.autobrakeSpeedGain = data->GetFloat();
+		else if (!stricmp(key, "autobrakeSpeedFactor"))
+			engine.autobrakeSpeedFactor = data->GetFloat();
+		else if (!stricmp(key, "autotransmission"))
+			engine.isAutoTransmission = data->GetInt() > 0;
 		else if (!stricmp(key, "axleratio"))
 			engine.axleRatio = data->GetFloat();
-		else if (!stricmp(key, "maxRPM"))
-			engine.maxRPM = data->GetFloat();
-		else if (!stricmp(key, "throttleTime"))
-			engine.throttleTime = data->GetFloat();
-		else if (!stricmp(key, "AutoTransmission"))
-			engine.isAutoTransmission = data->GetInt() > 0;
-		else if (!stricmp(key, "shiftUpRPM"))
+		else if (!stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)
+			engine.gearRatio[engine.gearCount++] = data->GetFloat();
+		else if (!stricmp(key, "shiftuprpm"))
 			engine.shiftUpRPM = data->GetFloat();
-		else if (!stricmp(key, "shiftDownRPM"))
+		else if (!stricmp(key, "shiftdownrpm"))
 			engine.shiftDownRPM = data->GetFloat();
+		else if (!stricmp(key, "boost"))
+			ParseVehicleEngineBoost(engine, data);
+		else if (!stricmp(key, "throttleTime"))				// TODO: Verify if this is used.
+			engine.throttleTime = data->GetFloat();
 	}
 }
 
@@ -342,10 +343,10 @@ void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, 
 			engine.boostDuration = data->GetFloat();
 		else if (!stricmp(key, "delay"))
 			engine.boostDelay = data->GetFloat();
-		else if (!stricmp(key, "maxspeed"))
-			engine.boostMaxSpeed = data->GetFloat();
 		else if (!stricmp(key, "torqueboost"))
 			engine.torqueBoost = data->GetInt() > 0;
+		else if (!stricmp(key, "maxspeed"))
+			engine.boostMaxSpeed = data->GetFloat();
 	}
 }
 
@@ -353,21 +354,41 @@ void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering,
 {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
-		if (!stricmp(key, "degrees")) // FIXME: Bit unsure here, in the 2003 code it just set "degrees" which does not exist anymore
-		{
+
+		if (!stricmp(key, "degreesSlow"))
 			steering.degreesBoost = data->GetFloat();
+		else if (!stricmp(key, "degreesFast"))
 			steering.degreesFast = data->GetFloat();
+		else if (!stricmp(key, "degreesBoost"))
 			steering.degreesSlow = data->GetFloat();
-		}
-		if (!stricmp(key, "fastcarspeed"))
-			steering.speedFast = data->GetFloat();
-		if (!stricmp(key, "slowcarspeed"))
+		else if (!stricmp(key, "steeringExponent"))
+			steering.steeringExponent = data->GetFloat();
+		else if (!stricmp(key, "slowcarspeed"))
 			steering.speedSlow = data->GetFloat();
-		else if (!stricmp(key, "slowsteeringrate"))
+		else if (!stricmp(key, "fastcarspeed"))
+			steering.speedFast = data->GetFloat();
+		else if (!stricmp(key, "slowSteeringRate"))
 			steering.steeringRateSlow = data->GetFloat();
-		else if (!stricmp(key, "faststeeringrate"))
+		else if (!stricmp(key, "fastSteeringRate"))
 			steering.steeringRateFast = data->GetFloat();
-		//else if (!stricmp(key, "steeringRestFactor")) // This one was in the 2003 leak, its used in some vehicle scripts but I dont know which variable it should set
+		else if (!stricmp(key, "steeringRestRateSlow"))
+			steering.steeringRestRateSlow = data->GetFloat();
+		else if (!stricmp(key, "steeringRestRateFast"))
+			steering.steeringRestRateFast = data->GetFloat();
+		else if (!stricmp(key, "turnThrottleReduceSlow"))
+			steering.turnThrottleReduceSlow = data->GetFloat();
+		else if (!stricmp(key, "turnThrottleReduceFast"))
+			steering.turnThrottleReduceFast = data->GetFloat();
+		else if (!stricmp(key, "brakeSteeringRateFactor"))
+			steering.brakeSteeringRateFactor = data->GetFloat();
+		else if (!stricmp(key, "throttleSteeringRestRateFactor"))
+			steering.throttleSteeringRestRateFactor = data->GetFloat();
+		else if (!stricmp(key, "boostSteeringRestRateFactor"))
+			steering.boostSteeringRestRateFactor = data->GetFloat();
+		else if (!stricmp(key, "boostSteeringRateFactor"))
+			steering.boostSteeringRateFactor = data->GetFloat();
+		else if (!stricmp(key, "powerSlideAccel"))
+			steering.powerSlideAccel = data->GetFloat();
 		else if (!stricmp(key, "skidallowed"))
 			steering.isSkidAllowed = data->GetInt() > 0;
 		else if (!stricmp(key, "dustcloud"))

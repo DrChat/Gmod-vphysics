@@ -76,7 +76,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
-	object->setAngularVelocity(rot_speed);
+	//object->setAngularVelocity(rot_speed);
+	object->setAngularVelocity(btVector3(0, 0, 0));	// TODO: Remove when physgun rotation issue is resolved.
 
 	return secondsToArrival;
 }
