@@ -59,6 +59,7 @@ void CPhysicsVehicleController::InitCarWheels()
 	}
 
 	// TODO: Disable collisions between two objects
+	// See: http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?t=4853
 	// for (int i = 0; i < m_iWheelCount; i++) {
 	// 	m_pWheels[i]->EnableCollisions(true);
 	// }

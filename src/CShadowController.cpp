@@ -10,8 +10,8 @@
 //#include "tier0/memdbgon.h"
 
 void QuaternionDiff(const btQuaternion &q1, const btQuaternion &q2, btQuaternion &qt) {
-	btQuaternion q1inv = q1.inverse();
-	qt = q2 * q1inv;
+	btQuaternion q2inv = q2.inverse();
+	qt = q2inv * q1;
 	qt.normalize();
 }
 
