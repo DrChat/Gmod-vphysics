@@ -1,0 +1,2 @@
+- Bugs
+	- Player intersecting with an object causes FPS to GRADUALLY decrease. Removing the player from the object will make FPS GRADUALLY increase.
