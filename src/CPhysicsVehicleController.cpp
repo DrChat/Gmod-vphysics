@@ -131,21 +131,25 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	ConvertPosToBull(Vector(1, 0, 0), bullWheelAxleCS);			// TODO: Find out what this is
 	bullSuspensionRestLength = ConvertDistanceToBull(axle.suspension.springConstant);
 	bullWheelRadius = ConvertDistanceToBull(axle.wheels.radius);
+	bool bIsFrontWheel = (wheelIndex < 2);						// BUG: Only works with 2 front wheels
 
-	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, false);
+	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
+
+	wheelInfo.m_suspensionStiffness = ConvertDistanceToBull(axle.suspension.springConstant);
+	wheelInfo.m_maxSuspensionForce = ConvertDistanceToBull(axle.suspension.maxBodyForce);
 
 	return pWheel;
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls)
 {
-	//m_pRaycastVehicle->updateVehicle(dt);
+	m_pRaycastVehicle->updateVehicle(dt);
 }
 
 float CPhysicsVehicleController::UpdateBooster(float dt)
 {
 	NOT_IMPLEMENTED
-	return 0.0f;
+	return 0.0f;		// Return boost delay.
 }
 
 int CPhysicsVehicleController::GetWheelCount()

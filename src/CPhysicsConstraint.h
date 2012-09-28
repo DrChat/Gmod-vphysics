@@ -36,24 +36,27 @@ class CPhysicsConstraint : public IPhysicsConstraint
 		CPhysicsEnvironment *	m_pEnv;
 };
 
+// TODO: Find out how to use m_mindist to make ropes non-rigid.
 class btDistanceConstraint : public btPoint2PointConstraint
 {
 	protected:
-		btScalar	m_distance;
+		btScalar	m_mindist;
+		btScalar	m_maxdist;
 	public:
-		btDistanceConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, btScalar dist)
+		btDistanceConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, btScalar mindist, btScalar maxdist)
 			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
 		{
-			m_distance = dist;
+			m_mindist = mindist;
+			m_maxdist = maxdist;
 		}
 
-		virtual void getInfo1 (btConstraintInfo1* info)
+		void getInfo1 (btConstraintInfo1* info)
 		{
 			info->m_numConstraintRows = 1;
 			info->nub = 5;
 		}
 
-		virtual void getInfo2 (btConstraintInfo2* info)
+		void getInfo2 (btConstraintInfo2* info)
 		{
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
 			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
@@ -74,7 +77,7 @@ class btDistanceConstraint : public btPoint2PointConstraint
 			info->m_J2angularAxis[0] = -q[0];
 			info->m_J2angularAxis[1] = -q[1];
 			info->m_J2angularAxis[2] = -q[2];
-			btScalar rhs = (currDist - m_distance) * info->fps * info->erp;
+			btScalar rhs = (currDist - m_maxdist) * info->fps * info->erp;
 			info->m_constraintError[0] = rhs;
 			info->cfm[0] = btScalar(0.f);
 			info->m_lowerLimit[0] = -SIMD_INFINITY;

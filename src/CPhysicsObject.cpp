@@ -127,6 +127,8 @@ bool CPhysicsObject::IsStatic() const {
 // Possible that the lag shitfest is caused by the engine processing collision?
 // Returning true will cause the object to completely stop colliding with anything
 // Including traces such as with physics_debug_entity
+// Also note the lag doesn't stop when the game is paused, indicating that it isn't caused
+// by physics simulations.
 bool CPhysicsObject::IsAsleep() const {
 	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
@@ -581,9 +583,6 @@ const CPhysCollide *CPhysicsObject::GetCollide() const {
 }
 
 const char *CPhysicsObject::GetName() const {
-	//NOT_IMPLEMENTED;
-	//return NULL;
-
 	return m_pName;
 }
 

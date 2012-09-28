@@ -13,12 +13,12 @@ CPhysicsSurfaceProps::~CPhysicsSurfaceProps() {
 	delete m_strings;
 }
 
-int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pTextfile) {
+int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pTextfile) {
 	if (!AddFileToDatabase(pFilename)) return 0;
 
-	KeyValues* surfprops = new KeyValues("");
+	KeyValues *surfprops = new KeyValues("");
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
-	for (KeyValues* surface = surfprops; surface; surface = surface->GetNextKey()) {
+	for (KeyValues *surface = surfprops; surface; surface = surface->GetNextKey()) {
 		CSurface prop;
 		int baseMaterial = GetSurfaceIndex("default");
 
@@ -30,46 +30,46 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pT
 		prop.data.game.climbable = 0.0f;
 		CopyPhysicsProperties(&prop, baseMaterial);
 
-		for (KeyValues* data = surface->GetFirstSubKey(); data; data = data->GetNextKey()) {
-			const char* key = data->GetName();
+		for (KeyValues *data = surface->GetFirstSubKey(); data; data = data->GetNextKey()) {
+			const char *key = data->GetName();
 			if (!strcmpi(key, "base")) {
 				baseMaterial = GetSurfaceIndex(data->GetString());
 				CopyPhysicsProperties(&prop, baseMaterial);
-			} else if (!strcmpi(key, "thickness")) {
+			} else if (!strcmpi(key, "thickness"))
 				prop.data.physics.thickness = data->GetFloat();
-			} else if (!strcmpi(key, "density")) {
+			else if (!strcmpi(key, "density"))
 				prop.data.physics.density = data->GetFloat();
-			} else if (!strcmpi(key, "elasticity")) {
+			else if (!strcmpi(key, "elasticity"))
 				prop.data.physics.elasticity = data->GetFloat();
-			} else if (!strcmpi(key, "friction")) {
+			else if (!strcmpi(key, "friction"))
 				prop.data.physics.friction = data->GetFloat();
-			} else if (!strcmpi(key, "dampening")) {
+			else if (!strcmpi(key, "dampening"))
 				prop.data.physics.dampening = data->GetFloat();
-			} else if (!strcmpi(key, "audioreflectivity")) {
+			else if (!strcmpi(key, "audioreflectivity"))
 				prop.data.audio.reflectivity = data->GetFloat();
-			} else if (!strcmpi(key, "audiohardnessfactor")) {
+			else if (!strcmpi(key, "audiohardnessfactor"))
 				prop.data.audio.hardnessFactor = data->GetFloat();
-			} else if (!strcmpi(key, "audioroughnessfactor")) {
+			else if (!strcmpi(key, "audioroughnessfactor"))
 				prop.data.audio.roughnessFactor = data->GetFloat();
-			} else if (!strcmpi(key, "scrapeRoughThreshold")) {
+			else if (!strcmpi(key, "scrapeRoughThreshold"))
 				prop.data.audio.roughThreshold = data->GetFloat();
-			} else if (!strcmpi(key, "impactHardThreshold")) {
+			else if (!strcmpi(key, "impactHardThreshold"))
 				prop.data.audio.hardThreshold = data->GetFloat();
-			} else if (!strcmpi(key, "audioHardMinVelocity")) {
+			else if (!strcmpi(key, "audioHardMinVelocity"))
 				prop.data.audio.hardVelocityThreshold = data->GetFloat();
-			} else if (!strcmpi(key, "maxspeedfactor")) {
+			else if (!strcmpi(key, "maxspeedfactor"))
 				prop.data.game.maxSpeedFactor = data->GetFloat();
-			} else if (!strcmpi(key, "jumpfactor")) {
+			else if (!strcmpi(key, "jumpfactor"))
 				prop.data.game.jumpFactor = data->GetFloat();
-			} else if (!strcmpi(key, "climbable")) {
+			else if (!strcmpi(key, "climbable"))
 				prop.data.game.climbable = data->GetInt();
-			} else if (!strcmpi(key, "gamematerial")) {
+			else if (!strcmpi(key, "gamematerial"))
 				if (data->GetDataType() == KeyValues::TYPE_STRING && strlen(data->GetString()) == 1) {
 					prop.data.game.material = toupper(data->GetString()[0]);
 				} else {
 					prop.data.game.material = data->GetInt();
 				}
-			} else if (!strcmpi(key, "stepleft")) {
+			else if (!strcmpi(key, "stepleft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.stepleft = m_soundList.AddToTail(sym);
 			} else if (!strcmpi(key, "stepright")) {
@@ -99,9 +99,9 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char* pFilename, const char* pT
 			} else if (!strcmpi(key, "rolling")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.rolling = m_soundList.AddToTail(sym);
-			} else {
+			} else
 				AssertMsg2(0, "Bad surfaceprop key %s (%s)\n", key, data->GetString());
-			}
+			
 		}
 		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0) break;
 
@@ -115,7 +115,7 @@ int CPhysicsSurfaceProps::SurfacePropCount() const {
 	return m_props.Size();
 }
 
-int CPhysicsSurfaceProps::GetSurfaceIndex(const char* pSurfacePropName) const {
+int CPhysicsSurfaceProps::GetSurfaceIndex(const char *pSurfacePropName) const {
 	if (pSurfacePropName[0] == '$') {
 		int index = GetReservedSurfaceIndex(pSurfacePropName);
 		if (index >= 0) return index;
@@ -131,7 +131,7 @@ int CPhysicsSurfaceProps::GetSurfaceIndex(const char* pSurfacePropName) const {
 	return -1;
 }
 
-void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float* density, float* thickness, float* friction, float* elasticity) const  {
+void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float *density, float *thickness, float *friction, float *elasticity) const  {
 	const CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
 	if (pSurface) {
 		if (friction) *friction = (float)pSurface->data.physics.friction;
@@ -141,48 +141,55 @@ void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float* den
 	}
 }
 
-surfacedata_t* CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
+surfacedata_t *CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
 	CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
 	if (!pSurface) pSurface = GetInternalSurface(GetSurfaceIndex("default"));
 	assert(pSurface);
 	return &pSurface->data;
 }
 
-const char* CPhysicsSurfaceProps::GetString(unsigned short stringTableIndex) const {
+const char *CPhysicsSurfaceProps::GetString(unsigned short stringTableIndex) const {
 	CUtlSymbol index = m_soundList[stringTableIndex];
 	return m_strings->String(index);
 }
 
-const char* CPhysicsSurfaceProps::GetPropName(int surfaceDataIndex) const {
+const char *CPhysicsSurfaceProps::GetPropName(int surfaceDataIndex) const {
 	return m_strings->String(m_props[surfaceDataIndex].m_name);
 }
 
-void CPhysicsSurfaceProps::SetWorldMaterialIndexTable(int* pMapArray, int mapSize) {
+void CPhysicsSurfaceProps::SetWorldMaterialIndexTable(int *pMapArray, int mapSize) {
 	NOT_IMPLEMENTED;
 }
 
-void CPhysicsSurfaceProps::GetPhysicsParameters(int surfaceDataIndex, surfacephysicsparams_t* pParamsOut) const {
-	NOT_IMPLEMENTED;
+void CPhysicsSurfaceProps::GetPhysicsParameters(int surfaceDataIndex, surfacephysicsparams_t *pParamsOut) const {
+	if (!pParamsOut) return;
+
+	const CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
+	if (pSurface) {
+		*pParamsOut = pSurface->data.physics;
+	}
 }
 
-int CPhysicsSurfaceProps::GetReservedSurfaceIndex(const char* pSurfacePropName) const {
+int CPhysicsSurfaceProps::GetReservedSurfaceIndex(const char *pSurfacePropName) const {
 	if (!Q_stricmp(pSurfacePropName, "$MATERIAL_INDEX_SHADOW")) {
 		return MATERIAL_INDEX_SHADOW;
 	}
 	return -1;
 }
 
-CSurface* CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) {
+CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) {
 	if (materialIndex < 0 || materialIndex > m_props.Size()-1) {
 		return NULL;
 	}
+
 	return &m_props[materialIndex];
 }
 
-const CSurface* CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) const {
+const CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) const {
 	if (materialIndex < 0 || materialIndex > m_props.Size()-1) {
 		return NULL;
 	}
+
 	return &m_props[materialIndex];
 }
 

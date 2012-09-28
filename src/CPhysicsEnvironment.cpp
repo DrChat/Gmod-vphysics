@@ -314,7 +314,6 @@ IPhysicsConstraint* CPhysicsEnvironment::CreatePulleyConstraint(IPhysicsObject *
 	return NULL;
 }
 
-// TODO: Ropes are rigid ALWAYS! Read length.minlength
 IPhysicsConstraint* CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length) {
 	btVector3 obj1Pos, obj2Pos;
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);
@@ -329,7 +328,7 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *
 	if (shapeInfo2)
 		obj2Pos -= shapeInfo2->massCenter;
 
-	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
+	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.minLength), HL2BULL(length.totalLength));
 	m_pBulletEnvironment->addConstraint(constraint, false);
 	return new CPhysicsConstraint(this, obj1, obj2, constraint);
 }
@@ -501,6 +500,7 @@ void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList) c
 		pOutputObjectList[i] = m_objects[i];
 }
 
+// TODO: Not sure if this is correct and we're supposed to use m_objects.
 const IPhysicsObject** CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount) const {
 	if (pOutputObjectCount) {
 		*pOutputObjectCount = m_objects.Count();
