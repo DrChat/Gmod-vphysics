@@ -67,6 +67,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 }
 
 CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
+	if (!pEnvironment) return NULL;
+
 	btSphereShape *shape = new btSphereShape(ConvertDistanceToBull(radius));
 	
 	btVector3 vector;
@@ -75,8 +77,17 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
-	float mass = pParams->mass;
-	if (isStatic) mass = 0;
+	float mass, volume;
+
+	if (pParams) {
+		mass = pParams->mass;
+		if (isStatic) mass = 0;
+
+		volume = pParams->volume;
+		if (volume <= 0) {
+			pParams->volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
+		}
+	}
 
 	btMotionState *motionstate = new btMassCenterMotionState(transform);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
@@ -87,11 +98,6 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
 	else
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
-
-	float volume = pParams->volume;
-	if (volume <= 0) {
-		pParams->volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
-	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
@@ -329,6 +335,8 @@ void CPhysicsObject::SetInertia(const Vector& inertia) {
 }
 
 void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
+	if (!speed && !rot) return;
+
 	if (speed && rot) {
 		m_pObject->setDamping(*speed, *rot);
 		return;
@@ -408,6 +416,8 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTelepor
 }
 
 void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
+	if (!worldPosition && !angles) return;
+
 	btTransform transform;
 	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (worldPosition) ConvertPosToHL(transform.getOrigin(), *worldPosition);
@@ -415,12 +425,16 @@ void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 }
 
 void CPhysicsObject::GetPositionMatrix(matrix3x4_t *positionMatrix) const {
+	if (!positionMatrix) return;
+
 	btTransform transform;
 	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	ConvertMatrixToHL(transform, *positionMatrix);
 }
 
 void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
+	if (!velocity && !angularVelocity) return;
+
 	btVector3 vel, angvel;
 	if (velocity) {
 		ConvertPosToBull(*velocity, vel);
@@ -443,6 +457,8 @@ void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVeloci
 }
 
 void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
+	if (!velocity && !angularVelocity) return;
+
 	btVector3 btvelocity, btangular;
 	if (velocity) {
 		ConvertPosToBull(*velocity, btvelocity);
@@ -455,34 +471,46 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 }
 
 void CPhysicsObject::GetVelocityAtPoint(const Vector& worldPosition, Vector *pVelocity) const {
+	if (!pVelocity) return;
+
 	btVector3 vec;
 	ConvertPosToBull(worldPosition, vec);
 	ConvertPosToHL(m_pObject->getVelocityInLocalPoint(vec), *pVelocity);
 }
 
 void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
+	if (!velocity && !angularVelocity) return;
+
 	NOT_IMPLEMENTED;
 }
 
 void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector& localPosition) const {
+	if (!worldPosition) return;
+
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorTransform(Vector(localPosition), matrix, *worldPosition);
 }
 
 void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector& worldPosition) const {
+	if (!localPosition) return;
+
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorITransform(Vector(worldPosition), matrix, *localPosition);
 }
 
 void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector& localVector) const {
+	if (!worldVector) return;
+
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorRotate(Vector(localVector), matrix, *worldVector);
 }
 
 void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector& worldVector) const {
+	if (!localVector) return;
+
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
 	VectorIRotate(Vector(worldVector), matrix, *localVector);
@@ -555,6 +583,8 @@ void CPhysicsObject::UpdateShadow(const Vector& targetPosition, const QAngle& ta
 }
 
 int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
+	if (!position && !angles) return 1;
+
 	btTransform transform;
 	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (position) {
@@ -563,7 +593,8 @@ int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 	if (angles) {
 		ConvertRotationToHL(transform.getBasis(), *angles);
 	}
-	return 0;
+
+	return 0; // return pVEnv->GetSimulatedPSIs();
 }
 
 IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
@@ -666,23 +697,23 @@ void CPhysicsObject::OutputDebugInfo() const {
 }
 
 void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams) {
-	if (!pParams) Assert(0);
-
 	m_pEnv = pEnv;
 	m_materialIndex = materialIndex;
 	m_pObject = pObject;
 	pObject->setUserPointer(this);
-	m_pGameData = pParams->pGameData;
-	m_pName = pParams->pName;
 	m_gameFlags = 0;
 	m_iLastActivationState = pObject->getActivationState();
 	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
-	m_fVolume = pParams->volume;
 	float matdensity;
 	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
 	m_fBuoyancyRatio = (GetMass()/(GetVolume()*METERS_PER_INCH*METERS_PER_INCH*METERS_PER_INCH))/matdensity;
 
-	EnableCollisions(pParams->enableCollisions);
+	if (pParams) {
+		m_pGameData = pParams->pGameData;
+		m_pName = pParams->pName;
+		m_fVolume = pParams->volume;
+		EnableCollisions(pParams->enableCollisions);
+	}
 
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
 	if (surface)
@@ -693,8 +724,12 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	}
 
 	// Drag calculations converted from  2003 source code
-	float drag = pParams->dragCoefficient;
-	float angDrag = pParams->dragCoefficient;
+	float drag = 0;
+	float angDrag = 0;
+	if (pParams) {
+		drag = pParams->dragCoefficient;
+		angDrag = pParams->dragCoefficient;
+	}
 
 	if (!IsStatic() && GetCollide() )
 	{
@@ -737,6 +772,8 @@ btRigidBody *CPhysicsObject::GetObject() {
 
 float CPhysicsObject::GetDragInDirection(btVector3 *dir) const
 {
+	if (!dir) return 0.0f;
+
 	btVector3 out;
 	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis(); // const IVP_U_Matrix *m_world_f_core = m_pObject->get_core()->get_m_world_f_core_PSI();
 	BtMatrix_vimult(&mat, dir, &out); // m_world_f_core->vimult3( &velocity, &local );
@@ -746,8 +783,11 @@ float CPhysicsObject::GetDragInDirection(btVector3 *dir) const
 		fabs(out.getZ() * m_dragBasis.getZ());
 	
 }
+
 float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const
 {
+	if (!dir) return 0.0f;
+
 	return m_angDragCoefficient * fabs(dir->getX() * m_angDragBasis.getX()) +
 		fabs(dir->getY() * m_angDragBasis.getY()) +
 		fabs(dir->getZ() * m_angDragBasis.getZ());

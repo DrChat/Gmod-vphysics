@@ -84,8 +84,7 @@ void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl) {
 	hl = radian.ToQAngle();
 }
 
-void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl)
-{
+void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl) {
 	Quaternion q(quat.getX(), -quat.getZ(), quat.getY(), quat.getW());
 	RadianEuler radian(q);
 	hl = radian.ToQAngle();
@@ -114,8 +113,7 @@ void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl) {
 	hl.Init(forward, left, up, pos);
 }
 
-void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform)
-{
+void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform) {
 	Vector forward, left, up, pos;
 
 	forward.x = hl[0][0];

@@ -9,18 +9,12 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-void QuaternionDiff(const btQuaternion &q1, const btQuaternion &q2, btQuaternion &qt) {
-	btQuaternion q2inv = q2.inverse();
-	qt = q2inv * q1;
+void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
+	btQuaternion qinv = q.inverse();
+	qt = qinv * p;
 	qt.normalize();
 }
 
-// BUG WITH OBJECTS: Improper angle conversion?
-// Object at QAngle(0, -180, 0) when PhysWake()'d will flip to
-// QAngle(0, -133, 179)
-// Occurs from QAngle(0, -70, 0) (on all 3 axis, not just y)
-// to QAngle(0, 70, 0)
-// Reproduce by rotating an object with the physgun. Most likely related to shadow controllers.
 ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// DEBUG
@@ -66,7 +60,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	// BUG: Physgun rotation bug most likely caused here
 	// Set breakpoint @ ComputeShadowControllerHL WHILE holding object in spazout rotation
-
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
@@ -80,49 +73,21 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setZ(axis.z() * angle);
 
 	btVector3 rot_speed = object->getAngularVelocity();
-	if (cvar_spewshadowdebuginfo.GetBool() && (rot_speed.getX() > 0 || rot_speed.getY() > 0 || rot_speed.getZ() > 0)) {				// DEBUG
+	if (cvar_spewshadowdebuginfo.GetBool() && (rot_speed.getX() != 0 || rot_speed.getY() != 0 || rot_speed.getZ() != 0)) {		// DEBUG
 		Msg("---\n");
 		//Msg("SPEED BEFORE: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
+		btQuaternion transquat = transform.getRotation();
+		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
 
-		btVector3 targTransAxis = params.targetRotation.getAxis();
-		float targTransAngle = params.targetRotation.getAngle();
-		btVector3 targvec;
-
-		targvec.setX(targTransAxis.x() * targTransAngle);
-		targvec.setY(targTransAxis.y() * targTransAngle);
-		targvec.setZ(targTransAxis.z() * targTransAngle);
-
-		Msg("Target Rotation: %f %f %f\n", targvec.x(), targvec.y(), targvec.z());
 		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
-
-		QAngle HLTargetVec;
-		ConvertRotationToHL(params.targetRotation, HLTargetVec);
-		Msg("HL Target Rotation: %f %f %f\n", HLTargetVec.x, HLTargetVec.y, HLTargetVec.z);
-		
-		QAngle HLCurRotation;
-		((CPhysicsObject *)object->getUserPointer())->GetPosition(NULL, &HLCurRotation);
-		Msg("HL Current Position: %f %f %f\n", HLCurRotation.x, HLCurRotation.y, HLCurRotation.z);
-		Msg("Delta Angles: %f %f %f\n", deltaAngles.x(), deltaAngles.y(), deltaAngles.z());
-
-		btVector3 transAxis = transform.getRotation().getAxis();
-		float transAngle = transform.getRotation().getAngle();
-		btVector3 bullTransformRotation;
-
-		bullTransformRotation.setX(transAxis.x() * transAngle);
-		bullTransformRotation.setY(transAxis.y() * transAngle);
-		bullTransformRotation.setZ(transAxis.z() * transAngle);
-
-		QAngle HLTransformRotation;
-		ConvertRotationToHL(transform.getRotation(), HLTransformRotation);
-		Msg("HL Transform Rotation: %f %f %f\n", HLTransformRotation.x, HLTransformRotation.y, HLTransformRotation.z);
-		Msg("Bull Transform Rotation: %f %f %f\n", bullTransformRotation.x(), bullTransformRotation.y(), bullTransformRotation.z());
+		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
 	}
 
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
 
-	//if (cvar_spewshadowdebuginfo.GetBool() && (rot_speed.getX() > 0 || rot_speed.getY() > 0 || rot_speed.getZ() > 0))
-		//Msg("SPEED AFTER: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
+	if (cvar_spewshadowdebuginfo.GetBool() && (rot_speed.getX() != 0 || rot_speed.getY() != 0 || rot_speed.getZ() != 0))
+		Msg("SPEED AFTER: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
 
 	// For debugging purposes.
 	AngularImpulse rotspeedHL;

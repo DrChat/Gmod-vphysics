@@ -11,6 +11,7 @@
 void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping) {
 	// Timestep scale
 	btVector3 acceleration = delta * scaleDelta;
+
 	if (currentSpeed.length2() < 1e-6) {
 		currentSpeed.setZero();
 	}
