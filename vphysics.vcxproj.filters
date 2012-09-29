@@ -72,10 +72,10 @@
     <ClCompile Include="src\StfAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Garry%27s Mod\gmvphysics\src\GLDebugDrawer.cpp">
+    <ClCompile Include="src\CPhysicsTrace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Garry%27s Mod\gmvphysics\src\CPhysicsTrace.cpp">
+    <ClCompile Include="src\GLDebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -140,14 +140,14 @@
     <ClInclude Include="src\StdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Garry%27s Mod\gmvphysics\src\GLDebugDrawer.h">
+    <ClInclude Include="src\CPhysicsTrace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Garry%27s Mod\gmvphysics\src\CPhysicsTrace.h">
+    <ClInclude Include="src\GLDebugDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\Garry%27s Mod\Gmod-vphysics\todo.txt" />
+    <Text Include="todo.txt" />
   </ItemGroup>
 </Project>

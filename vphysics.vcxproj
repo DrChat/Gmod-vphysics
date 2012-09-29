@@ -113,8 +113,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Garry%27s Mod\gmvphysics\src\CPhysicsTrace.cpp" />
-    <ClCompile Include="..\..\Garry%27s Mod\gmvphysics\src\GLDebugDrawer.cpp" />
+    <ClCompile Include="src\GLDebugDrawer.cpp" />
     <ClCompile Include="src\convert.cpp" />
     <ClCompile Include="src\CPhysics.cpp" />
     <ClCompile Include="src\CPhysicsCollision.cpp" />
@@ -129,6 +128,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     <ClCompile Include="src\CPhysicsObject.cpp" />
     <ClCompile Include="src\CPhysicsObjectPairHash.cpp" />
     <ClCompile Include="src\CPhysicsSurfaceProps.cpp" />
+    <ClCompile Include="src\CPhysicsTrace.cpp" />
     <ClCompile Include="src\CPhysicsVehicleController.cpp" />
     <ClCompile Include="src\CPlayerController.cpp" />
     <ClCompile Include="src\CShadowController.cpp" />
@@ -139,8 +139,8 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Garry%27s Mod\gmvphysics\src\CPhysicsTrace.h" />
-    <ClInclude Include="..\..\Garry%27s Mod\gmvphysics\src\GLDebugDrawer.h" />
+    <ClInclude Include="src\GLDebugDrawer.h" />
+    <ClInclude Include="src\CPhysicsTrace.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\CPhysics.h" />
     <ClInclude Include="src\CPhysicsCollision.h" />
@@ -163,7 +163,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     <ClInclude Include="src\StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\Garry%27s Mod\Gmod-vphysics\todo.txt" />
+    <Text Include="todo.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
