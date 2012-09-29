@@ -1,19 +1,30 @@
 #include "StdAfx.h"
 
-#include "GLDebugDrawer.h"
+#include "CPhysicsEnvironment.h"
+#include "CDebugDrawer.h"
+#include "convert.h"
+#include <edict.h>
 
 #include <SDL.h>
 #include <SDL_opengl.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
+#define RENDER_SDL 0
 
-#if DEBUG_DRAW == 1
+#if DEBUG_DRAW
+#if RENDER_SDL
 #pragma comment(lib, "SDL")
 #pragma comment(lib, "OpenGL32")
 #pragma comment(lib, "Glu32")
+#endif
 
-GLDebugDrawer::GLDebugDrawer(btCollisionWorld* world) : m_debugMode(0) {
+static ConVar cvar_renderoverlay("vphysics_renderoverlay", "0", 0, "Whether or not to render to the debug overlay.");
+
+CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
+	m_pEnv = pEnv;
+
+#if RENDER_SDL
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
@@ -33,32 +44,46 @@ GLDebugDrawer::GLDebugDrawer(btCollisionWorld* world) : m_debugMode(0) {
 	glFrustum(-1, 1, -1, 1, 1, 10000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(0, 17, -47, 0, 0, 0, 0, 1, 0);
+	gluLookAt(0, 17, -60, 0, 0, 0, 0, 1, 0);
+#endif
 
 	m_world = world;
 	m_world->setDebugDrawer(this);
 }
 
-GLDebugDrawer::~GLDebugDrawer() {
+CDebugDrawer::~CDebugDrawer() {
 	m_world->setDebugDrawer(NULL);
+
+#if RENDER_SDL
 	SDL_FreeSurface(Display);
 	SDL_Quit();
+#endif
 }
 
-void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& fromColor, const btVector3& toColor) {
+void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor) {
+#if RENDER_SDL
 	glBegin(GL_LINES);
 		glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
 		glVertex3d(from.getX(), from.getY(), from.getZ());
 		glColor3f(toColor.getX(), toColor.getY(), toColor.getZ());
 		glVertex3d(to.getX(), to.getY(), to.getZ());
 	glEnd();
+#else
+	Vector HLFrom;
+	Vector HLTo;
+	ConvertPosToHL(from, HLFrom);
+	ConvertPosToHL(to, HLTo);
+
+	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x(), fromColor.y(), fromColor.z(), false, 0.1f);
+#endif
 }
 
-void GLDebugDrawer::drawLine(const btVector3& from,const btVector3& to,const btVector3& color) {
-	drawLine(from,to,color,color);
+void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
+	drawLine(from, to, color, color);
 }
 
-void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVector3& color) {
+void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
+#if RENDER_SDL
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
 	glPushMatrix ();
 	glTranslatef (p.getX(), p.getY(), p.getZ());
@@ -91,9 +116,11 @@ void GLDebugDrawer::drawSphere (const btVector3& p, btScalar radius, const btVec
 	}
 
 	glPopMatrix();
+#endif
 }
 
-void GLDebugDrawer::drawBox (const btVector3& boxMin, const btVector3& boxMax, const btVector3& color, btScalar alpha) {
+void CDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& color, btScalar alpha) {
+#if RENDER_SDL
 	btVector3 halfExtent = (boxMax - boxMin) * btScalar(0.5f);
 	btVector3 center = (boxMax + boxMin) * btScalar(0.5f);
 	//glEnable(GL_BLEND);     // Turn blending On
@@ -104,35 +131,51 @@ void GLDebugDrawer::drawBox (const btVector3& boxMin, const btVector3& boxMax, c
 	glScaled(2*halfExtent[0], 2*halfExtent[1], 2*halfExtent[2]);
 	glPopMatrix ();
 	//glDisable(GL_BLEND);
+#else
+	Vector HLBoxMin;
+	Vector HLBoxMax;
+	ConvertPosToHL(boxMin, HLBoxMin);
+	ConvertPosToHL(boxMax, HLBoxMax);
+#endif
 }
 
-void GLDebugDrawer::drawTriangle(const btVector3& a,const btVector3& b,const btVector3& c,const btVector3& color,btScalar alpha) {
-	{
-		const btVector3	n=btCross(b-a,c-a).normalized();
-		glBegin(GL_TRIANGLES);		
+void CDebugDrawer::drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha) {
+#if RENDER_SDL
+	const btVector3	n=btCross(b-a,c-a).normalized();
+	glBegin(GL_TRIANGLES);		
 		glColor4f(color.getX(), color.getY(), color.getZ(),alpha);
 		glNormal3d(n.getX(),n.getY(),n.getZ());
 		glVertex3d(a.getX(),a.getY(),a.getZ());
 		glVertex3d(b.getX(),b.getY(),b.getZ());
 		glVertex3d(c.getX(),c.getY(),c.getZ());
-		glEnd();
-	}
+	glEnd();
+#else
+	Vector HLA;
+	Vector HLB;
+	Vector HLC;
+	ConvertPosToHL(a, HLA);
+	ConvertPosToHL(b, HLB);
+	ConvertPosToHL(c, HLC);
+	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x(), color.y(), color.z(), alpha, false, 0.1f);
+#endif
 }
 
-void GLDebugDrawer::setDebugMode(int debugMode) {
+void CDebugDrawer::setDebugMode(int debugMode) {
 	m_debugMode = debugMode;
 }
 
-void GLDebugDrawer::draw3dText(const btVector3& location,const char* textString) {
+void CDebugDrawer::draw3dText(const btVector3& location, const char *textString) {
+#if RENDER_SDL
 	glRasterPos3f(location.x(),  location.y(),  location.z());
+#endif
 }
 
-void GLDebugDrawer::reportErrorWarning(const char* warningString) {
-	printf("%s\n",warningString);
+void CDebugDrawer::reportErrorWarning(const char *warningString) {
+	Warning("%s\n", warningString);
 }
 
-void GLDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color) {
-	{
+void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
+#if RENDER_SDL
 		btVector3 to=pointOnB+normalOnB*1;//distance;
 		const btVector3&from = pointOnB;
 		glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
@@ -141,14 +184,26 @@ void GLDebugDrawer::drawContactPoint(const btVector3& pointOnB,const btVector3& 
 		glVertex3d(to.getX(), to.getY(), to.getZ());
 		glEnd();
 
-	}
+#endif
 }
 
-void GLDebugDrawer::DrawWorld() {
+void CDebugDrawer::DrawWorld() {
+#if RENDER_SDL
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setDebugMode(DBG_DrawWireframe);
 	m_world->debugDrawWorld();
 	glFlush();
 	SDL_GL_SwapBuffers();
+#else
+	if (cvar_renderoverlay.GetBool()) {
+		if (!m_overlay)
+			m_overlay = m_pEnv->GetDebugOverlay();
+
+		if (m_overlay) {
+			setDebugMode(DBG_DrawWireframe);
+			m_world->debugDrawWorld();
+		}
+	}
+#endif
 }
 #endif // DEBUG_DRAW

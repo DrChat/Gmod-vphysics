@@ -62,7 +62,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;mathlib.lib;BulletDynamics_vs2010_debug.lib;BulletCollision_vs2010_debug.lib;LinearMath_vs2010_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletDynamics_vs2010_debug.lib;BulletCollision_vs2010_debug.lib;LinearMath_vs2010_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;F:\Dev\Libraries\bullet\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -91,7 +91,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>tier0.lib;tier1.lib;vstdlib.lib;mathlib.lib;BulletDynamics_vs2010.lib;BulletCollision_vs2010.lib;LinearMath_vs2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletDynamics_vs2010.lib;BulletCollision_vs2010.lib;LinearMath_vs2010.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;F:\Dev\Libraries\bullet\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
@@ -113,7 +113,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\GLDebugDrawer.cpp" />
+    <ClCompile Include="src\CDebugDrawer.cpp" />
     <ClCompile Include="src\convert.cpp" />
     <ClCompile Include="src\CPhysics.cpp" />
     <ClCompile Include="src\CPhysicsCollision.cpp" />
@@ -139,7 +139,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\GLDebugDrawer.h" />
+    <ClInclude Include="src\CDebugDrawer.h" />
     <ClInclude Include="src\CPhysicsTrace.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\CPhysics.h" />

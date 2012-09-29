@@ -87,7 +87,7 @@ CPhysCollide* CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pCon
 }
 
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
-	btCollisionShape* shape = (btCollisionShape*)pCollide;
+	btCollisionShape *shape = (btCollisionShape *)pCollide;
 	delete shape;
 }
 
@@ -269,7 +269,6 @@ bool CPhysicsCollision::IsBoxIntersectingCone( const Vector &boxAbsMins, const V
 }
 
 struct compactsurfaceheader_t {
-	int		size;			// Size of the content after this byte
 	int		vphysicsID;		// Generally the ASCII for "VPHY" in newer files
 	short	version;
 	short	modelType;
@@ -280,7 +279,6 @@ struct compactsurfaceheader_t {
 
 // old style phy format
 struct legacysurfaceheader_t {
-	//int		size;
 	float	mass_center[3];
 	float	rotation_inertia[3];
 	float	upper_limit_radius;
@@ -302,10 +300,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	for (int i = 0; i < solidCount; i++)
 	{
 		int size = *(int*)(pBuffer + position);
+		position += 4; // Skip the size int.
 
-		const char *solid = pBuffer + position;
-		pOutput->solids[i] = (CPhysCollide *)solid;
-		position += size + 4; // size + sizeof(int)
+		pOutput->solids[i] = (CPhysCollide *)(pBuffer + position);
+		position += size;
 	}
 	pOutput->pKeyValues = (char*)malloc(bufferSize - position);
 	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
@@ -315,8 +313,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	// because havoc solids are saved into a phy file.
 	for (int i = 0; i < solidCount; i++)
 	{
-		const char *solid = (const char*)pOutput->solids[i];
-
+		const char *solid = (const char *)pOutput->solids[i];
 		compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
 		legacysurfaceheader_t legacyheader = *(legacysurfaceheader_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
@@ -346,7 +343,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		
 		info->massCenter = btVector3(legacyheader.mass_center[0], -legacyheader.mass_center[1], -legacyheader.mass_center[2]);
 		assert(legacyheader.dummy[2] == 0x53505649); // == "IVPS"
-		const char *convexes = solid + 80;
+		const char *convexes = solid + 76;
 
 		Msg("Mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
 		btCompoundShape *bull = new btCompoundShape();
@@ -381,18 +378,25 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				position += 16;
 			}
 
-			btShapeHull* hull = new btShapeHull(mesh);
+			// Optimize the mesh with a btShapeHull
+			btShapeHull *hull = new btShapeHull(mesh);
 			btScalar margin = mesh->getMargin();
-			hull->buildHull(margin); // HOLY FUCK THIS FUNCTION IS EXPENSIVE
-			delete mesh;
-			mesh = new btConvexHullShape((btScalar*)hull->getVertexPointer(), hull->numVertices());
-			mesh->setMargin(COLLISION_MARGIN);
+			bool bOk = hull->buildHull(margin); // HOLY FUCK THIS FUNCTION IS EXPENSIVE
+									// TODO: Flatgrass crash is caused by this function failing (returns false)
+			if (bOk) {
+				delete mesh;
+				mesh = new btConvexHullShape((btScalar *)hull->getVertexPointer(), hull->numVertices());
+				mesh->setMargin(COLLISION_MARGIN);
 
-			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
+				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
+			} else {
+				delete hull;
+				delete mesh;
+			}
 			if (convexes + position >= vertices)
 				break;
 		}
-		pOutput->solids[i] = (CPhysCollide*)bull;
+		pOutput->solids[i] = (CPhysCollide *)bull;
 	}
 
 	/*g_ValvePhysicsCollision->VCollideLoad(pOutput, solidCount, pBuffer, size, swap);
@@ -406,7 +410,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
-		btCollisionShape* shape = (btCollisionShape*)pVCollide->solids[i];
+		btCollisionShape *shape = (btCollisionShape *)pVCollide->solids[i];
 		delete shape;
 	}
 	free(pVCollide->pKeyValues);
@@ -443,7 +447,7 @@ int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vect
 }
 
 void CPhysicsCollision::DestroyDebugMesh(int vertCount, Vector *outVerts) {
-	delete outVerts;
+	delete [] outVerts;
 }
 
 ICollisionQuery* CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {

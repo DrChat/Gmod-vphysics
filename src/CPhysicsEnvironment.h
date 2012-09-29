@@ -12,7 +12,7 @@ class CCollisionSolver;
 class CPhysicsFluidController;
 class CPhysicsDragController;
 
-class GLDebugDrawer;
+class CDebugDrawer;
 
 class CPhysicsEnvironment : public IPhysicsEnvironment {
 public:
@@ -141,7 +141,7 @@ private:
 	float									m_timestep;
 	IVPhysicsDebugOverlay *					m_DebugOverlay;
 
-	GLDebugDrawer *							m_debugdraw;
+	CDebugDrawer *							m_debugdraw;
 };
 
 #endif

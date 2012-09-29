@@ -12,10 +12,10 @@ class ITraceObject {
 
 class CPhysicsTrace {
 	public:
-		CPhysicsTrace();
-		~CPhysicsTrace();
+				CPhysicsTrace();
+				~CPhysicsTrace();
 
-		Vector GetExtent(const btCollisionShape *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction);
+		Vector	GetExtent(const btCollisionShape *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction);
 };
 
 #endif // CPHYSICSTRACE_H

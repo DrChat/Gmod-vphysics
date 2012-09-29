@@ -39,7 +39,7 @@ IPhysicsEnvironment* CPhysics::CreateEnvironment() {
 	return pEnvironment;
 }
 
-void CPhysics::DestroyEnvironment(IPhysicsEnvironment* pEnvironment) {
+void CPhysics::DestroyEnvironment(IPhysicsEnvironment *pEnvironment) {
 	m_envList.FindAndRemove(pEnvironment);
 	delete pEnvironment;
 }

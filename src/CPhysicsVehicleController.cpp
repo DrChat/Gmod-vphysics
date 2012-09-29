@@ -8,11 +8,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace)
-{
+CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
 	m_pEnv = pEnv;
 	m_pBody = pBody;
-	m_vehicleParams = params;
 	m_iVehicleType = nVehicleType;
 
 	for (int i = 0; i < VEHICLE_MAX_WHEEL_COUNT; i++) {
@@ -20,33 +18,38 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	}
 
 	m_pBody->GetObject()->setActivationState(DISABLE_DEACTIVATION);
+	m_iWheelCount = m_vehicleParams.axleCount * m_vehicleParams.wheelsPerAxle;
 
+	// Initialization and setup
+	InitVehicleParams(params);
+	InitBullVehicle();
+	InitCarWheels();
+}
+
+CPhysicsVehicleController::~CPhysicsVehicleController() {
+	ShutdownBullVehicle();
+}
+
+void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {
+	m_vehicleParams = params;
+	m_vehicleParams.engine.maxSpeed			= ConvertDistanceToBull(params.engine.maxSpeed);		// Needs speed to bull (MPH to bull speed)
+	m_vehicleParams.engine.maxRevSpeed		= ConvertDistanceToBull(params.engine.maxRevSpeed);		// Needs speed to bull (MPH to bull speed)
+	m_vehicleParams.engine.boostMaxSpeed	= ConvertDistanceToBull(params.engine.boostMaxSpeed);	// Needs speed to bull (MPH to bull speed)
+	m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
+	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
+		m_vehicleParams.axles[i].wheels.radius = ConvertDistanceToBull(params.axles[i].wheels.radius);
+		m_vehicleParams.axles[i].wheels.springAdditionalLength = ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
+	}
+}
+
+void CPhysicsVehicleController::InitBullVehicle() {
 	m_pRaycaster = new btDefaultVehicleRaycaster(m_pEnv->GetBulletEnvironment());
 	m_pRaycastVehicle = new btRaycastVehicle(m_tuning, m_pBody->GetObject(), m_pRaycaster);
 	m_pRaycastVehicle->setCoordinateSystem(0,1,2);
 	m_pEnv->GetBulletEnvironment()->addVehicle(m_pRaycastVehicle);
-
-	m_iWheelCount = m_vehicleParams.axleCount * m_vehicleParams.wheelsPerAxle;
-
-	// Initialization and setup
-	InitCarWheels();
 }
 
-CPhysicsVehicleController::~CPhysicsVehicleController()
-{
-	m_pEnv->GetBulletEnvironment()->removeVehicle(m_pRaycastVehicle);
-
-	delete m_pRaycaster;
-	delete m_pRaycastVehicle;
-
-	for (int i = 0; i < m_iWheelCount; i++) {
-		m_pEnv->DestroyObject(m_pWheels[i]);
-		m_pWheels[i] = NULL;
-	}
-}
-
-void CPhysicsVehicleController::InitCarWheels()
-{
+void CPhysicsVehicleController::InitCarWheels() {
 	int wheelIndex = 0;
 
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
@@ -60,14 +63,13 @@ void CPhysicsVehicleController::InitCarWheels()
 
 	// TODO: Disable collisions between two objects
 	// See: http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?t=4853
-	// for (int i = 0; i < m_iWheelCount; i++) {
-	// 	m_pWheels[i]->EnableCollisions(true);
-	// }
+	for (int i = 0; i < m_iWheelCount; i++) {
+		m_pWheels[i]->EnableCollisions(true);
+	}
 }
 
 // Purpose: Create wheel on source side (CPhysicsObject *)
-CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_axleparams_t &axle)
-{
+CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_axleparams_t &axle) {
 	if (wheelIndex >= VEHICLE_MAX_WHEEL_COUNT)
 		return NULL;
 
@@ -109,7 +111,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	float r3 = radius * radius * radius;
 	params.volume = (4 / 3) * M_PI * r3;
 
-	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject( radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params, false );
+	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject(radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params, false);
 	pWheel->Wake();
 
 	// UNDONE: only mask off some of these flags?
@@ -123,22 +125,41 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	pWheel->SetCallbackFlags( pWheel->GetCallbackFlags() | CALLBACK_IS_VEHICLE_WHEEL );
 
 	// Create the wheel in bullet
-	btVector3 bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS;
+	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
+	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
+	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
+
 	ConvertPosToBull(position, bullConnectionPointCS0);
-	ConvertPosToBull(Vector(0, 0, 1), bullWheelDirectionCS0);	// TODO: Find out what this is
-	ConvertPosToBull(Vector(1, 0, 0), bullWheelAxleCS);			// TODO: Find out what this is
-	bullSuspensionRestLength = ConvertDistanceToBull(axle.suspension.springConstant);
+	bullSuspensionRestLength = ConvertDistanceToBull(axle.suspension.springConstant + axle.wheels.springAdditionalLength);
 	bullWheelRadius = ConvertDistanceToBull(axle.wheels.radius);
-	bool bIsFrontWheel = (wheelIndex < 2);						// BUG: Only works with 2 front wheels
+	bool bIsFrontWheel = (wheelIndex < 2); // NOTE: Only works with 2 front wheels
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
-	wheelInfo.m_suspensionStiffness = ConvertDistanceToBull(axle.suspension.springConstant);
-	wheelInfo.m_maxSuspensionForce = ConvertDistanceToBull(axle.suspension.maxBodyForce);
+	wheelInfo.m_maxSuspensionTravelCm = 25;		// lel debeg
+	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;
+
+	//wheel.m_suspensionStiffness = suspensionStiffness;
+	//wheel.m_wheelsDampingRelaxation = suspensionDamping;
+	//wheel.m_wheelsDampingCompression = suspensionCompression;
+	//wheel.m_frictionSlip = wheelFriction;
+	//wheel.m_rollInfluence = rollInfluence;
 
 	return pWheel;
+}
+
+void CPhysicsVehicleController::ShutdownBullVehicle() {
+	m_pEnv->GetBulletEnvironment()->removeVehicle(m_pRaycastVehicle);
+
+	delete m_pRaycaster;
+	delete m_pRaycastVehicle;
+
+	for (int i = 0; i < m_iWheelCount; i++) {
+		m_pEnv->DestroyObject(m_pWheels[i]);
+		m_pWheels[i] = NULL;
+	}
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls)
@@ -187,6 +208,7 @@ void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction)
 //--------------
 void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem) {
 	memset(&debugCarSystem, 0, sizeof(debugCarSystem));
+	NOT_IMPLEMENTED
 }
 
 //---------------------------------------

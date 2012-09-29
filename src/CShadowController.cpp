@@ -15,7 +15,7 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
-ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
+static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// DEBUG
 	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
@@ -93,7 +93,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	AngularImpulse rotspeedHL;
 	ConvertAngularImpulseToHL(rot_speed, rotspeedHL);
 
-	//object->setAngularVelocity(btVector3(0, 0, 0));	// TODO: Remove when physgun rotation issue is resolved.
+	object->setAngularVelocity(btVector3(0, 0, 0));	// TODO: Remove when physgun rotation issue is resolved.
 
 	return secondsToArrival;
 }

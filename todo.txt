@@ -1,3 +1,9 @@
 - Bugs
-	- Player intersecting with an object causes FPS to GRADUALLY decrease. Removing the player from the object will make FPS GRADUALLY increase.
+	- Anything except solid brushes intersecting with an object causes FPS to GRADUALLY decrease. Removing the not solid brush from the object will make FPS GRADUALLY increase (in gm_construct).
 	- Removing a vehicle will cause the game to crash about a second later (delay caused by remover tool deleting parented objects?) in materialsystem.dll
+	- Bouyancy calculations taking too long(?) Large amounts of lag caused if many objects are intersecting with water at once.
+	- gm_flatgrass crash in CPhysicsCollision::VCollideLoad
+	- Dynamite tool causes a crash (probably the dynamite model)
+	- IsAsleep() returning true causes lag freeze (Only when object on displacements?)
+- TODO
+	- Support concave meshes

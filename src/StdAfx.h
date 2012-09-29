@@ -20,7 +20,7 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
-#define DEBUG_DRAW 0
+#define DEBUG_DRAW 1
 
 #define COLLISION_MARGIN 0.004
 
@@ -43,7 +43,7 @@ struct btMassCenterMotionState : public btMotionState
 	btTransform m_worldTrans;
 	void*		m_userPointer;
 
-	btMassCenterMotionState(const btTransform& startTrans = btTransform::getIdentity(),const btTransform& centerOfMassOffset = btTransform::getIdentity())
+	btMassCenterMotionState(const btTransform& startTrans = btTransform::getIdentity(), const btTransform& centerOfMassOffset = btTransform::getIdentity())
 		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(startTrans * centerOfMassOffset), m_userPointer(0)
 	{
 	}

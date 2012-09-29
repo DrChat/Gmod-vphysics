@@ -14,8 +14,8 @@
 // WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
 //#define MULTITHREAD // TODO: Mac and Linux support
 
-#if DEBUG_DRAW == 1
-#include "GLDebugDrawer.h"
+#if DEBUG_DRAW
+#include "CDebugDrawer.h"
 #endif
 
 #ifdef MULTITHREAD
@@ -146,13 +146,13 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
 
-#if DEBUG_DRAW == 1
-	m_debugdraw = new GLDebugDrawer(m_pBulletEnvironment);
+#if DEBUG_DRAW
+	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment, this);
 #endif
 }
 
 CPhysicsEnvironment::~CPhysicsEnvironment() {
-#if DEBUG_DRAW == 1
+#if DEBUG_DRAW
 	delete m_debugdraw;
 #endif
 	SetQuickDelete(true);
@@ -180,7 +180,7 @@ void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory)
 	m_DebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
 }
 
-IVPhysicsDebugOverlay* CPhysicsEnvironment::GetDebugOverlay() {
+IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
 	return m_DebugOverlay;
 }
 
@@ -412,6 +412,10 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		for (int i = 0; i < m_fluids.Count(); i++) {
 			m_fluids[i]->Tick(deltaTime);
 		}
+
+#if DEBUG_DRAW
+		m_debugdraw->DrawWorld();
+#endif
 		/*
 		if (m_pObjectEvent)
 		{
@@ -443,9 +447,6 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_queueDeleteObject) {
 		CleanupDeleteList();
 	}
-#if DEBUG_DRAW == 1
-	m_debugdraw->DrawWorld();
-#endif
 }
 
 bool CPhysicsEnvironment::IsInSimulation() const {

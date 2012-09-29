@@ -39,8 +39,13 @@ class CPhysicsVehicleController : public IPhysicsVehicleController
 		void								VehicleDataReload() { NOT_IMPLEMENTED; }
 
 		// Unexposed functions
+		void								InitVehicleParams(const vehicleparams_t &params);
+		void								InitBullVehicle();
+
 		void								InitCarWheels();
 		CPhysicsObject *					CreateWheel(int wheelIndex, vehicle_axleparams_t &axle);
+
+		void								ShutdownBullVehicle();
 
 	private:
 		vehicleparams_t						m_vehicleParams;
