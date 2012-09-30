@@ -114,10 +114,8 @@ CPhysicsObject::CPhysicsObject() {
 CPhysicsObject::~CPhysicsObject() {
 	if (m_pEnv)
 	{
+		RemoveShadowController();
 		m_pEnv->GetDragController()->RemovePhysicsObject(this);
-		if (m_pShadow)
-			m_pEnv->DestroyShadowController(m_pShadow);
-		m_pShadow = NULL;
 	}
 	
 	if (m_pEnv && m_pObject) {
@@ -602,7 +600,10 @@ IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
 }
 
 void CPhysicsObject::RemoveShadowController() {
-	NOT_IMPLEMENTED;
+	if (m_pShadow)
+		m_pEnv->DestroyShadowController(m_pShadow);
+
+	m_pShadow = NULL;
 }
 
 float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t& params, float secondsToArrival, float dt) {

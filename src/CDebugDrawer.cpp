@@ -13,16 +13,11 @@
 #define RENDER_SDL 0
 
 #if DEBUG_DRAW
-#if RENDER_SDL
-#pragma comment(lib, "SDL")
-#pragma comment(lib, "OpenGL32")
-#pragma comment(lib, "Glu32")
-#endif
-
-// Lel, needs an update.
-class ICurVPhysicsDebugOverlay {
-
-};
+#	if RENDER_SDL
+#		pragma comment(lib, "SDL")
+#		pragma comment(lib, "OpenGL32")
+#		pragma comment(lib, "Glu32")
+#	endif
 
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "0", 0, "Render debug overlay");
 

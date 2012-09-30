@@ -1,6 +1,7 @@
 #ifndef CPHYSICSENVIRONMENT_H
 #define CPHYSICSENVIRONMENT_H
 
+class btThreadSupportInterface;
 class btCollisionConfiguration;
 class btDispatcher;
 class btBroadphaseInterface;
@@ -122,6 +123,7 @@ public:
 private:
 	bool									m_inSimulation;
 	bool									m_queueDeleteObject;
+	btThreadSupportInterface *				m_pThreadSupportCollision;
 	btCollisionConfiguration *				m_pBulletConfiguration;
 	btDispatcher *							m_pBulletDispatcher;
 	btBroadphaseInterface *					m_pBulletBroadphase;
@@ -139,7 +141,7 @@ private:
 	CUtlVector<IController*>				m_controllers;
 	bool									m_deleteQuick;
 	float									m_timestep;
-	IVPhysicsDebugOverlay *					m_DebugOverlay;
+	IVPhysicsDebugOverlay *					m_pDebugOverlay;
 
 	CDebugDrawer *							m_debugdraw;
 };

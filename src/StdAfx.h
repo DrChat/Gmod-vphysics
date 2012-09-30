@@ -20,20 +20,21 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
-#define DEBUG_DRAW 1
+// Win32 because linux can't draw, and I don't debug on mac.
+#if defined(_WIN32) && defined(_DEBUG)
+#	define DEBUG_DRAW 1
+#endif
 
 #define COLLISION_MARGIN 0.004
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
-//extern IPhysics* g_ValvePhysics;
-//extern IPhysicsCollision* g_ValvePhysicsCollision;
 #ifdef _DEBUG
-//#define NOT_IMPLEMENTED __asm {int 3}
+//#	define NOT_IMPLEMENTED __asm {int 3}
 
-#define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#	define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #else
-#define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#	define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #endif
 
 // Putting these in here because I dont want to make a header just for them

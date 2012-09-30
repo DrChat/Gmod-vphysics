@@ -73,7 +73,6 @@ void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull) {
 void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull) {
 	RadianEuler radian(angles);
 	Quaternion q(radian);
-	bull.setValue(q.x, q.z, -q.y, q.w);
 }
 
 void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl) {

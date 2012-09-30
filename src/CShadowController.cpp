@@ -15,7 +15,7 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
-static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
+static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "1", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// DEBUG
 	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
@@ -73,14 +73,14 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setZ(axis.z() * angle);
 
 	btVector3 rot_speed = object->getAngularVelocity();
-	if (cvar_spewshadowdebuginfo.GetBool() && (rot_speed.getX() != 0 || rot_speed.getY() != 0 || rot_speed.getZ() != 0)) {		// DEBUG
-		Msg("---\n");
+	if (cvar_spewshadowdebuginfo.GetBool() && (params.targetRotation.getX() != 0 || params.targetRotation.getY() != 0 || params.targetRotation.getZ() != 0 || params.targetRotation.getW() != 0)) {		// DEBUG
+		//Msg("---\n");
 		//Msg("SPEED BEFORE: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
 		btQuaternion transquat = transform.getRotation();
 		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
-
 		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
 		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
+		Msg("Delta Rotation Vec: %f %f %f\n", deltaAngles.getX(), deltaAngles.getY(), deltaAngles.getZ());
 	}
 
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
@@ -98,7 +98,13 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	return secondsToArrival;
 }
 
+// BUG: in.targetRotation is ABOVE 180 at value 360 when rotation bug happens
+// What happens is the target rotation (y is used as an example) y value will FLIP when dragged across it's axis
+// so it goes from 0 to 360 when dragged one way across
+// or from 0 to -360 the other.
+// So we need to fix this.
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
+	Msg("HL Target Rotation Before Convert: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
 	ConvertPosToBull(in.targetPosition, out.targetPosition);
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);
@@ -128,7 +134,7 @@ static bool IsEqual(const btVector3 &pt0, const btVector3 &pt1) {
 	return pt0.distance2(pt1) < 1e-8f;
 }
 
-CShadowController::CShadowController(CPhysicsObject* pObject, bool allowTranslation, bool allowRotation) {
+CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
 	m_pObject = pObject;
 	m_shadow.dampFactor = 1.0f;
 	m_shadow.teleportDistance = 0;

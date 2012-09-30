@@ -11,19 +11,30 @@
 #include "CPhysicsConstraint.h"
 #include "CPhysicsVehicleController.h"
 
-// WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
-//#define MULTITHREAD // TODO: Mac and Linux support
-
 #if DEBUG_DRAW
-#include "CDebugDrawer.h"
+#	include "CDebugDrawer.h"
 #endif
 
-#ifdef MULTITHREAD
-#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
-#include "BulletMultiThreaded/PlatformDefinitions.h"
-#include "BulletMultiThreaded/Win32ThreadSupport.h"
-#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
-#pragma comment(lib,"BulletMultiThreaded.lib")
+// WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
+// Looks like the person who wrote the above just had some trouble with CMake. Compiling the library was piss easy.
+#define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
+
+#if MULTITHREAD
+#	include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
+#	include "BulletMultiThreaded/PlatformDefinitions.h"
+#	include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+
+#	ifdef _WIN32
+#		include "BulletMultiThreaded/Win32ThreadSupport.h"
+#	else
+#		include "BulletMultiThreaded/PosixThreadSupport.h"
+#	endif
+
+#	ifdef _DEBUG
+#		pragma comment(lib, "BulletMultiThreaded_Debug.lib")
+#	elif _RELEASE
+#		pragma comment(lib, "BulletMultiThreaded_RelWithDebugInfo.lib")
+#	endif
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -83,14 +94,18 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 			return !(body1->isStaticObject() || body1->getInvMass() == 0.0f);
 		return false;
 	}
+
 	CPhysicsObject* pObject0 = (CPhysicsObject*)body0->getUserPointer();
 	CPhysicsObject* pObject1 = (CPhysicsObject*)body1->getUserPointer();
+
 	if (!pObject0 || !pObject1)
 		return true;
 	if (!pObject0->IsMoveable() && !pObject1->IsMoveable())
 		return false;
+
 	if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 	if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
+
 	// FIXME: This is completely broken
 	//if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
 	return true;
@@ -106,31 +121,39 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick = false;
 	m_queueDeleteObject = false;
 	m_inSimulation = false;
-	m_DebugOverlay = NULL;
+	m_pDebugOverlay = NULL;
 
 	m_pCollisionSolver = new CCollisionSolver;
 
-#ifndef MULTITHREAD
+#if !MULTITHREAD
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
-	m_pBulletBroadphase = new btDbvtBroadphase();
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
-	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 #else
 	int maxTasks = 4;
 
+#	ifdef _WIN32
 	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
 								"collision",
 								processCollisionTask,
 								createCollisionLocalStoreMemory,
 								maxTasks));
+#	else
+	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+								"collision",
+								processCollisionTask,
+								createCollisionLocalStoreMemory,
+								maxTasks));
+#	endif
 
+	m_pThreadSupportCollision = threadInterface;
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
-	m_pBulletBroadphase = new btDbvtBroadphase();
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
-	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver(); // TODO: Implement btParallelConstraintSolver
 #endif
+
+	m_pBulletBroadphase = new btDbvtBroadphase();
+	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
@@ -141,6 +164,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_physics_performanceparams = new physics_performanceparams_t;
 	m_physics_performanceparams->Defaults();
+
+	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
 
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;
@@ -166,7 +191,13 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	m_objects.RemoveAll();
 	CleanupDeleteList();
 
+#if MULTITHREAD
+	deleteCollisionLocalStoreMemory();
+	delete m_pThreadSupportCollision;
+#endif
+
 	delete m_pDeleteQueue;
+	delete m_pPhysicsDragController;
 
 	delete m_pBulletEnvironment;
 	delete m_pBulletSolver;
@@ -178,11 +209,11 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 }
 
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
-	m_DebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
+	m_pDebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
 }
 
 IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
-	return m_DebugOverlay;
+	return m_pDebugOverlay;
 }
 
 void CPhysicsEnvironment::SetGravity(const Vector& gravityVector) {
@@ -392,7 +423,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps", true, 0, true, 1);
+static ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps", true, 0, true, 1);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {
