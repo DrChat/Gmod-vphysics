@@ -15,7 +15,7 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
-static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "1", 0);
+static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// DEBUG
 	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
@@ -101,10 +101,12 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 // BUG: in.targetRotation is ABOVE 180 at value 360 when rotation bug happens
 // What happens is the target rotation (y is used as an example) y value will FLIP when dragged across it's axis
 // so it goes from 0 to 360 when dragged one way across
-// or from 0 to -360 the other.
+// or from -0 to -360 the other.
 // So we need to fix this.
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
-	Msg("HL Target Rotation Before Convert: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
+	if (cvar_spewshadowdebuginfo.GetBool())
+		Msg("HL Target Rotation Before Convert: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
+
 	ConvertPosToBull(in.targetPosition, out.targetPosition);
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);

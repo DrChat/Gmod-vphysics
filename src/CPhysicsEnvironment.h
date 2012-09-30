@@ -124,6 +124,7 @@ private:
 	bool									m_inSimulation;
 	bool									m_queueDeleteObject;
 	btThreadSupportInterface *				m_pThreadSupportCollision;
+	btThreadSupportInterface *				m_pThreadSupportSolver;
 	btCollisionConfiguration *				m_pBulletConfiguration;
 	btDispatcher *							m_pBulletDispatcher;
 	btBroadphaseInterface *					m_pBulletBroadphase;

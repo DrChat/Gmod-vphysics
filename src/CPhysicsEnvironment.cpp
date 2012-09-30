@@ -17,7 +17,7 @@
 
 // WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
 // Looks like the person who wrote the above just had some trouble with CMake. Compiling the library was piss easy.
-#define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
+#define MULTITHREAD 1 // TODO: Mac and Linux support (Possibly done, needs testing)
 
 #if MULTITHREAD
 #	include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
@@ -123,38 +123,46 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_inSimulation = false;
 	m_pDebugOverlay = NULL;
 
-	m_pCollisionSolver = new CCollisionSolver;
+#if MULTITHREAD
+	m_pThreadSupportCollision = NULL;
+	m_pThreadSupportSolver = NULL;
 
-#if !MULTITHREAD
-	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
-	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
-#else
 	int maxTasks = 4;
+
+	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
+	static int uniquenum = 0;	// Fixes a crash with multiple environments.
+	char uniquename[1024];
+	sprintf(uniquename, "collision%d", uniquenum);
+	uniquenum++;
 
 #	ifdef _WIN32
 	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-								"collision",
-								processCollisionTask,
-								createCollisionLocalStoreMemory,
-								maxTasks));
+																		uniquename,
+																		processCollisionTask,
+																		createCollisionLocalStoreMemory,
+																		maxTasks));
 #	else
 	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-								"collision",
-								processCollisionTask,
-								createCollisionLocalStoreMemory,
-								maxTasks));
+																		uniquename,
+																		processCollisionTask,
+																		createCollisionLocalStoreMemory,
+																		maxTasks));
 #	endif
 
 	m_pThreadSupportCollision = threadInterface;
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver(); // TODO: Implement btParallelConstraintSolver
+#else
+	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
+	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 #endif
 
 	m_pBulletBroadphase = new btDbvtBroadphase();
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
+	m_pCollisionSolver = new CCollisionSolver;
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 
@@ -165,6 +173,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_physics_performanceparams = new physics_performanceparams_t;
 	m_physics_performanceparams->Defaults();
 
+	m_pBulletEnvironment->getSolverInfo().m_numIterations = 4;
+	m_pBulletEnvironment->getSolverInfo().m_solverMode = SOLVER_SIMD+SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
 
 	//m_simPSIs = 0;
