@@ -23,6 +23,7 @@
 #	include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
 #	include "BulletMultiThreaded/PlatformDefinitions.h"
 #	include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+#	include "BulletMultiThreaded/btParallelConstraintSolver.h"
 
 #	ifdef _WIN32
 #		include "BulletMultiThreaded/Win32ThreadSupport.h"
@@ -131,28 +132,46 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
 	static int uniquenum = 0;	// Fixes a crash with multiple environments.
-	char uniquename[1024];
-	sprintf(uniquename, "collision%d", uniquenum);
+	char uniquenamecollision[1024];
+	char uniquenamesolver[1024];
+	sprintf(uniquenamecollision, "collision%d", uniquenum);
+	sprintf(uniquenamesolver, "solver%d", uniquenum);
 	uniquenum++;
 
 #	ifdef _WIN32
 	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																		uniquename,
+																		uniquenamecollision,
 																		processCollisionTask,
 																		createCollisionLocalStoreMemory,
 																		maxTasks));
+
+	btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																		uniquenamesolver,
+																		SolverThreadFunc,
+																		SolverlsMemoryFunc,
+																		maxTasks));
+	solverThreadInterface->startSPU();
 #	else
 	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																		uniquename,
+																		uniquenamecollision,
 																		processCollisionTask,
 																		createCollisionLocalStoreMemory,
+																		maxTasks));
+
+	btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+																		uniquenamesolver,
+																		SolverThreadFunc,
+																		SolverlsMemoryFunc,
 																		maxTasks));
 #	endif
 
 	m_pThreadSupportCollision = threadInterface;
+	m_pThreadSupportSolver = solverThreadInterface;
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver(); // TODO: Implement btParallelConstraintSolver
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+
+	//m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface); // TODO: Work out bugs
 #else
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
@@ -204,6 +223,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 #if MULTITHREAD
 	deleteCollisionLocalStoreMemory();
 	delete m_pThreadSupportCollision;
+	delete m_pThreadSupportSolver;
 #endif
 
 	delete m_pDeleteQueue;
@@ -212,7 +232,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pBulletEnvironment;
 	delete m_pBulletSolver;
 	delete m_pBulletBroadphase;
-	delete m_pBulletDispatcher;
+	delete m_pBulletDispatcher;		// CRASH HERE
 	delete m_pBulletConfiguration;
 
 	delete m_physics_performanceparams;

@@ -26,7 +26,7 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 	currentSpeed += acceleration;
 }
 
-CPlayerController::CPlayerController(CPhysicsObject* pObject) {
+CPlayerController::CPlayerController(CPhysicsObject *pObject) {
 	m_pObject = pObject;
 	m_handler = NULL;
 	m_maxDeltaPosition = HL2BULL(24); // ConvertDistanceToBull(24);
@@ -38,7 +38,7 @@ CPlayerController::~CPlayerController() {
 	DetachObject();
 }
 
-void CPlayerController::Update(const Vector& position, const Vector& velocity, float secondsToArrival, bool onground, IPhysicsObject* ground) {
+void CPlayerController::Update(const Vector &position, const Vector &velocity, float secondsToArrival, bool onground, IPhysicsObject *ground) {
 	btVector3 targetPositionBull, targetSpeedBull;
 
 	ConvertPosToBull(position, targetPositionBull);
@@ -54,7 +54,7 @@ void CPlayerController::Update(const Vector& position, const Vector& velocity, f
 	m_currentSpeed = targetSpeedBull;
 
 	m_enable = true;
-	m_onground = false;
+	m_onground = onground;
 
 	if (velocity.LengthSqr() <= 0.1f) {
 		m_enable = false;
@@ -100,7 +100,7 @@ void CPlayerController::SetObject(IPhysicsObject *pObject) {
 	AttachObject();
 }
 
-int CPlayerController::GetShadowPosition( Vector* position, QAngle* angles ) {
+int CPlayerController::GetShadowPosition( Vector *position, QAngle *angles ) {
 	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
@@ -124,7 +124,7 @@ void CPlayerController::Jump() {
 	return;
 }
 
-void CPlayerController::GetShadowVelocity(Vector* velocity) {
+void CPlayerController::GetShadowVelocity(Vector *velocity) {
 	btRigidBody *body = m_pObject->GetObject();
 	ConvertPosToHL(body->getLinearVelocity(), *velocity);
 	NOT_IMPLEMENTED;
@@ -193,7 +193,7 @@ void CPlayerController::Tick(float deltaTime) {
 		return;
 	}
 
-	if (m_onground) {
+	if (!m_onground) {
 		btVector3 pgrav = world->getGravity();
 		btVector3 gravSpeed = pgrav * deltaTime;
 		body->setLinearVelocity(body->getLinearVelocity() - gravSpeed);

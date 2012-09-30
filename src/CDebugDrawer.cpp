@@ -10,7 +10,6 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
-#define RENDER_SDL 0
 
 #if DEBUG_DRAW
 #	if RENDER_SDL
@@ -19,10 +18,11 @@
 #		pragma comment(lib, "Glu32")
 #	endif
 
-static ConVar cvar_renderoverlay("vphysics_renderoverlay", "0", 0, "Render debug overlay");
+static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", 0, "Render debug overlay");
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
 	m_pEnv = pEnv;
+	setDebugMode(DBG_DrawAabb | DBG_DrawText | DBG_DrawFeaturesText | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints);
 
 #if RENDER_SDL
 	SDL_Init(SDL_INIT_VIDEO);
@@ -74,7 +74,7 @@ void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const bt
 	ConvertPosToHL(from, HLFrom);
 	ConvertPosToHL(to, HLTo);
 
-	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x(), fromColor.y(), fromColor.z(), false, 0);
+	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x() * 255, fromColor.y() * 255, fromColor.z() * 255, false, 0);
 #endif
 }
 
@@ -82,8 +82,9 @@ void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const bt
 	drawLine(from, to, color, color);
 }
 
-void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
 #if RENDER_SDL
+// This entire function is SDL only.
+void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
 	glPushMatrix ();
 	glTranslatef (p.getX(), p.getY(), p.getZ());
@@ -116,8 +117,8 @@ void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVecto
 	}
 
 	glPopMatrix();
-#endif
 }
+#endif
 
 void CDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& color, btScalar alpha) {
 #if RENDER_SDL
@@ -156,7 +157,7 @@ void CDebugDrawer::drawTriangle(const btVector3& a, const btVector3& b, const bt
 	ConvertPosToHL(a, HLA);
 	ConvertPosToHL(b, HLB);
 	ConvertPosToHL(c, HLC);
-	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x(), color.y(), color.z(), alpha, false, 0);
+	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x() * 255, color.y() * 255, color.z() * 255, alpha * 255, false, 0);
 #endif
 }
 
@@ -167,6 +168,11 @@ void CDebugDrawer::setDebugMode(int debugMode) {
 void CDebugDrawer::draw3dText(const btVector3& location, const char *textString) {
 #if RENDER_SDL
 	glRasterPos3f(location.x(),  location.y(),  location.z());
+#else
+	Vector HLLocation;
+	ConvertPosToHL(location, HLLocation);
+
+	m_overlay->AddTextOverlay(HLLocation, 0, textString);
 #endif
 }
 
@@ -199,7 +205,6 @@ void CDebugDrawer::DrawWorld() {
 			m_overlay = m_pEnv->GetDebugOverlay();
 
 		if (m_overlay) {
-			setDebugMode(DBG_DrawWireframe);
 			m_world->debugDrawWorld();
 		}
 	}
