@@ -106,6 +106,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick = false;
 	m_queueDeleteObject = false;
 	m_inSimulation = false;
+	m_DebugOverlay = NULL;
 
 	m_pCollisionSolver = new CCollisionSolver;
 
@@ -391,7 +392,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of Simulation substeps to do", true, 0, true, 1);
+ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps", true, 0, true, 1);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {

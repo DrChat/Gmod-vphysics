@@ -8,10 +8,14 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+// MPH2INS: 1(miles/hr) = 0.44704(meters/sec)
+#define MPH2MS(x) ((x) * 0.44704)
+
 CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
 	m_pEnv = pEnv;
 	m_pBody = pBody;
 	m_iVehicleType = nVehicleType;
+	InitVehicleParams(params);
 
 	for (int i = 0; i < VEHICLE_MAX_WHEEL_COUNT; i++) {
 		m_pWheels[i] = NULL;
@@ -21,7 +25,6 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	m_iWheelCount = m_vehicleParams.axleCount * m_vehicleParams.wheelsPerAxle;
 
 	// Initialization and setup
-	InitVehicleParams(params);
 	InitBullVehicle();
 	InitCarWheels();
 }
@@ -32,9 +35,9 @@ CPhysicsVehicleController::~CPhysicsVehicleController() {
 
 void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {
 	m_vehicleParams = params;
-	m_vehicleParams.engine.maxSpeed			= ConvertDistanceToBull(params.engine.maxSpeed);		// Needs speed to bull (MPH to bull speed)
-	m_vehicleParams.engine.maxRevSpeed		= ConvertDistanceToBull(params.engine.maxRevSpeed);		// Needs speed to bull (MPH to bull speed)
-	m_vehicleParams.engine.boostMaxSpeed	= ConvertDistanceToBull(params.engine.boostMaxSpeed);	// Needs speed to bull (MPH to bull speed)
+	m_vehicleParams.engine.maxSpeed			= MPH2MS(params.engine.maxSpeed);
+	m_vehicleParams.engine.maxRevSpeed		= MPH2MS(params.engine.maxRevSpeed);
+	m_vehicleParams.engine.boostMaxSpeed	= MPH2MS(params.engine.boostMaxSpeed);
 	m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
 		m_vehicleParams.axles[i].wheels.radius = ConvertDistanceToBull(params.axles[i].wheels.radius);
@@ -138,7 +141,6 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
-	wheelInfo.m_maxSuspensionTravelCm = 25;		// lel debeg
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;
 
 	//wheel.m_suspensionStiffness = suspensionStiffness;

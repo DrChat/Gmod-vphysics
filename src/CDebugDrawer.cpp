@@ -19,7 +19,12 @@
 #pragma comment(lib, "Glu32")
 #endif
 
-static ConVar cvar_renderoverlay("vphysics_renderoverlay", "0", 0, "Whether or not to render to the debug overlay.");
+// Lel, needs an update.
+class ICurVPhysicsDebugOverlay {
+
+};
+
+static ConVar cvar_renderoverlay("vphysics_renderoverlay", "0", 0, "Render debug overlay");
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
 	m_pEnv = pEnv;
@@ -74,7 +79,7 @@ void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const bt
 	ConvertPosToHL(from, HLFrom);
 	ConvertPosToHL(to, HLTo);
 
-	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x(), fromColor.y(), fromColor.z(), false, 0.1f);
+	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x(), fromColor.y(), fromColor.z(), false, 0);
 #endif
 }
 
@@ -156,7 +161,7 @@ void CDebugDrawer::drawTriangle(const btVector3& a, const btVector3& b, const bt
 	ConvertPosToHL(a, HLA);
 	ConvertPosToHL(b, HLB);
 	ConvertPosToHL(c, HLC);
-	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x(), color.y(), color.z(), alpha, false, 0.1f);
+	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x(), color.y(), color.z(), alpha, false, 0);
 #endif
 }
 
@@ -176,14 +181,13 @@ void CDebugDrawer::reportErrorWarning(const char *warningString) {
 
 void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
 #if RENDER_SDL
-		btVector3 to=pointOnB+normalOnB*1;//distance;
-		const btVector3&from = pointOnB;
+		btVector3 to = pointOnB+normalOnB*1; //distance;
+		const btVector3 &from = pointOnB;
 		glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
 		glBegin(GL_LINES);
-		glVertex3d(from.getX(), from.getY(), from.getZ());
-		glVertex3d(to.getX(), to.getY(), to.getZ());
+			glVertex3d(from.getX(), from.getY(), from.getZ());
+			glVertex3d(to.getX(), to.getY(), to.getZ());
 		glEnd();
-
 #endif
 }
 
