@@ -326,8 +326,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		unsigned long surfacesize = *(uint32*)(solid + 8);
 		*/
 		
-		assert(surfaceheader.vphysicsID == 0x59485056); // == "VPHY"
-		assert(surfaceheader.version == 0x100);
+		Assert(surfaceheader.vphysicsID == 0x59485056); // == "VPHY"
+		Assert(surfaceheader.version == 0x100);
 
 		if (surfaceheader.modelType != 0x0)
 		{
@@ -342,7 +342,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		*/
 		
 		info->massCenter = btVector3(legacyheader.mass_center[0], -legacyheader.mass_center[1], -legacyheader.mass_center[2]);
-		assert(legacyheader.dummy[2] == 0x53505649); // == "IVPS"
+		Assert(legacyheader.dummy[2] == 0x53505649); // == "IVPS"
 		const char *convexes = solid + 76;
 
 		Msg("Mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
@@ -354,7 +354,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			short tricount = *(short*)(convexes + position + 12);
 			uint32 vertexoffset = *(uint32*)(convexes + position);
 			const char *vertices = convexes + position + vertexoffset;
-			assert(convexes + position < vertices);
+			Assert(convexes + position < vertices);
 
 			//Msg("Convex with %i triangles and %i vertex offset\n", (int)tricount, (int)vertexoffset);
 
@@ -379,7 +379,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			}
 
 			// Optimize the mesh with a btShapeHull
-			btShapeHull *hull = new btShapeHull(mesh);
+			btShapeHull *hull = new btShapeHull(mesh);	// TODO: Does this leak memory?
 			btScalar margin = mesh->getMargin();
 			bool bOk = hull->buildHull(margin); // HOLY FUCK THIS FUNCTION IS EXPENSIVE
 									// TODO: Flatgrass crash is caused by this function failing (returns false)
@@ -390,8 +390,12 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
 			} else {
+				Warning("hull->buildHull() failed!\n");
+
+				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
+
 				delete hull;
-				delete mesh;
+				//delete mesh;
 			}
 			if (convexes + position >= vertices)
 				break;

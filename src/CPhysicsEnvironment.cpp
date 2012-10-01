@@ -38,6 +38,8 @@
 #	endif
 #endif
 
+#include "BulletCollision/CollisionDispatch/btCollisionDispatcher.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
@@ -131,12 +133,12 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	int maxTasks = 4;
 
 	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
-	static int uniquenum = 0;	// Fixes a crash with multiple environments.
+	static int iUniqueNum = 0;	// Fixes a crash with multiple environments.
 	char uniquenamecollision[1024];
 	char uniquenamesolver[1024];
-	sprintf(uniquenamecollision, "collision%d", uniquenum);
-	sprintf(uniquenamesolver, "solver%d", uniquenum);
-	uniquenum++;
+	sprintf(uniquenamecollision, "collision%d", iUniqueNum);
+	sprintf(uniquenamesolver, "solver%d", iUniqueNum);
+	iUniqueNum++;
 
 #	ifdef _WIN32
 	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
@@ -150,7 +152,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 																		SolverThreadFunc,
 																		SolverlsMemoryFunc,
 																		maxTasks));
-	solverThreadInterface->startSPU();
+	//solverThreadInterface->startSPU();
 #	else
 	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
 																		uniquenamecollision,
@@ -172,6 +174,9 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 
 	//m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface); // TODO: Work out bugs
+
+	//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
+	//m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
 #else
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
@@ -250,7 +255,6 @@ void CPhysicsEnvironment::SetGravity(const Vector& gravityVector) {
 	btVector3 temp;
 	ConvertPosToBull(gravityVector, temp);
 
-	// There's unusually low gravity at default!
 	m_pBulletEnvironment->setGravity(temp);
 }
 
@@ -453,7 +457,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-static ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps", true, 0, true, 1);
+static ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps");
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {

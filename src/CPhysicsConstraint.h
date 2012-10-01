@@ -36,7 +36,12 @@ class CPhysicsConstraint : public IPhysicsConstraint
 		CPhysicsEnvironment *	m_pEnv;
 };
 
-// TODO: Find out how to use m_mindist to make ropes non-rigid.
+// TODO: Find out how to use m_mindist to make ropes non-rigid, otherwise this is essentially a ballsocket.
+class btRopeConstraint: public btPoint2PointConstraint
+{
+
+};
+
 class btDistanceConstraint : public btPoint2PointConstraint
 {
 	protected:

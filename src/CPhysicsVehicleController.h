@@ -45,6 +45,9 @@ class CPhysicsVehicleController : public IPhysicsVehicleController
 		void								InitCarWheels();
 		CPhysicsObject *					CreateWheel(int wheelIndex, vehicle_axleparams_t &axle);
 
+		void								UpdateSteering(const vehicle_controlparams_t &controls, float dt);
+		void								UpdateEngine(const vehicle_controlparams_t &controls, float dt);
+
 		void								ShutdownBullVehicle();
 
 	private:

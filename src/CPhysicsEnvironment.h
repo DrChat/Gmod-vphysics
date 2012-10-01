@@ -126,7 +126,7 @@ private:
 	btThreadSupportInterface *				m_pThreadSupportCollision;
 	btThreadSupportInterface *				m_pThreadSupportSolver;
 	btCollisionConfiguration *				m_pBulletConfiguration;
-	btDispatcher *							m_pBulletDispatcher;
+	btCollisionDispatcher *					m_pBulletDispatcher;
 	btBroadphaseInterface *					m_pBulletBroadphase;
 	btConstraintSolver *					m_pBulletSolver;
 	btDynamicsWorld *						m_pBulletEnvironment;
