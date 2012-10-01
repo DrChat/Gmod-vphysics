@@ -539,6 +539,7 @@ void CPhysicsObject::CalculateForceOffset(const Vector& forceVector, const Vecto
 	NOT_IMPLEMENTED;
 }
 
+// TODO: Thrusters call this
 void CPhysicsObject::CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	NOT_IMPLEMENTED;
 }
@@ -556,7 +557,47 @@ float CPhysicsObject::CalculateAngularDrag(const Vector& objectSpaceRotationAxis
 }
 
 bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
-	NOT_IMPLEMENTED;
+	if (!contactPoint && !contactObject) return false;
+
+	int numManifolds = m_pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++) {
+		btPersistentManifold *contactManifold = m_pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject *obA = contactManifold->getBody0();
+		const btCollisionObject *obB = contactManifold->getBody1();
+
+		if (contactManifold->getNumContacts() <= 0)
+			continue;
+
+		// Does it matter what the index is, or should we just return the first point of contact?
+		btManifoldPoint bullContactPoint = contactManifold->getContactPoint(0);
+
+		if (obA == m_pObject) {
+			btVector3 bullContactVec = bullContactPoint.getPositionWorldOnA();
+
+			if (contactPoint) {
+				ConvertPosToHL(bullContactVec, *contactPoint);
+			}
+
+			if (contactObject) {
+				*contactObject = (IPhysicsObject *)obA->getUserPointer();
+			}
+
+			return true;
+		} else if (obB == m_pObject) {
+			btVector3 bullContactVec = bullContactPoint.getPositionWorldOnB();
+
+			if (contactPoint) {
+				ConvertPosToHL(bullContactVec, *contactPoint);
+			}
+
+			if (contactObject) {
+				*contactObject = (IPhysicsObject *)obB->getUserPointer();
+			}
+
+			return true;
+		}
+	}
+
 	return false;
 }
 
