@@ -327,7 +327,6 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject 
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
 
 	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
-	m_pBulletEnvironment->addConstraint(ballsock, false);
 	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
 }
 
@@ -340,12 +339,12 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *p
 {
 	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
 	btGeneric6DofConstraint *weld = new btGeneric6DofConstraint(*obj1->GetObject(), *obj2->GetObject(),
-		obj1->GetObject()->getWorldTransform().inverse() * obj2->GetObject()->getWorldTransform(), btTransform::getIdentity(), true);
+																obj1->GetObject()->getWorldTransform().inverse() * obj2->GetObject()->getWorldTransform(),
+																btTransform::getIdentity(), true);
 	weld->setLinearLowerLimit(btVector3(0,0,0));
 	weld->setLinearUpperLimit(btVector3(0,0,0));
 	weld->setAngularLowerLimit(btVector3(0,0,0));
 	weld->setAngularUpperLimit(btVector3(0,0,0));
-	m_pBulletEnvironment->addConstraint(weld, false);
 
 	return new CPhysicsConstraint(this, obj1, obj2, weld);
 }
@@ -371,7 +370,6 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObje
 		obj2Pos -= shapeInfo2->massCenter;
 
 	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos);
-	m_pBulletEnvironment->addConstraint(ballsock, false);
 	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
 }
 
@@ -395,7 +393,6 @@ IPhysicsConstraint* CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *
 		obj2Pos -= shapeInfo2->massCenter;
 
 	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.minLength), HL2BULL(length.totalLength));
-	m_pBulletEnvironment->addConstraint(constraint, false);
 	return new CPhysicsConstraint(this, obj1, obj2, constraint);
 }
 
@@ -457,7 +454,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-static ConVar cvar_numsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps");
+static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps");
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {
@@ -474,7 +471,9 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
-		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_numsubsteps.GetInt(), m_timestep/2.0f);
+		// Divide by zero check.
+		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / (cvar_maxsubsteps.GetInt() * 2) : m_timestep;
+		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt(), timestep); // m_timestep/2.0f
 		for (int i = 0; i < m_fluids.Count(); i++) {
 			m_fluids[i]->Tick(deltaTime);
 		}
@@ -585,7 +584,8 @@ void CPhysicsEnvironment::CleanupDeleteList(void) {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject*)m_deadObjects.Element(i);
 
-		delete pObject;
+		delete pObject;	// CRASH HERE ON EXIT (Object has already been deleted!)
+						// Exception is handled and then the game crashes in materialsystem
 	}
 	m_deadObjects.Purge();
 	m_pDeleteQueue->DeleteAll();

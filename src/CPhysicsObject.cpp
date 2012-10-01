@@ -109,6 +109,10 @@ CPhysicsObject::CPhysicsObject() {
 	m_contents = 0;
 	m_pShadow = NULL;
 	m_pFluidController = NULL;
+	m_pEnv = NULL;
+	m_pGameData = NULL;
+	m_pObject = NULL;
+	m_pName = NULL;
 }
 
 CPhysicsObject::~CPhysicsObject() {
@@ -557,7 +561,7 @@ float CPhysicsObject::CalculateAngularDrag(const Vector& objectSpaceRotationAxis
 }
 
 bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
-	if (!contactPoint && !contactObject) return false;
+	if (!contactPoint && !contactObject) return true;
 
 	int numManifolds = m_pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
@@ -598,7 +602,7 @@ bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **cont
 		}
 	}
 
-	return false;
+	return false; // Bool success
 }
 
 void CPhysicsObject::SetShadow(float maxSpeed, float maxAngularSpeed, bool allowPhysicsMovement, bool allowPhysicsRotation) {
@@ -691,6 +695,11 @@ void CPhysicsObject::OutputDebugInfo() const {
 	}
 
 	Msg( "Mass: %f (inv %f)\n", GetMass(), GetInvMass() );
+
+	Vector pos;
+	QAngle ang;
+	GetPosition(&pos, &ang);
+	Msg("Position: %f %f %f\nAngle: %f %f %f\n", pos.x, pos.y, pos.z, ang.x, ang.y, ang.z);
 
 	Vector inertia = GetInertia();
 	Vector invinertia = GetInvInertia();

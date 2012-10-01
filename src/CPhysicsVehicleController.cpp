@@ -129,7 +129,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
 	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
 
-	position += Vector(0, 0, -40);	// The wheels are spawned too high!
+	position += Vector(0, 35, -42);	// The wheels are spawned too high!
 	ConvertPosToBull(position, bullConnectionPointCS0);
 	bullSuspensionRestLength = ConvertDistanceToBull(axle.suspension.springConstant + axle.wheels.springAdditionalLength);
 	bullWheelRadius = ConvertDistanceToBull(axle.wheels.radius);
@@ -137,10 +137,8 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
-	//wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;
+	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;
 	wheelInfo.m_frictionSlip = axle.wheels.frictionScale;			// TODO: How do we convert this?
-	wheelInfo.m_maxSuspensionTravelCm = 100;	// 1 meter. NOTE: Need to unhardcode this later.
-	wheelInfo.m_suspensionStiffness = 10;		// NOTE: Need to unhardcode this later.
 
 	//wheel.m_suspensionStiffness = suspensionStiffness;
 	//wheel.m_wheelsDampingRelaxation = suspensionDamping;
@@ -176,6 +174,7 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 
 	UpdateSteering(controls, dt);
 	UpdateEngine(controls, dt);
+	UpdateWheels(controls, dt);
 
 	m_pRaycastVehicle->updateVehicle(dt);
 }
@@ -187,7 +186,9 @@ void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &co
 	bullCurrentSpeed = bullCurrentSpeed / 3.6; // Convert from km/h to m/s
 
 	// TODO: Calculate for degreesSlow, degreesFast, and degreesBoost
-	steeringVal *= m_vehicleParams.steering.degreesSlow;
+	steeringVal *= m_vehicleParams.steering.degreesFast;
+
+	m_vehicleState.steeringAngle = steeringVal;
 
 	// BUG: Only works for vehicles with 2 front wheels.
 	for (int i = 0; i < 2; i++) {
@@ -196,7 +197,25 @@ void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &co
 }
 
 void CPhysicsVehicleController::UpdateEngine(const vehicle_controlparams_t &controls, float dt) {
+	// Update the operating params
+	float fSpeed = m_pRaycastVehicle->getCurrentSpeedKmHour();
+	fSpeed *= 0.621371; // km/h -> mph
+	m_vehicleState.speed = fSpeed;
+}
 
+void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &controls, float dt) {
+	for (int i = 0; i < m_iWheelCount; i++) {
+		btTransform bullTransform = m_pRaycastVehicle->getWheelTransformWS(i);
+		btVector3 bullPos = bullTransform.getOrigin();
+		btQuaternion bullRot = bullTransform.getRotation();
+
+		Vector HLPos;
+		QAngle HLRot;
+		ConvertPosToHL(bullPos, HLPos);
+		ConvertRotationToHL(bullRot, HLRot);
+
+		m_pWheels[i]->SetPosition(HLPos, HLRot, true);
+	}
 }
 
 float CPhysicsVehicleController::UpdateBooster(float dt) {
@@ -217,8 +236,17 @@ IPhysicsObject *CPhysicsVehicleController::GetWheel(int index) {
 }
 
 bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps) {
-	// Removed for spam
-	//NOT_IMPLEMENTED
+	if ((index >= m_iWheelCount || index < 0) || (!pContactPoint && !pSurfaceProps)) return false;
+
+	btWheelInfo wheelInfo = m_pRaycastVehicle->getWheelInfo(index);
+	if (wheelInfo.m_raycastInfo.m_isInContact) {
+		btVector3 bullContactVec = wheelInfo.m_raycastInfo.m_contactPointWS;
+
+		if (pContactPoint)
+			ConvertPosToHL(bullContactVec, *pContactPoint);
+
+		return true;
+	}
 	return false;
 }
 

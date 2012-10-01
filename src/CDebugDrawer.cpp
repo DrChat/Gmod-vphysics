@@ -23,6 +23,7 @@ static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", 0, "Render debug
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
 	m_pEnv = pEnv;
 	setDebugMode(DBG_DrawAabb | DBG_DrawText | DBG_DrawFeaturesText | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints);
+	//setDebugMode(DBG_MAX_DEBUG_DRAW_MODE);
 
 #if RENDER_SDL
 	SDL_Init(SDL_INIT_VIDEO);

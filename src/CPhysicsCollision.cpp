@@ -288,6 +288,12 @@ struct legacysurfaceheader_t {
 	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
 };
 
+struct ivpmeshheader_t {
+	int		vertexoffset;
+	char	unk[8];
+	short	tricount;
+};
+
 // Purpose: Parses a .phy file's collision
 // TODO: This function is really expensive! In the future, should we
 // generate the data we need and then save it to a mdl.bphy?
@@ -326,7 +332,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		unsigned long surfacesize = *(uint32*)(solid + 8);
 		*/
 		
-		Assert(surfaceheader.vphysicsID == 0x59485056); // == "VPHY"
+		Assert(surfaceheader.vphysicsID == MAKEID('V', 'P', 'H', 'Y'));
 		Assert(surfaceheader.version == 0x100);
 
 		if (surfaceheader.modelType != 0x0)
@@ -342,7 +348,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		*/
 		
 		info->massCenter = btVector3(legacyheader.mass_center[0], -legacyheader.mass_center[1], -legacyheader.mass_center[2]);
-		Assert(legacyheader.dummy[2] == 0x53505649); // == "IVPS"
+		Assert(legacyheader.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
 		const char *convexes = solid + 76;
 
 		Msg("Mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
@@ -350,10 +356,11 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		bull->setMargin(COLLISION_MARGIN);
 		bull->setUserPointer(info);
 		int position = 0;
+
+		// Add all of the convex solids to our compound shape.
 		for (;;) {
-			short tricount = *(short*)(convexes + position + 12);
-			uint32 vertexoffset = *(uint32*)(convexes + position);
-			const char *vertices = convexes + position + vertexoffset;
+			ivpmeshheader_t ivpheader = *(ivpmeshheader_t *)(convexes + position);
+			const char *vertices = convexes + position + ivpheader.vertexoffset;
 			Assert(convexes + position < vertices);
 
 			//Msg("Convex with %i triangles and %i vertex offset\n", (int)tricount, (int)vertexoffset);
@@ -361,7 +368,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			position += 16;
 			btConvexHullShape *mesh = new btConvexHullShape();
 			mesh->setMargin(COLLISION_MARGIN);
-			for (int j = 0; j < tricount; j++)
+			for (int j = 0; j < ivpheader.tricount; j++)
 			{
 				short index1 = *(short*)(convexes + position + 4);
 				short index2 = *(short*)(convexes + position + 8);
@@ -402,14 +409,6 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		}
 		pOutput->solids[i] = (CPhysCollide *)bull;
 	}
-
-	/*g_ValvePhysicsCollision->VCollideLoad(pOutput, solidCount, pBuffer, size, swap);
-	for (int i = 0; i < solidCount; i++) {
-		CPhysCollide *ivp = pOutput->solids[i];
-		if (!ivp) continue;
-		pOutput->solids[i] = (CPhysCollide*)ConvertMeshToBull(ivp);
-		g_ValvePhysicsCollision->DestroyCollide(ivp);
-	}*/
 }
 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
@@ -477,7 +476,7 @@ CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	virtualmeshlist_t *pList = new virtualmeshlist_t;
 	handler->GetVirtualMesh(params.userData, pList);
 
-	btTriangleMesh* btmesh= new btTriangleMesh;
+	btTriangleMesh *btmesh= new btTriangleMesh;
 	btVector3 btvec[3];
 	for (int i = 0; i < pList->triangleCount; i++)
 	{
@@ -487,9 +486,9 @@ CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
 	}
 
-	btBvhTriangleMeshShape* bull = new btBvhTriangleMeshShape(btmesh, true);
+	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(btmesh, true);
 	bull->setMargin(COLLISION_MARGIN);
-	return (CPhysCollide*)bull;
+	return (CPhysCollide *)bull;
 }
 
 bool CPhysicsCollision::SupportsVirtualMesh() {

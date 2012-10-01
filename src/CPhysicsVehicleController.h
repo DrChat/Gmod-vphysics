@@ -47,6 +47,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController
 
 		void								UpdateSteering(const vehicle_controlparams_t &controls, float dt);
 		void								UpdateEngine(const vehicle_controlparams_t &controls, float dt);
+		void								UpdateWheels(const vehicle_controlparams_t &controls, float dt);
 
 		void								ShutdownBullVehicle();
 

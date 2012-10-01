@@ -13,6 +13,8 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject
 	m_pObject2 = pObject2;
 	m_pConstraint = pConstraint;
 	m_pEnv = pEnv;
+
+	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
 }
 
 CPhysicsConstraint::~CPhysicsConstraint()

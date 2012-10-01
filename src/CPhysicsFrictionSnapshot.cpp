@@ -7,7 +7,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject* pObject) {
+CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject *pObject) {
+	//NOT_IMPLEMENTED
 	// Didn't really get anywhere with this
 	/*
 	m_pObject = pObject;
@@ -29,60 +30,61 @@ CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject* pObject) {
 }
 
 CPhysicsFrictionSnapshot::~CPhysicsFrictionSnapshot() {
-
+	//NOT_IMPLEMENTED
 }
 
 bool CPhysicsFrictionSnapshot::IsValid() {
 	//return m_manifold < m_manifolds.Count();
-	//NOT_IMPLEMENTED;
+	//NOT_IMPLEMENTED
 	return false;
 }
 
 IPhysicsObject* CPhysicsFrictionSnapshot::GetObject(int index) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 int CPhysicsFrictionSnapshot::GetMaterial(int index) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
-void CPhysicsFrictionSnapshot::GetContactPoint(Vector& out) {
-	NOT_IMPLEMENTED;
+void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
+	NOT_IMPLEMENTED
 }
 
-void CPhysicsFrictionSnapshot::GetSurfaceNormal(Vector& out) {
-	NOT_IMPLEMENTED;
+void CPhysicsFrictionSnapshot::GetSurfaceNormal(Vector &out) {
+	NOT_IMPLEMENTED
 }
 
 float CPhysicsFrictionSnapshot::GetNormalForce() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 float CPhysicsFrictionSnapshot::GetEnergyAbsorbed() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 void CPhysicsFrictionSnapshot::RecomputeFriction() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsFrictionSnapshot::ClearFrictionForce() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsFrictionSnapshot::MarkContactForDelete() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsFrictionSnapshot::DeleteAllMarkedContacts(bool wakeObjects) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsFrictionSnapshot::NextFrictionData() {
+	NOT_IMPLEMENTED
 	/*
 	m_contactpoint++;
 	if (m_contactpoint >= m_manifolds[m_manifold]->getNumContacts()) {
@@ -93,7 +95,7 @@ void CPhysicsFrictionSnapshot::NextFrictionData() {
 }
 
 float CPhysicsFrictionSnapshot::GetFrictionCoefficient() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
