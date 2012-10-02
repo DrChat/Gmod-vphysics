@@ -41,7 +41,7 @@ void CPhysicsConstraint::Deactivate(void)
 /************************
 * CREATION FUNCTIONS
 ************************/
-CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
+CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	btTransform obj1Pos, obj2Pos;
 	ConvertMatrixToBull(ragdoll.constraintToAttached, obj1Pos);
 	ConvertMatrixToBull(ragdoll.constraintToReference, obj2Pos);
@@ -51,7 +51,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, CPhysicsO
 	return new CPhysicsConstraint(pEnv, obj1, obj2, ballsock);
 }
 
-CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
+CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
 
@@ -107,7 +107,7 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);
 	ConvertPosToBull(length.objectPosition[1], obj2Pos);
 
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+	CPhysicsObject *obj1 = (CPhysicsObject *)pReferenceObject, *obj2 = (CPhysicsObject *)pAttachedObject;
 	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
 	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
 
