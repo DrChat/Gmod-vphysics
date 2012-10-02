@@ -8,110 +8,114 @@ class CPhysicsConstraint;
 
 class CPhysicsObject : public IPhysicsObject {
 	public:
-		CPhysicsObject();
-		~CPhysicsObject();
-		virtual bool						IsStatic() const;
-		virtual bool						IsAsleep() const;
-		virtual bool						IsTrigger() const;
-		virtual bool						IsFluid() const;
-		virtual bool						IsHinged() const;
-		virtual bool						IsCollisionEnabled() const;
-		virtual bool						IsGravityEnabled() const;
-		virtual bool						IsDragEnabled() const;
-		virtual bool						IsMotionEnabled() const;
-		virtual bool						IsMoveable() const;
-		virtual bool						IsAttachedToConstraint(bool bExternalOnly) const;
+											CPhysicsObject();
+											~CPhysicsObject();
+		bool								IsStatic() const;
+		bool								IsAsleep() const;
+		bool								IsTrigger() const;
+		bool								IsFluid() const;
+		bool								IsHinged() const;
+		bool								IsCollisionEnabled() const;
+		bool								IsGravityEnabled() const;
+		bool								IsDragEnabled() const;
+		bool								IsMotionEnabled() const;
+		bool								IsMoveable() const;
+		bool								IsAttachedToConstraint(bool bExternalOnly) const;
 
-		virtual void						EnableCollisions(bool enable);
-		virtual void						EnableGravity(bool enable);
-		virtual void						EnableDrag(bool enable);
-		virtual void						EnableMotion(bool enable);
+		void								EnableCollisions(bool enable);
+		void								EnableGravity(bool enable);
+		void								EnableDrag(bool enable);
+		void								EnableMotion(bool enable);
 
-		virtual void						SetGameData(void *pGameData);
-		virtual void *						GetGameData() const;
-		virtual void						SetGameFlags(unsigned short userFlags);
-		virtual unsigned short				GetGameFlags() const;
-		virtual void						SetGameIndex(unsigned short gameIndex);
-		virtual unsigned short				GetGameIndex() const;
-		virtual void						SetCallbackFlags(unsigned short callbackflags);
-		virtual unsigned short				GetCallbackFlags() const;
+		void								SetGameData(void *pGameData);
+		void *								GetGameData() const;
+		void								SetGameFlags(unsigned short userFlags);
+		unsigned short						GetGameFlags() const;
+		void								SetGameIndex(unsigned short gameIndex);
+		unsigned short						GetGameIndex() const;
+		void								SetCallbackFlags(unsigned short callbackflags);
+		unsigned short						GetCallbackFlags() const;
 
-		virtual void						Wake();
-		virtual void						Sleep();
+		// UNEXPOSED
+		void								AddCallbackFlags(unsigned short flag);
+		void								RemoveCallbackFlags(unsigned short flag);
 
-		virtual void						RecheckCollisionFilter();
-		virtual void						RecheckContactPoints();
+		void								Wake();
+		void								Sleep();
 
-		virtual void						SetMass(float mass);
-		virtual float						GetMass() const;
-		virtual float						GetInvMass() const;
-		virtual Vector						GetInertia() const;
-		virtual Vector						GetInvInertia() const;
-		virtual void						SetInertia(const Vector& inertia);
-		virtual void						SetDamping(const float *speed, const float *rot);
-		virtual void						GetDamping(float *speed, float *rot) const;
-		virtual void						SetDragCoefficient(float *pDrag, float *pAngularDrag);
-		virtual void						SetBuoyancyRatio(float ratio);
-		virtual int							GetMaterialIndex() const;
-		virtual void						SetMaterialIndex(int materialIndex);
-		virtual unsigned int				GetContents() const;
-		virtual void						SetContents(unsigned int contents);
-		virtual float						GetSphereRadius() const;
-		virtual float						GetEnergy() const;
-		virtual Vector						GetMassCenterLocalSpace() const;
+		void								RecheckCollisionFilter();
+		void								RecheckContactPoints();
 
-		virtual void						SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport);
-		virtual void						SetPositionMatrix(const matrix3x4_t&matrix, bool isTeleport);
-		virtual void						GetPosition(Vector *worldPosition, QAngle *angles) const;
-		virtual void						GetPositionMatrix(matrix3x4_t *positionMatrix) const;
+		void								SetMass(float mass);
+		float								GetMass() const;
+		float								GetInvMass() const;
+		Vector								GetInertia() const;
+		Vector								GetInvInertia() const;
+		void								SetInertia(const Vector& inertia);
+		void								SetDamping(const float *speed, const float *rot);
+		void								GetDamping(float *speed, float *rot) const;
+		void								SetDragCoefficient(float *pDrag, float *pAngularDrag);
+		void								SetBuoyancyRatio(float ratio);
+		int									GetMaterialIndex() const;
+		void								SetMaterialIndex(int materialIndex);
+		unsigned int						GetContents() const;
+		void								SetContents(unsigned int contents);
+		float								GetSphereRadius() const;
+		float								GetEnergy() const;
+		Vector								GetMassCenterLocalSpace() const;
 
-		virtual void						SetVelocity(const Vector *velocity, const AngularImpulse *angularVelocity);
-		virtual void						SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity);
-		virtual void						GetVelocity(Vector *velocity, AngularImpulse *angularVelocity) const;
-		virtual void						AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity);
-		virtual void						GetVelocityAtPoint(const Vector& worldPosition, Vector *pVelocity) const;
-		virtual void						GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const;
+		void								SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport);
+		void								SetPositionMatrix(const matrix3x4_t&matrix, bool isTeleport);
+		void								GetPosition(Vector *worldPosition, QAngle *angles) const;
+		void								GetPositionMatrix(matrix3x4_t *positionMatrix) const;
 
-		virtual void						LocalToWorld(Vector *worldPosition, const Vector& localPosition) const;
-		virtual void						WorldToLocal(Vector *localPosition, const Vector& worldPosition) const;
-		virtual void						LocalToWorldVector(Vector *worldVector, const Vector& localVector) const;
-		virtual void						WorldToLocalVector(Vector *localVector, const Vector& worldVector) const;
+		void								SetVelocity(const Vector *velocity, const AngularImpulse *angularVelocity);
+		void								SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity);
+		void								GetVelocity(Vector *velocity, AngularImpulse *angularVelocity) const;
+		void								AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity);
+		void								GetVelocityAtPoint(const Vector& worldPosition, Vector *pVelocity) const;
+		void								GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const;
+
+		void								LocalToWorld(Vector *worldPosition, const Vector& localPosition) const;
+		void								WorldToLocal(Vector *localPosition, const Vector& worldPosition) const;
+		void								LocalToWorldVector(Vector *worldVector, const Vector& localVector) const;
+		void								WorldToLocalVector(Vector *localVector, const Vector& worldVector) const;
 	
-		virtual void						ApplyForceCenter(const Vector& forceVector);
-		virtual void						ApplyForceOffset(const Vector& forceVector, const Vector& worldPosition);
-		virtual void						ApplyTorqueCenter(const AngularImpulse& torque);
+		void								ApplyForceCenter(const Vector& forceVector);
+		void								ApplyForceOffset(const Vector& forceVector, const Vector& worldPosition);
+		void								ApplyTorqueCenter(const AngularImpulse& torque);
 
-		virtual void						CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const;
-		virtual void						CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const;
-		virtual float						CalculateLinearDrag(const Vector& unitDirection) const;
-		virtual float						CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const;
+		void								CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const;
+		void								CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const;
+		float								CalculateLinearDrag(const Vector& unitDirection) const;
+		float								CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const;
 
-		virtual bool						GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const;
+		bool								GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const;
 
-		virtual void						SetShadow(float maxSpeed, float maxAngularSpeed, bool allowPhysicsMovement, bool allowPhysicsRotation);
-		virtual void						UpdateShadow(const Vector& targetPosition, const QAngle& targetAngles, bool tempDisableGravity, float timeOffset);
+		void								SetShadow(float maxSpeed, float maxAngularSpeed, bool allowPhysicsMovement, bool allowPhysicsRotation);
+		void								UpdateShadow(const Vector& targetPosition, const QAngle& targetAngles, bool tempDisableGravity, float timeOffset);
 	
-		virtual int							GetShadowPosition(Vector *position, QAngle *angles) const;
-		virtual IPhysicsShadowController *	GetShadowController() const;
-		virtual void						RemoveShadowController();
-		virtual float						ComputeShadowControl(const hlshadowcontrol_params_t& params, float secondsToArrival, float dt);
+		int									GetShadowPosition(Vector *position, QAngle *angles) const;
+		IPhysicsShadowController *			GetShadowController() const;
+		void								RemoveShadowController();
+		float								ComputeShadowControl(const hlshadowcontrol_params_t& params, float secondsToArrival, float dt);
 
-		virtual const CPhysCollide *		GetCollide() const;
-		virtual const char *				GetName() const;
+		const CPhysCollide *				GetCollide() const;
+		const char *						GetName() const;
 
-		virtual void						BecomeTrigger();
-		virtual void						RemoveTrigger();
+		void								BecomeTrigger();
+		void								RemoveTrigger();
 
-		virtual void						BecomeHinged(int localAxis);
-		virtual void						RemoveHinged();
+		void								BecomeHinged(int localAxis);
+		void								RemoveHinged();
 
-		virtual IPhysicsFrictionSnapshot *	CreateFrictionSnapshot();
-		virtual void						DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot);
+		IPhysicsFrictionSnapshot *			CreateFrictionSnapshot();
+		void								DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot);
 
-		virtual void						OutputDebugInfo() const;
+		void								OutputDebugInfo() const;
 
-		virtual CPhysicsFluidController *	GetFluidController(void) { return m_pFluidController; }
-		virtual void						SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
+		CPhysicsFluidController *			GetFluidController(void) { return m_pFluidController; }
+		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	public:
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams);
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();

@@ -121,13 +121,13 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	// cache the wheel object pointer
 	m_pWheels[wheelIndex] = pWheel;
 
-	pWheel->SetCallbackFlags( pWheel->GetCallbackFlags() | CALLBACK_IS_VEHICLE_WHEEL );
+	pWheel->AddCallbackFlags( CALLBACK_IS_VEHICLE_WHEEL );
 
 	// Create the wheel in bullet
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
-	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
+	btVector3 bullWheelDirectionCS0(0,-1,0);		// TODO: Figure out what this is.
 	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
 
 	position += Vector(0, 35, -42);	// The wheels are spawned too high!

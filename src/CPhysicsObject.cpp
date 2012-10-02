@@ -265,6 +265,16 @@ unsigned short CPhysicsObject::GetCallbackFlags() const {
 	return m_callbacks;
 }
 
+// UNEXPOSED
+void CPhysicsObject::AddCallbackFlags(unsigned short flags) {
+	m_callbacks |= flags;
+}
+
+// UNEXPOSED
+void CPhysicsObject::RemoveCallbackFlags(unsigned short flags) {
+	m_callbacks &= ~(flags);
+}
+
 void CPhysicsObject::Wake() {
 	m_pObject->setActivationState(ACTIVE_TAG);
 }
@@ -397,9 +407,13 @@ float CPhysicsObject::GetEnergy() const {
 	return ConvertEnergyToHL(e);
 }
 
+// Local space means from the origin of the model
 Vector CPhysicsObject::GetMassCenterLocalSpace() const {
-	NOT_IMPLEMENTED;
-	return Vector();
+	btTransform bullTransform = ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset;
+	Vector HLMassCenter;
+	ConvertPosToHL(bullTransform.getOrigin(), HLMassCenter);
+
+	return HLMassCenter;
 }
 
 void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport) {

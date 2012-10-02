@@ -436,6 +436,8 @@ int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vect
 	}
 	*outVerts = new Vector[count];
 	int k = 0;
+
+	// BUG: This doesn't work on concave meshes!
 	for (int i = 0; i < compound->getNumChildShapes(); i++)
 	{
 		btConvexHullShape *hull = (btConvexHullShape*)compound->getChildShape(i);
@@ -462,7 +464,7 @@ void CPhysicsCollision::DestroyQueryModel(ICollisionQuery *pQuery) {
 	NOT_IMPLEMENTED;
 }
 
-IPhysicsCollision* CPhysicsCollision::ThreadContextCreate() {
+IPhysicsCollision *CPhysicsCollision::ThreadContextCreate() {
 	return new CPhysicsCollision;
 }
 
@@ -470,7 +472,7 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContex) {
 	delete (CPhysicsCollision*)pThreadContex;
 }
 
-CPhysCollide* CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
+CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
 	IVirtualMeshEvent *handler = params.pMeshEventHandler;
 
 	virtualmeshlist_t *pList = new virtualmeshlist_t;
