@@ -36,12 +36,13 @@ class CPhysicsConstraint : public IPhysicsConstraint
 		CPhysicsEnvironment *	m_pEnv;
 };
 
-// TODO: Find out how to use m_mindist to make ropes non-rigid, otherwise this is essentially a ballsocket.
+// TODO: Should we use point to point ropes or soft body ropes?
 class btRopeConstraint: public btPoint2PointConstraint
 {
 
 };
 
+// TODO: Find out how to use m_mindist to make ropes non-rigid, otherwise this is essentially a ballsocket.
 class btDistanceConstraint : public btPoint2PointConstraint
 {
 	protected:
@@ -102,5 +103,14 @@ class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 		void	SetErrorParams(const constraint_groupparams_t &params) { NOT_IMPLEMENTED; };
 		void	SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1) { NOT_IMPLEMENTED; };
 };
+
+// CONSTRAINT CREATION FUNCTIONS
+CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll);
+CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge);
+CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed);
+CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding);
+CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket);
+CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
+CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
 
 #endif

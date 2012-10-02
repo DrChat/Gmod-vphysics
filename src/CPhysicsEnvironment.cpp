@@ -15,9 +15,8 @@
 #	include "CDebugDrawer.h"
 #endif
 
-// WARNING: ATTEMPTING TO USE MULTITHREADING MAY CAUSE BRAINDAMGE DUE TO THE COMPLEXITY OF BUILDING BulletMultiThreaded.lib
-// Looks like the person who wrote the above just had some trouble with CMake. Compiling the library was piss easy.
 #define MULTITHREAD 1 // TODO: Mac and Linux support (Possibly done, needs testing)
+#define USE_PARALLEL_SOLVER 0 // TODO: This crashes right now!
 
 #if MULTITHREAD
 #	include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
@@ -81,7 +80,7 @@ class CCollisionSolver : public btOverlapFilterCallback {
 	public:
 		CCollisionSolver() {m_pSolver = NULL;}
 		void SetHandler(IPhysicsCollisionSolver *pSolver) {m_pSolver = pSolver;}
-		virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0,btBroadphaseProxy *proxy1) const;
+		virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const;
 	private:
 		IPhysicsCollisionSolver *m_pSolver;
 };
@@ -114,15 +113,14 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	return true;
 }
 
-void CPhysicsEnvironment_TickCallBack(btDynamicsWorld *world, btScalar timeStep)
-{
+void CPhysicsEnvironment_TickCallBack(btDynamicsWorld *world, btScalar timeStep) {
 	CPhysicsEnvironment *phy = (CPhysicsEnvironment *)(world->getWorldUserInfo());
 	phy->BulletTick(timeStep);
 }
 
 CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick = false;
-	m_queueDeleteObject = false;
+	m_bUseDeleteQueue = false;
 	m_inSimulation = false;
 	m_pDebugOverlay = NULL;
 
@@ -147,12 +145,14 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 																		createCollisionLocalStoreMemory,
 																		maxTasks));
 
+#		if USE_PARALLEL_SOLVER
 	btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
 																		uniquenamesolver,
 																		SolverThreadFunc,
 																		SolverlsMemoryFunc,
 																		maxTasks));
-	//solverThreadInterface->startSPU();
+	solverThreadInterface->startSPU();
+#		endif
 #	else
 	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
 																		uniquenamecollision,
@@ -160,23 +160,30 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 																		createCollisionLocalStoreMemory,
 																		maxTasks));
 
+#		if USE_PARALLEL_SOLVER
 	btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
 																		uniquenamesolver,
 																		SolverThreadFunc,
 																		SolverlsMemoryFunc,
 																		maxTasks));
+#		endif
+#	endif
+
+#	if USE_PARALLEL_SOLVER
+	m_pThreadSupportSolver = solverThreadInterface;
 #	endif
 
 	m_pThreadSupportCollision = threadInterface;
-	m_pThreadSupportSolver = solverThreadInterface;
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 
-	//m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface); // TODO: Work out bugs
-
+#	if USE_PARALLEL_SOLVER
+	m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface); // TODO: Crashes
 	//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
-	//m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
+	m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
+#	else
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+#	endif
 #else
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
@@ -217,7 +224,6 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 #endif
 	SetQuickDelete(true);
 
-	// TODO: Is it possible for an object to be on this list AND the delete list?
 	for (int i = m_objects.Count()-1; i >= 0; --i) {
 		CPhysicsObject *pObject = (CPhysicsObject*)(m_objects[i]);
 		delete pObject;
@@ -239,7 +245,10 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	// Remove the threads AFTER we remove what's using them!
 	deleteCollisionLocalStoreMemory();
 	delete m_pThreadSupportCollision;
+
+#	if USE_PARALLEL_SOLVER
 	delete m_pThreadSupportSolver;
+#	endif
 #endif
 
 	delete m_physics_performanceparams;
@@ -294,11 +303,12 @@ IPhysicsObject *CPhysicsEnvironment::CreateSphereObject(float radius, int materi
 void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	if (!pObject) return;
 	m_objects.FindAndRemove(pObject);
-	if (m_inSimulation || m_queueDeleteObject) {
+	if (m_inSimulation || m_bUseDeleteQueue) {
 		((CPhysicsObject *)pObject)->AddCallbackFlags(CALLBACK_MARKED_FOR_DELETE);
 		m_deadObjects.AddToTail(pObject);
 	} else {
 		delete pObject;
+		pObject = NULL;
 	}
 }
 
@@ -317,90 +327,57 @@ IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, 
 	return NULL;
 }
 
-void CPhysicsEnvironment::DestroySpring(IPhysicsSpring*) {
+void CPhysicsEnvironment::DestroySpring(IPhysicsSpring *pSpring) {
 	NOT_IMPLEMENTED;
 }
 
-IPhysicsConstraint *CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) 
-{
-	btTransform obj1Pos, obj2Pos;
-	ConvertMatrixToBull(ragdoll.constraintToAttached, obj1Pos);
-	ConvertMatrixToBull(ragdoll.constraintToReference, obj2Pos);
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-
-	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
-	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
+IPhysicsConstraint *CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
+	return ::CreateRagdollConstraint(this, pReferenceObject, pAttachedObject, pGroup, ragdoll);
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreateHingeConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	return ::CreateHingeConstraint(this, pReferenceObject, pAttachedObject, pGroup, hinge);
 }
 
-IPhysicsConstraint *CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed)
-{
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	btGeneric6DofConstraint *weld = new btGeneric6DofConstraint(*obj1->GetObject(), *obj2->GetObject(),
-																obj1->GetObject()->getWorldTransform().inverse() * obj2->GetObject()->getWorldTransform(),
-																btTransform::getIdentity(), true);
-	weld->setLinearLowerLimit(btVector3(0,0,0));
-	weld->setLinearUpperLimit(btVector3(0,0,0));
-	weld->setAngularLowerLimit(btVector3(0,0,0));
-	weld->setAngularUpperLimit(btVector3(0,0,0));
-
-	return new CPhysicsConstraint(this, obj1, obj2, weld);
+IPhysicsConstraint *CPhysicsEnvironment::CreateFixedConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed) {
+	return ::CreateFixedConstraint(this, pReferenceObject, pAttachedObject, pGroup, fixed);
 }
 
-IPhysicsConstraint *CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding)
-{
-	NOT_IMPLEMENTED;
-	return NULL;
+IPhysicsConstraint *CPhysicsEnvironment::CreateSlidingConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
+	return ::CreateSlidingConstraint(this, pReferenceObject, pAttachedObject, pGroup, sliding);
 }
 
-IPhysicsConstraint *CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {	
-	btVector3 obj1Pos, obj2Pos;
-	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
-	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
-
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
-
-	if (shapeInfo1)
-		obj1Pos -= shapeInfo1->massCenter;
-	if (shapeInfo2)
-		obj2Pos -= shapeInfo2->massCenter;
-
-	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos);
-	return new CPhysicsConstraint(this, obj1, obj2, ballsock);
+IPhysicsConstraint *CPhysicsEnvironment::CreateBallsocketConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
+	return ::CreateBallsocketConstraint(this, pReferenceObject, pAttachedObject, pGroup, ballsocket);
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreatePulleyConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	return ::CreatePulleyConstraint(this, pReferenceObject, pAttachedObject, pGroup, pulley);
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length) {
-	btVector3 obj1Pos, obj2Pos;
-	ConvertPosToBull(length.objectPosition[0], obj1Pos);
-	ConvertPosToBull(length.objectPosition[1], obj2Pos);
-
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
-
-	if (shapeInfo1)
-		obj1Pos -= shapeInfo1->massCenter;
-	if (shapeInfo2)
-		obj2Pos -= shapeInfo2->massCenter;
-
-	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.minLength), HL2BULL(length.totalLength));
-	return new CPhysicsConstraint(this, obj1, obj2, constraint);
+	return ::CreateLengthConstraint(this, pReferenceObject, pAttachedObject, pGroup, length);
 }
 
 void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
-	CPhysicsConstraint *constraint = (CPhysicsConstraint *)pConstraint;
-	delete constraint;
+	if (!pConstraint) return;
+
+	if (m_deleteQuick) {
+		IPhysicsObject *pObj0 = pConstraint->GetReferenceObject();
+		if (pObj0)
+			pObj0->Wake();
+
+		IPhysicsObject *pObj1 = pConstraint->GetAttachedObject();
+		if (pObj1)
+			pObj1->Wake();
+	}
+
+	if (m_inSimulation) {
+		pConstraint->Deactivate();
+		m_pDeleteQueue->QueueForDelete(pConstraint);
+	} else {
+		delete pConstraint;
+	}
 }
 
 IPhysicsConstraintGroup *CPhysicsEnvironment::CreateConstraintGroup(const constraint_groupparams_t &groupParams) {
@@ -511,7 +488,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		*/
 	}
 	m_inSimulation = false;
-	if (!m_queueDeleteObject) {
+	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
 }
@@ -578,23 +555,31 @@ const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCoun
 }
 
 bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment) {
-	NOT_IMPLEMENTED;
-	return false;
+	if (pDestinationEnvironment == this) {
+		m_objects.AddToTail(pObject);
+		return true;
+	} else {
+		m_objects.FindAndRemove(pObject);
+		return pDestinationEnvironment->TransferObject(pObject, pDestinationEnvironment);
+	}
 }
 
 void CPhysicsEnvironment::CleanupDeleteList(void) {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject*)m_deadObjects.Element(i);
+		assert(pObject);
 
 		delete pObject;	// CRASH HERE ON EXIT (Object has already been deleted!)
 						// Exception is handled and then the game crashes in materialsystem
+						// The objects are the vehicle controller's wheels, they've already
+						// been deleted!
 	}
 	m_deadObjects.Purge();
 	m_pDeleteQueue->DeleteAll();
 }
 
 void CPhysicsEnvironment::EnableDeleteQueue(bool enable) {
-	m_queueDeleteObject = enable;
+	m_bUseDeleteQueue = enable;
 }
 
 bool CPhysicsEnvironment::Save(const physsaveparams_t &params) {
@@ -620,10 +605,7 @@ bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 		if (((CPhysicsObject*)m_objects[i])->GetObject()->getCollisionShape() == (btCollisionShape*)pCollide)
 			return true;
 	}
-	for (int i = 0; i < m_deadObjects.Count(); i++) {
-		if (((CPhysicsObject*)m_deadObjects[i])->GetObject()->getCollisionShape() == (btCollisionShape*)pCollide)
-			return true;
-	}
+
 	return false;
 }
 	
@@ -695,7 +677,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 	}
 
 	m_inSimulation = false;
-	if (!m_queueDeleteObject) {
+	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
 

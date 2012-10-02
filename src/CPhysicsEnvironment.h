@@ -122,7 +122,7 @@ public:
 	IPhysicsObjectEvent *					m_pObjectEvent;
 private:
 	bool									m_inSimulation;
-	bool									m_queueDeleteObject;
+	bool									m_bUseDeleteQueue;
 	btThreadSupportInterface *				m_pThreadSupportCollision;
 	btThreadSupportInterface *				m_pThreadSupportSolver;
 	btCollisionConfiguration *				m_pBulletConfiguration;

@@ -796,8 +796,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		angDrag = pParams->dragCoefficient;
 	}
 
-	if (!IsStatic() && GetCollide() )
-	{
+	if (!IsStatic() && GetCollide()) {
 		btCollisionShape  *shape = m_pObject->getCollisionShape();
 
 		btVector3 min, max, delta;
