@@ -10,16 +10,12 @@
 //#include "tier0/memdbgon.h"
 
 void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
-	btQuaternion qinv = q.inverse();
-	qt = qinv * p;
+	qt = q.inverse() * p;
 	qt.normalize();
 }
 
 static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
-	// DEBUG
-	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
-
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
 		fraction *= dt / secondsToArrival;
@@ -60,6 +56,9 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	// BUG: Physgun rotation bug most likely caused here
 	// Set breakpoint @ ComputeShadowControllerHL WHILE holding object in spazout rotation
+	// DEBUG
+	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
+
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
@@ -100,9 +99,9 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 // BUG: in.targetRotation is ABOVE 180 at value 360 when rotation bug happens
 // What happens is the target rotation (y is used as an example) y value will FLIP when dragged across it's axis
-// so it goes from 0 to 360 when dragged one way across
-// or from -0 to -360 the other.
-// So we need to fix this.
+// So drag it one way, it adds +360
+// The other, -360
+// So apparently it's the exact opposite in a quaternion.
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
 	if (cvar_spewshadowdebuginfo.GetBool())
 		Msg("HL Target Rotation Before Convert: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);

@@ -15,6 +15,7 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	m_pEnv = pEnv;
 	m_pBody = pBody;
 	m_iVehicleType = nVehicleType;
+	memset(&m_vehicleState, 0, sizeof(m_vehicleState));
 	InitVehicleParams(params);
 
 	for (int i = 0; i < VEHICLE_MAX_WHEEL_COUNT; i++) {
@@ -199,8 +200,13 @@ void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &co
 void CPhysicsVehicleController::UpdateEngine(const vehicle_controlparams_t &controls, float dt) {
 	// Update the operating params
 	float fSpeed = m_pRaycastVehicle->getCurrentSpeedKmHour();
-	fSpeed *= 0.621371; // km/h -> mph
-	m_vehicleState.speed = fSpeed;
+	fSpeed *= 0.27777778; // km/h -> m/s
+	m_vehicleState.speed = ConvertDistanceToHL(-fSpeed);
+
+	for (int i = 2; i < m_iWheelCount; i++) {
+		m_pRaycastVehicle->applyEngineForce(-controls.throttle * 1000, i);
+		m_pRaycastVehicle->setBrake(0, i);
+	}
 }
 
 void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &controls, float dt) {

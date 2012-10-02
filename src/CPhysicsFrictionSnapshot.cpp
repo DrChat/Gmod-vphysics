@@ -4,62 +4,81 @@
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 
+#include "convert.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
 CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject *pObject) {
-	//NOT_IMPLEMENTED
-	// Didn't really get anywhere with this
-	/*
 	m_pObject = pObject;
-	m_manifold = 0;
-	m_contactpoint = 0;
-	btRigidBody* body = pObject->GetObject();
-	btDynamicsWorld* pEnv = pObject->GetVPhysicsEnvironment()->GetBulletEnvironment();
-	btDispatcher* dispatch = pEnv->getDispatcher();
-	int count = dispatch->getNumManifolds();
-	for (int i = 0; i < count; i++) {
-		btPersistentManifold* manifold = dispatch->getManifoldByIndexInternal(i);
-		void* body0 = manifold->getBody0();
-		void* body1 = manifold->getBody1();
-		if (body0 == body || body1 == body) {
-			m_manifolds.AddToTail(manifold);
+	m_iCurContactPoint = 0;
+	m_iCurManifold = 0;
+
+	CPhysicsEnvironment *pEnv = pObject->GetVPhysicsEnvironment();
+	btRigidBody *pBody = pObject->GetObject();
+	int numManifolds = pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++) {
+		btPersistentManifold *pManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject *pObjA = pManifold->getBody0();
+		const btCollisionObject *pObjB = pManifold->getBody1();
+
+		if (pManifold->getNumContacts() <= 0)
+			continue;
+
+		if (pObjA == pBody || pObjB == pBody) {
+			m_manifolds.AddToTail(pManifold);
 		}
 	}
-	*/
 }
 
 CPhysicsFrictionSnapshot::~CPhysicsFrictionSnapshot() {
-	//NOT_IMPLEMENTED
+	m_manifolds.RemoveAll();
 }
 
 bool CPhysicsFrictionSnapshot::IsValid() {
-	//return m_manifold < m_manifolds.Count();
-	//NOT_IMPLEMENTED
-	return false;
+	return m_iCurManifold < m_manifolds.Count();
 }
 
-IPhysicsObject* CPhysicsFrictionSnapshot::GetObject(int index) {
-	NOT_IMPLEMENTED
+IPhysicsObject *CPhysicsFrictionSnapshot::GetObject(int index) {
+	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
+	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
+
+	// TODO: Index 1 or 0?
+	if (index == 1)
+		return (IPhysicsObject *)pObjA->getUserPointer();
+	else
+		return (IPhysicsObject *)pObjB->getUserPointer();
+
 	return NULL;
 }
 
 int CPhysicsFrictionSnapshot::GetMaterial(int index) {
-	NOT_IMPLEMENTED
+	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
+	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
+
+	// TODO: Index 1 or 0?
+	if (index == 1)
+		return ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex();
+	else
+		return ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
+
 	return 0;
 }
 
 void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
-	NOT_IMPLEMENTED
+	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
+	btVector3 bullPos = bullManifoldPoint.getPositionWorldOnA(); // TODO: A or B?
+	ConvertPosToHL(bullPos, out);
 }
 
 void CPhysicsFrictionSnapshot::GetSurfaceNormal(Vector &out) {
-	NOT_IMPLEMENTED
+	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
+	ConvertPosToHL(bullManifoldPoint.m_normalWorldOnB, out);
 }
 
 float CPhysicsFrictionSnapshot::GetNormalForce() {
-	NOT_IMPLEMENTED
-	return 0;
+	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
+	return bullManifoldPoint.m_appliedImpulse;
 }
 
 float CPhysicsFrictionSnapshot::GetEnergyAbsorbed() {
@@ -84,17 +103,15 @@ void CPhysicsFrictionSnapshot::DeleteAllMarkedContacts(bool wakeObjects) {
 }
 
 void CPhysicsFrictionSnapshot::NextFrictionData() {
-	NOT_IMPLEMENTED
-	/*
-	m_contactpoint++;
-	if (m_contactpoint >= m_manifolds[m_manifold]->getNumContacts()) {
-		m_manifold++;
-		m_contactpoint = 0;
+	m_iCurContactPoint++;
+	if (m_iCurContactPoint >= m_manifolds[m_iCurManifold]->getNumContacts()) {
+		m_iCurManifold++;
+		m_iCurContactPoint = 0;
 	}
-	*/
 }
 
 float CPhysicsFrictionSnapshot::GetFrictionCoefficient() {
+	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
 	NOT_IMPLEMENTED
 	return 0;
 }

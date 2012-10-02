@@ -2,11 +2,12 @@
 #define CPHYSICSFRICTIONSNAPSHOT_H
 
 class CPhysicsObject;
+class btPersistentManifold;
 
 class CPhysicsFrictionSnapshot : public IPhysicsFrictionSnapshot
 {
 	public:
-											CPhysicsFrictionSnapshot(CPhysicsObject* pObject);
+											CPhysicsFrictionSnapshot(CPhysicsObject *pObject);
 		virtual								~CPhysicsFrictionSnapshot();
 		virtual bool						IsValid();
 
@@ -28,10 +29,10 @@ class CPhysicsFrictionSnapshot : public IPhysicsFrictionSnapshot
 		virtual void						NextFrictionData();
 		virtual float						GetFrictionCoefficient();
 	private:
-		CUtlVector<btPersistentManifold*>	m_manifolds;
+		CUtlVector<btPersistentManifold *>	m_manifolds;
 		CPhysicsObject *					m_pObject;
-		int									m_manifold;
-		int									m_contactpoint;
+		int									m_iCurManifold;
+		int									m_iCurContactPoint;
 };
 
 #endif
