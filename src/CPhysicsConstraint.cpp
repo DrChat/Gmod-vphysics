@@ -45,10 +45,11 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform obj1Pos, obj2Pos;
 	ConvertMatrixToBull(ragdoll.constraintToAttached, obj1Pos);
 	ConvertMatrixToBull(ragdoll.constraintToReference, obj2Pos);
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
+	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
 
-	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
-	return new CPhysicsConstraint(pEnv, obj1, obj2, ballsock);
+	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, ballsock);
 }
 
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
@@ -62,21 +63,41 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 }
 
 CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed) {
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	btGeneric6DofConstraint *weld = new btGeneric6DofConstraint(*obj1->GetObject(), *obj2->GetObject(),
-																obj1->GetObject()->getWorldTransform().inverse() * obj2->GetObject()->getWorldTransform(),
+	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	btGeneric6DofConstraint *weld = new btGeneric6DofConstraint(*pObjA->GetObject(), *pObjB->GetObject(),
+																pObjA->GetObject()->getWorldTransform().inverse() * pObjB->GetObject()->getWorldTransform(),
 																btTransform::getIdentity(), true);
 	weld->setLinearLowerLimit(btVector3(0,0,0));
 	weld->setLinearUpperLimit(btVector3(0,0,0));
 	weld->setAngularLowerLimit(btVector3(0,0,0));
 	weld->setAngularUpperLimit(btVector3(0,0,0));
 
-	return new CPhysicsConstraint(pEnv, obj1, obj2, weld);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, weld);
 }
 
 CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
-	NOT_IMPLEMENTED;
-	return NULL;
+	//btSliderConstraint
+	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	btVector3 bullSlideAxisRef;
+	ConvertDirectionToBull(sliding.slideAxisRef, bullSlideAxisRef);
+
+	btTransform frameInA = btTransform::getIdentity();
+	ConvertMatrixToBull(sliding.attachedRefXform, frameInA);
+	frameInA.setOrigin(bullSlideAxisRef);
+
+	btSliderConstraint *slider = new btSliderConstraint(*pObjA->GetObject(), *pObjB->GetObject(), frameInA, btTransform::getIdentity(), true);
+
+	if (sliding.limitMin != sliding.limitMax) {
+		slider->setLowerLinLimit(sliding.limitMin);
+		slider->setUpperLinLimit(sliding.limitMax);
+	}
+
+	slider->setLowerAngLimit(0);
+	slider->setUpperAngLimit(0);
+
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, slider);
 }
 
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
@@ -84,17 +105,18 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
 	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
 
-	CPhysicsObject *obj1 = (CPhysicsObject*)pReferenceObject, *obj2 = (CPhysicsObject*)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)pObjA->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)pObjB->GetObject()->getCollisionShape()->getUserPointer();
 
 	if (shapeInfo1)
 		obj1Pos -= shapeInfo1->massCenter;
 	if (shapeInfo2)
 		obj2Pos -= shapeInfo2->massCenter;
 
-	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos);
-	return new CPhysicsConstraint(pEnv, obj1, obj2, ballsock);
+	btPoint2PointConstraint *ballsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, ballsock);
 }
 
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
@@ -107,15 +129,16 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);
 	ConvertPosToBull(length.objectPosition[1], obj2Pos);
 
-	CPhysicsObject *obj1 = (CPhysicsObject *)pReferenceObject, *obj2 = (CPhysicsObject *)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)obj1->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)obj2->GetObject()->getCollisionShape()->getUserPointer();
+	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)pObjA->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)pObjB->GetObject()->getCollisionShape()->getUserPointer();
 
 	if (shapeInfo1)
 		obj1Pos -= shapeInfo1->massCenter;
 	if (shapeInfo2)
 		obj2Pos -= shapeInfo2->massCenter;
 
-	btPoint2PointConstraint *constraint = new btDistanceConstraint(*obj1->GetObject(), *obj2->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.minLength), HL2BULL(length.totalLength));
-	return new CPhysicsConstraint(pEnv, obj1, obj2, constraint);
+	btPoint2PointConstraint *constraint = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, constraint);
 }

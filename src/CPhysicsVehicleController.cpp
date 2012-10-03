@@ -40,9 +40,11 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 	m_vehicleParams.engine.maxRevSpeed		= MPH2MS(params.engine.maxRevSpeed);
 	m_vehicleParams.engine.boostMaxSpeed	= MPH2MS(params.engine.boostMaxSpeed);
 	m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
+
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
 		m_vehicleParams.axles[i].wheels.radius = ConvertDistanceToBull(params.axles[i].wheels.radius);
 		m_vehicleParams.axles[i].wheels.springAdditionalLength = ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
+		m_vehicleParams.axles[i].suspension.springConstant = ConvertDistanceToBull(params.axles[i].suspension.springConstant);
 	}
 }
 
@@ -127,25 +129,20 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
-	btVector3 bullWheelDirectionCS0(0,-1,0);		// TODO: Figure out what this is.
+	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
 	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
 
-	position += Vector(0, 35, -42);	// The wheels are spawned too high!
+	// TODO: We shouldn't have to reposition the wheels. Find out how to disable collisions between the raycast wheels and our body.
+	position += Vector(0, 35, 0);
+	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
 	ConvertPosToBull(position, bullConnectionPointCS0);
-	bullSuspensionRestLength = ConvertDistanceToBull(axle.suspension.springConstant + axle.wheels.springAdditionalLength);
-	bullWheelRadius = ConvertDistanceToBull(axle.wheels.radius);
-	bool bIsFrontWheel = (wheelIndex < 2); // NOTE: Only works with 2 front wheels
+	bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
+	bullWheelRadius = axle.wheels.radius;
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;
 	wheelInfo.m_frictionSlip = axle.wheels.frictionScale;			// TODO: How do we convert this?
-
-	//wheel.m_suspensionStiffness = suspensionStiffness;
-	//wheel.m_wheelsDampingRelaxation = suspensionDamping;
-	//wheel.m_wheelsDampingCompression = suspensionCompression;
-	//wheel.m_frictionSlip = wheelFriction;
-	//wheel.m_rollInfluence = rollInfluence;
 
 	return pWheel;
 }
@@ -153,13 +150,13 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 void CPhysicsVehicleController::ShutdownBullVehicle() {
 	m_pEnv->GetBulletEnvironment()->removeVehicle(m_pRaycastVehicle);
 
-	delete m_pRaycaster;
-	delete m_pRaycastVehicle;
-
 	for (int i = 0; i < m_iWheelCount; i++) {
 		m_pEnv->DestroyObject(m_pWheels[i]);
 		m_pWheels[i] = NULL;
 	}
+
+	delete m_pRaycaster;
+	delete m_pRaycastVehicle;
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls) {
@@ -183,12 +180,8 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &controls, float dt) {
 	float steeringVal = controls.steering;
 
-	btScalar bullCurrentSpeed = m_pRaycastVehicle->getCurrentSpeedKmHour();
-	bullCurrentSpeed = bullCurrentSpeed / 3.6; // Convert from km/h to m/s
-
 	// TODO: Calculate for degreesSlow, degreesFast, and degreesBoost
 	steeringVal *= m_vehicleParams.steering.degreesFast;
-
 	m_vehicleState.steeringAngle = steeringVal;
 
 	// BUG: Only works for vehicles with 2 front wheels.
@@ -219,6 +212,9 @@ void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &cont
 		QAngle HLRot;
 		ConvertPosToHL(bullPos, HLPos);
 		ConvertRotationToHL(bullRot, HLRot);
+
+		// z = spin
+		HLRot.z = -HLRot.z;
 
 		m_pWheels[i]->SetPosition(HLPos, HLRot, true);
 	}

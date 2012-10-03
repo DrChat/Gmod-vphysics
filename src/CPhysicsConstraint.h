@@ -3,8 +3,7 @@
 
 class CPhysicsEnvironment;
 
-class CPhysicsConstraint : public IPhysicsConstraint
-{
+class CPhysicsConstraint : public IPhysicsConstraint {
 	public:
 								CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint);
 								~CPhysicsConstraint();
@@ -37,23 +36,33 @@ class CPhysicsConstraint : public IPhysicsConstraint
 };
 
 // TODO: Should we use point to point ropes or soft body ropes?
-class btRopeConstraint: public btPoint2PointConstraint
-{
+class btLengthConstraint: public btPoint2PointConstraint {
+	protected:
+		btScalar	m_mindist;
+		btScalar	m_maxdist;
+	public:
+		btLengthConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, btScalar minDist, btScalar maxDist)
+			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
+		{
+			m_mindist = minDist;
+			m_maxdist = maxDist;
+		}
 
+		void solveConstraint(btScalar timeStep) {
+
+		}
 };
 
 // TODO: Find out how to use m_mindist to make ropes non-rigid, otherwise this is essentially a ballsocket.
 class btDistanceConstraint : public btPoint2PointConstraint
 {
 	protected:
-		btScalar	m_mindist;
-		btScalar	m_maxdist;
+		btScalar	m_dist;
 	public:
-		btDistanceConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, btScalar mindist, btScalar maxdist)
+		btDistanceConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, btScalar dist)
 			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
 		{
-			m_mindist = mindist;
-			m_maxdist = maxdist;
+			m_dist = dist;
 		}
 
 		void getInfo1 (btConstraintInfo1* info)
@@ -83,7 +92,7 @@ class btDistanceConstraint : public btPoint2PointConstraint
 			info->m_J2angularAxis[0] = -q[0];
 			info->m_J2angularAxis[1] = -q[1];
 			info->m_J2angularAxis[2] = -q[2];
-			btScalar rhs = (currDist - m_maxdist) * info->fps * info->erp;
+			btScalar rhs = (currDist - m_dist) * info->fps * info->erp;
 			info->m_constraintError[0] = rhs;
 			info->cfm[0] = btScalar(0.f);
 			info->m_lowerLimit[0] = -SIMD_INFINITY;
