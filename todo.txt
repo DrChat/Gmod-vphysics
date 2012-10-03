@@ -14,6 +14,12 @@
 		- One of the wheels fly off in vehicle creation. (front left)
 		- Removing a vehicle will cause the game to crash about a second later (delay caused by remover tool deleting parented objects?) in materialsystem.dll
 		- HOLY SHIT THE RAYCAST VEHICLE IS BACKWARDS!
+	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
+	- OBJECTS:
+		- SetPosition is BROKEN! (Rotations are okay)
 - TODO
 	- Support concave meshes (see: trash dumpster)
 	- Vehicles: bullet's vehicle wheels aren't physical, but IVP's wheels were. We need to sync the CPhysicsObject wheels with the virtual wheels on the raycast car.
+	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
+		- Soft bodies
+		- Scaling of models

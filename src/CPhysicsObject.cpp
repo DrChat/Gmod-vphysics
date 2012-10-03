@@ -430,7 +430,10 @@ void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angl
 	// Mass center compensation.
 	btTransform finaltrans;
 	((btMassCenterMotionState *)m_pObject->getMotionState())->getWorldTransform(finaltrans);
-	m_pObject->setWorldTransform(transform);
+	m_pObject->setWorldTransform(finaltrans);
+
+	if (isTeleport)
+		m_pObject->setActivationState(ACTIVE_TAG);
 }
 
 void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTeleport) {

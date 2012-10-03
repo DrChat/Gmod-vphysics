@@ -172,7 +172,8 @@ float CPlayerController::GetPushSpeedLimit() {
 }
 
 bool CPlayerController::WasFrozen() {
-	NOT_IMPLEMENTED;
+	// Removed. All you need to know is that this is called every frame.
+	//NOT_IMPLEMENTED;
 	return false;
 }
 
