@@ -50,6 +50,8 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		btVector3						m_currentSpeed;
 		float							m_PushMassLimit;
 		float							m_PushSpeedLimit;
+
+		int								m_iTicksSinceUpdate;
 };
 
 #endif

@@ -18,86 +18,21 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		IPhysicsObject *		GetAttachedObject(void) const { return m_pObject1; };
 
 		// What the christ are these?
-		void					SetLinearMotor(float speed, float maxLinearImpulse) { NOT_IMPLEMENTED; };
-		void					SetAngularMotor(float rotSpeed, float maxAngularImpulse) { NOT_IMPLEMENTED; };
+		void					SetLinearMotor(float speed, float maxLinearImpulse);
+		void					SetAngularMotor(float rotSpeed, float maxAngularImpulse);
 		
-		void					UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached) { NOT_IMPLEMENTED; };
-		bool					GetConstraintTransform(matrix3x4_t *pConstraintToReference, matrix3x4_t *pConstraintToAttached) const { NOT_IMPLEMENTED; return false; };
-		bool					GetConstraintParams(constraint_breakableparams_t *pParams) const { NOT_IMPLEMENTED; return false; };
+		void					UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached);
+		bool					GetConstraintTransform(matrix3x4_t *pConstraintToReference, matrix3x4_t *pConstraintToAttached) const;
+		bool					GetConstraintParams(constraint_breakableparams_t *pParams) const;
 		
-		void					OutputDebugInfo() { NOT_IMPLEMENTED; };
+		void					OutputDebugInfo();
 
 	private:
-		CPhysicsObject *		m_pObject1;
-		CPhysicsObject *		m_pObject2;
+		CPhysicsObject *		m_pObject1;	// Reference object
+		CPhysicsObject *		m_pObject2;	// Attached object
 		btTypedConstraint *		m_pConstraint;
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;
-};
-
-// TODO: Should we use point to point ropes or soft body ropes?
-class btLengthConstraint: public btPoint2PointConstraint {
-	protected:
-		btScalar	m_mindist;
-		btScalar	m_maxdist;
-	public:
-		btLengthConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, btScalar minDist, btScalar maxDist)
-			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
-		{
-			m_mindist = minDist;
-			m_maxdist = maxDist;
-		}
-
-		void solveConstraint(btScalar timeStep) {
-
-		}
-};
-
-// TODO: Find out how to use m_mindist to make ropes non-rigid, otherwise this is essentially a ballsocket.
-class btDistanceConstraint : public btPoint2PointConstraint
-{
-	protected:
-		btScalar	m_dist;
-	public:
-		btDistanceConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, btScalar dist)
-			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
-		{
-			m_dist = dist;
-		}
-
-		void getInfo1 (btConstraintInfo1* info)
-		{
-			info->m_numConstraintRows = 1;
-			info->nub = 5;
-		}
-
-		void getInfo2 (btConstraintInfo2* info)
-		{
-			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
-			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
-			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
-			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
-			btVector3 del = posB - posA;
-			btScalar currDist = btSqrt(del.dot(del));
-			btVector3 ortho = del / currDist;
-			info->m_J1linearAxis[0] = ortho[0];
-			info->m_J1linearAxis[1] = ortho[1];
-			info->m_J1linearAxis[2] = ortho[2];
-			btVector3 p, q;
-			p = relA.cross(ortho);
-			q = relB.cross(ortho);
-			info->m_J1angularAxis[0] = p[0];
-			info->m_J1angularAxis[1] = p[1];
-			info->m_J1angularAxis[2] = p[2];
-			info->m_J2angularAxis[0] = -q[0];
-			info->m_J2angularAxis[1] = -q[1];
-			info->m_J2angularAxis[2] = -q[2];
-			btScalar rhs = (currDist - m_dist) * info->fps * info->erp;
-			info->m_constraintError[0] = rhs;
-			info->cfm[0] = btScalar(0.f);
-			info->m_lowerLimit[0] = -SIMD_INFINITY;
-			info->m_upperLimit[0] = SIMD_INFINITY;
-		}
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?

@@ -210,9 +210,8 @@ void CPhysicsObject::EnableGravity(bool enable) {
 	}
 }
 
-void CPhysicsObject::EnableDrag(bool enable) 
-{
-	if ( IsStatic() )
+void CPhysicsObject::EnableDrag(bool enable)  {
+	if (IsStatic())
 		return;
 
 	if (enable != IsDragEnabled())
@@ -226,8 +225,12 @@ void CPhysicsObject::EnableDrag(bool enable)
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
+	if (IsMotionEnabled() == enable) return;
+
+	// TODO: Set mass to 0 to disable motion!
 	if (enable) {
-		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btRigidBody::CF_STATIC_OBJECT);	
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btRigidBody::CF_STATIC_OBJECT);
+		//m_pObject->setMassProps(
 	} else {
 		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);	
 	}
@@ -423,12 +426,22 @@ void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angl
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, pos);
 	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(transform);
+
+	// Mass center compensation.
+	btTransform finaltrans;
+	((btMassCenterMotionState *)m_pObject->getMotionState())->getWorldTransform(finaltrans);
+	m_pObject->setWorldTransform(transform);
 }
 
 void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTeleport) {
 	btTransform trans;
 	ConvertMatrixToBull(matrix, trans);
 	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(trans);
+
+	// Mass center compensation.
+	btTransform finaltrans;
+	((btMassCenterMotionState *)m_pObject->getMotionState())->getWorldTransform(finaltrans);
+	m_pObject->setWorldTransform(finaltrans);
 }
 
 void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
@@ -781,8 +794,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	}
 
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
-	if (surface)
-	{
+	if (surface) {
 		m_pObject->setFriction(surface->physics.friction);
 		// Note to self: using these dampening values = breakdancing fridges http://dl.dropbox.com/u/4838268/gm_construct%202012-4-24%2004-50-26.webm
 		//m_pObject->setDamping(surface->physics.dampening, surface->physics.dampening);
@@ -796,6 +808,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		angDrag = pParams->dragCoefficient;
 	}
 
+	// THIS IS COMPLETELY BROKEN!
 	if (!IsStatic() && GetCollide()) {
 		btCollisionShape  *shape = m_pObject->getCollisionShape();
 

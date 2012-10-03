@@ -61,10 +61,12 @@ class CDeleteQueue {
 		void Add(IDeleteQueueItem *pItem) {
 			m_list.AddToTail(pItem);
 		}
+
 		template <typename T>
 		void QueueForDelete(T *pItem) {
 			Add(new CDeleteProxy<T>(pItem));
 		}
+
 		void DeleteAll() {
 			for (int i = m_list.Count()-1; i >= 0; --i) {
 				m_list[i]->Delete();
@@ -204,9 +206,11 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_physics_performanceparams = new physics_performanceparams_t;
 	m_physics_performanceparams->Defaults();
 
+#if MULTITHREAD
 	m_pBulletEnvironment->getSolverInfo().m_numIterations = 4;
 	m_pBulletEnvironment->getSolverInfo().m_solverMode = SOLVER_SIMD+SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
+#endif
 
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;

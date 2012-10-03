@@ -29,8 +29,9 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 CPlayerController::CPlayerController(CPhysicsObject *pObject) {
 	m_pObject = pObject;
 	m_handler = NULL;
-	m_maxDeltaPosition = HL2BULL(24); // ConvertDistanceToBull(24);
+	m_maxDeltaPosition = ConvertDistanceToBull(24);
 	m_dampFactor = 1.0f;
+	m_iTicksSinceUpdate = 0;
 	AttachObject();
 }
 
@@ -62,14 +63,28 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	} else {
 		MaxSpeed(velocity);
 	}
+
+	m_iTicksSinceUpdate = 0;
 }
 
-void CPlayerController::SetEventHandler(IPhysicsPlayerControllerEvent* handler) {
+void CPlayerController::SetEventHandler(IPhysicsPlayerControllerEvent *handler) {
 	m_handler = handler;
 }
 
 bool CPlayerController::IsInContact() {
-	//NOT_IMPLEMENTED;
+	CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
+
+	int numManifolds = pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++) {
+		btPersistentManifold *contactManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject *obA = contactManifold->getBody0();
+		const btCollisionObject *obB = contactManifold->getBody1();
+
+		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject() || obB == m_pObject->GetObject())) {
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -100,7 +115,7 @@ void CPlayerController::SetObject(IPhysicsObject *pObject) {
 	AttachObject();
 }
 
-int CPlayerController::GetShadowPosition( Vector *position, QAngle *angles ) {
+int CPlayerController::GetShadowPosition(Vector *position, QAngle *angles) {
 	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
@@ -108,7 +123,7 @@ int CPlayerController::GetShadowPosition( Vector *position, QAngle *angles ) {
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 	// FIXME: what is this?
 	// Andrew; this needs to return the amount of ticks since the last Update()
-	return 0;
+	return m_iTicksSinceUpdate;
 }
 
 void CPlayerController::StepUp(float height) {
@@ -125,9 +140,10 @@ void CPlayerController::Jump() {
 }
 
 void CPlayerController::GetShadowVelocity(Vector *velocity) {
+	if (!velocity) return;
+
 	btRigidBody *body = m_pObject->GetObject();
 	ConvertPosToHL(body->getLinearVelocity(), *velocity);
-	NOT_IMPLEMENTED;
 }
 
 IPhysicsObject *CPlayerController::GetObject() {
@@ -168,6 +184,8 @@ bool CPlayerController::WasFrozen() {
 void CPlayerController::Tick(float deltaTime) {
 	if (!m_enable)
 		return;
+
+	m_iTicksSinceUpdate++;
 
 	btRigidBody *body = m_pObject->GetObject();
 	CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
