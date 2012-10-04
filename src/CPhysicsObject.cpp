@@ -420,12 +420,11 @@ Vector CPhysicsObject::GetMassCenterLocalSpace() const {
 }
 
 void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport) {
-	btVector3 pos;
-	btMatrix3x3 matrix;
-	ConvertPosToBull(worldPosition, pos);
-	ConvertRotationToBull(angles, matrix);
-	btTransform transform(matrix, pos);
-	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(transform);
+	btVector3 bullPos;
+	btMatrix3x3 bullAngles;
+	ConvertPosToBull(worldPosition, bullPos);
+	ConvertRotationToBull(angles, bullAngles);
+	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(btTransform(bullAngles, bullPos));
 
 	// Mass center compensation.
 	btTransform finaltrans;

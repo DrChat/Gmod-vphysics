@@ -55,7 +55,8 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	m_currentSpeed = targetSpeedBull;
 
 	m_enable = true;
-	m_onground = onground;
+	//m_onground = onground;
+	m_onground = false;
 
 	if (velocity.LengthSqr() <= 0.1f) {
 		m_enable = false;
@@ -133,6 +134,8 @@ void CPlayerController::StepUp(float height) {
 	btTransform transform;
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
 	transform.setOrigin(transform.getOrigin()+step);
+
+	pObject->setWorldTransform(transform);
 }
 
 void CPlayerController::Jump() {
@@ -177,11 +180,6 @@ bool CPlayerController::WasFrozen() {
 	return false;
 }
 
-// TODO: Players walking ontop of physical objects causes players
-// to fly off. About 90% reproducible in gm_construct white room
-// when walking
-// Goes in -x +y direction when near front doors of white room
-// At back, -x -y
 void CPlayerController::Tick(float deltaTime) {
 	if (!m_enable)
 		return;
@@ -224,15 +222,17 @@ void CPlayerController::Tick(float deltaTime) {
 }
 
 void CPlayerController::AttachObject() {
-	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
+	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
+
+	// TODO: This doesn't work!
 	m_saveRot = body->getAngularDamping();
-	body->setDamping(body->getLinearDamping(), 100);
+	body->setDamping(body->getLinearDamping(), 9000);
 
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
 
 void CPlayerController::DetachObject() {
-	btRigidBody* body = btRigidBody::upcast(m_pObject->GetObject());
+	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	body->setDamping(body->getLinearDamping(), m_saveRot);
 	m_pObject = NULL;
 
