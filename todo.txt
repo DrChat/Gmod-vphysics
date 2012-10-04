@@ -10,10 +10,11 @@
 	- VEHICLES:
 		- One of the wheels fly off in vehicle creation. (front left)
 		- Vehicles cause a crash when removed. The wheels are already removed before being deleted from the queued object list.
-		- HOLY SHIT THE RAYCAST VEHICLE IS BACKWARDS!
 	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
 - TODO
 	- Support concave meshes (see: trash dumpster)
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies
 		- Scaling of models
+		- ...
+	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this!

@@ -78,11 +78,12 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 /*********************************
 * CLASS CPhysicsConstraint
 *********************************/
-CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint) {
+CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type) {
 	m_pObject1 = pObject1;
 	m_pObject2 = pObject2;
 	m_pConstraint = pConstraint;
 	m_pEnv = pEnv;
+	m_type = type;
 
 	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
 }
@@ -138,7 +139,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
 
 	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock, CONSTRAINT_RAGDOLL);
 }
 
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
@@ -162,7 +163,7 @@ CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	pWeld->setAngularLowerLimit(btVector3(0,0,0));
 	pWeld->setAngularUpperLimit(btVector3(0,0,0));
 
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pWeld);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pWeld, CONSTRAINT_FIXED);
 }
 
 CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
@@ -198,7 +199,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	pSlider->setLowerAngLimit(0);
 	pSlider->setUpperAngLimit(0);
 
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pSlider);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pSlider, CONSTRAINT_SLIDING);
 }
 
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
@@ -217,7 +218,7 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 		obj2Pos -= shapeInfo2->massCenter;
 
 	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos);
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock, CONSTRAINT_BALLSOCKET);
 }
 
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
@@ -241,5 +242,5 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 		obj2Pos -= shapeInfo2->massCenter;
 
 	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength);
+	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength, CONSTRAINT_LENGTH);
 }

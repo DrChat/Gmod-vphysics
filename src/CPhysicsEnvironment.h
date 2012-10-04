@@ -114,6 +114,9 @@ public:
 
 	void									EnableConstraintNotify(bool bEnable);
 	void									DebugCheckContacts(void);
+
+	// UNEXPOSED
+	void									DoCollisionEvents();
 public:
 	btDynamicsWorld *						GetBulletEnvironment();
 	float									GetInvPSIScale();

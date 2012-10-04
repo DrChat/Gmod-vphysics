@@ -88,8 +88,8 @@ class CCollisionSolver : public btOverlapFilterCallback {
 };
 
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
-	btRigidBody *body0 = btRigidBody::upcast((btCollisionObject*)proxy0->m_clientObject);
-	btRigidBody *body1 =  btRigidBody::upcast((btCollisionObject*)proxy1->m_clientObject);
+	btRigidBody *body0 = btRigidBody::upcast((btCollisionObject *)proxy0->m_clientObject);
+	btRigidBody *body1 =  btRigidBody::upcast((btCollisionObject *)proxy1->m_clientObject);
 	if (!body0 || !body1)
 	{
 		if (body0)
@@ -99,8 +99,8 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 		return false;
 	}
 
-	CPhysicsObject *pObject0 = (CPhysicsObject*)body0->getUserPointer();
-	CPhysicsObject *pObject1 = (CPhysicsObject*)body1->getUserPointer();
+	CPhysicsObject *pObject0 = (CPhysicsObject *)body0->getUserPointer();
+	CPhysicsObject *pObject1 = (CPhysicsObject *)body1->getUserPointer();
 
 	if (!pObject0 || !pObject1)
 		return true;
@@ -572,6 +572,7 @@ void CPhysicsEnvironment::CleanupDeleteList(void) {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject*)m_deadObjects.Element(i);
 		assert(pObject);
+		assert(*(char *)pObject != '\xDD'); // Debug
 
 		delete pObject;	// CRASH HERE ON EXIT (Object has already been deleted!)
 						// Exception is handled and then the game crashes in materialsystem
@@ -606,7 +607,7 @@ void CPhysicsEnvironment::PostRestore() {
 
 bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 	for (int i = 0; i < m_objects.Count(); i++) {
-		if (((CPhysicsObject*)m_objects[i])->GetObject()->getCollisionShape() == (btCollisionShape*)pCollide)
+		if (((CPhysicsObject *)m_objects[i])->GetObject()->getCollisionShape() == (btCollisionShape *)pCollide)
 			return true;
 	}
 
@@ -670,15 +671,14 @@ float CPhysicsEnvironment::GetInvPSIScale() {
 	return 0.5;
 }
 
-void CPhysicsEnvironment::BulletTick(btScalar dt)
-{
+void CPhysicsEnvironment::BulletTick(btScalar dt) {
 	// FIXME: Maybe this should be in CPhysicsEnvironment:Simulate instead?
-	if (m_pCollisionEvent)
-		m_pCollisionEvent->PostSimulationFrame();
 	m_pPhysicsDragController->Tick(dt);
 	for (int i = 0; i < m_controllers.Count(); i++) {
 		m_controllers[i]->Tick(dt);
 	}
+
+	DoCollisionEvents();
 
 	m_inSimulation = false;
 	if (!m_bUseDeleteQueue) {
@@ -696,10 +696,17 @@ void CPhysicsEnvironment::BulletTick(btScalar dt)
 		m_invPSIscale = 0;
 	}
 	*/
+	if (m_pCollisionEvent)
+		m_pCollisionEvent->PostSimulationFrame();
+
 	m_inSimulation = true;
 }
 
-CPhysicsDragController *CPhysicsEnvironment::GetDragController()
-{
+CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 	return m_pPhysicsDragController;
+}
+
+// UNEXPOSED
+void CPhysicsEnvironment::DoCollisionEvents() {
+
 }

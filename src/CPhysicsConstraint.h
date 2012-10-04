@@ -3,9 +3,19 @@
 
 class CPhysicsEnvironment;
 
+enum EConstraintType {
+	CONSTRAINT_RAGDOLL,
+	CONSTRAINT_HINGE,
+	CONSTRAINT_FIXED,
+	CONSTRAINT_SLIDING,
+	CONSTRAINT_BALLSOCKET,
+	CONSTRAINT_PULLEY,
+	CONSTRAINT_LENGTH
+};
+
 class CPhysicsConstraint : public IPhysicsConstraint {
 	public:
-								CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint);
+								CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint, EConstraintType type);
 								~CPhysicsConstraint();
 
 		void					Activate();
@@ -33,6 +43,7 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		btTypedConstraint *		m_pConstraint;
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;
+		EConstraintType			m_type;
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?
