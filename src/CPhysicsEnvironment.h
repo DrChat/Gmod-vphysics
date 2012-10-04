@@ -116,7 +116,7 @@ public:
 	void									DebugCheckContacts(void);
 
 	// UNEXPOSED
-	void									DoCollisionEvents();
+	void									DoCollisionEvents(float dt);
 public:
 	btDynamicsWorld *						GetBulletEnvironment();
 	float									GetInvPSIScale();

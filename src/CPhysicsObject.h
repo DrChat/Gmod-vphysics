@@ -140,7 +140,8 @@ class CPhysicsObject : public IPhysicsObject {
 		unsigned short						m_iGameIndex;
 
 
-		float								m_fInvMass;
+		bool								m_bMotionEnabled;
+		float								m_fMass;
 		float								m_fVolume;
 		float								m_fBuoyancyRatio;
 		float								m_dragCoefficient;

@@ -26,6 +26,10 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 	currentSpeed += acceleration;
 }
 
+/****************************
+* CLASS CPlayerController
+****************************/
+
 CPlayerController::CPlayerController(CPhysicsObject *pObject) {
 	m_pObject = pObject;
 	m_handler = NULL;
@@ -126,8 +130,7 @@ int CPlayerController::GetShadowPosition(Vector *position, QAngle *angles) {
 	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
 	if (position) ConvertPosToHL(transform.getOrigin(), *position);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
-	// FIXME: what is this?
-	// Andrew; this needs to return the amount of ticks since the last Update()
+
 	return m_iTicksSinceUpdate;
 }
 

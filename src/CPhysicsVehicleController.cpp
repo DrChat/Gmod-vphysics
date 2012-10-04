@@ -11,6 +11,63 @@
 // MPH2INS: 1(miles/hr) = 0.44704(meters/sec)
 #define MPH2MS(x) ((x) * 0.44704)
 
+/*********************************
+* MISC CLASSES
+*********************************/
+
+struct IgnoreObjectRayResultCallback: public btCollisionWorld::ClosestRayResultCallback {
+	IgnoreObjectRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
+		:ClosestRayResultCallback(from, to) {
+		m_pIgnoreObject = pIgnoreObject;
+	}
+
+	bool needsCollision(btBroadphaseProxy *proxy0) const {
+		btRigidBody *pBody = (btRigidBody *)proxy0->m_clientObject;
+		if (pBody) {
+			return pBody != m_pIgnoreObject;
+		}
+
+		return true;
+	}
+
+	const btRigidBody *m_pIgnoreObject;
+};
+
+// Purpose: This raycaster will cast a ray ignoring the vehicle's body.
+class btHLVehicleRaycaster: public btVehicleRaycaster {
+	public:
+		btHLVehicleRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
+			m_pWorld = pWorld;
+			m_pBody = pBody;
+		}
+
+		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
+			IgnoreObjectRayResultCallback rayCallback(m_pBody, from, to);
+			
+			m_pWorld->rayTest(from, to, rayCallback);
+			
+			if (rayCallback.hasHit()) {
+				const btRigidBody *body = btRigidBody::upcast(rayCallback.m_collisionObject);
+				if (body && body->hasContactResponse()) {
+					result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+					result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+					result.m_hitNormalInWorld.normalize();
+					result.m_distFraction = rayCallback.m_closestHitFraction;
+					return (void *)body;
+				}
+			}
+
+			return 0;
+		}
+	private:
+		btDynamicsWorld *	m_pWorld;
+		btRigidBody *		m_pBody;
+};
+
+/*********************************
+* CLASS CPhysicsVehicleController
+*********************************/
+
 CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
 	m_pEnv = pEnv;
 	m_pBody = pBody;
@@ -49,28 +106,34 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 }
 
 void CPhysicsVehicleController::InitBullVehicle() {
-	m_pRaycaster = new btDefaultVehicleRaycaster(m_pEnv->GetBulletEnvironment());
+	m_pRaycaster = new btHLVehicleRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
 	m_pRaycastVehicle = new btRaycastVehicle(m_tuning, m_pBody->GetObject(), m_pRaycaster);
 	m_pRaycastVehicle->setCoordinateSystem(0,1,2);
-	m_pEnv->GetBulletEnvironment()->addVehicle(m_pRaycastVehicle);
+	m_pEnv->GetBulletEnvironment()->addAction(m_pRaycastVehicle);
+}
+
+void CPhysicsVehicleController::ShutdownBullVehicle() {
+	m_pEnv->GetBulletEnvironment()->removeAction(m_pRaycastVehicle);
+
+	for (int i = 0; i < m_iWheelCount; i++) {
+		m_pEnv->DestroyObject(m_pWheels[i]);
+		m_pWheels[i] = NULL;
+	}
+
+	delete m_pRaycaster;
+	delete m_pRaycastVehicle;
 }
 
 void CPhysicsVehicleController::InitCarWheels() {
 	int wheelIndex = 0;
 
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-		for ( int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++ ) {
+		for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 			CPhysicsObject *pWheel = CreateWheel(wheelIndex, m_vehicleParams.axles[i]);
 			if (pWheel) {
 				m_pWheels[i] = pWheel;
 			}
 		}
-	}
-
-	// TODO: Disable collisions between two objects
-	// See: http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?t=4853
-	for (int i = 0; i < m_iWheelCount; i++) {
-		m_pWheels[i]->EnableCollisions(true);
 	}
 }
 
@@ -133,7 +196,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
 
 	// TODO: We shouldn't have to reposition the wheels. Find out how to disable collisions between the raycast wheels and our body.
-	position += Vector(0, 35, 0);
+	position += Vector(0, 35, -10);
 	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
 	ConvertPosToBull(position, bullConnectionPointCS0);
 	bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
@@ -145,18 +208,6 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	wheelInfo.m_frictionSlip = axle.wheels.frictionScale;			// TODO: How do we convert this?
 
 	return pWheel;
-}
-
-void CPhysicsVehicleController::ShutdownBullVehicle() {
-	m_pEnv->GetBulletEnvironment()->removeVehicle(m_pRaycastVehicle);
-
-	for (int i = 0; i < m_iWheelCount; i++) {
-		m_pEnv->DestroyObject(m_pWheels[i]);
-		m_pWheels[i] = NULL;
-	}
-
-	delete m_pRaycaster;
-	delete m_pRaycastVehicle;
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls) {

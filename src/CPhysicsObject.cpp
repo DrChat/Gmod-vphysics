@@ -28,8 +28,10 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btTransform masscenter(btMatrix3x3::getIdentity());
 	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
 
-	float mass = pParams->mass;
-	if (isStatic) mass = 0;
+	float mass = 0;
+
+	if (pParams && !isStatic)
+		mass = pParams->mass;
 
 	btVector3 inertia;
 
@@ -37,11 +39,18 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btMotionState *motionstate = new btMassCenterMotionState(transform, masscenter);
 	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
 
-	info.m_linearDamping = pParams->damping;
-	info.m_angularDamping = pParams->rotdamping;
-	//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
+	if (pParams) {
+		info.m_linearDamping = pParams->damping;
+		info.m_angularDamping = pParams->rotdamping;
+		//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
+	}
 
 	btRigidBody *body = new btRigidBody(info);
+
+	if (isStatic)
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+	else
+		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
 
 	if (mass > 0)
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
@@ -50,7 +59,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
-	if (!isStatic && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
+	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
 
 	/*if (mass > 0)
 	{
@@ -77,11 +86,11 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
-	float mass, volume;
+	float mass = 0;
+	float volume = 0;
 
 	if (pParams) {
-		mass = pParams->mass;
-		if (isStatic) mass = 0;
+		mass = isStatic ? 0 : pParams->mass;
 
 		volume = pParams->volume;
 		if (volume <= 0) {
@@ -90,9 +99,14 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	}
 
 	btMotionState *motionstate = new btMassCenterMotionState(transform);
-	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape);
+	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape);
 
 	btRigidBody *body = new btRigidBody(info);
+
+	if (isStatic)
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+	else
+		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
 
 	if (mass > 0)
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
@@ -104,6 +118,10 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 	return pObject;
 }
+
+/***************************
+* CLASS CPhysicsObject
+***************************/
 
 CPhysicsObject::CPhysicsObject() {
 	m_contents = 0;
@@ -129,7 +147,7 @@ CPhysicsObject::~CPhysicsObject() {
 }
 
 bool CPhysicsObject::IsStatic() const {
-	return m_pObject->getInvMass() == 0;
+	return (m_pObject->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT);
 }
 
 // Possible that the lag shitfest is caused by the engine processing collision?
@@ -179,7 +197,7 @@ bool CPhysicsObject::IsDragEnabled() const {
 }
 
 bool CPhysicsObject::IsMotionEnabled() const {
-	return !(m_pObject->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT);
+	return m_bMotionEnabled;
 }
 
 bool CPhysicsObject::IsMoveable() const {
@@ -229,14 +247,16 @@ void CPhysicsObject::EnableDrag(bool enable)  {
 }
 
 void CPhysicsObject::EnableMotion(bool enable) {
-	if (IsMotionEnabled() == enable) return;
+	if (IsMotionEnabled() == enable || IsStatic()) return;
+	m_bMotionEnabled = enable;
 
-	// TODO: Set mass to 0 to disable motion!
+	// TODO: Does this cause any issues with player controllers?
 	if (enable) {
-		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btRigidBody::CF_STATIC_OBJECT);
-		//m_pObject->setMassProps(
+		m_pObject->setLinearFactor(btVector3(1, 1, 1));
+		m_pObject->setAngularFactor(1);
 	} else {
-		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btRigidBody::CF_STATIC_OBJECT);	
+		m_pObject->setLinearFactor(btVector3(0, 0, 0));
+		m_pObject->setAngularFactor(0);
 	}
 }
 
@@ -299,6 +319,8 @@ void CPhysicsObject::RecheckContactPoints() {
 }
 
 void CPhysicsObject::SetMass(float mass) {
+	if (IsStatic()) return;
+
 	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
 
 	// Invert the inverse intertia to get inertia
@@ -791,6 +813,8 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	float matdensity;
 	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
 	m_fBuoyancyRatio = (GetMass()/(GetVolume()*METERS_PER_INCH*METERS_PER_INCH*METERS_PER_INCH))/matdensity;
+	m_bMotionEnabled = !IsStatic();
+	m_fMass = GetMass();
 
 	if (pParams) {
 		m_pGameData = pParams->pGameData;

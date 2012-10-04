@@ -43,26 +43,20 @@ IPhysicsObject *CPhysicsFrictionSnapshot::GetObject(int index) {
 	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
 	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
 
-	// TODO: Index 1 or 0?
-	if (index == 1)
-		return (IPhysicsObject *)pObjA->getUserPointer();
+	if (index == 0)
+		return ((CPhysicsObject *)pObjA->getUserPointer() == m_pObject) ? (IPhysicsObject *)pObjA->getUserPointer() : (IPhysicsObject *)pObjB->getUserPointer();
 	else
-		return (IPhysicsObject *)pObjB->getUserPointer();
-
-	return NULL;
+		return ((CPhysicsObject *)pObjA->getUserPointer() != m_pObject) ? (IPhysicsObject *)pObjA->getUserPointer() : (IPhysicsObject *)pObjB->getUserPointer();
 }
 
 int CPhysicsFrictionSnapshot::GetMaterial(int index) {
 	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
 	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
 
-	// TODO: Index 1 or 0?
-	if (index == 1)
-		return ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex();
+	if (index == 0)
+		return ((CPhysicsObject *)pObjA->getUserPointer() == m_pObject) ? ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex() : ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
 	else
-		return ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
-
-	return 0;
+		return ((CPhysicsObject *)pObjA->getUserPointer() != m_pObject) ? ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex() : ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
 }
 
 void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {

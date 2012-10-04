@@ -42,6 +42,10 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+/*****************************
+* MISC. CLASSES
+*****************************/
+
 class IDeleteQueueItem {
 	public:
 		virtual void Delete() = 0;
@@ -114,6 +118,10 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	//if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
 	return true;
 }
+
+/*******************************
+* CLASS CPhysicsEnvironment
+*******************************/
 
 void CPhysicsEnvironment_TickCallBack(btDynamicsWorld *world, btScalar timeStep) {
 	CPhysicsEnvironment *phy = (CPhysicsEnvironment *)(world->getWorldUserInfo());
@@ -393,13 +401,13 @@ void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup
 }
 
 IPhysicsShadowController *CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
-	CShadowController *pController = new CShadowController((CPhysicsObject*)pObject, allowTranslation, allowRotation);
+	CShadowController *pController = new CShadowController((CPhysicsObject *)pObject, allowTranslation, allowRotation);
 	m_controllers.AddToTail(pController);
 	return pController;
 }
 
 void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController *pController) {
-	m_controllers.FindAndRemove((CShadowController*)pController);
+	m_controllers.FindAndRemove((CShadowController *)pController);
 	delete pController;
 }
 
@@ -410,18 +418,18 @@ IPhysicsPlayerController *CPhysicsEnvironment::CreatePlayerController(IPhysicsOb
 }
 
 void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController *pController) {
-	m_controllers.FindAndRemove((CPlayerController*)pController);
+	m_controllers.FindAndRemove((CPlayerController *)pController);
 	delete pController;
 }
 
 IPhysicsMotionController *CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
-	CPhysicsMotionController *pController = (CPhysicsMotionController*)::CreateMotionController(this, pHandler);
+	CPhysicsMotionController *pController = (CPhysicsMotionController *)::CreateMotionController(this, pHandler);
 	m_controllers.AddToTail(pController);
 	return pController;
 }
 
 void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pController) {
-	m_controllers.FindAndRemove((CPhysicsMotionController*)pController);
+	m_controllers.FindAndRemove((CPhysicsMotionController *)pController);
 	delete pController;
 }
 
@@ -678,12 +686,12 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 		m_controllers[i]->Tick(dt);
 	}
 
-	DoCollisionEvents();
-
 	m_inSimulation = false;
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
+
+	DoCollisionEvents(dt);
 
 	//m_pCollisionSolver->EventPSI(this);
 	//m_pCollisionListener->EventPSI(this);
@@ -707,6 +715,25 @@ CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 }
 
 // UNEXPOSED
-void CPhysicsEnvironment::DoCollisionEvents() {
+void CPhysicsEnvironment::DoCollisionEvents(float dt) {
+	// IPhysicsCollisionEvent::Friction
+	int numManifolds = m_pBulletEnvironment->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++) {
+		btPersistentManifold *contactManifold = m_pBulletEnvironment->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject *obA = contactManifold->getBody0();
+		const btCollisionObject *obB = contactManifold->getBody1();
 
+		if (contactManifold->getNumContacts() <= 0)
+			continue;
+
+		if ((((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION) &&
+			(((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION)) {
+			btManifoldPoint manPoint = contactManifold->getContactPoint(0);
+			
+			float energy = manPoint.m_combinedFriction;
+			if (energy > 0.05f) {
+
+			}
+		}
+	}
 }
