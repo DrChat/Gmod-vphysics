@@ -165,6 +165,7 @@ bool CPhysicsObject::IsGravityEnabled() const {
 	if (!IsStatic()) {
 		return !(m_pObject->getFlags() & BT_DISABLE_WORLD_GRAVITY);
 	}
+
 	return false;
 }
 
@@ -173,6 +174,7 @@ bool CPhysicsObject::IsDragEnabled() const {
 	{
 		return m_pEnv->GetDragController()->IsControlling(this); // Expensive function
 	}
+
 	return false;
 }
 
@@ -191,6 +193,8 @@ bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
 }
 
 void CPhysicsObject::EnableCollisions(bool enable) {
+	if (IsCollisionEnabled() == enable) return;
+
 	if (enable) {
 		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
 	} else {
@@ -199,12 +203,12 @@ void CPhysicsObject::EnableCollisions(bool enable) {
 }
 
 void CPhysicsObject::EnableGravity(bool enable) {
-	if (IsStatic()) return;
+	if (IsGravityEnabled() == enable || IsStatic()) return;
+
 	if (enable) {
 		m_pObject->setGravity(m_pEnv->GetBulletEnvironment()->getGravity());
 		m_pObject->setFlags(m_pObject->getFlags() & ~BT_DISABLE_WORLD_GRAVITY);
-	}
-	else {
+	} else {
 		m_pObject->setGravity(btVector3(0,0,0));
 		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_WORLD_GRAVITY);
 	}

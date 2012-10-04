@@ -55,8 +55,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	m_currentSpeed = targetSpeedBull;
 
 	m_enable = true;
-	//m_onground = onground;
-	m_onground = false;
+	m_onground = onground;
 
 	if (velocity.LengthSqr() <= 0.1f) {
 		m_enable = false;
@@ -64,6 +63,8 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	} else {
 		MaxSpeed(velocity);
 	}
+
+	m_pGround = (CPhysicsObject *)ground;
 
 	m_iTicksSinceUpdate = 0;
 }
@@ -82,6 +83,9 @@ bool CPlayerController::IsInContact() {
 		const btCollisionObject *obB = contactManifold->getBody1();
 
 		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject() || obB == m_pObject->GetObject())) {
+			if (((CPhysicsObject *)obA->getUserPointer())->IsStatic() || ((CPhysicsObject *)obB->getUserPointer())->IsStatic())
+				continue;
+
 			return true;
 		}
 	}
@@ -132,8 +136,8 @@ void CPlayerController::StepUp(float height) {
 	ConvertPosToBull(Vector(0, 0, height), step);
 	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
-	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
-	transform.setOrigin(transform.getOrigin()+step);
+	((btMassCenterMotionState*)pObject->getMotionState())->getWorldTransform(transform);
+	transform.setOrigin(transform.getOrigin() + step);
 
 	pObject->setWorldTransform(transform);
 }
@@ -225,15 +229,15 @@ void CPlayerController::AttachObject() {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 
 	// TODO: This doesn't work!
-	m_saveRot = body->getAngularDamping();
-	body->setDamping(body->getLinearDamping(), 9000);
+	m_saveRot = body->getAngularFactor();
+	body->setAngularFactor(0);
 
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
 
 void CPlayerController::DetachObject() {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
-	body->setDamping(body->getLinearDamping(), m_saveRot);
+	body->setAngularFactor(m_saveRot);
 	m_pObject = NULL;
 
 	body->setActivationState(ACTIVE_TAG);

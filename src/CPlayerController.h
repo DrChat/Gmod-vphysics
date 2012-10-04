@@ -40,8 +40,9 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 
 		bool							m_enable;
 		bool							m_onground;
+		CPhysicsObject *				m_pGround;
 		CPhysicsObject *				m_pObject;
-		btScalar						m_saveRot;
+		btVector3						m_saveRot;
 		IPhysicsPlayerControllerEvent *	m_handler;
 		float							m_maxDeltaPosition;
 		float							m_dampFactor;
