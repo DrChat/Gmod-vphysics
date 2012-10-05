@@ -48,22 +48,22 @@ public:
 	IPhysicsConstraint *					CreatePulleyConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
 	IPhysicsConstraint *					CreateLengthConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
 
-	void									DestroyConstraint(IPhysicsConstraint*);
+	void									DestroyConstraint(IPhysicsConstraint *pConstraint);
 
 	IPhysicsConstraintGroup *				CreateConstraintGroup(const constraint_groupparams_t &groupParams);
 	void									DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup);
 
 	IPhysicsShadowController *				CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation);
-	void									DestroyShadowController(IPhysicsShadowController*);
+	void									DestroyShadowController(IPhysicsShadowController *pController);
 
-	IPhysicsPlayerController *				CreatePlayerController(IPhysicsObject* pObject);
-	void									DestroyPlayerController(IPhysicsPlayerController*);
+	IPhysicsPlayerController *				CreatePlayerController(IPhysicsObject *pObject);
+	void									DestroyPlayerController(IPhysicsPlayerController *pController);
 
 	IPhysicsMotionController *				CreateMotionController(IMotionEvent *pHandler);
 	void									DestroyMotionController(IPhysicsMotionController *pController);
 
 	IPhysicsVehicleController *				CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
-	void									DestroyVehicleController(IPhysicsVehicleController*);
+	void									DestroyVehicleController(IPhysicsVehicleController *pController);
 
 	void									SetCollisionSolver(IPhysicsCollisionSolver *pSolver);
 

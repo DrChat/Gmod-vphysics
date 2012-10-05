@@ -34,16 +34,21 @@ void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1)
 void CPhysicsObjectPairHash::RemoveObjectPair(void *pObject0, void *pObject1)
 {
 	int entry = (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
-	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = hash->next)
-	{
-		if (hash->object0 == pObject0 || hash->object0 == pObject1 || hash->object1 == pObject0 || hash->object1 == pObject1)
-		{
+
+	pair_hash_list *hashnext = NULL;
+	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = hashnext) {
+		if (hash->object0 == pObject0 || hash->object0 == pObject1 || hash->object1 == pObject0 || hash->object1 == pObject1) {
 			if (hash->previous)
 				hash->previous->next = hash->next;
 			else
 				m_pHashList[entry] = hash->next;
 			if (hash->next)
 				hash->next->previous = hash->previous;
+
+			if (hash->next)
+				hashnext = hash->next;
+			else
+				hashnext = NULL;
 
 			delete hash;
 		}

@@ -97,7 +97,7 @@ bool CPlayerController::IsInContact() {
 	return false;
 }
 
-void CPlayerController::MaxSpeed(const Vector& maxVelocity) {
+void CPlayerController::MaxSpeed(const Vector &maxVelocity) {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	btVector3 bullVel;
 	ConvertPosToBull(maxVelocity, bullVel);

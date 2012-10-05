@@ -147,6 +147,8 @@ void CPhysicsObject::EnableMotion(bool enable) {
 
 	// TODO: Does this cause any issues with player controllers?
 	if (enable) {
+		SetVelocity(&Vector(0, 0, 0), &AngularImpulse(0, 0, 0));
+
 		m_pObject->setLinearFactor(btVector3(1, 1, 1));
 		m_pObject->setAngularFactor(1);
 	} else {

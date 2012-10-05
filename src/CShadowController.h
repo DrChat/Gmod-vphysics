@@ -22,24 +22,24 @@ struct shadowcontrol_params_t {
 class CShadowController : public IController, public IPhysicsShadowController
 {
 	public:
-								CShadowController(CPhysicsObject* pObject, bool allowTranslation, bool allowRotation);
-		virtual					~CShadowController();
-		virtual void			Update(const Vector &position, const QAngle &angles, float timeOffset);
-		virtual void			MaxSpeed(float maxSpeed, float maxAngularSpeed);
-		virtual void			StepUp(float height);
-		virtual void			SetTeleportDistance(float teleportDistance);
-		virtual bool			AllowsTranslation();
-		virtual bool			AllowsRotation();
-		virtual void			SetPhysicallyControlled(bool isPhysicallyControlled);
-		virtual bool			IsPhysicallyControlled();
-		virtual void			GetLastImpulse(Vector* pOut);
-		virtual void			UseShadowMaterial(bool bUseShadowMaterial);
-		virtual void			ObjectMaterialChanged(int materialIndex);
-		virtual float			GetTargetPosition(Vector* pPositionOut, QAngle* pAnglesOut);
-		virtual float			GetTeleportDistance();
-		virtual void			GetMaxSpeed(float* pMaxSpeedOut, float* pMaxAngularSpeedOut);
+								CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation);
+						~CShadowController();
+		void			Update(const Vector &position, const QAngle &angles, float timeOffset);
+		void			MaxSpeed(float maxSpeed, float maxAngularSpeed);
+		void			StepUp(float height);
+		void			SetTeleportDistance(float teleportDistance);
+		bool			AllowsTranslation();
+		bool			AllowsRotation();
+		void			SetPhysicallyControlled(bool isPhysicallyControlled);
+		bool			IsPhysicallyControlled();
+		void			GetLastImpulse(Vector *pOut);
+		void			UseShadowMaterial(bool bUseShadowMaterial);
+		void			ObjectMaterialChanged(int materialIndex);
+		float			GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut);
+		float			GetTeleportDistance();
+		void			GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut);
 	public:
-		virtual void			Tick(float deltaTime);
+		void			Tick(float deltaTime);
 	private:
 		void					AttachObject();
 		void					DetachObject();

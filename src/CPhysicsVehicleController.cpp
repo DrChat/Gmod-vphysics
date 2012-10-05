@@ -138,6 +138,10 @@ void CPhysicsVehicleController::InitCarWheels() {
 			}
 		}
 	}
+
+	for (int i = 0; i < m_iWheelCount; i++) {
+		m_pWheels[i]->EnableGravity(false);	// Otherwise they slowly sink.
+	}
 }
 
 // Purpose: Create wheel on source side (CPhysicsObject *)
@@ -198,7 +202,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
 	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
 
-	// TODO: We shouldn't have to reposition the wheels.
+	// TODO: We shouldn't have to reposition the wheels. Figure out why they're 35 units behind.
 	position += Vector(0, 35, 0);
 	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
 	ConvertPosToBull(position, bullConnectionPointCS0);
@@ -301,6 +305,8 @@ bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContact
 		if (pContactPoint)
 			ConvertPosToHL(bullContactVec, *pContactPoint);
 
+		// TODO: pSurfaceProps
+
 		return true;
 	}
 	return false;
@@ -327,7 +333,5 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 //---------------------------------------
 IPhysicsVehicleController *CreateVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
 	CPhysicsVehicleController *pController = new CPhysicsVehicleController(pEnv, pBody, params, nVehicleType, pGameTrace);
-	//pController->InitCarSystem(pBody);
-
 	return pController;
 }

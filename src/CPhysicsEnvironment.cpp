@@ -133,6 +133,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_bUseDeleteQueue = false;
 	m_inSimulation = false;
 	m_pDebugOverlay = NULL;
+	m_pConstraintEvent = NULL;
 
 #if MULTITHREAD
 	m_pThreadSupportCollision = NULL;
