@@ -199,15 +199,13 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
-	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
-	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
-
-	// TODO: We shouldn't have to reposition the wheels. Figure out why they're 35 units behind.
-	position += Vector(0, 35, 0);
 	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
+	btVector3 bullWheelDirectionCS0(0,-1,0);
+	btVector3 bullWheelAxleCS(-1,0,0);
 	ConvertPosToBull(position, bullConnectionPointCS0);
 	bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
 	bullWheelRadius = axle.wheels.radius;
+	bullConnectionPointCS0 += btVector3(0, 0, -(axle.wheels.radius * 2));
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
