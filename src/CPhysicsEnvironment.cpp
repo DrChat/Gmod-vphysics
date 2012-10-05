@@ -237,7 +237,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	SetQuickDelete(true);
 
 	for (int i = m_objects.Count()-1; i >= 0; --i) {
-		CPhysicsObject *pObject = (CPhysicsObject*)(m_objects[i]);
+		CPhysicsObject *pObject = (CPhysicsObject *)(m_objects[i]);
 		delete pObject;
 	}
 
@@ -307,14 +307,17 @@ IPhysicsObject *CPhysicsEnvironment::CreatePolyObjectStatic(const CPhysCollide *
 }
 
 IPhysicsObject *CPhysicsEnvironment::CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
-	IPhysicsObject *pObject = CreatePhysicsSphere(this, radius, materialIndex, position, angles, pParams, false);
+	IPhysicsObject *pObject = CreatePhysicsSphere(this, radius, materialIndex, position, angles, pParams, isStatic);
 	m_objects.AddToTail(pObject);
 	return pObject;
 }
 
 void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	if (!pObject) return;
+	assert(m_deadObjects.Find(pObject) == -1);	// If you hit this assert, the object is already on the list!
+
 	m_objects.FindAndRemove(pObject);
+
 	if (m_inSimulation || m_bUseDeleteQueue) {
 		((CPhysicsObject *)pObject)->AddCallbackFlags(CALLBACK_MARKED_FOR_DELETE);
 		m_deadObjects.AddToTail(pObject);
@@ -580,13 +583,14 @@ void CPhysicsEnvironment::CleanupDeleteList(void) {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject*)m_deadObjects.Element(i);
 		assert(pObject);
-		assert(*(char *)pObject != '\xDD'); // Debug
+		assert(*(char *)pObject != '\xDD'); // Debug for the below
 
 		delete pObject;	// CRASH HERE ON EXIT (Object has already been deleted!)
 						// Exception is handled and then the game crashes in materialsystem
 						// The objects are the vehicle controller's wheels, they've already
 						// been deleted!
 	}
+
 	m_deadObjects.Purge();
 	m_pDeleteQueue->DeleteAll();
 }
@@ -596,21 +600,21 @@ void CPhysicsEnvironment::EnableDeleteQueue(bool enable) {
 }
 
 bool CPhysicsEnvironment::Save(const physsaveparams_t &params) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return false;
 }
 
 void CPhysicsEnvironment::PreRestore(const physprerestoreparams_t &params) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 bool CPhysicsEnvironment::Restore(const physrestoreparams_t &params) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return false;
 }
 
 void CPhysicsEnvironment::PostRestore() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
@@ -623,11 +627,11 @@ bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 }
 	
 void CPhysicsEnvironment::TraceRay(const Ray_t &ray, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsEnvironment::GetPerformanceSettings(physics_performanceparams_t *pOutput) const {
@@ -638,35 +642,35 @@ void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams
 }
 
 void CPhysicsEnvironment::ReadStats(physics_stats_t *pOutput) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsEnvironment::ClearStats() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 unsigned int CPhysicsEnvironment::GetObjectSerializeSize(IPhysicsObject *pObject) const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 void CPhysicsEnvironment::SerializeObjectToBuffer(IPhysicsObject *pObject, unsigned char *pBuffer, unsigned int bufferSize) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 IPhysicsObject *CPhysicsEnvironment::UnserializeObjectFromBuffer(void *pGameData, unsigned char *pBuffer, unsigned int bufferSize, bool enableCollisions) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
-	NOT_IMPLEMENTED; // UNDONE: Unsure what this functions is supposed to do its not documentated anywhere so for the moment it shall just be disabled
+	NOT_IMPLEMENTED // UNDONE: Unsure what this functions is supposed to do its not documentated anywhere so for the moment it shall just be disabled
 	// Andrew; this tells the physics environment to handle a callback whenever a physics object is removed that was attached to a constraint
 	return;
 }
 
 void CPhysicsEnvironment::DebugCheckContacts(void) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 btDynamicsWorld *CPhysicsEnvironment::GetBulletEnvironment() {

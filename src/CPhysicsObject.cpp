@@ -15,110 +15,6 @@
 
 extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
-CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
-	btCollisionShape *shape = (btCollisionShape*)pCollisionModel;
-	
-	btVector3 vector;
-	btMatrix3x3 matrix;
-	ConvertPosToBull(position, vector);
-	ConvertRotationToBull(angles, matrix);
-	btTransform transform(matrix, vector);
-
-	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
-	btTransform masscenter(btMatrix3x3::getIdentity());
-	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
-
-	float mass = 0;
-
-	if (pParams && !isStatic)
-		mass = pParams->mass;
-
-	btVector3 inertia;
-
-	shape->calculateLocalInertia(mass, inertia);
-	btMotionState *motionstate = new btMassCenterMotionState(transform, masscenter);
-	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
-
-	if (pParams) {
-		info.m_linearDamping = pParams->damping;
-		info.m_angularDamping = pParams->rotdamping;
-		//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
-	}
-
-	btRigidBody *body = new btRigidBody(info);
-
-	if (isStatic)
-		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-	else
-		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
-
-	if (mass > 0)
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
-	else
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
-
-	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams);
-	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
-
-	/*if (mass > 0)
-	{
-		btVector3 mins, maxs;
-		shape->getAabb(btTransform::getIdentity(), mins, maxs);
-		float maxradius = min(min(abs(maxs.getX()), abs(maxs.getY())), abs(maxs.getZ()));
-		float minradius = min(min(abs(mins.getX()), abs(mins.getY())), abs(mins.getZ()));
-		float radius = min(maxradius,minradius)/2.0f;
-		body->setCcdMotionThreshold(radius*0.5f);
-		body->setCcdSweptSphereRadius(0.2f*radius);
-	}*/
-	
-	return pObject;
-}
-
-CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
-	if (!pEnvironment) return NULL;
-
-	btSphereShape *shape = new btSphereShape(ConvertDistanceToBull(radius));
-	
-	btVector3 vector;
-	btMatrix3x3 matrix;
-	ConvertPosToBull(position, vector);
-	ConvertRotationToBull(angles, matrix);
-	btTransform transform(matrix, vector);
-
-	float mass = 0;
-	float volume = 0;
-
-	if (pParams) {
-		mass = isStatic ? 0 : pParams->mass;
-
-		volume = pParams->volume;
-		if (volume <= 0) {
-			pParams->volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
-		}
-	}
-
-	btMotionState *motionstate = new btMassCenterMotionState(transform);
-	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape);
-
-	btRigidBody *body = new btRigidBody(info);
-
-	if (isStatic)
-		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-	else
-		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
-
-	if (mass > 0)
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
-	else
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
-
-	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams);
-
-	return pObject;
-}
-
 /***************************
 * CLASS CPhysicsObject
 ***************************/
@@ -134,8 +30,7 @@ CPhysicsObject::CPhysicsObject() {
 }
 
 CPhysicsObject::~CPhysicsObject() {
-	if (m_pEnv)
-	{
+	if (m_pEnv) {
 		RemoveShadowController();
 		m_pEnv->GetDragController()->RemovePhysicsObject(this);
 	}
@@ -903,4 +798,112 @@ float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const
 		IVP_Inline_Math::fabsd( angVelocity.k[1] * m_angDragBasis.y ) + 
 		IVP_Inline_Math::fabsd( angVelocity.k[2] * m_angDragBasis.z );
 	*/
+}
+
+/************************
+* CREATION FUNCTIONS
+************************/
+
+CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
+	btCollisionShape *shape = (btCollisionShape*)pCollisionModel;
+	
+	btVector3 vector;
+	btMatrix3x3 matrix;
+	ConvertPosToBull(position, vector);
+	ConvertRotationToBull(angles, matrix);
+	btTransform transform(matrix, vector);
+
+	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
+	btTransform masscenter(btMatrix3x3::getIdentity());
+	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
+
+	float mass = 0;
+
+	if (pParams && !isStatic)
+		mass = pParams->mass;
+
+	btVector3 inertia;
+
+	shape->calculateLocalInertia(mass, inertia);
+	btMotionState *motionstate = new btMassCenterMotionState(transform, masscenter);
+	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
+
+	if (pParams) {
+		info.m_linearDamping = pParams->damping;
+		info.m_angularDamping = pParams->rotdamping;
+		//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
+	}
+
+	btRigidBody *body = new btRigidBody(info);
+
+	if (isStatic)
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+	else
+		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
+
+	if (mass > 0)
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	else
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
+
+	CPhysicsObject *pObject = new CPhysicsObject();
+	pObject->Init(pEnvironment, body, materialIndex, pParams);
+	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
+
+	/*if (mass > 0)
+	{
+		btVector3 mins, maxs;
+		shape->getAabb(btTransform::getIdentity(), mins, maxs);
+		float maxradius = min(min(abs(maxs.getX()), abs(maxs.getY())), abs(maxs.getZ()));
+		float minradius = min(min(abs(mins.getX()), abs(mins.getY())), abs(mins.getZ()));
+		float radius = min(maxradius,minradius)/2.0f;
+		body->setCcdMotionThreshold(radius*0.5f);
+		body->setCcdSweptSphereRadius(0.2f*radius);
+	}*/
+	
+	return pObject;
+}
+
+CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
+	if (!pEnvironment) return NULL;
+
+	btSphereShape *shape = new btSphereShape(ConvertDistanceToBull(radius));
+	
+	btVector3 vector;
+	btMatrix3x3 matrix;
+	ConvertPosToBull(position, vector);
+	ConvertRotationToBull(angles, matrix);
+	btTransform transform(matrix, vector);
+
+	float mass = 0;
+	float volume = 0;
+
+	if (pParams) {
+		mass = isStatic ? 0 : pParams->mass;
+
+		volume = pParams->volume;
+		if (volume <= 0) {
+			pParams->volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
+		}
+	}
+
+	btMotionState *motionstate = new btMassCenterMotionState(transform);
+	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape);
+
+	btRigidBody *body = new btRigidBody(info);
+
+	if (isStatic)
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+	else
+		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
+
+	if (mass > 0)
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	else
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
+
+	CPhysicsObject *pObject = new CPhysicsObject();
+	pObject->Init(pEnvironment, body, materialIndex, pParams);
+
+	return pObject;
 }

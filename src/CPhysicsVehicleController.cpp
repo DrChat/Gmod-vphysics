@@ -24,7 +24,7 @@ struct IgnoreObjectRayResultCallback: public btCollisionWorld::ClosestRayResultC
 	bool needsCollision(btBroadphaseProxy *proxy0) const {
 		btRigidBody *pBody = (btRigidBody *)proxy0->m_clientObject;
 		if (pBody) {
-			return pBody != m_pIgnoreObject;
+			return (pBody != m_pIgnoreObject || !((CPhysicsObject *)pBody->getUserPointer())->IsCollisionEnabled());	// HACK: Fix for the physical wheels.
 		}
 
 		return true;
@@ -131,7 +131,7 @@ void CPhysicsVehicleController::InitCarWheels() {
 		for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 			CPhysicsObject *pWheel = CreateWheel(wheelIndex, m_vehicleParams.axles[i]);
 			if (pWheel) {
-				m_pWheels[i] = pWheel;
+				m_pWheels[wheelIndex] = pWheel;
 			}
 		}
 	}
@@ -186,7 +186,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	// cache the wheel object pointer
 	m_pWheels[wheelIndex] = pWheel;
 
-	pWheel->AddCallbackFlags( CALLBACK_IS_VEHICLE_WHEEL );
+	pWheel->AddCallbackFlags(CALLBACK_IS_VEHICLE_WHEEL);
 
 	// Create the wheel in bullet
 	btVector3 bullConnectionPointCS0;
@@ -195,8 +195,8 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullWheelDirectionCS0(0,-1,0);	// TODO: Figure out what this is.
 	btVector3 bullWheelAxleCS(-1,0,0);			// TODO: Figure out what this is.
 
-	// TODO: We shouldn't have to reposition the wheels. Find out how to disable collisions between the raycast wheels and our body.
-	position += Vector(0, 35, -10);
+	// TODO: We shouldn't have to reposition the wheels.
+	position += Vector(0, 35, 0);
 	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
 	ConvertPosToBull(position, bullConnectionPointCS0);
 	bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
