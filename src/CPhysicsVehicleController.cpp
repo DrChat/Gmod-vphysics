@@ -24,7 +24,10 @@ struct IgnoreObjectRayResultCallback: public btCollisionWorld::ClosestRayResultC
 	bool needsCollision(btBroadphaseProxy *proxy0) const {
 		btRigidBody *pBody = (btRigidBody *)proxy0->m_clientObject;
 		if (pBody) {
-			return (pBody != m_pIgnoreObject || !((CPhysicsObject *)pBody->getUserPointer())->IsCollisionEnabled());	// HACK: Fix for the physical wheels.
+			if (pBody == m_pIgnoreObject)
+				return false;
+			else
+				return ((CPhysicsObject *)pBody->getUserPointer())->IsCollisionEnabled();	// HACK: Fix for the physical wheels.
 		}
 
 		return true;

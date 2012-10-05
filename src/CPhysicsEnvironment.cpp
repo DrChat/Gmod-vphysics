@@ -582,13 +582,7 @@ bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnviro
 void CPhysicsEnvironment::CleanupDeleteList(void) {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject*)m_deadObjects.Element(i);
-		assert(pObject);
-		assert(*(char *)pObject != '\xDD'); // Debug for the below
-
-		delete pObject;	// CRASH HERE ON EXIT (Object has already been deleted!)
-						// Exception is handled and then the game crashes in materialsystem
-						// The objects are the vehicle controller's wheels, they've already
-						// been deleted!
+		delete pObject;
 	}
 
 	m_deadObjects.Purge();
