@@ -49,6 +49,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	ConvertPosToBull(position, targetPositionBull);
 	ConvertPosToBull(velocity, targetSpeedBull);
 
+	// If the object hasn't moved, abort.
 	if (targetSpeedBull.distance2(m_currentSpeed) < 1e-6) {
 		if (targetPositionBull.distance2(m_targetPosition) < 1e-6) {
 			return;
@@ -67,6 +68,9 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	} else {
 		MaxSpeed(velocity);
 	}
+
+	// AKA ensure_core_in_simulation
+	m_pObject->Wake();
 
 	m_pGround = (CPhysicsObject *)ground;
 

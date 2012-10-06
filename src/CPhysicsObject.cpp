@@ -259,7 +259,7 @@ Vector CPhysicsObject::GetInvInertia() const {
 	return hlvec;
 }
 
-void CPhysicsObject::SetInertia(const Vector& inertia) {
+void CPhysicsObject::SetInertia(const Vector &inertia) {
 	btVector3 btvec;
 	ConvertDirectionToBull(inertia, btvec);
 	btvec = btvec.absolute();
@@ -342,7 +342,7 @@ Vector CPhysicsObject::GetMassCenterLocalSpace() const {
 	return HLMassCenter;
 }
 
-void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport) {
+void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angles, bool isTeleport) {
 	btVector3 bullPos;
 	btMatrix3x3 bullAngles;
 	ConvertPosToBull(worldPosition, bullPos);
@@ -361,19 +361,22 @@ void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angl
 void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTeleport) {
 	btTransform trans;
 	ConvertMatrixToBull(matrix, trans);
-	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(trans);
+	((btMassCenterMotionState *)m_pObject->getMotionState())->setGraphicTransform(trans);
 
 	// Mass center compensation.
 	btTransform finaltrans;
 	((btMassCenterMotionState *)m_pObject->getMotionState())->getWorldTransform(finaltrans);
 	m_pObject->setWorldTransform(finaltrans);
+
+	if (isTeleport)
+		m_pObject->setActivationState(ACTIVE_TAG);
 }
 
 void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 	if (!worldPosition && !angles) return;
 
 	btTransform transform;
-	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
+	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (worldPosition) ConvertPosToHL(transform.getOrigin(), *worldPosition);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 }
@@ -424,7 +427,7 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 	}
 }
 
-void CPhysicsObject::GetVelocityAtPoint(const Vector& worldPosition, Vector *pVelocity) const {
+void CPhysicsObject::GetVelocityAtPoint(const Vector &worldPosition, Vector *pVelocity) const {
 	if (!pVelocity) return;
 
 	btVector3 vec;
@@ -438,7 +441,7 @@ void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angul
 	NOT_IMPLEMENTED;
 }
 
-void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector& localPosition) const {
+void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector &localPosition) const {
 	if (!worldPosition) return;
 
 	matrix3x4_t matrix;
@@ -446,7 +449,7 @@ void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector& localPosi
 	VectorTransform(Vector(localPosition), matrix, *worldPosition);
 }
 
-void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector& worldPosition) const {
+void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector &worldPosition) const {
 	if (!localPosition) return;
 
 	matrix3x4_t matrix;
@@ -454,7 +457,7 @@ void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector& worldPosi
 	VectorITransform(Vector(worldPosition), matrix, *localPosition);
 }
 
-void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector& localVector) const {
+void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector &localVector) const {
 	if (!worldVector) return;
 
 	matrix3x4_t matrix;
@@ -462,7 +465,7 @@ void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector& local
 	VectorRotate(Vector(localVector), matrix, *worldVector);
 }
 
-void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector& worldVector) const {
+void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &worldVector) const {
 	if (!localVector) return;
 
 	matrix3x4_t matrix;
@@ -470,13 +473,14 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector& world
 	VectorIRotate(Vector(worldVector), matrix, *localVector);
 }
 
-void CPhysicsObject::ApplyForceCenter(const Vector& forceVector) {
+// These two functions are broken with the physcannon.
+void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
 	m_pObject->applyCentralForce(force);
 }
 
-void CPhysicsObject::ApplyForceOffset(const Vector& forceVector, const Vector& worldPosition) {
+void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &worldPosition) {
 	Vector local;
 	WorldToLocal(&local, worldPosition);
 	btVector3 force, offset;
@@ -485,31 +489,37 @@ void CPhysicsObject::ApplyForceOffset(const Vector& forceVector, const Vector& w
 	m_pObject->applyForce(force, offset);
 }
 
-void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse& torque) {
+void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 	btVector3 bullTorque;
 	ConvertAngularImpulseToBull(torque, bullTorque);
 	m_pObject->applyTorque(bullTorque);
 }
 
-void CPhysicsObject::CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const {
+void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const {
+	if (!centerForce && !centerTorque) return;
 	NOT_IMPLEMENTED;
 }
 
 // TODO: Thrusters call this
-void CPhysicsObject::CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
+void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
+	if (!centerVelocity && !centerAngularVelocity) return;
+
+	btVector3 bullForceVector, bullWorldPosition;
+	ConvertForceImpulseToBull(forceVector, bullForceVector);
+	ConvertPosToBull(worldPosition, bullWorldPosition);
 	NOT_IMPLEMENTED;
 }
 
-float CPhysicsObject::CalculateLinearDrag(const Vector& unitDirection) const {
+float CPhysicsObject::CalculateLinearDrag(const Vector &unitDirection) const {
 	btVector3 bull_unitDirection;
 	ConvertDirectionToBull(unitDirection,bull_unitDirection);
 	return GetDragInDirection( &bull_unitDirection );
 }
 
-float CPhysicsObject::CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const {
+float CPhysicsObject::CalculateAngularDrag(const Vector &objectSpaceRotationAxis) const {
 	btVector3 bull_unitDirection;
-	ConvertDirectionToBull(objectSpaceRotationAxis,bull_unitDirection);
-	return GetAngularDragInDirection( &bull_unitDirection ) * DEG2RAD(1.0);
+	ConvertDirectionToBull(objectSpaceRotationAxis, bull_unitDirection);
+	return DEG2RAD(GetAngularDragInDirection(&bull_unitDirection));
 }
 
 bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
@@ -571,7 +581,7 @@ void CPhysicsObject::SetShadow(float maxSpeed, float maxAngularSpeed, bool allow
 	}
 }
 
-void CPhysicsObject::UpdateShadow(const Vector& targetPosition, const QAngle& targetAngles, bool tempDisableGravity, float timeOffset) {
+void CPhysicsObject::UpdateShadow(const Vector &targetPosition, const QAngle &targetAngles, bool tempDisableGravity, float timeOffset) {
 	if (m_pShadow) {
 		m_pShadow->Update(targetPosition, targetAngles, timeOffset);
 	}
@@ -603,7 +613,7 @@ void CPhysicsObject::RemoveShadowController() {
 	m_pShadow = NULL;
 }
 
-float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t& params, float secondsToArrival, float dt) {
+float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	return ComputeShadowControllerHL(this, params, secondsToArrival, dt);
 }
 
@@ -806,7 +816,7 @@ float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const
 * CREATION FUNCTIONS
 ************************/
 
-CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle& angles, objectparams_t *pParams, bool isStatic) {
+CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
 	btCollisionShape *shape = (btCollisionShape*)pCollisionModel;
 	
 	btVector3 vector;

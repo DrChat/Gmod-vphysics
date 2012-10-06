@@ -30,27 +30,6 @@ void ConvertDirectionToHL(const btVector3 &dir, Vector &hl) {
 }
 
 void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {
-	/*
-	Vector forward, right, up;
-	btVector3 bullForward, bullRight, bullUp;
-	
-	AngleVectors( angles, &forward, &right, &up );
-	// now this is left
-	//right = -right;
-
-	up = -up;
-	
-	ConvertDirectionToBull( forward, bullForward );
-	ConvertDirectionToBull( right, bullRight );
-	ConvertDirectionToBull( up, bullUp );
-
-	bull.setValue(
-		bullForward.x(), bullForward.y(), bullForward.z(),
-		bullUp.x(), bullUp.y(), bullUp.z(),
-		bullRight.x(), bullRight.y(), bullRight.z()
-		);
-	*/
-	
 	RadianEuler radian(angles);
 	Quaternion q(radian);
 	btQuaternion quat(q.x, q.z, -q.y, q.w);
@@ -58,75 +37,23 @@ void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {
 }
 
 void ConvertRotationToBull(const QAngle &angles, btQuaternion &bull) {
-	/*
-	btMatrix3x3 temp;
-	ConvertRotationToBull(angles, temp);
-	bull = btQuaternion(temp);
-	*/
-	
 	RadianEuler radian(angles);
 	Quaternion q(radian);
 	bull.setValue(q.x, q.z, -q.y, q.w);
 }
 
-// NOTE: This function is BROKEN! Rewrite this!
-// You can test this with:
-//	lua_run local ent = player.GetByID(1):GetEyeTrace().Entity local i = 0 hook.Add("Think", "asdft", function() if i > 180 then i = -180 end print(tostring(ent:GetAngles()) .. " i(" .. i .. ")") ent:SetAngles(Angle(i, 0, 0)) i = i + 1 end)
-// With this code, when HL.x > 90 || HL.x < -90 the other two angles (y and z) start screwing over.
 void ConvertRotationToHL(const btMatrix3x3 &matrix, QAngle &hl) {
-	btVector3 out;
-	Vector forward, right, up;
-
-	out = matrix.getColumn(0);
-	ConvertDirectionToHL(out, forward);
-	out = matrix.getColumn(2);
-	ConvertDirectionToHL(out, right);
-	out = matrix.getColumn(1);
-	ConvertDirectionToHL(out, up);
-
-	up = -up;
-
-	float xyDist = sqrt( forward.x * forward.x + forward.y * forward.y );
-	
-	// enough here to get angles?
-	if ( xyDist > 0.001 ) {
-		// (yaw)	y = ATAN( forward.y, forward.x );		-- in our space, forward is the X axis
-		hl.y = RAD2DEG( atan2( forward.y, forward.x ) );
-
-		// (pitch)	x = ATAN( -forward.z, sqrt(forward.x*forward.x+forward.y*forward.y) );
-		hl.x = RAD2DEG( atan2( -forward.z, xyDist ) );
-
-		// (roll)	z = ATAN( -right.z, up.z );
-		hl.z = RAD2DEG( atan2( -right.z, up.z ) ) + 180;
-	} else {	// forward is mostly Z, gimbal lock
-		// (yaw)	y = ATAN( -right.x, right.y );		-- forward is mostly z, so use right for yaw
-		hl.y = RAD2DEG( atan2( right.x, -right.y ) );
-
-		// (pitch)	x = ATAN( -forward.z, sqrt(forward.x*forward.x+forward.y*forward.y) );
-		hl.x = RAD2DEG( atan2( -forward.z, xyDist ) );
-
-		// Assume no roll in this case as one degree of freedom has been lost (i.e. yaw == roll)
-		hl.z = 180;
-	}
-	
-	/*
 	btQuaternion quat;
 	matrix.getRotation(quat);
 	Quaternion q(quat.getX(), -quat.getZ(), quat.getY(), quat.getW());
 	RadianEuler radian(q);
 	hl = radian.ToQAngle();
-	*/
 }
 
 void ConvertRotationToHL(const btQuaternion &quat, QAngle &hl) {
-	btMatrix3x3 temp(quat);
-	ConvertRotationToHL(temp, hl);
-
-	/*
 	Quaternion q(quat.getX(), -quat.getZ(), quat.getY(), quat.getW());
 	RadianEuler radian(q);
 	hl = radian.ToQAngle();
-	*/
 }
 
 void ConvertAngularImpulseToBull(const AngularImpulse &angularimp, btVector3 &bull) {
