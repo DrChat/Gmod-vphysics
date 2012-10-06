@@ -63,14 +63,14 @@ void ConvertDirectionToHL(const btVector3& dir, Vector& hl) {
 	hl.z = dir.y();
 }
 
-void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull) {
+void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {
 	RadianEuler radian(angles);
 	Quaternion q(radian);
 	btQuaternion quat(q.x, q.z, -q.y, q.w);
 	bull.setRotation(quat);
 }
 
-void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull) {
+void ConvertRotationToBull(const QAngle &angles, btQuaternion &bull) {
 	RadianEuler radian(angles);
 	Quaternion q(radian);
 	bull.setValue(q.x, q.z, -q.y, q.w);

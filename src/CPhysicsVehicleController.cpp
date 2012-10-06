@@ -60,7 +60,7 @@ class btHLVehicleRaycaster: public btVehicleRaycaster {
 				}
 			}
 
-			return 0;
+			return NULL;
 		}
 	private:
 		btDynamicsWorld *	m_pWorld;
@@ -166,7 +166,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	QAngle angles = vec3_angle;
 	Vector wheelPositionHL;
-	VectorTransform( position, matrix, wheelPositionHL );
+	VectorTransform(position, matrix, wheelPositionHL);
 
 	objectparams_t params;
 	memset(&params, 0, sizeof(params));
@@ -189,10 +189,6 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject(radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params, false);
 	pWheel->Wake();
-
-	// cache the wheel object pointer
-	m_pWheels[wheelIndex] = pWheel;
-
 	pWheel->AddCallbackFlags(CALLBACK_IS_VEHICLE_WHEEL);
 
 	// Create the wheel in bullet
@@ -252,6 +248,8 @@ void CPhysicsVehicleController::UpdateEngine(const vehicle_controlparams_t &cont
 	fSpeed *= 0.27777778; // km/h -> m/s
 	m_vehicleState.speed = ConvertDistanceToHL(-fSpeed);
 
+	CalcEngine(controls, dt);
+
 	for (int i = 2; i < m_iWheelCount; i++) {
 		m_pRaycastVehicle->applyEngineForce(-controls.throttle * 1000, i);
 		m_pRaycastVehicle->setBrake(0, i);
@@ -279,6 +277,15 @@ void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &cont
 float CPhysicsVehicleController::UpdateBooster(float dt) {
 	NOT_IMPLEMENTED
 	return 0.0f;		// Return boost delay.
+}
+
+void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &controls, float dt) {
+	if (m_vehicleParams.engine.isAutoTransmission) {
+		float avgRotSpeed = 0;
+		for (int i = 0; i < m_iWheelCount; i++) {
+			avgRotSpeed += fabs(m_pRaycastVehicle->getWheelInfo(i).m_deltaRotation);
+		}
+	}
 }
 
 int CPhysicsVehicleController::GetWheelCount() {

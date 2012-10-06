@@ -127,7 +127,7 @@ void CPlayerController::SetObject(IPhysicsObject *pObject) {
 int CPlayerController::GetShadowPosition(Vector *position, QAngle *angles) {
 	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
-	((btMassCenterMotionState*)pObject->getMotionState())->getGraphicTransform(transform);
+	((btMassCenterMotionState *)pObject->getMotionState())->getGraphicTransform(transform);
 	if (position) ConvertPosToHL(transform.getOrigin(), *position);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 
@@ -139,7 +139,7 @@ void CPlayerController::StepUp(float height) {
 	ConvertPosToBull(Vector(0, 0, height), step);
 	btRigidBody *pObject = m_pObject->GetObject();
 	btTransform transform;
-	((btMassCenterMotionState*)pObject->getMotionState())->getWorldTransform(transform);
+	((btMassCenterMotionState *)pObject->getMotionState())->getWorldTransform(transform);
 	transform.setOrigin(transform.getOrigin() + step);
 
 	pObject->setWorldTransform(transform);

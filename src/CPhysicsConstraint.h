@@ -27,7 +27,6 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		IPhysicsObject *		GetReferenceObject(void) const { return m_pObject2; };
 		IPhysicsObject *		GetAttachedObject(void) const { return m_pObject1; };
 
-		// What the christ are these?
 		void					SetLinearMotor(float speed, float maxLinearImpulse);
 		void					SetAngularMotor(float rotSpeed, float maxAngularImpulse);
 		

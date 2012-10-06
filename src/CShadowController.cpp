@@ -14,7 +14,15 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
-static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
+// TODO: Shadow controller rotation bug
+// Rotate the object so one of the HL angles is negative such as QAngle(0, -179, 0)
+// Then let go of the object and quickly grab it again
+// The bullet transform rotation quaternion is the EXACT opposite of the target rotation quaternion!
+// The same thing happens when you drag the object across an axis.
+// TODO: It may be the conversion functions, ConvertRotationToBull. Test these functions!
+//	NOTE: Converting to bull and back will be the same QAngle. It might be on the bull
+//	side where they don't do something HL does.
+static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "1", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -28,7 +36,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	if (fraction <= 0) return secondsToArrival;
 
 	btTransform transform;
-	((btMassCenterMotionState*)object->getMotionState())->getGraphicTransform(transform);
+	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
 	btVector3 posbull = transform.getOrigin();
 	btVector3 delta_position = params.targetPosition - posbull;
 
@@ -72,14 +80,16 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setZ(axis.z() * angle);
 
 	btVector3 rot_speed = object->getAngularVelocity();
-	if (cvar_spewshadowdebuginfo.GetBool() && (params.targetRotation.getX() != 0 || params.targetRotation.getY() != 0 || params.targetRotation.getZ() != 0 || params.targetRotation.getW() != 0)) {		// DEBUG
-		//Msg("---\n");
-		//Msg("SPEED BEFORE: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
+	// DEBUG
+	if (cvar_spewshadowdebuginfo.GetBool() && (params.targetRotation.getX() != 0 || params.targetRotation.getY() != 0 || params.targetRotation.getZ() != 0 || params.targetRotation.getW() != 0)) {
+		QAngle HLTransAng;
+		ConvertRotationToHL(transform.getRotation(), HLTransAng);
+		Msg("HL Transform Rotation: %f %f %f\n", HLTransAng.x, HLTransAng.y, HLTransAng.z);
 		btQuaternion transquat = transform.getRotation();
 		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
 		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
 		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
-		Msg("Delta Rotation Vec: %f %f %f\n", deltaAngles.getX(), deltaAngles.getY(), deltaAngles.getZ());
+		//Msg("Delta Rotation Vec: %f %f %f\n", deltaAngles.getX(), deltaAngles.getY(), deltaAngles.getZ());
 	}
 
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
@@ -97,11 +107,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	return secondsToArrival;
 }
 
-// BUG: in.targetRotation is ABOVE 180 at value 360 when rotation bug happens
-// What happens is the target rotation (y is used as an example) y value will FLIP when dragged across it's axis
-// So drag it one way, it adds +360
-// The other, -360
-// So apparently it's the exact opposite in a quaternion.
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
 	if (cvar_spewshadowdebuginfo.GetBool())
 		Msg("HL Target Rotation Before Convert: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
@@ -233,7 +238,7 @@ bool CShadowController::IsPhysicallyControlled() {
 	return false;
 }
 
-void CShadowController::GetLastImpulse(Vector* pOut) {
+void CShadowController::GetLastImpulse(Vector *pOut) {
 	NOT_IMPLEMENTED;
 	*pOut = Vector(0,0,0);
 }
