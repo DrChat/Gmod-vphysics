@@ -347,7 +347,7 @@ void CPhysicsObject::SetPosition(const Vector& worldPosition, const QAngle& angl
 	btMatrix3x3 bullAngles;
 	ConvertPosToBull(worldPosition, bullPos);
 	ConvertRotationToBull(angles, bullAngles);
-	((btMassCenterMotionState*)m_pObject->getMotionState())->setGraphicTransform(btTransform(bullAngles, bullPos));
+	((btMassCenterMotionState *)m_pObject->getMotionState())->setGraphicTransform(btTransform(bullAngles, bullPos));
 
 	// Mass center compensation.
 	btTransform finaltrans;

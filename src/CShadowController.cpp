@@ -14,15 +14,6 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
-// TODO: Shadow controller rotation bug
-// Rotate the object so one of the HL angles is negative such as QAngle(0, -179, 0)
-// Then let go of the object and quickly grab it again
-// The bullet transform rotation quaternion is the EXACT opposite of the target rotation quaternion!
-// The same thing happens when you drag the object across an axis.
-// TODO: It may be the conversion functions, ConvertRotationToBull. Test these functions!
-//	NOTE: Converting to bull and back will be the same QAngle. It might be on the bull
-//	side where they don't do something HL does.
-static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "1", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -62,11 +53,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	params.lastPosition = posbull + speed * dt;
 
-	// BUG: Physgun rotation bug most likely caused here
-	// Set breakpoint @ ComputeShadowControllerHL WHILE holding object in spazout rotation
-	// DEBUG
-	const char *pObjName = ((CPhysicsObject *)object->getUserPointer())->GetName();
-
+	// Set the angles
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
@@ -80,37 +67,13 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setZ(axis.z() * angle);
 
 	btVector3 rot_speed = object->getAngularVelocity();
-	// DEBUG
-	if (cvar_spewshadowdebuginfo.GetBool() && (params.targetRotation.getX() != 0 || params.targetRotation.getY() != 0 || params.targetRotation.getZ() != 0 || params.targetRotation.getW() != 0)) {
-		QAngle HLTransAng;
-		ConvertRotationToHL(transform.getRotation(), HLTransAng);
-		Msg("HL Transform Rotation: %f %f %f\n", HLTransAng.x, HLTransAng.y, HLTransAng.z);
-		btQuaternion transquat = transform.getRotation();
-		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
-		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
-		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
-		//Msg("Delta Rotation Vec: %f %f %f\n", deltaAngles.getX(), deltaAngles.getY(), deltaAngles.getZ());
-	}
-
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
-
-	if (cvar_spewshadowdebuginfo.GetBool() && (rot_speed.getX() != 0 || rot_speed.getY() != 0 || rot_speed.getZ() != 0))
-		Msg("SPEED AFTER: %f %f %f\n", rot_speed.getX(), rot_speed.getY(), rot_speed.getZ());
-
-	// For debugging purposes.
-	AngularImpulse rotspeedHL;
-	ConvertAngularImpulseToHL(rot_speed, rotspeedHL);
-
-	object->setAngularVelocity(btVector3(0, 0, 0));	// TODO: Remove when physgun rotation issue is resolved.
 
 	return secondsToArrival;
 }
 
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
-	if (cvar_spewshadowdebuginfo.GetBool())
-		Msg("HL Target Rotation Before Convert: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
-
 	ConvertPosToBull(in.targetPosition, out.targetPosition);
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);

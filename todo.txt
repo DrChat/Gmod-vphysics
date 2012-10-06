@@ -10,6 +10,8 @@
 	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
 	- VEHICLES:
 		- Physical wheels slowly sink.
+	- Conversions
+		- ConvertRotationToX functions are BROKEN! (Details in convert.cpp)
 - TODO
 	- Support concave meshes (see: trash dumpster)
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
