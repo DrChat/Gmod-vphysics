@@ -3,21 +3,20 @@
 
 class CPhysicsObject;
 
-class CPhysicsDragController
-{
+class CPhysicsDragController {
 	public:
 									CPhysicsDragController();
 		void						SetAirDensity(float density);
 		float						GetAirDensity();
 
-		void						AddPhysicsObject(CPhysicsObject *);
-		void						RemovePhysicsObject(CPhysicsObject *);
+		void						AddPhysicsObject(CPhysicsObject *pObject);
+		void						RemovePhysicsObject(CPhysicsObject *pObject);
 		void						Tick(btScalar dt);
-		bool						IsControlling(const CPhysicsObject *) const;
+		bool						IsControlling(const CPhysicsObject *pObject) const;
 	private:
 		float						m_airDensity;
 
-		CUtlVector<CPhysicsObject*> m_ents;
+		CUtlVector<CPhysicsObject *>m_ents;
 };
 
 #endif

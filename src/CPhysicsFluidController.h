@@ -9,17 +9,17 @@ class CPhysicsEnvironment;
 class CPhysicsFluidController : public IPhysicsFluidController, public IController
 {
 	public:
-								CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t * pParams);
-		virtual					~CPhysicsFluidController( void );
+								CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams);
+								~CPhysicsFluidController();
 
-		virtual void			SetGameData( void *pGameData ) ;
-		virtual void *			GetGameData( void ) const;
+		void					SetGameData(void *pGameData);
+		void *					GetGameData() const;
 
-		virtual void			GetSurfacePlane( Vector *pNormal, float *pDist ) const;
-		virtual float			GetDensity() const;
-		virtual void			WakeAllSleepingObjects();
-		virtual int				GetContents() const;
-		virtual void			Tick(float deltaTime);
+		void					GetSurfacePlane( Vector *pNormal, float *pDist ) const;
+		float					GetDensity() const;
+		void					WakeAllSleepingObjects();
+		int						GetContents() const;
+		void					Tick(float deltaTime);
 	private:
 		void *					m_pGameData;
 		int						m_iContents;
@@ -29,6 +29,6 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		btGhostObject *			m_pGhostObject;
 };
 
-CPhysicsFluidController * CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams);
+CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams);
 
 #endif

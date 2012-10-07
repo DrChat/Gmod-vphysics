@@ -449,7 +449,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "1", 0, "Sets the maximum amount of simulation substeps");
+static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "2", 0, "Sets the maximum amount of simulation substeps");
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {
@@ -467,7 +467,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	m_inSimulation = true;
 	if (deltaTime > 0.0001) {
 		// Divide by zero check.
-		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / (cvar_maxsubsteps.GetInt() * 2) : m_timestep;
+		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
 		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt(), timestep); // m_timestep/2.0f
 		for (int i = 0; i < m_fluids.Count(); i++) {
 			m_fluids[i]->Tick(deltaTime);

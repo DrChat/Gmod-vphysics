@@ -26,8 +26,9 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	if (fraction <= 0) return secondsToArrival;
 
-	btTransform transform(object->getWorldTransform());
-	//((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
+	btTransform transform;
+	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
+
 	btVector3 posbull = transform.getOrigin();
 	btVector3 delta_position = params.targetPosition - posbull;
 
@@ -225,7 +226,7 @@ void CShadowController::ObjectMaterialChanged(int materialIndex) {
 }
 
 float CShadowController::GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut) {
-	if (!pPositionOut && !pAnglesOut) return;
+	if (!pPositionOut && !pAnglesOut) return 0;
 
 	NOT_IMPLEMENTED
 	return 0;

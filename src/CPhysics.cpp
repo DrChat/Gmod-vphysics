@@ -56,7 +56,8 @@ IPhysicsCollisionSet *CPhysics::FindOrCreateCollisionSet(unsigned int id, int ma
 	if (m_collisionSets.IsValidIndex(id))
 		return m_collisionSets[id];
 	CPhysicsCollisionSet *set = new CPhysicsCollisionSet(maxElementCount);
-	m_collisionSets.InsertBefore(id, set);
+	//m_collisionSets.InsertBefore(id, set);	// TODO: Crashes with ragdolls!
+	m_collisionSets.AddToTail(set);
 	return set;
 }
 

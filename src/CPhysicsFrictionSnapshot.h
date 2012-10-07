@@ -8,26 +8,26 @@ class CPhysicsFrictionSnapshot : public IPhysicsFrictionSnapshot
 {
 	public:
 											CPhysicsFrictionSnapshot(CPhysicsObject *pObject);
-		virtual								~CPhysicsFrictionSnapshot();
-		virtual bool						IsValid();
+											~CPhysicsFrictionSnapshot();
+		bool								IsValid();
 
-		virtual IPhysicsObject *			GetObject(int index);
-		virtual int							GetMaterial(int index);
+		IPhysicsObject *					GetObject(int index);
+		int									GetMaterial(int index);
 
-		virtual void						GetContactPoint(Vector& out);
+		void								GetContactPoint(Vector &out);
 	
-		virtual void						GetSurfaceNormal(Vector& out);
-		virtual float						GetNormalForce();
-		virtual float						GetEnergyAbsorbed();
+		void								GetSurfaceNormal(Vector &out);
+		float								GetNormalForce();
+		float								GetEnergyAbsorbed();
 
-		virtual void						RecomputeFriction();
-		virtual void						ClearFrictionForce();
+		void								RecomputeFriction();
+		void								ClearFrictionForce();
 
-		virtual void						MarkContactForDelete();
-		virtual void						DeleteAllMarkedContacts(bool wakeObjects);
+		void								MarkContactForDelete();
+		void								DeleteAllMarkedContacts(bool wakeObjects);
 
-		virtual void						NextFrictionData();
-		virtual float						GetFrictionCoefficient();
+		void								NextFrictionData();
+		float								GetFrictionCoefficient();
 	private:
 		CUtlVector<btPersistentManifold *>	m_manifolds;
 		CPhysicsObject *					m_pObject;

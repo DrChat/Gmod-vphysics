@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#include "CPhysicsTrace.h"
+#include "trace.h"
 #include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

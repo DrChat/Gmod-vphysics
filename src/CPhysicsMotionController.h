@@ -10,12 +10,12 @@ class CPhysicsMotionController : public IController, public IPhysicsMotionContro
 	public:
 										CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv);
 										~CPhysicsMotionController();
-		void							SetEventHandler(IMotionEvent* handler);
-		void							AttachObject(IPhysicsObject* pObject, bool checkIfAlreadyAttached);
-		void							DetachObject(IPhysicsObject* pObject);
+		void							SetEventHandler(IMotionEvent *handler);
+		void							AttachObject(IPhysicsObject *pObject, bool checkIfAlreadyAttached);
+		void							DetachObject(IPhysicsObject *pObject);
 
 		int								CountObjects();
-		void							GetObjects(IPhysicsObject** pObjectList);
+		void							GetObjects(IPhysicsObject **pObjectList);
 		void							ClearObjects();
 		void							WakeObjects();
 

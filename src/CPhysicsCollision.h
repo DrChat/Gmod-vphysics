@@ -1,7 +1,7 @@
 #ifndef CPHYSICSCOLLISION_H
 #define CPHYSICSCOLLISION_H
 
-#include "CPhysicsTrace.h"
+#include "trace.h"
 
 class CPhysicsCollision : public IPhysicsCollision {
 	public:
@@ -46,7 +46,7 @@ class CPhysicsCollision : public IPhysicsCollision {
 		void					TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 		void					TraceCollide(const Vector &start, const Vector &end, const CPhysCollide *pSweepCollide, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 
-		bool					IsBoxIntersectingCone( const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &cone);
+		bool					IsBoxIntersectingCone(const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &cone);
 
 		void					VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int size, bool swap = false);
 		void					VCollideUnload(vcollide_t *pVCollide);
@@ -68,7 +68,7 @@ class CPhysicsCollision : public IPhysicsCollision {
 
 		bool					GetBBoxCacheSize(int *pCachedSize, int *pCachedCount);
 
-		CPolyhedron *			PolyhedronFromConvex(CPhysConvex  *const pConvex, bool bUseTempPolyhedron);
+		CPolyhedron *			PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron);
 
 		void					OutputDebugInfo(const CPhysCollide *pCollide);
 		unsigned int			ReadStat(int statID);
