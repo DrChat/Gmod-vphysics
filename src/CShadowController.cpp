@@ -26,8 +26,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	if (fraction <= 0) return secondsToArrival;
 
-	btTransform transform;
-	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
+	btTransform transform(object->getWorldTransform());
+	//((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
 	btVector3 posbull = transform.getOrigin();
 	btVector3 delta_position = params.targetPosition - posbull;
 
@@ -109,6 +109,7 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_pObject = pObject;
 	m_shadow.dampFactor = 1.0f;
 	m_shadow.teleportDistance = 0;
+	m_bPhysicallyControlled = false;
 
 	m_allowPhysicsMovement = allowTranslation;
 	m_allowPhysicsRotation = allowRotation;
@@ -119,6 +120,7 @@ CShadowController::~CShadowController() {
 	DetachObject();
 }
 
+// UNEXPOSED
 void CShadowController::Tick(float deltaTime) {
 	if (m_enable) {
 		ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
@@ -179,11 +181,11 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 }
 
 void CShadowController::StepUp(float height) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CShadowController::SetTeleportDistance(float teleportDistance) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 bool CShadowController::AllowsTranslation() {
@@ -195,39 +197,47 @@ bool CShadowController::AllowsRotation() {
 }
 
 void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {
-	NOT_IMPLEMENTED;
+	m_bPhysicallyControlled = isPhysicallyControlled;
 }
 
 bool CShadowController::IsPhysicallyControlled() {
-	NOT_IMPLEMENTED;
-	return false;
+	return m_bPhysicallyControlled;
 }
 
 void CShadowController::GetLastImpulse(Vector *pOut) {
-	NOT_IMPLEMENTED;
+	if (!pOut) return;
+
+	NOT_IMPLEMENTED
 	*pOut = Vector(0,0,0);
 }
 
 void CShadowController::UseShadowMaterial(bool bUseShadowMaterial) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CShadowController::ObjectMaterialChanged(int materialIndex) {
-	NOT_IMPLEMENTED;
+	// (assumed)
+	// if (m_bUseShadowMaterial) {
+	//		m_iObjectMaterial = materialIndex
+	// }
+
+	NOT_IMPLEMENTED
 }
 
-float CShadowController::GetTargetPosition(Vector* pPositionOut, QAngle* pAnglesOut) {
-	NOT_IMPLEMENTED;
+float CShadowController::GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut) {
+	if (!pPositionOut && !pAnglesOut) return;
+
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 float CShadowController::GetTeleportDistance() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 void CShadowController::GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CShadowController::AttachObject() {

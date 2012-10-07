@@ -194,12 +194,12 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
 #	else
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
-#	endif
+#	endif // USE_PARARLLEL_SOLVER
 #else
 	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
-#endif
+#endif // MULTITHREAD
 
 	m_pBulletBroadphase = new btDbvtBroadphase();
 	m_pBulletEnvironment = new btDiscreteDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
@@ -716,6 +716,7 @@ CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 // UNEXPOSED
 void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 	// IPhysicsCollisionEvent::Friction
+	/*
 	int numManifolds = m_pBulletEnvironment->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
 		btPersistentManifold *contactManifold = m_pBulletEnvironment->getDispatcher()->getManifoldByIndexInternal(i);
@@ -725,14 +726,18 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 		if (contactManifold->getNumContacts() <= 0)
 			continue;
 
+		if (obA->getInternalType() == btCollisionObject::CO_GHOST_OBJECT || obB->getInternalType() == btCollisionObject::CO_GHOST_OBJECT)
+			continue;
+
 		if ((((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION) &&
-			(((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION)) {
+			(((CPhysicsObject *)obB->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION)) {
 			btManifoldPoint manPoint = contactManifold->getContactPoint(0);
 			
 			float energy = manPoint.m_combinedFriction;
 			if (energy > 0.05f) {
-
+				
 			}
 		}
 	}
+	*/
 }

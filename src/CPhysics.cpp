@@ -25,8 +25,6 @@ InitReturnVal_t CPhysics::Init() {
 }
 
 void CPhysics::Shutdown() {
-	Sys_UnloadModule(m_valvephysics);
-	m_valvephysics = NULL;
 	BaseClass::Shutdown();
 }
 
@@ -71,7 +69,7 @@ IPhysicsCollisionSet *CPhysics::FindCollisionSet(unsigned int id) {
 
 void CPhysics::DestroyAllCollisionSets() {
 	for (int i = 0; i < m_collisionSets.Count(); i++)
-		delete (CPhysicsCollisionSet*)m_collisionSets[i];
+		delete (CPhysicsCollisionSet *)m_collisionSets[i];
 
 	m_collisionSets.RemoveAll();
 }

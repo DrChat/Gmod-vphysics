@@ -1,12 +1,14 @@
 #include "StdAfx.h"
 
-#include "CPhysicsEnvironment.h"
-#include "CDebugDrawer.h"
-#include "convert.h"
 #include <edict.h>
 
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <LinearMath/btQuickprof.h>
+
+#include "CPhysicsEnvironment.h"
+#include "CDebugDrawer.h"
+#include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
@@ -22,7 +24,9 @@ static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", 0, "Render debug
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
 	m_pEnv = pEnv;
-	setDebugMode(DBG_DrawAabb | DBG_DrawText | DBG_DrawFeaturesText | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints);
+	setDebugMode(DBG_DrawAabb | DBG_DrawText | DBG_DrawFeaturesText | DBG_DrawConstraints |
+				DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
+				DBG_ProfileTimings | DBG_DrawNormals);
 	//setDebugMode(DBG_MAX_DEBUG_DRAW_MODE);
 
 #if RENDER_SDL
@@ -50,10 +54,13 @@ CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) :
 
 	m_world = world;
 	m_world->setDebugDrawer(this);
+
+	m_pProfIterator = CProfileManager::Get_Iterator();
 }
 
 CDebugDrawer::~CDebugDrawer() {
 	m_world->setDebugDrawer(NULL);
+	CProfileManager::Release_Iterator(m_pProfIterator);
 
 #if RENDER_SDL
 	SDL_FreeSurface(Display);
@@ -182,7 +189,7 @@ void CDebugDrawer::reportErrorWarning(const char *warningString) {
 }
 
 void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
-	btVector3 to = pointOnB+normalOnB*1; //distance;
+	btVector3 to = pointOnB + normalOnB * distance; //*1;
 	const btVector3 &from = pointOnB;
 #if RENDER_SDL
 	glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
@@ -193,6 +200,12 @@ void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& 
 #else
 	drawLine(from, to, color);
 #endif
+}
+
+void CDebugDrawer::DrawProfiler() {
+	if (getDebugMode() & btIDebugDraw::DBG_ProfileTimings) {
+		
+	}
 }
 
 void CDebugDrawer::DrawWorld() {
@@ -209,6 +222,10 @@ void CDebugDrawer::DrawWorld() {
 
 		if (m_overlay) {
 			m_world->debugDrawWorld();
+
+			if (m_debugMode & btIDebugDraw::DBG_ProfileTimings) {
+				DrawProfiler();
+			}
 		}
 	}
 #endif

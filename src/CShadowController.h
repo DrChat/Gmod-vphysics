@@ -38,7 +38,8 @@ class CShadowController : public IController, public IPhysicsShadowController
 		float			GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut);
 		float			GetTeleportDistance();
 		void			GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut);
-	public:
+
+		// UNEXPOSED FUNCTIONS
 		void			Tick(float deltaTime);
 	private:
 		void					AttachObject();
@@ -53,6 +54,7 @@ class CShadowController : public IController, public IPhysicsShadowController
 		bool					m_allowPhysicsMovement;
 		bool					m_allowPhysicsRotation;
 		shadowcontrol_params_t	m_shadow;
+		bool					m_bPhysicallyControlled;
 };
 
 #endif

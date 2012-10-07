@@ -70,7 +70,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	}
 
 	// AKA ensure_core_in_simulation
-	m_pObject->Wake();
+	m_pObject->GetObject()->activate(true);
 
 	m_pGround = (CPhysicsObject *)ground;
 

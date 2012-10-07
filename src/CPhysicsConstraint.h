@@ -4,6 +4,7 @@
 class CPhysicsEnvironment;
 
 enum EConstraintType {
+	CONSTRAINT_UNKNOWN,
 	CONSTRAINT_RAGDOLL,
 	CONSTRAINT_HINGE,
 	CONSTRAINT_FIXED,
@@ -35,7 +36,6 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		bool					GetConstraintParams(constraint_breakableparams_t *pParams) const;
 		
 		void					OutputDebugInfo();
-
 	private:
 		CPhysicsObject *		m_pObject1;	// Reference object
 		CPhysicsObject *		m_pObject2;	// Attached object

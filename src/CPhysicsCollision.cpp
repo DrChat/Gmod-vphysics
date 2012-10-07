@@ -18,71 +18,71 @@ CPhysicsCollision::~CPhysicsCollision() {
 }
 
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 CPhysConvex *CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 float CPhysicsCollision::ConvexVolume(CPhysConvex *pConvex) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 float CPhysicsCollision::ConvexSurfaceArea(CPhysConvex *pConvex) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &maxs) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 CPhysConvex *CPhysicsCollision::ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, const Vector *pPoints, int iPointCount, CPhysConvex **pOutput) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 CPhysPolysoup *CPhysicsCollision::PolysoupCreate() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 void CPhysicsCollision::PolysoupDestroy(CPhysPolysoup *pSoup) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsCollision::PolysoupAddTriangle(CPhysPolysoup *pSoup, const Vector &a, const Vector &b, const Vector &c, int materialIndex7bits) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 CPhysCollide* CPhysicsCollision::ConvertPolysoupToCollide(CPhysPolysoup *pSoup, bool useMOPP) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 CPhysCollide* CPhysicsCollision::ConvertConvexToCollide(CPhysConvex **pConvex, int convexCount) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 CPhysCollide* CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pConvex, int convexCount, const convertconvexparams_t &convertParams) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
@@ -92,27 +92,27 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 }
 
 int CPhysicsCollision::CollideSize(CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 int CPhysicsCollision::CollideWrite(char *pDest, CPhysCollide *pCollide, bool bSwap) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 CPhysCollide* CPhysicsCollision::UnserializeCollide(char *pBuffer, int size, int index) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 float CPhysicsCollision::CollideVolume(CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
@@ -171,16 +171,16 @@ void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vecto
 }
 
 Vector CPhysicsCollision::CollideGetOrthographicAreas(const CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return Vector();
 }
 
 void CPhysicsCollision::CollideSetOrthographicAreas(CPhysCollide *pCollide, const Vector &areas) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 int CPhysicsCollision::CollideIndex(const CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
@@ -203,16 +203,16 @@ CPhysCollide* CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 }
 
 int CPhysicsCollision::GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 void CPhysicsCollision::TraceBox(const Vector &start, const Vector &end, const Vector &mins, const Vector &maxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
@@ -260,11 +260,11 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 }
 
 void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, const CPhysCollide *pSweepCollide, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 bool CPhysicsCollision::IsBoxIntersectingCone( const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &cone) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return false;
 }
 

@@ -51,9 +51,9 @@ bool CPhysicsObject::IsStatic() const {
 // Also note the lag doesn't stop when the game is paused, indicating that it isn't caused
 // by physics simulations.
 bool CPhysicsObject::IsAsleep() const {
-	return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	//return false;
+	return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
@@ -474,6 +474,7 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 }
 
 // These two functions are broken with the physcannon.
+// They work on jeeps, however.
 void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
@@ -576,7 +577,7 @@ void CPhysicsObject::SetShadow(float maxSpeed, float maxAngularSpeed, bool allow
 		flags &= ~CALLBACK_GLOBAL_COLLIDE_STATIC;
 		SetCallbackFlags(flags);
 
-		m_pShadow = (CShadowController*)m_pEnv->CreateShadowController(this, allowPhysicsMovement, allowPhysicsRotation);
+		m_pShadow = (CShadowController *)m_pEnv->CreateShadowController(this, allowPhysicsMovement, allowPhysicsRotation);
 		m_pShadow->MaxSpeed(maxSpeed, maxAngularSpeed);
 	}
 }
@@ -618,7 +619,7 @@ float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t &param
 }
 
 const CPhysCollide *CPhysicsObject::GetCollide() const {
-	return (CPhysCollide*)m_pObject->getCollisionShape();
+	return (CPhysCollide *)m_pObject->getCollisionShape();
 }
 
 const char *CPhysicsObject::GetName() const {
@@ -650,13 +651,12 @@ void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot
 }
 
 void CPhysicsObject::OutputDebugInfo() const {
-	Msg( "-----------------\n" );
+	Msg("-----------------\n");
 
-	if (m_pName) {
+	if (m_pName)
 		Msg("Object: %s\n", m_pName);
-	}
 
-	Msg( "Mass: %f (inv %f)\n", GetMass(), GetInvMass() );
+	Msg("Mass: %f (inv %f)\n", GetMass(), GetInvMass());
 
 	Vector pos;
 	QAngle ang;
@@ -709,6 +709,7 @@ void CPhysicsObject::OutputDebugInfo() const {
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
+// UNEXPOSED
 void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams) {
 	m_pEnv = pEnv;
 	m_materialIndex = materialIndex;
@@ -745,6 +746,9 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		angDrag = pParams->dragCoefficient;
 	}
 
+	m_dragBasis.setValue(0, 0, 0);
+	m_angDragBasis.setValue(0, 0, 0);
+
 	// THIS IS COMPLETELY BROKEN!
 	if (!IsStatic() && GetCollide()) {
 		btCollisionShape  *shape = m_pObject->getCollisionShape();
@@ -764,9 +768,9 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		btVector3 ang = m_pObject->getInvInertiaDiagLocal();
 		delta *= 0.5;
 
-		m_angDragBasis.setX(AngDragIntegral( ang[0], delta.x(), delta.y(), delta.z() ) + AngDragIntegral( ang[0], delta.x(), delta.z(), delta.y() ));
-		m_angDragBasis.setY(AngDragIntegral( ang[1], delta.y(), delta.x(), delta.z() ) + AngDragIntegral( ang[1], delta.y(), delta.z(), delta.x() ));
-		m_angDragBasis.setZ(AngDragIntegral( ang[2], delta.z(), delta.x(), delta.y() ) + AngDragIntegral( ang[2], delta.z(), delta.y(), delta.x() ));
+		m_angDragBasis.setX(AngDragIntegral(ang[0], delta.x(), delta.y(), delta.z()) + AngDragIntegral(ang[0], delta.x(), delta.z(), delta.y()));
+		m_angDragBasis.setY(AngDragIntegral(ang[1], delta.y(), delta.x(), delta.z()) + AngDragIntegral(ang[1], delta.y(), delta.z(), delta.x()));
+		m_angDragBasis.setZ(AngDragIntegral(ang[2], delta.z(), delta.x(), delta.y()) + AngDragIntegral(ang[2], delta.z(), delta.y(), delta.x()));
 	} else {
 		drag = 0;
 		angDrag = 0;
@@ -776,14 +780,17 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_angDragCoefficient = angDrag;
 }
 
+// UNEXPOSED
 CPhysicsEnvironment *CPhysicsObject::GetVPhysicsEnvironment() {
 	return m_pEnv;
 }
 
+// UNEXPOSED
 btRigidBody *CPhysicsObject::GetObject() {
 	return m_pObject;
 }
 
+// UNEXPOSED
 float CPhysicsObject::GetDragInDirection(btVector3 *dir) const
 {
 	if (!dir) return 0.0f;
@@ -798,6 +805,7 @@ float CPhysicsObject::GetDragInDirection(btVector3 *dir) const
 	
 }
 
+// UNEXPOSED
 float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const
 {
 	if (!dir) return 0.0f;
@@ -834,11 +842,12 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	if (pParams && !isStatic)
 		mass = pParams->mass;
 
-	btVector3 inertia;
+	btVector3 inertia(0, 0, 0);
 
-	shape->calculateLocalInertia(mass, inertia);
+	if (!isStatic)
+		shape->calculateLocalInertia(mass, inertia);
 	btMotionState *motionstate = new btMassCenterMotionState(transform, masscenter);
-	btRigidBody::btRigidBodyConstructionInfo info(mass,motionstate,shape,inertia);
+	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape, inertia);
 
 	if (pParams) {
 		info.m_linearDamping = pParams->damping;

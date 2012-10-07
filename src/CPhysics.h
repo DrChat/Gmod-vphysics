@@ -23,7 +23,6 @@ class CPhysics : public CTier1AppSystem<IPhysics> {
 	private:
 		CUtlVector<IPhysicsEnvironment *>	m_envList;
 		CUtlVector<CPhysicsCollisionSet *>	m_collisionSets;
-		CSysModule *						m_valvephysics;
 };
 
 #endif

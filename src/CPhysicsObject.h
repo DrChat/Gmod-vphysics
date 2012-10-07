@@ -117,6 +117,7 @@ class CPhysicsObject : public IPhysicsObject {
 		CPhysicsFluidController *			GetFluidController(void) { return m_pFluidController; }
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	public:
+		// UNEXPOSED FUNCTIONS
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams);
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
 		btRigidBody *						GetObject();
