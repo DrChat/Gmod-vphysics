@@ -111,6 +111,19 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if (!pObject0->IsMoveable() && !pObject1->IsMoveable())
 		return false;
 
+	if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
+		return false;
+
+	// HACK: Fix shadow vs world collisions.
+	if ((pObject0->GetShadowController() && pObject1->IsStatic()) || (pObject1->GetShadowController() && pObject0->IsStatic()))
+		return false;
+
+	if (pObject0->IsStatic() && pObject1->IsStatic())
+		return false;
+
+	if (pObject0->GetShadowController() && pObject1->GetShadowController())
+		return false;
+
 	if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 	if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 
@@ -473,9 +486,6 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 			m_fluids[i]->Tick(deltaTime);
 		}
 
-#if DEBUG_DRAW
-		m_debugdraw->DrawWorld();
-#endif
 		/*
 		if (m_pObjectEvent)
 		{
@@ -504,6 +514,11 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		*/
 	}
 	m_inSimulation = false;
+
+#if DEBUG_DRAW
+		m_debugdraw->DrawWorld();
+#endif
+
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
@@ -714,6 +729,8 @@ CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 }
 
 // UNEXPOSED
+// TODO: Bullet exposes collision callbacks such as gContactAddedCallback!
+// See: http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Callbacks_and_Triggers
 void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 	// IPhysicsCollisionEvent::Friction
 	/*

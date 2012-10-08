@@ -21,6 +21,7 @@ extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
 CPhysicsObject::CPhysicsObject() {
 	m_contents = 0;
+	m_iGameIndex = 0;
 	m_pShadow = NULL;
 	m_pFluidController = NULL;
 	m_pEnv = NULL;
@@ -51,9 +52,9 @@ bool CPhysicsObject::IsStatic() const {
 // Also note the lag doesn't stop when the game is paused, indicating that it isn't caused
 // by physics simulations.
 bool CPhysicsObject::IsAsleep() const {
-	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	return false;
+	//return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
@@ -859,8 +860,6 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	if (isStatic)
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-	else
-		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
 
 	if (mass > 0)
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);

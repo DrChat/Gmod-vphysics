@@ -63,6 +63,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
 
+	// CONDITIONAL BREAKPOINT HERE: deltaRotation.m_floats[3] <= -0.9
 	btVector3 axis = deltaRotation.getAxis();
 	float angle = deltaRotation.getAngle();
 	axis.normalize();
@@ -78,6 +79,11 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
 		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
 		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
+
+		// Go here on the breakpoint. Note that HLTrans == HLTarg despite the delta being the exact opposite!
+		QAngle HLTrans, HLTarg;
+		ConvertRotationToHL(transquat, HLTrans);
+		ConvertRotationToHL(params.targetRotation, HLTarg);
 	}
 
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
@@ -126,6 +132,10 @@ static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1) {
 static bool IsEqual(const btVector3 &pt0, const btVector3 &pt1) {
 	return pt0.distance2(pt1) < 1e-8f;
 }
+
+/***************************
+* CLASS CShadowController
+***************************/
 
 CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
 	m_pObject = pObject;

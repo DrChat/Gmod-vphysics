@@ -9,9 +9,17 @@
 	- Immense lag when an object is welded to world and crash when removing that weld in materialsystem
 	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
 	- SHADOW CONTROLLERS
-		- We're receiving bad angles!
+		- 120 degree odd spot, depending on what rotation you grab the object (tested on yaw axis)
+			- Inside: 120 degrees of correctness, 240 of error
+			- Outside: 240 degrees of correctness, 120 of error
+			- Maybe we can only tolerate from 120 to -120 (object rotation)?
+			- Maybe we aren't calculating for a different range between bullet quaternions and HL Quats?
+		- No matter what the rotation is, the bull tranform rotation and target rotation are the SAME! (except for pos/neg)
+		- The object's tranform rotation should be the same as the target rotation after one try, but it's the opposite even though the target rotation did not change!
 	- MAPS
 		- SOLID_BSP brushes take too long for calculations! Collisions between them and the world are being calculated!
+			- Should we assign the world geometry a collision group, and have our shadow controller not calculate collisions against that group?
+	- CCollisionEvent::ShouldCollide appears to return false after the object has slept atleast once(?)
 - TODO
 	- Support concave meshes (see: trash dumpster)
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:

@@ -154,6 +154,9 @@ const char *CPhysicsSurfaceProps::GetString(unsigned short stringTableIndex) con
 }
 
 const char *CPhysicsSurfaceProps::GetPropName(int surfaceDataIndex) const {
+	if (surfaceDataIndex < 0 || surfaceDataIndex > m_props.Size())
+		return "default";
+
 	return m_strings->String(m_props[surfaceDataIndex].m_name);
 }
 
@@ -171,24 +174,24 @@ void CPhysicsSurfaceProps::GetPhysicsParameters(int surfaceDataIndex, surfacephy
 }
 
 int CPhysicsSurfaceProps::GetReservedSurfaceIndex(const char *pSurfacePropName) const {
-	if (!Q_stricmp(pSurfacePropName, "$MATERIAL_INDEX_SHADOW")) {
+	if (!Q_stricmp(pSurfacePropName, "$MATERIAL_INDEX_SHADOW"))
 		return MATERIAL_INDEX_SHADOW;
-	}
+	
 	return -1;
 }
 
 CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) {
-	if (materialIndex < 0 || materialIndex > m_props.Size()-1) {
+	if (materialIndex < 0 || materialIndex > m_props.Size()-1)
 		return NULL;
-	}
+	
 
 	return &m_props[materialIndex];
 }
 
 const CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) const {
-	if (materialIndex < 0 || materialIndex > m_props.Size()-1) {
+	if (materialIndex < 0 || materialIndex > m_props.Size()-1)
 		return NULL;
-	}
+	
 
 	return &m_props[materialIndex];
 }
@@ -208,9 +211,8 @@ void CPhysicsSurfaceProps::CopyPhysicsProperties(CSurface *pOut, int baseIndex) 
 bool CPhysicsSurfaceProps::AddFileToDatabase(const char *pFilename) {
 	CUtlSymbol id = m_strings->AddString(pFilename);
 
-	for (int i = 0; i < m_fileList.Size(); i++) {
+	for (int i = 0; i < m_fileList.Size(); i++)
 		if (m_fileList[i] == id) return false;
-	}
 
 	m_fileList.AddToTail(id);
 	return true;

@@ -257,11 +257,15 @@ int CPlayerController::TryTeleportObject() {
 		if (!m_handler->ShouldMoveTo(m_pObject, hlPosition)) return 0;
 	}
 
-	btRigidBody* body = m_pObject->GetObject();
+	btRigidBody *body = m_pObject->GetObject();
 	btTransform transform;
-	((btMassCenterMotionState*)body->getMotionState())->getGraphicTransform(transform);
-
+	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 	transform.setOrigin(m_targetPosition);
-	((btMassCenterMotionState*)body->getMotionState())->setGraphicTransform(transform);
+	((btMassCenterMotionState *)body->getMotionState())->setGraphicTransform(transform);
+
+	btTransform finaltrans;
+	((btMassCenterMotionState *)body->getMotionState())->getWorldTransform(finaltrans);
+
+	body->setWorldTransform(finaltrans);
 	return 1;
 }

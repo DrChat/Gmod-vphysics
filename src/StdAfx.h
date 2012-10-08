@@ -42,7 +42,7 @@ struct btMassCenterMotionState : public btMotionState
 {
 	btTransform	m_centerOfMassOffset;
 	btTransform m_worldTrans;
-	void*		m_userPointer;
+	void *		m_userPointer;
 
 	btMassCenterMotionState(const btTransform& startTrans = btTransform::getIdentity(), const btTransform& centerOfMassOffset = btTransform::getIdentity())
 		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(startTrans * centerOfMassOffset), m_userPointer(0)
