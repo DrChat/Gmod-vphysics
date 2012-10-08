@@ -19,3 +19,6 @@
 		- Scaling of models
 		- ...
 	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this!
+	- CONSTRAINTS
+		- Implement constraint_breakableparams_t
+		- Ragdolls, etc.

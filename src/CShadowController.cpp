@@ -14,6 +14,7 @@ void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &
 	qt.normalize();
 }
 
+ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -55,6 +56,9 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	params.lastPosition = posbull + speed * dt;
 
 	// Set the angles
+	// DEBUG
+	btQuaternion transformRot = transform.getRotation();
+
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation; 
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
@@ -68,15 +72,32 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setZ(axis.z() * angle);
 
 	btVector3 rot_speed = object->getAngularVelocity();
+	// DEBUG
+	if (cvar_spewshadowdebuginfo.GetBool() && (params.targetRotation.getX() != 0 || params.targetRotation.getY() != 0 || params.targetRotation.getZ() != 0 || params.targetRotation.getW() != 0)) {
+		btQuaternion transquat = transform.getRotation();
+		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
+		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
+		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
+	}
+
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
 
-	//object->setAngularVelocity(btVector3(0, 0, 0));
+	object->setAngularVelocity(btVector3(0, 0, 0));
+
+	// HACK: Replace this soon!
+	btTransform targTrans;
+	targTrans.setOrigin(params.targetPosition);
+	targTrans.setRotation(params.targetRotation);
+	object->setWorldTransform(targTrans);
 
 	return secondsToArrival;
 }
 
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
+	if (cvar_spewshadowdebuginfo.GetBool() && (in.targetRotation.x != 0 || in.targetRotation.y != 0 || in.targetRotation.z))
+		Msg("IN Target Rotation: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
+
 	ConvertPosToBull(in.targetPosition, out.targetPosition);
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);

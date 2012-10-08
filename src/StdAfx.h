@@ -49,8 +49,8 @@ struct btMassCenterMotionState : public btMotionState
 	{
 	}
 
-	virtual void getWorldTransform(btTransform& worldTrans) const { worldTrans = m_worldTrans; }	// FYI: Bullet does NOT call this! This is for US only.
-	virtual void setWorldTransform(const btTransform& worldTrans) { m_worldTrans = worldTrans; }	// FYI: Bullet calls this to update the motion state.
+	virtual void getWorldTransform(btTransform& worldTrans) const { worldTrans = m_worldTrans; }	// FYI: Bullet calls this only when we're a kinematic object.
+	virtual void setWorldTransform(const btTransform& worldTrans) { m_worldTrans = worldTrans; }	// FYI: Bullet calls this to update the motion state if we're not a kinematic object.
 	virtual void getGraphicTransform(btTransform& graphTrans) const { graphTrans = m_worldTrans * m_centerOfMassOffset.inverse(); }	// Bullet -> HL
 	virtual void setGraphicTransform(const btTransform& graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }			// HL -> Bullet
 };

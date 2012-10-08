@@ -213,8 +213,8 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)pObjA->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)pObjB->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo *)pObjA->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo *)pObjB->GetObject()->getCollisionShape()->getUserPointer();
 
 	if (shapeInfo1)
 		obj1Pos -= shapeInfo1->massCenter;
@@ -237,31 +237,14 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo*)pObjA->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo*)pObjB->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo *)pObjA->GetObject()->getCollisionShape()->getUserPointer();
+	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo *)pObjB->GetObject()->getCollisionShape()->getUserPointer();
 
 	if (shapeInfo1)
 		obj1Pos -= shapeInfo1->massCenter;
 	if (shapeInfo2)
 		obj2Pos -= shapeInfo2->massCenter;
 
-	btTransform obj1Trans, obj2Trans;
-	obj1Trans.setIdentity();
-	obj2Trans.setIdentity();
-
-	obj1Trans.setOrigin(obj1Pos);
-	obj2Trans.setOrigin(obj2Pos);
-
-	btGeneric6DofConstraint *pLength = new btGeneric6DofConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Trans, obj2Trans, true);
-	
-	btScalar bullTotalLength = ConvertDistanceToBull(length.totalLength);
-	pLength->setLinearUpperLimit(btVector3(bullTotalLength, bullTotalLength, bullTotalLength));
-
-	if (length.minLength) {
-		btScalar bullMinLength = ConvertDistanceToBull(length.minLength);
-		pLength->setLinearLowerLimit(btVector3(bullMinLength, bullMinLength, bullMinLength));
-	}
-
-	//btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
+	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength, CONSTRAINT_LENGTH);
 }

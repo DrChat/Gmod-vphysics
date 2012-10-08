@@ -12,6 +12,10 @@ IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMot
 	return new CPhysicsMotionController(pHandler, pEnv);
 }
 
+/***********************************
+* CLASS CPhysicsMotionController
+***********************************/
+
 CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv) {
 	m_handler = pHandler;
 	m_pEnv = pEnv;
