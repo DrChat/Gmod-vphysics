@@ -72,9 +72,6 @@
     <ClCompile Include="src\StfAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CPhysicsTrace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\CDebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -138,9 +135,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\StdAfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CPhysicsTrace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\CDebugDrawer.h">

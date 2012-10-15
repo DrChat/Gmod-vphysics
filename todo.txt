@@ -1,13 +1,15 @@
 - Bugs
 	- Anything except solid brushes intersecting with an object causes FPS to GRADUALLY decrease. Removing the not solid brush from the object will make FPS GRADUALLY increase (in gm_construct).
 	- Bouyancy calculations taking too long(?) Large amounts of lag caused if many objects are intersecting with water at once.
-	- Dynamite model acts odd (inconsistency between server and client predictions?) Physical model is detached from graphical model.
+	- Dynamite tool makes an odd object. Physical model separated from graphics model.
 	- IsAsleep() returning true causes lag freeze (Only when object asleep on displacements?)
 	- Mystical magnetic properities depending on if using singlethreaded or multithreaded.
 		- Singlethreaded: attractive (literally, use your physgun)
 		- Multithreaded: repulsive (object will bounce if on top of another)
-	- Immense lag when an object is welded to world and crash when removing that weld in materialsystem
+	- Immense lag when an object is welded to world
+		- World is unfrozen(?) Loads of collision points calculated on the static mesh the weld was made on
 	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
+		- Appears to be with the world only
 	- SHADOW CONTROLLERS
 		- 120 degree odd spot, depending on what rotation you grab the object (tested on yaw axis)
 			- Inside: 120 degrees of correctness, 240 of error
@@ -16,12 +18,18 @@
 			- Maybe we aren't calculating for a different range between bullet quaternions and HL Quats?
 		- No matter what the rotation is, the bull tranform rotation and target rotation are the SAME! (except for pos/neg)
 		- The object's tranform rotation should be the same as the target rotation after one try, but it's the opposite even though the target rotation did not change!
+		- Maybe bullet quaternions have a different range? Converting the target rotation quaternion into a bullet matrix looks almost exactly the same as our transform basis!
+			- It atleast has something to do with bullet's quaternions. Bullet matrices are similar and HL angles are similar.
+		- Are quaternions viable for comparison?
+		- What if everything is a lie and we're just rotating the objects the wrong way at certain rotations?
+		- Or are we just keeping the old velocity, and the delta gets bigger?
 	- MAPS
 		- SOLID_BSP brushes take too long for calculations! Collisions between them and the world are being calculated!
 			- Should we assign the world geometry a collision group, and have our shadow controller not calculate collisions against that group?
 	- CCollisionEvent::ShouldCollide appears to return false after the object has slept atleast once(?)
+	- All concave meshes aren't working, except for the map itself!
+	- Weld to world apparently makes the whole map get simulated (aka LOADS OF COLLISIONS!) Appears to ignore needsBroadphaseCollision callback.
 - TODO
-	- Support concave meshes (see: trash dumpster)
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies
 		- Scaling of models
@@ -30,3 +38,4 @@
 	- CONSTRAINTS
 		- Implement constraint_breakableparams_t
 		- Ragdolls, etc.
+	- When we're just about wrapping up, implement saving!

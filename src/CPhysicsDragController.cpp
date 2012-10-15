@@ -7,6 +7,10 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+/******************************
+* CLASS CPhysicsDragController
+******************************/
+
 CPhysicsDragController::CPhysicsDragController() {
 	m_airDensity = 2; // default
 }
@@ -24,8 +28,7 @@ void CPhysicsDragController::RemovePhysicsObject(CPhysicsObject * obj) {
 }
 
 void CPhysicsDragController::AddPhysicsObject(CPhysicsObject * obj) {
-	if (!m_ents.Find(obj))
-	{
+	if (!m_ents.Find(obj)) {
 		m_ents.AddToTail(obj);
 	}
 }
@@ -36,8 +39,7 @@ bool CPhysicsDragController::IsControlling(const CPhysicsObject * obj) const {
 
 void CPhysicsDragController::Tick(btScalar dt) {
 	int iEntCount = m_ents.Count();
-	for(int i = 0; i < iEntCount; i++)
-	{
+	for (int i = 0; i < iEntCount; i++) {
 		CPhysicsObject *object = (CPhysicsObject *)m_ents[i];
 
 		Vector dragLinearFinal(0,0,0);
@@ -54,24 +56,20 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		ConvertAngularImpulseToBull(ang, bull_angimpulse);
 
 		float dragForce = -0.5 * object->GetDragInDirection( &bull_vel ) * m_airDensity * dt;
-		if ( dragForce < -1.0f )
-		{
+		if (dragForce < -1.0f)
 			dragForce = -1.0f;
-		}
-		if ( dragForce < 0 )
-		{
+		
+		if (dragForce < 0)
 			Vector dragLinearFinal = vel * dragForce;
-		}
 
 		float angDragForce = -object->GetAngularDragInDirection(&bull_angimpulse) * m_airDensity * dt;
-		if ( angDragForce < -1.0f )
-		{
+
+		if (angDragForce < -1.0f)
 			angDragForce = -1.0f;
-		}
-		if( angDragForce < 0)
-		{
+
+		if (angDragForce < 0)
 			dragAngularFinal = ang * angDragForce;
-		}
+
 		object->AddVelocity(&dragLinearFinal, &dragAngularFinal);
 	}
 }

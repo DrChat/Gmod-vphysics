@@ -5,6 +5,10 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+/*****************************
+* CLASS CPhysicsSurfaceProps
+*****************************/
+
 CPhysicsSurfaceProps::CPhysicsSurfaceProps() {
 	m_strings = new CUtlSymbolTable(0, 32, true);
 }
@@ -16,7 +20,7 @@ CPhysicsSurfaceProps::~CPhysicsSurfaceProps() {
 int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pTextfile) {
 	if (!AddFileToDatabase(pFilename)) return 0;
 
-	KeyValues *surfprops = new KeyValues("");
+	KeyValues *surfprops = new KeyValues("CPhysicsSurfaceProps");
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
 	for (KeyValues *surface = surfprops; surface; surface = surface->GetNextKey()) {
 		CSurface prop;
@@ -101,7 +105,6 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 				prop.data.sounds.rolling = m_soundList.AddToTail(sym);
 			} else
 				AssertMsg2(0, "Bad surfaceprop key %s (%s)\n", key, data->GetString());
-			
 		}
 		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0) break;
 
@@ -161,7 +164,7 @@ const char *CPhysicsSurfaceProps::GetPropName(int surfaceDataIndex) const {
 }
 
 void CPhysicsSurfaceProps::SetWorldMaterialIndexTable(int *pMapArray, int mapSize) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsSurfaceProps::GetPhysicsParameters(int surfaceDataIndex, surfacephysicsparams_t *pParamsOut) const {
@@ -183,7 +186,6 @@ int CPhysicsSurfaceProps::GetReservedSurfaceIndex(const char *pSurfacePropName) 
 CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) {
 	if (materialIndex < 0 || materialIndex > m_props.Size()-1)
 		return NULL;
-	
 
 	return &m_props[materialIndex];
 }
@@ -191,7 +193,6 @@ CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) {
 const CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) const {
 	if (materialIndex < 0 || materialIndex > m_props.Size()-1)
 		return NULL;
-	
 
 	return &m_props[materialIndex];
 }

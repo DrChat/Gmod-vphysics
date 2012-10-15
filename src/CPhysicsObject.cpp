@@ -474,8 +474,7 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 	VectorIRotate(Vector(worldVector), matrix, *localVector);
 }
 
-// These two functions are broken with the physcannon.
-// They work on jeeps, however.
+// These two functions apply an insanely low force!
 void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
@@ -861,10 +860,10 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	if (isStatic)
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
 
-	if (mass > 0)
+	if (!isStatic)
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
 	else
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);	// Static objects don't collide with static objects.
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams);

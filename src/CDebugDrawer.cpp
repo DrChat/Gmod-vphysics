@@ -202,10 +202,12 @@ void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& 
 #endif
 }
 
-void CDebugDrawer::DrawProfiler() {
-	if (getDebugMode() & btIDebugDraw::DBG_ProfileTimings) {
-		
-	}
+void CDebugDrawer::SetDebugOverlay(IVPhysicsDebugOverlay *pOverlay) {
+	m_overlay = pOverlay;
+}
+
+IVPhysicsDebugOverlay *CDebugDrawer::GetDebugOverlay() {
+	return m_overlay;
 }
 
 void CDebugDrawer::DrawWorld() {
@@ -217,16 +219,8 @@ void CDebugDrawer::DrawWorld() {
 	SDL_GL_SwapBuffers();
 #else
 	if (cvar_renderoverlay.GetBool()) {
-		if (!m_overlay)
-			m_overlay = m_pEnv->GetDebugOverlay();
-
-		if (m_overlay) {
+		if (m_overlay)
 			m_world->debugDrawWorld();
-
-			if (m_debugMode & btIDebugDraw::DBG_ProfileTimings) {
-				DrawProfiler();
-			}
-		}
 	}
 #endif
 }

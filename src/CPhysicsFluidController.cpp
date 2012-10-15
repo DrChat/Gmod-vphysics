@@ -23,6 +23,7 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 		m_iContents = pParams->contents;
 		m_vSurfacePlane = pParams->surfacePlane;
 	}
+
 	m_fDensity = 1.0f; // Density of water, used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
 	pFluidObject->EnableCollisions(false);
 	pFluidObject->SetContents(m_iContents); // Do we really need to do this?
@@ -63,7 +64,14 @@ float CPhysicsFluidController::GetDensity() const {
 }
 
 void CPhysicsFluidController::WakeAllSleepingObjects() {
-	NOT_IMPLEMENTED;
+	int count = m_pGhostObject->getNumOverlappingObjects();
+	for (int i = 0; i < count; i++) {
+		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
+		if (!body)
+			continue;
+
+		body->activate(true);
+	}
 }
 
 int	CPhysicsFluidController::GetContents() const {
@@ -72,8 +80,7 @@ int	CPhysicsFluidController::GetContents() const {
 
 void CPhysicsFluidController::Tick(float dt) {
 	int count = m_pGhostObject->getNumOverlappingObjects();
-	for (int i = 0; i < count; i++)
-	{
+	for (int i = 0; i < count; i++) {
 		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
 		if (!body)
 			continue;

@@ -20,6 +20,10 @@ public:
 											CPhysicsEnvironment();
 											~CPhysicsEnvironment();
 
+	// UNEXPOSED
+	// Don't call this directly!
+	static void								TickCallback(btDynamicsWorld *world, btScalar timestep);
+
 	void									SetDebugOverlay(CreateInterfaceFn debugOverlayFactory);
 	IVPhysicsDebugOverlay *					GetDebugOverlay();
 
@@ -31,7 +35,7 @@ public:
 	
 	IPhysicsObject *						CreatePolyObject(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
 	IPhysicsObject *						CreatePolyObjectStatic(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
-	IPhysicsObject *						CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic);
+	IPhysicsObject *						CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic = false);
 	void									DestroyObject(IPhysicsObject*);
 
 	IPhysicsFluidController	*				CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams);

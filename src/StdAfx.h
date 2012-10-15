@@ -37,6 +37,10 @@
 #	define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #endif
 
+/******************************
+* MISC CLASSES
+******************************/
+
 // Putting these in here because I dont want to make a header just for them
 struct btMassCenterMotionState : public btMotionState
 {

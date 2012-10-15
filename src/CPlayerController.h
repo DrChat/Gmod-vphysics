@@ -49,6 +49,7 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		btVector3						m_targetPosition;
 		btVector3						m_maxSpeed;
 		btVector3						m_currentSpeed;
+		btVector3						m_lastImpulse;
 		float							m_PushMassLimit;
 		float							m_PushSpeedLimit;
 

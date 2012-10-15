@@ -9,7 +9,10 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
+// INFO ON QUATERNIONS
+// -q and q represent the same orientation!
+
+inline static void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, btQuaternion &qt) {
 	qt = q.inverse() * p;
 	qt.normalize();
 }
@@ -45,6 +48,11 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		if (qdist > params.teleportDistance * params.teleportDistance) {
 			transform.setOrigin(params.targetPosition);
 			transform.setRotation(params.targetRotation);
+
+			((btMassCenterMotionState *)object->getMotionState())->setGraphicTransform(transform);
+			btTransform finalTrans;
+			((btMassCenterMotionState *)object->getMotionState())->getWorldTransform(finalTrans);
+			object->setWorldTransform(finalTrans);
 		}
 	}
 
@@ -56,54 +64,65 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	params.lastPosition = posbull + speed * dt;
 
 	// Set the angles
-	// DEBUG
-	btQuaternion transformRot = transform.getRotation();
-
 	btVector3 deltaAngles;
-	btQuaternion deltaRotation; 
+	btQuaternion deltaRotation;
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
 
+	// TODO: Quaternions q and -q represent the same orientation! Compensate for this!
+	// https://www.panda3d.org/forums/viewtopic.php?t=12568
+	// DEBUG
+	/*
+	if (deltaRotation.w() < 0) {
+		deltaRotation.setW(-deltaRotation.w());
+		deltaRotation.setX(-deltaRotation.x());
+		deltaRotation.setY(-deltaRotation.y());
+		deltaRotation.setZ(-deltaRotation.z());
+	}
+	*/
+	// END DEBUG
+
 	// CONDITIONAL BREAKPOINT HERE: deltaRotation.m_floats[3] <= -0.9
+	// w val of -1 makes the angle 2pi
+	// w val of 0 makes the angle pi
+	// w val of 1 makes the angle 0
+	// Maybe we don't handle big angles that well
+	// TODO: This code might be the broken code!
+	///*
 	btVector3 axis = deltaRotation.getAxis();
-	float angle = deltaRotation.getAngle();
+	btScalar angle = deltaRotation.getAngle();
 	axis.normalize();
 
-	deltaAngles.setX(axis.x() * angle);
-	deltaAngles.setY(axis.y() * angle);
-	deltaAngles.setZ(axis.z() * angle);
+	deltaAngles.setValue(axis.x() * angle,
+						axis.y() * angle,
+						axis.z() * angle);
+						//*/
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	// DEBUG
-	if (cvar_spewshadowdebuginfo.GetBool() && (params.targetRotation.getX() != 0 || params.targetRotation.getY() != 0 || params.targetRotation.getZ() != 0 || params.targetRotation.getW() != 0)) {
+	if (cvar_spewshadowdebuginfo.GetBool()) {
 		btQuaternion transquat = transform.getRotation();
 		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
 		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
-		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
-
-		// Go here on the breakpoint. Note that HLTrans == HLTarg despite the delta being the exact opposite!
-		QAngle HLTrans, HLTarg;
-		ConvertRotationToHL(transquat, HLTrans);
-		ConvertRotationToHL(params.targetRotation, HLTarg);
+		Msg("-- Delta Rotation Quat: %f %f %f %f --\n\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
 	}
+	// END DEBUG
 
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
-
-	object->setAngularVelocity(btVector3(0, 0, 0));
-
+	
 	// HACK: Replace this soon!
+	///*
+	object->setAngularVelocity(btVector3(0, 0, 0));
 	btTransform targTrans;
 	targTrans.setOrigin(params.targetPosition);
 	targTrans.setRotation(params.targetRotation);
 	object->setWorldTransform(targTrans);
+	//*/
 
 	return secondsToArrival;
 }
 
 void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcontrol_params_t &out) {
-	if (cvar_spewshadowdebuginfo.GetBool() && (in.targetRotation.x != 0 || in.targetRotation.y != 0 || in.targetRotation.z))
-		Msg("IN Target Rotation: %f %f %f\n", in.targetRotation.x, in.targetRotation.y, in.targetRotation.z);
-
 	ConvertPosToBull(in.targetPosition, out.targetPosition);
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);
@@ -279,8 +298,8 @@ void CShadowController::AttachObject() {
 
 	m_pObject->SetMaterialIndex(MATERIAL_INDEX_SHADOW);
 
-	if ( !m_allowPhysicsMovement ) {
-		m_pObject->SetMass(1e6f);
+	if (!m_allowPhysicsMovement) {
+		m_pObject->SetMass(0);
 		m_pObject->EnableGravity(false);
 	}
 

@@ -150,6 +150,7 @@ void CPlayerController::StepUp(float height) {
 }
 
 void CPlayerController::Jump() {
+	// This function does absolutely nothing!
 	return;
 }
 
@@ -165,8 +166,13 @@ IPhysicsObject *CPlayerController::GetObject() {
 }
 
 // Called with NPCs
+// Appears to be called when our object has CALLBACK_IS_PLAYER_CONTROLLER
+// Perhaps this is the last velocity we have applied to our object?
+// Called in CalculateObjectStress in physics_impact_damage.cpp, may apply damage to players when hit with an object
 void CPlayerController::GetLastImpulse(Vector *pOut) {
-	NOT_IMPLEMENTED;
+	if (!pOut) return;
+
+	ConvertForceImpulseToHL(m_lastImpulse, *pOut);
 }
 
 void CPlayerController::SetPushMassLimit(float maxPushMass) {
@@ -230,14 +236,16 @@ void CPlayerController::Tick(float deltaTime) {
 	btVector3 speed = body->getLinearVelocity();
 	ComputeController(speed, delta_position, m_maxSpeed, psiScale / deltaTime, m_dampFactor);
 	body->setLinearVelocity(speed);
+
+	m_lastImpulse = speed;
 }
 
 void CPlayerController::AttachObject() {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
-
-	// TODO: This doesn't work!
 	m_saveRot = body->getAngularFactor();
 	body->setAngularFactor(0);
+
+	m_pObject->AddCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
 
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
@@ -245,9 +253,11 @@ void CPlayerController::AttachObject() {
 void CPlayerController::DetachObject() {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	body->setAngularFactor(m_saveRot);
-	m_pObject = NULL;
-
 	body->setActivationState(ACTIVE_TAG);
+
+	m_pObject->RemoveCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
+
+	m_pObject = NULL;
 }
 
 int CPlayerController::TryTeleportObject() {

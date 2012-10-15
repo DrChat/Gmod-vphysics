@@ -1,8 +1,6 @@
 #ifndef CPHYSICSCOLLISION_H
 #define CPHYSICSCOLLISION_H
 
-#include "trace.h"
-
 class CPhysicsCollision : public IPhysicsCollision {
 	public:
 								CPhysicsCollision();
@@ -72,8 +70,6 @@ class CPhysicsCollision : public IPhysicsCollision {
 
 		void					OutputDebugInfo(const CPhysCollide *pCollide);
 		unsigned int			ReadStat(int statID);
-	private:
-		CPhysicsTrace			m_traceapi;
 };
 
 #endif

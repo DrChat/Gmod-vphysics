@@ -26,20 +26,20 @@ struct IgnoreObjectRayResultCallback: public btCollisionWorld::ClosestRayResultC
 		if (pBody) {
 			if (pBody == m_pIgnoreObject)
 				return false;
-			else
-				return ((CPhysicsObject *)pBody->getUserPointer())->IsCollisionEnabled();	// HACK: Fix for the physical wheels.
+			else if (!((CPhysicsObject *)pBody->getUserPointer())->IsCollisionEnabled())
+				return false;
 		}
 
-		return true;
+		return btCollisionWorld::ClosestRayResultCallback::needsCollision(proxy0);
 	}
 
 	const btRigidBody *m_pIgnoreObject;
 };
 
 // Purpose: This raycaster will cast a ray ignoring the vehicle's body.
-class btHLVehicleRaycaster: public btVehicleRaycaster {
+class btHLJeepRaycaster: public btVehicleRaycaster {
 	public:
-		btHLVehicleRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
+		btHLJeepRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
 			m_pWorld = pWorld;
 			m_pBody = pBody;
 		}
@@ -67,6 +67,64 @@ class btHLVehicleRaycaster: public btVehicleRaycaster {
 		btRigidBody *		m_pBody;
 };
 
+// Purpose: This ray will ignore a body AND detect water for use in airboats.
+struct DetectWaterRayResultCallback: public btCollisionWorld::ClosestRayResultCallback {
+	DetectWaterRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
+		:ClosestRayResultCallback(from, to) {
+		m_pIgnoreObject = pIgnoreObject;
+	}
+
+	bool needsCollision(btBroadphaseProxy *proxy0) const {
+		btRigidBody *pBody = (btRigidBody *)proxy0->m_clientObject;
+		if (pBody) {
+			if (pBody == m_pIgnoreObject)
+				return false;
+			else if (((CPhysicsObject *)pBody->getUserPointer())->GetCallbackFlags() & CALLBACK_FLUID_TOUCH)
+				return true;
+			else if (!((CPhysicsObject *)pBody->getUserPointer())->IsCollisionEnabled())
+				return false;
+		}
+
+		return btCollisionWorld::ClosestRayResultCallback::needsCollision(proxy0);
+	}
+
+	const btRigidBody *m_pIgnoreObject;
+};
+
+// Purpose: Airboat raycaster
+class btHLAirboatRaycaster: public btVehicleRaycaster {
+	public:
+		btHLAirboatRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody, IPhysicsGameTrace *pGameTrace) {
+			m_pWorld = pWorld;
+			m_pBody = pBody;
+			m_pGameTrace = pGameTrace;
+		}
+
+		// Returns the rigid body the ray hits
+		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
+			DetectWaterRayResultCallback rayCallback(m_pBody, from, to);
+
+			m_pWorld->rayTest(from, to, rayCallback);
+
+			if (rayCallback.hasHit()) {
+				const btRigidBody *body = btRigidBody::upcast(rayCallback.m_collisionObject);
+				if (body && body->hasContactResponse()) {
+					result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+					result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+					result.m_hitNormalInWorld.normalize();
+					result.m_distFraction = rayCallback.m_closestHitFraction;
+					return (void *)body;
+				}
+			}
+
+			return NULL;
+		}
+	private:
+		btDynamicsWorld *	m_pWorld;
+		btRigidBody *		m_pBody;
+		IPhysicsGameTrace *	m_pGameTrace;
+};
+
 /*********************************
 * CLASS CPhysicsVehicleController
 *********************************/
@@ -75,6 +133,7 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	m_pEnv = pEnv;
 	m_pBody = pBody;
 	m_iVehicleType = nVehicleType;
+	m_pGameTrace = pGameTrace;
 	memset(&m_vehicleState, 0, sizeof(m_vehicleState));
 	InitVehicleParams(params);
 
@@ -87,11 +146,11 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 
 	// Initialization and setup
 	InitBullVehicle();
-	InitCarWheels();
 }
 
 CPhysicsVehicleController::~CPhysicsVehicleController() {
 	ShutdownBullVehicle();
+	m_pBody->GetObject()->setActivationState(ACTIVE_TAG);
 }
 
 void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {
@@ -109,10 +168,19 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 }
 
 void CPhysicsVehicleController::InitBullVehicle() {
-	m_pRaycaster = new btHLVehicleRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
+	// NOTE: We're faking the car wheels because bullet does not offer a vehicle with physical wheels.
+	if (m_iVehicleType == VEHICLE_TYPE_CAR_WHEELS)
+		m_pRaycaster = new btHLJeepRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
+	else if (m_iVehicleType == VEHICLE_TYPE_CAR_RAYCAST)
+		m_pRaycaster = new btHLJeepRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
+	else if (m_iVehicleType == VEHICLE_TYPE_AIRBOAT_RAYCAST)
+		m_pRaycaster = new btHLAirboatRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject(), m_pGameTrace);
+
 	m_pRaycastVehicle = new btRaycastVehicle(m_tuning, m_pBody->GetObject(), m_pRaycaster);
-	m_pRaycastVehicle->setCoordinateSystem(0,1,2);
+	m_pRaycastVehicle->setCoordinateSystem(0, 1, 2);
 	m_pEnv->GetBulletEnvironment()->addAction(m_pRaycastVehicle);
+
+	InitCarWheels();
 }
 
 void CPhysicsVehicleController::ShutdownBullVehicle() {
@@ -144,7 +212,7 @@ void CPhysicsVehicleController::InitCarWheels() {
 	}
 }
 
-// Purpose: Create wheel on source side (CPhysicsObject *)
+// Purpose: Create wheel on source side (CPhysicsObject *) and add a wheel to the raycaster.
 CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_axleparams_t &axle) {
 	if (wheelIndex >= VEHICLE_MAX_WHEEL_COUNT)
 		return NULL;
@@ -187,7 +255,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	float r3 = radius * radius * radius;
 	params.volume = (4 / 3) * M_PI * r3;
 
-	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject(radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params, false);
+	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject(radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params);
 	pWheel->Wake();
 	pWheel->AddCallbackFlags(CALLBACK_IS_VEHICLE_WHEEL);
 
@@ -205,20 +273,19 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
-	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;
-	wheelInfo.m_frictionSlip = axle.wheels.frictionScale;			// TODO: How do we convert this?
+	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;		// TODO: How do we convert this?
+	wheelInfo.m_frictionSlip = axle.wheels.frictionScale;				// TODO: How do we convert this?
+	wheelInfo.m_suspensionStiffness = axle.suspension.springDamping;	// TODO: How do we convert this?
 
 	return pWheel;
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls) {
-	if ( controls.handbrake )
-	{
+	if (controls.handbrake) {
 		controls.throttle = 0.0f;
 	}
 
-	if ( controls.throttle == 0.0f && controls.brake == 0.0f && !controls.handbrake )
-	{
+	if (controls.throttle == 0.0f && controls.brake == 0.0f && !controls.handbrake) {
 		controls.brake = 0.1f;
 	}
 
@@ -236,7 +303,7 @@ void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &co
 	steeringVal *= m_vehicleParams.steering.degreesFast;
 	m_vehicleState.steeringAngle = steeringVal;
 
-	// BUG: Only works for vehicles with 2 front wheels.
+	// NOTE: Only works for vehicles with 2 front wheels.
 	for (int i = 0; i < 2; i++) {
 		m_pRaycastVehicle->setSteeringValue(DEG2RAD(-steeringVal), i);
 	}
@@ -250,6 +317,7 @@ void CPhysicsVehicleController::UpdateEngine(const vehicle_controlparams_t &cont
 
 	CalcEngine(controls, dt);
 
+	// TODO: This is for debug only. Remove this later.
 	for (int i = 2; i < m_iWheelCount; i++) {
 		m_pRaycastVehicle->applyEngineForce(-controls.throttle * 1000, i);
 		m_pRaycastVehicle->setBrake(0, i);

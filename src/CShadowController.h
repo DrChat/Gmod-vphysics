@@ -23,24 +23,24 @@ class CShadowController : public IController, public IPhysicsShadowController
 {
 	public:
 								CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation);
-						~CShadowController();
-		void			Update(const Vector &position, const QAngle &angles, float timeOffset);
-		void			MaxSpeed(float maxSpeed, float maxAngularSpeed);
-		void			StepUp(float height);
-		void			SetTeleportDistance(float teleportDistance);
-		bool			AllowsTranslation();
-		bool			AllowsRotation();
-		void			SetPhysicallyControlled(bool isPhysicallyControlled);
-		bool			IsPhysicallyControlled();
-		void			GetLastImpulse(Vector *pOut);
-		void			UseShadowMaterial(bool bUseShadowMaterial);
-		void			ObjectMaterialChanged(int materialIndex);
-		float			GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut);
-		float			GetTeleportDistance();
-		void			GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut);
+								~CShadowController();
+		void					Update(const Vector &position, const QAngle &angles, float timeOffset);
+		void					MaxSpeed(float maxSpeed, float maxAngularSpeed);
+		void					StepUp(float height);
+		void					SetTeleportDistance(float teleportDistance);
+		bool					AllowsTranslation();
+		bool					AllowsRotation();
+		void					SetPhysicallyControlled(bool isPhysicallyControlled);
+		bool					IsPhysicallyControlled();
+		void					GetLastImpulse(Vector *pOut);
+		void					UseShadowMaterial(bool bUseShadowMaterial);
+		void					ObjectMaterialChanged(int materialIndex);
+		float					GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut);
+		float					GetTeleportDistance();
+		void					GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut);
 
 		// UNEXPOSED FUNCTIONS
-		void			Tick(float deltaTime);
+		void					Tick(float deltaTime);
 	private:
 		void					AttachObject();
 		void					DetachObject();

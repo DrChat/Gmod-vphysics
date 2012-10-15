@@ -8,8 +8,8 @@ enum {
 class CSurface : public btMaterial
 {
 	public:
-		CUtlSymbol m_name;
-		surfacedata_t data;
+		CUtlSymbol		m_name;
+		surfacedata_t	data;
 };
 
 class CPhysicsSurfaceProps : public IPhysicsSurfaceProps

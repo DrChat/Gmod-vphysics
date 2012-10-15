@@ -45,10 +45,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)build\bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>vphysics</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)build\bin\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>vphysics</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,7 +132,6 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     <ClCompile Include="src\CPhysicsObject.cpp" />
     <ClCompile Include="src\CPhysicsObjectPairHash.cpp" />
     <ClCompile Include="src\CPhysicsSurfaceProps.cpp" />
-    <ClCompile Include="src\CPhysicsTrace.cpp" />
     <ClCompile Include="src\CPhysicsVehicleController.cpp" />
     <ClCompile Include="src\CPlayerController.cpp" />
     <ClCompile Include="src\CShadowController.cpp" />
@@ -142,7 +143,6 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CDebugDrawer.h" />
-    <ClInclude Include="src\CPhysicsTrace.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\CPhysics.h" />
     <ClInclude Include="src\CPhysicsCollision.h" />

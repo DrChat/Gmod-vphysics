@@ -15,7 +15,7 @@
 #	include "CDebugDrawer.h"
 #endif
 
-#define MULTITHREAD 1 // TODO: Mac and Linux support (Possibly done, needs testing)
+#define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
 #define USE_PARALLEL_SOLVER 0 // TODO: This crashes right now!
 
 #if MULTITHREAD
@@ -23,13 +23,13 @@
 #	include "BulletMultiThreaded/PlatformDefinitions.h"
 #	include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 #	include "BulletMultiThreaded/btParallelConstraintSolver.h"
-
+#
 #	ifdef _WIN32
 #		include "BulletMultiThreaded/Win32ThreadSupport.h"
 #	else
 #		include "BulletMultiThreaded/PosixThreadSupport.h"
 #	endif
-
+#
 #	ifdef _DEBUG
 #		pragma comment(lib, "BulletMultiThreaded_Debug.lib")
 #	elif _RELEASE
@@ -97,9 +97,9 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if (!body0 || !body1)
 	{
 		if (body0)
-			return !(body0->isStaticObject() || body0->getInvMass() == 0.0f);
+			return !(body0->isStaticObject());
 		if (body1)
-			return !(body1->isStaticObject() || body1->getInvMass() == 0.0f);
+			return !(body1->isStaticObject());
 		return false;
 	}
 
@@ -108,8 +108,6 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 
 	if (!pObject0 || !pObject1)
 		return true;
-	if (!pObject0->IsMoveable() && !pObject1->IsMoveable())
-		return false;
 
 	if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
 		return false;
@@ -136,11 +134,6 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 * CLASS CPhysicsEnvironment
 *******************************/
 
-void CPhysicsEnvironment_TickCallBack(btDynamicsWorld *world, btScalar timeStep) {
-	CPhysicsEnvironment *phy = (CPhysicsEnvironment *)(world->getWorldUserInfo());
-	phy->BulletTick(timeStep);
-}
-
 CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick = false;
 	m_bUseDeleteQueue = false;
@@ -155,9 +148,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	int maxTasks = 4;
 
 	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
-	static int iUniqueNum = 0;	// Fixes a crash with multiple environments.
-	char uniquenamecollision[1024];
-	char uniquenamesolver[1024];
+	// TODO: This int will eventually overflow after too many map changes!
+	static unsigned int iUniqueNum = 0;	// Fixes a crash with multiple environments.
+	char uniquenamecollision[128];
+	char uniquenamesolver[128];
 	sprintf(uniquenamecollision, "collision%d", iUniqueNum);
 	sprintf(uniquenamesolver, "solver%d", iUniqueNum);
 	iUniqueNum++;
@@ -219,7 +213,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pCollisionSolver = new CCollisionSolver;
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
-	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());	// TODO: Does this leak memory?
 
 	m_pDeleteQueue = new CDeleteQueue;
 
@@ -237,7 +231,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;
 
-	m_pBulletEnvironment->setInternalTickCallback(CPhysicsEnvironment_TickCallBack, (void *)(this));
+	m_pBulletEnvironment->setInternalTickCallback(TickCallback, (void *)(this));
 
 #if DEBUG_DRAW
 	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment, this);
@@ -280,8 +274,17 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_physics_performanceparams;
 }
 
+// UNEXPOSED
+void CPhysicsEnvironment::TickCallback(btDynamicsWorld *world, btScalar timeStep) {
+	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)(world->getWorldUserInfo());
+	pEnv->BulletTick(timeStep);
+}
+
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
 	m_pDebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
+
+	if (m_pDebugOverlay)
+		m_debugdraw->SetDebugOverlay(m_pDebugOverlay);
 }
 
 IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
@@ -352,12 +355,12 @@ void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController *tbr) {
 }
 
 IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, IPhysicsObject *pObjectEnd, springparams_t *pParams) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 void CPhysicsEnvironment::DestroySpring(IPhysicsSpring *pSpring) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
@@ -462,9 +465,10 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "2", 0, "Sets the maximum amount of simulation substeps");
+static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "2", 0, "Sets the maximum amount of simulation substeps", true, 1, true, 8);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (!m_pBulletEnvironment) return;
+
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {
 		deltaTime = 0;
 	} else if ( deltaTime > 0.1 ) {
@@ -478,45 +482,15 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	//m_simPSIcurrent = m_simPSIs;
 
 	m_inSimulation = true;
-	if (deltaTime > 0.0001) {
+	if (deltaTime > 1e-4) {
 		// Divide by zero check.
 		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
 		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt(), timestep); // m_timestep/2.0f
-		for (int i = 0; i < m_fluids.Count(); i++) {
-			m_fluids[i]->Tick(deltaTime);
-		}
-
-		/*
-		if (m_pObjectEvent)
-		{
-			// FIXME: This got very messy, must be a better way to do this
-			int numObjects = m_pBulletEnvironment->getNumCollisionObjects();
-			btCollisionObjectArray collisionObjects = m_pBulletEnvironment->getCollisionObjectArray();
-			for (int i = 0; i < numObjects; i++)
-			{
-				btCollisionObject *obj = collisionObjects[i];
-				CPhysicsObject *physobj = (CPhysicsObject*)collisionObjects[i]->getUserPointer();
-				if (physobj->m_iLastActivationState != obj->getActivationState())
-				{
-					switch (obj->getActivationState())
-					{
-					case ACTIVE_TAG:
-						m_pObjectEvent->ObjectWake(physobj);
-						break;
-					case ISLAND_SLEEPING:
-						m_pObjectEvent->ObjectSleep(physobj);
-						break;
-					}
-					physobj->m_iLastActivationState = obj->getActivationState();
-				}
-			}
-		}
-		*/
 	}
 	m_inSimulation = false;
 
 #if DEBUG_DRAW
-		m_debugdraw->DrawWorld();
+	m_debugdraw->DrawWorld();
 #endif
 
 	if (!m_bUseDeleteQueue) {
@@ -537,16 +511,16 @@ void CPhysicsEnvironment::SetSimulationTimestep(float timestep) {
 }
 
 float CPhysicsEnvironment::GetSimulationTime() const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
 void CPhysicsEnvironment::ResetSimulationClock() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 float CPhysicsEnvironment::GetNextFrameTime() const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return 0;
 }
 
@@ -597,7 +571,7 @@ bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnviro
 
 void CPhysicsEnvironment::CleanupDeleteList(void) {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
-		CPhysicsObject *pObject = (CPhysicsObject*)m_deadObjects.Element(i);
+		CPhysicsObject *pObject = (CPhysicsObject *)m_deadObjects.Element(i);
 		delete pObject;
 	}
 
@@ -694,11 +668,12 @@ float CPhysicsEnvironment::GetInvPSIScale() {
 }
 
 void CPhysicsEnvironment::BulletTick(btScalar dt) {
-	// FIXME: Maybe this should be in CPhysicsEnvironment:Simulate instead?
 	m_pPhysicsDragController->Tick(dt);
-	for (int i = 0; i < m_controllers.Count(); i++) {
+	for (int i = 0; i < m_controllers.Count(); i++)
 		m_controllers[i]->Tick(dt);
-	}
+
+	for (int i = 0; i < m_fluids.Count(); i++)
+		m_fluids[i]->Tick(dt);
 
 	m_inSimulation = false;
 	if (!m_bUseDeleteQueue) {
@@ -753,6 +728,33 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 			float energy = manPoint.m_combinedFriction;
 			if (energy > 0.05f) {
 				
+			}
+		}
+	}
+	*/
+
+	/*
+	if (m_pObjectEvent)
+	{
+		// FIXME: This got very messy, must be a better way to do this
+		int numObjects = m_pBulletEnvironment->getNumCollisionObjects();
+		btCollisionObjectArray collisionObjects = m_pBulletEnvironment->getCollisionObjectArray();
+		for (int i = 0; i < numObjects; i++)
+		{
+			btCollisionObject *obj = collisionObjects[i];
+			CPhysicsObject *physobj = (CPhysicsObject*)collisionObjects[i]->getUserPointer();
+			if (physobj->m_iLastActivationState != obj->getActivationState())
+			{
+				switch (obj->getActivationState())
+				{
+				case ACTIVE_TAG:
+					m_pObjectEvent->ObjectWake(physobj);
+					break;
+				case ISLAND_SLEEPING:
+					m_pObjectEvent->ObjectSleep(physobj);
+					break;
+				}
+				physobj->m_iLastActivationState = obj->getActivationState();
 			}
 		}
 	}

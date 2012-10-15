@@ -58,6 +58,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController
 		vehicle_operatingparams_t			m_vehicleState;
 		CPhysicsObject *					m_pBody;
 		CPhysicsEnvironment *				m_pEnv;
+		IPhysicsGameTrace *					m_pGameTrace;
 		unsigned int						m_iVehicleType;
 		bool								m_bEngineDisabled;
 		bool								m_bOccupied;

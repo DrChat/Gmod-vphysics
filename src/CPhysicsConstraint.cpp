@@ -18,6 +18,7 @@ class btPulleyConstraint: public btTypedConstraint {
 	public:
 };
 
+// TODO: Finish this (for ropes)
 class btLengthConstraint: public btPoint2PointConstraint {
 	protected:
 		btScalar	m_mindist;
@@ -150,7 +151,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	//btHingeConstraint *pHinge = new btHingeConstraint();
+	//btHingeConstraint *pHinge = new btHingeConstraint(*pObjA->GetObject(), *pObjB->GetObject(), );
 
 	NOT_IMPLEMENTED;
 	return NULL;
@@ -174,23 +175,20 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
 
-	// Position of attached object in reference object's local space.
+	// Position of attached object space to reference object space.
 	btTransform bullAttRefXform = btTransform::getIdentity();
 	ConvertMatrixToBull(sliding.attachedRefXform, bullAttRefXform);
 	
+	// Axis to slide on in reference object space
 	btVector3 bullSlideAxisRef;
 	ConvertDirectionToBull(sliding.slideAxisRef, bullSlideAxisRef);
 
 	btTransform bullFrameInA = btTransform::getIdentity();
-	bullFrameInA = ((btMassCenterMotionState *)pObjA->GetObject()->getMotionState())->m_centerOfMassOffset;
-	bullFrameInA.setRotation(bullAttRefXform.getRotation());
+	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef.x(), bullSlideAxisRef.y(), bullSlideAxisRef.z(), 0));
 
 	btTransform bullFrameInB = btTransform::getIdentity();
-
-	// We need to know our own position and the other object's position in local space.
-	// Figure out what makes the objects snap together when the constraint is created.
-	// NOTES: The sliding constraint will line up with object B (spawning 2 washing machines near eachother and constraining them)
-	// TODO: Figure out how to properly attach this to the world.
+	//btTransform bullFrameInB = ((btMassCenterMotionState *)pObjB->GetObject()->getMotionState())->m_centerOfMassOffset;
+	//bullFrameInB.setRotation(bullAttRefXform.getRotation());
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullFrameInA, bullFrameInB, true);
 

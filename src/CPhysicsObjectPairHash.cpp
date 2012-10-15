@@ -13,10 +13,6 @@ CPhysicsObjectPairHash::CPhysicsObjectPairHash() {
 		m_pHashList[i] = NULL;
 }
 
-CPhysicsObjectPairHash::~CPhysicsObjectPairHash() {
-
-}
-
 void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
 	int entry = (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
 	pair_hash_list *last = NULL;
@@ -43,16 +39,15 @@ void CPhysicsObjectPairHash::RemoveObjectPair(void *pObject0, void *pObject1) {
 				hash->previous->next = hash->next;
 			else
 				m_pHashList[entry] = hash->next;
-			if (hash->next)
-				hash->next->previous = hash->previous;
 
-			// Fix for accessing the object after it's been deleted!
-			if (hash->next)
-				hashnext = hash->next;
-			else
-				hashnext = NULL;
+			if (hash->next) {
+				hash->next->previous = hash->previous;
+				hashnext = hash->next;	// Fix for access violation
+			}
 
 			delete hash;
+		} else {
+			hashnext = hash->next;
 		}
 	}
 }
@@ -66,16 +61,20 @@ void CPhysicsObjectPairHash::RemoveAllPairsForObject(void *pObject0) {
 					hash->previous->next = hash->next;
 				else
 					m_pHashList[i] = hash->next;
-				if (hash->next)
-					hash->next->previous = hash->previous;
 
-				// Fix for accessing the object after it's been deleted!
+				if (hash->next) {
+					hash->next->previous = hash->previous;
+					hashnext = hash->next;	// Fix for access violation
+				} else {
+					hashnext = NULL;
+				}
+
+				delete hash;
+			} else {
 				if (hash->next)
 					hashnext = hash->next;
 				else
 					hashnext = NULL;
-
-				delete hash;
 			}
 		}
 	}
