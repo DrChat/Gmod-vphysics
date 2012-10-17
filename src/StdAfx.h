@@ -25,10 +25,12 @@
 #	define DEBUG_DRAW 1
 #endif
 
+// 4 mm
 #define COLLISION_MARGIN 0.004
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
+/*
 #ifdef _DEBUG
 //#	define NOT_IMPLEMENTED __asm {int 3}
 
@@ -36,6 +38,9 @@
 #else
 #	define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #endif
+*/
+
+#define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 
 /******************************
 * MISC CLASSES

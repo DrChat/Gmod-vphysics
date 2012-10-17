@@ -150,7 +150,6 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 
 CPhysicsVehicleController::~CPhysicsVehicleController() {
 	ShutdownBullVehicle();
-	m_pBody->GetObject()->setActivationState(ACTIVE_TAG);
 }
 
 void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {

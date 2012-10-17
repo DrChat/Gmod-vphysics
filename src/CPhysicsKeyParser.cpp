@@ -92,7 +92,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 			pSolid->params.volume = data->GetFloat();
 		else if (!stricmp(key, "drag"))
 			pSolid->params.dragCoefficient = data->GetFloat();
-		//else if (!stricmp(key, "rollingdrag"))					// This is in vphysics.so but it doesn't seem to set any variables.
+		//else if (!stricmp(key, "rollingdrag")) // This is in vphysics.so but it doesn't seem to set any variables.
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
 	}

@@ -9,21 +9,31 @@
 
 //IPhysicsCollision *g_ValvePhysicsCollision = NULL;
 
+// NOTE:
+// CPhysCollide is a btCollisionShape
+// CPhysConvex is a btConvexHullShape
+
 /****************************
 * CLASS CPhysicsCollision
 ****************************/
 
-CPhysicsCollision::CPhysicsCollision() {
-
-}
-
-CPhysicsCollision::~CPhysicsCollision() {
-
-}
-
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
-	NOT_IMPLEMENTED
-	return NULL;
+	btConvexHullShape *pConvex = new btConvexHullShape;
+
+	for (int i = 0; i < vertCount; i++) {
+		btVector3 vert;
+		ConvertPosToBull(*pVerts[i], vert);
+
+		pConvex->addPoint(vert);
+	}
+
+	// Optimize the shape.
+	btShapeHull *hull = new btShapeHull(pConvex);
+	delete pConvex;
+	pConvex = new btConvexHullShape((btScalar *)hull->getVertexPointer(), hull->numVertices());
+	delete hull;
+
+	return (CPhysConvex *)pConvex;
 }
 
 CPhysConvex *CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance) {
@@ -46,7 +56,7 @@ void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gam
 }
 
 void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
-	NOT_IMPLEMENTED
+	delete (btConvexHullShape *)pConvex;
 }
 
 CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &maxs) {
@@ -171,6 +181,8 @@ void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOu
 }
 
 void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vector &massCenter) {
+	if (!pCollide) return;
+
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
 	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
 
@@ -277,6 +289,42 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 }
 
 void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, const CPhysCollide *pSweepCollide, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
+	btVector3 bullVec;
+	btMatrix3x3 bullMatrix;
+
+	// Create the collision object
+	btCollisionObject *object = new btCollisionObject;
+	btCollisionShape *shape = (btCollisionShape *)pCollide;
+	object->setCollisionShape(shape);
+	ConvertRotationToBull(collideAngles, bullMatrix);
+	ConvertPosToBull(collideOrigin, bullVec);
+	btTransform transform(bullMatrix, bullVec);
+
+	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
+	if (shapeInfo)
+		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
+	object->setWorldTransform(transform);
+
+	// Create the sweep collision object
+	btCollisionObject *pSweepObject = new btCollisionObject;
+	btCollisionShape *pSweepShape = (btCollisionShape *)pSweepCollide;
+	pSweepObject->setCollisionShape(pSweepShape);
+	ConvertRotationToBull(sweepAngles, bullMatrix);
+	btTransform bullSweepTransform(bullMatrix);
+
+	PhysicsShapeInfo *pSweepShapeInfo = (PhysicsShapeInfo *)pSweepShape->getUserPointer();
+	if (pSweepShapeInfo)
+		bullSweepTransform *= btTransform(btMatrix3x3::getIdentity(), pSweepShapeInfo->massCenter);
+	pSweepObject->setWorldTransform(bullSweepTransform);
+
+	btVector3 bullStartVec, bullEndVec;
+	ConvertPosToBull(start, bullStartVec);
+	ConvertPosToBull(end, bullEndVec);
+	btTransform bullStartT(btMatrix3x3::getIdentity(), bullStartVec);
+	btTransform bullEndT(btMatrix3x3::getIdentity(), bullEndVec);
+
+	btCollisionWorld::ClosestConvexResultCallback cb(bullStartVec, bullEndVec);
+
 	NOT_IMPLEMENTED
 }
 
@@ -295,7 +343,7 @@ struct compactsurfaceheader_t {
 	int		axisMapSize;
 };
 
-// old style phy format
+// old style phy format (IVP_Compact_Surface)
 struct legacysurfaceheader_t {
 	float	mass_center[3];
 	float	rotation_inertia[3];
@@ -312,9 +360,7 @@ struct ivpmeshheader_t {
 	short	tricount;
 };
 
-// Purpose: Parses a .phy file's collision
-// TODO: This function is really expensive! In the future, should we
-// generate the data we need and then save it to a mdl.bphy, or something similar?
+// Purpose: Loads and converts an ivp mesh to a bullet mesh.
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
 	memset(pOutput, 0, sizeof(*pOutput));
 	pOutput->solidCount = solidCount;
@@ -328,16 +374,16 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		pOutput->solids[i] = (CPhysCollide *)(pBuffer + position);
 		position += size;
 	}
-	pOutput->pKeyValues = (char *)malloc(bufferSize - position);
+	pOutput->pKeyValues = new char[bufferSize - position];
 	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
 
 	// Now for the fun part:
 	// We have to convert every solid into a bullet solid
-	// because havoc solids are saved into a phy file.
+	// because ivp solids are normally saved into a phy file.
 	for (int i = 0; i < solidCount; i++) {
 		const char *solid = (const char *)pOutput->solids[i];
-		compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
-		legacysurfaceheader_t legacyheader = *(legacysurfaceheader_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
+		const compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
+		const legacysurfaceheader_t legacyheader = *(legacysurfaceheader_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
 
@@ -345,23 +391,26 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		Assert(surfaceheader.version == 0x100);
 
 		if (surfaceheader.modelType != 0x0) {
+			Msg("Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
 			pOutput->solids[i] = NULL;
 			continue;
 		}
 
 		info->massCenter = btVector3(legacyheader.mass_center[0], -legacyheader.mass_center[1], -legacyheader.mass_center[2]);
+
+		// TODO: Support loading of IVP MOPP
 		Assert(legacyheader.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
 		const char *convexes = solid + 76;
 
-		Msg("Loaded shape with mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
+		Msg("Loading shape with mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
 		btCompoundShape *bull = new btCompoundShape();
-		bull->setMargin(COLLISION_MARGIN);
+		bull->setMargin(COLLISION_MARGIN); // TODO: Multithreaded prop bouncing is related to the margins!
 		bull->setUserPointer(info);
 		int position = 0;
 
 		// Add all of the convex solids to our compound shape.
 		while (true) {
-			ivpmeshheader_t ivpheader = *(ivpmeshheader_t *)(convexes + position);
+			const ivpmeshheader_t ivpheader = *(ivpmeshheader_t *)(convexes + position);
 			const char *vertices = convexes + position + ivpheader.vertexoffset;
 			Assert(convexes + position < vertices);
 
@@ -386,28 +435,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				position += 16;
 			}
 
-			// Optimize the mesh with a btShapeHull
-			btShapeHull *hull = new btShapeHull(mesh);
-			btScalar margin = mesh->getMargin();
-			bool bOk = hull->buildHull(margin); // TODO: This function is EXPENSIVE!
-												// TODO: Flatgrass crash is caused by this function failing (returns false)
-			if (bOk) {
-				delete mesh;
-				mesh = new btConvexHullShape((btScalar *)hull->getVertexPointer(), hull->numVertices());
-				mesh->setMargin(COLLISION_MARGIN);
+			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
 
-				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
-
-				// btConvexHullShape will make an internal copy of the points!
-				delete hull;
-			} else {
-				Warning("hull->buildHull() failed!\n");
-
-				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
-
-				delete hull;
-				//delete mesh;
-			}
+			// UNDONE: We don't need to optimize the hulls here!
 
 			if (convexes + position >= vertices)
 				break;
@@ -421,9 +451,11 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
 		btCollisionShape *shape = (btCollisionShape *)pVCollide->solids[i];
 		delete shape;
+
+		pVCollide->solids[i] = NULL;
 	}
 
-	free(pVCollide->pKeyValues);
+	delete pVCollide->pKeyValues;
 }
 
 IVPhysicsKeyParser *CPhysicsCollision::VPhysicsKeyParserCreate(const char *pKeyData) {
@@ -484,7 +516,7 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	virtualmeshlist_t *pList = new virtualmeshlist_t;
 	handler->GetVirtualMesh(params.userData, pList);
 
-	btTriangleMesh *btmesh= new btTriangleMesh;
+	btTriangleMesh *btmesh = new btTriangleMesh;
 	btVector3 btvec[3];
 	for (int i = 0; i < pList->triangleCount; i++)
 	{
@@ -493,6 +525,8 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 		ConvertPosToBull(pList->pVerts[pList->indices[i*3+2]], btvec[2]);
 		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
 	}
+
+	delete pList;
 
 	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(btmesh, true);
 	bull->setMargin(COLLISION_MARGIN);

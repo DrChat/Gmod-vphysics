@@ -15,7 +15,7 @@
 #	include "CDebugDrawer.h"
 #endif
 
-#define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
+#define MULTITHREAD 1 // TODO: Mac and Linux support (Possibly done, needs testing)
 #define USE_PARALLEL_SOLVER 0 // TODO: This crashes right now!
 
 #if MULTITHREAD

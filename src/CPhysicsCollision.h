@@ -3,9 +3,6 @@
 
 class CPhysicsCollision : public IPhysicsCollision {
 	public:
-								CPhysicsCollision();
-								~CPhysicsCollision();
-
 		CPhysConvex *			ConvexFromVerts(Vector **pVerts, int vertCount);
 		CPhysConvex *			ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance);
 		float					ConvexVolume(CPhysConvex *pConvex);
