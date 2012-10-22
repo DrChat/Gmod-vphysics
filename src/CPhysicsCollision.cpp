@@ -437,8 +437,6 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
 
-			// UNDONE: We don't need to optimize the hulls here!
-
 			if (convexes + position >= vertices)
 				break;
 		}

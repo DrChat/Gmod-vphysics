@@ -134,6 +134,7 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	m_pBody = pBody;
 	m_iVehicleType = nVehicleType;
 	m_pGameTrace = pGameTrace;
+	m_bEngineDisabled = false;
 	memset(&m_vehicleState, 0, sizeof(m_vehicleState));
 	InitVehicleParams(params);
 
@@ -335,6 +336,7 @@ void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &cont
 		ConvertRotationToHL(bullRot, HLRot);
 
 		// z = spin
+		// flip it because HL expects it to come in opposite.
 		HLRot.z = -HLRot.z;
 
 		m_pWheels[i]->SetPosition(HLPos, HLRot, true);

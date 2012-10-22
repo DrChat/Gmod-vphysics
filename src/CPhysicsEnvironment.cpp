@@ -15,8 +15,9 @@
 #	include "CDebugDrawer.h"
 #endif
 
-#define MULTITHREAD 1 // TODO: Mac and Linux support (Possibly done, needs testing)
+#define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
 #define USE_PARALLEL_SOLVER 0 // TODO: This crashes right now!
+// See: http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=7016
 
 #if MULTITHREAD
 #	include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
@@ -93,7 +94,7 @@ class CCollisionSolver : public btOverlapFilterCallback {
 
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
 	btRigidBody *body0 = btRigidBody::upcast((btCollisionObject *)proxy0->m_clientObject);
-	btRigidBody *body1 =  btRigidBody::upcast((btCollisionObject *)proxy1->m_clientObject);
+	btRigidBody *body1 = btRigidBody::upcast((btCollisionObject *)proxy1->m_clientObject);
 	if (!body0 || !body1)
 	{
 		if (body0)
@@ -145,10 +146,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pThreadSupportCollision = NULL;
 	m_pThreadSupportSolver = NULL;
 
+	// TODO: In the future, try and get this value from the game somewhere.
 	int maxTasks = 4;
 
 	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
-	// TODO: This int will eventually overflow after too many map changes!
 	static unsigned int iUniqueNum = 0;	// Fixes a crash with multiple environments.
 	char uniquenamecollision[128];
 	char uniquenamesolver[128];
@@ -196,7 +197,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
 
 #	if USE_PARALLEL_SOLVER
-	m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface); // TODO: Crashes
+	m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface);
 	//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
 	m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
 #	else
@@ -561,9 +562,11 @@ const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCoun
 
 bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment) {
 	if (pDestinationEnvironment == this) {
+		m_pBulletEnvironment->addRigidBody(((CPhysicsObject *)pObject)->GetObject());
 		m_objects.AddToTail(pObject);
 		return true;
 	} else {
+		m_pBulletEnvironment->removeRigidBody(((CPhysicsObject *)pObject)->GetObject());
 		m_objects.FindAndRemove(pObject);
 		return pDestinationEnvironment->TransferObject(pObject, pDestinationEnvironment);
 	}
@@ -621,6 +624,7 @@ void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const V
 void CPhysicsEnvironment::GetPerformanceSettings(physics_performanceparams_t *pOutput) const {
 	memcpy(pOutput, m_physics_performanceparams, sizeof(physics_performanceparams_t));
 }
+
 void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams_t *pSettings) {
 	memcpy((void *)m_physics_performanceparams, pSettings, sizeof(physics_performanceparams_t));
 }

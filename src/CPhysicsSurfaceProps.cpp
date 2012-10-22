@@ -36,71 +36,71 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 
 		for (KeyValues *data = surface->GetFirstSubKey(); data; data = data->GetNextKey()) {
 			const char *key = data->GetName();
-			if (!strcmpi(key, "base")) {
+			if (!Q_stricmp(key, "base")) {
 				baseMaterial = GetSurfaceIndex(data->GetString());
 				CopyPhysicsProperties(&prop, baseMaterial);
-			} else if (!strcmpi(key, "thickness"))
+			} else if (!Q_stricmp(key, "thickness"))
 				prop.data.physics.thickness = data->GetFloat();
-			else if (!strcmpi(key, "density"))
+			else if (!Q_stricmp(key, "density"))
 				prop.data.physics.density = data->GetFloat();
-			else if (!strcmpi(key, "elasticity"))
+			else if (!Q_stricmp(key, "elasticity"))
 				prop.data.physics.elasticity = data->GetFloat();
-			else if (!strcmpi(key, "friction"))
+			else if (!Q_stricmp(key, "friction"))
 				prop.data.physics.friction = data->GetFloat();
-			else if (!strcmpi(key, "dampening"))
+			else if (!Q_stricmp(key, "dampening"))
 				prop.data.physics.dampening = data->GetFloat();
-			else if (!strcmpi(key, "audioreflectivity"))
+			else if (!Q_stricmp(key, "audioreflectivity"))
 				prop.data.audio.reflectivity = data->GetFloat();
-			else if (!strcmpi(key, "audiohardnessfactor"))
+			else if (!Q_stricmp(key, "audiohardnessfactor"))
 				prop.data.audio.hardnessFactor = data->GetFloat();
-			else if (!strcmpi(key, "audioroughnessfactor"))
+			else if (!Q_stricmp(key, "audioroughnessfactor"))
 				prop.data.audio.roughnessFactor = data->GetFloat();
-			else if (!strcmpi(key, "scrapeRoughThreshold"))
+			else if (!Q_stricmp(key, "scrapeRoughThreshold"))
 				prop.data.audio.roughThreshold = data->GetFloat();
-			else if (!strcmpi(key, "impactHardThreshold"))
+			else if (!Q_stricmp(key, "impactHardThreshold"))
 				prop.data.audio.hardThreshold = data->GetFloat();
-			else if (!strcmpi(key, "audioHardMinVelocity"))
+			else if (!Q_stricmp(key, "audioHardMinVelocity"))
 				prop.data.audio.hardVelocityThreshold = data->GetFloat();
-			else if (!strcmpi(key, "maxspeedfactor"))
+			else if (!Q_stricmp(key, "maxspeedfactor"))
 				prop.data.game.maxSpeedFactor = data->GetFloat();
-			else if (!strcmpi(key, "jumpfactor"))
+			else if (!Q_stricmp(key, "jumpfactor"))
 				prop.data.game.jumpFactor = data->GetFloat();
-			else if (!strcmpi(key, "climbable"))
+			else if (!Q_stricmp(key, "climbable"))
 				prop.data.game.climbable = data->GetInt();
-			else if (!strcmpi(key, "gamematerial"))
+			else if (!Q_stricmp(key, "gamematerial"))
 				if (data->GetDataType() == KeyValues::TYPE_STRING && strlen(data->GetString()) == 1) {
 					prop.data.game.material = toupper(data->GetString()[0]);
 				} else {
 					prop.data.game.material = data->GetInt();
 				}
-			else if (!strcmpi(key, "stepleft")) {
+			else if (!Q_stricmp(key, "stepleft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.stepleft = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "stepright")) {
+			} else if (!Q_stricmp(key, "stepright")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.stepright = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "impactsoft")) {
+			} else if (!Q_stricmp(key, "impactsoft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.impactSoft = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "impacthard")) {
+			} else if (!Q_stricmp(key, "impacthard")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.impactHard = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "scrapesmooth")) {
+			} else if (!Q_stricmp(key, "scrapesmooth")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.scrapeSmooth = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "scraperough")) {
+			} else if (!Q_stricmp(key, "scraperough")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.scrapeRough = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "bulletimpact")) {
+			} else if (!Q_stricmp(key, "bulletimpact")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.bulletImpact = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "break")) {
+			} else if (!Q_stricmp(key, "break")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.breakSound = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "strain")) {
+			} else if (!Q_stricmp(key, "strain")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.strainSound = m_soundList.AddToTail(sym);
-			} else if (!strcmpi(key, "rolling")) {
+			} else if (!Q_stricmp(key, "rolling")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				prop.data.sounds.rolling = m_soundList.AddToTail(sym);
 			} else

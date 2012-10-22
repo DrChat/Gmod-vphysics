@@ -8,8 +8,7 @@
 
 extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
-static void ReadVector(const char *pString, Vector& out)
-{
+static void ReadVector(const char *pString, Vector& out) {
 	float x, y, z;
 	sscanf(pString, "%f %f %f", &x, &y, &z);
 	out.x = x;
@@ -17,8 +16,7 @@ static void ReadVector(const char *pString, Vector& out)
 	out.z = z;
 }
 
-static void ReadVector4D(const char *pString, Vector4D& out)
-{
+static void ReadVector4D(const char *pString, Vector4D& out) {
 	float x, y, z, w;
 	sscanf(pString, "%f %f %f %f", &x, &y, &z, &w);
 	out.x = x;
@@ -27,41 +25,35 @@ static void ReadVector4D(const char *pString, Vector4D& out)
 	out.w = w;
 }
 
-CPhysicsKeyParser::CPhysicsKeyParser(const char *pKeyValues)
-{
+CPhysicsKeyParser::CPhysicsKeyParser(const char *pKeyValues) {
 	m_pKeyValues = new KeyValues("CPhysicsKeyParser");
 	m_pKeyValues->LoadFromBuffer("CPhysicsKeyParser", pKeyValues);
 	m_pCurrentBlock = m_pKeyValues;
 }
 
-CPhysicsKeyParser::~CPhysicsKeyParser()
-{
+CPhysicsKeyParser::~CPhysicsKeyParser() {
 	if (m_pKeyValues)
 		m_pKeyValues->deleteThis();
 }
 
-void CPhysicsKeyParser::NextBlock(void)
-{
+void CPhysicsKeyParser::NextBlock(void) {
 	if (m_pCurrentBlock)
 		m_pCurrentBlock = m_pCurrentBlock->GetNextKey();
 }
 
-const char *CPhysicsKeyParser::GetCurrentBlockName(void)
-{
-	if (m_pCurrentBlock)
-	{
+const char *CPhysicsKeyParser::GetCurrentBlockName(void) {
+	if (m_pCurrentBlock) {
 		return m_pCurrentBlock->GetName();
 	}
+
 	return NULL;
 }
 
-bool CPhysicsKeyParser::Finished(void)
-{
+bool CPhysicsKeyParser::Finished(void) {
 	return m_pCurrentBlock == NULL;
 }
 
-void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknownKeyHandler)
-{
+void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknownKeyHandler) {
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pSolid);
 	else
@@ -99,8 +91,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 	NextBlock();
 }
 
-void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknownKeyHandler)
-{
+void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknownKeyHandler) {
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pFluid);
 	else
@@ -127,8 +118,7 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 	NextBlock();
 }
 
-void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pConstraint, IVPhysicsKeyHandler *unknownKeyHandler)
-{
+void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pConstraint, IVPhysicsKeyHandler *unknownKeyHandler) {
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pConstraint);
 	else
@@ -178,8 +168,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 	NextBlock();
 }
 
-void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unknownKeyHandler)
-{
+void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unknownKeyHandler) {
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		if (data->GetInt() < 128)
 			table[data->GetInt()] = g_SurfaceDatabase.GetSurfaceIndex(data->GetName());
@@ -187,22 +176,31 @@ void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unkno
 	NextBlock();
 }
 
-void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler)
-{
-	if (unknownKeyHandler)
-		unknownKeyHandler->SetDefaults(pCustom);
-	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
-		const char *key = data->GetName();
+// Purpose: Recursive function to loop through all the keyvalues!
+void RecursiveLoop(KeyValues *pBlock, void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
+	for (KeyValues *pKey = pBlock; pKey; pKey = pKey->GetNextKey()) {
+		if (pKey->GetFirstSubKey())
+			RecursiveLoop(pKey->GetFirstSubKey(), pCustom, unknownKeyHandler);
+	
+		const char *key = pKey->GetName();
+		const char *value = pKey->GetString();
 
-		const char *value = data->GetString();
-		if (unknownKeyHandler)
-			unknownKeyHandler->ParseKeyValue(pCustom, key, value);
+		Msg("key: %s value: %s\n", key, value);
+
+		unknownKeyHandler->ParseKeyValue(pCustom, key, value);
 	}
+}
+
+void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
+	if (!unknownKeyHandler) return;
+
+	unknownKeyHandler->SetDefaults(pCustom);
+
+	RecursiveLoop(m_pCurrentBlock, pCustom, unknownKeyHandler);
 	NextBlock();
 }
 
-void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHandler *unknownKeyHandler)
-{
+void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHandler *unknownKeyHandler) {
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pVehicle);
 	else
@@ -228,8 +226,7 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 }
 
 
-void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
@@ -244,8 +241,7 @@ void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *
 	}
 }
 
-void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
@@ -270,8 +266,7 @@ void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValue
 	}
 }
 
-void CPhysicsKeyParser::ParseVehicleSuspension(vehicle_suspensionparams_t &suspension, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleSuspension(vehicle_suspensionparams_t &suspension, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
@@ -288,8 +283,7 @@ void CPhysicsKeyParser::ParseVehicleSuspension(vehicle_suspensionparams_t &suspe
 	}
 }
 
-void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
@@ -312,8 +306,7 @@ void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *
 	}
 }
 
-void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
@@ -346,8 +339,7 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 	}
 }
 
-void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
@@ -364,8 +356,7 @@ void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, 
 	}
 }
 
-void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering, KeyValues *kv)
-{
+void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering, KeyValues *kv) {
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 

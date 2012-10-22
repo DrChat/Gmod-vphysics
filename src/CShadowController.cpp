@@ -73,12 +73,13 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	// DEBUG
 	/*
 	if (deltaRotation.w() < 0) {
-		deltaRotation.setW(-deltaRotation.w());
-		deltaRotation.setX(-deltaRotation.x());
-		deltaRotation.setY(-deltaRotation.y());
-		deltaRotation.setZ(-deltaRotation.z());
+		//deltaRotation.setW(-deltaRotation.w());
+		//deltaRotation.setX(-deltaRotation.x());
+		//deltaRotation.setY(-deltaRotation.y());
+		//deltaRotation.setZ(-deltaRotation.z());
+		deltaRotation = -deltaRotation;
 	}
-	*/
+	//*/
 	// END DEBUG
 
 	// CONDITIONAL BREAKPOINT HERE: deltaRotation.m_floats[3] <= -0.9
@@ -87,15 +88,18 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	// w val of 1 makes the angle 0
 	// Maybe we don't handle big angles that well
 	// TODO: This code might be the broken code!
-	///*
+	/*
 	btVector3 axis = deltaRotation.getAxis();
 	btScalar angle = deltaRotation.getAngle();
 	axis.normalize();
 
-	deltaAngles.setValue(axis.x() * angle,
-						axis.y() * angle,
-						axis.z() * angle);
-						//*/
+	deltaAngles.setX(axis.x() * angle);
+	deltaAngles.setY(axis.y() * angle);
+	deltaAngles.setZ(axis.z() * angle);
+	//*/
+
+	// This seems to fix the spazzing out when w is negative.
+	btMatrix3x3(deltaRotation).getEulerZYX(deltaAngles[2], deltaAngles[1], deltaAngles[0]);
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	// DEBUG
@@ -103,6 +107,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		btQuaternion transquat = transform.getRotation();
 		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
 		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
+		Msg("Delta Angles: %f %f %f\n", deltaAngles.x(), deltaAngles.y(), deltaAngles.z());
 		Msg("-- Delta Rotation Quat: %f %f %f %f --\n\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
 	}
 	// END DEBUG
@@ -111,7 +116,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	object->setAngularVelocity(rot_speed);
 	
 	// HACK: Replace this soon!
-	///*
+	//*
 	object->setAngularVelocity(btVector3(0, 0, 0));
 	btTransform targTrans;
 	targTrans.setOrigin(params.targetPosition);

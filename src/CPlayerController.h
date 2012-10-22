@@ -10,20 +10,21 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 class CPlayerController : public IController, public IPhysicsPlayerController
 {
 	public:
-										CPlayerController(CPhysicsObject* pObject);
+										CPlayerController(CPhysicsObject *pObject);
 										~CPlayerController();
-		void							Update(const Vector& position, const Vector& velocity, float secondsToArrival, bool onground, IPhysicsObject* ground);
-		void							SetEventHandler(IPhysicsPlayerControllerEvent* handler);
-		bool							IsInContact();
-		void							MaxSpeed(const Vector& maxVelocity);
 
-		void							SetObject(IPhysicsObject* pObject);
-		int								GetShadowPosition( Vector* position, QAngle* angles );
+		void							Update(const Vector &position, const Vector &velocity, float secondsToArrival, bool onground, IPhysicsObject *ground);
+		void							SetEventHandler(IPhysicsPlayerControllerEvent *handler);
+		bool							IsInContact();
+		void							MaxSpeed(const Vector &maxVelocity);
+
+		void							SetObject(IPhysicsObject *pObject);
+		int								GetShadowPosition(Vector *position, QAngle *angles);
 		void							StepUp(float height);
 		void							Jump();
-		void							GetShadowVelocity(Vector* velocity);
+		void							GetShadowVelocity(Vector *velocity);
 		IPhysicsObject *				GetObject();
-		void							GetLastImpulse(Vector* pOut);
+		void							GetLastImpulse(Vector *pOut);
 
 		void							SetPushMassLimit(float maxPushMass);
 		void							SetPushSpeedLimit(float maxPushSpeed);
@@ -31,7 +32,8 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		float							GetPushMassLimit();
 		float							GetPushSpeedLimit();
 		bool							WasFrozen();
-	public:
+	
+		// UNEXPOSED
 		void							Tick(float deltaTime);
 	private:
 		void							AttachObject();

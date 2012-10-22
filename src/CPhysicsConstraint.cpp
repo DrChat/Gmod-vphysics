@@ -133,14 +133,8 @@ void CPhysicsConstraint::OutputDebugInfo() {
 * CREATION FUNCTIONS
 ************************/
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
-	btTransform obj1Pos, obj2Pos;
-	ConvertMatrixToBull(ragdoll.constraintToAttached, obj1Pos);
-	ConvertMatrixToBull(ragdoll.constraintToReference, obj2Pos);
-	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
-
-	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos.getOrigin(), obj2Pos.getOrigin());
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock, CONSTRAINT_RAGDOLL);
+	NOT_IMPLEMENTED
+	return NULL;
 }
 
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
@@ -151,7 +145,11 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	//btHingeConstraint *pHinge = new btHingeConstraint(*pObjA->GetObject(), *pObjB->GetObject(), );
+	btTransform bullAFrame, bullBFrame;
+	bullAFrame.setIdentity();
+	bullBFrame.setIdentity();
+
+	//btHingeConstraint *pHinge = new btHingeConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullAFrame, bullBFrame);
 
 	NOT_IMPLEMENTED;
 	return NULL;
@@ -186,9 +184,9 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform bullFrameInA = btTransform::getIdentity();
 	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef.x(), bullSlideAxisRef.y(), bullSlideAxisRef.z(), 0));
 
+	// TODO: Compute the slide axis in attached object space...
 	btTransform bullFrameInB = btTransform::getIdentity();
-	//btTransform bullFrameInB = ((btMassCenterMotionState *)pObjB->GetObject()->getMotionState())->m_centerOfMassOffset;
-	//bullFrameInB.setRotation(bullAttRefXform.getRotation());
+	bullFrameInB.setRotation(btQuaternion(bullSlideAxisRef.x(), bullSlideAxisRef.y(), bullSlideAxisRef.z(), 0));
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullFrameInA, bullFrameInB, true);
 

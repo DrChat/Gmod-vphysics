@@ -1,6 +1,5 @@
 #ifndef CPHYSICSCOLLISIONSET_H
 #define CPHYSICSCOLLISIONSET_H
-// FIXME: Slacking out on the speed of this one
 
 class CPhysicsCollisionSet : public IPhysicsCollisionSet
 {
