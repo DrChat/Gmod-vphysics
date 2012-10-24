@@ -7,15 +7,24 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-//IPhysicsCollision *g_ValvePhysicsCollision = NULL;
+/****************************
+* CLASS CCollisionQuery
+****************************/
 
-// NOTE:
-// CPhysCollide is a btCollisionShape
-// CPhysConvex is a btConvexHullShape
+class CCollisionQuery : public ICollisionQuery {
+	public:
+							CCollisionQuery(btCollisionShape *pShape);
+							~CCollisionQuery();
+	private:
+};
 
 /****************************
 * CLASS CPhysicsCollision
 ****************************/
+
+// NOTE:
+// CPhysCollide is a btCollisionShape
+// CPhysConvex is a btConvexHullShape
 
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
 	btConvexHullShape *pConvex = new btConvexHullShape;
@@ -354,10 +363,32 @@ struct legacysurfaceheader_t {
 	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
 };
 
-struct ivpmeshheader_t {
-	int		vertexoffset;
-	char	unk[8];
-	short	tricount;
+struct ivpcompactledge_t {
+	int		c_point_offset; // byte offset from 'this' to (ledge) point array
+    union {
+		int	ledgetree_node_offset;
+		int	client_data;	// if indicates a non terminal ledge
+    };
+    uint	has_chilren_flag:2;
+    int		is_compact_flag:2;  // if false than compact ledge uses points outside this piece of memory
+    uint	dummy:4;
+    uint	size_div_16:24; 
+    short	n_triangles;
+    short	for_future_use;
+};
+
+struct ivpcompactedge_t {
+	uint	start_point_index:16;		// point index
+	int		opposite_index:15;			// rel to this // maybe extra array, 3 bits more than tri_index/pierce_index
+	uint	is_virtual:1;
+};
+
+struct ivpcompacttriangle_t {
+	uint				tri_index : 12; // used for upward navigation
+	uint				pierce_index : 12;
+	uint				material_index : 7;
+	uint				is_virtual : 1;
+	ivpcompactedge_t	c_three_edges[3];
 };
 
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
@@ -391,7 +422,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		Assert(surfaceheader.version == 0x100);
 
 		if (surfaceheader.modelType != 0x0) {
-			Msg("Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
+			Warning("Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
 			pOutput->solids[i] = NULL;
 			continue;
 		}
@@ -400,39 +431,39 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		// TODO: Support loading of IVP MOPP
 		Assert(legacyheader.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
-		const char *convexes = solid + 76;
+		const char *convexes = solid + 76; // Right after legacyheader
 
 		Msg("Loading shape with mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
 		btCompoundShape *bull = new btCompoundShape();
-		bull->setMargin(COLLISION_MARGIN); // TODO: Multithreaded prop bouncing is related to the margins!
+		bull->setMargin(COLLISION_MARGIN);
 		bull->setUserPointer(info);
 		int position = 0;
 
 		// Add all of the convex solids to our compound shape.
 		while (true) {
-			const ivpmeshheader_t ivpheader = *(ivpmeshheader_t *)(convexes + position);
-			const char *vertices = convexes + position + ivpheader.vertexoffset;
+			// First is the ivp_compact_ledge
+			// Right after it are the triangles, which have 3 edges
+			const ivpcompactledge_t ivpledge = *(ivpcompactledge_t *)(convexes + position);
+
+			const char *vertices = convexes + position + ivpledge.c_point_offset; // point offset
 			Assert(convexes + position < vertices);
 
-			position += 16;
+			// Triangles start after the ivp_compact_ledge
+			position += sizeof(ivpcompactledge_t);
 			btConvexHullShape *mesh = new btConvexHullShape();
 			mesh->setMargin(COLLISION_MARGIN);
 
 			// Add all of the triangles to our mesh.
-			for (int j = 0; j < ivpheader.tricount; j++) {
-				short index1 = *(short *)(convexes + position + 4);
-				short index2 = *(short *)(convexes + position + 8);
-				short index3 = *(short *)(convexes + position + 12);
+			for (int j = 0; j < ivpledge.n_triangles; j++) {
+				const ivpcompacttriangle_t ivptri = *(ivpcompacttriangle_t *)(convexes + position);
+				for (int k = 0; k < 3; k++) {
+					short index = ivptri.c_three_edges[k].start_point_index;
 
-				btVector3 vertex1(*(float *)(vertices + index1 * 16), -*(float *)(vertices + index1 * 16 + 4), -*(float *)(vertices + index1 * 16 + 8));
-				btVector3 vertex2(*(float *)(vertices + index2 * 16), -*(float *)(vertices + index2 * 16 + 4), -*(float *)(vertices + index2 * 16 + 8));
-				btVector3 vertex3(*(float *)(vertices + index3 * 16), -*(float *)(vertices + index3 * 16 + 4), -*(float *)(vertices + index3 * 16 + 8));
+					btVector3 vertex(*(float *)(vertices + index * 16), -*(float *)(vertices + index * 16 + 4), -*(float *)(vertices + index * 16 + 8));
+					mesh->addPoint(vertex);
+				}
 
-				mesh->addPoint(vertex1);
-				mesh->addPoint(vertex2);
-				mesh->addPoint(vertex3);
-
-				position += 16;
+				position += sizeof(ivpcompacttriangle_t);
 			}
 
 			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
@@ -474,11 +505,9 @@ int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vect
 	int k = 0;
 
 	// BUG: This doesn't work on concave meshes! (Lots of lines connecting far apart vertices)
-	for (int i = 0; i < compound->getNumChildShapes(); i++)
-	{
+	for (int i = 0; i < compound->getNumChildShapes(); i++) {
 		btConvexHullShape *hull = (btConvexHullShape *)compound->getChildShape(i);
-		for (int j = hull->getNumVertices()-1; j >= 0; j--) // ugh, source wants the vertices in this order or shit begins to draw improperly
-		{
+		for (int j = hull->getNumVertices()-1; j >= 0; j--) { // ugh, source wants the vertices in this order or shit begins to draw improperly
 			btVector3 pos;
 			hull->getVertex(j, pos);
 			ConvertPosToHL(pos, (*outVerts)[k++]);
@@ -494,10 +523,12 @@ void CPhysicsCollision::DestroyDebugMesh(int vertCount, Vector *outVerts) {
 ICollisionQuery *CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {
 	NOT_IMPLEMENTED
 	return NULL;
+	//return new CCollisionQuery();
 }
 
 void CPhysicsCollision::DestroyQueryModel(ICollisionQuery *pQuery) {
 	NOT_IMPLEMENTED
+	// delete (CCollisionQuery *)pQuery;
 }
 
 IPhysicsCollision *CPhysicsCollision::ThreadContextCreate() {

@@ -57,7 +57,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pSolid);
 	else
-		memset(pSolid, 0, sizeof*pSolid);
+		memset(pSolid, 0, sizeof(*pSolid));
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
@@ -121,9 +121,8 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pConstraint, IVPhysicsKeyHandler *unknownKeyHandler) {
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pConstraint);
-	else
-	{
-		memset(pConstraint, 0, sizeof*pConstraint);
+	else {
+		memset(pConstraint, 0, sizeof(*pConstraint));
 		pConstraint->childIndex = -1;
 		pConstraint->parentIndex = -1;
 	}
@@ -177,16 +176,13 @@ void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unkno
 }
 
 // Purpose: Recursive function to loop through all the keyvalues!
-void RecursiveLoop(KeyValues *pBlock, void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
+void RecursiveKeyLoop(KeyValues *pBlock, void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
 	for (KeyValues *pKey = pBlock; pKey; pKey = pKey->GetNextKey()) {
 		if (pKey->GetFirstSubKey())
-			RecursiveLoop(pKey->GetFirstSubKey(), pCustom, unknownKeyHandler);
+			RecursiveKeyLoop(pKey->GetFirstSubKey(), pCustom, unknownKeyHandler);
 	
 		const char *key = pKey->GetName();
 		const char *value = pKey->GetString();
-
-		Msg("key: %s value: %s\n", key, value);
-
 		unknownKeyHandler->ParseKeyValue(pCustom, key, value);
 	}
 }
@@ -196,7 +192,7 @@ void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownK
 
 	unknownKeyHandler->SetDefaults(pCustom);
 
-	RecursiveLoop(m_pCurrentBlock, pCustom, unknownKeyHandler);
+	RecursiveKeyLoop(m_pCurrentBlock, pCustom, unknownKeyHandler);
 	NextBlock();
 }
 
@@ -204,7 +200,7 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pVehicle);
 	else
-		memset(pVehicle, 0, sizeof*pVehicle);
+		memset(pVehicle, 0, sizeof(*pVehicle));
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();

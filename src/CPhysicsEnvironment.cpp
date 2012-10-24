@@ -15,6 +15,7 @@
 #	include "CDebugDrawer.h"
 #endif
 
+// Multithreading is so buggy as of now. Leave this disabled.
 #define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
 #define USE_PARALLEL_SOLVER 0 // TODO: This crashes right now!
 // See: http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=7016
