@@ -13,10 +13,38 @@
 
 class CCollisionQuery : public ICollisionQuery {
 	public:
-							CCollisionQuery(btCollisionShape *pShape);
-							~CCollisionQuery();
+		CCollisionQuery(btCollisionShape *pShape) {m_pShape = pShape;}
+		~CCollisionQuery();
+
+		// number of convex pieces in the whole solid
+		int					ConvexCount();
+		// triangle count for this convex piece
+		int					TriangleCount(int convexIndex);
+		// get the stored game data
+		uint				GetGameData(int convexIndex);
+		// Gets the triangle's verts to an array
+		void				GetTriangleVerts(int convexIndex, int triangleIndex, Vector *verts);
+		
+		// UNDONE: This doesn't work!!!
+		void				SetTriangleVerts(int convexIndex, int triangleIndex, const Vector *verts);
+		
+		// returns the 7-bit material index
+		int					GetTriangleMaterialIndex(int convexIndex, int triangleIndex);
+		// sets a 7-bit material index for this triangle
+		void				SetTriangleMaterialIndex(int convexIndex, int triangleIndex, int index7bits);
+
 	private:
+		btCollisionShape *	m_pShape;
 };
+
+int CCollisionQuery::ConvexCount() {
+	if (m_pShape->isCompound()) {
+		btCompoundShape *pShape = (btCompoundShape *)m_pShape;
+		return pShape->getNumChildShapes();
+	}
+
+	return 0;
+}
 
 /****************************
 * CLASS CPhysicsCollision
@@ -352,8 +380,9 @@ struct compactsurfaceheader_t {
 	int		axisMapSize;
 };
 
-// old style phy format (IVP_Compact_Surface)
-struct legacysurfaceheader_t {
+// 16 bytes
+// Just like a btCompoundShape.
+struct ivpcompactsurface_t {
 	float	mass_center[3];
 	float	rotation_inertia[3];
 	float	upper_limit_radius;
@@ -363,6 +392,8 @@ struct legacysurfaceheader_t {
 	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
 };
 
+// 16 bytes
+// Just like a btConvexShapeHull.
 struct ivpcompactledge_t {
 	int		c_point_offset; // byte offset from 'this' to (ledge) point array
     union {
@@ -377,12 +408,14 @@ struct ivpcompactledge_t {
     short	for_future_use;
 };
 
+// 4 bytes
 struct ivpcompactedge_t {
 	uint	start_point_index:16;		// point index
 	int		opposite_index:15;			// rel to this // maybe extra array, 3 bits more than tri_index/pierce_index
 	uint	is_virtual:1;
 };
 
+// 16 bytes
 struct ivpcompacttriangle_t {
 	uint				tri_index : 12; // used for upward navigation
 	uint				pierce_index : 12;
@@ -414,7 +447,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	for (int i = 0; i < solidCount; i++) {
 		const char *solid = (const char *)pOutput->solids[i];
 		const compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
-		const legacysurfaceheader_t legacyheader = *(legacysurfaceheader_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
+		const ivpcompactsurface_t ivpsurface = *(ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
 
@@ -427,10 +460,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			continue;
 		}
 
-		info->massCenter = btVector3(legacyheader.mass_center[0], -legacyheader.mass_center[1], -legacyheader.mass_center[2]);
+		info->massCenter = btVector3(ivpsurface.mass_center[0], -ivpsurface.mass_center[1], -ivpsurface.mass_center[2]);
 
 		// TODO: Support loading of IVP MOPP
-		Assert(legacyheader.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
+		Assert(ivpsurface.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
 		const char *convexes = solid + 76; // Right after legacyheader
 
 		Msg("Loading shape with mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
@@ -441,8 +474,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		// Add all of the convex solids to our compound shape.
 		while (true) {
-			// First is the ivp_compact_ledge
-			// Right after it are the triangles, which have 3 edges
+			// Structure:
+			// ivp_compact_ledge, ivp_compact_triangle, tri, tri, ...
+			// Later on are actual edge points of each triangle (After the last triangle(?))
 			const ivpcompactledge_t ivpledge = *(ivpcompactledge_t *)(convexes + position);
 
 			const char *vertices = convexes + position + ivpledge.c_point_offset; // point offset
@@ -456,14 +490,17 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			// Add all of the triangles to our mesh.
 			for (int j = 0; j < ivpledge.n_triangles; j++) {
 				const ivpcompacttriangle_t ivptri = *(ivpcompacttriangle_t *)(convexes + position);
+				position += sizeof(ivpcompacttriangle_t);
+
+				if (ivptri.is_virtual)
+					continue;
+
 				for (int k = 0; k < 3; k++) {
 					short index = ivptri.c_three_edges[k].start_point_index;
 
 					btVector3 vertex(*(float *)(vertices + index * 16), -*(float *)(vertices + index * 16 + 4), -*(float *)(vertices + index * 16 + 8));
 					mesh->addPoint(vertex);
 				}
-
-				position += sizeof(ivpcompacttriangle_t);
 			}
 
 			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
@@ -547,8 +584,7 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 
 	btTriangleMesh *btmesh = new btTriangleMesh;
 	btVector3 btvec[3];
-	for (int i = 0; i < pList->triangleCount; i++)
-	{
+	for (int i = 0; i < pList->triangleCount; i++) {
 		ConvertPosToBull(pList->pVerts[pList->indices[i*3+0]], btvec[0]);
 		ConvertPosToBull(pList->pVerts[pList->indices[i*3+1]], btvec[1]);
 		ConvertPosToBull(pList->pVerts[pList->indices[i*3+2]], btvec[2]);
