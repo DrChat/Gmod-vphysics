@@ -3,14 +3,14 @@
 
 #define TEST(name) printf(#name ": %s\n", name() ? "Success!" : "Failure!")
 
-CSysModule* g_vphysics = NULL;
-IPhysics* g_Physics = NULL;
-IPhysicsSurfaceProps* g_PhysicsSurfaceProps = NULL;
-IPhysicsCollision* g_PhysicsCollision = NULL;
+CSysModule *g_vphysics = NULL;
+IPhysics *g_Physics = NULL;
+IPhysicsSurfaceProps *g_PhysicsSurfaceProps = NULL;
+IPhysicsCollision *g_PhysicsCollision = NULL;
 
-IPhysicsEnvironment* g_Env = NULL;
-CPhysCollide* g_Collide = NULL;
-IPhysicsObject* g_Object1 = NULL;
+IPhysicsEnvironment *g_Env = NULL;
+CPhysCollide *g_Collide = NULL;
+IPhysicsObject *g_Object1 = NULL;
 
 bool Init() {
 	g_vphysics = Sys_LoadModule("vphysics");
@@ -24,17 +24,23 @@ bool Init() {
 	g_Physics->Init();
 	//g_Physics->Connect();
 
-	FILE* file = fopen("surfaceproperties.txt", "rb");
-	fseek(file, 0, SEEK_END);
-	int size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	char* buffer = (char*)malloc(size+1);
-	fread(buffer, sizeof(char), size, file);
-	buffer[size] = 0;
-	fclose(file);
+	char *buffer = NULL;
 
-	g_PhysicsSurfaceProps->ParseSurfaceData("surfaceproperties.txt", buffer);
-	free(buffer);
+	FILE *file = fopen("surfaceproperties.txt", "rb");
+	if (file) {
+		fseek(file, 0, SEEK_END);
+		int size = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		buffer = (char*)malloc(size+1);
+		fread(buffer, sizeof(char), size, file);
+		buffer[size] = 0;
+		fclose(file);
+	}
+
+	if (buffer) {
+		g_PhysicsSurfaceProps->ParseSurfaceData("surfaceproperties.txt", buffer);
+		free(buffer);
+	}
 
 	g_Env = g_Physics->CreateEnvironment();
 

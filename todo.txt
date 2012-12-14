@@ -24,6 +24,7 @@
 		- Are quaternions viable for comparison?
 		- What if everything is a lie and we're just rotating the objects the wrong way at certain rotations?
 		- Or are we just keeping the old velocity, and the delta gets bigger?
+		- Converting it to a vector wrong?
 	- MAPS
 		- SOLID_BSP brushes take too long for calculations(construct white room)! Collisions between them and the world are being calculated!
 			- Should we assign the world geometry a collision group, and have our shadow controller not calculate collisions against that group?

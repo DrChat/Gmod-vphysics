@@ -129,7 +129,12 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 
 	// FIXME: This is completely broken
 	//if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
-	return true;
+	
+	// And then the default bullet stuff...
+	bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
+	collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+	
+	return collides;
 }
 
 /*******************************

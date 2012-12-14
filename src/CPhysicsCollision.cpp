@@ -362,6 +362,10 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 
 	btCollisionWorld::ClosestConvexResultCallback cb(bullStartVec, bullEndVec);
 
+	// Cleanup
+	delete object;
+	delete pSweepObject;
+
 	NOT_IMPLEMENTED
 }
 
@@ -371,6 +375,7 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 }
 
 // Various structures used in vcollide parsing.
+// 28 bytes
 struct compactsurfaceheader_t {
 	int		vphysicsID;		// Generally the ASCII for "VPHY" in newer files
 	short	version;
@@ -420,7 +425,7 @@ struct ivpcompacttriangle_t {
 	uint				tri_index : 12; // used for upward navigation
 	uint				pierce_index : 12;
 	uint				material_index : 7;
-	uint				is_virtual : 1;
+	uint				is_virtual : 1;	// DrChat; I believe this is just an optimization. Just ignore anything marked is_virtual.
 	ivpcompactedge_t	c_three_edges[3];
 };
 
@@ -515,9 +520,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
-		btCollisionShape *shape = (btCollisionShape *)pVCollide->solids[i];
-		delete shape;
-
+		delete (btCollisionShape *)pVCollide->solids[i];
 		pVCollide->solids[i] = NULL;
 	}
 

@@ -75,9 +75,9 @@
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND
 if exist "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll"
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll"
+if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll"
 copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\"</Command>
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Copying dll</Message>
@@ -106,9 +106,9 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND
 if exist "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll"
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\vphysics.dll"
+if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll"
 copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garry's mod beta\bin\"</Command>
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Copying dll</Message>

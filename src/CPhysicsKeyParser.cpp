@@ -65,7 +65,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 		if (!stricmp(key, "index"))
 			pSolid->index = data->GetInt();
 		else if (!stricmp(key, "name"))
-			strncpy(pSolid->name, data->GetString(), sizeof pSolid->name);
+			strncpy(pSolid->name, data->GetString(), sizeof(pSolid->name));
 		else if (!stricmp(key, "parent"))
 			strncpy(pSolid->parent, data->GetString(), sizeof(pSolid->parent));
 		else if (!stricmp(key, "mass"))
@@ -73,7 +73,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 		else if (!stricmp(key, "massCenterOverride"))
 			ReadVector(data->GetString(), pSolid->massCenterOverride);
 		else if (!stricmp(key, "surfaceprop"))
-			strncpy(pSolid->surfaceprop, data->GetString(), sizeof pSolid->surfaceprop);
+			strncpy(pSolid->surfaceprop, data->GetString(), sizeof(pSolid->surfaceprop));
 		else if (!stricmp(key, "damping"))
 			pSolid->params.damping = data->GetFloat();
 		else if (!stricmp(key, "rotdamping"))
@@ -138,8 +138,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 			pConstraint->axes[0].minRotation = data->GetFloat();
 		else if (!stricmp(key, "xmax"))
 			pConstraint->axes[0].maxRotation = data->GetFloat();
-		else if (!stricmp(key, "xfriction"))
-		{
+		else if (!stricmp(key, "xfriction")) {
 			pConstraint->axes[0].angularVelocity = 0;
 			pConstraint->axes[0].torque = data->GetFloat();
 		}
@@ -147,8 +146,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 			pConstraint->axes[1].minRotation = data->GetFloat();
 		else if (!stricmp(key, "ymax"))
 			pConstraint->axes[1].maxRotation = data->GetFloat();
-		else if (!stricmp(key, "yfriction"))
-		{
+		else if (!stricmp(key, "yfriction")) {
 			pConstraint->axes[1].angularVelocity = 0;
 			pConstraint->axes[1].torque = data->GetFloat();
 		}
@@ -156,8 +154,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 			pConstraint->axes[2].minRotation = data->GetFloat();
 		else if (!stricmp(key, "zmax"))
 			pConstraint->axes[2].maxRotation = data->GetFloat();
-		else if (!stricmp(key, "zfriction"))
-		{
+		else if (!stricmp(key, "zfriction")) {
 			pConstraint->axes[2].angularVelocity = 0;
 			pConstraint->axes[2].torque = data->GetFloat();
 		}
@@ -176,7 +173,7 @@ void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unkno
 }
 
 // Purpose: Recursive function to loop through all the keyvalues!
-void RecursiveKeyLoop(KeyValues *pBlock, void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
+static void RecursiveKeyLoop(KeyValues *pBlock, void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
 	for (KeyValues *pKey = pBlock; pKey; pKey = pKey->GetNextKey()) {
 		if (pKey->GetFirstSubKey())
 			RecursiveKeyLoop(pKey->GetFirstSubKey(), pCustom, unknownKeyHandler);

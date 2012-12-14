@@ -192,7 +192,8 @@ float CPlayerController::GetPushSpeedLimit() {
 }
 
 bool CPlayerController::WasFrozen() {
-	// Removed. All you need to know is that this is called every frame.
+	// Removed: This function was called every frame.
+	// Unknown purpose, can anyone fill in what this function is used for?
 	//NOT_IMPLEMENTED;
 	return false;
 }

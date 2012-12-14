@@ -88,10 +88,15 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	// w val of 1 makes the angle 0
 	// Maybe we don't handle big angles that well
 	// TODO: This code might be the broken code!
-	/*
+	//*
 	btVector3 axis = deltaRotation.getAxis();
 	btScalar angle = deltaRotation.getAngle();
 	axis.normalize();
+
+	// We don't want a super long rotation delta.
+	if (angle > M_PI) {
+		angle -= 2 * M_PI;
+	}
 
 	deltaAngles.setX(axis.x() * angle);
 	deltaAngles.setY(axis.y() * angle);
@@ -99,7 +104,13 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	//*/
 
 	// This seems to fix the spazzing out when w is negative.
+	/*
 	btMatrix3x3(deltaRotation).getEulerZYX(deltaAngles[2], deltaAngles[1], deltaAngles[0]);
+	btVector3 dummy = deltaRotation.getAxis().normalized();
+	dummy.setX(dummy.x() * deltaRotation.getAngle());
+	dummy.setY(dummy.y() * deltaRotation.getAngle());
+	dummy.setZ(dummy.z() * deltaRotation.getAngle());
+	*/
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	// DEBUG

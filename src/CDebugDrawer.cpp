@@ -189,7 +189,7 @@ void CDebugDrawer::reportErrorWarning(const char *warningString) {
 }
 
 void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
-	btVector3 to = pointOnB + normalOnB * 0.5; //pointOnB + normalOnB * 1;
+	btVector3 to = pointOnB + normalOnB * (distance + 0.5); //pointOnB + normalOnB * 1;
 	const btVector3 &from = pointOnB;
 #if RENDER_SDL
 	glColor4f(color.getX(), color.getY(), color.getZ(),1.f);

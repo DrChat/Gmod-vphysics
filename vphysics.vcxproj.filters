@@ -69,10 +69,10 @@
     <ClCompile Include="src\math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\StfAfx.cpp">
+    <ClCompile Include="src\CDebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CDebugDrawer.cpp">
+    <ClCompile Include="src\StfAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -752,14 +752,14 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 
 	// THIS IS COMPLETELY BROKEN!
 	if (!IsStatic() && GetCollide()) {
-		btCollisionShape  *shape = m_pObject->getCollisionShape();
+		btCollisionShape *shape = m_pObject->getCollisionShape();
 
 		btVector3 min, max, delta;
 		btTransform t;
 
-		shape->getAabb( t, min, max);
+		shape->getAabb(t, min, max);
 
-		delta = min, max;
+		delta = max - min;
 		delta = delta.absolute();
 
 		m_dragBasis.setX(delta.y() * delta.z());
@@ -858,13 +858,12 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	btRigidBody *body = new btRigidBody(info);
 
-	if (isStatic)
+	if (isStatic) {
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-
-	if (!isStatic)
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2); // Collision flag so static objects don't collide with eachother.
+	} else {
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
-	else
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);	// Static objects don't collide with static objects.
+	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
@@ -912,15 +911,12 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 	btRigidBody *body = new btRigidBody(info);
 
-	if (isStatic)
+	if (isStatic) {
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-	else
-		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_STATIC_OBJECT));
-
-	if (mass > 0)
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
-	else
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
+	} else {
+		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
+	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
