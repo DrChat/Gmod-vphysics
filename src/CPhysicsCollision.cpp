@@ -497,8 +497,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				const ivpcompacttriangle_t ivptri = *(ivpcompacttriangle_t *)(convexes + position);
 				position += sizeof(ivpcompacttriangle_t);
 
-				if (ivptri.is_virtual)
-					continue;
+				//if (ivptri.is_virtual)
+				//	continue;
 
 				for (int k = 0; k < 3; k++) {
 					short index = ivptri.c_three_edges[k].start_point_index;

@@ -12,19 +12,8 @@
 		- Appears to be with the world only
 		- Flatgrass: Happens whenever something collides (with the world only?): Object m_companionId == -2
 	- SHADOW CONTROLLERS
-		- 120 degree odd spot, depending on what rotation you grab the object (tested on yaw axis)
-			- Inside: 120 degrees of correctness, 240 of error
-			- Outside: 240 degrees of correctness, 120 of error
-			- Maybe we can only tolerate from 120 to -120 (object rotation)?
-			- Maybe we aren't calculating for a different range between bullet quaternions and HL Quats?
-		- No matter what the rotation is, the bull tranform rotation and target rotation are the SAME! (except for pos/neg)
-		- The object's tranform rotation should be the same as the target rotation after one try, but it's the opposite even though the target rotation did not change!
-		- Maybe bullet quaternions have a different range? Converting the target rotation quaternion into a bullet matrix looks almost exactly the same as our transform basis!
-			- It atleast has something to do with bullet's quaternions. Bullet matrices are similar and HL angles are similar.
-		- Are quaternions viable for comparison?
-		- What if everything is a lie and we're just rotating the objects the wrong way at certain rotations?
-		- Or are we just keeping the old velocity, and the delta gets bigger?
-		- Converting it to a vector wrong?
+		- >70 to <-70 angles on all 3 axis seem to be the spots our calculations fuck up on
+			- At 71 for example, the calculations slowly become more inaccurate.
 	- MAPS
 		- SOLID_BSP brushes take too long for calculations(construct white room)! Collisions between them and the world are being calculated!
 			- Should we assign the world geometry a collision group, and have our shadow controller not calculate collisions against that group?

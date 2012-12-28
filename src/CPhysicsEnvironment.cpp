@@ -114,7 +114,6 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
 		return false;
 
-	// HACK: Fix shadow vs world collisions.
 	if ((pObject0->GetShadowController() && pObject1->IsStatic()) || (pObject1->GetShadowController() && pObject0->IsStatic()))
 		return false;
 
@@ -269,7 +268,6 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pBulletConfiguration;
 
 #if MULTITHREAD
-	// Remove the threads AFTER we remove what's using them!
 	deleteCollisionLocalStoreMemory();
 	delete m_pThreadSupportCollision;
 
@@ -298,7 +296,7 @@ IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
 	return m_pDebugOverlay;
 }
 
-void CPhysicsEnvironment::SetGravity(const Vector& gravityVector) {
+void CPhysicsEnvironment::SetGravity(const Vector &gravityVector) {
 	btVector3 temp;
 	ConvertPosToBull(gravityVector, temp);
 
@@ -338,7 +336,7 @@ IPhysicsObject *CPhysicsEnvironment::CreateSphereObject(float radius, int materi
 
 void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	if (!pObject) return;
-	assert(m_deadObjects.Find(pObject) == -1);	// If you hit this assert, the object is already on the list!
+	Assert(m_deadObjects.Find(pObject) == -1);	// If you hit this assert, the object is already on the list!
 
 	m_objects.FindAndRemove(pObject);
 

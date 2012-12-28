@@ -17,7 +17,8 @@ inline static void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, 
 	qt.normalize();
 }
 
-ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", 0);
+ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", FCVAR_CHEAT | FCVAR_ARCHIVE);
+ConVar cvar_shadowfix("vphysics_useshadowfix", "1", FCVAR_ARCHIVE);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -70,24 +71,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	// TODO: Quaternions q and -q represent the same orientation! Compensate for this!
 	// https://www.panda3d.org/forums/viewtopic.php?t=12568
-	// DEBUG
-	/*
-	if (deltaRotation.w() < 0) {
-		//deltaRotation.setW(-deltaRotation.w());
-		//deltaRotation.setX(-deltaRotation.x());
-		//deltaRotation.setY(-deltaRotation.y());
-		//deltaRotation.setZ(-deltaRotation.z());
-		deltaRotation = -deltaRotation;
-	}
-	//*/
-	// END DEBUG
-
-	// CONDITIONAL BREAKPOINT HERE: deltaRotation.m_floats[3] <= -0.9
-	// w val of -1 makes the angle 2pi
-	// w val of 0 makes the angle pi
-	// w val of 1 makes the angle 0
-	// Maybe we don't handle big angles that well
-	// TODO: This code might be the broken code!
 	//*
 	btVector3 axis = deltaRotation.getAxis();
 	btScalar angle = deltaRotation.getAngle();
@@ -102,15 +85,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	deltaAngles.setY(axis.y() * angle);
 	deltaAngles.setZ(axis.z() * angle);
 	//*/
-
-	// This seems to fix the spazzing out when w is negative.
-	/*
-	btMatrix3x3(deltaRotation).getEulerZYX(deltaAngles[2], deltaAngles[1], deltaAngles[0]);
-	btVector3 dummy = deltaRotation.getAxis().normalized();
-	dummy.setX(dummy.x() * deltaRotation.getAngle());
-	dummy.setY(dummy.y() * deltaRotation.getAngle());
-	dummy.setZ(dummy.z() * deltaRotation.getAngle());
-	*/
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	// DEBUG
@@ -128,11 +102,13 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	
 	// HACK: Replace this soon!
 	//*
-	object->setAngularVelocity(btVector3(0, 0, 0));
-	btTransform targTrans;
-	targTrans.setOrigin(params.targetPosition);
-	targTrans.setRotation(params.targetRotation);
-	object->setWorldTransform(targTrans);
+	if (cvar_shadowfix.GetBool()) {
+		object->setAngularVelocity(btVector3(0, 0, 0));
+		btTransform targTrans;
+		targTrans.setOrigin(params.targetPosition);
+		targTrans.setRotation(params.targetRotation);
+		object->setWorldTransform(targTrans);
+	}
 	//*/
 
 	return secondsToArrival;

@@ -20,7 +20,8 @@
 #		pragma comment(lib, "Glu32")
 #	endif
 
-static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", 0, "Render debug overlay");
+static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
+//static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on large maps!)", true, 0, true, 1);
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
 	m_pEnv = pEnv;
@@ -91,7 +92,6 @@ void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const bt
 }
 
 #if RENDER_SDL
-// This entire function is SDL only.
 void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
 	glPushMatrix ();
@@ -185,7 +185,7 @@ void CDebugDrawer::draw3dText(const btVector3& location, const char *textString)
 }
 
 void CDebugDrawer::reportErrorWarning(const char *warningString) {
-	Warning("%s\n", warningString);
+	Warning("bullet warning: %s\n", warningString);
 }
 
 void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
