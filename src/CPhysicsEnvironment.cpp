@@ -114,7 +114,8 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
 		return false;
 
-	if ((pObject0->GetShadowController() && pObject1->IsStatic()) || (pObject1->GetShadowController() && pObject0->IsStatic()))
+	if ((pObject0->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject1->IsStatic())
+		|| (pObject0->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject0->IsStatic()))
 		return false;
 
 	if (pObject0->IsStatic() && pObject1->IsStatic())

@@ -11,7 +11,7 @@
 #include "CPhysicsSurfaceProps.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-////#include "tier0/memdbgon.h"
+//#include "tier0/memdbgon.h"
 
 extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
@@ -54,7 +54,7 @@ bool CPhysicsObject::IsStatic() const {
 bool CPhysicsObject::IsAsleep() const {
 	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	//return false;
+	// return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
@@ -84,8 +84,7 @@ bool CPhysicsObject::IsGravityEnabled() const {
 }
 
 bool CPhysicsObject::IsDragEnabled() const {
-	if ( !IsStatic() )
-	{
+	if (!IsStatic()) {
 		return m_pEnv->GetDragController()->IsControlling(this); // Expensive function
 	}
 

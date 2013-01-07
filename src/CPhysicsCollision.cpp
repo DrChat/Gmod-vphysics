@@ -314,7 +314,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 		btBoxShape *box = new btBoxShape(btvec);
 
 		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
-		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 1);
+		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0);
 
 		ptr->fraction = cb.m_closestHitFraction;
 		ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
@@ -448,7 +448,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 	// Now for the fun part:
 	// We have to convert every solid into a bullet solid
-	// because ivp solids are normally saved into a phy file.
+	// because a phy file is made up of ivp solids.
 	for (int i = 0; i < solidCount; i++) {
 		const char *solid = (const char *)pOutput->solids[i];
 		const compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
@@ -469,7 +469,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		// TODO: Support loading of IVP MOPP
 		Assert(ivpsurface.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
-		const char *convexes = solid + 76; // Right after legacyheader
+		const char *convexes = solid + 76; // Right after ivpsurface
 
 		Msg("Loading shape with mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
 		btCompoundShape *bull = new btCompoundShape();
@@ -480,8 +480,12 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		// Add all of the convex solids to our compound shape.
 		while (true) {
 			// Structure:
-			// ivp_compact_ledge, ivp_compact_triangle, tri, tri, ...
+			// ivp_compact_ledge, ivp_compact_triangle, tri, tri, ..., repeat ivp_compact_ledge
 			// Later on are actual edge points of each triangle (After the last triangle(?))
+
+			// TODO: IVP Solids contain a final ledge which appears to be a convex wrap
+			// of any concave models. (Found from phy file props_junk/TrashDumpster02.phy @ 0x000007B0)
+			// (Also found from phy file props_c17/FurnitureWashingmachine001a.phy @ 0x000002D0)
 			const ivpcompactledge_t ivpledge = *(ivpcompactledge_t *)(convexes + position);
 
 			const char *vertices = convexes + position + ivpledge.c_point_offset; // point offset
@@ -497,8 +501,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				const ivpcompacttriangle_t ivptri = *(ivpcompacttriangle_t *)(convexes + position);
 				position += sizeof(ivpcompacttriangle_t);
 
-				//if (ivptri.is_virtual)
-				//	continue;
+				if (ivptri.is_virtual)
+					continue;
 
 				for (int k = 0; k < 3; k++) {
 					short index = ivptri.c_three_edges[k].start_point_index;
@@ -508,7 +512,12 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				}
 			}
 
-			bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
+			// Not enough points to make a triangle.
+			if (mesh->getNumPoints() >= 3) {
+				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
+			} else {
+				delete mesh;
+			}
 
 			if (convexes + position >= vertices)
 				break;
