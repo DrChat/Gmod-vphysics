@@ -9,6 +9,17 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+/**********************
+* Misc. Functions
+**********************/
+void TransformWorldToLocal(const btVector3 &vec, btVector3 &out, btRigidBody &obj) {
+
+}
+
+void TransformLocalToWorld(const btVector3 &vec, btVector3 &out, btRigidBody &obj) {
+
+}
+
 /***********************
 * BULLET CONSTRAINTS
 ***********************/
@@ -87,6 +98,9 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject
 	m_type = type;
 
 	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
+
+	pObject1->Wake();
+	pObject2->Wake();
 }
 
 CPhysicsConstraint::~CPhysicsConstraint() {
@@ -151,7 +165,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 
 	//btHingeConstraint *pHinge = new btHingeConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullAFrame, bullBFrame);
 
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
@@ -173,7 +187,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
 
-	// Position of attached object space to reference object space.
+	// Position of attached object space relative to reference object space.
 	btTransform bullAttRefXform = btTransform::getIdentity();
 	ConvertMatrixToBull(sliding.attachedRefXform, bullAttRefXform);
 	
@@ -182,11 +196,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	ConvertDirectionToBull(sliding.slideAxisRef, bullSlideAxisRef);
 
 	btTransform bullFrameInA = btTransform::getIdentity();
-	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef.x(), bullSlideAxisRef.y(), bullSlideAxisRef.z(), 0));
-
-	// TODO: Compute the slide axis in attached object space...
 	btTransform bullFrameInB = btTransform::getIdentity();
-	bullFrameInB.setRotation(btQuaternion(bullSlideAxisRef.x(), bullSlideAxisRef.y(), bullSlideAxisRef.z(), 0));
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullFrameInA, bullFrameInB, true);
 
@@ -222,7 +232,7 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 }
 
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return NULL;
 }
 

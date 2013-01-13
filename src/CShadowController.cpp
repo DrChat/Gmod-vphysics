@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 
+#include "CPhysicsEnvironment.h"
 #include "CShadowController.h"
 #include "CPlayerController.h"
 #include "CPhysicsObject.h"
@@ -17,8 +18,8 @@ inline static void QuaternionDiff(const btQuaternion &p, const btQuaternion &q, 
 	qt.normalize();
 }
 
-ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", FCVAR_CHEAT | FCVAR_ARCHIVE);
-ConVar cvar_shadowfix("vphysics_useshadowfix", "1", FCVAR_ARCHIVE);
+static ConVar cvar_spewshadowdebuginfo("vphysics_spewshadowcontrollerdebuginfo", "0", FCVAR_CHEAT | FCVAR_ARCHIVE);
+static ConVar cvar_shadowfix("vphysics_useshadowfix", "1", FCVAR_ARCHIVE);
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
@@ -57,7 +58,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		}
 	}
 
-	float invDt = 1.0f / dt;
+	float invDt = SAFE_DIVIDE(1.0f, dt);
 	btVector3 speed = object->getLinearVelocity();
 	ComputeController(speed, delta_position, params.maxSpeed, fraction * invDt, params.dampFactor);
 	object->setLinearVelocity(speed);
@@ -69,9 +70,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	btQuaternion deltaRotation;
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
 
-	// TODO: Quaternions q and -q represent the same orientation! Compensate for this!
-	// https://www.panda3d.org/forums/viewtopic.php?t=12568
 	//*
+	// When the target rotation angle is b/t 1 and 5, screwups start occurring.
 	btVector3 axis = deltaRotation.getAxis();
 	btScalar angle = deltaRotation.getAngle();
 	axis.normalize();
@@ -81,19 +81,30 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		angle -= 2 * M_PI;
 	}
 
-	deltaAngles.setX(axis.x() * angle);
-	deltaAngles.setY(axis.y() * angle);
-	deltaAngles.setZ(axis.z() * angle);
+	deltaAngles = axis * angle;
 	//*/
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	// DEBUG
 	if (cvar_spewshadowdebuginfo.GetBool()) {
 		btQuaternion transquat = transform.getRotation();
-		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getX(), transquat.getY(), transquat.getZ(), transquat.getW());
-		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getX(), params.targetRotation.getY(), params.targetRotation.getZ(), params.targetRotation.getW());
-		Msg("Delta Angles: %f %f %f\n", deltaAngles.x(), deltaAngles.y(), deltaAngles.z());
-		Msg("-- Delta Rotation Quat: %f %f %f %f --\n\n", deltaRotation.getX(), deltaRotation.getY(), deltaRotation.getZ(), deltaRotation.getW());
+		Msg("Bull Transform Rotation Quat: %f %f %f %f\n", transquat.getAxis().x(), transquat.getAxis().y(), transquat.getAxis().z(), transquat.getAngle());
+		Msg("Target Rotation Quat: %f %f %f %f\n", params.targetRotation.getAxis().x(), params.targetRotation.getAxis().y(), params.targetRotation.getAxis().z(), params.targetRotation.getAngle());
+		Msg("Delta Rotation Quat: %f %f %f %f\n", deltaRotation.getAxis().x(), deltaRotation.getAxis().y(), deltaRotation.getAxis().z(), deltaRotation.getAngle());
+		Msg("-- Delta Angles: %f %f %f --\n\n", deltaAngles.x(), deltaAngles.y(), deltaAngles.z());
+
+		CPhysicsEnvironment *pEnv = ((CPhysicsObject *)object->getUserPointer())->GetVPhysicsEnvironment();
+		if (pEnv) {
+			IVPhysicsDebugOverlay *pOverlay = pEnv->GetDebugOverlay();
+			if (pOverlay) {
+				Vector origin;
+				ConvertPosToHL(params.targetRotation.getAxis(), origin);
+				pOverlay->AddTextOverlay(origin, 0, -1, "%f %f %f", origin.x, origin.y, origin.z);
+				pOverlay->AddTextOverlay(origin, 1, -1, "%f", params.targetRotation.getAngle());
+				pOverlay->AddLineOverlay(Vector(0, 0, 0), origin, 255, 0, 0, false, 0);
+				pOverlay->AddTextOverlay(Vector(0, 0, 0), 0, 0, "Origin");
+			}
+		}
 	}
 	// END DEBUG
 
@@ -308,6 +319,6 @@ void CShadowController::DetachObject() {
 	body->setMassProps(m_savedMass, btvec);
 	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
 
-	body->setCollisionFlags(body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+	body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
 	body->setActivationState(ACTIVE_TAG);
 }

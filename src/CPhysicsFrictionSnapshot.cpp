@@ -19,6 +19,7 @@ CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject *pObject) {
 	int numManifolds = pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
 		btPersistentManifold *pManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
+		// pObjA is the object colliding with pObjB
 		const btCollisionObject *pObjA = pManifold->getBody0();
 		const btCollisionObject *pObjB = pManifold->getBody1();
 
@@ -61,7 +62,7 @@ int CPhysicsFrictionSnapshot::GetMaterial(int index) {
 
 void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
 	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
-	btVector3 bullPos = bullManifoldPoint.getPositionWorldOnA(); // TODO: A or B?
+	btVector3 bullPos = bullManifoldPoint.getPositionWorldOnA();
 	ConvertPosToHL(bullPos, out);
 }
 

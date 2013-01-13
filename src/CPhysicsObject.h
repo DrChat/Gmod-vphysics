@@ -126,7 +126,8 @@ class CPhysicsObject : public IPhysicsObject {
 		float								GetVolume() const { return m_fVolume; }
 		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; }
 
-		int									m_iLastActivationState;
+		int									GetLastActivationState() { return m_iLastActivationState; }
+		void								SetLastActivationState(int iState) { m_iLastActivationState = iState; }
 	private:
 		CPhysicsEnvironment *				m_pEnv;
 		void *								m_pGameData;
@@ -152,6 +153,8 @@ class CPhysicsObject : public IPhysicsObject {
 		Vector								m_massCenterOverride;
 		CShadowController *					m_pShadow;
 		CPhysicsFluidController *			m_pFluidController;
+
+		int									m_iLastActivationState;
 };
 
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector& position, const QAngle& angles, objectparams_t *pParams, bool isStatic);

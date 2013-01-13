@@ -116,7 +116,7 @@ void CPhysicsMotionController::GetObjects(IPhysicsObject **pObjectList) {
 }
 
 void CPhysicsMotionController::ClearObjects() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsMotionController::WakeObjects() {
@@ -136,5 +136,5 @@ void CPhysicsMotionController::SetPriority(priority_t priority) {
 			break;
 	}
 
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }

@@ -46,19 +46,19 @@ bool CPhysicsObject::IsStatic() const {
 	return (m_pObject->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT);
 }
 
-// Possible that the lag shitfest is caused by the engine processing collision?
-// Returning true will cause the object to completely stop colliding with anything
-// Including traces such as with physics_debug_entity
+// Returning true will cause most traces to fail, making the object almost impossible to interact with.
 // Also note the lag doesn't stop when the game is paused, indicating that it isn't caused
 // by physics simulations.
+// Call stack comes from CPhysicsHook:FrameUpdatePostEntityThink to IVEngineServer::SolidMoved
+// Perhaps the game is receiving flawed data somewhere, as the engine makes almost no calls to vphysics
 bool CPhysicsObject::IsAsleep() const {
 	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	// return false;
+	//return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return false;
 }
 
@@ -67,7 +67,7 @@ bool CPhysicsObject::IsFluid() const {
 }
 
 bool CPhysicsObject::IsHinged() const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return false;
 }
 
@@ -101,7 +101,7 @@ bool CPhysicsObject::IsMoveable() const {
 }
 
 bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 	return false;
 }
 
@@ -213,7 +213,7 @@ void CPhysicsObject::RecheckCollisionFilter() {
 }
 
 void CPhysicsObject::RecheckContactPoints() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsObject::SetMass(float mass) {
@@ -356,7 +356,7 @@ void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angl
 	m_pObject->setWorldTransform(finaltrans);
 
 	if (isTeleport)
-		m_pObject->setActivationState(ACTIVE_TAG);
+		m_pObject->activate();
 }
 
 void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTeleport) {
@@ -370,7 +370,7 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTelepor
 	m_pObject->setWorldTransform(finaltrans);
 
 	if (isTeleport)
-		m_pObject->setActivationState(ACTIVE_TAG);
+		m_pObject->activate();
 }
 
 void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
@@ -439,7 +439,7 @@ void CPhysicsObject::GetVelocityAtPoint(const Vector &worldPosition, Vector *pVe
 void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
 	if (!velocity && !angularVelocity) return;
 
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector &localPosition) const {
@@ -498,7 +498,7 @@ void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 
 void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const {
 	if (!centerForce && !centerTorque) return;
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 // TODO: Thrusters call this
@@ -508,7 +508,7 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 	btVector3 bullForceVector, bullWorldPosition;
 	ConvertForceImpulseToBull(forceVector, bullForceVector);
 	ConvertPosToBull(worldPosition, bullWorldPosition);
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 float CPhysicsObject::CalculateLinearDrag(const Vector &unitDirection) const {
@@ -627,19 +627,19 @@ const char *CPhysicsObject::GetName() const {
 }
 
 void CPhysicsObject::BecomeTrigger() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsObject::RemoveTrigger() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsObject::BecomeHinged(int localAxis) {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsObject::RemoveHinged() {
-	NOT_IMPLEMENTED;
+	NOT_IMPLEMENTED
 }
 
 IPhysicsFrictionSnapshot *CPhysicsObject::CreateFrictionSnapshot() {
@@ -868,8 +868,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
 	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
 
-	/*if (mass > 0)
-	{
+	/*
+	if (!isStatic) {
 		btVector3 mins, maxs;
 		shape->getAabb(btTransform::getIdentity(), mins, maxs);
 		float maxradius = min(min(abs(maxs.getX()), abs(maxs.getY())), abs(maxs.getZ()));
@@ -877,7 +877,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 		float radius = min(maxradius,minradius)/2.0f;
 		body->setCcdMotionThreshold(radius*0.5f);
 		body->setCcdSweptSphereRadius(0.2f*radius);
-	}*/
+	}
+	*/
 	
 	return pObject;
 }

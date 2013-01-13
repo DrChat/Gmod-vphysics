@@ -21,14 +21,13 @@
 #	endif
 
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
-//static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on large maps!)", true, 0, true, 1);
+//static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)", true, 0, true, 1);
 
-CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(0) {
+CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(NULL) {
 	m_pEnv = pEnv;
 	setDebugMode(DBG_DrawAabb | DBG_DrawText | DBG_DrawFeaturesText | DBG_DrawConstraints |
 				DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
-				DBG_ProfileTimings | DBG_DrawNormals);
-	//setDebugMode(DBG_MAX_DEBUG_DRAW_MODE);
+				DBG_ProfileTimings | DBG_DrawNormals | DBG_DrawWireframe);
 
 #if RENDER_SDL
 	SDL_Init(SDL_INIT_VIDEO);
@@ -185,7 +184,7 @@ void CDebugDrawer::draw3dText(const btVector3& location, const char *textString)
 }
 
 void CDebugDrawer::reportErrorWarning(const char *warningString) {
-	Warning("bullet warning: %s\n", warningString);
+	Warning(warningString);
 }
 
 void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
@@ -219,8 +218,9 @@ void CDebugDrawer::DrawWorld() {
 	SDL_GL_SwapBuffers();
 #else
 	if (cvar_renderoverlay.GetBool()) {
-		if (m_overlay)
+		if (m_overlay) {
 			m_world->debugDrawWorld();
+		}
 	}
 #endif
 }

@@ -142,6 +142,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\physics_interface.h" />
     <ClInclude Include="src\CDebugDrawer.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\CPhysics.h" />

@@ -420,7 +420,7 @@ struct ivpcompactedge_t {
 	uint	is_virtual:1;
 };
 
-// 16 bytes
+// 16 bytes (4 bytes + 12 bytes edge array)
 struct ivpcompacttriangle_t {
 	uint				tri_index : 12; // used for upward navigation
 	uint				pierce_index : 12;
@@ -446,6 +446,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	pOutput->pKeyValues = new char[bufferSize - position];
 	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
 
+	// TODO: swap possibly meaning bitswap?
+
+	DevMsg("VPhysics: VCollideLoad with %d solids, swap is %s\n", solidCount, swap ? "true" : "false");
+
 	// Now for the fun part:
 	// We have to convert every solid into a bullet solid
 	// because a phy file is made up of ivp solids.
@@ -456,8 +460,18 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
 
-		Assert(surfaceheader.vphysicsID == MAKEID('V', 'P', 'H', 'Y'));
-		Assert(surfaceheader.version == 0x100);
+		// Some checks and warnings (condense these when we want to remove the warnings)
+		if (surfaceheader.vphysicsID != MAKEID('V', 'P', 'H', 'Y')) {
+			Warning("Could not load a solid! (surfaceheader.vphysicsID != \"VPHY\")\n");
+			pOutput->solids[i] = NULL;
+			continue;
+		}
+
+		if (surfaceheader.version != 0x100) {
+			Warning("Could not load a solid! (surfaceheader.version == %X)\n", surfaceheader.version);
+			pOutput->solids[i] = NULL;
+			continue;
+		}
 
 		if (surfaceheader.modelType != 0x0) {
 			Warning("Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
@@ -467,11 +481,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		info->massCenter = btVector3(ivpsurface.mass_center[0], -ivpsurface.mass_center[1], -ivpsurface.mass_center[2]);
 
-		// TODO: Support loading of IVP MOPP
+		// TODO: Support loading of IVP MOPP (is it even used?)
 		Assert(ivpsurface.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
 		const char *convexes = solid + 76; // Right after ivpsurface
 
-		Msg("Loading shape with mass center: %f %f %f\n", info->massCenter.x(), info->massCenter.y(), info->massCenter.z());
 		btCompoundShape *bull = new btCompoundShape();
 		bull->setMargin(COLLISION_MARGIN);
 		bull->setUserPointer(info);
@@ -480,16 +493,21 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		// Add all of the convex solids to our compound shape.
 		while (true) {
 			// Structure:
-			// ivp_compact_ledge, ivp_compact_triangle, tri, tri, ..., repeat ivp_compact_ledge
-			// Later on are actual edge points of each triangle (After the last triangle(?))
+			// ivp_compact_ledge, ivp_compact_triangle[ledge.n_trianges], repeat until vertices
+			// Later on are actual edge(vertices) points of each triangle
 
 			// TODO: IVP Solids contain a final ledge which appears to be a convex wrap
 			// of any concave models. (Found from phy file props_junk/TrashDumpster02.phy @ 0x000007B0)
 			// (Also found from phy file props_c17/FurnitureWashingmachine001a.phy @ 0x000002D0)
+			// From my observations of IVP source, they appear to be using qhull internally. They
+			// also will run through and mark any points not included in the initial points received
+			// as is_virtual(?)
+
+			// TODO: Detailed analysis of dumpster02, as it still appears to have a distorted
+			// collision mesh
 			const ivpcompactledge_t ivpledge = *(ivpcompactledge_t *)(convexes + position);
 
 			const char *vertices = convexes + position + ivpledge.c_point_offset; // point offset
-			Assert(convexes + position < vertices);
 
 			// Triangles start after the ivp_compact_ledge
 			position += sizeof(ivpcompactledge_t);
@@ -506,8 +524,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 				for (int k = 0; k < 3; k++) {
 					short index = ivptri.c_three_edges[k].start_point_index;
+					float *verts = (float *)(vertices + index * 16);
 
-					btVector3 vertex(*(float *)(vertices + index * 16), -*(float *)(vertices + index * 16 + 4), -*(float *)(vertices + index * 16 + 8));
+					btVector3 vertex(verts[0], -verts[1], -verts[2]);
 					mesh->addPoint(vertex);
 				}
 			}
@@ -610,6 +629,7 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	return (CPhysCollide *)bull;
 }
 
+// Function only called once in server.dll - seems pretty pointless for valve to make this function.
 bool CPhysicsCollision::SupportsVirtualMesh() {
 	return true;
 }

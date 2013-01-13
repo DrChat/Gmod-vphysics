@@ -11,6 +11,8 @@
 #include "CPhysicsConstraint.h"
 #include "CPhysicsVehicleController.h"
 
+#include "tier0/vprof.h"
+
 #if DEBUG_DRAW
 #	include "CDebugDrawer.h"
 #endif
@@ -138,6 +140,42 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 }
 
 /*******************************
+* CLASS CPhysicsCollisionData
+*******************************/
+class CPhysicsCollisionData: public IPhysicsCollisionData {
+	public:
+		void GetSurfaceNormal(Vector &out);		// normal points toward second object (object index 1)
+		void GetContactPoint(Vector &out);		// contact point of collision (in world space)
+		void GetContactSpeed(Vector &out);		// speed of surface 1 relative to surface 0 (in world space)
+
+		// UNEXPOSED FUNCTIONS
+		CPhysicsCollisionData(btManifoldPoint *manPoint);
+	private:
+		Vector m_surfaceNormal;
+		Vector m_contactPoint;
+		Vector m_contactSpeed;
+};
+
+CPhysicsCollisionData::CPhysicsCollisionData(btManifoldPoint *manPoint) {
+	ConvertDirectionToHL(manPoint->m_normalWorldOnB, m_surfaceNormal);
+	ConvertPosToHL(manPoint->getPositionWorldOnA(), m_contactPoint);
+	m_contactSpeed.Zero();
+	m_contactSpeed.x = 500;
+}
+
+void CPhysicsCollisionData::GetSurfaceNormal(Vector &out) {
+	out = m_surfaceNormal;
+}
+
+void CPhysicsCollisionData::GetContactPoint(Vector &out) {
+	out = m_contactPoint;
+}
+
+void CPhysicsCollisionData::GetContactSpeed(Vector &out) {
+	out = m_contactSpeed;
+}
+
+/*******************************
 * CLASS CPhysicsEnvironment
 *******************************/
 
@@ -147,13 +185,18 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_inSimulation = false;
 	m_pDebugOverlay = NULL;
 	m_pConstraintEvent = NULL;
+	m_pObjectEvent = NULL;
 
-#if MULTITHREAD
+#if !MULTITHREAD
+	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
+	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+#else
 	m_pThreadSupportCollision = NULL;
 	m_pThreadSupportSolver = NULL;
 
 	// TODO: In the future, try and get this value from the game somewhere.
-	int maxTasks = 4;
+	int maxTasks = 8;
 
 	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
 	static unsigned int iUniqueNum = 0;	// Fixes a crash with multiple environments.
@@ -164,38 +207,38 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	iUniqueNum++;
 
 #	ifdef _WIN32
-	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																		uniquenamecollision,
-																		processCollisionTask,
-																		createCollisionLocalStoreMemory,
-																		maxTasks));
+		btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																			uniquenamecollision,
+																			processCollisionTask,
+																			createCollisionLocalStoreMemory,
+																			maxTasks));
 
 #		if USE_PARALLEL_SOLVER
-	btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																		uniquenamesolver,
-																		SolverThreadFunc,
-																		SolverlsMemoryFunc,
-																		maxTasks));
-	solverThreadInterface->startSPU();
+			btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																					uniquenamesolver,
+																					SolverThreadFunc,
+																					SolverlsMemoryFunc,
+																					maxTasks));
+			solverThreadInterface->startSPU();
 #		endif
 #	else
-	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																		uniquenamecollision,
-																		processCollisionTask,
-																		createCollisionLocalStoreMemory,
-																		maxTasks));
+		btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+																			uniquenamecollision,
+																			processCollisionTask,
+																			createCollisionLocalStoreMemory,
+																			maxTasks));
 
 #		if USE_PARALLEL_SOLVER
-	btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																		uniquenamesolver,
-																		SolverThreadFunc,
-																		SolverlsMemoryFunc,
-																		maxTasks));
+			btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+																				uniquenamesolver,
+																				SolverThreadFunc,
+																				SolverlsMemoryFunc,
+																				maxTasks));
 #		endif
 #	endif
 
 #	if USE_PARALLEL_SOLVER
-	m_pThreadSupportSolver = solverThreadInterface;
+		m_pThreadSupportSolver = solverThreadInterface;
 #	endif
 
 	m_pThreadSupportCollision = threadInterface;
@@ -203,16 +246,12 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
 
 #	if USE_PARALLEL_SOLVER
-	m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface);
-	//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
-	m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
+		m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface);
+		//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
+		m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
 #	else
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+		m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 #	endif // USE_PARARLLEL_SOLVER
-#else
-	m_pBulletConfiguration = new btDefaultCollisionConfiguration();
-	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 #endif // MULTITHREAD
 
 	m_pBulletBroadphase = new btDbvtBroadphase();
@@ -234,6 +273,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment->getSolverInfo().m_solverMode = SOLVER_SIMD+SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
 #endif
+
+	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER;
 
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;
@@ -473,6 +514,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "2", 0, "Sets the maximum amount of simulation substeps", true, 1, true, 8);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
+	VPROF_BUDGET("CPhysicsEnvironment::Simulate", VPROF_BUDGETGROUP_PHYSICS);
 	if (!m_pBulletEnvironment) return;
 
 	if ( deltaTime > 1.0 || deltaTime < 0.0 ) {
@@ -491,13 +533,18 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	if (deltaTime > 1e-4) {
 		// Divide by zero check.
 		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
+		
+		VPROF_ENTER_SCOPE("m_pBulletEnvironment->stepSimulation");
 		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt(), timestep); // m_timestep/2.0f
-	}
-	m_inSimulation = false;
+		VPROF_EXIT_SCOPE();
 
 #if DEBUG_DRAW
-	m_debugdraw->DrawWorld();
+		VPROF_ENTER_SCOPE("m_debugdraw->DrawWorld");
+		m_debugdraw->DrawWorld();
+		VPROF_EXIT_SCOPE();
 #endif
+	}
+	m_inSimulation = false;
 
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
@@ -556,7 +603,6 @@ void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList) c
 		pOutputObjectList[i] = m_objects[i];
 }
 
-// TODO: Not sure if this is correct and we're supposed to use m_objects.
 const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount) const {
 	if (pOutputObjectCount) {
 		*pOutputObjectCount = m_objects.Count();
@@ -566,6 +612,8 @@ const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCoun
 }
 
 bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment) {
+	if (!pObject || !pDestinationEnvironment) return false;
+
 	if (pDestinationEnvironment == this) {
 		m_pBulletEnvironment->addRigidBody(((CPhysicsObject *)pObject)->GetObject());
 		m_objects.AddToTail(pObject);
@@ -677,6 +725,7 @@ float CPhysicsEnvironment::GetInvPSIScale() {
 }
 
 void CPhysicsEnvironment::BulletTick(btScalar dt) {
+	VPROF_BUDGET("CPhysicsEnvironment::BulletTick", VPROF_BUDGETGROUP_PHYSICS);
 	m_pPhysicsDragController->Tick(dt);
 	for (int i = 0; i < m_controllers.Count(); i++)
 		m_controllers[i]->Tick(dt);
@@ -685,6 +734,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 		m_fluids[i]->Tick(dt);
 
 	m_inSimulation = false;
+
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
@@ -716,56 +766,64 @@ CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 // TODO: Bullet exposes collision callbacks such as gContactAddedCallback!
 // See: http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Callbacks_and_Triggers
 void CPhysicsEnvironment::DoCollisionEvents(float dt) {
+	VPROF_BUDGET("CPhysicsEnvironment::DoCollisionEvents", VPROF_BUDGETGROUP_PHYSICS);
+	if (!m_pCollisionEvent) return;
+
 	// IPhysicsCollisionEvent::Friction
-	/*
 	int numManifolds = m_pBulletEnvironment->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
 		btPersistentManifold *contactManifold = m_pBulletEnvironment->getDispatcher()->getManifoldByIndexInternal(i);
-		const btCollisionObject *obA = contactManifold->getBody0();
-		const btCollisionObject *obB = contactManifold->getBody1();
-
 		if (contactManifold->getNumContacts() <= 0)
 			continue;
+
+		// obA is the object which is colliding with obB
+		const btCollisionObject *obA = contactManifold->getBody0();
+		const btCollisionObject *obB = contactManifold->getBody1();
 
 		if (obA->getInternalType() == btCollisionObject::CO_GHOST_OBJECT || obB->getInternalType() == btCollisionObject::CO_GHOST_OBJECT)
 			continue;
 
 		if ((((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION) &&
 			(((CPhysicsObject *)obB->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION)) {
-			btManifoldPoint manPoint = contactManifold->getContactPoint(0);
-			
-			float energy = manPoint.m_combinedFriction;
-			if (energy > 0.05f) {
+			for (int j = 0; j < contactManifold->getNumContacts(); j++) {
+				btManifoldPoint manPoint = contactManifold->getContactPoint(j);
 				
+				// TODO: We need to find the energy used by the friction! Bullet doesn't provide this in the manifold point.
+				float energy = 200;
+				if (energy > 0.05f) {
+					CPhysicsCollisionData data(&manPoint);
+					m_pCollisionEvent->Friction((CPhysicsObject *)obA->getUserPointer(), ConvertEnergyToHL(energy) * 100,
+												((CPhysicsObject *)obA->getUserPointer())->GetMaterialIndex(), ((CPhysicsObject *)obB->getUserPointer())->GetMaterialIndex(), &data);
+					
+					// DEBUG
+					if (m_pDebugOverlay) {
+						Vector point;
+						ConvertPosToHL(manPoint.getPositionWorldOnA(), point);
+						m_pDebugOverlay->AddTextOverlay(point, 0, 0, "%f", energy);
+					}
+				}
 			}
 		}
 	}
-	*/
 
-	/*
-	if (m_pObjectEvent)
-	{
+	if (m_pObjectEvent) {
 		// FIXME: This got very messy, must be a better way to do this
 		int numObjects = m_pBulletEnvironment->getNumCollisionObjects();
 		btCollisionObjectArray collisionObjects = m_pBulletEnvironment->getCollisionObjectArray();
-		for (int i = 0; i < numObjects; i++)
-		{
+		for (int i = 0; i < numObjects; i++) {
 			btCollisionObject *obj = collisionObjects[i];
 			CPhysicsObject *physobj = (CPhysicsObject*)collisionObjects[i]->getUserPointer();
-			if (physobj->m_iLastActivationState != obj->getActivationState())
-			{
-				switch (obj->getActivationState())
-				{
-				case ACTIVE_TAG:
-					m_pObjectEvent->ObjectWake(physobj);
-					break;
-				case ISLAND_SLEEPING:
-					m_pObjectEvent->ObjectSleep(physobj);
-					break;
+			if (physobj->GetLastActivationState() != obj->getActivationState()) {
+				switch (obj->getActivationState()) {
+					case ACTIVE_TAG:
+						m_pObjectEvent->ObjectWake(physobj);
+						break;
+					case ISLAND_SLEEPING:
+						m_pObjectEvent->ObjectSleep(physobj);
+						break;
 				}
-				physobj->m_iLastActivationState = obj->getActivationState();
+				physobj->SetLastActivationState(obj->getActivationState());
 			}
 		}
 	}
-	*/
 }

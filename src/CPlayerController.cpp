@@ -70,7 +70,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	}
 
 	// AKA ensure_core_in_simulation
-	m_pObject->GetObject()->activate(true);
+	//m_pObject->GetObject()->activate(true);
 
 	m_pGround = (CPhysicsObject *)ground;
 
@@ -194,7 +194,7 @@ float CPlayerController::GetPushSpeedLimit() {
 bool CPlayerController::WasFrozen() {
 	// Removed: This function was called every frame.
 	// Unknown purpose, can anyone fill in what this function is used for?
-	//NOT_IMPLEMENTED;
+	//NOT_IMPLEMENTED
 	return false;
 }
 
@@ -247,6 +247,7 @@ void CPlayerController::AttachObject() {
 	body->setAngularFactor(0);
 
 	m_pObject->AddCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
+	//body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_KINEMATIC_OBJECT);
 
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
@@ -257,6 +258,7 @@ void CPlayerController::DetachObject() {
 	body->setActivationState(ACTIVE_TAG);
 
 	m_pObject->RemoveCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
+	//body->setCollisionFlags(body->getCollisionFlags() & ~(btRigidBody::CF_KINEMATIC_OBJECT));
 
 	m_pObject = NULL;
 }

@@ -116,7 +116,6 @@ float ConvertDistanceToHL(float distance) {
 	return BULL2HL(distance);
 }
 
-float ConvertEnergyToHL( float energy )
-{
+float ConvertEnergyToHL(float energy) {
 	return energy * HL2BULL_INSQR_PER_METERSQR;
 }

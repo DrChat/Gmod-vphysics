@@ -20,7 +20,7 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
-// Win32 because linux can't draw, and I don't debug on mac.
+// Win32 because linux can't draw, and I don't debug on mac (feel free to enable it for macs).
 #if defined(_WIN32) && defined(_DEBUG)
 #	define DEBUG_DRAW 1
 #endif

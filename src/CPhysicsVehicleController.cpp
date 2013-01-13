@@ -168,7 +168,8 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 }
 
 void CPhysicsVehicleController::InitBullVehicle() {
-	// NOTE: We're faking the car wheels because bullet does not offer a vehicle with physical wheels.
+	// NOTE: We're faking the car wheels for now because bullet does not offer a vehicle with physical wheels.
+	// TODO: Simulate the car wheels to a degree (raycast wheels will go on objects that are above the chassis, causing the vehicle to flip backwards)
 	if (m_iVehicleType == VEHICLE_TYPE_CAR_WHEELS)
 		m_pRaycaster = new btHLJeepRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
 	else if (m_iVehicleType == VEHICLE_TYPE_CAR_RAYCAST)
@@ -274,8 +275,8 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;		// TODO: How do we convert this?
-	wheelInfo.m_frictionSlip = axle.wheels.frictionScale;				// TODO: How do we convert this?
 	wheelInfo.m_suspensionStiffness = axle.suspension.springDamping;	// TODO: How do we convert this?
+	wheelInfo.m_frictionSlip = axle.wheels.frictionScale - 1;
 
 	return pWheel;
 }

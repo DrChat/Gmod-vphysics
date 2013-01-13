@@ -12,11 +12,18 @@ CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysi
 	return pFluid;
 }
 
+/********************************
+* CLASS CPhysicsFluidController
+********************************/
+
 CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams) {
 	m_pEnv = pEnv;
 	m_pGameData = NULL;
 	m_iContents = 0;
 	m_vSurfacePlane = Vector4D(0, 0, 0, 0);
+
+	Assert(pEnv);
+	Assert(pFluidObject);
 
 	if (pParams) {
 		m_pGameData = pParams->pGameData;
@@ -28,6 +35,7 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 	pFluidObject->EnableCollisions(false);
 	pFluidObject->SetContents(m_iContents); // Do we really need to do this?
 	pFluidObject->SetFluidController(this);
+
 	m_pGhostObject = new btGhostObject();
 	m_pGhostObject->setUserPointer(pFluidObject);
 	m_pGhostObject->setCollisionShape(pFluidObject->GetObject()->getCollisionShape());
@@ -86,6 +94,9 @@ void CPhysicsFluidController::Tick(float dt) {
 			continue;
 
 		CPhysicsObject *obj = (CPhysicsObject *)body->getUserPointer();
+		if (!obj)
+			continue;
+
 		btVector3 mins, maxs, omins, omaxs;
 		body->getAabb(mins, maxs);
 		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
@@ -93,9 +104,11 @@ void CPhysicsFluidController::Tick(float dt) {
 		float dist = omaxs.y() - mins.y();
 		float p = clamp(dist/height, 0.0f, 1.0f);
 		float vol = (obj->GetVolume() * p)/64; 
-		body->applyCentralForce((-body->getGravity() * m_fDensity * vol)*obj->GetBuoyancyRatio()/*, (maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
-		body->setLinearVelocity(body->getLinearVelocity() * (1.0f-(0.75f*dt)));
+
+		body->applyCentralForce((-body->getGravity() * m_fDensity * vol) * obj->GetBuoyancyRatio()/*, (maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
+		body->setLinearVelocity(body->getLinearVelocity() * (1.0f-(0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f-(0.75f*dt)));
+
 		if (body->getLinearVelocity().length2() > 0.01f)
 			body->activate(true); // Stop it from freezing while mini-bouncing, it looks dumb
 	}
