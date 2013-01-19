@@ -249,7 +249,6 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	params.pName = "VehicleWheel";
 	params.rotdamping = axle.wheels.rotdamping;
 	params.rotInertiaLimit = 0;
-	params.massCenterOverride = NULL;
 	// needs to be in HL units because we're calling through the "outer" interface to create
 	// the wheels
 	float radius = ConvertDistanceToHL( axle.wheels.radius );
@@ -265,8 +264,8 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
 	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
-	btVector3 bullWheelDirectionCS0(0,-1,0);
-	btVector3 bullWheelAxleCS(-1,0,0);
+	btVector3 bullWheelDirectionCS0(0,-1,0);	// Straight down
+	btVector3 bullWheelAxleCS(-1,0,0);			// Left
 	ConvertPosToBull(position, bullConnectionPointCS0);
 	bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
 	bullWheelRadius = axle.wheels.radius;

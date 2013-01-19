@@ -9,7 +9,7 @@
 * CLASS CPhysicsCollisionSet
 ******************************/
 
-// TODO: Is this class sort of like CPhysicsObjectPairHash?
+// Is this class sort of like CPhysicsObjectPairHash?
 // ShouldCollide is called by game code from the collision event handler in CPhysicsEnvironment
 
 CPhysicsCollisionSet::CPhysicsCollisionSet(int iMaxEntries) {

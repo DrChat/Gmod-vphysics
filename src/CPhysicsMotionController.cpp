@@ -4,11 +4,13 @@
 #include "CPhysicsObject.h"
 #include "convert.h"
 
+#include "tier0/vprof.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler) {
-	if (!pHandler) return NULL;
+	if (!pHandler || !pEnv) return NULL;
 	return new CPhysicsMotionController(pHandler, pEnv);
 }
 
@@ -28,6 +30,8 @@ CPhysicsMotionController::~CPhysicsMotionController() {
 }
 
 void CPhysicsMotionController::Tick(float deltaTime) {
+	VPROF_BUDGET("CPhysicsMotionController::Tick", VPROF_BUDGETGROUP_PHYSICS);
+
 	if (!m_handler) return;
 	for (int i = 0; i < m_objectList.Count(); i++) {
 		Vector speed;
@@ -125,6 +129,7 @@ void CPhysicsMotionController::WakeObjects() {
 	}
 }
 
+// FIXME: What the shit do we even do? Can we implement this?
 void CPhysicsMotionController::SetPriority(priority_t priority) {
 	switch (priority) {
 		case LOW_PRIORITY:

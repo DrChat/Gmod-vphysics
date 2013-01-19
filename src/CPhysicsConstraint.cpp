@@ -90,17 +90,14 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 /*********************************
 * CLASS CPhysicsConstraint
 *********************************/
-CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type) {
-	m_pObject1 = pObject1;
-	m_pObject2 = pObject2;
+CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint, EConstraintType type) {
+	m_pReferenceObject = pReferenceObject;
+	m_pAttachedObject = pAttachedObject;
 	m_pConstraint = pConstraint;
 	m_pEnv = pEnv;
 	m_type = type;
 
 	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
-
-	pObject1->Wake();
-	pObject2->Wake();
 }
 
 CPhysicsConstraint::~CPhysicsConstraint() {
@@ -147,8 +144,21 @@ void CPhysicsConstraint::OutputDebugInfo() {
 * CREATION FUNCTIONS
 ************************/
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
-	NOT_IMPLEMENTED
-	return NULL;
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+
+	btTransform bullAFrame, bullBFrame;
+	bullAFrame.setIdentity();
+	bullBFrame.setIdentity();
+
+	bullAFrame = pObjRef->GetObject()->getWorldTransform().inverse() * pObjAtt->GetObject()->getWorldTransform();
+
+	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
+
+	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
+	// Set axis limits
+
+	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
 
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {

@@ -5,6 +5,9 @@
 // memdbgon must be the last include file in a .cpp file!!!
 ////#include "tier0/memdbgon.h"
 
+// Bullet vector: Forward, Up, Right
+// HL Vector: Forward, Left, Up
+
 void ConvertPosToBull(const Vector &pos, btVector3 &bull) {
 	bull.setX(HL2BULL(pos.x));
 	bull.setY(HL2BULL(pos.z));

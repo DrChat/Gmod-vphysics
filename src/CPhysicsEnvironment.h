@@ -12,6 +12,7 @@ class CDeleteQueue;
 class CCollisionSolver;
 class CPhysicsFluidController;
 class CPhysicsDragController;
+class CPhysicsConstraint;
 
 class CDebugDrawer;
 
@@ -90,7 +91,7 @@ public:
 
 	int										GetActiveObjectCount() const;
 	void									GetActiveObjects(IPhysicsObject **pOutputObjectList ) const;
-	const IPhysicsObject **					GetObjectList(int *pOutputObjectCount ) const;
+	const IPhysicsObject **					GetObjectList(int *pOutputObjectCount) const;
 	bool									TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment);
 
 	void									CleanupDeleteList(void);
@@ -118,18 +119,25 @@ public:
 
 	void									EnableConstraintNotify(bool bEnable);
 	void									DebugCheckContacts(void);
-
-	// UNEXPOSED
-	void									DoCollisionEvents(float dt);
 public:
+	// Unexposed functions
 	btDynamicsWorld *						GetBulletEnvironment();
 	float									GetInvPSIScale();
 	void									BulletTick(btScalar timeStep);
 	CPhysicsDragController *				GetDragController();
-	IPhysicsObjectEvent *					m_pObjectEvent;
+
+	void									DoCollisionEvents(float dt);
+
+	void									HandleConstraintBroken(CPhysicsConstraint *pConstraint); // Call this if you're a constraint that was just broken.
+
+	// Soft body functions we'll expose at a later time...
 private:
 	bool									m_inSimulation;
 	bool									m_bUseDeleteQueue;
+	bool									m_bConstraintNotify;
+	bool									m_deleteQuick;
+	float									m_timestep;
+
 	btThreadSupportInterface *				m_pThreadSupportCollision;
 	btThreadSupportInterface *				m_pThreadSupportSolver;
 	btCollisionConfiguration *				m_pBulletConfiguration;
@@ -137,19 +145,20 @@ private:
 	btBroadphaseInterface *					m_pBulletBroadphase;
 	btConstraintSolver *					m_pBulletSolver;
 	btDynamicsWorld *						m_pBulletEnvironment;
-	CUtlVector<IPhysicsObject*>				m_objects;
-	CUtlVector<IPhysicsObject*>				m_deadObjects;
+	btOverlappingPairCallback *				m_pBulletGhostCallback;
+
+	CUtlVector<IPhysicsObject *>			m_objects;
+	CUtlVector<IPhysicsObject *>			m_deadObjects;
 	CCollisionSolver *						m_pCollisionSolver;
 	IPhysicsCollisionEvent *				m_pCollisionEvent;
 	IPhysicsConstraintEvent *				m_pConstraintEvent;
 	CDeleteQueue *							m_pDeleteQueue;
-	physics_performanceparams_t *			m_physics_performanceparams;
-	CUtlVector<CPhysicsFluidController*>	m_fluids;
+	physics_performanceparams_t *			m_perfparams;
+	CUtlVector<CPhysicsFluidController *>	m_fluids;
 	CPhysicsDragController *				m_pPhysicsDragController;
 	CUtlVector<IController*>				m_controllers;
-	bool									m_deleteQuick;
-	float									m_timestep;
 	IVPhysicsDebugOverlay *					m_pDebugOverlay;
+	IPhysicsObjectEvent *					m_pObjectEvent;
 
 	CDebugDrawer *							m_debugdraw;
 };

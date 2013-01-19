@@ -4,6 +4,8 @@
 #include "convert.h"
 #include "CPhysicsKeyParser.h"
 
+#include "tier0/vprof.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
@@ -276,8 +278,11 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide,
 	return TraceBox(ray, MASK_ALL, NULL, pCollide, collideOrigin, collideAngles, ptr);
 }
 
-// TODO: Lack of collision between players and objects might be caused by inaccuracy in this function!
+// FIXME: Lack of collision between players and objects might be caused by inaccuracy in this function?
+// TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
+	VPROF_BUDGET("CPhysicsCollision::TraceBox", VPROF_BUDGETGROUP_PHYSICS);
+
 	btVector3 btvec;
 	btMatrix3x3 btmatrix;
 	btCollisionObject *object = new btCollisionObject;
@@ -401,16 +406,16 @@ struct ivpcompactsurface_t {
 // Just like a btConvexShapeHull.
 struct ivpcompactledge_t {
 	int		c_point_offset; // byte offset from 'this' to (ledge) point array
-    union {
+	union {
 		int	ledgetree_node_offset;
 		int	client_data;	// if indicates a non terminal ledge
-    };
-    uint	has_chilren_flag:2;
-    int		is_compact_flag:2;  // if false than compact ledge uses points outside this piece of memory
-    uint	dummy:4;
-    uint	size_div_16:24; 
-    short	n_triangles;
-    short	for_future_use;
+	};
+	uint	has_chilren_flag:2;
+	int		is_compact_flag:2;  // if false than compact ledge uses points outside this piece of memory
+	uint	dummy:4;
+	uint	size_div_16:24; 
+	short	n_triangles;
+	short	for_future_use;
 };
 
 // 4 bytes
@@ -446,8 +451,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	pOutput->pKeyValues = new char[bufferSize - position];
 	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
 
-	// TODO: swap possibly meaning bitswap?
-
+	// swap possibly meaning bitswap?
 	DevMsg("VPhysics: VCollideLoad with %d solids, swap is %s\n", solidCount, swap ? "true" : "false");
 
 	// Now for the fun part:
@@ -533,7 +537,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 			// Not enough points to make a triangle.
 			if (mesh->getNumPoints() >= 3) {
-				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh);
+				bull->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), mesh); // Move by opposite of center of mass since bullet takes our origin as the center of mass.
 			} else {
 				delete mesh;
 			}

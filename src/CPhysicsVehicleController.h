@@ -10,8 +10,7 @@ struct vehicle_operatingparams_t;
 struct vehicle_controlparams_t;
 struct vehicle_debugcarsystem_t;
 
-class CPhysicsVehicleController : public IPhysicsVehicleController
-{
+class CPhysicsVehicleController : public IPhysicsVehicleController {
 	public:
 											CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
 											~CPhysicsVehicleController();

@@ -16,17 +16,17 @@ enum EConstraintType {
 
 class CPhysicsConstraint : public IPhysicsConstraint {
 	public:
-								CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject* pObject1, CPhysicsObject* pObject2, btTypedConstraint *pConstraint, EConstraintType type);
+								CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
 								~CPhysicsConstraint();
 
 		void					Activate();
 		void					Deactivate();
 
 		void					SetGameData(void *gameData) { m_pGameData = gameData; };
-		void *					GetGameData(void) const { return m_pGameData; };
+		void *					GetGameData() const { return m_pGameData; };
 
-		IPhysicsObject *		GetReferenceObject(void) const { return m_pObject2; };
-		IPhysicsObject *		GetAttachedObject(void) const { return m_pObject1; };
+		IPhysicsObject *		GetReferenceObject(void) const { return m_pReferenceObject; };
+		IPhysicsObject *		GetAttachedObject(void) const { return m_pAttachedObject; };
 
 		void					SetLinearMotor(float speed, float maxLinearImpulse);
 		void					SetAngularMotor(float rotSpeed, float maxAngularImpulse);
@@ -36,9 +36,11 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		bool					GetConstraintParams(constraint_breakableparams_t *pParams) const;
 		
 		void					OutputDebugInfo();
+
+		// UNEXPOSED FUNCTIONS
 	private:
-		CPhysicsObject *		m_pObject1;	// Reference object
-		CPhysicsObject *		m_pObject2;	// Attached object
+		CPhysicsObject *		m_pReferenceObject;	// Reference object
+		CPhysicsObject *		m_pAttachedObject;	// Attached object
 		btTypedConstraint *		m_pConstraint;
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;
@@ -46,10 +48,13 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?
+// We'll have to emulate this on bullet.
 class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 {
 	public:
-				~CPhysicsConstraintGroup(void) {}
+		CPhysicsConstraintGroup(const constraint_groupparams_t &params) {}
+		~CPhysicsConstraintGroup(void) {}
+
 		void	Activate() { NOT_IMPLEMENTED };
 		bool	IsInErrorState() { return false; };
 		void	ClearErrorState() { };

@@ -348,12 +348,7 @@ void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angl
 	btMatrix3x3 bullAngles;
 	ConvertPosToBull(worldPosition, bullPos);
 	ConvertRotationToBull(angles, bullAngles);
-	((btMassCenterMotionState *)m_pObject->getMotionState())->setGraphicTransform(btTransform(bullAngles, bullPos));
-
-	// Mass center compensation.
-	btTransform finaltrans;
-	((btMassCenterMotionState *)m_pObject->getMotionState())->getWorldTransform(finaltrans);
-	m_pObject->setWorldTransform(finaltrans);
+	m_pObject->setWorldTransform(btTransform(bullAngles, bullPos) * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
 	if (isTeleport)
 		m_pObject->activate();
@@ -362,12 +357,7 @@ void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angl
 void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTeleport) {
 	btTransform trans;
 	ConvertMatrixToBull(matrix, trans);
-	((btMassCenterMotionState *)m_pObject->getMotionState())->setGraphicTransform(trans);
-
-	// Mass center compensation.
-	btTransform finaltrans;
-	((btMassCenterMotionState *)m_pObject->getMotionState())->getWorldTransform(finaltrans);
-	m_pObject->setWorldTransform(finaltrans);
+	m_pObject->setWorldTransform(trans * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
 	if (isTeleport)
 		m_pObject->activate();
@@ -592,13 +582,12 @@ int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 	if (!position && !angles) return 1;
 
 	btTransform transform;
-	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
-	if (position) {
+	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
+	if (position)
 		ConvertPosToHL(transform.getOrigin(), *position);
-	}
-	if (angles) {
+
+	if (angles)
 		ConvertRotationToHL(transform.getBasis(), *angles);
-	}
 
 	return 0; // return pVEnv->GetSimulatedPSIs();
 }
@@ -717,7 +706,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	pObject->setUserPointer(this);
 	m_gameFlags = 0;
 	m_iLastActivationState = pObject->getActivationState();
-	m_callbacks = CALLBACK_GLOBAL_COLLISION|CALLBACK_GLOBAL_FRICTION|CALLBACK_FLUID_TOUCH|CALLBACK_GLOBAL_TOUCH|CALLBACK_GLOBAL_COLLIDE_STATIC|CALLBACK_DO_FLUID_SIMULATION;
+	m_callbacks = CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
 	float matdensity;
 	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
 	m_fBuoyancyRatio = (GetMass()/(GetVolume()*METERS_PER_INCH*METERS_PER_INCH*METERS_PER_INCH))/matdensity;
@@ -791,33 +780,26 @@ btRigidBody *CPhysicsObject::GetObject() {
 }
 
 // UNEXPOSED
-float CPhysicsObject::GetDragInDirection(btVector3 *dir) const
-{
+float CPhysicsObject::GetDragInDirection(btVector3 *dir) const {
 	if (!dir) return 0.0f;
 
 	btVector3 out;
-	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis(); // const IVP_U_Matrix *m_world_f_core = m_pObject->get_core()->get_m_world_f_core_PSI();
-	BtMatrix_vimult(&mat, dir, &out); // m_world_f_core->vimult3( &velocity, &local );
+	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis();
+	BtMatrix_vimult(&mat, dir, &out);
 
-	return m_dragCoefficient * fabs(out.getX() * m_dragBasis.getX()) +	// Maybe the fabs need to be calculated first AND THEN be multiplied with the m_dragCoefficient
-		fabs(out.getY() * m_dragBasis.getY()) +							// However this is the way its done in the 2003 code.
+	return m_dragCoefficient * fabs(out.getX() * m_dragBasis.getX()) + 
+		fabs(out.getY() * m_dragBasis.getY()) +	
 		fabs(out.getZ() * m_dragBasis.getZ());
 	
 }
 
 // UNEXPOSED
-float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const
-{
+float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const {
 	if (!dir) return 0.0f;
 
 	return m_angDragCoefficient * fabs(dir->getX() * m_angDragBasis.getX()) +
 		fabs(dir->getY() * m_angDragBasis.getY()) +
 		fabs(dir->getZ() * m_angDragBasis.getZ());
-	/*
-	return m_angDragCoefficient * IVP_Inline_Math::fabsd( angVelocity.k[0] * m_angDragBasis.x ) + 
-		IVP_Inline_Math::fabsd( angVelocity.k[1] * m_angDragBasis.y ) + 
-		IVP_Inline_Math::fabsd( angVelocity.k[2] * m_angDragBasis.z );
-	*/
 }
 
 /************************
@@ -833,7 +815,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
-	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo*)shape->getUserPointer();
+	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
 	btTransform masscenter(btMatrix3x3::getIdentity());
 	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
 
@@ -868,17 +850,15 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
 	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
 
-	/*
 	if (!isStatic) {
 		btVector3 mins, maxs;
 		shape->getAabb(btTransform::getIdentity(), mins, maxs);
 		float maxradius = min(min(abs(maxs.getX()), abs(maxs.getY())), abs(maxs.getZ()));
 		float minradius = min(min(abs(mins.getX()), abs(mins.getY())), abs(mins.getZ()));
-		float radius = min(maxradius,minradius)/2.0f;
-		body->setCcdMotionThreshold(radius*0.5f);
-		body->setCcdSweptSphereRadius(0.2f*radius);
+		float radius = min(maxradius, minradius) / 2.0f;
+		body->setCcdMotionThreshold(radius);
+		body->setCcdSweptSphereRadius(0.9f * radius);
 	}
-	*/
 	
 	return pObject;
 }

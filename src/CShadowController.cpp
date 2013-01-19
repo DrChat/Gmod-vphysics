@@ -239,7 +239,7 @@ void CShadowController::StepUp(float height) {
 }
 
 void CShadowController::SetTeleportDistance(float teleportDistance) {
-	NOT_IMPLEMENTED
+	m_shadow.teleportDistance = ConvertDistanceToBull(teleportDistance);
 }
 
 bool CShadowController::AllowsTranslation() {
@@ -258,6 +258,7 @@ bool CShadowController::IsPhysicallyControlled() {
 	return m_bPhysicallyControlled;
 }
 
+// NPCs call this
 void CShadowController::GetLastImpulse(Vector *pOut) {
 	if (!pOut) return;
 
@@ -278,19 +279,25 @@ void CShadowController::ObjectMaterialChanged(int materialIndex) {
 	NOT_IMPLEMENTED
 }
 
+// FIXME: What do we return? Ticks since last update?
 float CShadowController::GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut) {
 	if (!pPositionOut && !pAnglesOut) return 0;
 
-	NOT_IMPLEMENTED
+	if (pPositionOut)
+		ConvertPosToHL(m_shadow.targetPosition, *pPositionOut);
+
+	if (pAnglesOut)
+		ConvertRotationToHL(m_shadow.targetRotation, *pAnglesOut);
+
 	return 0;
 }
 
 float CShadowController::GetTeleportDistance() {
-	NOT_IMPLEMENTED
-	return 0;
+	return ConvertDistanceToHL(m_shadow.teleportDistance);
 }
 
 void CShadowController::GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut) {
+	if (!pMaxSpeedOut && !pMaxAngularSpeedOut) return;
 	NOT_IMPLEMENTED
 }
 

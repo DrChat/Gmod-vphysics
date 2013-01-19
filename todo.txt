@@ -30,6 +30,7 @@
 		and there's no collision points being drawn in the debug overlay.
 	- Constraints
 		- If a constrained object goes too far away from the world, the game crashes.
+	- Touching water in release mode = crash
 - TODO
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies

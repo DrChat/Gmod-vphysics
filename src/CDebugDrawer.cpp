@@ -10,6 +10,8 @@
 #include "CDebugDrawer.h"
 #include "convert.h"
 
+#include "tier0/vprof.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
@@ -21,13 +23,12 @@
 #	endif
 
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
-//static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)", true, 0, true, 1);
+static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)");
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(NULL) {
 	m_pEnv = pEnv;
-	setDebugMode(DBG_DrawAabb | DBG_DrawText | DBG_DrawFeaturesText | DBG_DrawConstraints |
-				DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
-				DBG_ProfileTimings | DBG_DrawNormals | DBG_DrawWireframe);
+	setDebugMode(DBG_DrawAabb | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
+				DBG_DrawNormals | DBG_DrawWireframe);
 
 #if RENDER_SDL
 	SDL_Init(SDL_INIT_VIDEO);
@@ -69,6 +70,7 @@ CDebugDrawer::~CDebugDrawer() {
 }
 
 void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor) {
+	VPROF_BUDGET("CDebugDrawer::drawLine", VPROF_BUDGETGROUP_PHYSICS);
 #if RENDER_SDL
 	glBegin(GL_LINES);
 		glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
@@ -218,6 +220,8 @@ void CDebugDrawer::DrawWorld() {
 	SDL_GL_SwapBuffers();
 #else
 	if (cvar_renderoverlay.GetBool()) {
+		// Shit fuck I don't care, it works
+		cvar_overlaywireframe.GetBool() ? setDebugMode(getDebugMode() | DBG_DrawWireframe) : setDebugMode(getDebugMode() & ~(DBG_DrawWireframe));
 		if (m_overlay) {
 			m_world->debugDrawWorld();
 		}

@@ -165,9 +165,6 @@ IPhysicsObject *CPlayerController::GetObject() {
 	return m_pObject;
 }
 
-// Called with NPCs
-// Appears to be called when our object has CALLBACK_IS_PLAYER_CONTROLLER
-// Perhaps this is the last velocity we have applied to our object?
 // Called in CalculateObjectStress in physics_impact_damage.cpp, may apply damage to players when hit with an object
 void CPlayerController::GetLastImpulse(Vector *pOut) {
 	if (!pOut) return;

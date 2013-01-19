@@ -143,7 +143,7 @@
     <ClInclude Include="src\CDebugDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Garry%27s Mod\Gmod-vphysics\include\physics_interface.h">
+    <ClInclude Include="include\physics_interface.h">
       <Filter>Header Files\public</Filter>
     </ClInclude>
   </ItemGroup>

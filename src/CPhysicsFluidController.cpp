@@ -8,6 +8,7 @@
 //#include "tier0/memdbgon.h"
 
 CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams) {
+	if (!pEnv || !pFluidObject) return NULL;
 	CPhysicsFluidController *pFluid = new CPhysicsFluidController(pEnv, pFluidObject, pParams);
 	return pFluid;
 }
