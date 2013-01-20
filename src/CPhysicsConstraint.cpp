@@ -12,12 +12,13 @@
 /**********************
 * Misc. Functions
 **********************/
-void TransformWorldToLocal(const btVector3 &vec, btVector3 &out, btRigidBody &obj) {
-
+// I hope these work!
+void TransformWorldToLocal(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
+	out = trans * obj.getWorldTransform().inverse();
 }
 
-void TransformLocalToWorld(const btVector3 &vec, btVector3 &out, btRigidBody &obj) {
-
+void TransformLocalToWorld(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
+	out = trans * obj.getWorldTransform();
 }
 
 /***********************
@@ -54,12 +55,12 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 			m_dist = dist;
 		}
 
-		void getInfo1 (btConstraintInfo1* info) {
+		void getInfo1 (btConstraintInfo1 *info) {
 			info->m_numConstraintRows = 1;
 			info->nub = 5;
 		}
 
-		void getInfo2 (btConstraintInfo2* info) {
+		void getInfo2 (btConstraintInfo2 *info) {
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
 			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
 			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;

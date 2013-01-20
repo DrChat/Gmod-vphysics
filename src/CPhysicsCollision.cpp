@@ -53,7 +53,7 @@ int CCollisionQuery::ConvexCount() {
 ****************************/
 
 // NOTE:
-// CPhysCollide is a btCollisionShape
+// CPhysCollide is a btCompoundShape
 // CPhysConvex is a btConvexHullShape
 
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
@@ -466,19 +466,19 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		// Some checks and warnings (condense these when we want to remove the warnings)
 		if (surfaceheader.vphysicsID != MAKEID('V', 'P', 'H', 'Y')) {
-			Warning("Could not load a solid! (surfaceheader.vphysicsID != \"VPHY\")\n");
+			Warning("VPhysics: Could not load a solid! (surfaceheader.vphysicsID != \"VPHY\")\n");
 			pOutput->solids[i] = NULL;
 			continue;
 		}
 
 		if (surfaceheader.version != 0x100) {
-			Warning("Could not load a solid! (surfaceheader.version == %X)\n", surfaceheader.version);
+			Warning("VPhysics: Could not load a solid! (surfaceheader.version == %X)\n", surfaceheader.version);
 			pOutput->solids[i] = NULL;
 			continue;
 		}
 
 		if (surfaceheader.modelType != 0x0) {
-			Warning("Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
+			Warning("VPhysics: Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
 			pOutput->solids[i] = NULL;
 			continue;
 		}
@@ -552,7 +552,21 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
-		delete (btCollisionShape *)pVCollide->solids[i];
+		btCollisionShape *pShape = (btCollisionShape *)pVCollide->solids[i];
+
+		// Compound shape? Delete all of it's children.
+		if (pShape->isCompound()) {
+			btCompoundShape *pCompound = (btCompoundShape *)pShape;
+			int numChildShapes = pCompound->getNumChildShapes();
+			for (int j = 0; j < numChildShapes; j++) {
+				delete (btCollisionShape *)pCompound->getChildShape(j);
+			}
+
+			// Also delete our PhysicsShapeInfo thing.
+			delete (PhysicsShapeInfo *)pCompound->getUserPointer();
+		}
+
+		delete pShape;
 		pVCollide->solids[i] = NULL;
 	}
 

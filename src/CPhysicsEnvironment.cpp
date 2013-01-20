@@ -101,8 +101,7 @@ class CCollisionSolver : public btOverlapFilterCallback {
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
 	btRigidBody *body0 = btRigidBody::upcast((btCollisionObject *)proxy0->m_clientObject);
 	btRigidBody *body1 = btRigidBody::upcast((btCollisionObject *)proxy1->m_clientObject);
-	if (!body0 || !body1)
-	{
+	if (!body0 || !body1) {
 		if (body0)
 			return !(body0->isStaticObject());
 		if (body1)
@@ -190,11 +189,11 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pConstraintEvent = NULL;
 	m_pObjectEvent = NULL;
 
-	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
+	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration;
 
 #if !MULTITHREAD
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
 #else
 	m_pThreadSupportCollision = NULL;
 	m_pThreadSupportSolver = NULL;
@@ -234,10 +233,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 #		if USE_PARALLEL_SOLVER
 			btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																				uniquenamesolver,
-																				SolverThreadFunc,
-																				SolverlsMemoryFunc,
-																				maxTasks));
+																					uniquenamesolver,
+																					SolverThreadFunc,
+																					SolverlsMemoryFunc,
+																					maxTasks));
 #		endif
 #	endif
 
@@ -257,12 +256,12 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 #	endif // USE_PARARLLEL_SOLVER
 #endif // MULTITHREAD
 
-	m_pBulletBroadphase = new btDbvtBroadphase();
+	m_pBulletBroadphase = new btDbvtBroadphase;
 
 	// Note: The soft body solver (last default-arg in the constructor) is used for OpenCL stuff (as per the Soft Body Demo)
 	m_pBulletEnvironment = new btSoftRigidDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
-	m_pBulletGhostCallback = new btGhostPairCallback();
+	m_pBulletGhostCallback = new btGhostPairCallback;
 	m_pCollisionSolver = new CCollisionSolver;
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(m_pBulletGhostCallback);
@@ -276,11 +275,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 #if MULTITHREAD
 	m_pBulletEnvironment->getSolverInfo().m_numIterations = 4;
-	m_pBulletEnvironment->getSolverInfo().m_solverMode = SOLVER_SIMD+SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
 #endif
 
-	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER;
+	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
 
 	//m_simPSIs = 0;

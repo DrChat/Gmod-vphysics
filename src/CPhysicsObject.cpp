@@ -38,6 +38,12 @@ CPhysicsObject::~CPhysicsObject() {
 	
 	if (m_pEnv && m_pObject) {
 		m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
+
+		// Sphere collision shape is allocated when we're a sphere. Delete it.
+		if (m_bIsSphere)
+			delete (btSphereShape *)m_pObject->getCollisionShape();
+
+		delete m_pObject->getMotionState();
 		delete m_pObject;
 	}
 }
@@ -699,24 +705,27 @@ void CPhysicsObject::OutputDebugInfo() const {
 }
 
 // UNEXPOSED
-void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams) {
-	m_pEnv = pEnv;
-	m_materialIndex = materialIndex;
-	m_pObject = pObject;
-	pObject->setUserPointer(this);
-	m_gameFlags = 0;
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere = false) {
+	m_pEnv				= pEnv;
+	m_materialIndex		= materialIndex;
+	m_pObject			= pObject;
+	m_bIsSphere			= isSphere;
+	m_gameFlags			= 0;
+	m_bMotionEnabled	= !IsStatic();
+	m_fMass				= GetMass();
+	m_callbacks			= CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
 	m_iLastActivationState = pObject->getActivationState();
-	m_callbacks = CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
+
 	float matdensity;
 	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
-	m_fBuoyancyRatio = (GetMass()/(GetVolume()*METERS_PER_INCH*METERS_PER_INCH*METERS_PER_INCH))/matdensity;
-	m_bMotionEnabled = !IsStatic();
-	m_fMass = GetMass();
+	m_fBuoyancyRatio = (GetMass() / (GetVolume() * METERS_PER_INCH * METERS_PER_INCH * METERS_PER_INCH)) / matdensity;
+
+	m_pObject->setUserPointer(this);
 
 	if (pParams) {
-		m_pGameData = pParams->pGameData;
-		m_pName = pParams->pName;
-		m_fVolume = pParams->volume;
+		m_pGameData		= pParams->pGameData;
+		m_pName			= pParams->pName;
+		m_fVolume		= pParams->volume;
 		EnableCollisions(pParams->enableCollisions);
 	}
 
@@ -848,7 +857,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	CPhysicsObject *pObject = new CPhysicsObject();
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
-	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f) pObject->EnableDrag(true);
+	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f)
+		pObject->EnableDrag(true);
 
 	if (!isStatic) {
 		btVector3 mins, maxs;
@@ -899,7 +909,7 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	}
 
 	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams);
+	pObject->Init(pEnvironment, body, materialIndex, pParams, true);
 
 	return pObject;
 }

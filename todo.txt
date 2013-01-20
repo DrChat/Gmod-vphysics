@@ -31,10 +31,12 @@
 	- Constraints
 		- If a constrained object goes too far away from the world, the game crashes.
 	- Touching water in release mode = crash
+	- Memory leaks everywhere! Bullet memory management rules = whoever allocates memory must delete it!
 - TODO
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies
 		- Scaling of models
+			- Vector(1, 1, 1) would be normal scale.
 		- ...
 	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this!
 	- CONSTRAINTS

@@ -118,7 +118,7 @@ class CPhysicsObject : public IPhysicsObject {
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	public:
 		// UNEXPOSED FUNCTIONS
-		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams);
+		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere = false);
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
 		btRigidBody *						GetObject();
 		float								GetDragInDirection(btVector3  *direction) const; // Function is not interfaced anymore
@@ -135,13 +135,12 @@ class CPhysicsObject : public IPhysicsObject {
 		const char *						m_pName;
 
 		unsigned short						m_materialIndex;
-
 		unsigned short						m_callbacks;
 		unsigned short						m_gameFlags;
 		unsigned int						m_contents;
 		unsigned short						m_iGameIndex;
 
-
+		bool								m_bIsSphere;
 		bool								m_bMotionEnabled;
 		float								m_fMass;
 		float								m_fVolume;

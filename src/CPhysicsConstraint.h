@@ -25,8 +25,8 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		void					SetGameData(void *gameData) { m_pGameData = gameData; };
 		void *					GetGameData() const { return m_pGameData; };
 
-		IPhysicsObject *		GetReferenceObject(void) const { return m_pReferenceObject; };
-		IPhysicsObject *		GetAttachedObject(void) const { return m_pAttachedObject; };
+		IPhysicsObject *		GetReferenceObject() const { return m_pReferenceObject; };
+		IPhysicsObject *		GetAttachedObject() const { return m_pAttachedObject; };
 
 		void					SetLinearMotor(float speed, float maxLinearImpulse);
 		void					SetAngularMotor(float rotSpeed, float maxAngularImpulse);
