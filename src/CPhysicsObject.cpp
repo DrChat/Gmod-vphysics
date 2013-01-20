@@ -705,7 +705,7 @@ void CPhysicsObject::OutputDebugInfo() const {
 }
 
 // UNEXPOSED
-void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere = false) {
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere) {
 	m_pEnv				= pEnv;
 	m_materialIndex		= materialIndex;
 	m_pObject			= pObject;
