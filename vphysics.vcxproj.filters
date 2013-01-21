@@ -139,7 +139,7 @@
     <ClInclude Include="src\CDebugDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\physics_interface.h">
+    <ClInclude Include="include\vphysics_interfaceV32.h">
       <Filter>Header Files\public</Filter>
     </ClInclude>
   </ItemGroup>

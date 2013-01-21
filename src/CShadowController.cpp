@@ -162,7 +162,8 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_shadow.dampFactor = 1.0f;
 	m_shadow.teleportDistance = 0;
 	m_shadow.targetPosition.setZero();
-	m_shadow.targetRotation = btQuaternion::getIdentity();
+	memset(&m_shadow.targetRotation, 0, sizeof(btQuaternion)); // Shit fucking access violation randomly caused by below line in release builds
+	//m_shadow.targetRotation = btQuaternion(0, 0, 0, 1);
 	m_bPhysicallyControlled = false;
 
 	m_allowPhysicsMovement = allowTranslation;
@@ -177,7 +178,10 @@ CShadowController::~CShadowController() {
 // UNEXPOSED
 void CShadowController::Tick(float deltaTime) {
 	if (m_enable) {
-		ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
+		// TODO: Figure out the intended behavior and set accordingly. We may just want to smoothly move the object
+		// to point B without applying velocities to achieve this. IVP shadows don't respond to collisions, and
+		// neither should we.
+		//ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
 		m_secondsToArrival -= deltaTime;
 		if (m_secondsToArrival < 0) m_secondsToArrival = 0;
 	} else {
@@ -197,7 +201,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 
 	if (IsEqual(targetPosition, m_shadow.targetPosition) && IsEqual(targetRotation, m_shadow.targetRotation)) return;
 
-	m_pObject->Wake();
+	//m_pObject->Wake();
 }
 
 void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {

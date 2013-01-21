@@ -849,7 +849,7 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 		btCollisionObjectArray collisionObjects = m_pBulletEnvironment->getCollisionObjectArray();
 		for (int i = 0; i < numObjects; i++) {
 			btCollisionObject *obj = collisionObjects[i];
-			CPhysicsObject *physobj = (CPhysicsObject*)collisionObjects[i]->getUserPointer();
+			CPhysicsObject *physobj = (CPhysicsObject *)collisionObjects[i]->getUserPointer();
 			if (physobj->GetLastActivationState() != obj->getActivationState()) {
 				switch (obj->getActivationState()) {
 					case ACTIVE_TAG:

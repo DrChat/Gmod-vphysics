@@ -713,12 +713,11 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_gameFlags			= 0;
 	m_bMotionEnabled	= !IsStatic();
 	m_fMass				= GetMass();
+	m_pGameData			= NULL;
+	m_pName				= NULL;
+	m_fVolume			= 0;
 	m_callbacks			= CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
 	m_iLastActivationState = pObject->getActivationState();
-
-	float matdensity;
-	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
-	m_fBuoyancyRatio = (GetMass() / (GetVolume() * METERS_PER_INCH * METERS_PER_INCH * METERS_PER_INCH)) / matdensity;
 
 	m_pObject->setUserPointer(this);
 
@@ -729,11 +728,15 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		EnableCollisions(pParams->enableCollisions);
 	}
 
+	float matdensity;
+	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
+	m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, (m_fVolume * METERS_PER_INCH * METERS_PER_INCH * METERS_PER_INCH)), matdensity);
+
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
 	if (surface) {
 		m_pObject->setFriction(surface->physics.friction);
-		//m_pObject->setRestitution(surface->physics.elasticity); // FIXME: metal_bouncy has elasticity of 1000?
-		// Note to self: using these dampening values = breakdancing fridges http://dl.dropbox.com/u/4838268/gm_construct%202012-4-24%2004-50-26.webm
+		m_pObject->setRestitution(surface->physics.elasticity > 1 ? 1 : surface->physics.elasticity);
+
 		// Dampening = 0 always for some reason (not a problem with our key parser looking for the wrong names)
 		//m_pObject->setDamping(surface->physics.dampening, surface->physics.dampening);
 	} else {

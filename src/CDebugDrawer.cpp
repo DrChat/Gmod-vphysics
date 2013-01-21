@@ -2,8 +2,11 @@
 
 #include <edict.h>
 
-#include <SDL.h>
-#include <SDL_opengl.h>
+#if RENDER_SDL
+#	include <SDL.h>
+#	include <SDL_opengl.h>
+#endif
+
 #include <LinearMath/btQuickprof.h>
 
 #include "CPhysicsEnvironment.h"

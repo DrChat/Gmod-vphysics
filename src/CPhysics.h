@@ -6,20 +6,21 @@ class CPhysicsCollisionSet;
 class CPhysics : public CTier1AppSystem<IPhysics> {
 	typedef CTier1AppSystem<IPhysics> BaseClass;
 	public:
-		virtual void *						QueryInterface(const char *pInterfaceName);
-		virtual InitReturnVal_t				Init();
-		virtual void						Shutdown();
+		void *						QueryInterface(const char *pInterfaceName);
+		InitReturnVal_t				Init();
+		void						Shutdown();
 
-		virtual	IPhysicsEnvironment *		CreateEnvironment();
-		virtual void						DestroyEnvironment(IPhysicsEnvironment*);
-		virtual IPhysicsEnvironment *		GetActiveEnvironmentByIndex(int index);
+		IPhysicsEnvironment *		CreateEnvironment();
+		void						DestroyEnvironment(IPhysicsEnvironment*);
+		IPhysicsEnvironment *		GetActiveEnvironmentByIndex(int index);
+		int							GetNumActiveEnvironments();
 
-		virtual IPhysicsObjectPairHash *	CreateObjectPairHash();
-		virtual void						DestroyObjectPairHash(IPhysicsObjectPairHash *pHash);
+		IPhysicsObjectPairHash *	CreateObjectPairHash();
+		void						DestroyObjectPairHash(IPhysicsObjectPairHash *pHash);
 
-		virtual IPhysicsCollisionSet *		FindOrCreateCollisionSet( unsigned int id, int maxElementCount );
-		virtual IPhysicsCollisionSet *		FindCollisionSet( unsigned int id );
-		virtual void						DestroyAllCollisionSets();
+		IPhysicsCollisionSet *		FindOrCreateCollisionSet(unsigned int id, int maxElementCount);
+		IPhysicsCollisionSet *		FindCollisionSet(unsigned int id);
+		void						DestroyAllCollisionSets();
 	private:
 		CUtlVector<IPhysicsEnvironment *>	m_envList;
 		CUtlVector<CPhysicsCollisionSet *>	m_collisionSets;

@@ -27,7 +27,8 @@
 	- Constraints
 		- If a constrained object goes too far away from the world, the game crashes.
 	- Some concave meshes (trashdumpster02) aren't working properly.
-	- Touching water in release mode = crash
+	- Shadow controllers crash some of the time in release builds
+		- Related to memory being uninitialized somewhere (ex. btVector3() without setting x y and z to 0)
 	- Memory leaks everywhere! Bullet memory management rules = whoever allocates memory must delete it!
 - TODO
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
@@ -41,3 +42,4 @@
 		- Ragdolls, etc.
 	- Bullet has an internal profiler, grab the results from it and give them to vprof.
 	- When we're just about wrapping up, implement saving!
+	- IMPORTANT: INITIALIZE YOUR MEMORY FOR RELEASE BUILDS
