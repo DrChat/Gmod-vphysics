@@ -32,12 +32,13 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 		m_vSurfacePlane = pParams->surfacePlane;
 	}
 
-	m_fDensity = 1.0f; // Density of water, used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
+	m_fDensity = 1.0f;	// Density of water, used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
+						// FIXME: This might be available in the surface properities of the fluid object?
 	pFluidObject->EnableCollisions(false);
-	pFluidObject->SetContents(m_iContents); // Do we really need to do this?
+	pFluidObject->SetContents(m_iContents);
 	pFluidObject->SetFluidController(this);
 
-	m_pGhostObject = new btGhostObject();
+	m_pGhostObject = new btGhostObject;
 	m_pGhostObject->setUserPointer(pFluidObject);
 	m_pGhostObject->setCollisionShape(pFluidObject->GetObject()->getCollisionShape());
 	m_pGhostObject->setWorldTransform(pFluidObject->GetObject()->getWorldTransform());

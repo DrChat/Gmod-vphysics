@@ -19,8 +19,7 @@
 
 // Multithreading is so buggy as of now. Leave this disabled.
 #define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
-#define USE_PARALLEL_SOLVER 0 // TODO: This crashes right now!
-// See: http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=7016
+#define USE_PARALLEL_SOLVER 0
 
 #if MULTITHREAD
 #	include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
@@ -30,14 +29,14 @@
 #
 #	ifdef _WIN32
 #		include "BulletMultiThreaded/Win32ThreadSupport.h"
+#
+#		ifdef _DEBUG
+#			pragma comment(lib, "BulletMultiThreaded_Debug.lib")
+#		elif _RELEASE
+#			pragma comment(lib, "BulletMultiThreaded_RelWithDebugInfo.lib")
+#		endif
 #	else
 #		include "BulletMultiThreaded/PosixThreadSupport.h"
-#	endif
-#
-#	ifdef _DEBUG
-#		pragma comment(lib, "BulletMultiThreaded_Debug.lib")
-#	elif _RELEASE
-#		pragma comment(lib, "BulletMultiThreaded_RelWithDebugInfo.lib")
 #	endif
 #endif
 
@@ -45,6 +44,7 @@
 #include "BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h"
 
 #include "BulletCollision/CollisionDispatch/btCollisionDispatcher.h"
+#include "BulletCollision/CollisionDispatch/btSimulationIslandManager.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
@@ -189,7 +189,9 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pConstraintEvent = NULL;
 	m_pObjectEvent = NULL;
 
-	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration;
+	btDefaultCollisionConstructionInfo cci;
+	cci.m_defaultMaxPersistentManifoldPoolSize = 32768;
+	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
 #if !MULTITHREAD
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
@@ -210,49 +212,49 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	iUniqueNum++;
 
 #	ifdef _WIN32
-		btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																			uniquenamecollision,
-																			processCollisionTask,
-																			createCollisionLocalStoreMemory,
-																			maxTasks));
+	btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																		uniquenamecollision,
+																		processCollisionTask,
+																		createCollisionLocalStoreMemory,
+																		maxTasks));
 
 #		if USE_PARALLEL_SOLVER
-			btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																					uniquenamesolver,
-																					SolverThreadFunc,
-																					SolverlsMemoryFunc,
-																					maxTasks));
-			solverThreadInterface->startSPU();
+	btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																		uniquenamesolver,
+																		SolverThreadFunc,
+																		SolverlsMemoryFunc,
+																		maxTasks));
+	solverThreadInterface->startSPU();
 #		endif
 #	else
-		btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																			uniquenamecollision,
-																			processCollisionTask,
-																			createCollisionLocalStoreMemory,
-																			maxTasks));
+	btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+																		uniquenamecollision,
+																		processCollisionTask,
+																		createCollisionLocalStoreMemory,
+																		maxTasks));
 
 #		if USE_PARALLEL_SOLVER
-			btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																					uniquenamesolver,
-																					SolverThreadFunc,
-																					SolverlsMemoryFunc,
-																					maxTasks));
+	btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+																		uniquenamesolver,
+																		SolverThreadFunc,
+																		SolverlsMemoryFunc,
+																		maxTasks));
 #		endif
 #	endif
 
 #	if USE_PARALLEL_SOLVER
-		m_pThreadSupportSolver = solverThreadInterface;
+	m_pThreadSupportSolver = solverThreadInterface;
 #	endif
 
 	m_pThreadSupportCollision = threadInterface;
 	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
 
 #	if USE_PARALLEL_SOLVER
-		m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface);
-		//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
-		m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
+	m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface);
+	//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
+	m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
 #	else
-		m_pBulletSolver = new btSequentialImpulseConstraintSolver();
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver();
 #	endif // USE_PARARLLEL_SOLVER
 #endif // MULTITHREAD
 
@@ -274,12 +276,17 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_perfparams->Defaults();
 
 #if MULTITHREAD
-	m_pBulletEnvironment->getSolverInfo().m_numIterations = 4;
+	m_pBulletEnvironment->getSolverInfo().m_numIterations = maxTasks;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
+#	if USE_PARALLEL_SOLVER
+	// Required for parallel solver (undocumented lolololo)
+	m_pBulletEnvironment->getSimulationIslandManager()->setSplitIslands(false);
+#	endif
 #endif
 
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
+	m_pBulletEnvironment->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
 
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;
@@ -405,7 +412,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 }
 
 IPhysicsFluidController *CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
-	CPhysicsFluidController *pFluid = ::CreateFluidController(this, static_cast<CPhysicsObject*>(pFluidObject), pParams);
+	CPhysicsFluidController *pFluid = ::CreateFluidController(this, (CPhysicsObject *)pFluidObject, pParams);
 	m_fluids.AddToTail( pFluid );
 	return pFluid;
 }
@@ -482,6 +489,7 @@ void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup
 
 IPhysicsShadowController *CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
 	if (!pObject) return NULL;
+
 	CShadowController *pController = new CShadowController((CPhysicsObject *)pObject, allowTranslation, allowRotation);
 	m_controllers.AddToTail(pController);
 	return pController;
@@ -489,11 +497,14 @@ IPhysicsShadowController *CPhysicsEnvironment::CreateShadowController(IPhysicsOb
 
 void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController *pController) {
 	if (!pController) return;
+
 	m_controllers.FindAndRemove((CShadowController *)pController);
-	delete pController;
+	delete (CShadowController *)pController;
 }
 
 IPhysicsPlayerController *CPhysicsEnvironment::CreatePlayerController(IPhysicsObject *pObject) {
+	if (!pObject) return NULL;
+
 	CPlayerController *pController = new CPlayerController((CPhysicsObject *)pObject);
 	m_controllers.AddToTail(pController);
 	return pController;
@@ -501,8 +512,9 @@ IPhysicsPlayerController *CPhysicsEnvironment::CreatePlayerController(IPhysicsOb
 
 void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController *pController) {
 	if (!pController) return;
+
 	m_controllers.FindAndRemove((CPlayerController *)pController);
-	delete pController;
+	delete (CPlayerController *)pController;
 }
 
 IPhysicsMotionController *CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
@@ -513,11 +525,14 @@ IPhysicsMotionController *CPhysicsEnvironment::CreateMotionController(IMotionEve
 
 void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pController) {
 	if (!pController) return;
+
 	m_controllers.FindAndRemove((CPhysicsMotionController *)pController);
-	delete pController;
+	delete (CPhysicsMotionController *)pController;
 }
 
 IPhysicsVehicleController *CPhysicsEnvironment::CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
+	if (!pVehicleBodyObject) return NULL;
+
 	return ::CreateVehicleController(this, (CPhysicsObject *)pVehicleBodyObject, params, nVehicleType, pGameTrace);
 }
 

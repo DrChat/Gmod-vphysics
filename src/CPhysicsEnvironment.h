@@ -6,7 +6,8 @@ class btCollisionConfiguration;
 class btDispatcher;
 class btBroadphaseInterface;
 class btConstraintSolver;
-class btDynamicsWorld;
+class btSoftRigidDynamicsWorld;
+
 class IController;
 class CDeleteQueue;
 class CCollisionSolver;
@@ -144,7 +145,7 @@ private:
 	btCollisionDispatcher *					m_pBulletDispatcher;
 	btBroadphaseInterface *					m_pBulletBroadphase;
 	btConstraintSolver *					m_pBulletSolver;
-	btDynamicsWorld *						m_pBulletEnvironment;
+	btSoftRigidDynamicsWorld *				m_pBulletEnvironment;
 	btOverlappingPairCallback *				m_pBulletGhostCallback;
 
 	CUtlVector<IPhysicsObject *>			m_objects;

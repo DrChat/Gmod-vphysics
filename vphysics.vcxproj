@@ -43,13 +43,13 @@
     <_ProjectFileVersion>11.0.50214.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)build\bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>vphysics</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)build\bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>vphysics</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -95,8 +95,9 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>_WINDLL;_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision_RelWithDebugInfo.lib;BulletDynamics_RelWithDebugInfo.lib;BulletSoftBody_RelWithDebugInfo.lib;LinearMath_RelWithDebugInfo.lib;%(AdditionalDependencies)</AdditionalDependencies>

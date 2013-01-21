@@ -542,7 +542,7 @@ bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **cont
 			}
 
 			if (contactObject) {
-				*contactObject = (IPhysicsObject *)obA->getUserPointer();
+				*contactObject = (IPhysicsObject *)obB->getUserPointer();
 			}
 
 			return true;
@@ -554,7 +554,7 @@ bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **cont
 			}
 
 			if (contactObject) {
-				*contactObject = (IPhysicsObject *)obB->getUserPointer();
+				*contactObject = (IPhysicsObject *)obA->getUserPointer();
 			}
 
 			return true;
@@ -732,8 +732,12 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
 	if (surface) {
 		m_pObject->setFriction(surface->physics.friction);
+		//m_pObject->setRestitution(surface->physics.elasticity); // FIXME: metal_bouncy has elasticity of 1000?
 		// Note to self: using these dampening values = breakdancing fridges http://dl.dropbox.com/u/4838268/gm_construct%202012-4-24%2004-50-26.webm
+		// Dampening = 0 always for some reason (not a problem with our key parser looking for the wrong names)
 		//m_pObject->setDamping(surface->physics.dampening, surface->physics.dampening);
+	} else {
+		Warning("Physics model \"%s\" created with invalid material index!", GetName());
 	}
 
 	// Drag calculations converted from  2003 source code
@@ -837,7 +841,9 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	if (!isStatic)
 		shape->calculateLocalInertia(mass, inertia);
-	btMotionState *motionstate = new btMassCenterMotionState(transform, masscenter);
+
+	btMassCenterMotionState *motionstate = new btMassCenterMotionState(masscenter);
+	motionstate->setGraphicTransform(transform);
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape, inertia);
 
 	if (pParams) {

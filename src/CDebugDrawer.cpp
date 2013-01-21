@@ -25,10 +25,10 @@
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
 static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)");
 
-CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(NULL) {
+CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(NULL), m_pDisplay(NULL) {
 	m_pEnv = pEnv;
 	setDebugMode(DBG_DrawAabb | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
-				DBG_DrawNormals | DBG_DrawWireframe);
+				DBG_DrawNormals);
 
 #if RENDER_SDL
 	SDL_Init(SDL_INIT_VIDEO);
@@ -37,7 +37,7 @@ CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) :
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	Display = SDL_SetVideoMode(640, 480, 32, SDL_OPENGL);
+	m_pDisplay = SDL_SetVideoMode(640, 480, 32, SDL_OPENGL);
 
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
@@ -64,7 +64,7 @@ CDebugDrawer::~CDebugDrawer() {
 	CProfileManager::Release_Iterator(m_pProfIterator);
 
 #if RENDER_SDL
-	SDL_FreeSurface(Display);
+	SDL_FreeSurface(m_pDisplay);
 	SDL_Quit();
 #endif
 }

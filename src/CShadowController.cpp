@@ -112,7 +112,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	object->setAngularVelocity(rot_speed);
 	
 	// HACK: Replace this soon!
-	//*
 	if (cvar_shadowfix.GetBool()) {
 		object->setAngularVelocity(btVector3(0, 0, 0));
 		btTransform targTrans;
@@ -120,7 +119,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		targTrans.setRotation(params.targetRotation);
 		object->setWorldTransform(targTrans);
 	}
-	//*/
 
 	return secondsToArrival;
 }
@@ -163,6 +161,8 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_pObject = pObject;
 	m_shadow.dampFactor = 1.0f;
 	m_shadow.teleportDistance = 0;
+	m_shadow.targetPosition.setZero();
+	m_shadow.targetRotation = btQuaternion::getIdentity();
 	m_bPhysicallyControlled = false;
 
 	m_allowPhysicsMovement = allowTranslation;

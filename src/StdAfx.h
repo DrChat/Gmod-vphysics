@@ -49,14 +49,14 @@
 // Class is mainly used for bullet -> game position. Bullet will only get the transform from this
 // if we're a kinematic object.
 // We have a mass center motion state because bullet sees the mass center as the origin of the object,
-// but HL sees the mass center independently.
+// but HL sees the mass center as an offset.
 struct btMassCenterMotionState : public btMotionState {
 	btTransform	m_centerOfMassOffset;
 	btTransform m_worldTrans;
 	void *		m_userPointer;
 
-	btMassCenterMotionState(const btTransform &startTrans = btTransform::getIdentity(), const btTransform &centerOfMassOffset = btTransform::getIdentity())
-		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(startTrans * centerOfMassOffset), m_userPointer(0)
+	btMassCenterMotionState(const btTransform &centerOfMassOffset = btTransform::getIdentity())
+		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(btTransform::getIdentity()), m_userPointer(0)
 	{
 	}
 

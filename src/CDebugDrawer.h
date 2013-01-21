@@ -35,7 +35,7 @@ class CDebugDrawer : public btIDebugDraw {
 	private:
 		int						m_debugMode;
 		btCollisionWorld *		m_world;
-		SDL_Surface *			Display;
+		SDL_Surface *			m_pDisplay;
 		CProfileIterator *		m_pProfIterator;
 
 		IVPhysicsDebugOverlay *	m_overlay;
