@@ -35,6 +35,10 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	btTransform transform;
 	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
 
+	//----------------------------------------------------------
+	// Translation
+	//----------------------------------------------------------
+
 	btVector3 posbull = transform.getOrigin();
 	btVector3 delta_position = params.targetPosition - posbull;
 
@@ -63,15 +67,19 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	ComputeController(speed, delta_position, params.maxSpeed, fraction * invDt, params.dampFactor);
 	object->setLinearVelocity(speed);
 
-	params.lastPosition = posbull + speed * dt;
+	// FYI: IVP code does (v2 * factor2) + v1
+	params.lastPosition = posbull + (speed * dt);
 
-	// Set the angles
+	//----------------------------------------------------------
+	// Rotation
+	//----------------------------------------------------------
 	btVector3 deltaAngles;
 	btQuaternion deltaRotation;
 	QuaternionDiff(params.targetRotation, transform.getRotation(), deltaRotation);
-
-	//*
+	
 	// When the target rotation angle is b/t 1 and 5, screwups start occurring.
+	// Convert delta quaternion to an angular impulse
+	// RULED OUT THIS CONVERSION FOR CAUSE OF BUG: DIFFERENT CONVERSION METHOD CAUSES SAME ISSUES
 	btVector3 axis = deltaRotation.getAxis();
 	btScalar angle = deltaRotation.getAngle();
 	axis.normalize();
@@ -82,7 +90,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	}
 
 	deltaAngles = axis * angle;
-	//*/
 
 	btVector3 rot_speed = object->getAngularVelocity();
 	// DEBUG
@@ -99,10 +106,33 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 			if (pOverlay) {
 				Vector origin;
 				ConvertPosToHL(params.targetRotation.getAxis(), origin);
-				pOverlay->AddTextOverlay(origin, 0, -1, "%f %f %f", origin.x, origin.y, origin.z);
-				pOverlay->AddTextOverlay(origin, 1, -1, "%f", params.targetRotation.getAngle());
+				pOverlay->AddTextOverlay(origin, 0, 0, "target quat");
+				pOverlay->AddTextOverlay(origin, 1, 0, "%f %f %f", params.targetRotation.getAxis().x(), params.targetRotation.getAxis().y(), params.targetRotation.getAxis().z());
+				pOverlay->AddTextOverlay(origin, 2, 0, "%f", params.targetRotation.getAngle());
 				pOverlay->AddLineOverlay(Vector(0, 0, 0), origin, 255, 0, 0, false, 0);
 				pOverlay->AddTextOverlay(Vector(0, 0, 0), 0, 0, "Origin");
+
+				Vector curOrigin;
+				ConvertPosToHL(transform.getRotation().getAxis(), curOrigin);
+				pOverlay->AddTextOverlay(curOrigin, 0, 0, "current transform quat");
+				pOverlay->AddTextOverlay(curOrigin, 1, 0, "%f %f %f", transform.getRotation().getAxis().x(), transform.getRotation().getAxis().y(), transform.getRotation().getAxis().z());
+				pOverlay->AddTextOverlay(curOrigin, 2, 0, "%f", transform.getRotation().getAngle());
+				pOverlay->AddLineOverlay(Vector(0, 0, 0), curOrigin, 255, 0, 0, false, 0);
+
+				Vector deltaOrigin;
+				ConvertPosToHL(deltaRotation.getAxis(), deltaOrigin);
+				pOverlay->AddTextOverlay(deltaOrigin, 0, 0, "delta quat");
+				pOverlay->AddTextOverlay(deltaOrigin, 1, 0, "%f %f %f", deltaRotation.getAxis().x(), deltaRotation.getAxis().y(), deltaRotation.getAxis().z());
+				pOverlay->AddTextOverlay(deltaOrigin, 2, 0, "%f", deltaRotation.getAngle());
+				pOverlay->AddLineOverlay(Vector(0, 0, 0), deltaOrigin, 255, 0, 0, false, 0);
+
+				/*
+				Vector deltaAng;
+				ConvertPosToHL(deltaAngles, deltaAng);
+				pOverlay->AddTextOverlay(deltaAng, 0, 0, "Delta Angle");
+				pOverlay->AddTextOverlay(deltaAng, 1, 0, "%f %f %f", deltaAngles.x(), deltaAngles.y(), deltaAngles.z());
+				pOverlay->AddLineOverlay(Vector(0, 0, 0), deltaAng, 255, 0, 0, false, 0);
+				*/
 			}
 		}
 	}

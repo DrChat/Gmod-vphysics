@@ -58,9 +58,9 @@ bool CPhysicsObject::IsStatic() const {
 // Call stack comes from CPhysicsHook:FrameUpdatePostEntityThink to IVEngineServer::SolidMoved
 // Perhaps the game is receiving flawed data somewhere, as the engine makes almost no calls to vphysics
 bool CPhysicsObject::IsAsleep() const {
-	return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
 	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	//return false;
+	return false;
 }
 
 bool CPhysicsObject::IsTrigger() const {
@@ -279,6 +279,20 @@ void CPhysicsObject::SetInertia(const Vector &inertia) {
 	m_pObject->updateInertiaTensor();
 }
 
+// UNEXPOSED
+void CPhysicsObject::SetGravity(const Vector &gravityVector) {
+	btVector3 tmp;
+	ConvertPosToBull(gravityVector, tmp);
+	m_pObject->setGravity(tmp);
+}
+
+// UNEXPOSED
+Vector CPhysicsObject::GetGravity() {
+	Vector tmp;
+	ConvertPosToHL(m_pObject->getGravity(), tmp);
+	return tmp;
+}
+
 void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
 	if (!speed && !rot) return;
 
@@ -328,7 +342,7 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 }
 
 float CPhysicsObject::GetSphereRadius() const {
-	btCollisionShape  *shape = m_pObject->getCollisionShape();
+	btCollisionShape *shape = m_pObject->getCollisionShape();
 	if (shape->getShapeType() != SPHERE_SHAPE_PROXYTYPE) return 0;
 	btSphereShape *sphere = (btSphereShape*)shape;
 	return ConvertDistanceToHL(sphere->getRadius());

@@ -89,10 +89,13 @@ bool CPlayerController::IsInContact() {
 		btPersistentManifold *contactManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
 		const btCollisionObject *obA = contactManifold->getBody0();
 		const btCollisionObject *obB = contactManifold->getBody1();
+		CPhysicsObject *pPhysA = (CPhysicsObject *)obA->getUserPointer();
+		CPhysicsObject *pPhysB = (CPhysicsObject *)obB->getUserPointer();
 
-		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject() || obB == m_pObject->GetObject())) {
-			if (((CPhysicsObject *)obA->getUserPointer())->IsStatic() || ((CPhysicsObject *)obB->getUserPointer())->IsStatic())
+		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject())) {
+			if (pPhysB->IsStatic() || pPhysB->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION)
 				continue;
+			
 
 			return true;
 		}
@@ -165,7 +168,6 @@ IPhysicsObject *CPlayerController::GetObject() {
 	return m_pObject;
 }
 
-// Called in CalculateObjectStress in physics_impact_damage.cpp, may apply damage to players when hit with an object
 void CPlayerController::GetLastImpulse(Vector *pOut) {
 	if (!pOut) return;
 
@@ -210,9 +212,7 @@ void CPlayerController::Tick(float deltaTime) {
 
 	btTransform transform;
 	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
-	btVector3 cur_pos = transform.getOrigin();
-
-	btVector3 delta_position = m_targetPosition - cur_pos;
+	btVector3 delta_position = m_targetPosition - transform.getOrigin();
 
 	//FIXME: figure out what shift_core_f_object is
 	// shift_core_f_object is a floating point vector3
@@ -225,11 +225,13 @@ void CPlayerController::Tick(float deltaTime) {
 		return;
 	}
 
+	/*
 	if (!m_onground) {
 		btVector3 pgrav = world->getGravity();
 		btVector3 gravSpeed = pgrav * deltaTime;
 		body->setLinearVelocity(body->getLinearVelocity() - gravSpeed);
 	}
+	*/
 
 	btVector3 speed = body->getLinearVelocity();
 	ComputeController(speed, delta_position, m_maxSpeed, psiScale / deltaTime, m_dampFactor);

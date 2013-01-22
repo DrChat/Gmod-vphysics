@@ -13,6 +13,7 @@
 * CLASS CCollisionQuery
 ****************************/
 
+// FIXME: Bullet doesn't use triangles to represent shapes internally!
 class CCollisionQuery : public ICollisionQuery {
 	public:
 		CCollisionQuery(btCollisionShape *pShape) {m_pShape = pShape;}
@@ -26,8 +27,6 @@ class CCollisionQuery : public ICollisionQuery {
 		uint				GetGameData(int convexIndex);
 		// Gets the triangle's verts to an array
 		void				GetTriangleVerts(int convexIndex, int triangleIndex, Vector *verts);
-		
-		// UNDONE: This doesn't work!!!
 		void				SetTriangleVerts(int convexIndex, int triangleIndex, const Vector *verts);
 		
 		// returns the 7-bit material index
@@ -46,6 +45,33 @@ int CCollisionQuery::ConvexCount() {
 	}
 
 	return 0;
+}
+
+int CCollisionQuery::TriangleCount(int convexIndex) {
+	NOT_IMPLEMENTED
+	return 0;
+}
+
+unsigned int CCollisionQuery::GetGameData(int convexIndex) {
+	NOT_IMPLEMENTED
+	return 0;
+}
+
+void CCollisionQuery::GetTriangleVerts(int convexIndex, int triangleIndex, Vector *verts) {
+	NOT_IMPLEMENTED
+}
+
+void CCollisionQuery::SetTriangleVerts(int convexIndex, int triangleIndex, const Vector *verts) {
+	NOT_IMPLEMENTED
+}
+
+int CCollisionQuery::GetTriangleMaterialIndex(int convexIndex, int triangleIndex) {
+	NOT_IMPLEMENTED
+	return 0;
+}
+
+void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleIndex, int index7bits) {
+	NOT_IMPLEMENTED
 }
 
 /****************************
@@ -552,6 +578,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
 		btCollisionShape *pShape = (btCollisionShape *)pVCollide->solids[i];
+		if (!pShape) continue;
 
 		// Compound shape? Delete all of it's children.
 		if (pShape->isCompound()) {

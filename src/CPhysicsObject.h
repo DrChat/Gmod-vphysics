@@ -49,17 +49,28 @@ class CPhysicsObject : public IPhysicsObject {
 		void								SetMass(float mass);
 		float								GetMass() const;
 		float								GetInvMass() const;
+
 		Vector								GetInertia() const;
 		Vector								GetInvInertia() const;
 		void								SetInertia(const Vector& inertia);
+
+		// UNEXPOSED
+		// TODO: Expose in new interface
+		void								SetGravity(const Vector &gravityVector);
+		Vector								GetGravity();
+
 		void								SetDamping(const float *speed, const float *rot);
 		void								GetDamping(float *speed, float *rot) const;
+
 		void								SetDragCoefficient(float *pDrag, float *pAngularDrag);
 		void								SetBuoyancyRatio(float ratio);
+
 		int									GetMaterialIndex() const;
 		void								SetMaterialIndex(int materialIndex);
+
 		unsigned int						GetContents() const;
 		void								SetContents(unsigned int contents);
+
 		float								GetSphereRadius() const;
 		float								GetEnergy() const;
 		Vector								GetMassCenterLocalSpace() const;
