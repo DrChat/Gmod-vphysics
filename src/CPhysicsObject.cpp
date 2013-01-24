@@ -77,6 +77,16 @@ bool CPhysicsObject::IsHinged() const {
 	return false;
 }
 
+bool CPhysicsObject::IsMoveable() const {
+	if (IsStatic() || !IsMotionEnabled()) return false;
+	return true;
+}
+
+bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
+	NOT_IMPLEMENTED
+	return false;
+}
+
 bool CPhysicsObject::IsCollisionEnabled() const {
 	return !(m_pObject->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
@@ -99,16 +109,6 @@ bool CPhysicsObject::IsDragEnabled() const {
 
 bool CPhysicsObject::IsMotionEnabled() const {
 	return m_bMotionEnabled;
-}
-
-bool CPhysicsObject::IsMoveable() const {
-	if (IsStatic() || !IsMotionEnabled()) return false;
-	return true;
-}
-
-bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
-	NOT_IMPLEMENTED
-	return false;
 }
 
 void CPhysicsObject::EnableCollisions(bool enable) {
@@ -494,6 +494,7 @@ void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &worldPosition) {
 	Vector local;
 	WorldToLocal(&local, worldPosition);
+
 	btVector3 force, offset;
 	ConvertForceImpulseToBull(forceVector, force);
 	ConvertPosToBull(local, offset);
@@ -751,7 +752,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		m_pObject->setFriction(surface->physics.friction);
 		m_pObject->setRestitution(surface->physics.elasticity > 1 ? 1 : surface->physics.elasticity);
 
-		// Dampening = 0 always for some reason (not a problem with our key parser looking for the wrong names)
+		// Dampening = 0 always for some reason
 		//m_pObject->setDamping(surface->physics.dampening, surface->physics.dampening);
 	} else {
 		Warning("Physics model \"%s\" created with invalid material index!", GetName());

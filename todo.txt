@@ -9,9 +9,6 @@
 	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
 		- Appears to be with the world only
 		- Flatgrass: Happens whenever something collides (with the world only?): Object m_companionId == -2
-	- SHADOW CONTROLLERS
-		- >70 to <-70 angles on all 3 axis seem to be the spots our calculations fuck up on
-			- At 71 for example, the calculations slowly become more inaccurate.
 	- MAPS
 		- SOLID_BSP brushes take too long for calculations(construct white room)! Collisions between them and the world are being calculated!
 			- Should we assign the world geometry a collision group, and have our shadow controller not calculate collisions against that group?
@@ -27,7 +24,7 @@
 	- Constraints
 		- If a constrained object goes too far away from the world, the game crashes.
 	- Some concave meshes (trashdumpster02) aren't working properly.
-	- Shadow controllers crash some of the time in release builds
+	- Shadow controllers crash some of the time in release builds (solved with hack, needs proper fix)
 		- Related to memory being uninitialized somewhere (ex. btVector3() without setting x y and z to 0)
 	- Memory leaks everywhere! Bullet memory management rules = whoever allocates memory must delete it!
 - TODO

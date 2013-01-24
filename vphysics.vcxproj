@@ -66,6 +66,7 @@
       <PreprocessorDefinitions>_WINDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>

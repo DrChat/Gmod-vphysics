@@ -138,6 +138,7 @@ int CPlayerController::GetShadowPosition(Vector *position, QAngle *angles) {
 	if (position) ConvertPosToHL(transform.getOrigin(), *position);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 
+	// Yep. We're returning a variable totally unrelated to the shadow's position.
 	return m_iTicksSinceUpdate;
 }
 

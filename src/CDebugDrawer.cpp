@@ -2,11 +2,6 @@
 
 #include <edict.h>
 
-#if RENDER_SDL
-#	include <SDL.h>
-#	include <SDL_opengl.h>
-#endif
-
 #include <LinearMath/btQuickprof.h>
 
 #include "CPhysicsEnvironment.h"
@@ -14,6 +9,11 @@
 #include "convert.h"
 
 #include "tier0/vprof.h"
+
+#if RENDER_SDL
+#	include <SDL.h>
+#	include <SDL_opengl.h>
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"

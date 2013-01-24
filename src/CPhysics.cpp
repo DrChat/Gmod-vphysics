@@ -14,7 +14,10 @@
 
 void *CPhysics::QueryInterface(const char *pInterfaceName) {
 	CreateInterfaceFn func = Sys_GetFactoryThis();
-	return func(pInterfaceName, 0);
+	if (!func)
+		return NULL;
+
+	return func(pInterfaceName, NULL);
 }
 
 InitReturnVal_t CPhysics::Init() {
@@ -36,7 +39,7 @@ IPhysicsEnvironment *CPhysics::CreateEnvironment() {
 
 void CPhysics::DestroyEnvironment(IPhysicsEnvironment *pEnvironment) {
 	m_envList.FindAndRemove(pEnvironment);
-	delete pEnvironment;
+	delete (CPhysicsEnvironment *)pEnvironment;
 }
 
 IPhysicsEnvironment *CPhysics::GetActiveEnvironmentByIndex(int index) {
@@ -55,12 +58,13 @@ IPhysicsObjectPairHash *CPhysics::CreateObjectPairHash() {
 }
 
 void CPhysics::DestroyObjectPairHash(IPhysicsObjectPairHash *pHash) {
-	delete (CPhysicsObjectPairHash*)pHash;
+	delete (CPhysicsObjectPairHash *)pHash;
 }
 
 IPhysicsCollisionSet *CPhysics::FindOrCreateCollisionSet(unsigned int id, int maxElementCount) {
 	if (m_collisionSets.IsValidIndex(id))
 		return m_collisionSets[id];
+
 	CPhysicsCollisionSet *set = new CPhysicsCollisionSet(maxElementCount);
 	//m_collisionSets.InsertBefore(id, set); // FIXME: Assert hit with ragdolls!
 	m_collisionSets.AddToTail(set);

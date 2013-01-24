@@ -207,6 +207,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 
 // Called every frame when an object is reported to be asleep in CPhysicsObject::IsAsleep!
 void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles) {
+	VPROF_BUDGET("CPhysicsCollision::CollideGetAABB", VPROF_BUDGETGROUP_PHYSICS);
 	if (!pCollide || (!pMins && !pMaxs)) return;
 
 	// Bullet returns very different AABBs than Havok.

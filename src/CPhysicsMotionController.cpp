@@ -22,7 +22,7 @@ CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhys
 	m_handler = pHandler;
 	m_pEnv = pEnv;
 
-	SetPriority(MEDIUM_PRIORITY);
+	//SetPriority(MEDIUM_PRIORITY);
 }
 
 CPhysicsMotionController::~CPhysicsMotionController() {

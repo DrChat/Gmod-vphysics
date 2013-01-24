@@ -18,6 +18,15 @@ int lPhysStats(lua_State *state) {
 	return 0;
 }
 
+// FIXME: The userdata isn't an IPhysicsObject. Figure out what it is.
+int lPhysObj_SetGravity(lua_State *state) {
+	Msg("top: %d\n", LUA->Top());
+	for (int i = 1; i <= LUA->Top(); i++)
+		Msg("type: %s\n", LUA->GetTypeName(LUA->GetType(i)));
+
+	return 0;
+}
+
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory)
@@ -31,6 +40,13 @@ GMOD_MODULE_OPEN() {
 		LUA->CreateTable();
 			LUA->PushCFunction(lPhysStats); LUA->SetField(-2, "printstats");
 		LUA->SetField(-2, "vphysics");
+	LUA->Pop();
+
+	// Testing adding new functions to PhysObj lua class
+	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG);
+		LUA->GetField(-1, "PhysObj");
+			LUA->PushCFunction(lPhysObj_SetGravity); LUA->SetField(-2, "SetGravity");
+		LUA->Pop();
 	LUA->Pop();
 
 	return 0;

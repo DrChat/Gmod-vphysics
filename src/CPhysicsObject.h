@@ -10,17 +10,19 @@ class CPhysicsObject : public IPhysicsObject {
 	public:
 											CPhysicsObject();
 											~CPhysicsObject();
+
 		bool								IsStatic() const;
 		bool								IsAsleep() const;
 		bool								IsTrigger() const;
 		bool								IsFluid() const;
 		bool								IsHinged() const;
+		bool								IsMoveable() const;
+		bool								IsAttachedToConstraint(bool bExternalOnly) const;
+
 		bool								IsCollisionEnabled() const;
 		bool								IsGravityEnabled() const;
 		bool								IsDragEnabled() const;
 		bool								IsMotionEnabled() const;
-		bool								IsMoveable() const;
-		bool								IsAttachedToConstraint(bool bExternalOnly) const;
 
 		void								EnableCollisions(bool enable);
 		void								EnableGravity(bool enable);
@@ -54,8 +56,7 @@ class CPhysicsObject : public IPhysicsObject {
 		Vector								GetInvInertia() const;
 		void								SetInertia(const Vector& inertia);
 
-		// UNEXPOSED
-		// TODO: Expose in new interface
+		// TO EXPOSE
 		void								SetGravity(const Vector &gravityVector);
 		Vector								GetGravity();
 
