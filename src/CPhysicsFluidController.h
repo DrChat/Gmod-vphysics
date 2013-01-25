@@ -15,7 +15,7 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		void					SetGameData(void *pGameData);
 		void *					GetGameData() const;
 
-		void					GetSurfacePlane( Vector *pNormal, float *pDist ) const;
+		void					GetSurfacePlane(Vector *pNormal, float *pDist) const;
 		float					GetDensity() const;
 		void					WakeAllSleepingObjects();
 		int						GetContents() const;

@@ -2,7 +2,9 @@
 #include <tier1/tier1.h>
 #include <tier1/KeyValues.h>
 #include <tier1/utlsymbol.h>
+
 #include <vphysics_interface.h>
+#include "vphysics_interfaceV32.h"
 #include <vphysics/collision_set.h>
 #include <vphysics/constraints.h>
 #include <vphysics/friction.h>
@@ -13,6 +15,7 @@
 #include <vphysics/vehicles.h>
 #include <vphysics/virtualmesh.h>
 #include <vcollide_parse.h>
+
 #include <cmodel.h>
 
 #include <btBulletDynamicsCommon.h>
@@ -65,8 +68,4 @@ struct btMassCenterMotionState : public btMotionState {
 
 	void getGraphicTransform(btTransform &graphTrans) const { graphTrans = m_worldTrans * m_centerOfMassOffset.inverse(); }	// Bullet -> HL
 	void setGraphicTransform(const btTransform &graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }			// HL -> Bullet
-};
-
-struct PhysicsShapeInfo {
-	btVector3 massCenter;
 };

@@ -222,11 +222,12 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	Vector bodyPosition;
 	QAngle bodyAngles;
-	m_pBody->GetPosition( &bodyPosition, &bodyAngles );
+	m_pBody->GetPosition(&bodyPosition, &bodyAngles);
 	matrix3x4_t matrix;
-	AngleMatrix( bodyAngles, bodyPosition, matrix );
+	AngleMatrix(bodyAngles, bodyPosition, matrix);
 
 	// Note: This will only work with vehicles that have 2 wheels per axle
+	// TODO: Compensate for the vehicle's mass offset!
 	if (wheelIndex & 1) {
 		position += axle.wheelOffset;
 	} else {
@@ -251,7 +252,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	params.rotInertiaLimit = 0;
 	// needs to be in HL units because we're calling through the "outer" interface to create
 	// the wheels
-	float radius = ConvertDistanceToHL( axle.wheels.radius );
+	float radius = ConvertDistanceToHL(axle.wheels.radius);
 	float r3 = radius * radius * radius;
 	params.volume = (4 / 3) * M_PI * r3;
 

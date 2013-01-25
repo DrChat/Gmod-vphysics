@@ -188,9 +188,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pDebugOverlay = NULL;
 	m_pConstraintEvent = NULL;
 	m_pObjectEvent = NULL;
+	m_pCollisionEvent = NULL;
 
 	btDefaultCollisionConstructionInfo cci;
-	cci.m_defaultMaxPersistentManifoldPoolSize = 32768;
+	cci.m_defaultMaxPersistentManifoldPoolSize = 65536;
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
 #if !MULTITHREAD
@@ -356,6 +357,10 @@ IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
 	return m_pDebugOverlay;
 }
 
+btIDebugDraw *CPhysicsEnvironment::GetDebugDrawer() {
+	return m_debugdraw;
+}
+
 void CPhysicsEnvironment::SetGravity(const Vector &gravityVector) {
 	btVector3 temp;
 	ConvertPosToBull(gravityVector, temp);
@@ -413,7 +418,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 
 IPhysicsFluidController *CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
 	CPhysicsFluidController *pFluid = ::CreateFluidController(this, (CPhysicsObject *)pFluidObject, pParams);
-	m_fluids.AddToTail( pFluid );
+	m_fluids.AddToTail(pFluid);
 	return pFluid;
 }
 
@@ -741,8 +746,6 @@ IPhysicsObject *CPhysicsEnvironment::UnserializeObjectFromBuffer(void *pGameData
 }
 
 void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
-	NOT_IMPLEMENTED // UNDONE: Unsure what this functions is supposed to do its not documentated anywhere so for the moment it shall just be disabled
-	// Andrew; this tells the physics environment to handle a callback whenever a physics object is removed that was attached to a constraint
 	m_bConstraintNotify = bEnable;
 }
 

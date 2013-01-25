@@ -1,8 +1,7 @@
 #ifndef CPHYSICSOBJECTPAIRHASH_H
 #define CPHYSICSOBJECTPAIRHASH_H
 
-struct pair_hash_list
-{
+struct pair_hash_list {
 	void *object0;
 	void *object1;
 
@@ -10,8 +9,7 @@ struct pair_hash_list
 	pair_hash_list *next;
 };
 
-class CPhysicsObjectPairHash : public IPhysicsObjectPairHash
-{
+class CPhysicsObjectPairHash : public IPhysicsObjectPairHash {
 	public:
 						CPhysicsObjectPairHash();
 		virtual void	AddObjectPair(void *pObject0, void *pObject1);

@@ -40,10 +40,9 @@ void CPhysicsObjectPairHash::RemoveObjectPair(void *pObject0, void *pObject1) {
 			else
 				m_pHashList[entry] = hash->next;
 
-			if (hash->next) {
+			if (hash->next)
 				hash->next->previous = hash->previous;
-				hashnext = hash->next;	// Fix for access violation
-			}
+			hashnext = hash->next;	// Fix for access violation
 
 			delete hash;
 		} else {
@@ -62,19 +61,13 @@ void CPhysicsObjectPairHash::RemoveAllPairsForObject(void *pObject0) {
 				else
 					m_pHashList[i] = hash->next;
 
-				if (hash->next) {
+				if (hash->next)
 					hash->next->previous = hash->previous;
-					hashnext = hash->next;	// Fix for access violation
-				} else {
-					hashnext = NULL;
-				}
+				hashnext = hash->next;	// Fix for access violation
 
 				delete hash;
 			} else {
-				if (hash->next)
-					hashnext = hash->next;
-				else
-					hashnext = NULL;
+				hashnext = hash->next;
 			}
 		}
 	}

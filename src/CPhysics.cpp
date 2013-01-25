@@ -47,8 +47,7 @@ IPhysicsEnvironment *CPhysics::GetActiveEnvironmentByIndex(int index) {
 	return m_envList[index];
 }
 
-// UNEXPOSED
-// TODO: Expose this function in a newer interface!
+// TODO: EXPOSE
 int CPhysics::GetNumActiveEnvironments() {
 	return m_envList.Count();
 }

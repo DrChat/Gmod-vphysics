@@ -279,15 +279,13 @@ void CPhysicsObject::SetInertia(const Vector &inertia) {
 	m_pObject->updateInertiaTensor();
 }
 
-// UNEXPOSED
 void CPhysicsObject::SetGravity(const Vector &gravityVector) {
 	btVector3 tmp;
 	ConvertPosToBull(gravityVector, tmp);
 	m_pObject->setGravity(tmp);
 }
 
-// UNEXPOSED
-Vector CPhysicsObject::GetGravity() {
+Vector CPhysicsObject::GetGravity() const {
 	Vector tmp;
 	ConvertPosToHL(m_pObject->getGravity(), tmp);
 	return tmp;
@@ -309,16 +307,13 @@ void CPhysicsObject::GetDamping(float *speed, float *rot) const {
 	if (rot) *rot = m_pObject->getAngularDamping();
 }
 
-void CPhysicsObject::SetDragCoefficient( float *pDrag, float *pAngularDrag )
+void CPhysicsObject::SetDragCoefficient(float *pDrag, float *pAngularDrag)
 {
-	if ( pDrag )
-	{
+	if (pDrag)
 		m_dragCoefficient = *pDrag;
-	}
-	if ( pAngularDrag )
-	{
+
+	if (pAngularDrag)
 		m_angDragCoefficient = *pAngularDrag;
-	}
 }
 
 void CPhysicsObject::SetBuoyancyRatio(float ratio) {
@@ -343,14 +338,16 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 
 float CPhysicsObject::GetSphereRadius() const {
 	btCollisionShape *shape = m_pObject->getCollisionShape();
-	if (shape->getShapeType() != SPHERE_SHAPE_PROXYTYPE) return 0;
-	btSphereShape *sphere = (btSphereShape*)shape;
+	if (shape->getShapeType() != SPHERE_SHAPE_PROXYTYPE)
+		return 0;
+
+	btSphereShape *sphere = (btSphereShape *)shape;
 	return ConvertDistanceToHL(sphere->getRadius());
 }
 
 float CPhysicsObject::GetEnergy() const {
 	float e = 0.5 * GetMass() * m_pObject->getLinearVelocity().dot(m_pObject->getLinearVelocity());
-	e =+ 0.5 * GetMass() * m_pObject->getAngularVelocity().dot(m_pObject->getAngularVelocity());
+	e += 0.5 * GetMass() * m_pObject->getAngularVelocity().dot(m_pObject->getAngularVelocity());
 	return ConvertEnergyToHL(e);
 }
 
@@ -416,6 +413,7 @@ void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *a
 
 void CPhysicsObject::SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	// FIXME: what is different from SetVelocity?
+	// Sets velocity in the same frame
 	SetVelocity(velocity, angularVelocity);
 }
 
@@ -441,6 +439,7 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 void CPhysicsObject::GetVelocityAtPoint(const Vector &worldPosition, Vector *pVelocity) const {
 	if (!pVelocity) return;
 
+	// FIXME: Doesn't getVelocityInLocalPoint take a vector in local space?
 	btVector3 vec;
 	ConvertPosToBull(worldPosition, vec);
 	ConvertPosToHL(m_pObject->getVelocityInLocalPoint(vec), *pVelocity);
@@ -512,7 +511,7 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 	NOT_IMPLEMENTED
 }
 
-// TODO: Thrusters call this
+// Thrusters call this
 void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	if (!centerVelocity && !centerAngularVelocity) return;
 
@@ -524,8 +523,8 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 
 float CPhysicsObject::CalculateLinearDrag(const Vector &unitDirection) const {
 	btVector3 bull_unitDirection;
-	ConvertDirectionToBull(unitDirection,bull_unitDirection);
-	return GetDragInDirection( &bull_unitDirection );
+	ConvertDirectionToBull(unitDirection, bull_unitDirection);
+	return GetDragInDirection(&bull_unitDirection);
 }
 
 float CPhysicsObject::CalculateAngularDrag(const Vector &objectSpaceRotationAxis) const {

@@ -28,6 +28,7 @@ public:
 
 	void									SetDebugOverlay(CreateInterfaceFn debugOverlayFactory);
 	IVPhysicsDebugOverlay *					GetDebugOverlay();
+	btIDebugDraw *							GetDebugDrawer();
 
 	void									SetGravity(const Vector& gravityVector);
 	void									GetGravity(Vector* pGravityVector) const;

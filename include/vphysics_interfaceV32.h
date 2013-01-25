@@ -7,7 +7,12 @@
 #endif
 
 #include "tier1/interface.h"
+#include "vphysics_interface.h"
 
-
+abstract_class IPhysicsObject1: public IPhysicsObject {
+	public:
+		virtual void		SetGravity(const Vector &gravityVector) = 0;
+		virtual Vector		GetGravity() const = 0;
+};
 
 #endif // VPHYSICS_INTERFACEV32_H

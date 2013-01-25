@@ -6,7 +6,7 @@ class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
 
-class CPhysicsObject : public IPhysicsObject {
+class CPhysicsObject : public IPhysicsObject1 {
 	public:
 											CPhysicsObject();
 											~CPhysicsObject();
@@ -56,9 +56,8 @@ class CPhysicsObject : public IPhysicsObject {
 		Vector								GetInvInertia() const;
 		void								SetInertia(const Vector& inertia);
 
-		// TO EXPOSE
 		void								SetGravity(const Vector &gravityVector);
-		Vector								GetGravity();
+		Vector								GetGravity() const;
 
 		void								SetDamping(const float *speed, const float *rot);
 		void								GetDamping(float *speed, float *rot) const;

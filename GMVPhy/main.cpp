@@ -1,6 +1,7 @@
 #include "GarrysMod/Lua/Interface.h"
 
 #include <vphysics_interface.h>
+#include "../include/vphysics_interfaceV32.h"
 
 IPhysics *g_pPhysics = NULL;
 

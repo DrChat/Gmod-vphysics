@@ -208,6 +208,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 
 	btTransform bullFrameInA = btTransform::getIdentity();
 	btTransform bullFrameInB = btTransform::getIdentity();
+	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef, 0));
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullFrameInA, bullFrameInB, true);
 
@@ -230,14 +231,11 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo *)pObjA->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo *)pObjB->GetObject()->getCollisionShape()->getUserPointer();
 
-	if (shapeInfo1)
-		obj1Pos -= shapeInfo1->massCenter;
-	if (shapeInfo2)
-		obj2Pos -= shapeInfo2->massCenter;
+	obj1Pos -= ((btMassCenterMotionState *)pObjA->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+	obj2Pos -= ((btMassCenterMotionState *)pObjB->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
+	// TODO: Not the correct constraint.
 	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos);
 	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock, CONSTRAINT_BALLSOCKET);
 }
@@ -254,13 +252,9 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 
 	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
-	PhysicsShapeInfo *shapeInfo1 = (PhysicsShapeInfo *)pObjA->GetObject()->getCollisionShape()->getUserPointer();
-	PhysicsShapeInfo *shapeInfo2 = (PhysicsShapeInfo *)pObjB->GetObject()->getCollisionShape()->getUserPointer();
 
-	if (shapeInfo1)
-		obj1Pos -= shapeInfo1->massCenter;
-	if (shapeInfo2)
-		obj2Pos -= shapeInfo2->massCenter;
+	obj1Pos -= ((btMassCenterMotionState *)pObjA->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+	obj2Pos -= ((btMassCenterMotionState *)pObjB->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
 	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength, CONSTRAINT_LENGTH);

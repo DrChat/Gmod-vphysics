@@ -1,6 +1,10 @@
 #ifndef CPHYSICSCOLLISION_H
 #define CPHYSICSCOLLISION_H
 
+struct PhysicsShapeInfo {
+	btVector3 massCenter;
+};
+
 class CPhysicsCollision : public IPhysicsCollision {
 	public:
 		CPhysConvex *			ConvexFromVerts(Vector **pVerts, int vertCount);
