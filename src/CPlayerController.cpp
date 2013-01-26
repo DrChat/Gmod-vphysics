@@ -70,7 +70,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	}
 
 	// AKA ensure_core_in_simulation
-	//m_pObject->GetObject()->activate(true);
+	m_pObject->GetObject()->activate(true);
 
 	m_pGround = (CPhysicsObject *)ground;
 
@@ -145,9 +145,9 @@ int CPlayerController::GetShadowPosition(Vector *position, QAngle *angles) {
 void CPlayerController::StepUp(float height) {
 	btVector3 step;
 	ConvertPosToBull(Vector(0, 0, height), step);
+
 	btRigidBody *pObject = m_pObject->GetObject();
-	btTransform transform;
-	((btMassCenterMotionState *)pObject->getMotionState())->getWorldTransform(transform);
+	btTransform transform = pObject->getWorldTransform();
 	transform.setOrigin(transform.getOrigin() + step);
 
 	pObject->setWorldTransform(transform);

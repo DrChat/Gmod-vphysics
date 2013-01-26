@@ -279,6 +279,8 @@ void CPhysicsObject::SetInertia(const Vector &inertia) {
 	m_pObject->updateInertiaTensor();
 }
 
+// FIXME: The API is confusing because we need to add the BT_DISABLE_WORLD_GRAVITY flag to the object
+// by calling EnableGravity(false)
 void CPhysicsObject::SetGravity(const Vector &gravityVector) {
 	btVector3 tmp;
 	ConvertPosToBull(gravityVector, tmp);
@@ -515,9 +517,13 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	if (!centerVelocity && !centerAngularVelocity) return;
 
-	btVector3 bullForceVector, bullWorldPosition;
-	ConvertForceImpulseToBull(forceVector, bullForceVector);
-	ConvertPosToBull(worldPosition, bullWorldPosition);
+	btVector3 force, pos;
+	ConvertForceImpulseToBull(forceVector, force);
+	ConvertPosToBull(worldPosition, pos);
+
+	pos = pos - m_pObject->getWorldTransform().getOrigin();
+	btVector3 cross = pos.cross(force);
+
 	NOT_IMPLEMENTED
 }
 
@@ -619,6 +625,8 @@ IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
 void CPhysicsObject::RemoveShadowController() {
 	if (m_pShadow)
 		m_pEnv->DestroyShadowController(m_pShadow);
+	RemoveCallbackFlags(CALLBACK_SHADOW_COLLISION);
+	AddCallbackFlags(CALLBACK_GLOBAL_FRICTION | CALLBACK_GLOBAL_COLLIDE_STATIC);
 
 	m_pShadow = NULL;
 }
