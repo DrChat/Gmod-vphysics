@@ -17,7 +17,6 @@
 class CCollisionQuery : public ICollisionQuery {
 	public:
 		CCollisionQuery(btCollisionShape *pShape) {m_pShape = pShape;}
-		~CCollisionQuery();
 
 		// number of convex pieces in the whole solid
 		int					ConvexCount();
@@ -280,12 +279,12 @@ CPhysCollide *CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 	btVector3 btmins, btmaxs;
 	ConvertPosToBull(mins, btmins);
 	ConvertPosToBull(maxs, btmaxs);
-	btVector3 halfsize = (btmaxs - btmins) / 2;
+	btVector3 halfsize = btVector3(btmaxs - btmins).absolute() / 2;
 
 	btBoxShape *box = new btBoxShape(halfsize);
 	btCompoundShape *shape = new btCompoundShape;
 
-	btTransform transform(btMatrix3x3::getIdentity(), btmins + halfsize);
+	btTransform transform(btMatrix3x3::getIdentity(), halfsize - btmins.absolute());
 	shape->addChildShape(transform, box);
 
 	return (CPhysCollide *)shape;
@@ -304,7 +303,6 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide,
 	return TraceBox(ray, MASK_ALL, NULL, pCollide, collideOrigin, collideAngles, ptr);
 }
 
-// FIXME: Lack of collision between players and objects might be caused by inaccuracy in this function?
 // TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
 	VPROF_BUDGET("CPhysicsCollision::TraceBox", VPROF_BUDGETGROUP_PHYSICS);
@@ -634,14 +632,11 @@ void CPhysicsCollision::DestroyDebugMesh(int vertCount, Vector *outVerts) {
 }
 
 ICollisionQuery *CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED
-	return NULL;
-	//return new CCollisionQuery();
+	return new CCollisionQuery((btCollisionShape *)pCollide);
 }
 
 void CPhysicsCollision::DestroyQueryModel(ICollisionQuery *pQuery) {
-	NOT_IMPLEMENTED
-	// delete (CCollisionQuery *)pQuery;
+	delete (CCollisionQuery *)pQuery;
 }
 
 IPhysicsCollision *CPhysicsCollision::ThreadContextCreate() {

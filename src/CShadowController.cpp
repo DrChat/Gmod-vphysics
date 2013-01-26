@@ -135,7 +135,7 @@ void CShadowController::Tick(float deltaTime) {
 		// TODO: Figure out the intended behavior and set accordingly. We may just want to smoothly move the object
 		// to point B without applying velocities to achieve this. IVP shadows don't respond to collisions, and
 		// neither should we.
-		//ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
+		ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
 		m_secondsToArrival -= deltaTime;
 		if (m_secondsToArrival < 0) m_secondsToArrival = 0;
 	} else {
@@ -271,7 +271,7 @@ void CShadowController::AttachObject() {
 		m_pObject->EnableGravity(false);
 	}
 
-	body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	//body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
 
@@ -284,6 +284,6 @@ void CShadowController::DetachObject() {
 	body->setMassProps(m_savedMass, btvec);
 	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
 
-	body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
+	//body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
 	body->setActivationState(ACTIVE_TAG);
 }

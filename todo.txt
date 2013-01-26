@@ -18,9 +18,6 @@
 	- MULTITHREADED: Model kennel_physics.mdl(llamar's cage) triggers an assert (more points than MAX_NUM_SPU_CONVEX_POINTS)
 	- Physgun: Won't detect asleep objects for some reason, until you physgun it in a certain spot.
 		- Works fine if you always return false in CPhysicsObject::IsAsleep
-	- PlayerControllers
-		- Doesn't seem that bullet is properly simulating these - props they're obviously touching aren't waken up
-		and there's no collision points being drawn in the debug overlay.
 	- Constraints
 		- If a constrained object goes too far away from the world, the game crashes.
 	- Some concave meshes (trashdumpster02) aren't working properly.
@@ -30,6 +27,7 @@
 - TODO
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies
+			- Would require alot of work on garry's part, such as networking, prediction, etc...
 		- Scaling of models
 			- Vector(1, 1, 1) would be normal scale.
 		- ...

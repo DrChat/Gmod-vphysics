@@ -29,9 +29,11 @@ LIBFILES = \
 	$(BULLET_SDK)/buildlin-cmake/src/BulletSoftBody/libBulletSoftBody.a
 		
 CC = /usr/bin/g++-3.4
-ARCH = i486
+LINK = /usr/bin/g++-3.4
+ARCH = i386
 DEFINES = -DLINUX -D__LINUX__ -D_LINUX -D__linux__ -DARCH=$(ARCH) -Dsprintf_s=snprintf -Dstrcmpi=strcasecmp -D_alloca=alloca -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrcpy_s=strncpy -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -DNDEBUG
-CFLAGS = $(INCLUDES) $(DEFINES) -m32 -fpermissive -w -mtune=$(ARCH)
+CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -w
+LFLAGS = $(CFLAGS) -lm -ldl -shared -Wl
 
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
