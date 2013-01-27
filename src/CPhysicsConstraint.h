@@ -11,13 +11,14 @@ enum EConstraintType {
 	CONSTRAINT_SLIDING,
 	CONSTRAINT_BALLSOCKET,
 	CONSTRAINT_PULLEY,
-	CONSTRAINT_LENGTH
+	CONSTRAINT_LENGTH,
+	CONSTRAINT_SPRING
 };
 
 class CPhysicsConstraint : public IPhysicsConstraint {
 	public:
-								CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
-								~CPhysicsConstraint();
+		CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
+		~CPhysicsConstraint();
 
 		void					Activate();
 		void					Deactivate();
@@ -49,6 +50,9 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 
 class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 	public:
+		CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint);
+		~CPhysicsSpring();
+
 		void			GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd);
 		void			SetSpringConstant(float flSpringContant);
 		void			SetSpringDamping(float flSpringDamping);
@@ -59,7 +63,6 @@ class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 
 		// Get the end object
 		IPhysicsObject *GetEndObject();
-	private:
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?
@@ -79,6 +82,7 @@ class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 };
 
 // CONSTRAINT CREATION FUNCTIONS
+CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring);
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll);
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge);
 CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed);
@@ -86,6 +90,5 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket);
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
 CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
-CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring);
 
 #endif

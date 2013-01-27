@@ -134,16 +134,13 @@ void CPhysicsObject::EnableGravity(bool enable) {
 }
 
 void CPhysicsObject::EnableDrag(bool enable)  {
-	if (IsStatic())
+	if (IsStatic() || enable == IsDragEnabled())
 		return;
 
-	if (enable != IsDragEnabled())
-	{
-		if (enable) {
-			m_pEnv->GetDragController()->AddPhysicsObject(this);
-		} else {
-			m_pEnv->GetDragController()->RemovePhysicsObject(this);
-		}
+	if (enable) {
+		m_pEnv->GetDragController()->AddPhysicsObject(this);
+	} else {
+		m_pEnv->GetDragController()->RemovePhysicsObject(this);
 	}
 }
 
@@ -747,6 +744,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_fVolume			= 0;
 	m_callbacks			= CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
 	m_iLastActivationState = pObject->getActivationState();
+	EnableDrag(true);
 
 	m_pObject->setUserPointer(this);
 

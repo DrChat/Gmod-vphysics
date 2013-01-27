@@ -146,11 +146,54 @@ void CPhysicsConstraint::OutputDebugInfo() {
 * CLASS CPhysicsSpring
 ************************/
 
+CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint)
+				: CPhysicsConstraint(pEnv, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
+	
+}
 
+CPhysicsSpring::~CPhysicsSpring() {
+
+}
+
+void CPhysicsSpring::GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsSpring::SetSpringConstant(float flSpringContant) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsSpring::SetSpringDamping(float flSpringDamping) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsSpring::SetSpringLength(float flSpringLength) {
+	NOT_IMPLEMENTED
+}
+
+IPhysicsObject *CPhysicsSpring::GetStartObject() {
+	return m_pReferenceObject;
+}
+
+IPhysicsObject *CPhysicsSpring::GetEndObject() {
+	return m_pAttachedObject;
+}
 
 /************************
 * CREATION FUNCTIONS
 ************************/
+
+CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring) {
+	if (!spring) return NULL;
+
+	btVector3 bullRefPos, bullAttPos;
+	ConvertPosToBull(spring->startPosition, bullRefPos);
+	ConvertPosToBull(spring->endPosition, bullAttPos);
+
+
+	NOT_IMPLEMENTED
+	return NULL;
+}
 
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
@@ -266,16 +309,4 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 
 	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength, CONSTRAINT_LENGTH);
-}
-
-CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring) {
-	if (!spring) return NULL;
-
-	btVector3 bullRefPos, bullAttPos;
-	ConvertPosToBull(spring->startPosition, bullRefPos);
-	ConvertPosToBull(spring->endPosition, bullAttPos);
-
-
-	NOT_IMPLEMENTED
-	return NULL;
 }

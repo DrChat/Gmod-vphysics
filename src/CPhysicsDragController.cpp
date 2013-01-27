@@ -23,17 +23,17 @@ float CPhysicsDragController::GetAirDensity() {
 	return m_airDensity;
 }
 
-void CPhysicsDragController::RemovePhysicsObject(CPhysicsObject * obj) {
+void CPhysicsDragController::RemovePhysicsObject(CPhysicsObject *obj) {
 	m_ents.FindAndRemove(obj);
 }
 
-void CPhysicsDragController::AddPhysicsObject(CPhysicsObject * obj) {
+void CPhysicsDragController::AddPhysicsObject(CPhysicsObject *obj) {
 	if (!m_ents.Find(obj)) {
 		m_ents.AddToTail(obj);
 	}
 }
 
-bool CPhysicsDragController::IsControlling(const CPhysicsObject * obj) const {
+bool CPhysicsDragController::IsControlling(const CPhysicsObject *obj) const {
 	return (m_ents.Find((CPhysicsObject *)obj) != NULL);
 }
 
