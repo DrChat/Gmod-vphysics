@@ -429,12 +429,13 @@ void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController *tbr) {
 }
 
 IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, IPhysicsObject *pObjectEnd, springparams_t *pParams) {
-	NOT_IMPLEMENTED
-	return NULL;
+	return ::CreateSpringConstraint(this, pObjectStart, pObjectEnd, pParams);
 }
 
 void CPhysicsEnvironment::DestroySpring(IPhysicsSpring *pSpring) {
-	NOT_IMPLEMENTED
+	if (!pSpring) return;
+
+	DestroyConstraint((IPhysicsConstraint *)pSpring);
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {

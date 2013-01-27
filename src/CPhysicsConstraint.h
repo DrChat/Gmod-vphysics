@@ -38,13 +38,28 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		void					OutputDebugInfo();
 
 		// UNEXPOSED FUNCTIONS
-	private:
+	protected:
 		CPhysicsObject *		m_pReferenceObject;	// Reference object
 		CPhysicsObject *		m_pAttachedObject;	// Attached object
 		btTypedConstraint *		m_pConstraint;
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;
 		EConstraintType			m_type;
+};
+
+class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
+	public:
+		void			GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd);
+		void			SetSpringConstant(float flSpringContant);
+		void			SetSpringDamping(float flSpringDamping);
+		void			SetSpringLength(float flSpringLength);
+
+		// Get the starting object
+		IPhysicsObject *GetStartObject();
+
+		// Get the end object
+		IPhysicsObject *GetEndObject();
+	private:
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?
@@ -71,5 +86,6 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket);
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
 CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
+CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring);
 
 #endif

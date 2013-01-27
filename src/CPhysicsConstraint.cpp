@@ -91,6 +91,7 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 /*********************************
 * CLASS CPhysicsConstraint
 *********************************/
+
 CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint, EConstraintType type) {
 	m_pReferenceObject = pReferenceObject;
 	m_pAttachedObject = pAttachedObject;
@@ -142,8 +143,15 @@ void CPhysicsConstraint::OutputDebugInfo() {
 }
 
 /************************
+* CLASS CPhysicsSpring
+************************/
+
+
+
+/************************
 * CREATION FUNCTIONS
 ************************/
+
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -258,4 +266,16 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 
 	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength, CONSTRAINT_LENGTH);
+}
+
+CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring) {
+	if (!spring) return NULL;
+
+	btVector3 bullRefPos, bullAttPos;
+	ConvertPosToBull(spring->startPosition, bullRefPos);
+	ConvertPosToBull(spring->endPosition, bullAttPos);
+
+
+	NOT_IMPLEMENTED
+	return NULL;
 }
