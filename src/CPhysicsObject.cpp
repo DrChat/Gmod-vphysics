@@ -327,7 +327,12 @@ int CPhysicsObject::GetMaterialIndex() const {
 }
 
 void CPhysicsObject::SetMaterialIndex(int materialIndex) {
-	m_materialIndex = materialIndex;
+	surfacedata_t *pSurface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
+	if (pSurface) {
+		m_materialIndex = materialIndex;
+		m_pObject->setFriction(pSurface->physics.friction);
+		m_pObject->setRestitution(pSurface->physics.elasticity > 1 ? 1 : pSurface->physics.elasticity);
+	}
 }
 
 unsigned int CPhysicsObject::GetContents() const {
@@ -587,6 +592,8 @@ bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **cont
 void CPhysicsObject::SetShadow(float maxSpeed, float maxAngularSpeed, bool allowPhysicsMovement, bool allowPhysicsRotation) {
 	if (m_pShadow) {
 		m_pShadow->MaxSpeed(maxSpeed, maxAngularSpeed);
+		m_pShadow->SetAllowsTranslation(allowPhysicsMovement);
+		m_pShadow->SetAllowsRotation(allowPhysicsRotation);
 	} else {
 		unsigned int flags = GetCallbackFlags() | CALLBACK_SHADOW_COLLISION;
 		flags &= ~CALLBACK_GLOBAL_FRICTION;
@@ -750,7 +757,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		EnableCollisions(pParams->enableCollisions);
 	}
 
-	float matdensity;
+	float matdensity = 0;
 	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
 	m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, (m_fVolume * METERS_PER_INCH * METERS_PER_INCH * METERS_PER_INCH)), matdensity);
 
@@ -927,7 +934,8 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 		}
 	}
 
-	btMotionState *motionstate = new btMassCenterMotionState(transform);
+	btMassCenterMotionState *motionstate = new btMassCenterMotionState();
+	motionstate->setGraphicTransform(transform);
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape);
 
 	btRigidBody *body = new btRigidBody(info);

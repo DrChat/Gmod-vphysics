@@ -135,9 +135,14 @@ void CShadowController::Tick(float deltaTime) {
 		// TODO: Figure out the intended behavior and set accordingly. We may just want to smoothly move the object
 		// to point B without applying velocities to achieve this. IVP shadows don't respond to collisions, and
 		// neither should we.
-		ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
-		m_secondsToArrival -= deltaTime;
-		if (m_secondsToArrival < 0) m_secondsToArrival = 0;
+		if (m_bPhysicallyControlled) {
+			ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
+			m_secondsToArrival -= deltaTime;
+			if (m_secondsToArrival < 0) m_secondsToArrival = 0;
+		} else {
+			btTransform target(m_shadow.targetRotation, m_shadow.targetPosition);
+			m_pObject->GetObject()->setWorldTransform(target);
+		}
 	} else {
 		m_shadow.lastPosition.setZero();
 	}
@@ -206,6 +211,14 @@ bool CShadowController::AllowsTranslation() {
 
 bool CShadowController::AllowsRotation() {
 	return m_allowPhysicsRotation;
+}
+
+void CShadowController::SetAllowsTranslation(bool enable) {
+	m_allowPhysicsMovement = enable;
+}
+
+void CShadowController::SetAllowsRotation(bool enable) {
+	m_allowPhysicsRotation = enable;
 }
 
 void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {
@@ -286,4 +299,15 @@ void CShadowController::DetachObject() {
 
 	//body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
 	body->setActivationState(ACTIVE_TAG);
+}
+
+/*************************
+* CREATION FUNCTIONS
+*************************/
+
+CShadowController *CreateShadowController(IPhysicsObject *pObject, bool allowPhysicsMovement, bool allowPhysicsRotation) {
+	if (!pObject)
+		return NULL;
+
+	return new CShadowController((CPhysicsObject *)pObject, allowPhysicsMovement, allowPhysicsRotation);
 }

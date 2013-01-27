@@ -62,7 +62,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	m_enable = true;
 	m_onground = onground;
 
-	if (velocity.LengthSqr() <= 0.1f) {
+	if (velocity.LengthSqr() <= 0.001f) {
 		m_enable = false;
 		ground = NULL;
 	} else {
@@ -89,11 +89,19 @@ bool CPlayerController::IsInContact() {
 		btPersistentManifold *contactManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
 		const btCollisionObject *obA = contactManifold->getBody0();
 		const btCollisionObject *obB = contactManifold->getBody1();
-		CPhysicsObject *pPhysA = (CPhysicsObject *)obA->getUserPointer();
-		CPhysicsObject *pPhysB = (CPhysicsObject *)obB->getUserPointer();
+		CPhysicsObject *pPhysUs;
+		CPhysicsObject *pPhysOther;
 
-		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject())) {
-			if (pPhysB->IsStatic() || pPhysB->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION)
+		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject() || obB == m_pObject->GetObject())) {
+			if (obA == m_pObject->GetObject()) {
+				pPhysUs = (CPhysicsObject *)obA->getUserPointer();
+				pPhysOther = (CPhysicsObject *)obB->getUserPointer();
+			} else if (obB == m_pObject->GetObject()) {
+				pPhysUs = (CPhysicsObject *)obB->getUserPointer();
+				pPhysOther = (CPhysicsObject *)obA->getUserPointer();
+			}
+
+			if (pPhysOther->IsStatic() || pPhysOther->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION)
 				continue;
 			
 

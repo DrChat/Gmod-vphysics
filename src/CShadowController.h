@@ -5,8 +5,6 @@
 
 class CPhysicsObject;
 
-float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
-
 struct shadowcontrol_params_t {
 	shadowcontrol_params_t() {lastPosition.setZero();}
 
@@ -28,19 +26,25 @@ class CShadowController : public IController, public IPhysicsShadowController
 		void					MaxSpeed(float maxSpeed, float maxAngularSpeed);
 		void					StepUp(float height);
 		void					SetTeleportDistance(float teleportDistance);
+
 		bool					AllowsTranslation();
 		bool					AllowsRotation();
+
 		void					SetPhysicallyControlled(bool isPhysicallyControlled);
 		bool					IsPhysicallyControlled();
+
 		void					GetLastImpulse(Vector *pOut);
 		void					UseShadowMaterial(bool bUseShadowMaterial);
 		void					ObjectMaterialChanged(int materialIndex);
+
 		float					GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut);
 		float					GetTeleportDistance();
 		void					GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeedOut);
 
 		// UNEXPOSED FUNCTIONS
 		void					Tick(float deltaTime);
+		void					SetAllowsTranslation(bool enable);
+		void					SetAllowsRotation(bool enable);
 	private:
 		void					AttachObject();
 		void					DetachObject();
@@ -56,5 +60,9 @@ class CShadowController : public IController, public IPhysicsShadowController
 		shadowcontrol_params_t	m_shadow;
 		bool					m_bPhysicallyControlled;
 };
+
+float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
+
+CShadowController *CreateShadowController(IPhysicsObject *pObject, bool allowPhysicsMovement, bool allowPhysicsRotation);
 
 #endif

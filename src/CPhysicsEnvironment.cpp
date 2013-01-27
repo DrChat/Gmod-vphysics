@@ -191,7 +191,9 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pCollisionEvent = NULL;
 
 	btDefaultCollisionConstructionInfo cci;
+#if MULTITHREAD
 	cci.m_defaultMaxPersistentManifoldPoolSize = 65536;
+#endif
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
 #if !MULTITHREAD
@@ -493,10 +495,10 @@ void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup
 }
 
 IPhysicsShadowController *CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
-	if (!pObject) return NULL;
+	CShadowController *pController = ::CreateShadowController(pObject, allowTranslation, allowRotation);
+	if (pController)
+		m_controllers.AddToTail(pController);
 
-	CShadowController *pController = new CShadowController((CPhysicsObject *)pObject, allowTranslation, allowRotation);
-	m_controllers.AddToTail(pController);
 	return pController;
 }
 

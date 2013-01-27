@@ -72,7 +72,7 @@ CDebugDrawer::~CDebugDrawer() {
 #endif
 }
 
-void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor) {
+void CDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor) {
 	VPROF_BUDGET("CDebugDrawer::drawLine", VPROF_BUDGETGROUP_PHYSICS);
 #if RENDER_SDL
 	glBegin(GL_LINES);
@@ -91,12 +91,12 @@ void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const bt
 #endif
 }
 
-void CDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
+void CDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color) {
 	drawLine(from, to, color, color);
 }
 
 #if RENDER_SDL
-void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVector3& color) {
+void CDebugDrawer::drawSphere(const btVector3 &p, btScalar radius, const btVector3 &color) {
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
 	glPushMatrix ();
 	glTranslatef (p.getX(), p.getY(), p.getZ());
@@ -132,7 +132,7 @@ void CDebugDrawer::drawSphere(const btVector3& p, btScalar radius, const btVecto
 }
 #endif
 
-void CDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, const btVector3& color, btScalar alpha) {
+void CDebugDrawer::drawBox(const btVector3 &boxMin, const btVector3 &boxMax, const btVector3 &color, btScalar alpha) {
 #if RENDER_SDL
 	btVector3 halfExtent = (boxMax - boxMin) * btScalar(0.5f);
 	btVector3 center = (boxMax + boxMin) * btScalar(0.5f);
@@ -152,7 +152,7 @@ void CDebugDrawer::drawBox(const btVector3& boxMin, const btVector3& boxMax, con
 #endif
 }
 
-void CDebugDrawer::drawTriangle(const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& color, btScalar alpha) {
+void CDebugDrawer::drawTriangle(const btVector3 &a, const btVector3 &b, const btVector3 &c, const btVector3 &color, btScalar alpha) {
 #if RENDER_SDL
 	const btVector3	n=btCross(b-a,c-a).normalized();
 	glBegin(GL_TRIANGLES);		
@@ -177,7 +177,7 @@ void CDebugDrawer::setDebugMode(int debugMode) {
 	m_debugMode = debugMode;
 }
 
-void CDebugDrawer::draw3dText(const btVector3& location, const char *textString) {
+void CDebugDrawer::draw3dText(const btVector3 &location, const char *textString) {
 #if RENDER_SDL
 	glRasterPos3f(location.x(),  location.y(),  location.z());
 #else
@@ -192,7 +192,7 @@ void CDebugDrawer::reportErrorWarning(const char *warningString) {
 	Warning(warningString);
 }
 
-void CDebugDrawer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {
+void CDebugDrawer::drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color) {
 	btVector3 to = pointOnB + normalOnB * (distance + 0.5); //pointOnB + normalOnB * 1;
 	const btVector3 &from = pointOnB;
 #if RENDER_SDL

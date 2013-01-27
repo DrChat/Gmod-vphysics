@@ -4,6 +4,8 @@
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
 
+#include "tier0/vprof.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
@@ -89,6 +91,8 @@ int	CPhysicsFluidController::GetContents() const {
 }
 
 void CPhysicsFluidController::Tick(float dt) {
+	VPROF_BUDGET("CPhysicsFluidController::Tick", VPROF_BUDGETGROUP_PHYSICS);
+
 	int count = m_pGhostObject->getNumOverlappingObjects();
 	for (int i = 0; i < count; i++) {
 		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
@@ -104,12 +108,13 @@ void CPhysicsFluidController::Tick(float dt) {
 		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
 		m_pGhostObject->getCollisionShape()->getAabb(m_pGhostObject->getWorldTransform(), omins, omaxs);
 		float dist = omaxs.y() - mins.y();
-		float p = clamp(dist/height, 0.0f, 1.0f);
-		float vol = (obj->GetVolume() * p)/64; 
+		float p = clamp(dist / height, 0.0f, 1.0f);
+		float vol = (obj->GetVolume() * p) / 64; 
 
-		body->applyCentralForce((-body->getGravity() * m_fDensity * vol) * obj->GetBuoyancyRatio()/*, (maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
-		body->setLinearVelocity(body->getLinearVelocity() * (1.0f-(0.75f * dt)));
-		body->setAngularVelocity(body->getAngularVelocity() * (1.0f-(0.75f*dt)));
+		body->applyCentralForce((-body->getGravity() * m_fDensity * vol) * obj->GetBuoyancyRatio()/*(maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
+
+		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
+		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
 
 		if (body->getLinearVelocity().length2() > 0.01f)
 			body->activate(true); // Stop it from freezing while mini-bouncing, it looks dumb
