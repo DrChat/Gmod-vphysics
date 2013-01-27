@@ -279,12 +279,12 @@ CPhysCollide *CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 	btVector3 btmins, btmaxs;
 	ConvertPosToBull(mins, btmins);
 	ConvertPosToBull(maxs, btmaxs);
-	btVector3 halfsize = btVector3(btmaxs - btmins).absolute() / 2;
+	btVector3 halfsize = (btmaxs - btmins) / 2;
 
 	btBoxShape *box = new btBoxShape(halfsize.absolute());
 	btCompoundShape *shape = new btCompoundShape;
 
-	btTransform transform(btMatrix3x3::getIdentity(), halfsize - btmins.absolute());
+	btTransform transform(btMatrix3x3::getIdentity(), btmins + halfsize);
 	shape->addChildShape(transform, box);
 
 	return (CPhysCollide *)shape;
