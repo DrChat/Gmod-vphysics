@@ -6,9 +6,6 @@
 	- IsAsleep() returning true causes lag freeze (Only when object asleep on displacements?)
 	- Immense lag when an object is welded to world
 		- World is unfrozen(?) Loads of collision points calculated on the static mesh the weld was made on
-	- Parallel Constraint Solver crash: Manifold has a body that isn't in the bodies array!
-		- Appears to be with the world only
-		- Flatgrass: Happens whenever something collides (with the world only?): Object m_companionId == -2
 	- MAPS
 		- SOLID_BSP brushes take too long for calculations(construct white room)! Collisions between them and the world are being calculated!
 			- Should we assign the world geometry a collision group, and have our shadow controller not calculate collisions against that group?
