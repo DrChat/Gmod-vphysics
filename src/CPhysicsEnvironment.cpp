@@ -511,10 +511,10 @@ void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController *pCon
 }
 
 IPhysicsPlayerController *CPhysicsEnvironment::CreatePlayerController(IPhysicsObject *pObject) {
-	if (!pObject) return NULL;
+	CPlayerController *pController = ::CreatePlayerController(pObject);
+	if (pController)
+		m_controllers.AddToTail(pController);
 
-	CPlayerController *pController = new CPlayerController((CPhysicsObject *)pObject);
-	m_controllers.AddToTail(pController);
 	return pController;
 }
 
@@ -527,7 +527,9 @@ void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController *pCon
 
 IPhysicsMotionController *CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
 	CPhysicsMotionController *pController = (CPhysicsMotionController *)::CreateMotionController(this, pHandler);
-	m_controllers.AddToTail(pController);
+	if (pController)
+		m_controllers.AddToTail(pController);
+
 	return pController;
 }
 

@@ -5,8 +5,6 @@
 
 class CPhysicsObject;
 
-void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping);
-
 class CPlayerController : public IController, public IPhysicsPlayerController
 {
 	public:
@@ -57,5 +55,9 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 
 		int								m_iTicksSinceUpdate;
 };
+
+void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping);
+
+CPlayerController *CreatePlayerController(IPhysicsObject *pObject);
 
 #endif

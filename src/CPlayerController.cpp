@@ -290,3 +290,13 @@ int CPlayerController::TryTeleportObject() {
 	body->setWorldTransform(finaltrans);
 	return 1;
 }
+
+/***********************
+* CREATION FUNCTIONS
+***********************/
+
+CPlayerController *CreatePlayerController(IPhysicsObject *pObject) {
+	if (!pObject) return NULL;
+
+	return new CPlayerController((CPhysicsObject *)pObject);
+}

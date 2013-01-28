@@ -101,7 +101,7 @@ bool CPhysicsObject::IsGravityEnabled() const {
 
 bool CPhysicsObject::IsDragEnabled() const {
 	if (!IsStatic()) {
-		return m_pEnv->GetDragController()->IsControlling(this); // Expensive function
+		return m_pEnv->GetDragController()->IsControlling(this);
 	}
 
 	return false;

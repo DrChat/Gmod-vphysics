@@ -327,10 +327,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
-	// m_IsRay appears to only be true when the crosshair crosses the AABB of the object.
-	// Otherwise, we're doing a box trace.
-	// TODO: Box trace doesn't handle trace failures!
-	// Does the trace always fail if our object is penetrating the other one?
+	// Single line trace must be supported in TraceBox? Yep, you betcha.
 	if (ray.m_IsRay) {
 		btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
 		btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
@@ -643,26 +640,24 @@ IPhysicsCollision *CPhysicsCollision::ThreadContextCreate() {
 	return new CPhysicsCollision;
 }
 
-void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContex) {
-	delete (CPhysicsCollision *)pThreadContex;
+void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContext) {
+	delete (CPhysicsCollision *)pThreadContext;
 }
 
 CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
 	IVirtualMeshEvent *handler = params.pMeshEventHandler;
 
-	virtualmeshlist_t *pList = new virtualmeshlist_t;
-	handler->GetVirtualMesh(params.userData, pList);
+	virtualmeshlist_t list;
+	handler->GetVirtualMesh(params.userData, &list);
 
 	btTriangleMesh *btmesh = new btTriangleMesh;
 	btVector3 btvec[3];
-	for (int i = 0; i < pList->triangleCount; i++) {
-		ConvertPosToBull(pList->pVerts[pList->indices[i*3+0]], btvec[0]);
-		ConvertPosToBull(pList->pVerts[pList->indices[i*3+1]], btvec[1]);
-		ConvertPosToBull(pList->pVerts[pList->indices[i*3+2]], btvec[2]);
+	for (int i = 0; i < list.triangleCount; i++) {
+		ConvertPosToBull(list.pVerts[list.indices[i*3+0]], btvec[0]);
+		ConvertPosToBull(list.pVerts[list.indices[i*3+1]], btvec[1]);
+		ConvertPosToBull(list.pVerts[list.indices[i*3+2]], btvec[2]);
 		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
 	}
-
-	delete pList;
 
 	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(btmesh, true);
 	bull->setMargin(COLLISION_MARGIN);
