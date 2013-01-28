@@ -337,7 +337,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 		ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 	} else {
 		ConvertPosToBull(ray.m_Extents, btvec);
-		btBoxShape *box = new btBoxShape(btvec);
+		btBoxShape *box = new btBoxShape(btvec.absolute());
 
 		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
 		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0);
