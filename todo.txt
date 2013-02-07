@@ -17,6 +17,8 @@
 		- Works fine if you always return false in CPhysicsObject::IsAsleep
 	- Constraints
 		- If a constrained object goes too far away from the world, the game crashes.
+		- Deleting a constrained object (ex. a balloon) makes the game call a function from the deleted object.
+			- Calls DestroyObject (which adds object to delete queue), and then CleanupDeleteList, and afterwards the game crashes.
 	- Some concave meshes (trashdumpster02) aren't working properly.
 	- Shadow controllers crash some of the time in release builds (solved with hack, needs proper fix)
 		- Related to memory being uninitialized somewhere (ex. btVector3() without setting x y and z to 0)
@@ -35,3 +37,4 @@
 	- Bullet has an internal profiler, grab the results from it and give them to vprof.
 	- When we're just about wrapping up, implement saving!
 	- IMPORTANT: INITIALIZE YOUR MEMORY FOR RELEASE BUILDS
+	- The code needs to be cleaned up and become nice and tidy!

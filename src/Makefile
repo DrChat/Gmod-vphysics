@@ -15,6 +15,7 @@ OBJ_DIR = ../build/obj/linux/vphysics/Release
 
 # Compilation Configuration
 INCLUDES = \
+	-I../include \
 	-I$(SOURCE_SDK)/public \
 	-I$(SOURCE_SDK)/public/tier0 \
 	-I$(SOURCE_SDK)/public/tier1 \
@@ -32,7 +33,7 @@ CC = /usr/bin/g++-3.4
 LINK = /usr/bin/g++-3.4
 ARCH = i386
 DEFINES = -DLINUX -D__LINUX__ -D_LINUX -D__linux__ -DARCH=$(ARCH) -Dsprintf_s=snprintf -Dstrcmpi=strcasecmp -D_alloca=alloca -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrcpy_s=strncpy -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -DNDEBUG
-CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -w
+CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -w -fPIC
 LFLAGS = $(CFLAGS) -lm -ldl -shared -Wl
 
 SOURCES = $(wildcard *.cpp)

@@ -216,7 +216,7 @@ void CPhysicsObject::RecheckCollisionFilter() {
 }
 
 void CPhysicsObject::RecheckContactPoints() {
-	NOT_IMPLEMENTED
+	
 }
 
 void CPhysicsObject::SetMass(float mass) {
@@ -460,7 +460,7 @@ void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector &localPosi
 
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
-	VectorTransform(Vector(localPosition), matrix, *worldPosition);
+	VectorTransform(localPosition, matrix, *worldPosition);
 }
 
 void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector &worldPosition) const {

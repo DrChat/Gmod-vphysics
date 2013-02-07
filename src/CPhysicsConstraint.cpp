@@ -13,12 +13,37 @@
 * Misc. Functions
 **********************/
 // I hope these work!
-void TransformWorldToLocal(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
+inline void TransformWorldToLocal(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
 	out = trans * obj.getWorldTransform().inverse();
 }
 
-void TransformLocalToWorld(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
+inline void TransformLocalToWorld(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
 	out = trans * obj.getWorldTransform();
+}
+
+const char *GetConstraintName(EConstraintType type) {
+	switch (type) {
+		case CONSTRAINT_UNKNOWN:
+			return "unknown";
+		case CONSTRAINT_RAGDOLL:
+			return "ragdoll";
+		case CONSTRAINT_HINGE:
+			return "hinge";
+		case CONSTRAINT_FIXED:
+			return "fixed";
+		case CONSTRAINT_SLIDING:
+			return "sliding";
+		case CONSTRAINT_BALLSOCKET:
+			return "ballsocket";
+		case CONSTRAINT_PULLEY:
+			return "pulley";
+		case CONSTRAINT_LENGTH:
+			return "length";
+		case CONSTRAINT_SPRING:
+			return "spring";
+		default:
+			return "invalid";
+	}
 }
 
 /***********************
@@ -125,6 +150,7 @@ void CPhysicsConstraint::SetAngularMotor(float rotSpeed, float maxAngularImpulse
 }
 
 void CPhysicsConstraint::UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached) {
+	if (m_type != CONSTRAINT_RAGDOLL) return;
 	NOT_IMPLEMENTED
 }
 
@@ -139,12 +165,14 @@ bool CPhysicsConstraint::GetConstraintParams(constraint_breakableparams_t *pPara
 }
 
 void CPhysicsConstraint::OutputDebugInfo() {
-	NOT_IMPLEMENTED
+	Msg("-------------------\n");
+	Msg("%s constraint\n", GetConstraintName(m_type));
 }
 
 /************************
 * CLASS CPhysicsSpring
 ************************/
+// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE CPhysicsEnvironment::DestroySpring!!!
 
 CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint)
 				: CPhysicsConstraint(pEnv, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
@@ -156,6 +184,7 @@ CPhysicsSpring::~CPhysicsSpring() {
 }
 
 void CPhysicsSpring::GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd) {
+	if (!worldPositionStart && !worldPositionEnd) return;
 	NOT_IMPLEMENTED
 }
 
@@ -199,9 +228,14 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
+	btTransform constraintToReference, constraintToAttached;
+	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // It appears that constraintToReference is always the identity matrix.
+	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
+
 	btTransform bullAFrame, bullBFrame;
 	bullAFrame.setIdentity();
 	bullBFrame.setIdentity();
+	// FIXME: How do we get the frames? The ragdoll params have a "constraint to body" transform, so what is constraint space?
 
 	bullAFrame = pObjRef->GetObject()->getWorldTransform().inverse() * pObjAtt->GetObject()->getWorldTransform();
 
@@ -214,40 +248,37 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 }
 
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
-	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
 	btVector3 bullWorldPosition, bullWorldAxis;
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	btTransform bullAFrame, bullBFrame;
-	bullAFrame.setIdentity();
-	bullBFrame.setIdentity();
+	btTransform bullAFrame;
+	btTransform bullBFrame;
 
-	//btHingeConstraint *pHinge = new btHingeConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullAFrame, bullBFrame);
-
-	NOT_IMPLEMENTED
-	return NULL;
+	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
+	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }
 
 CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed) {
-	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
-	btGeneric6DofConstraint *pWeld = new btGeneric6DofConstraint(*pObjA->GetObject(), *pObjB->GetObject(),
-																pObjA->GetObject()->getWorldTransform().inverse() * pObjB->GetObject()->getWorldTransform(),
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+	btGeneric6DofConstraint *pWeld = new btGeneric6DofConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(),
+																pObjRef->GetObject()->getWorldTransform().inverse() * pObjAtt->GetObject()->getWorldTransform(),
 																btTransform::getIdentity(), true);
 	pWeld->setLinearLowerLimit(btVector3(0,0,0));
 	pWeld->setLinearUpperLimit(btVector3(0,0,0));
 	pWeld->setAngularLowerLimit(btVector3(0,0,0));
 	pWeld->setAngularUpperLimit(btVector3(0,0,0));
 
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pWeld, CONSTRAINT_FIXED);
+	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
 }
 
 CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
-	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
 	// Position of attached object space relative to reference object space.
 	btTransform bullAttRefXform = btTransform::getIdentity();
@@ -260,8 +291,9 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform bullFrameInA = btTransform::getIdentity();
 	btTransform bullFrameInB = btTransform::getIdentity();
 	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef, 0));
+	bullFrameInB.setRotation(pObjAtt->GetObject()->getWorldTransform().getRotation());
 
-	btSliderConstraint *pSlider = new btSliderConstraint(*pObjA->GetObject(), *pObjB->GetObject(), bullFrameInA, bullFrameInB, true);
+	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullFrameInA, bullFrameInB, true);
 
 	// If linear min == lin max then there is no limit!
 	if (sliding.limitMin != sliding.limitMax) {
@@ -272,7 +304,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	pSlider->setLowerAngLimit(0);
 	pSlider->setUpperAngLimit(0);
 
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pSlider, CONSTRAINT_SLIDING);
+	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pSlider, CONSTRAINT_SLIDING);
 }
 
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
@@ -280,18 +312,19 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
 	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
 
-	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
-	obj1Pos -= ((btMassCenterMotionState *)pObjA->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
-	obj2Pos -= ((btMassCenterMotionState *)pObjB->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+	obj1Pos -= ((btMassCenterMotionState *)pObjRef->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
 	// TODO: Not the correct constraint.
-	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos);
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pBallsock, CONSTRAINT_BALLSOCKET);
+	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos);
+	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pBallsock, CONSTRAINT_BALLSOCKET);
 }
 
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
+	// TODO: Bullet has no default pulley constraint. Make one.
 	NOT_IMPLEMENTED
 	return NULL;
 }
@@ -301,12 +334,12 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);
 	ConvertPosToBull(length.objectPosition[1], obj2Pos);
 
-	CPhysicsObject *pObjA = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjB = (CPhysicsObject *)pAttachedObject;
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
-	obj1Pos -= ((btMassCenterMotionState *)pObjA->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
-	obj2Pos -= ((btMassCenterMotionState *)pObjB->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+	obj1Pos -= ((btMassCenterMotionState *)pObjRef->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
-	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjA->GetObject(), *pObjB->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
-	return new CPhysicsConstraint(pEnv, pObjA, pObjB, pLength, CONSTRAINT_LENGTH);
+	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
+	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
 }

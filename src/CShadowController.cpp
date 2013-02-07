@@ -25,9 +25,9 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	btTransform transform;
 	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
 
-	//----------------------------------------------------------
+	//-------------------
 	// Translation
-	//----------------------------------------------------------
+	//-------------------
 
 	btVector3 posbull = transform.getOrigin();
 	btVector3 delta_position = params.targetPosition - posbull;
@@ -56,9 +56,9 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	// FYI: IVP code does (v2 * factor2) + v1
 	params.lastPosition = posbull + (speed * dt);
 
-	//----------------------------------------------------------
+	//----------------
 	// Rotation
-	//----------------------------------------------------------
+	//----------------
 
 	btVector3 axis;
 	btScalar angle;

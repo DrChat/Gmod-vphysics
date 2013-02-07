@@ -340,7 +340,8 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 // UNEXPOSED
 void CPhysicsEnvironment::TickCallback(btDynamicsWorld *world, btScalar timeStep) {
 	if (!world) return;
-	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)(world->getWorldUserInfo());
+
+	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)world->getWorldUserInfo();
 	if (pEnv)
 		pEnv->BulletTick(timeStep);
 }
@@ -360,7 +361,7 @@ IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
 }
 
 btIDebugDraw *CPhysicsEnvironment::GetDebugDrawer() {
-	return m_debugdraw;
+	return (btIDebugDraw *)m_debugdraw;
 }
 
 void CPhysicsEnvironment::SetGravity(const Vector &gravityVector) {
@@ -435,6 +436,7 @@ IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, 
 void CPhysicsEnvironment::DestroySpring(IPhysicsSpring *pSpring) {
 	if (!pSpring) return;
 
+	// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE THIS FUNCTION!!!
 	DestroyConstraint((IPhysicsConstraint *)pSpring);
 }
 
@@ -554,7 +556,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "2", 0, "Sets the maximum amount of simulation substeps", true, 1, true, 50);
+static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", 0, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	VPROF_BUDGET("CPhysicsEnvironment::Simulate", VPROF_BUDGETGROUP_PHYSICS);
 
@@ -575,7 +577,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		m_inSimulation = true;
 		// Divide by zero check.
 		// We're scaling the timestep down by the number of substeps to have a higher precision and take
-		// the same amount of time as a simulation with only 1 substep
+		// the same amount of time as a simulation with the requested timestep
 		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
 		
 		VPROF_ENTER_SCOPE("m_pBulletEnvironment->stepSimulation");
@@ -716,6 +718,7 @@ void CPhysicsEnvironment::TraceRay(const Ray_t &ray, unsigned int fMask, IPhysic
 	NOT_IMPLEMENTED
 }
 
+// Is this function ever called?
 void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
 	NOT_IMPLEMENTED
 }
@@ -754,7 +757,8 @@ void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
 	m_bConstraintNotify = bEnable;
 }
 
-void CPhysicsEnvironment::DebugCheckContacts(void) {
+// FIXME: What do?
+void CPhysicsEnvironment::DebugCheckContacts() {
 	NOT_IMPLEMENTED
 }
 
@@ -812,7 +816,7 @@ CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 // UNEXPOSED
 // Purpose: To be the biggest eyesore ever
 // Bullet doesn't provide many callbacks such as the ones we're looking for, so
-// we have to iterate through all the contact manifolds and get the data ourselves.
+// we have to iterate through all the contact manifolds and generate the callbacks ourselves.
 void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 	VPROF_BUDGET("CPhysicsEnvironment::DoCollisionEvents", VPROF_BUDGETGROUP_PHYSICS);
 
@@ -836,7 +840,7 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 				
 				// FRICTION CALLBACK
 				if (((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION) {
-					// TODO: We need to find the energy used by the friction! Bullet doesn't provide this in the manifold point.
+					// FIXME: We need to find the energy used by the friction! Bullet doesn't provide this in the manifold point.
 					// This may not be the proper variable but whatever, as of now it works.
 					float energy = abs(manPoint.m_appliedImpulseLateral1);
 					if (energy > 0.05f) {

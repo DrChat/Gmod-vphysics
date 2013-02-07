@@ -10,7 +10,7 @@
 //#include "tier0/memdbgon.h"
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler) {
-	if (!pHandler || !pEnv) return NULL;
+	if (!pEnv) return NULL;
 	return new CPhysicsMotionController(pHandler, pEnv);
 }
 
@@ -25,14 +25,10 @@ CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhys
 	//SetPriority(MEDIUM_PRIORITY);
 }
 
-CPhysicsMotionController::~CPhysicsMotionController() {
-
-}
-
 void CPhysicsMotionController::Tick(float deltaTime) {
 	VPROF_BUDGET("CPhysicsMotionController::Tick", VPROF_BUDGETGROUP_PHYSICS);
-
 	if (!m_handler) return;
+
 	for (int i = 0; i < m_objectList.Count(); i++) {
 		Vector speed;
 		AngularImpulse rot;
@@ -51,7 +47,7 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 
 				btTransform transform;
 				((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
-				bullSpeed = transform.getBasis()*bullSpeed;
+				bullSpeed = transform.getBasis() * bullSpeed;
 
 				body->setLinearVelocity(body->getLinearVelocity() + bullSpeed * deltaTime);
 				body->setAngularVelocity(body->getAngularVelocity() + bullRot * deltaTime);
@@ -63,7 +59,7 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 
 				btTransform transform;
 				((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
-				bullSpeed = transform.getBasis()*bullSpeed;
+				bullSpeed = transform.getBasis() * bullSpeed;
 
 				body->applyCentralForce(bullSpeed * deltaTime);
 				body->applyTorque(bullRot * deltaTime);
@@ -82,6 +78,9 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 				body->applyCentralForce(bullSpeed * deltaTime);
 				body->applyTorque(bullRot * deltaTime);
 				break;
+			}
+			default: {
+				Warning("VPhysics: Invalid motion controller event type returned (%d)\n", ret);
 			}
 		}
 	}

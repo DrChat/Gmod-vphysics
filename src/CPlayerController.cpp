@@ -202,12 +202,13 @@ float CPlayerController::GetPushSpeedLimit() {
 bool CPlayerController::WasFrozen() {
 	// Removed: This function was called every frame.
 	// Unknown purpose, can anyone fill in what this function is used for?
+	// Appears that if we were frozen, the game will try and update our position to the player's current position.
 	//NOT_IMPLEMENTED
 	return false;
 }
 
 void CPlayerController::Tick(float deltaTime) {
-	if (!m_enable)
+	if (!m_enable && !IsInContact())
 		return;
 
 	m_iTicksSinceUpdate++;
