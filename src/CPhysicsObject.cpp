@@ -422,8 +422,13 @@ void CPhysicsObject::SetVelocityInstantaneous(const Vector *velocity, const Angu
 }
 
 void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
-	if (velocity) ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
-	if (angularVelocity) ConvertAngularImpulseToHL(m_pObject->getAngularVelocity(), *angularVelocity);
+	if (!velocity && !angularVelocity) return;
+
+	if (velocity)
+		ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
+
+	if (angularVelocity)
+		ConvertAngularImpulseToHL(m_pObject->getAngularVelocity(), *angularVelocity);
 }
 
 void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
@@ -613,6 +618,7 @@ int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 
 	btTransform transform;
 	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
+
 	if (position)
 		ConvertPosToHL(transform.getOrigin(), *position);
 
@@ -786,9 +792,9 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		btCollisionShape *shape = m_pObject->getCollisionShape();
 
 		btVector3 min, max, delta;
-		btTransform t;
+		btTransform ident = btTransform::getIdentity();
 
-		shape->getAabb(t, min, max);
+		shape->getAabb(ident, min, max);
 
 		delta = max - min;
 		delta = delta.absolute();
@@ -879,6 +885,9 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	if (pParams) {
 		info.m_linearDamping = pParams->damping;
 		info.m_angularDamping = pParams->rotdamping;
+
+		// FIXME: We should be using inertia values from source. Figure out a proper conversion.
+		// Inertia with props is 1 (always?) and 25 with ragdolls (always?)
 		//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
 	}
 
@@ -891,7 +900,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
 	}
 
-	CPhysicsObject *pObject = new CPhysicsObject();
+	CPhysicsObject *pObject = new CPhysicsObject;
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
 	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f)
 		pObject->EnableDrag(true);

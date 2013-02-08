@@ -36,7 +36,7 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 	private:
 		void							AttachObject();
 		void							DetachObject();
-		int								TryTeleportObject();
+		bool							TryTeleportObject();
 
 		bool							m_enable;
 		bool							m_onground;

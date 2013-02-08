@@ -7,7 +7,7 @@ BULLET_SDK = ../../../../Libraries/bullet
 # Unused as of now
 SRCDS_DIR = .
 
-LIBRARY_PATH=/usr/lib/x86_64-linux-gnu
+LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
 
 PROJECT_DIR = .
 OUT_DIR = ../build/bin/linux/Release
@@ -33,7 +33,7 @@ CC = /usr/bin/g++-3.4
 LINK = /usr/bin/g++-3.4
 ARCH = i386
 DEFINES = -DLINUX -D__LINUX__ -D_LINUX -D__linux__ -DARCH=$(ARCH) -Dsprintf_s=snprintf -Dstrcmpi=strcasecmp -D_alloca=alloca -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrcpy_s=strncpy -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -DNDEBUG
-CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -w -fPIC
+CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -w -fPIC -m32
 LFLAGS = $(CFLAGS) -lm -ldl -shared -Wl
 
 SOURCES = $(wildcard *.cpp)
@@ -45,18 +45,17 @@ RM = rm -f
 all: dirs $(MODULE_NAME)
 
 dirs:
-	@echo "Making dirs"
-	-mkdir -p $(OUT_DIR)
-	-mkdir -p $(OBJ_DIR)
+	@-mkdir -p $(OUT_DIR)
+	@-mkdir -p $(OBJ_DIR)
 	
 $(MODULE_NAME): $(OBJECTS)
 	@echo " + Linking..."
-	$(CC) -shared -o $@ $(CFLAGS) $(OBJECTS) $(LIBFILES)
+	$(CC) $(LFLAGS) -o $@ $(OBJECTS) $(LIBFILES)
 
 $(OBJ_DIR)/%.o: %.cpp
 	@echo " + Compiling '$<'"
-	$(CC) -o $@ -c $< $(CFLAGS)
+	@$(CC) $(CFLAGS) -o $@ -c $<
 	
 clean:
-	$(RM) $(OBJECTS)
+	@$(RM) $(OBJECTS)
   

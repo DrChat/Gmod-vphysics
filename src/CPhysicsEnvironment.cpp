@@ -192,6 +192,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	btDefaultCollisionConstructionInfo cci;
 #if MULTITHREAD
+	// Multithreaded versions cannot dynamically expand this pool. Having a small pool causes props to bounce around.
 	cci.m_defaultMaxPersistentManifoldPoolSize = 65536;
 #endif
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
@@ -543,8 +544,6 @@ void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pCon
 }
 
 IPhysicsVehicleController *CPhysicsEnvironment::CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
-	if (!pVehicleBodyObject) return NULL;
-
 	return ::CreateVehicleController(this, (CPhysicsObject *)pVehicleBodyObject, params, nVehicleType, pGameTrace);
 }
 
@@ -575,7 +574,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	
 	if (deltaTime > 1e-4) {
 		m_inSimulation = true;
-		// Divide by zero check.
+
 		// We're scaling the timestep down by the number of substeps to have a higher precision and take
 		// the same amount of time as a simulation with the requested timestep
 		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;

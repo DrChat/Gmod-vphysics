@@ -30,13 +30,13 @@ void CPhysicsDragController::RemovePhysicsObject(CPhysicsObject *obj) {
 }
 
 void CPhysicsDragController::AddPhysicsObject(CPhysicsObject *obj) {
-	if (!m_ents.Find(obj)) {
+	if (!IsControlling(obj)) {
 		m_ents.AddToTail(obj);
 	}
 }
 
 bool CPhysicsDragController::IsControlling(const CPhysicsObject *obj) const {
-	return (m_ents.Find((CPhysicsObject *)obj) != NULL);
+	return m_ents.Find((CPhysicsObject *)obj) != -1;
 }
 
 void CPhysicsDragController::Tick(btScalar dt) {
@@ -44,14 +44,43 @@ void CPhysicsDragController::Tick(btScalar dt) {
 
 	int iEntCount = m_ents.Count();
 	for (int i = 0; i < iEntCount; i++) {
-		CPhysicsObject *object = (CPhysicsObject *)m_ents[i];
+		CPhysicsObject *pObject = (CPhysicsObject *)m_ents[i];
+		btRigidBody *body = pObject->GetObject();
 
+		btVector3 vel = body->getLinearVelocity();
+		btVector3 ang = body->getAngularVelocity();
+
+		//------------------
+		// LINEAR DRAG
+		//------------------
+		float dragForce = -0.5 * pObject->GetDragInDirection(&vel) * m_airDensity * dt;
+		if (dragForce < -1.0f)
+			dragForce = -1.0f;
+
+		if (dragForce < 0)
+			vel *= dragForce;
+
+		body->setLinearVelocity(vel + body->getLinearVelocity());
+
+		//------------------
+		// ANGULAR DRAG
+		//------------------
+		float angDragForce = -pObject->GetAngularDragInDirection(&ang) * m_airDensity * dt;
+		if (angDragForce < -1.0f)
+			angDragForce = -1.0f;
+
+		if (angDragForce < 0)
+			ang *= angDragForce;
+
+		body->setAngularVelocity(ang + body->getAngularVelocity());
+
+		/*
 		Vector dragLinearFinal(0,0,0);
 		AngularImpulse dragAngularFinal(0,0,0);
 
 		Vector vel;
 		AngularImpulse ang;
-		object->GetVelocity(&vel, &ang);
+		pObject->GetVelocity(&vel, &ang);
 
 		btVector3 bull_vel;
 		btVector3 bull_angimpulse;
@@ -59,14 +88,14 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		ConvertPosToBull(vel, bull_vel);
 		ConvertAngularImpulseToBull(ang, bull_angimpulse);
 
-		float dragForce = -0.5 * object->GetDragInDirection(&bull_vel) * m_airDensity * dt;
+		float dragForce = -0.5 * pObject->GetDragInDirection(&bull_vel) * m_airDensity * dt;
 		if (dragForce < -1.0f)
 			dragForce = -1.0f;
 		
 		if (dragForce < 0)
 			Vector dragLinearFinal = vel * dragForce;
 
-		float angDragForce = -object->GetAngularDragInDirection(&bull_angimpulse) * m_airDensity * dt;
+		float angDragForce = -pObject->GetAngularDragInDirection(&bull_angimpulse) * m_airDensity * dt;
 
 		if (angDragForce < -1.0f)
 			angDragForce = -1.0f;
@@ -75,5 +104,6 @@ void CPhysicsDragController::Tick(btScalar dt) {
 			dragAngularFinal = ang * angDragForce;
 
 		object->AddVelocity(&dragLinearFinal, &dragAngularFinal);
+		*/
 	}
 }
