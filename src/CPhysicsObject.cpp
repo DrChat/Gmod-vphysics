@@ -329,6 +329,11 @@ void CPhysicsObject::SetMaterialIndex(int materialIndex) {
 		m_materialIndex = materialIndex;
 		m_pObject->setFriction(pSurface->physics.friction);
 		m_pObject->setRestitution(pSurface->physics.elasticity > 1 ? 1 : pSurface->physics.elasticity);
+
+		// FIXME: Figure out how to convert damping values.
+
+		// ratio = (mass / (volume * CUBIC_METERS_PER_CUBIC_INCH)) / density
+		m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, m_fVolume * CUBIC_METERS_PER_CUBIC_INCH), pSurface->physics.density);
 	}
 }
 
@@ -417,7 +422,7 @@ void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *a
 
 void CPhysicsObject::SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	// FIXME: what is different from SetVelocity?
-	// Sets velocity in the same frame
+	// Sets velocity in the same "iteration"
 	SetVelocity(velocity, angularVelocity);
 }
 
@@ -434,14 +439,14 @@ void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVeloci
 void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	if (!velocity && !angularVelocity) return;
 
-	btVector3 btvelocity, btangular;
+	btVector3 bullvelocity, bullangular;
 	if (velocity) {
-		ConvertPosToBull(*velocity, btvelocity);
-		m_pObject->setLinearVelocity(m_pObject->getLinearVelocity() + btvelocity);
+		ConvertPosToBull(*velocity, bullvelocity);
+		m_pObject->setLinearVelocity(m_pObject->getLinearVelocity() + bullvelocity);
 	}
 	if (angularVelocity) {
-		ConvertAngularImpulseToBull(*angularVelocity, btangular);
-		m_pObject->setAngularVelocity(m_pObject->getAngularVelocity() + btangular);
+		ConvertAngularImpulseToBull(*angularVelocity, bullangular);
+		m_pObject->setAngularVelocity(m_pObject->getAngularVelocity() + bullangular);
 	}
 }
 
@@ -537,13 +542,13 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 float CPhysicsObject::CalculateLinearDrag(const Vector &unitDirection) const {
 	btVector3 bull_unitDirection;
 	ConvertDirectionToBull(unitDirection, bull_unitDirection);
-	return GetDragInDirection(&bull_unitDirection);
+	return GetDragInDirection(bull_unitDirection);
 }
 
 float CPhysicsObject::CalculateAngularDrag(const Vector &objectSpaceRotationAxis) const {
 	btVector3 bull_unitDirection;
 	ConvertDirectionToBull(objectSpaceRotationAxis, bull_unitDirection);
-	return DEG2RAD(GetAngularDragInDirection(&bull_unitDirection));
+	return DEG2RAD(GetAngularDragInDirection(bull_unitDirection));
 }
 
 bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
@@ -588,7 +593,7 @@ bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **cont
 		}
 	}
 
-	return false; // Bool success
+	return false; // Bool in contact
 }
 
 void CPhysicsObject::SetShadow(float maxSpeed, float maxAngularSpeed, bool allowPhysicsMovement, bool allowPhysicsRotation) {
@@ -670,11 +675,11 @@ void CPhysicsObject::RemoveHinged() {
 }
 
 IPhysicsFrictionSnapshot *CPhysicsObject::CreateFrictionSnapshot() {
-	return new CPhysicsFrictionSnapshot(this);
+	return ::CreateFrictionSnapshot(this);
 }
 
 void CPhysicsObject::DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot) {
-	delete pSnapshot;
+	delete (CPhysicsFrictionSnapshot *)pSnapshot;
 }
 
 void CPhysicsObject::OutputDebugInfo() const {
@@ -739,7 +744,6 @@ void CPhysicsObject::OutputDebugInfo() const {
 // UNEXPOSED
 void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere) {
 	m_pEnv				= pEnv;
-	m_materialIndex		= materialIndex;
 	m_pObject			= pObject;
 	m_bIsSphere			= isSphere;
 	m_gameFlags			= 0;
@@ -750,9 +754,10 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_fVolume			= 0;
 	m_callbacks			= CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
 	m_iLastActivationState = pObject->getActivationState();
-	EnableDrag(true);
 
 	m_pObject->setUserPointer(this);
+
+	SetMaterialIndex(materialIndex);
 
 	if (pParams) {
 		m_pGameData		= pParams->pGameData;
@@ -761,22 +766,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		EnableCollisions(pParams->enableCollisions);
 	}
 
-	float matdensity = 0;
-	g_SurfaceDatabase.GetPhysicsProperties(materialIndex, &matdensity, NULL, NULL, NULL);
-	m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, (m_fVolume * METERS_PER_INCH * METERS_PER_INCH * METERS_PER_INCH)), matdensity);
-
-	surfacedata_t *surface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
-	if (surface) {
-		m_pObject->setFriction(surface->physics.friction);
-		m_pObject->setRestitution(surface->physics.elasticity > 1 ? 1 : surface->physics.elasticity);
-
-		// Dampening = 0 always for some reason
-		//m_pObject->setDamping(surface->physics.dampening, surface->physics.dampening);
-	} else {
-		Warning("Physics model \"%s\" created with invalid material index!", GetName());
-	}
-
-	// Drag calculations converted from  2003 source code
+	// Drag calculations converted from 2003 source code
 	float drag = 0;
 	float angDrag = 0;
 	if (pParams) {
@@ -787,7 +777,6 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_dragBasis.setValue(0, 0, 0);
 	m_angDragBasis.setValue(0, 0, 0);
 
-	// THIS IS COMPLETELY BROKEN!
 	if (!IsStatic() && GetCollide()) {
 		btCollisionShape *shape = m_pObject->getCollisionShape();
 
@@ -829,26 +818,25 @@ btRigidBody *CPhysicsObject::GetObject() {
 }
 
 // UNEXPOSED
-float CPhysicsObject::GetDragInDirection(btVector3 *dir) const {
+float CPhysicsObject::GetDragInDirection(const btVector3 &dir) const {
 	if (!dir) return 0.0f;
 
 	btVector3 out;
 	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis();
-	BtMatrix_vimult(&mat, dir, &out);
+	BtMatrix_vimult(mat, dir, out);
 
 	return m_dragCoefficient * fabs(out.getX() * m_dragBasis.getX()) + 
 		fabs(out.getY() * m_dragBasis.getY()) +	
 		fabs(out.getZ() * m_dragBasis.getZ());
-	
 }
 
 // UNEXPOSED
-float CPhysicsObject::GetAngularDragInDirection(btVector3 *dir) const {
+float CPhysicsObject::GetAngularDragInDirection(const btVector3 &dir) const {
 	if (!dir) return 0.0f;
 
-	return m_angDragCoefficient * fabs(dir->getX() * m_angDragBasis.getX()) +
-		fabs(dir->getY() * m_angDragBasis.getY()) +
-		fabs(dir->getZ() * m_angDragBasis.getZ());
+	return m_angDragCoefficient * fabs(dir.getX() * m_angDragBasis.getX()) +
+		fabs(dir.getY() * m_angDragBasis.getY()) +
+		fabs(dir.getZ() * m_angDragBasis.getZ());
 }
 
 /************************
@@ -908,11 +896,15 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	if (!isStatic) {
 		btVector3 mins, maxs;
 		shape->getAabb(btTransform::getIdentity(), mins, maxs);
-		float maxradius = min(min(abs(maxs.getX()), abs(maxs.getY())), abs(maxs.getZ()));
-		float minradius = min(min(abs(mins.getX()), abs(mins.getY())), abs(mins.getZ()));
+		mins = mins.absolute();
+		maxs = maxs.absolute();
+
+		float maxradius = min(min(maxs.getX(), maxs.getY()), maxs.getZ());
+		float minradius = min(min(mins.getX(), mins.getY()), mins.getZ());
 		float radius = min(maxradius, minradius) / 2.0f;
+
 		body->setCcdMotionThreshold(radius);
-		body->setCcdSweptSphereRadius(0.9f * radius);
+		body->setCcdSweptSphereRadius(0.2f * radius);
 	}
 	
 	return pObject;

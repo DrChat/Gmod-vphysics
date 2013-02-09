@@ -53,6 +53,17 @@ CPhysicsFluidController::~CPhysicsFluidController() {
 	delete m_pGhostObject;
 }
 
+void CPhysicsFluidController::WakeAllSleepingObjects() {
+	int count = m_pGhostObject->getNumOverlappingObjects();
+	for (int i = 0; i < count; i++) {
+		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
+		if (!body)
+			continue;
+
+		body->activate(true);
+	}
+}
+
 void CPhysicsFluidController::SetGameData(void *pGameData) {
 	m_pGameData = pGameData;
 }
@@ -75,44 +86,36 @@ float CPhysicsFluidController::GetDensity() const {
 	return m_fDensity;
 }
 
-void CPhysicsFluidController::WakeAllSleepingObjects() {
-	int count = m_pGhostObject->getNumOverlappingObjects();
-	for (int i = 0; i < count; i++) {
-		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
-		if (!body)
-			continue;
-
-		body->activate(true);
-	}
-}
-
 int	CPhysicsFluidController::GetContents() const {
 	return m_iContents;
 }
 
+// TODO: Refactor this code to be less messy.
 void CPhysicsFluidController::Tick(float dt) {
 	VPROF_BUDGET("CPhysicsFluidController::Tick", VPROF_BUDGETGROUP_PHYSICS);
 
-	int count = m_pGhostObject->getNumOverlappingObjects();
-	for (int i = 0; i < count; i++) {
+	int numObjects = m_pGhostObject->getNumOverlappingObjects();
+	for (int i = 0; i < numObjects; i++) {
 		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
 		if (!body)
 			continue;
 
-		CPhysicsObject *obj = (CPhysicsObject *)body->getUserPointer();
-		if (!obj)
+		CPhysicsObject *pObject = (CPhysicsObject *)body->getUserPointer();
+		if (!pObject)
 			continue;
 
 		btVector3 mins, maxs, omins, omaxs;
 		body->getAabb(mins, maxs);
-		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
 		m_pGhostObject->getCollisionShape()->getAabb(m_pGhostObject->getWorldTransform(), omins, omaxs);
+
+		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
 		float dist = omaxs.y() - mins.y();
 		float p = clamp(dist / height, 0.0f, 1.0f);
-		float vol = (obj->GetVolume() * p) / 64; 
+		float vol = (pObject->GetVolume() * p) / 64; 
 
-		body->applyCentralForce((-body->getGravity() * m_fDensity * vol) * obj->GetBuoyancyRatio()/*(maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
+		body->applyCentralForce((-body->getGravity() * m_fDensity * vol) * pObject->GetBuoyancyRatio()/*(maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
 
+		// Damping
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
 

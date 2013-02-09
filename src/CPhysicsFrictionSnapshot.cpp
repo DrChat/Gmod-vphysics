@@ -44,6 +44,7 @@ IPhysicsObject *CPhysicsFrictionSnapshot::GetObject(int index) {
 	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
 	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
 
+	// index 0 is this object, 1 is other object
 	if (index == 0)
 		return ((CPhysicsObject *)pObjA->getUserPointer() == m_pObject) ? (IPhysicsObject *)pObjA->getUserPointer() : (IPhysicsObject *)pObjB->getUserPointer();
 	else
@@ -54,6 +55,7 @@ int CPhysicsFrictionSnapshot::GetMaterial(int index) {
 	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
 	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
 
+	// index 0 is this object, 1 is other object
 	if (index == 0)
 		return ((CPhysicsObject *)pObjA->getUserPointer() == m_pObject) ? ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex() : ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
 	else
@@ -107,7 +109,15 @@ void CPhysicsFrictionSnapshot::NextFrictionData() {
 
 float CPhysicsFrictionSnapshot::GetFrictionCoefficient() {
 	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
-	NOT_IMPLEMENTED
-	return 0;
+	return bullManifoldPoint.m_combinedFriction;
 }
 
+/***********************
+* CREATION FUNCTIONS
+***********************/
+
+CPhysicsFrictionSnapshot *CreateFrictionSnapshot(CPhysicsObject *pObject) {
+	if (!pObject) return NULL;
+
+	return new CPhysicsFrictionSnapshot(pObject);
+}

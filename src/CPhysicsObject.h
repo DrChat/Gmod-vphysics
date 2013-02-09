@@ -130,10 +130,13 @@ class CPhysicsObject : public IPhysicsObject1 {
 	public:
 		// UNEXPOSED FUNCTIONS
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere = false);
+
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
 		btRigidBody *						GetObject();
-		float								GetDragInDirection(btVector3  *direction) const; // Function is not interfaced anymore
-		float								GetAngularDragInDirection(btVector3  *direction) const;
+
+		float								GetDragInDirection(const btVector3 &direction) const; // Function is not interfaced anymore
+		float								GetAngularDragInDirection(const btVector3 &direction) const;
+
 		float								GetVolume() const { return m_fVolume; }
 		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; }
 

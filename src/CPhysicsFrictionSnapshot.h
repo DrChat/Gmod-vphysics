@@ -35,4 +35,6 @@ class CPhysicsFrictionSnapshot : public IPhysicsFrictionSnapshot
 		int									m_iCurContactPoint;
 };
 
+CPhysicsFrictionSnapshot *CreateFrictionSnapshot(CPhysicsObject *pObject);
+
 #endif

@@ -37,14 +37,14 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		btRigidBody *body = btRigidBody::upcast(m_objectList[i]);
 		IPhysicsObject *pObject = (IPhysicsObject *)body->getUserPointer();
 		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
+		ConvertForceImpulseToBull(speed, bullSpeed);
+		ConvertAngularImpulseToBull(rot, bullRot);
+
 		switch(ret) {
 			case IMotionEvent::SIM_NOTHING: {
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
-				ConvertForceImpulseToBull(speed, bullSpeed);
-				ConvertAngularImpulseToBull(rot, bullRot);
-
 				btTransform transform;
 				((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 				bullSpeed = transform.getBasis() * bullSpeed;
@@ -54,9 +54,6 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_FORCE: {
-				ConvertForceImpulseToBull(speed, bullSpeed);
-				ConvertAngularImpulseToBull(rot, bullRot);
-
 				btTransform transform;
 				((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 				bullSpeed = transform.getBasis() * bullSpeed;
@@ -66,21 +63,17 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 				break;
 			}
 			case IMotionEvent::SIM_GLOBAL_ACCELERATION: {
-				ConvertForceImpulseToBull(speed, bullSpeed);
-				ConvertAngularImpulseToBull(rot, bullRot);
 				body->setLinearVelocity(body->getLinearVelocity() + bullSpeed * deltaTime);
 				body->setAngularVelocity(body->getAngularVelocity() + bullRot * deltaTime);
 				break;
 			}
 			case IMotionEvent::SIM_GLOBAL_FORCE: {
-				ConvertForceImpulseToBull(speed, bullSpeed);
-				ConvertAngularImpulseToBull(rot, bullRot);
 				body->applyCentralForce(bullSpeed * deltaTime);
 				body->applyTorque(bullRot * deltaTime);
 				break;
 			}
 			default: {
-				Warning("VPhysics: Invalid motion controller event type returned (%d)\n", ret);
+				DevWarning("VPhysics: Invalid motion controller event type returned (%d)\n", ret);
 			}
 		}
 	}
@@ -96,6 +89,10 @@ void CPhysicsMotionController::AttachObject(IPhysicsObject *pObject, bool checkI
 
 	CPhysicsObject *pPhys = (CPhysicsObject *)pObject;
 	btRigidBody *body = pPhys->GetObject();
+
+	if (m_objectList.Find(body) != -1 && checkIfAlreadyAttached)
+		return;
+
 	m_objectList.AddToTail(body);
 }
 
@@ -113,13 +110,15 @@ int CPhysicsMotionController::CountObjects() {
 }
 
 void CPhysicsMotionController::GetObjects(IPhysicsObject **pObjectList) {
+	if (!pObjectList) return;
+
 	for (int i = 0; i < m_objectList.Count(); i++) {
 		pObjectList[i] = (IPhysicsObject *)m_objectList[i]->getUserPointer();
 	}
 }
 
 void CPhysicsMotionController::ClearObjects() {
-	NOT_IMPLEMENTED
+	m_objectList.Purge();
 }
 
 void CPhysicsMotionController::WakeObjects() {
@@ -128,17 +127,6 @@ void CPhysicsMotionController::WakeObjects() {
 	}
 }
 
-// FIXME: What the shit do we even do? Can we implement this?
 void CPhysicsMotionController::SetPriority(priority_t priority) {
-	switch (priority) {
-		case LOW_PRIORITY:
-			break;
-		default:
-		case MEDIUM_PRIORITY:
-			break;
-		case HIGH_PRIORITY:
-			break;
-	}
-
-	NOT_IMPLEMENTED
+	// IVP Controllers had a priority. Since bullet doesn't have controllers, this function is useless.
 }

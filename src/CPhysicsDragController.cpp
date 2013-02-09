@@ -47,63 +47,31 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		CPhysicsObject *pObject = (CPhysicsObject *)m_ents[i];
 		btRigidBody *body = pObject->GetObject();
 
-		btVector3 vel = body->getLinearVelocity();
-		btVector3 ang = body->getAngularVelocity();
+		btVector3 vel(0, 0, 0);
+		btVector3 ang(0, 0, 0);
 
 		//------------------
 		// LINEAR DRAG
 		//------------------
-		float dragForce = -0.5 * pObject->GetDragInDirection(&vel) * m_airDensity * dt;
+		float dragForce = -0.5f * pObject->GetDragInDirection(body->getLinearVelocity()) * m_airDensity * dt;
 		if (dragForce < -1.0f)
 			dragForce = -1.0f;
 
 		if (dragForce < 0)
-			vel *= dragForce;
+			vel = body->getLinearVelocity() * dragForce;
 
-		body->setLinearVelocity(vel + body->getLinearVelocity());
+		body->setLinearVelocity(body->getLinearVelocity() + vel);
 
 		//------------------
 		// ANGULAR DRAG
 		//------------------
-		float angDragForce = -pObject->GetAngularDragInDirection(&ang) * m_airDensity * dt;
+		float angDragForce = -pObject->GetAngularDragInDirection(body->getAngularVelocity()) * m_airDensity * dt;
 		if (angDragForce < -1.0f)
 			angDragForce = -1.0f;
 
 		if (angDragForce < 0)
-			ang *= angDragForce;
+			ang = body->getAngularVelocity() * angDragForce;
 
-		body->setAngularVelocity(ang + body->getAngularVelocity());
-
-		/*
-		Vector dragLinearFinal(0,0,0);
-		AngularImpulse dragAngularFinal(0,0,0);
-
-		Vector vel;
-		AngularImpulse ang;
-		pObject->GetVelocity(&vel, &ang);
-
-		btVector3 bull_vel;
-		btVector3 bull_angimpulse;
-
-		ConvertPosToBull(vel, bull_vel);
-		ConvertAngularImpulseToBull(ang, bull_angimpulse);
-
-		float dragForce = -0.5 * pObject->GetDragInDirection(&bull_vel) * m_airDensity * dt;
-		if (dragForce < -1.0f)
-			dragForce = -1.0f;
-		
-		if (dragForce < 0)
-			Vector dragLinearFinal = vel * dragForce;
-
-		float angDragForce = -pObject->GetAngularDragInDirection(&bull_angimpulse) * m_airDensity * dt;
-
-		if (angDragForce < -1.0f)
-			angDragForce = -1.0f;
-
-		if (angDragForce < 0)
-			dragAngularFinal = ang * angDragForce;
-
-		object->AddVelocity(&dragLinearFinal, &dragAngularFinal);
-		*/
+		body->setAngularVelocity(body->getAngularVelocity() + ang);
 	}
 }
