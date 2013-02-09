@@ -53,7 +53,7 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		//------------------
 		// LINEAR DRAG
 		//------------------
-		float dragForce = -0.5f * pObject->GetDragInDirection(body->getLinearVelocity()) * m_airDensity * dt;
+		float dragForce = -pObject->GetDragInDirection(body->getLinearVelocity()) * m_airDensity * dt;
 		if (dragForce < -1.0f)
 			dragForce = -1.0f;
 

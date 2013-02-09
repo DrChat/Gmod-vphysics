@@ -757,14 +757,14 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 
 	m_pObject->setUserPointer(this);
 
-	SetMaterialIndex(materialIndex);
-
 	if (pParams) {
 		m_pGameData		= pParams->pGameData;
 		m_pName			= pParams->pName;
 		m_fVolume		= pParams->volume;
 		EnableCollisions(pParams->enableCollisions);
 	}
+
+	SetMaterialIndex(materialIndex);
 
 	// Drag calculations converted from 2003 source code
 	float drag = 0;
@@ -819,8 +819,6 @@ btRigidBody *CPhysicsObject::GetObject() {
 
 // UNEXPOSED
 float CPhysicsObject::GetDragInDirection(const btVector3 &dir) const {
-	if (!dir) return 0.0f;
-
 	btVector3 out;
 	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis();
 	BtMatrix_vimult(mat, dir, out);
@@ -832,8 +830,6 @@ float CPhysicsObject::GetDragInDirection(const btVector3 &dir) const {
 
 // UNEXPOSED
 float CPhysicsObject::GetAngularDragInDirection(const btVector3 &dir) const {
-	if (!dir) return 0.0f;
-
 	return m_angDragCoefficient * fabs(dir.getX() * m_angDragBasis.getX()) +
 		fabs(dir.getY() * m_angDragBasis.getY()) +
 		fabs(dir.getZ() * m_angDragBasis.getZ());
@@ -890,8 +886,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	CPhysicsObject *pObject = new CPhysicsObject;
 	pObject->Init(pEnvironment, body, materialIndex, pParams);
-	if (!isStatic && pParams && pParams->dragCoefficient != 0.0f)
-		pObject->EnableDrag(true);
+	//if (!isStatic && pParams && pParams->dragCoefficient != 0.0f)
+	//	pObject->EnableDrag(true);
 
 	if (!isStatic) {
 		btVector3 mins, maxs;
