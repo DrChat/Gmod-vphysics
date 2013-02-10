@@ -35,7 +35,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController {
 
 		// Debug
 		void								GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem);
-		void								VehicleDataReload() { NOT_IMPLEMENTED }
+		void								VehicleDataReload();
 
 		// Unexposed functions
 		void								InitVehicleParams(const vehicleparams_t &params);

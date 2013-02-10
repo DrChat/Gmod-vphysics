@@ -163,7 +163,6 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
 		m_vehicleParams.axles[i].wheels.radius = ConvertDistanceToBull(params.axles[i].wheels.radius);
 		m_vehicleParams.axles[i].wheels.springAdditionalLength = ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
-		m_vehicleParams.axles[i].suspension.springConstant = ConvertDistanceToBull(params.axles[i].suspension.springConstant);
 	}
 }
 
@@ -226,8 +225,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	matrix3x4_t matrix;
 	AngleMatrix(bodyAngles, bodyPosition, matrix);
 
-	// Note: This will only work with vehicles that have 2 wheels per axle
-	// TODO: Compensate for the vehicle's mass offset!
+	// HACK: This will only work with vehicles that have 2 wheels per axle
 	if (wheelIndex & 1) {
 		position += axle.wheelOffset;
 	} else {
@@ -264,19 +262,24 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
-	bool bIsFrontWheel = (wheelIndex < 2);		// NOTE: Only works with 2 front wheels
-	btVector3 bullWheelDirectionCS0(0,-1,0);	// Straight down
-	btVector3 bullWheelAxleCS(-1,0,0);			// Left
+	bool bIsFrontWheel = (wheelIndex < 2);		// HACK: Only works with 2 front wheels
+
+	btVector3 bullWheelDirectionCS0(0, -1, 0);	// Straight down
+	btVector3 bullWheelAxleCS(-1, 0, 0);		// Left
+
 	ConvertPosToBull(position, bullConnectionPointCS0);
-	bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
+	bullConnectionPointCS0 -= ((btMassCenterMotionState *)m_pBody->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+
+	//bullSuspensionRestLength = axle.suspension.springConstant + axle.wheels.springAdditionalLength;
+	bullSuspensionRestLength = axle.wheels.springAdditionalLength;
 	bullWheelRadius = axle.wheels.radius;
-	bullConnectionPointCS0 += btVector3(0, 0, -(axle.wheels.radius * 2));
 
 	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;		// TODO: How do we convert this?
 	wheelInfo.m_suspensionStiffness = axle.suspension.springDamping;	// TODO: How do we convert this?
-	wheelInfo.m_frictionSlip = axle.wheels.frictionScale - 1;
+	wheelInfo.m_frictionSlip = axle.wheels.frictionScale - 1;			// FIXME: Proper conversion required.
+	wheelInfo.m_suspensionStiffness = axle.suspension.springConstant;
 
 	return pWheel;
 }
@@ -337,7 +340,7 @@ void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &cont
 		ConvertRotationToHL(bullRot, HLRot);
 
 		// z = spin
-		// flip it because HL expects it to come in opposite.
+		// flip it because HL expects it to come in opposite for some reason.
 		HLRot.z = -HLRot.z;
 
 		m_pWheels[i]->SetPosition(HLPos, HLRot, true);
@@ -346,7 +349,7 @@ void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &cont
 
 float CPhysicsVehicleController::UpdateBooster(float dt) {
 	NOT_IMPLEMENTED
-	return 0.0f;		// Return boost delay.
+	return 0.0f; // Return boost delay.
 }
 
 void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &controls, float dt) {
@@ -376,37 +379,46 @@ bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContact
 	btWheelInfo wheelInfo = m_pRaycastVehicle->getWheelInfo(index);
 	if (wheelInfo.m_raycastInfo.m_isInContact) {
 		btVector3 bullContactVec = wheelInfo.m_raycastInfo.m_contactPointWS;
+		btCollisionObject *body = (btCollisionObject *)wheelInfo.m_raycastInfo.m_groundObject;
+		CPhysicsObject *pObject = (CPhysicsObject *)body->getUserPointer();
 
 		if (pContactPoint)
 			ConvertPosToHL(bullContactVec, *pContactPoint);
 
-		// TODO: pSurfaceProps
+		if (pSurfaceProps)
+			*pSurfaceProps = pObject->GetMaterialIndex();
 
 		return true;
 	}
+
 	return false;
 }
 
 void CPhysicsVehicleController::SetSpringLength(int wheelIndex, float length) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) return;
 	NOT_IMPLEMENTED
 }
 
 void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) return;
 	NOT_IMPLEMENTED
 }
 
-//--------------
-// Debug stuff
-//--------------
 void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem) {
 	memset(&debugCarSystem, 0, sizeof(debugCarSystem));
 	NOT_IMPLEMENTED
 }
 
-//---------------------------------------
-// Class factory
-//---------------------------------------
+void CPhysicsVehicleController::VehicleDataReload() {
+	NOT_IMPLEMENTED
+}
+
+/****************************
+* CREATION FUNCTIONS
+****************************/
 IPhysicsVehicleController *CreateVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
+	if (!pBody) return NULL;
+
 	CPhysicsVehicleController *pController = new CPhysicsVehicleController(pEnv, pBody, params, nVehicleType, pGameTrace);
 	return pController;
 }

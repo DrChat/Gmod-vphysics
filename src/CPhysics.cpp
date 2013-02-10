@@ -84,5 +84,5 @@ void CPhysics::DestroyAllCollisionSets() {
 	m_collisionSets.RemoveAll();
 }
 
-static CPhysics g_MainDLLInterface;
+CPhysics g_MainDLLInterface;
 EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CPhysics, IPhysics, VPHYSICS_INTERFACE_VERSION, g_MainDLLInterface);

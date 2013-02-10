@@ -271,6 +271,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	if (pMins)
 		ConvertPosToHL(mins, *pMins);
+
 	if (pMaxs)
 		ConvertPosToHL(maxs, *pMaxs);
 }
@@ -410,7 +411,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 		btBoxShape *box = new btBoxShape(btvec.absolute());
 
 		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
-		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0);
+		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.001f);
 
 		ptr->fraction = cb.m_closestHitFraction;
 		ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
@@ -497,7 +498,7 @@ struct ivpcompactsurface_t {
 };
 
 // 16 bytes
-// Just like a btConvexShapeHull.
+// Just like a btTriangleMesh.
 struct ivpcompactledge_t {
 	int		c_point_offset; // byte offset from 'this' to (ledge) point array
 	union {
@@ -549,37 +550,24 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	DevMsg("VPhysics: VCollideLoad with %d solids, swap is %s\n", solidCount, swap ? "true" : "false");
 
 	// Now for the fun part:
-	// We have to convert every solid into a bullet solid
-	// because a phy file is made up of ivp solids.
+	// We must convert all of the ivp shapes into something we can read.
 	for (int i = 0; i < solidCount; i++) {
 		const char *solid = (const char *)pOutput->solids[i];
 		const compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
 		const ivpcompactsurface_t ivpsurface = *(ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
-		// Some checks and warnings (condense these when we want to remove the warnings)
-		if (surfaceheader.vphysicsID != MAKEID('V', 'P', 'H', 'Y')) {
-			Warning("VPhysics: Could not load a solid! (surfaceheader.vphysicsID != \"VPHY\")\n");
-			pOutput->solids[i] = NULL;
-			continue;
-		}
-
-		if (surfaceheader.version != 0x100) {
-			Warning("VPhysics: Could not load a solid! (surfaceheader.version == %X)\n", surfaceheader.version);
-			pOutput->solids[i] = NULL;
-			continue;
-		}
-
-		if (surfaceheader.modelType != 0x0) {
-			Warning("VPhysics: Could not load a solid! (surfaceheader.modelType == %X)\n", surfaceheader.modelType);
-			pOutput->solids[i] = NULL;
+		if (surfaceheader.vphysicsID != MAKEID('V', 'P', 'H', 'Y')
+				|| surfaceheader.version != 0x100
+				|| surfaceheader.modelType != 0x0
+				|| ivpsurface.dummy[2] != MAKEID('I', 'V', 'P', 'S')) 
+		{
+			DevWarning("VPhysics: Could not load mesh!");
 			continue;
 		}
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
 		info->massCenter = btVector3(ivpsurface.mass_center[0], -ivpsurface.mass_center[1], -ivpsurface.mass_center[2]);
 
-		// TODO: Support loading of IVP MOPP (is it even used?)
-		Assert(ivpsurface.dummy[2] == MAKEID('I', 'V', 'P', 'S'));
 		const char *convexes = solid + 76; // Right after ivpsurface
 
 		btCompoundShape *pCompound = new btCompoundShape;
@@ -592,21 +580,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			// Structure:
 			// ivp_compact_ledge, ivp_compact_triangle[ledge.n_trianges], repeat until vertices
 			// Later on are actual edge(vertices) points of each triangle
-
-			// IVP Solids contain a final ledge which appears to be a convex wrap
-			// of any concave models. (Found from phy file props_junk/TrashDumpster02.phy @ 0x000007B0)
-			// (Also found from phy file props_c17/FurnitureWashingmachine001a.phy @ 0x000002D0)
-			// From my observations of IVP source, they appear to be using qhull internally. They
-			// also will run through and mark any points not included in the initial points received
-			// as is_virtual(?)
-			// BUG: Trashdumpster02 and other props have some sort of invisible collision shape
-			// (trash dumpster has this shape at it's opening). You can still fit props inside
-			// of the trash dumpster as if the opening was covered over by something else.
-
-			// TODO: Detailed analysis of dumpster02, as it still appears to have a distorted
-			// collision mesh
 			const ivpcompactledge_t ivpledge = *(ivpcompactledge_t *)(convexes + position);
-
 			const char *vertices = convexes + position + ivpledge.c_point_offset;
 
 			// Triangles start after the ivp_compact_ledge
@@ -617,6 +591,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			// Add all of the triangles to our mesh.
 			for (int j = 0; j < ivpledge.n_triangles; j++) {
 				const ivpcompacttriangle_t ivptri = *(ivpcompacttriangle_t *)(convexes + position);
+				Assert(j == ivptri.tri_index); // If these are not equal, some data corruption may have occurred.
+
 				position += sizeof(ivpcompacttriangle_t);
 
 				if (ivptri.is_virtual)
@@ -631,8 +607,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				}
 			}
 
-			// Not enough points to make a triangle.
-			if (pConvex->getNumPoints() >= 3) {
+			if (pConvex->getNumPoints() > 0) {
 				pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), pConvex); // Move by opposite of center of mass since bullet takes our origin as the center of mass.
 			} else {
 				delete pConvex;

@@ -23,49 +23,13 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
-// Win32 because linux can't draw, and I don't debug on mac (feel free to enable it for macs).
 #if defined(_WIN32) //&& defined(_DEBUG)
 #	define DEBUG_DRAW 1
 #endif
 
-// 4 mm
-#define COLLISION_MARGIN 0.004
+#define COLLISION_MARGIN 0.004 // 4 mm
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
-/*
-#ifdef _DEBUG
-#	define NOT_IMPLEMENTED __asm {int 3}
-#else
-#	define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
-#endif
-*/
-
-#define NOT_IMPLEMENTED Warning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
 #define NOT_IMPLEMENTED_CRITICAL Error("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
-
-/******************************
-* MISC CLASSES
-******************************/
-
-// Putting these in here because I dont want to make a header just for them
-// Class is mainly used for bullet -> game position. Bullet will only get the transform from this
-// if we're a kinematic object.
-// We have a mass center motion state because bullet sees the mass center as the origin of the object,
-// but HL sees the mass center as an offset.
-struct btMassCenterMotionState : public btMotionState {
-	btTransform	m_centerOfMassOffset;
-	btTransform m_worldTrans;
-	void *		m_userPointer;
-
-	btMassCenterMotionState(const btTransform &centerOfMassOffset = btTransform::getIdentity())
-		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(btTransform::getIdentity()), m_userPointer(0)
-	{
-	}
-
-	void getWorldTransform(btTransform &worldTrans) const { worldTrans = m_worldTrans; }	// FYI: Bullet calls this ONLY when we're a kinematic object.
-	void setWorldTransform(const btTransform &worldTrans) { m_worldTrans = worldTrans; }	// FYI: Bullet calls this to update the motion state if we're not a kinematic object.
-
-	void getGraphicTransform(btTransform &graphTrans) const { graphTrans = m_worldTrans * m_centerOfMassOffset.inverse(); }	// Bullet -> HL
-	void setGraphicTransform(const btTransform &graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }			// HL -> Bullet
-};

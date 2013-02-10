@@ -83,6 +83,7 @@ bool CPhysicsObject::IsMoveable() const {
 }
 
 bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
+	// What is bExternalOnly?
 	NOT_IMPLEMENTED
 	return false;
 }
@@ -297,6 +298,7 @@ void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
 		m_pObject->setDamping(*speed, *rot);
 		return;
 	}
+
 	if (speed) m_pObject->setDamping(*speed, m_pObject->getAngularDamping());
 	if (rot) m_pObject->setDamping(m_pObject->getLinearDamping(), *rot);
 }
@@ -306,8 +308,7 @@ void CPhysicsObject::GetDamping(float *speed, float *rot) const {
 	if (rot) *rot = m_pObject->getAngularDamping();
 }
 
-void CPhysicsObject::SetDragCoefficient(float *pDrag, float *pAngularDrag)
-{
+void CPhysicsObject::SetDragCoefficient(float *pDrag, float *pAngularDrag) {
 	if (pDrag)
 		m_dragCoefficient = *pDrag;
 
@@ -328,6 +329,7 @@ void CPhysicsObject::SetMaterialIndex(int materialIndex) {
 	if (pSurface) {
 		m_materialIndex = materialIndex;
 		m_pObject->setFriction(pSurface->physics.friction);
+		//m_pObject->setRollingFriction(pSurface->physics.friction);
 		m_pObject->setRestitution(pSurface->physics.elasticity > 1 ? 1 : pSurface->physics.elasticity);
 
 		// FIXME: Figure out how to convert damping values.

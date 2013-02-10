@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
 #include "CPhysicsEnvironment.h"
+#include "CPhysics.h"
 #include "CPhysicsObject.h"
 #include "CShadowController.h"
 #include "CPlayerController.h"
@@ -555,11 +556,34 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
+extern CPhysics g_MainDLLInterface;
+void SerializeWorld_f(const CCommand &args) {
+	if (args.ArgC() != 2) {
+		Msg("Usage: vphysics_serialize <index>\n");
+		return;
+	}
+
+	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)g_MainDLLInterface.GetActiveEnvironmentByIndex(atoi(args.Arg(2)));
+	if (pEnv) {
+		btDiscreteDynamicsWorld *pWorld = (btDiscreteDynamicsWorld *)pEnv->GetBulletEnvironment();
+		if (!pWorld) return;
+
+		btSerializer *pSerializer = new btDefaultSerializer;
+		pWorld->serialize(pSerializer);
+
+		FILE *pFile = fopen("testfile.bullet", "wb");
+		if (pFile) {
+			fwrite(pSerializer->getBufferPointer(), pSerializer->getCurrentBufferSize(), 1, pFile);
+			fclose(pFile);
+		}
+	}
+}
+
+static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (0=server, 1=client)\nDumps \"testfile.bullet\" out to the exe directory.");
+
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", 0, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	VPROF_BUDGET("CPhysicsEnvironment::Simulate", VPROF_BUDGETGROUP_PHYSICS);
-
-	// If you hit this assert, something has gone horribly wrong!
 	if (!m_pBulletEnvironment) Assert(0);
 
 	if (deltaTime > 1.0 || deltaTime < 0.0) {
@@ -583,13 +607,14 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt(), timestep);
 		VPROF_EXIT_SCOPE();
 
-#if DEBUG_DRAW
-		VPROF_ENTER_SCOPE("m_debugdraw->DrawWorld");
-		m_debugdraw->DrawWorld();
-		VPROF_EXIT_SCOPE();
-#endif
 		m_inSimulation = false;
 	}
+
+#if DEBUG_DRAW
+	VPROF_ENTER_SCOPE("m_debugdraw->DrawWorld");
+	m_debugdraw->DrawWorld();
+	VPROF_EXIT_SCOPE();
+#endif
 
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
@@ -723,14 +748,17 @@ void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const V
 }
 
 void CPhysicsEnvironment::GetPerformanceSettings(physics_performanceparams_t *pOutput) const {
+	if (!pOutput) return;
 	memcpy(pOutput, m_perfparams, sizeof(physics_performanceparams_t));
 }
 
 void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams_t *pSettings) {
+	if (!pSettings) return;
 	memcpy((void *)m_perfparams, pSettings, sizeof(physics_performanceparams_t));
 }
 
 void CPhysicsEnvironment::ReadStats(physics_stats_t *pOutput) {
+	if (!pOutput) return;
 	NOT_IMPLEMENTED
 }
 
@@ -758,7 +786,7 @@ void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
 
 // FIXME: What do?
 void CPhysicsEnvironment::DebugCheckContacts() {
-	NOT_IMPLEMENTED
+	
 }
 
 // UNEXPOSED
@@ -808,6 +836,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 	m_inSimulation = true;
 }
 
+// UNEXPOSED
 CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 	return m_pPhysicsDragController;
 }
@@ -851,6 +880,10 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 													&data);
 					}
 				}
+
+				// TODO: Collision callback
+				// Source wants precollision and postcollision callbacks (pre velocity and post velocity, etc.)
+				// How do we generate a callback before the collision happens?
 			}
 		}
 	}
@@ -861,6 +894,7 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 		for (int i = 0; i < numObjects; i++) {
 			btCollisionObject *obj = collisionObjects[i];
 			CPhysicsObject *physobj = (CPhysicsObject *)collisionObjects[i]->getUserPointer();
+
 			if (physobj->GetLastActivationState() != obj->getActivationState()) {
 				switch (obj->getActivationState()) {
 					case ACTIVE_TAG:

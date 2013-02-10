@@ -3,17 +3,14 @@
 #include "CPhysicsFluidController.h"
 #include "CPhysicsObject.h"
 #include "CPhysicsEnvironment.h"
+#include "CPhysicsSurfaceProps.h"
 
 #include "tier0/vprof.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams) {
-	if (!pEnv || !pFluidObject) return NULL;
-	CPhysicsFluidController *pFluid = new CPhysicsFluidController(pEnv, pFluidObject, pParams);
-	return pFluid;
-}
+extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
 /********************************
 * CLASS CPhysicsFluidController
@@ -34,8 +31,17 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 		m_vSurfacePlane = pParams->surfacePlane;
 	}
 
-	m_fDensity = 1.0f;	// Density of water, used to be a parameter for this in the 2003 leak but it seems to have been removed for some reason
-						// FIXME: This might be available in the surface properities of the fluid object?
+	m_fDensity = 1.0f;
+
+	// FIXME: The below density is correct (kg/m^3, close to 1000). Adjust our calculations in Tick
+	/*
+	int matIndex = pFluidObject->GetMaterialIndex();
+	surfacedata_t *pSurface = g_SurfaceDatabase.GetSurfaceData(matIndex);
+	if (pSurface) {
+		m_fDensity = pSurface->physics.density;
+	}
+	*/
+
 	pFluidObject->EnableCollisions(false);
 	pFluidObject->SetContents(m_iContents);
 	pFluidObject->SetFluidController(this);
@@ -111,15 +117,57 @@ void CPhysicsFluidController::Tick(float dt) {
 		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
 		float dist = omaxs.y() - mins.y();
 		float p = clamp(dist / height, 0.0f, 1.0f);
-		float vol = (pObject->GetVolume() * p) / 64; 
+		float vol = (pObject->GetVolume() * p) / 64;
 
-		body->applyCentralForce((-body->getGravity() * m_fDensity * vol) * pObject->GetBuoyancyRatio()/*(maxs + mins - btVector3(0,height*(1-p),0)) * 0.5f - body->getWorldTransform().getOrigin()*/);
+		// TODO: We need to calculate this force at several points on the object.
+		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();
+		body->applyCentralForce(force);
+
+		/*
+		int numManifolds = m_pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
+		for (int j = 0; j < numManifolds; j++) {
+			btPersistentManifold *pManifold = m_pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(j);
+			const btCollisionObject *obA = pManifold->getBody0();
+			const btCollisionObject *obB = pManifold->getBody1();
+
+			int numContacts = pManifold->getNumContacts();
+			if (numContacts <= 0)
+				continue;
+
+			if (obA == m_pGhostObject && obB == body) {
+				for (int k = 0; k < numContacts; k++) {
+					btManifoldPoint manPoint = pManifold->getContactPoint(k);
+					btVector3 pos = manPoint.getPositionWorldOnB();
+
+					body->applyForce(force, pos);
+				}
+			} else if (obB == m_pGhostObject && obA == body) {
+				for (int k = 0; k < numContacts; k++) {
+					btManifoldPoint manPoint = pManifold->getContactPoint(k);
+					btVector3 pos = manPoint.getPositionWorldOnA();
+
+					body->applyForce(force, pos);
+				}
+			}
+		}
+		*/
 
 		// Damping
+		// FIXME: Damping would be way too much for an object barely touching our surface.
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
 
 		if (body->getLinearVelocity().length2() > 0.01f)
 			body->activate(true); // Stop it from freezing while mini-bouncing, it looks dumb
 	}
+}
+
+/************************
+* CREATION FUNCTIONS
+************************/
+
+CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams) {
+	if (!pEnv || !pFluidObject) return NULL;
+	CPhysicsFluidController *pFluid = new CPhysicsFluidController(pEnv, pFluidObject, pParams);
+	return pFluid;
 }

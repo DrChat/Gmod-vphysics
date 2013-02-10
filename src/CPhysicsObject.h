@@ -6,6 +6,23 @@ class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
 
+struct btMassCenterMotionState : public btMotionState {
+	btTransform	m_centerOfMassOffset;
+	btTransform m_worldTrans;
+	void *		m_userPointer;
+
+	btMassCenterMotionState(const btTransform &centerOfMassOffset = btTransform::getIdentity())
+		: m_centerOfMassOffset(centerOfMassOffset), m_worldTrans(btTransform::getIdentity()), m_userPointer(0) 
+	{
+	}
+
+	void getWorldTransform(btTransform &worldTrans) const { worldTrans = m_worldTrans; }	// FYI: Bullet calls this ONLY when we're a kinematic object.
+	void setWorldTransform(const btTransform &worldTrans) { m_worldTrans = worldTrans; }	// FYI: Bullet calls this to update the motion state if we're not a kinematic object.
+
+	void getGraphicTransform(btTransform &graphTrans) const { graphTrans = m_worldTrans * m_centerOfMassOffset.inverse(); }	// Bullet -> HL
+	void setGraphicTransform(const btTransform &graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }			// HL -> Bullet
+};
+
 class CPhysicsObject : public IPhysicsObject1 {
 	public:
 											CPhysicsObject();
