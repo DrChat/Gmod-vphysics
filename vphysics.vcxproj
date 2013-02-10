@@ -132,24 +132,24 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CDebugDrawer.cpp" />
+    <ClCompile Include="src\DebugDrawer.cpp" />
     <ClCompile Include="src\convert.cpp" />
-    <ClCompile Include="src\CPhysics.cpp" />
-    <ClCompile Include="src\CPhysicsCollision.cpp" />
-    <ClCompile Include="src\CPhysicsCollisionSet.cpp" />
-    <ClCompile Include="src\CPhysicsConstraint.cpp" />
-    <ClCompile Include="src\CPhysicsDragController.cpp" />
-    <ClCompile Include="src\CPhysicsEnvironment.cpp" />
-    <ClCompile Include="src\CPhysicsFluidController.cpp" />
-    <ClCompile Include="src\CPhysicsFrictionSnapshot.cpp" />
-    <ClCompile Include="src\CPhysicsKeyParser.cpp" />
-    <ClCompile Include="src\CPhysicsMotionController.cpp" />
-    <ClCompile Include="src\CPhysicsObject.cpp" />
-    <ClCompile Include="src\CPhysicsObjectPairHash.cpp" />
-    <ClCompile Include="src\CPhysicsSurfaceProps.cpp" />
-    <ClCompile Include="src\CPhysicsVehicleController.cpp" />
-    <ClCompile Include="src\CPlayerController.cpp" />
-    <ClCompile Include="src\CShadowController.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
+    <ClCompile Include="src\Physics_Collision.cpp" />
+    <ClCompile Include="src\Physics_CollisionSet.cpp" />
+    <ClCompile Include="src\Physics_Constraint.cpp" />
+    <ClCompile Include="src\Physics_DragController.cpp" />
+    <ClCompile Include="src\Physics_Environment.cpp" />
+    <ClCompile Include="src\Physics_FluidController.cpp" />
+    <ClCompile Include="src\Physics_FrictionSnapshot.cpp" />
+    <ClCompile Include="src\Physics_KeyParser.cpp" />
+    <ClCompile Include="src\Physics_MotionController.cpp" />
+    <ClCompile Include="src\Physics_Object.cpp" />
+    <ClCompile Include="src\Physics_ObjectPairHash.cpp" />
+    <ClCompile Include="src\Physics_SurfaceProps.cpp" />
+    <ClCompile Include="src\Physics_VehicleController.cpp" />
+    <ClCompile Include="src\Physics_PlayerController.cpp" />
+    <ClCompile Include="src\Physics_ShadowController.cpp" />
     <ClCompile Include="src\math.cpp" />
     <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -158,24 +158,24 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vphysics_interfaceV32.h" />
-    <ClInclude Include="src\CDebugDrawer.h" />
+    <ClInclude Include="src\DebugDrawer.h" />
     <ClInclude Include="src\convert.h" />
-    <ClInclude Include="src\CPhysics.h" />
-    <ClInclude Include="src\CPhysicsCollision.h" />
-    <ClInclude Include="src\CPhysicsCollisionSet.h" />
-    <ClInclude Include="src\CPhysicsConstraint.h" />
-    <ClInclude Include="src\CPhysicsDragController.h" />
-    <ClInclude Include="src\CPhysicsEnvironment.h" />
-    <ClInclude Include="src\CPhysicsFluidController.h" />
-    <ClInclude Include="src\CPhysicsFrictionSnapshot.h" />
-    <ClInclude Include="src\CPhysicsKeyParser.h" />
-    <ClInclude Include="src\CPhysicsMotionController.h" />
-    <ClInclude Include="src\CPhysicsObject.h" />
-    <ClInclude Include="src\CPhysicsObjectPairHash.h" />
-    <ClInclude Include="src\CPhysicsSurfaceProps.h" />
-    <ClInclude Include="src\CPhysicsVehicleController.h" />
-    <ClInclude Include="src\CPlayerController.h" />
-    <ClInclude Include="src\CShadowController.h" />
+    <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\Physics_Collision.h" />
+    <ClInclude Include="src\Physics_CollisionSet.h" />
+    <ClInclude Include="src\Physics_Constraint.h" />
+    <ClInclude Include="src\Physics_DragController.h" />
+    <ClInclude Include="src\Physics_Environment.h" />
+    <ClInclude Include="src\Physics_FluidController.h" />
+    <ClInclude Include="src\Physics_FrictionSnapshot.h" />
+    <ClInclude Include="src\Physics_KeyParser.h" />
+    <ClInclude Include="src\Physics_MotionController.h" />
+    <ClInclude Include="src\Physics_Object.h" />
+    <ClInclude Include="src\Physics_ObjectPairHash.h" />
+    <ClInclude Include="src\Physics_SurfaceProps.h" />
+    <ClInclude Include="src\Physics_VehicleController.h" />
+    <ClInclude Include="src\Physics_PlayerController.h" />
+    <ClInclude Include="src\Physics_ShadowController.h" />
     <ClInclude Include="src\IController.h" />
     <ClInclude Include="src\math.h" />
     <ClInclude Include="src\StdAfx.h" />

@@ -1,9 +1,9 @@
 #include "StdAfx.h"
 
-#include "CPhysicsFluidController.h"
-#include "CPhysicsObject.h"
-#include "CPhysicsEnvironment.h"
-#include "CPhysicsSurfaceProps.h"
+#include "Physics_FluidController.h"
+#include "Physics_Object.h"
+#include "Physics_Environment.h"
+#include "Physics_SurfaceProps.h"
 
 #include "tier0/vprof.h"
 

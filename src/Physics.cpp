@@ -1,9 +1,9 @@
 #include "StdAfx.h"
 
-#include "CPhysics.h"
-#include "CPhysicsEnvironment.h"
-#include "CPhysicsObjectPairHash.h"
-#include "CPhysicsCollisionSet.h"
+#include "Physics.h"
+#include "Physics_Environment.h"
+#include "Physics_ObjectPairHash.h"
+#include "Physics_CollisionSet.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"

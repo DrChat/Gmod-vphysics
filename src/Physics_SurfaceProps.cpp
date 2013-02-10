@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#include "CPhysicsSurfaceProps.h"
+#include "Physics_SurfaceProps.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"

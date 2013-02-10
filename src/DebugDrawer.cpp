@@ -4,8 +4,8 @@
 
 #include <LinearMath/btQuickprof.h>
 
-#include "CPhysicsEnvironment.h"
-#include "CDebugDrawer.h"
+#include "Physics_Environment.h"
+#include "DebugDrawer.h"
 #include "convert.h"
 
 #include "tier0/vprof.h"

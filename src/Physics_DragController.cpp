@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 
-#include "CPhysicsDragController.h"
-#include "CPhysicsObject.h"
+#include "Physics_DragController.h"
+#include "Physics_Object.h"
 #include "convert.h"
 
 #include "tier0/vprof.h"

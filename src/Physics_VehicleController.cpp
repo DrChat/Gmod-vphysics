@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 
-#include "CPhysicsObject.h"
-#include "CPhysicsVehicleController.h"
-#include "CPhysicsEnvironment.h"
+#include "Physics_Object.h"
+#include "Physics_VehicleController.h"
+#include "Physics_Environment.h"
 #include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!

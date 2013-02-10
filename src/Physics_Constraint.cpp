@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 
-#include "CPhysicsObject.h"
-#include "CPhysicsConstraint.h"
-#include "CPhysicsEnvironment.h"
+#include "Physics_Object.h"
+#include "Physics_Constraint.h"
+#include "Physics_Environment.h"
 
 #include "convert.h"
 

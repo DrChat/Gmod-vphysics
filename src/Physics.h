@@ -11,7 +11,7 @@ class CPhysics : public CTier1AppSystem<IPhysics> {
 		void						Shutdown();
 
 		IPhysicsEnvironment *		CreateEnvironment();
-		void						DestroyEnvironment(IPhysicsEnvironment*);
+		void						DestroyEnvironment(IPhysicsEnvironment *pEnv);
 		IPhysicsEnvironment *		GetActiveEnvironmentByIndex(int index);
 		int							GetNumActiveEnvironments();
 

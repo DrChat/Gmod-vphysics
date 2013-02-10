@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#include "CPhysicsCollisionSet.h"
+#include "Physics_CollisionSet.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"

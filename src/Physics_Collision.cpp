@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 
-#include "CPhysicsCollision.h"
+#include "Physics_Collision.h"
 #include "convert.h"
-#include "CPhysicsKeyParser.h"
+#include "Physics_KeyParser.h"
 
 #include "tier0/vprof.h"
 

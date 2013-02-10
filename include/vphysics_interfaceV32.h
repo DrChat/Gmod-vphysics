@@ -1,4 +1,5 @@
 // Purpose: Updated interface to vphysics.dll
+// This interface MUST be additive only. DO NOT change old function signatures.
 
 #ifndef VPHYSICS_INTERFACEV32_H
 #define VPHYSICS_INTERFACEV32_H
@@ -9,7 +10,12 @@
 #include "tier1/interface.h"
 #include "vphysics_interface.h"
 
-abstract_class IPhysicsObject1: public IPhysicsObject {
+// TODO: Soft bodies
+abstract_class IPhysicsEnvironment1 : public IPhysicsEnvironment {
+	public:
+};
+
+abstract_class IPhysicsObject1 : public IPhysicsObject {
 	public:
 		virtual void		SetGravity(const Vector &gravityVector) = 0;
 		virtual Vector		GetGravity() const = 0;

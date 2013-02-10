@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 
-#include "CPhysicsMotionController.h"
-#include "CPhysicsObject.h"
+#include "Physics_MotionController.h"
+#include "Physics_Object.h"
 #include "convert.h"
 
 #include "tier0/vprof.h"

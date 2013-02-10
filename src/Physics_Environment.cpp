@@ -1,21 +1,21 @@
 #include "StdAfx.h"
 
-#include "CPhysicsEnvironment.h"
-#include "CPhysics.h"
-#include "CPhysicsObject.h"
-#include "CShadowController.h"
-#include "CPlayerController.h"
-#include "CPhysicsFluidController.h"
-#include "CPhysicsDragController.h"
-#include "CPhysicsMotionController.h"
+#include "Physics_Environment.h"
+#include "Physics.h"
+#include "Physics_Object.h"
+#include "Physics_ShadowController.h"
+#include "Physics_PlayerController.h"
+#include "Physics_FluidController.h"
+#include "Physics_DragController.h"
+#include "Physics_MotionController.h"
 #include "convert.h"
-#include "CPhysicsConstraint.h"
-#include "CPhysicsVehicleController.h"
+#include "Physics_Constraint.h"
+#include "Physics_VehicleController.h"
 
 #include "tier0/vprof.h"
 
 #if DEBUG_DRAW
-#	include "CDebugDrawer.h"
+#	include "DebugDrawer.h"
 #endif
 
 // Multithreading is so buggy as of now. Leave this disabled.

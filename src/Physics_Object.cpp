@@ -1,14 +1,14 @@
 #include "StdAfx.h"
 
 #include "math.h"
-#include "CPhysicsObject.h"
-#include "CPhysicsEnvironment.h"
-#include "CPhysicsCollision.h"
-#include "CPhysicsFrictionSnapshot.h"
-#include "CShadowController.h"
+#include "Physics_Object.h"
+#include "Physics_Environment.h"
+#include "Physics_Collision.h"
+#include "Physics_FrictionSnapshot.h"
+#include "Physics_ShadowController.h"
 #include "convert.h"
-#include "CPhysicsDragController.h"
-#include "CPhysicsSurfaceProps.h"
+#include "Physics_DragController.h"
+#include "Physics_SurfaceProps.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"

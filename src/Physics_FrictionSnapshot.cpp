@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 
-#include "CPhysicsFrictionSnapshot.h"
-#include "CPhysicsObject.h"
-#include "CPhysicsEnvironment.h"
+#include "Physics_FrictionSnapshot.h"
+#include "Physics_Object.h"
+#include "Physics_Environment.h"
 
 #include "convert.h"
 
