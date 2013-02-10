@@ -27,7 +27,7 @@
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies
 			- Would require alot of work on garry's part, such as networking, prediction, etc...
-		- Scaling of models
+		- Scaling of collision models
 			- Vector(1, 1, 1) would be normal scale.
 		- ...
 	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this!
@@ -36,5 +36,4 @@
 		- Ragdolls, etc.
 	- Bullet has an internal profiler, grab the results from it and give them to vprof.
 	- When we're just about wrapping up, implement saving!
-	- IMPORTANT: INITIALIZE YOUR MEMORY FOR RELEASE BUILDS
 	- The code needs to be cleaned up and become nice and tidy!

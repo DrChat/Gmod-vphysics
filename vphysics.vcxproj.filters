@@ -71,7 +71,7 @@
     <ClCompile Include="src\CDebugDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\StfAfx.cpp">
+    <ClCompile Include="src\StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

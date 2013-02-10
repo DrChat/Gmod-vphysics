@@ -46,6 +46,7 @@
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName>vphysics</TargetName>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)build\bin\$(Platform)\$(Configuration)\</OutDir>
@@ -64,9 +65,10 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>_WINDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ShowIncludes>false</ShowIncludes>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -75,6 +77,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
     </Link>
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND
@@ -101,6 +105,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <Optimization>MaxSpeed</Optimization>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision_RelWithDebugInfo.lib;BulletDynamics_RelWithDebugInfo.lib;BulletSoftBody_RelWithDebugInfo.lib;LinearMath_RelWithDebugInfo.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -110,6 +115,8 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
     </Link>
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND
@@ -144,7 +151,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
     <ClCompile Include="src\CPlayerController.cpp" />
     <ClCompile Include="src\CShadowController.cpp" />
     <ClCompile Include="src\math.cpp" />
-    <ClCompile Include="src\StfAfx.cpp">
+    <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
