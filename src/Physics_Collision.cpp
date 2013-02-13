@@ -3,6 +3,7 @@
 #include "Physics_Collision.h"
 #include "convert.h"
 #include "Physics_KeyParser.h"
+#include "phydata.h"
 
 #include "tier0/vprof.h"
 
@@ -93,6 +94,7 @@ CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) 
 
 	// Optimize the shape.
 	btShapeHull *hull = new btShapeHull(pConvex);
+	hull->buildHull(COLLISION_MARGIN);
 	delete pConvex;
 	pConvex = new btConvexHullShape((btScalar *)hull->getVertexPointer(), hull->numVertices());
 	delete hull;
@@ -121,6 +123,11 @@ void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
 
 void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData) {
 	NOT_IMPLEMENTED
+}
+
+CPolyhedron *CPhysicsCollision::PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron) {
+	NOT_IMPLEMENTED
+	return NULL;
 }
 
 CPhysConvex *CPhysicsCollision::ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron) {
@@ -164,7 +171,7 @@ CPhysCollide *CPhysicsCollision::ConvertConvexToCollide(CPhysConvex **ppConvex, 
 
 CPhysCollide *CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pConvex, int convexCount, const convertconvexparams_t &convertParams) {
 	NOT_IMPLEMENTED
-	return NULL;
+	return ConvertConvexToCollide(pConvex, convexCount);
 }
 
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
@@ -473,62 +480,6 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	return false;
 }
 
-// Various structures used in vcollide parsing.
-// FIXME: Move these to another header file?
-// 28 bytes
-struct compactsurfaceheader_t {
-	int		vphysicsID;		// Generally the ASCII for "VPHY" in newer files
-	short	version;
-	short	modelType;
-	int		surfaceSize;
-	Vector	dragAxisAreas;
-	int		axisMapSize;
-};
-
-// 16 bytes
-// Just like a btCompoundShape.
-struct ivpcompactsurface_t {
-	float	mass_center[3];
-	float	rotation_inertia[3];
-	float	upper_limit_radius;
-	int		max_deviation : 8;
-	int		byte_size : 24;
-	int		offset_ledgetree_root;
-	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
-};
-
-// 16 bytes
-// Just like a btTriangleMesh.
-struct ivpcompactledge_t {
-	int		c_point_offset; // byte offset from 'this' to (ledge) point array
-	union {
-		int	ledgetree_node_offset;
-		int	client_data;	// if indicates a non terminal ledge
-	};
-	uint	has_chilren_flag:2;
-	int		is_compact_flag:2;  // if false than compact ledge uses points outside this piece of memory
-	uint	dummy:4;
-	uint	size_div_16:24; 
-	short	n_triangles;
-	short	for_future_use;
-};
-
-// 4 bytes
-struct ivpcompactedge_t {
-	uint	start_point_index:16;		// point index
-	int		opposite_index:15;			// rel to this // maybe extra array, 3 bits more than tri_index/pierce_index
-	uint	is_virtual:1;
-};
-
-// 16 bytes (4 bytes + 12 bytes edge array)
-struct ivpcompacttriangle_t {
-	uint				tri_index : 12; // used for upward navigation
-	uint				pierce_index : 12;
-	uint				material_index : 7;
-	uint				is_virtual : 1;	// DrChat; I believe this is just an optimization. Just ignore anything marked is_virtual.
-	ivpcompactedge_t	c_three_edges[3];
-};
-
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
 	memset(pOutput, 0, sizeof(*pOutput));
@@ -553,20 +504,32 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	// We must convert all of the ivp shapes into something we can read.
 	for (int i = 0; i < solidCount; i++) {
 		const char *solid = (const char *)pOutput->solids[i];
-		const compactsurfaceheader_t surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
-		const ivpcompactsurface_t ivpsurface = *(ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
+		const compactsurfaceheader_t *surfaceheader = (compactsurfaceheader_t *)pOutput->solids[i];
+		const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
-		if (surfaceheader.vphysicsID != MAKEID('V', 'P', 'H', 'Y')
-				|| surfaceheader.version != 0x100
-				|| surfaceheader.modelType != 0x0
-				|| ivpsurface.dummy[2] != MAKEID('I', 'V', 'P', 'S')) 
+		if (surfaceheader->vphysicsID != MAKEID('V', 'P', 'H', 'Y')
+				|| surfaceheader->version != 0x100
+				|| surfaceheader->modelType != 0x0
+				|| ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) 
 		{
 			DevWarning("VPhysics: Could not load mesh!");
+			pOutput->solids[i] = NULL;
 			continue;
 		}
 
+		// derp test
+		/*
+		const ivpcompactledgenode_t *ledgetree = (ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root);
+		while (ledgetree->offset_right_node) {
+			if (ledgetree->offset_compact_ledge)
+				ivpcompactledge_t *ledge = (ivpcompactledge_t *)((char *)ledgetree + ledgetree->offset_compact_ledge);
+
+			ledgetree = (ivpcompactledgenode_t *)((char *)ledgetree + ledgetree->offset_right_node);
+		}
+		*/
+
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
-		info->massCenter = btVector3(ivpsurface.mass_center[0], -ivpsurface.mass_center[1], -ivpsurface.mass_center[2]);
+		info->massCenter = btVector3(ivpsurface->mass_center[0], -ivpsurface->mass_center[1], -ivpsurface->mass_center[2]);
 
 		const char *convexes = solid + 76; // Right after ivpsurface
 
@@ -628,6 +591,7 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	}
 
 	delete pVCollide->pKeyValues;
+	pVCollide->pKeyValues = NULL;
 }
 
 IVPhysicsKeyParser *CPhysicsCollision::VPhysicsKeyParserCreate(const char *pKeyData) {
@@ -710,11 +674,6 @@ bool CPhysicsCollision::SupportsVirtualMesh() {
 bool CPhysicsCollision::GetBBoxCacheSize(int *pCachedSize, int *pCachedCount) {
 	NOT_IMPLEMENTED
 	return false;
-}
-
-CPolyhedron *CPhysicsCollision::PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron) {
-	NOT_IMPLEMENTED
-	return NULL;
 }
 
 void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {

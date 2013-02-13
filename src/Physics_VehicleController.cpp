@@ -15,7 +15,7 @@
 * MISC CLASSES
 *********************************/
 
-struct IgnoreObjectRayResultCallback: public btCollisionWorld::ClosestRayResultCallback {
+struct IgnoreObjectRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
 	IgnoreObjectRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
 		:ClosestRayResultCallback(from, to) {
 		m_pIgnoreObject = pIgnoreObject;
@@ -37,7 +37,7 @@ struct IgnoreObjectRayResultCallback: public btCollisionWorld::ClosestRayResultC
 };
 
 // Purpose: This raycaster will cast a ray ignoring the vehicle's body.
-class btHLJeepRaycaster: public btVehicleRaycaster {
+class btHLJeepRaycaster : public btVehicleRaycaster {
 	public:
 		btHLJeepRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
 			m_pWorld = pWorld;
@@ -68,7 +68,7 @@ class btHLJeepRaycaster: public btVehicleRaycaster {
 };
 
 // Purpose: This ray will ignore a body AND detect water for use in airboats.
-struct DetectWaterRayResultCallback: public btCollisionWorld::ClosestRayResultCallback {
+struct DetectWaterRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
 	DetectWaterRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
 		:ClosestRayResultCallback(from, to) {
 		m_pIgnoreObject = pIgnoreObject;
@@ -92,7 +92,7 @@ struct DetectWaterRayResultCallback: public btCollisionWorld::ClosestRayResultCa
 };
 
 // Purpose: Airboat raycaster
-class btHLAirboatRaycaster: public btVehicleRaycaster {
+class btHLAirboatRaycaster : public btVehicleRaycaster {
 	public:
 		btHLAirboatRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody, IPhysicsGameTrace *pGameTrace) {
 			m_pWorld = pWorld;
@@ -161,14 +161,14 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 	m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
 
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-		m_vehicleParams.axles[i].wheels.radius = ConvertDistanceToBull(params.axles[i].wheels.radius);
-		m_vehicleParams.axles[i].wheels.springAdditionalLength = ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
+		m_vehicleParams.axles[i].wheels.radius					= ConvertDistanceToBull(params.axles[i].wheels.radius);
+		m_vehicleParams.axles[i].wheels.springAdditionalLength	= ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
 	}
 }
 
 void CPhysicsVehicleController::InitBullVehicle() {
 	// NOTE: We're faking the car wheels for now because bullet does not offer a vehicle with physical wheels.
-	// TODO: Simulate the car wheels to a degree (raycast wheels will go on objects that are above the chassis, causing the vehicle to flip backwards)
+	// TODO: Simulate the car wheels to a degree
 	if (m_iVehicleType == VEHICLE_TYPE_CAR_WHEELS)
 		m_pRaycaster = new btHLJeepRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
 	else if (m_iVehicleType == VEHICLE_TYPE_CAR_RAYCAST)
@@ -218,7 +218,6 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 		return NULL;
 
 	Vector position = axle.offset;
-
 	Vector bodyPosition;
 	QAngle bodyAngles;
 	m_pBody->GetPosition(&bodyPosition, &bodyAngles);
@@ -274,11 +273,10 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	bullSuspensionRestLength = axle.wheels.springAdditionalLength;
 	bullWheelRadius = axle.wheels.radius;
 
-	btWheelInfo wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
+	btWheelInfo &wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
-	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce;		// TODO: How do we convert this?
-	wheelInfo.m_suspensionStiffness = axle.suspension.springDamping;	// TODO: How do we convert this?
-	wheelInfo.m_frictionSlip = axle.wheels.frictionScale - 1;			// FIXME: Proper conversion required.
+	//wheelInfo.m_frictionSlip = axle.wheels.frictionScale;				// FIXME: Proper conversion required.
+	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();		// TODO: How do we convert this?
 	wheelInfo.m_suspensionStiffness = axle.suspension.springConstant;
 
 	return pWheel;

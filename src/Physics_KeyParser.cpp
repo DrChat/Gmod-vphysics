@@ -249,7 +249,7 @@ void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValue
 		else if (!stricmp(key, "rotdamping"))
 			wheel.rotdamping = data->GetFloat();
 		else if (!stricmp(key, "frictionscale"))
-			wheel.frictionScale = data->GetFloat();
+			wheel.frictionScale = data->GetFloat(); // APPARENTLY UNUSED!
 		else if (!stricmp(key, "material"))
 			wheel.materialIndex = data->GetInt();
 		else if (!stricmp(key, "skidmaterial"))

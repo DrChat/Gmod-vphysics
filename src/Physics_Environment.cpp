@@ -8,9 +8,9 @@
 #include "Physics_FluidController.h"
 #include "Physics_DragController.h"
 #include "Physics_MotionController.h"
-#include "convert.h"
 #include "Physics_Constraint.h"
 #include "Physics_VehicleController.h"
+#include "convert.h"
 
 #include "tier0/vprof.h"
 
@@ -133,7 +133,8 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 
 	// FIXME: This is completely broken
-	//if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
+	// Has to do with the object's contents != MASK_SOLID
+	if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
 	
 	// And then the default bullet stuff...
 	bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
@@ -579,7 +580,7 @@ void SerializeWorld_f(const CCommand &args) {
 	}
 }
 
-static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (0=server, 1=client)\nDumps \"testfile.bullet\" out to the exe directory.");
+static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (0=server, 1=client), Dumps \"testfile.bullet\" out to the exe directory.");
 
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", 0, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
 void CPhysicsEnvironment::Simulate(float deltaTime) {

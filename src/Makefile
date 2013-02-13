@@ -1,17 +1,16 @@
 # My very first makefile!
-MODULE_NAME = vphysics.so
+MODULE_NAME = vphysics_srv.so
+PROJECT_NAME = vphysics
 
 # Path Configuration
 SOURCE_SDK = ../../../../Libraries/SourceMod/src
 BULLET_SDK = ../../../../Libraries/bullet
-# Unused as of now
-SRCDS_DIR = .
-
-LIBRARY_PATH = /usr/lib/x86_64-linux-gnu
+# Note: Srcds is required for a successful build because we need to link to some shared objects.
+SRCDS_BIN_DIR = ~/srcds/orangebox/bin
 
 PROJECT_DIR = .
 OUT_DIR = ../build/bin/linux/Release
-OBJ_DIR = ../build/obj/linux/vphysics/Release
+OBJ_DIR = ../build/obj/linux/$(PROJECT_NAME)/Release
 
 # Compilation Configuration
 INCLUDES = \
@@ -21,36 +20,54 @@ INCLUDES = \
 	-I$(SOURCE_SDK)/public/tier1 \
 	-I$(BULLET_SDK)/src
 	
-LIBFILES = \
-	$(SOURCE_SDK)/lib/linux/tier1_486.a \
-	$(SOURCE_SDK)/lib/linux/tier2_486.a \
-	$(BULLET_SDK)/buildlin-cmake/src/LinearMath/libLinearMath.a \
-	$(BULLET_SDK)/buildlin-cmake/src/BulletCollision/libBulletCollision.a \
-	$(BULLET_SDK)/buildlin-cmake/src/BulletDynamics/libBulletDynamics.a \
-	$(BULLET_SDK)/buildlin-cmake/src/BulletSoftBody/libBulletSoftBody.a
+STATICLIBDIRS = \
+	-L$(BULLET_SDK)/buildlin-cmake/src/BulletSoftBody \
+	-L$(BULLET_SDK)/buildlin-cmake/src/BulletDynamics \
+	-L$(BULLET_SDK)/buildlin-cmake/src/BulletCollision \
+	-L$(BULLET_SDK)/buildlin-cmake/src/LinearMath
+	
+STATICLIBS = \
+	-lBulletSoftBody \
+	-lBulletDynamics \
+	-lBulletCollision \
+	-lLinearMath
+	
+DYNAMICLIBS = \
+	$(SOURCE_SDK)/lib/linux/tier1_i486.a \
+	$(SOURCE_SDK)/lib/linux/mathlib_i486.a \
+	$(SRCDS_BIN_DIR)/libvstdlib_srv.so \
+	$(SRCDS_BIN_DIR)/libtier0_srv.so
 		
 CC = /usr/bin/g++-3.4
 LINK = /usr/bin/g++-3.4
 ARCH = i386
-DEFINES = -DLINUX -D__LINUX__ -D_LINUX -D__linux__ -DARCH=$(ARCH) -Dsprintf_s=snprintf -Dstrcmpi=strcasecmp -D_alloca=alloca -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrcpy_s=strncpy -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -DNDEBUG
-CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -w -fPIC -m32
-LFLAGS = $(CFLAGS) -lm -ldl -shared -Wl
+DEFINES = -DLINUX -D__LINUX__ -D_LINUX -D__linux__ -DARCH=$(ARCH) -Dsprintf_s=snprintf -Dstrcmpi=strcasecmp -D_alloca=alloca -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrcpy_s=strncpy -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -DNDEBUG -DNO_MALLOC_OVERRIDE
+CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -fPIC -w -msse2 -m32 -march=$(ARCH)
+LFLAGS = -m32 -lm -ldl $(STATICLIBDIRS) -Wl,-Bstatic $(STATICLIBS) -Wl,-Bdynamic $(DYNAMICLIBS) -shared
 
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 
 # Commands
 RM = rm -f
+CP = cp -f
+MKDIR = mkdir -p
 
-all: dirs $(MODULE_NAME)
+all: dirs $(MODULE_NAME) copy
+build: dirs $(MODULE_NAME)
 
 dirs:
-	@-mkdir -p $(OUT_DIR)
-	@-mkdir -p $(OBJ_DIR)
+	@-$(MKDIR) $(OUT_DIR)
+	@-$(MKDIR) $(OBJ_DIR)
+	
+copy:
+	@echo " + Copying $(OUT_DIR)/$(MODULE_NAME) to $(SRCDS_BIN_DIR)"
+	@$(CP) $(OUT_DIR)/$(MODULE_NAME) $(SRCDS_BIN_DIR)
 	
 $(MODULE_NAME): $(OBJECTS)
 	@echo " + Linking..."
-	$(CC) $(LFLAGS) -o $@ $(OBJECTS) $(LIBFILES)
+	@$(LINK) -o $(OUT_DIR)/$@ $(OBJECTS) $(LFLAGS)
+	@echo " + Module created at $(OUT_DIR)/$@"
 
 $(OBJ_DIR)/%.o: %.cpp
 	@echo " + Compiling '$<'"
@@ -58,4 +75,5 @@ $(OBJ_DIR)/%.o: %.cpp
 	
 clean:
 	@$(RM) $(OBJECTS)
+	@$(RM) $(OUT_DIR)/$(MODULE_NAME)
   

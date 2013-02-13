@@ -32,6 +32,9 @@ class CDebugDrawer : public btIDebugDraw {
 		void					SetDebugOverlay(IVPhysicsDebugOverlay *pOverlay);
 		IVPhysicsDebugOverlay *	GetDebugOverlay();
 		void					DrawWorld();
+
+		// Yeah, this isn't related to debug drawing but who cares.
+		void					SyncProfilerResults();
 	private:
 		int						m_debugMode;
 		btCollisionWorld *		m_world;

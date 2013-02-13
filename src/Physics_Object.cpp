@@ -767,6 +767,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	}
 
 	SetMaterialIndex(materialIndex);
+	SetContents(MASK_SOLID);
 
 	// Drag calculations converted from 2003 source code
 	float drag = 0;
@@ -899,7 +900,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 		float maxradius = min(min(maxs.getX(), maxs.getY()), maxs.getZ());
 		float minradius = min(min(mins.getX(), mins.getY()), mins.getZ());
-		float radius = min(maxradius, minradius) / 2.0f;
+		float radius = min(maxradius, minradius);
 
 		body->setCcdMotionThreshold(radius);
 		body->setCcdSweptSphereRadius(0.2f * radius);

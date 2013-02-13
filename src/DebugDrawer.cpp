@@ -231,4 +231,8 @@ void CDebugDrawer::DrawWorld() {
 	}
 #endif
 }
+
+void CDebugDrawer::SyncProfilerResults() {
+
+}
 #endif // DEBUG_DRAW

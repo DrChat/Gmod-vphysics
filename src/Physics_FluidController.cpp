@@ -134,14 +134,8 @@ void CPhysicsFluidController::Tick(float dt) {
 			if (numContacts <= 0)
 				continue;
 
-			if (obA == m_pGhostObject && obB == body) {
-				for (int k = 0; k < numContacts; k++) {
-					btManifoldPoint manPoint = pManifold->getContactPoint(k);
-					btVector3 pos = manPoint.getPositionWorldOnB();
-
-					body->applyForce(force, pos);
-				}
-			} else if (obB == m_pGhostObject && obA == body) {
+			// obA collides with obB. Because we're static, we cannot collide with anything.
+			if (obB == m_pGhostObject && obA == body) {
 				for (int k = 0; k < numContacts; k++) {
 					btManifoldPoint manPoint = pManifold->getContactPoint(k);
 					btVector3 pos = manPoint.getPositionWorldOnA();
