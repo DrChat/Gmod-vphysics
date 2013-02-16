@@ -857,11 +857,13 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btTransform masscenter = btTransform::getIdentity();
 	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
 
+	/*
 	if (pParams && pParams->massCenterOverride) {
 		btVector3 vecMassCenter;
 		ConvertPosToBull(*pParams->massCenterOverride, vecMassCenter);
 		masscenter.setOrigin(vecMassCenter);
 	}
+	*/
 
 	float mass = 0;
 
