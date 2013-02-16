@@ -9,20 +9,21 @@
 
 //btCompoundShape* ConvertMeshToBull(CPhysCollide* ivp);
 
-void ConvertPosToBull(const Vector& pos, btVector3& bull);
-void ConvertPosToHL(const btVector3& pos, Vector& hl);
-void ConvertDirectionToBull(const Vector& dir, btVector3& bull);
-void ConvertDirectionToHL(const btVector3& dir, Vector& hl);
+void ConvertIVPPosToBull(const float *pos, btVector3 &bull);
+void ConvertPosToBull(const Vector &pos, btVector3 &bull);
+void ConvertPosToHL(const btVector3 &pos, Vector &hl);
+void ConvertDirectionToBull(const Vector &dir, btVector3 &bull);
+void ConvertDirectionToHL(const btVector3 &dir, Vector &hl);
 #define ConvertForceImpulseToBull ConvertPosToBull
 #define ConvertForceImpulseToHL ConvertPosToHL
-void ConvertRotationToBull(const QAngle& angles, btMatrix3x3& bull);
-void ConvertRotationToBull(const QAngle& angles, btQuaternion& bull);
-void ConvertRotationToHL(const btMatrix3x3& matrix, QAngle& hl);
-void ConvertRotationToHL(const btQuaternion& quat, QAngle& hl);
-void ConvertAngularImpulseToBull(const AngularImpulse& angularimp, btVector3& bull);
-void ConvertAngularImpulseToHL(const btVector3& angularimp, AngularImpulse& hl);
-void ConvertMatrixToHL(const btTransform& transform, matrix3x4_t& hl);
-void ConvertMatrixToBull(const matrix3x4_t& hl, btTransform& transform);
+void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull);
+void ConvertRotationToBull(const QAngle &angles, btQuaternion &bull);
+void ConvertRotationToHL(const btMatrix3x3 &matrix, QAngle &hl);
+void ConvertRotationToHL(const btQuaternion &quat, QAngle &hl);
+void ConvertAngularImpulseToBull(const AngularImpulse &angularimp, btVector3 &bull);
+void ConvertAngularImpulseToHL(const btVector3 &angularimp, AngularImpulse &hl);
+void ConvertMatrixToHL(const btTransform &transform, matrix3x4_t &hl);
+void ConvertMatrixToBull(const matrix3x4_t &hl, btTransform &transform);
 
 float ConvertDistanceToBull(float distance);
 float ConvertDistanceToHL(float distance);

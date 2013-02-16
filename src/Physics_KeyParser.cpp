@@ -6,8 +6,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-extern CPhysicsSurfaceProps g_SurfaceDatabase;
-
 static void ReadVector(const char *pString, Vector& out) {
 	float x, y, z;
 	sscanf(pString, "%f %f %f", &x, &y, &z);
@@ -95,7 +93,7 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 	if (unknownKeyHandler)
 		unknownKeyHandler->SetDefaults(pFluid);
 	else
-		memset(pFluid, 0, sizeof*pFluid);
+		memset(pFluid, 0, sizeof(*pFluid));
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
@@ -188,7 +186,6 @@ void CPhysicsKeyParser::ParseCustom(void *pCustom, IVPhysicsKeyHandler *unknownK
 	if (!unknownKeyHandler) return;
 
 	unknownKeyHandler->SetDefaults(pCustom);
-
 	RecursiveKeyLoop(m_pCurrentBlock, pCustom, unknownKeyHandler);
 	NextBlock();
 }

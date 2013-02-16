@@ -139,6 +139,7 @@ void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, con
 	NOT_IMPLEMENTED
 }
 
+// TODO: Support this, lua Entity:PhysicsInitMultiConvex uses this!
 CPhysPolysoup *CPhysicsCollision::PolysoupCreate() {
 	NOT_IMPLEMENTED
 	return NULL;
@@ -325,6 +326,20 @@ int CPhysicsCollision::CollideIndex(const CPhysCollide *pCollide) {
 	return 0;
 }
 
+int CPhysicsCollision::GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit) {
+	const btCollisionShape *pShape = (btCollisionShape *)pCollideable;
+	if (!pShape->isCompound()) return 0;
+
+	const btCompoundShape *pCompound = (btCompoundShape *)pShape;
+	int numSolids = pCompound->getNumChildShapes();
+	for (int i = 0; i < numSolids && i < iOutputArrayLimit; i++) {
+		const btCollisionShape *pConvex = pCompound->getChildShape(i);
+		pOutputArray[i] = (CPhysConvex *)pConvex;
+	}
+
+	return numSolids > iOutputArrayLimit ? iOutputArrayLimit : numSolids;
+}
+
 CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &maxs) {
 	if (mins == maxs) return NULL;
 
@@ -338,33 +353,66 @@ CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &m
 }
 
 CPhysCollide *CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector &maxs) {
-	if (mins == maxs) return NULL;
+	CPhysConvex *pConvex = BBoxToConvex(mins, maxs);
+	if (!pConvex) return NULL;
+
+	btCompoundShape *pCompound = new btCompoundShape;
+	pCompound->setMargin(COLLISION_MARGIN);
 
 	btVector3 btmins, btmaxs;
 	ConvertPosToBull(mins, btmins);
 	ConvertPosToBull(maxs, btmaxs);
 	btVector3 halfsize = (btmaxs - btmins) / 2;
 
-	btBoxShape *box = new btBoxShape(halfsize.absolute());
-	btCompoundShape *shape = new btCompoundShape;
-	shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfsize), box);
-	shape->setMargin(COLLISION_MARGIN);
-
-	return (CPhysCollide *)shape;
+	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfsize), (btCollisionShape *)pConvex);
+	return (CPhysCollide *)pCompound;
 }
 
-int CPhysicsCollision::GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit) {
-	const btCollisionShape *pShape = (btCollisionShape *)pCollideable;
-	if (!pShape->isCompound()) return 0;
+CPhysConvex *CPhysicsCollision::CylinderToConvex(const Vector &mins, const Vector &maxs) {
+	if (mins == maxs) return NULL;
 
-	const btCompoundShape *pCompound = (btCompoundShape *)pShape;
-	int numSolids = pCompound->getNumChildShapes();
-	for (int i = 0; i < numSolids && i < iOutputArrayLimit; i++) {
-		const btCollisionShape *pConvex = pCompound->getChildShape(i);
-		pOutputArray[i] = (CPhysConvex *)pConvex;
-	}
+	btVector3 btmins, btmaxs;
+	ConvertPosToBull(mins, btmins);
+	ConvertPosToBull(maxs, btmaxs);
+	btVector3 halfSize = (btmaxs - btmins) / 2;
 
-	return numSolids > iOutputArrayLimit ? iOutputArrayLimit : numSolids;
+	btCylinderShape *pShape = new btCylinderShape(halfSize.absolute());
+
+	return (CPhysConvex *)pShape;
+}
+
+CPhysCollide *CPhysicsCollision::CylinderToCollide(const Vector &mins, const Vector &maxs) {
+	CPhysConvex *pConvex = CylinderToConvex(mins, maxs);
+	if (!pConvex) return NULL;
+
+	btCompoundShape *pCompound = new btCompoundShape;
+	pCompound->setMargin(COLLISION_MARGIN);
+
+	btVector3 btmins, btmaxs;
+	ConvertPosToBull(mins, btmins);
+	ConvertPosToBull(maxs, btmaxs);
+	btVector3 halfsize = (btmaxs - btmins) / 2;
+
+	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfsize), (btCollisionShape *)pConvex);
+	return (CPhysCollide *)pCompound;
+}
+
+CPhysConvex *CPhysicsCollision::ConeToConvex(const float radius, const float height) {
+	btConeShape *pShape = new btConeShape(radius, height);
+	return (CPhysConvex *)pShape;
+}
+
+CPhysCollide *CPhysicsCollision::ConeToCollide(const float radius, const float height) {
+	CPhysConvex *pConvex = ConeToConvex(radius, height);
+	if (!pConvex) return NULL;
+
+	btCompoundShape *pCompound = new btCompoundShape;
+	pCompound->setMargin(COLLISION_MARGIN);
+
+	// TODO: We need to center the cone shape so that the middle of it is the origin. Find the maths to do it with.
+	NOT_IMPLEMENTED
+
+	return (CPhysCollide *)pCompound;
 }
 
 void CPhysicsCollision::TraceBox(const Vector &start, const Vector &end, const Vector &mins, const Vector &maxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
@@ -529,7 +577,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		*/
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
-		info->massCenter = btVector3(ivpsurface->mass_center[0], -ivpsurface->mass_center[1], -ivpsurface->mass_center[2]);
+		btVector3 massCenter;
+		ConvertIVPPosToBull(ivpsurface->mass_center, massCenter);
+		info->massCenter = massCenter;
 
 		const char *convexes = solid + 76; // Right after ivpsurface
 
@@ -565,7 +615,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 					short index = ivptri.c_three_edges[k].start_point_index;
 					float *verts = (float *)(vertices + index * 16);
 
-					btVector3 vertex(verts[0], -verts[1], -verts[2]);
+					btVector3 vertex;
+					ConvertIVPPosToBull(verts, vertex);
 					pConvex->addPoint(vertex);
 				}
 			}
@@ -679,9 +730,21 @@ bool CPhysicsCollision::GetBBoxCacheSize(int *pCachedSize, int *pCachedCount) {
 void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
 
-	Msg("Congratulations! You have found the output of CPhysicsCollision::OutputDebugInfo!\nInform the developers of the command you used to generate this message!\n");
-	Msg("-----------------------\n");
-	Msg("Type: %s", pShape->getName());
+	Msg("Type: %s\n", pShape->getName());
+	if (pShape->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pShape;
+		Msg("Num child shapes: %d\n", pCompound->getNumChildShapes());
+
+		Msg("-- CHILD SHAPES:\n");
+		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+			OutputDebugInfo((CPhysCollide *)pCompound->getChildShape(i));
+		}
+		Msg("---\n");
+	} else if (pShape->isConvex()) {
+		// FIXME: Spheres don't work with this!
+		//btConvexHullShape *pConvex = (btConvexHullShape *)pShape;
+		//Msg("Num vertices: %d\n", pConvex->getNumVertices());
+	}
 }
 
 unsigned int CPhysicsCollision::ReadStat(int statID) {

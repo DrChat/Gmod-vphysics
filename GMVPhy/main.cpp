@@ -3,11 +3,10 @@
 #include <vphysics_interface.h>
 #include "../include/vphysics_interfaceV32.h"
 
-IPhysics *g_pPhysics = NULL;
+IPhysics1 *g_pPhysics = NULL;
 
 int lPhysStats(lua_State *state) {
-	// 3000 is just a big number, don't worry about it
-	for (int i = 0; i < 3000; i++) {
+	for (int i = 0; i < g_pPhysics->GetNumActiveEnvironments(); i++) {
 		IPhysicsEnvironment *pEnv = g_pPhysics->GetActiveEnvironmentByIndex(i);
 		if (!pEnv)
 			break;
@@ -22,7 +21,7 @@ int lPhysStats(lua_State *state) {
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory)
-		g_pPhysics = (IPhysics *)physFactory(VPHYSICS_INTERFACE_VERSION, NULL);
+		g_pPhysics = (IPhysics1 *)physFactory(VPHYSICS_INTERFACE_VERSION, NULL);
 
 	if (g_pPhysics)
 		Msg("Found physics interface!\n");

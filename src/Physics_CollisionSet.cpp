@@ -32,3 +32,11 @@ bool CPhysicsCollisionSet::ShouldCollide(int index0, int index1) {
 	NOT_IMPLEMENTED
 	return true;
 }
+
+/*********************
+* CREATION FUNCTIONS
+*********************/
+
+CPhysicsCollisionSet *CreateCollisionSet(int maxElements) {
+	return new CPhysicsCollisionSet(maxElements);
+}

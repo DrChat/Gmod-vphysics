@@ -557,14 +557,13 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-extern CPhysics g_MainDLLInterface;
 void SerializeWorld_f(const CCommand &args) {
 	if (args.ArgC() != 2) {
 		Msg("Usage: vphysics_serialize <index>\n");
 		return;
 	}
 
-	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)g_MainDLLInterface.GetActiveEnvironmentByIndex(atoi(args.Arg(2)));
+	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(atoi(args.Arg(2)));
 	if (pEnv) {
 		btDiscreteDynamicsWorld *pWorld = (btDiscreteDynamicsWorld *)pEnv->GetBulletEnvironment();
 		if (!pWorld) return;
@@ -698,9 +697,11 @@ bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnviro
 }
 
 void CPhysicsEnvironment::CleanupDeleteList(void) {
+	DevMsg(2, "VPhysics CleanupDeleteList: Deleting %d objects", m_deadObjects.Count());
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject *)m_deadObjects.Element(i);
 		delete pObject;
+		pObject = NULL;
 	}
 
 	m_deadObjects.Purge();

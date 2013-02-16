@@ -5,8 +5,30 @@
 // memdbgon must be the last include file in a .cpp file!!!
 ////#include "tier0/memdbgon.h"
 
-// Bullet vector: Forward, Up, Right
-// HL Vector: Forward, Left, Up
+/************************************************
+* COORDINATE SYSTEMS:
+* Bullet vector
+*	+x: forward (east)
+*	+y: up
+*	+z: right (south)
+* HL Vector: Forward, Left, Up
+*	+x: forward (east)
+*	+y: left (north)
+*	+z: up
+*
+*    left (y)
+*   -------> forward (x)
+*
+************************************************/
+
+// IVP: Forward down left
+void ConvertIVPPosToBull(const float *pos, btVector3 &bull) {
+	if (!pos) return;
+
+	bull.setX(pos[0]);
+	bull.setY(-pos[1]);
+	bull.setZ(-pos[2]);
+}
 
 void ConvertPosToBull(const Vector &pos, btVector3 &bull) {
 	bull.setX(HL2BULL(pos.x));

@@ -4,6 +4,7 @@
 #include "IController.h"
 
 class CPhysicsEnvironment;
+class CPhysicsObject;
 
 class CPhysicsMotionController : public IController, public IPhysicsMotionController
 {
@@ -24,7 +25,7 @@ class CPhysicsMotionController : public IController, public IPhysicsMotionContro
 		void							Tick(float deltaTime);
 	private:
 		IMotionEvent *					m_handler;
-		CUtlVector<btCollisionObject*>	m_objectList;
+		CUtlVector<CPhysicsObject *>	m_objectList;
 		CPhysicsEnvironment *			m_pEnv;
 
 		int								m_priority;

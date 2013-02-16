@@ -34,9 +34,19 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		AngularImpulse rot;
 		btVector3 bullSpeed, bullRot;
 
-		btRigidBody *body = btRigidBody::upcast(m_objectList[i]);
-		IPhysicsObject *pObject = (IPhysicsObject *)body->getUserPointer();
+		if (!m_objectList[i]) {
+			m_objectList.Remove(i);
+			i--;
+			continue;
+		}
+
+		// Assert hit = object is DELETED!
+		Assert(*(char *)m_objectList[i] != 0xDD);
+
+		btRigidBody *body = btRigidBody::upcast(m_objectList[i]->GetObject());
+		IPhysicsObject *pObject = (IPhysicsObject *)m_objectList[i];
 		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
+
 		ConvertForceImpulseToBull(speed, bullSpeed);
 		ConvertAngularImpulseToBull(rot, bullRot);
 
@@ -88,19 +98,17 @@ void CPhysicsMotionController::AttachObject(IPhysicsObject *pObject, bool checkI
 	if (!pObject || pObject->IsStatic()) return;
 
 	CPhysicsObject *pPhys = (CPhysicsObject *)pObject;
-	btRigidBody *body = pPhys->GetObject();
 
-	if (m_objectList.Find(body) != -1 && checkIfAlreadyAttached)
+	if (m_objectList.Find(pPhys) != -1 && checkIfAlreadyAttached)
 		return;
 
-	m_objectList.AddToTail(body);
+	m_objectList.AddToTail(pPhys);
 }
 
 void CPhysicsMotionController::DetachObject(IPhysicsObject *pObject) {
 	CPhysicsObject *pPhys = (CPhysicsObject *)pObject;
-	btRigidBody *body = pPhys->GetObject();
 
-	int index = m_objectList.Find(body);
+	int index = m_objectList.Find(pPhys);
 	if (!m_objectList.IsValidIndex(index)) return;
 	m_objectList.Remove(index);
 }
@@ -113,7 +121,7 @@ void CPhysicsMotionController::GetObjects(IPhysicsObject **pObjectList) {
 	if (!pObjectList) return;
 
 	for (int i = 0; i < m_objectList.Count(); i++) {
-		pObjectList[i] = (IPhysicsObject *)m_objectList[i]->getUserPointer();
+		pObjectList[i] = (IPhysicsObject *)m_objectList[i];
 	}
 }
 
@@ -123,7 +131,7 @@ void CPhysicsMotionController::ClearObjects() {
 
 void CPhysicsMotionController::WakeObjects() {
 	for (int i = 0; i < m_objectList.Count(); i++) {
-		m_objectList[i]->setActivationState(ACTIVE_TAG);
+		m_objectList[i]->GetObject()->setActivationState(ACTIVE_TAG);
 	}
 }
 

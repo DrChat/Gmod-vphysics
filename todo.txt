@@ -37,3 +37,4 @@
 	- Bullet has an internal profiler, grab the results from it and give them to vprof.
 	- When we're just about wrapping up, implement saving!
 	- The code needs to be cleaned up and become nice and tidy!
+	- Expose new collision shapes in CPhysicsCollision!

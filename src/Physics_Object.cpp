@@ -13,8 +13,6 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-extern CPhysicsSurfaceProps g_SurfaceDatabase;
-
 /***************************
 * CLASS CPhysicsObject
 ***************************/
@@ -45,6 +43,7 @@ CPhysicsObject::~CPhysicsObject() {
 
 		delete m_pObject->getMotionState();
 		delete m_pObject;
+		m_pObject = NULL;
 	}
 }
 
@@ -739,6 +738,9 @@ void CPhysicsObject::OutputDebugInfo() const {
 			pMaterialStr, surfaceData->physics.density, surfaceData->physics.thickness, surfaceData->physics.friction, surfaceData->physics.elasticity);
 	}
 
+	Msg("-- COLLISION SHAPE INFO --\n");
+	g_PhysicsCollision.OutputDebugInfo((CPhysCollide *)m_pObject->getCollisionShape());
+
 	// FIXME: complete this function via format noted on
 	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
@@ -852,8 +854,14 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btTransform transform(matrix, vector);
 
 	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
-	btTransform masscenter(btMatrix3x3::getIdentity());
+	btTransform masscenter = btTransform::getIdentity();
 	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
+
+	if (pParams && pParams->massCenterOverride) {
+		btVector3 vecMassCenter;
+		ConvertPosToBull(*pParams->massCenterOverride, vecMassCenter);
+		masscenter.setOrigin(vecMassCenter);
+	}
 
 	float mass = 0;
 

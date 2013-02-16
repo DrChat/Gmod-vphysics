@@ -5,7 +5,7 @@ struct PhysicsShapeInfo {
 	btVector3 massCenter;
 };
 
-class CPhysicsCollision : public IPhysicsCollision {
+class CPhysicsCollision : public IPhysicsCollision1 {
 	public:
 		CPhysConvex *			ConvexFromVerts(Vector **pVerts, int vertCount);
 		CPhysConvex *			ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance);
@@ -13,7 +13,6 @@ class CPhysicsCollision : public IPhysicsCollision {
 		float					ConvexSurfaceArea(CPhysConvex *pConvex);
 		void					SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData);
 		void					ConvexFree(CPhysConvex *pConvex);
-		CPhysConvex *			BBoxToConvex(const Vector &mins, const Vector &maxs);
 		CPhysConvex *			ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron);
 		void					ConvexesFromConvexPolygon(const Vector &vPolyNormal, const Vector *pPoints, int iPointCount, CPhysConvex **pOutput);
 
@@ -37,8 +36,16 @@ class CPhysicsCollision : public IPhysicsCollision {
 		Vector					CollideGetOrthographicAreas(const CPhysCollide *pCollide);
 		void					CollideSetOrthographicAreas(CPhysCollide *pCollide, const Vector &areas);
 		int						CollideIndex(const CPhysCollide *pCollide);
-		CPhysCollide *			BBoxToCollide(const Vector &mins, const Vector &maxs);
 		int						GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit);
+
+		CPhysConvex *			BBoxToConvex(const Vector &mins, const Vector &maxs);
+		CPhysCollide *			BBoxToCollide(const Vector &mins, const Vector &maxs);
+
+		CPhysConvex *			CylinderToConvex(const Vector &mins, const Vector &maxs);
+		CPhysCollide *			CylinderToCollide(const Vector &mins, const Vector &maxs);
+
+		CPhysConvex *			ConeToConvex(const float radius, const float height);
+		CPhysCollide *			ConeToCollide(const float radius, const float height);
 
 		void					TraceBox(const Vector &start, const Vector &end, const Vector &mins, const Vector &maxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 		void					TraceBox(const Ray_t &ray, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
@@ -72,5 +79,7 @@ class CPhysicsCollision : public IPhysicsCollision {
 		void					OutputDebugInfo(const CPhysCollide *pCollide);
 		unsigned int			ReadStat(int statID);
 };
+
+extern CPhysicsCollision g_PhysicsCollision;
 
 #endif

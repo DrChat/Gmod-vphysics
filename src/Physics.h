@@ -1,10 +1,11 @@
 #ifndef CPHYSICS_H
 #define CPHYSICS_H
 
-class CPhysicsCollisionSet;
+class IPhysicsEnvironment;
+class IPhysicsCollisionSet;
 
-class CPhysics : public CTier1AppSystem<IPhysics> {
-	typedef CTier1AppSystem<IPhysics> BaseClass;
+class CPhysics : public CTier1AppSystem<IPhysics1> {
+	typedef CTier1AppSystem<IPhysics1> BaseClass;
 	public:
 		void *						QueryInterface(const char *pInterfaceName);
 		InitReturnVal_t				Init();
@@ -23,7 +24,9 @@ class CPhysics : public CTier1AppSystem<IPhysics> {
 		void						DestroyAllCollisionSets();
 	private:
 		CUtlVector<IPhysicsEnvironment *>	m_envList;
-		CUtlVector<CPhysicsCollisionSet *>	m_collisionSets;
+		CUtlVector<IPhysicsCollisionSet *>	m_collisionSets;
 };
+
+extern CPhysics g_Physics;
 
 #endif

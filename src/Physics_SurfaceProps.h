@@ -44,4 +44,6 @@ class CPhysicsSurfaceProps : public IPhysicsSurfaceProps {
 		CUtlVector<CUtlSymbol>	m_fileList;
 };
 
+extern CPhysicsSurfaceProps g_SurfaceDatabase;
+
 #endif

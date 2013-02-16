@@ -21,6 +21,14 @@ inline void TransformLocalToWorld(const btTransform &trans, const btRigidBody &o
 	out = trans * obj.getWorldTransform();
 }
 
+inline void GraphicTransformWorldToLocal(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
+	out = (trans * ((btMassCenterMotionState *)obj.getMotionState())->m_centerOfMassOffset) * obj.getWorldTransform();
+}
+
+inline void GraphicTransformLocalToWorld(const btTransform &trans, const btRigidBody &obj, btTransform &out) {
+	out = (trans  * ((btMassCenterMotionState *)obj.getMotionState())->m_centerOfMassOffset) * obj.getWorldTransform();
+}
+
 const char *GetConstraintName(EConstraintType type) {
 	switch (type) {
 		case CONSTRAINT_UNKNOWN:
@@ -208,6 +216,42 @@ IPhysicsObject *CPhysicsSpring::GetEndObject() {
 	return m_pAttachedObject;
 }
 
+/*********************************
+* CLASS CPhysicsConstraintGroup
+*********************************/
+
+CPhysicsConstraintGroup::CPhysicsConstraintGroup(const constraint_groupparams_t &params) {
+
+}
+
+CPhysicsConstraintGroup::~CPhysicsConstraintGroup() {
+
+}
+
+void CPhysicsConstraintGroup::Activate() {
+	NOT_IMPLEMENTED
+}
+
+bool CPhysicsConstraintGroup::IsInErrorState() {
+	return false;
+}
+
+void CPhysicsConstraintGroup::ClearErrorState() {
+
+}
+
+void CPhysicsConstraintGroup::GetErrorParams(constraint_groupparams_t *pParams) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsConstraintGroup::SetErrorParams(const constraint_groupparams_t &params) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsConstraintGroup::SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1) {
+	NOT_IMPLEMENTED
+}
+
 /************************
 * CREATION FUNCTIONS
 ************************/
@@ -232,17 +276,15 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // It appears that constraintToReference is always the identity matrix.
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
-	btTransform bullAFrame, bullBFrame;
-	bullAFrame.setIdentity();
-	bullBFrame.setIdentity();
-	// FIXME: How do we get the frames? The ragdoll params have a "constraint to body" transform, so what is constraint space?
-
-	bullAFrame = pObjRef->GetObject()->getWorldTransform().inverse() * pObjAtt->GetObject()->getWorldTransform();
+	btTransform bullAFrame = constraintToReference;
+	btTransform bullBFrame = constraintToAttached;
 
 	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
 
 	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
+
 	// Set axis limits
+
 
 	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }

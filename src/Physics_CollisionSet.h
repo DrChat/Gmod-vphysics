@@ -15,4 +15,6 @@ class CPhysicsCollisionSet : public IPhysicsCollisionSet
 		int				m_iMaxEntries;
 };
 
+CPhysicsCollisionSet *CreateCollisionSet(int maxElements);
+
 #endif // CPHYSICSCOLLISIONSET_H

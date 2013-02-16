@@ -70,15 +70,15 @@ class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 {
 	public:
-		CPhysicsConstraintGroup(const constraint_groupparams_t &params) {}
-		~CPhysicsConstraintGroup(void) {}
+		CPhysicsConstraintGroup(const constraint_groupparams_t &params);
+		~CPhysicsConstraintGroup(void);
 
-		void	Activate() { NOT_IMPLEMENTED };
-		bool	IsInErrorState() { return false; };
-		void	ClearErrorState() { };
-		void	GetErrorParams(constraint_groupparams_t *pParams) { NOT_IMPLEMENTED };
-		void	SetErrorParams(const constraint_groupparams_t &params) { NOT_IMPLEMENTED };
-		void	SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1) { NOT_IMPLEMENTED };
+		void	Activate();
+		bool	IsInErrorState();
+		void	ClearErrorState();
+		void	GetErrorParams(constraint_groupparams_t *pParams);
+		void	SetErrorParams(const constraint_groupparams_t &params);
+		void	SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1);
 };
 
 // CONSTRAINT CREATION FUNCTIONS

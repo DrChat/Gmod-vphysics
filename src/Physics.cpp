@@ -64,7 +64,7 @@ IPhysicsCollisionSet *CPhysics::FindOrCreateCollisionSet(unsigned int id, int ma
 	if (m_collisionSets.IsValidIndex(id))
 		return m_collisionSets[id];
 
-	CPhysicsCollisionSet *set = new CPhysicsCollisionSet(maxElementCount);
+	CPhysicsCollisionSet *set = ::CreateCollisionSet(maxElementCount);
 	//m_collisionSets.InsertBefore(id, set); // FIXME: Assert hit with ragdolls!
 	m_collisionSets.AddToTail(set);
 	return set;
@@ -84,5 +84,5 @@ void CPhysics::DestroyAllCollisionSets() {
 	m_collisionSets.RemoveAll();
 }
 
-CPhysics g_MainDLLInterface;
-EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CPhysics, IPhysics, VPHYSICS_INTERFACE_VERSION, g_MainDLLInterface);
+CPhysics g_Physics;
+EXPOSE_SINGLE_INTERFACE_GLOBALVAR(CPhysics, IPhysics, VPHYSICS_INTERFACE_VERSION, g_Physics);
