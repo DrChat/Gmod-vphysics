@@ -741,6 +741,11 @@ bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 
 // Is this function ever called?
 void CPhysicsEnvironment::TraceRay(const Ray_t &ray, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
+	if (!ray.m_IsRay) return;
+
+	btVector3 vecStart, vecEnd;
+	ConvertPosToBull(ray.m_Start, vecStart);
+	ConvertPosToBull(ray.m_Start + ray.m_Delta, vecEnd);
 	NOT_IMPLEMENTED
 }
 

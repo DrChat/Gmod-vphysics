@@ -45,6 +45,8 @@ class CPhysicsVehicleController : public IPhysicsVehicleController {
 		void								InitCarWheels();
 		CPhysicsObject *					CreateWheel(int wheelIndex, vehicle_axleparams_t &axle);
 
+		CPhysicsObject *					GetBody();
+
 		void								UpdateSteering(const vehicle_controlparams_t &controls, float dt);
 		void								UpdateEngine(const vehicle_controlparams_t &controls, float dt);
 		void								UpdateWheels(const vehicle_controlparams_t &controls, float dt);

@@ -447,8 +447,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	object->setWorldTransform(transform);
 
 	btVector3 startv, endv;
-	ConvertPosToBull(ray.m_Start, startv);
-	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
+	ConvertPosToBull(ray.m_Start + ray.m_StartOffset, startv);
+	ConvertPosToBull(ray.m_Start + ray.m_StartOffset + ray.m_Delta, endv);
 
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
