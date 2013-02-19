@@ -40,3 +40,4 @@
 	- Expose new collision shapes in CPhysicsCollision!
 	- Valve may have hardcoded vehicle handling in ivp, but we don't have to! Expose ways for the game to control bullet vehicles.
 	- Bullet makefiles
+	- Something
