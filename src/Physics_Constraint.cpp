@@ -132,7 +132,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject
 	m_pEnv = pEnv;
 	m_type = type;
 
-	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
+	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 }
 
 CPhysicsConstraint::~CPhysicsConstraint() {

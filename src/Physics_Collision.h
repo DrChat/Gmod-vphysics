@@ -5,6 +5,12 @@ struct PhysicsShapeInfo {
 	btVector3 massCenter;
 };
 
+// NOTE: There can only be up to 15 unique collision groups!
+enum ECollisionGroups {
+	COLGROUP_NONE	= 0,
+	COLGROUP_WORLD	= 1<<1,
+};
+
 class CPhysicsCollision : public IPhysicsCollision1 {
 	public:
 		CPhysConvex *			ConvexFromVerts(Vector **pVerts, int vertCount);
@@ -46,6 +52,9 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 
 		CPhysConvex *			ConeToConvex(const float radius, const float height);
 		CPhysCollide *			ConeToCollide(const float radius, const float height);
+
+		CPhysConvex *			SphereToConvex(const float radius);
+		CPhysCollide *			SphereToCollide(const float radius);
 
 		void					TraceBox(const Vector &start, const Vector &end, const Vector &mins, const Vector &maxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 		void					TraceBox(const Ray_t &ray, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);

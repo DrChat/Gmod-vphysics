@@ -21,8 +21,6 @@ IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMot
 CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv) {
 	m_handler = pHandler;
 	m_pEnv = pEnv;
-
-	//SetPriority(MEDIUM_PRIORITY);
 }
 
 void CPhysicsMotionController::Tick(float deltaTime) {
@@ -34,17 +32,13 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		AngularImpulse rot;
 		btVector3 bullSpeed, bullRot;
 
-		if (!m_objectList[i]) {
-			m_objectList.Remove(i);
-			i--;
-			continue;
-		}
-
 		// Assert hit = object is DELETED!
-		Assert(*(char *)m_objectList[i] != 0xDD);
+		Assert(*(char *)m_objectList[i] != '\xDD');
+		
+		CPhysicsObject *pObject = (CPhysicsObject *)m_objectList[i];
+		btRigidBody *body = btRigidBody::upcast(pObject->GetObject());
+		if (!body) continue;
 
-		btRigidBody *body = btRigidBody::upcast(m_objectList[i]->GetObject());
-		IPhysicsObject *pObject = (IPhysicsObject *)m_objectList[i];
 		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
 
 		ConvertForceImpulseToBull(speed, bullSpeed);

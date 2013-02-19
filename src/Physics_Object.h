@@ -55,9 +55,8 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								SetCallbackFlags(unsigned short callbackflags);
 		unsigned short						GetCallbackFlags() const;
 
-		// UNEXPOSED
-		void								AddCallbackFlags(unsigned short flag);
-		void								RemoveCallbackFlags(unsigned short flag);
+		const CPhysCollide *				GetCollisionModel() const;
+		void								SetCollisionModel(CPhysCollide *pCollide);
 
 		void								Wake();
 		void								Sleep();
@@ -88,6 +87,9 @@ class CPhysicsObject : public IPhysicsObject1 {
 		unsigned int						GetContents() const;
 		void								SetContents(unsigned int contents);
 
+		void								SetSleepThresholds(const float *linVel, const float *angVel);
+		void								GetSleepThresholds(float *linVel, float *angVel) const;
+
 		float								GetSphereRadius() const;
 		float								GetEnergy() const;
 		Vector								GetMassCenterLocalSpace() const;
@@ -115,6 +117,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 
 		void								CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const;
 		void								CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const;
+
 		float								CalculateLinearDrag(const Vector& unitDirection) const;
 		float								CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const;
 
@@ -146,13 +149,17 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	public:
 		// UNEXPOSED FUNCTIONS
-		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere = false);
+		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isStatic, bool isSphere = false);
 
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
 		btRigidBody *						GetObject();
 
+		void								AddCallbackFlags(unsigned short flag);
+		void								RemoveCallbackFlags(unsigned short flag);
+
 		float								GetDragInDirection(const btVector3 &direction) const; // Function is not interfaced anymore
 		float								GetAngularDragInDirection(const btVector3 &direction) const;
+		void								ComputeDragBasis(bool isStatic);
 
 		float								GetVolume() const { return m_fVolume; }
 		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; }

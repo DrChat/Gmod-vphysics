@@ -43,7 +43,6 @@ CPhysicsObject::~CPhysicsObject() {
 
 		delete m_pObject->getMotionState();
 		delete m_pObject;
-		m_pObject = NULL;
 	}
 }
 
@@ -344,6 +343,30 @@ unsigned int CPhysicsObject::GetContents() const {
 
 void CPhysicsObject::SetContents(unsigned int contents) {
 	m_contents = contents;
+}
+
+void CPhysicsObject::SetSleepThresholds(const float *linVel, const float *angVel) {
+	if (linVel && angVel) {
+		m_pObject->setSleepingThresholds(ConvertDistanceToBull(*linVel), DEG2RAD(*angVel));
+	}
+
+	if (linVel) {
+		m_pObject->setSleepingThresholds(ConvertDistanceToBull(*linVel), m_pObject->getAngularSleepingThreshold());
+	}
+
+	if (angVel) {
+		m_pObject->setSleepingThresholds(m_pObject->getLinearSleepingThreshold(), DEG2RAD(*angVel));
+	}
+}
+
+void CPhysicsObject::GetSleepThresholds(float *linVel, float *angVel) const {
+	if (linVel) {
+		*linVel = ConvertDistanceToHL(m_pObject->getLinearSleepingThreshold());
+	}
+
+	if (angVel) {
+		*angVel = RAD2DEG(m_pObject->getAngularSleepingThreshold());
+	}
 }
 
 float CPhysicsObject::GetSphereRadius() const {
@@ -746,12 +769,12 @@ void CPhysicsObject::OutputDebugInfo() const {
 }
 
 // UNEXPOSED
-void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isSphere) {
+void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isStatic, bool isSphere) {
 	m_pEnv				= pEnv;
 	m_pObject			= pObject;
 	m_bIsSphere			= isSphere;
 	m_gameFlags			= 0;
-	m_bMotionEnabled	= !IsStatic();
+	m_bMotionEnabled	= !isStatic;
 	m_fMass				= GetMass();
 	m_pGameData			= NULL;
 	m_pName				= NULL;
@@ -760,6 +783,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_iLastActivationState = pObject->getActivationState();
 
 	m_pObject->setUserPointer(this);
+	m_pObject->setSleepingThresholds(SLEEP_LINEAR_THRESHOLD, SLEEP_ANGULAR_THRESHOLD);
 
 	if (pParams) {
 		m_pGameData		= pParams->pGameData;
@@ -771,7 +795,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	SetMaterialIndex(materialIndex);
 	SetContents(MASK_SOLID);
 
-	// Drag calculations converted from 2003 source code
+	// Compute our air drag values.
 	float drag = 0;
 	float angDrag = 0;
 	if (pParams) {
@@ -779,37 +803,41 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		angDrag = pParams->dragCoefficient;
 	}
 
-	m_dragBasis.setValue(0, 0, 0);
-	m_angDragBasis.setValue(0, 0, 0);
-
-	if (!IsStatic() && GetCollide()) {
-		btCollisionShape *shape = m_pObject->getCollisionShape();
-
-		btVector3 min, max, delta;
-		btTransform ident = btTransform::getIdentity();
-
-		shape->getAabb(ident, min, max);
-
-		delta = max - min;
-		delta = delta.absolute();
-
-		m_dragBasis.setX(delta.y() * delta.z());
-		m_dragBasis.setY(delta.x() * delta.z());
-		m_dragBasis.setZ(delta.x() * delta.y());
-
-		btVector3 ang = m_pObject->getInvInertiaDiagLocal();
-		delta *= 0.5;
-
-		m_angDragBasis.setX(AngDragIntegral(ang[0], delta.x(), delta.y(), delta.z()) + AngDragIntegral(ang[0], delta.x(), delta.z(), delta.y()));
-		m_angDragBasis.setY(AngDragIntegral(ang[1], delta.y(), delta.x(), delta.z()) + AngDragIntegral(ang[1], delta.y(), delta.z(), delta.x()));
-		m_angDragBasis.setZ(AngDragIntegral(ang[2], delta.z(), delta.x(), delta.y()) + AngDragIntegral(ang[2], delta.z(), delta.y(), delta.x()));
-	} else {
+	if (isStatic || !GetCollide()) {
 		drag = 0;
 		angDrag = 0;
 	}
 
+	ComputeDragBasis(isStatic);
+
+	if (!isStatic && drag != 0.0f) {
+		EnableDrag(true);
+	}
+
 	m_dragCoefficient = drag;
 	m_angDragCoefficient = angDrag;
+
+	// Compute our continuous collision detection stuff (for fast moving objects, prevents tunneling)
+	if (!isStatic) {
+		btVector3 mins, maxs;
+		m_pObject->getCollisionShape()->getAabb(btTransform::getIdentity(), mins, maxs);
+		mins = mins.absolute();
+		maxs = maxs.absolute();
+
+		float maxradius = min(min(maxs.getX(), maxs.getY()), maxs.getZ());
+		float minradius = min(min(mins.getX(), mins.getY()), mins.getZ());
+		float radius = min(maxradius, minradius);
+
+		m_pObject->setCcdMotionThreshold(radius);
+		m_pObject->setCcdSweptSphereRadius(0.2f * radius);
+	}
+
+	if (isStatic) {
+		pObject->setCollisionFlags(pObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+		pEnv->GetBulletEnvironment()->addRigidBody(pObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
+	} else {
+		pEnv->GetBulletEnvironment()->addRigidBody(pObject);
+	}
 }
 
 // UNEXPOSED
@@ -838,6 +866,36 @@ float CPhysicsObject::GetAngularDragInDirection(const btVector3 &dir) const {
 	return m_angDragCoefficient * fabs(dir.getX() * m_angDragBasis.getX()) +
 		fabs(dir.getY() * m_angDragBasis.getY()) +
 		fabs(dir.getZ() * m_angDragBasis.getZ());
+}
+
+// UNEXPOSED
+void CPhysicsObject::ComputeDragBasis(bool isStatic) {
+	m_dragBasis.setZero();
+	m_angDragBasis.setZero();
+
+	if (!isStatic && GetCollide()) {
+		btCollisionShape *shape = m_pObject->getCollisionShape();
+
+		btVector3 min, max, delta;
+		btTransform ident = btTransform::getIdentity();
+
+		shape->getAabb(ident, min, max);
+
+		delta = max - min;
+		delta = delta.absolute();
+
+		m_dragBasis.setX(delta.y() * delta.z());
+		m_dragBasis.setY(delta.x() * delta.z());
+		m_dragBasis.setZ(delta.x() * delta.y());
+		m_dragBasis *= GetInvMass();
+
+		btVector3 ang = m_pObject->getInvInertiaDiagLocal();
+		delta *= 0.5;
+
+		m_angDragBasis.setX(AngDragIntegral(ang[0], delta.x(), delta.y(), delta.z()) + AngDragIntegral(ang[0], delta.x(), delta.z(), delta.y()));
+		m_angDragBasis.setY(AngDragIntegral(ang[1], delta.y(), delta.x(), delta.z()) + AngDragIntegral(ang[1], delta.y(), delta.z(), delta.x()));
+		m_angDragBasis.setZ(AngDragIntegral(ang[2], delta.z(), delta.x(), delta.y()) + AngDragIntegral(ang[2], delta.z(), delta.y(), delta.x()));
+	}
 }
 
 /************************
@@ -890,31 +948,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 	btRigidBody *body = new btRigidBody(info);
 
-	if (isStatic) {
-		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2); // Collision flag so static objects don't collide with eachother.
-	} else {
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
-	}
-
 	CPhysicsObject *pObject = new CPhysicsObject;
-	pObject->Init(pEnvironment, body, materialIndex, pParams);
-	//if (!isStatic && pParams && pParams->dragCoefficient != 0.0f)
-	//	pObject->EnableDrag(true);
-
-	if (!isStatic) {
-		btVector3 mins, maxs;
-		shape->getAabb(btTransform::getIdentity(), mins, maxs);
-		mins = mins.absolute();
-		maxs = maxs.absolute();
-
-		float maxradius = min(min(maxs.getX(), maxs.getY()), maxs.getZ());
-		float minradius = min(min(mins.getX(), mins.getY()), mins.getZ());
-		float radius = min(maxradius, minradius);
-
-		body->setCcdMotionThreshold(radius);
-		body->setCcdSweptSphereRadius(0.2f * radius);
-	}
+	pObject->Init(pEnvironment, body, materialIndex, pParams, isStatic);
 	
 	return pObject;
 }
@@ -922,7 +957,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
 	if (!pEnvironment) return NULL;
 
-	btSphereShape *shape = new btSphereShape(ConvertDistanceToBull(radius));
+	// Conversion unnecessary as this is an exposed function.
+	btSphereShape *shape = (btSphereShape *)g_PhysicsCollision.SphereToConvex(radius);
 	
 	btVector3 vector;
 	btMatrix3x3 matrix;
@@ -948,15 +984,8 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 	btRigidBody *body = new btRigidBody(info);
 
-	if (isStatic) {
-		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body, 2, ~2);
-	} else {
-		pEnvironment->GetBulletEnvironment()->addRigidBody(body);
-	}
-
-	CPhysicsObject *pObject = new CPhysicsObject();
-	pObject->Init(pEnvironment, body, materialIndex, pParams, true);
+	CPhysicsObject *pObject = new CPhysicsObject;
+	pObject->Init(pEnvironment, body, materialIndex, pParams, isStatic, true);
 
 	return pObject;
 }

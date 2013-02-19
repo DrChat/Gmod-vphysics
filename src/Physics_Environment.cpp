@@ -302,6 +302,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 #if DEBUG_DRAW
 	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment, this);
 #endif
+
+	// Durr hack to get ourselves a debug overlay on the client
+	CreateInterfaceFn engine = Sys_GetFactory("engine");
+	SetDebugOverlay(engine);
 }
 
 CPhysicsEnvironment::~CPhysicsEnvironment() {
@@ -744,8 +748,8 @@ void CPhysicsEnvironment::TraceRay(const Ray_t &ray, unsigned int fMask, IPhysic
 	if (!ray.m_IsRay) return;
 
 	btVector3 vecStart, vecEnd;
-	ConvertPosToBull(ray.m_Start, vecStart);
-	ConvertPosToBull(ray.m_Start + ray.m_Delta, vecEnd);
+	ConvertPosToBull(ray.m_Start + ray.m_StartOffset, vecStart);
+	ConvertPosToBull(ray.m_Start + ray.m_StartOffset + ray.m_Delta, vecEnd);
 	NOT_IMPLEMENTED
 }
 

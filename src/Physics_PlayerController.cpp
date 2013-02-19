@@ -50,10 +50,8 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	ConvertPosToBull(velocity, targetSpeedBull);
 
 	// If the object hasn't moved, abort.
-	if (targetSpeedBull.distance2(m_currentSpeed) < 1e-6) {
-		if (targetPositionBull.distance2(m_targetPosition) < 1e-6) {
-			return;
-		}
+	if (targetSpeedBull.distance2(m_currentSpeed) < 1e-6 && targetPositionBull.distance2(m_targetPosition) < 1e-6) {
+		return;
 	}
 
 	m_targetPosition = targetPositionBull;
@@ -170,7 +168,8 @@ void CPlayerController::GetShadowVelocity(Vector *velocity) {
 	if (!velocity) return;
 
 	btRigidBody *body = m_pObject->GetObject();
-	ConvertPosToHL(body->getLinearVelocity(), *velocity);
+	//ConvertPosToHL(body->getLinearVelocity(), *velocity);
+	*velocity = Vector(0, 0, 0);
 }
 
 IPhysicsObject *CPlayerController::GetObject() {

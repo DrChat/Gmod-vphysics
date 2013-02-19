@@ -118,7 +118,7 @@ float CPhysicsCollision::ConvexSurfaceArea(CPhysConvex *pConvex) {
 }
 
 void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
-	delete (btConvexHullShape *)pConvex;
+	delete (btConvexShape *)pConvex;
 }
 
 void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData) {
@@ -398,7 +398,7 @@ CPhysCollide *CPhysicsCollision::CylinderToCollide(const Vector &mins, const Vec
 }
 
 CPhysConvex *CPhysicsCollision::ConeToConvex(const float radius, const float height) {
-	btConeShape *pShape = new btConeShape(radius, height);
+	btConeShape *pShape = new btConeShape(ConvertDistanceToBull(radius), ConvertDistanceToBull(height));
 	return (CPhysConvex *)pShape;
 }
 
@@ -410,6 +410,26 @@ CPhysCollide *CPhysicsCollision::ConeToCollide(const float radius, const float h
 	pCompound->setMargin(COLLISION_MARGIN);
 
 	// TODO: We need to center the cone shape so that the middle of it is the origin. Find the maths to do it with.
+	NOT_IMPLEMENTED
+
+	return (CPhysCollide *)pCompound;
+}
+
+CPhysConvex *CPhysicsCollision::SphereToConvex(const float radius) {
+	if (radius <= 0) return NULL;
+
+	btSphereShape *pShape = new btSphereShape(ConvertDistanceToBull(radius));
+	return (CPhysConvex *)pShape;
+}
+
+CPhysCollide *CPhysicsCollision::SphereToCollide(const float radius) {
+	CPhysConvex *pConvex = SphereToConvex(radius);
+	if (!pConvex) return NULL;
+
+	btCompoundShape *pCompound = new btCompoundShape;
+	pCompound->setMargin(COLLISION_MARGIN);
+
+	// TODO: Center it.
 	NOT_IMPLEMENTED
 
 	return (CPhysCollide *)pCompound;
@@ -558,23 +578,20 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		if (surfaceheader->vphysicsID != MAKEID('V', 'P', 'H', 'Y')
 				|| surfaceheader->version != 0x100
 				|| surfaceheader->modelType != 0x0
-				|| ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) 
-		{
+				|| ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) {
 			DevWarning("VPhysics: Could not load mesh!");
 			pOutput->solids[i] = NULL;
 			continue;
 		}
 
 		// derp test
-		/*
 		const ivpcompactledgenode_t *ledgetree = (ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root);
-		while (ledgetree->offset_right_node) {
+		do {
 			if (ledgetree->offset_compact_ledge)
 				ivpcompactledge_t *ledge = (ivpcompactledge_t *)((char *)ledgetree + ledgetree->offset_compact_ledge);
 
 			ledgetree = (ivpcompactledgenode_t *)((char *)ledgetree + ledgetree->offset_right_node);
-		}
-		*/
+		} while (ledgetree->offset_right_node);
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
 		btVector3 massCenter;

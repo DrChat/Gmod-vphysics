@@ -53,7 +53,6 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	ComputeController(speed, delta_position, params.maxSpeed, fraction * invDt, params.dampFactor);
 	object->setLinearVelocity(speed);
 
-	// FYI: IVP code does (v2 * factor2) + v1
 	params.lastPosition = posbull + (speed * dt);
 
 	//----------------

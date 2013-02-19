@@ -159,7 +159,7 @@ CPhysicsVehicleController::~CPhysicsVehicleController() {
 }
 
 void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {
-	m_vehicleParams = params;
+	m_vehicleParams							= params;
 	m_vehicleParams.engine.maxSpeed			= MPH2MS(params.engine.maxSpeed);
 	m_vehicleParams.engine.maxRevSpeed		= MPH2MS(params.engine.maxRevSpeed);
 	m_vehicleParams.engine.boostMaxSpeed	= MPH2MS(params.engine.boostMaxSpeed);
@@ -387,7 +387,7 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 		// only shift up when going forward
 		if (controls.throttle > 0) {
 			// check for higher gear, top gear is gearcount-1 (0 based)
-			while ( estEngineRPM > m_vehicleParams.engine.shiftUpRPM && m_vehicleState.gear < m_vehicleParams.engine.gearCount-1 ) {
+			while (estEngineRPM > m_vehicleParams.engine.shiftUpRPM && m_vehicleState.gear < m_vehicleParams.engine.gearCount-1) {
 				m_vehicleState.gear++;
 				estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * 60;
 			}
@@ -431,10 +431,8 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 			m_pRaycastVehicle->applyEngineForce(0, i);
 		}
 
-		float gravityLength = m_pBody->GetObject()->getGravity().length();
-
 		// float wheel_force_by_brake = brake_val * m_gravityLength * ( m_bodyMass + m_totalWheelMass );
-		float brakeForce = controls.brake * gravityLength * m_pBody->GetMass();
+		float brakeForce = controls.brake * m_pBody->GetMass();
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {

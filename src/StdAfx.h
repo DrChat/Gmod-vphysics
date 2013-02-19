@@ -29,6 +29,9 @@
 
 #define COLLISION_MARGIN 0.004 // 4 mm
 
+#define SLEEP_LINEAR_THRESHOLD 0.1 // m/s
+#define SLEEP_ANGULAR_THRESHOLD 0.4 // rad/s
+
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
 #define NOT_IMPLEMENTED DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);

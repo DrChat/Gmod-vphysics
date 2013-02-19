@@ -26,7 +26,7 @@ struct ivpcompactsurface_t {
 };
 
 // 16 bytes
-// Just like a btTriangleMesh.
+// Just like a btTriangleMesh (although we use btConvexHullShape)
 struct ivpcompactledge_t {
 	int		c_point_offset; // byte offset from 'this' to (ledge) point array
 	union {
@@ -57,6 +57,8 @@ struct ivpcompacttriangle_t {
 	ivpcompactedge_t	c_three_edges[3];
 };
 
+// 18 bytes
+// IVP has a ledge tree after the vertex data in every solid.
 struct ivpcompactledgenode_t {
 	int			offset_right_node; // (if != 0 than children
 	int			offset_compact_ledge; //(if != 0, pointer to hull that contains all subelements

@@ -57,7 +57,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\include;F:\Dev\Libraries\SDL-1.2.15\include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;F:\Dev\Libraries\bullet\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\bullet\src;.\include;F:\Dev\Libraries\SDL-1.2.15\include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -71,8 +71,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;F:\Dev\Libraries\bullet\build-cmake\lib\Debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\build\lib\$(Platform)\$(Configuration)\;F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
@@ -95,7 +95,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.\include;F:\Dev\Libraries\SDL-1.2.15\include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;F:\Dev\Libraries\bullet\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\bullet\src;.\include;F:\Dev\Libraries\SDL-1.2.15\include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
@@ -108,8 +108,8 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision_RelWithDebugInfo.lib;BulletDynamics_RelWithDebugInfo.lib;BulletSoftBody_RelWithDebugInfo.lib;LinearMath_RelWithDebugInfo.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;F:\Dev\Libraries\bullet\build-cmake\lib\RelWithDebInfo;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\build\lib\$(Platform)\$(Configuration)\;F:\Dev\Libraries\SDL-1.2.15\VisualC\SDL\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
