@@ -20,11 +20,13 @@ int lPhysStats(lua_State *state) {
 
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
-	if (physFactory)
+	if (physFactory) {
 		g_pPhysics = (IPhysics1 *)physFactory(VPHYSICS_INTERFACE_VERSION, NULL);
+	}
 
-	if (g_pPhysics)
+	if (g_pPhysics) {
 		Msg("Found physics interface!\n");
+	}
 
 	// Let's setup our table of functions
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);

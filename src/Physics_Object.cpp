@@ -974,7 +974,7 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 		volume = pParams->volume;
 		if (volume <= 0) {
-			pParams->volume = 4.0f * radius * radius * radius * M_PI / 3.0f;
+			pParams->volume = (4 / 3) * M_PI * radius * radius * radius;
 		}
 	}
 

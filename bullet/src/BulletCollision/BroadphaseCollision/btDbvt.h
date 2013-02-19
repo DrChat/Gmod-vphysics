@@ -160,10 +160,10 @@ struct	btDbvtAabbMm
 		btDbvtAabbMm& r);
 	DBVT_INLINE friend bool			NotEqual(	const btDbvtAabbMm& a,
 		const btDbvtAabbMm& b);
-    
-    DBVT_INLINE btVector3&	tMins()	{ return(mi); }
+	
+	DBVT_INLINE btVector3&	tMins()	{ return(mi); }
 	DBVT_INLINE btVector3&	tMaxs()	{ return(mx); }
-    
+	
 private:
 	DBVT_INLINE void				AddSpan(const btVector3& d,btScalar& smi,btScalar& smx) const;
 private:
@@ -526,7 +526,7 @@ DBVT_INLINE bool		Intersect(	const btDbvtAabbMm& a,
 #if defined (_WIN32)
 	const __int32*	pu((const __int32*)&rt);
 #else
-    const int*	pu((const int*)&rt);
+	const int*	pu((const int*)&rt);
 #endif
 	return((pu[0]|pu[1]|pu[2])==0);
 #else
@@ -576,11 +576,11 @@ DBVT_INLINE int			Select(	const btDbvtAabbMm& o,
 							   const btDbvtAabbMm& b)
 {
 #if	DBVT_SELECT_IMPL == DBVT_IMPL_SSE
-    
+	
 #if defined (_WIN32)
 	static ATTRIBUTE_ALIGNED16(const unsigned __int32)	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x7fffffff};
 #else
-    static ATTRIBUTE_ALIGNED16(const unsigned int)	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x00000000 /*0x7fffffff*/};
+	static ATTRIBUTE_ALIGNED16(const unsigned int)	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x00000000 /*0x7fffffff*/};
 #endif
 	///@todo: the intrinsic version is 11% slower
 #if DBVT_USE_INTRINSIC_SSE
@@ -961,7 +961,7 @@ inline void		btDbvt::rayTestInternal(	const btDbvtNode* root,
 								const btVector3& aabbMax,
 								DBVT_IPOLICY) const
 {
-        (void) rayTo;
+		(void) rayTo;
 	DBVT_CHECKTYPE
 	if(root)
 	{

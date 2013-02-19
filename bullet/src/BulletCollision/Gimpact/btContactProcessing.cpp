@@ -27,22 +27,22 @@ struct CONTACT_KEY_TOKEN
 	unsigned int m_key;
 	int m_value;
 	CONTACT_KEY_TOKEN()
-    {
-    }
+	{
+	}
 
-    CONTACT_KEY_TOKEN(unsigned int key,int token)
-    {
-    	m_key = key;
-    	m_value =  token;
-    }
+	CONTACT_KEY_TOKEN(unsigned int key,int token)
+	{
+		m_key = key;
+		m_value =  token;
+	}
 
-    CONTACT_KEY_TOKEN(const CONTACT_KEY_TOKEN& rtoken)
-    {
-    	m_key = rtoken.m_key;
-    	m_value = rtoken.m_value;
-    }
+	CONTACT_KEY_TOKEN(const CONTACT_KEY_TOKEN& rtoken)
+	{
+		m_key = rtoken.m_key;
+		m_value = rtoken.m_value;
+	}
 
-    inline bool operator <(const CONTACT_KEY_TOKEN& other) const
+	inline bool operator <(const CONTACT_KEY_TOKEN& other) const
 	{
 		return (m_key < other.m_key);
 	}
@@ -107,7 +107,7 @@ void btContactArray::merge_contacts(
 
 	for( i=1;i<keycontacts.size();i++)
 	{
-	    key = keycontacts[i].m_key;
+		key = keycontacts[i].m_key;
 		const GIM_CONTACT * scontact = &contacts[keycontacts[i].m_value];
 
 		if(last_key ==  key)//same points
@@ -116,32 +116,32 @@ void btContactArray::merge_contacts(
 			if(pcontact->m_depth - CONTACT_DIFF_EPSILON > scontact->m_depth)//)
 			{
 				*pcontact = *scontact;
-                coincident_count = 0;
+				coincident_count = 0;
 			}
 			else if(normal_contact_average)
 			{
 				if(btFabs(pcontact->m_depth - scontact->m_depth)<CONTACT_DIFF_EPSILON)
-                {
-                    if(coincident_count<MAX_COINCIDENT)
-                    {
-                    	coincident_normals[coincident_count] = scontact->m_normal;
-                        coincident_count++;
-                    }
-                }
+				{
+					if(coincident_count<MAX_COINCIDENT)
+					{
+						coincident_normals[coincident_count] = scontact->m_normal;
+						coincident_count++;
+					}
+				}
 			}
 		}
 		else
 		{//add new contact
 
-		    if(normal_contact_average && coincident_count>0)
-		    {
-		    	pcontact->interpolate_normals(coincident_normals,coincident_count);
-		        coincident_count = 0;
-		    }
+			if(normal_contact_average && coincident_count>0)
+			{
+				pcontact->interpolate_normals(coincident_normals,coincident_count);
+				coincident_count = 0;
+			}
 
-		    push_back(*scontact);
-		    pcontact = &(*this)[this->size()-1];
-        }
+			push_back(*scontact);
+			pcontact = &(*this)[this->size()-1];
+		}
 		last_key = key;
 	}
 }

@@ -79,6 +79,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND
@@ -117,6 +118,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND

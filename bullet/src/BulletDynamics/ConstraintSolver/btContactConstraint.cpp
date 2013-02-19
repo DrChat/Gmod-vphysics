@@ -72,55 +72,55 @@ void	btContactConstraint::buildJacobian()
 
 //response  between two dynamic objects without friction and no restitution, assuming 0 penetration depth
 btScalar resolveSingleCollision(
-        btRigidBody* body1,
-        btCollisionObject* colObj2,
+		btRigidBody* body1,
+		btCollisionObject* colObj2,
 		const btVector3& contactPositionWorld,
 		const btVector3& contactNormalOnB,
-        const btContactSolverInfo& solverInfo,
+		const btContactSolverInfo& solverInfo,
 		btScalar distance)
 {
 	btRigidBody* body2 = btRigidBody::upcast(colObj2);
-    
 	
-    const btVector3& normal = contactNormalOnB;
+	
+	const btVector3& normal = contactNormalOnB;
 
-    btVector3 rel_pos1 = contactPositionWorld - body1->getWorldTransform().getOrigin(); 
-    btVector3 rel_pos2 = contactPositionWorld - colObj2->getWorldTransform().getOrigin();
-    
-    btVector3 vel1 = body1->getVelocityInLocalPoint(rel_pos1);
+	btVector3 rel_pos1 = contactPositionWorld - body1->getWorldTransform().getOrigin(); 
+	btVector3 rel_pos2 = contactPositionWorld - colObj2->getWorldTransform().getOrigin();
+	
+	btVector3 vel1 = body1->getVelocityInLocalPoint(rel_pos1);
 	btVector3 vel2 = body2? body2->getVelocityInLocalPoint(rel_pos2) : btVector3(0,0,0);
-    btVector3 vel = vel1 - vel2;
-    btScalar rel_vel;
-    rel_vel = normal.dot(vel);
-    
-    btScalar combinedRestitution = 0.f;
-    btScalar restitution = combinedRestitution* -rel_vel;
+	btVector3 vel = vel1 - vel2;
+	btScalar rel_vel;
+	rel_vel = normal.dot(vel);
+	
+	btScalar combinedRestitution = 0.f;
+	btScalar restitution = combinedRestitution* -rel_vel;
 
-    btScalar positionalError = solverInfo.m_erp *-distance /solverInfo.m_timeStep ;
-    btScalar velocityError = -(1.0f + restitution) * rel_vel;// * damping;
+	btScalar positionalError = solverInfo.m_erp *-distance /solverInfo.m_timeStep ;
+	btScalar velocityError = -(1.0f + restitution) * rel_vel;// * damping;
 	btScalar denom0 = body1->computeImpulseDenominator(contactPositionWorld,normal);
 	btScalar denom1 = body2? body2->computeImpulseDenominator(contactPositionWorld,normal) : 0.f;
 	btScalar relaxation = 1.f;
 	btScalar jacDiagABInv = relaxation/(denom0+denom1);
 
-    btScalar penetrationImpulse = positionalError * jacDiagABInv;
-    btScalar velocityImpulse = velocityError * jacDiagABInv;
+	btScalar penetrationImpulse = positionalError * jacDiagABInv;
+	btScalar velocityImpulse = velocityError * jacDiagABInv;
 
-    btScalar normalImpulse = penetrationImpulse+velocityImpulse;
-    normalImpulse = 0.f > normalImpulse ? 0.f: normalImpulse;
+	btScalar normalImpulse = penetrationImpulse+velocityImpulse;
+	normalImpulse = 0.f > normalImpulse ? 0.f: normalImpulse;
 
 	body1->applyImpulse(normal*(normalImpulse), rel_pos1);
-    if (body2)
+	if (body2)
 		body2->applyImpulse(-normal*(normalImpulse), rel_pos2);
-    
-    return normalImpulse;
+	
+	return normalImpulse;
 }
 
 
 //bilateral constraint between two dynamic objects
 void resolveSingleBilateral(btRigidBody& body1, const btVector3& pos1,
-                      btRigidBody& body2, const btVector3& pos2,
-                      btScalar distance, const btVector3& normal,btScalar& impulse ,btScalar timeStep)
+					  btRigidBody& body2, const btVector3& pos2,
+					  btScalar distance, const btVector3& normal,btScalar& impulse ,btScalar timeStep)
 {
 	(void)timeStep;
 	(void)distance;

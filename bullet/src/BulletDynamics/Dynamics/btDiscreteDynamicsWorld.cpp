@@ -977,7 +977,7 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 {
 	BT_PROFILE("integrateTransforms");
 	btTransform predictedTrans;
-	for ( int i=0;i<m_nonStaticRigidBodies.size();i++)
+	for (int i=0; i<m_nonStaticRigidBodies.size(); i++)
 	{
 		btRigidBody* body = m_nonStaticRigidBodies[i];
 		body->setHitFraction(1.f);
@@ -1037,7 +1037,7 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 						body->setHitFraction(sweepResults.m_closestHitFraction);
 						body->predictIntegratedTransform(timeStep*body->getHitFraction(), predictedTrans);
 						body->setHitFraction(0.f);
-						body->proceedToTransform( predictedTrans);
+						body->proceedToTransform(predictedTrans);
 
 #if 0
 						btVector3 linVel = body->getLinearVelocity();
@@ -1335,15 +1335,11 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 	return;
 }
 
-
-
-
-
 void	btDiscreteDynamicsWorld::setConstraintSolver(btConstraintSolver* solver)
 {
 	if (m_ownsConstraintSolver)
 	{
-		btAlignedFree( m_constraintSolver);
+		btAlignedFree(m_constraintSolver);
 	}
 	m_ownsConstraintSolver = false;
 	m_constraintSolver = solver;
@@ -1355,11 +1351,11 @@ btConstraintSolver* btDiscreteDynamicsWorld::getConstraintSolver()
 	return m_constraintSolver;
 }
 
-
 int		btDiscreteDynamicsWorld::getNumConstraints() const
 {
 	return int(m_constraints.size());
 }
+
 btTypedConstraint* btDiscreteDynamicsWorld::getConstraint(int index)
 {
 	return m_constraints[index];
