@@ -62,7 +62,7 @@ public:
     {
     }
 
-    GIM_CONTACT(const btVector3 &point,const btVector3 & normal,
+    GIM_CONTACT(const btVector3 &point, const btVector3 & normal,
     	 			btScalar depth, int feature1, int feature2):
 				m_point(point),
 				m_normal(normal),
@@ -89,7 +89,7 @@ public:
 		return _hash;
     }
 
-    SIMD_FORCE_INLINE void interpolate_normals( btVector3 * normals,int normal_count)
+    SIMD_FORCE_INLINE void interpolate_normals( btVector3 * normals, int normal_count)
     {
     	btVector3 vec_sum(m_normal);
 		for(int i=0;i<normal_count;i++)
@@ -100,7 +100,7 @@ public:
 		btScalar vec_sum_len = vec_sum.length2();
 		if(vec_sum_len <CONTACT_DIFF_EPSILON) return;
 
-		//GIM_INV_SQRT(vec_sum_len,vec_sum_len); // 1/sqrt(vec_sum_len)
+		//GIM_INV_SQRT(vec_sum_len, vec_sum_len); // 1/sqrt(vec_sum_len)
 
 		m_normal = vec_sum/btSqrt(vec_sum_len);
     }
@@ -117,22 +117,22 @@ public:
 	}
 
 	SIMD_FORCE_INLINE void push_contact(
-		const btVector3 &point,const btVector3 & normal,
+		const btVector3 &point, const btVector3 & normal,
 		btScalar depth, int feature1, int feature2)
 	{
-		push_back( GIM_CONTACT(point,normal,depth,feature1,feature2) );
+		push_back( GIM_CONTACT(point, normal, depth, feature1, feature2) );
 	}
 
 	SIMD_FORCE_INLINE void push_triangle_contacts(
 		const GIM_TRIANGLE_CONTACT & tricontact,
-		int feature1,int feature2)
+		int feature1, int feature2)
 	{
 		for(int i = 0;i<tricontact.m_point_count ;i++ )
 		{
 			push_contact(
 				tricontact.m_points[i],
 				tricontact.m_separating_normal,
-				tricontact.m_penetration_depth,feature1,feature2);
+				tricontact.m_penetration_depth, feature1, feature2);
 		}
 	}
 

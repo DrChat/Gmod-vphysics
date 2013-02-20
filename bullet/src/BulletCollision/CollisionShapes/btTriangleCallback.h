@@ -34,7 +34,7 @@ class btInternalTriangleIndexCallback
 public:
 
 	virtual ~btInternalTriangleIndexCallback();
-	virtual void internalProcessTriangleIndex(btVector3* triangle,int partId,int  triangleIndex) = 0;
+	virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex) = 0;
 };
 
 

@@ -47,11 +47,11 @@ public:
 		
 	btUnionFind& getUnionFind() { return m_unionFind;}
 
-	virtual	void	updateActivationState(btCollisionWorld* colWorld,btDispatcher* dispatcher);
+	virtual	void	updateActivationState(btCollisionWorld* colWorld, btDispatcher* dispatcher);
 	virtual	void	storeIslandActivationState(btCollisionWorld* world);
 
 
-	void	findUnions(btDispatcher* dispatcher,btCollisionWorld* colWorld);
+	void	findUnions(btDispatcher* dispatcher, btCollisionWorld* colWorld);
 
 	
 
@@ -59,12 +59,12 @@ public:
 	{
 		virtual ~IslandCallback() {};
 
-		virtual	void	processIsland(btCollisionObject** bodies,int numBodies,class btPersistentManifold**	manifolds,int numManifolds, int islandId) = 0;
+		virtual	void	processIsland(btCollisionObject** bodies, int numBodies, class btPersistentManifold**	manifolds, int numManifolds, int islandId) = 0;
 	};
 
-	void	buildAndProcessIslands(btDispatcher* dispatcher,btCollisionWorld* collisionWorld, IslandCallback* callback);
+	void	buildAndProcessIslands(btDispatcher* dispatcher, btCollisionWorld* collisionWorld, IslandCallback* callback);
 
-	void buildIslands(btDispatcher* dispatcher,btCollisionWorld* colWorld);
+	void buildIslands(btDispatcher* dispatcher, btCollisionWorld* colWorld);
 
 	bool getSplitIslands()
 	{

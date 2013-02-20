@@ -46,12 +46,12 @@ ATTRIBUTE_ALIGNED16(class) SpuContactManifoldCollisionAlgorithm : public btColli
 	
 public:
 	
-	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
-	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
 	
-	SpuContactManifoldCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObject* body0,const btCollisionObject* body1);
+	SpuContactManifoldCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObject* body0, const btCollisionObject* body1);
 #ifdef USE_SEPDISTANCE_UTIL
 	btConvexSeparatingDistanceUtil	m_sepDistance;
 #endif //USE_SEPDISTANCE_UTIL
@@ -109,10 +109,10 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-        virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap)
+        virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
  		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(SpuContactManifoldCollisionAlgorithm));
-			return new(mem) SpuContactManifoldCollisionAlgorithm(ci,body0Wrap->getCollisionObject(),body1Wrap->getCollisionObject());
+			return new(mem) SpuContactManifoldCollisionAlgorithm(ci, body0Wrap->getCollisionObject(), body1Wrap->getCollisionObject());
 		}
 	};
 

@@ -28,20 +28,20 @@ subject to the following restrictions:
 
 
 ///Swap numbers
-#define BT_SWAP_NUMBERS(a,b){ \
+#define BT_SWAP_NUMBERS(a, b){ \
     a = a+b; \
     b = a-b; \
     a = a-b; \
 }\
 
 
-#define BT_MAX(a,b) (a<b?b:a)
-#define BT_MIN(a,b) (a>b?b:a)
+#define BT_MAX(a, b) (a<b?b:a)
+#define BT_MIN(a, b) (a>b?b:a)
 
 #define BT_GREATER(x, y)	btFabs(x) > (y)
 
-#define BT_MAX3(a,b,c) BT_MAX(a,BT_MAX(b,c))
-#define BT_MIN3(a,b,c) BT_MIN(a,BT_MIN(b,c))
+#define BT_MAX3(a, b,c) BT_MAX(a, BT_MAX(b, c))
+#define BT_MIN3(a, b,c) BT_MIN(a, BT_MIN(b, c))
 
 
 
@@ -74,7 +74,7 @@ enum eBT_PLANE_INTERSECTION_TYPE
 //	//find minmax
 //	if(pmin>pmax)
 //	{
-//		BT_SWAP_NUMBERS(pmin,pmax);
+//		BT_SWAP_NUMBERS(pmin, pmax);
 //	}
 //	//find extends
 //	const btScalar rad = extend[component_index0] * absolute_edge[dir_index0] +
@@ -91,7 +91,7 @@ enum eBT_PLANE_INTERSECTION_TYPE
 //	const btVector3 & pointb, btVector3 & extend)
 //{
 //
-//	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,2,1,1,2);
+//	return test_cross_edge_box(edge, absolute_edge, pointa, pointb, extend,2,1,1,2);
 //}
 //
 //
@@ -102,7 +102,7 @@ enum eBT_PLANE_INTERSECTION_TYPE
 //	const btVector3 & pointb, btVector3 & extend)
 //{
 //
-//	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,0,2,2,0);
+//	return test_cross_edge_box(edge, absolute_edge, pointa, pointb, extend,0,2,2,0);
 //}
 //
 //SIMD_FORCE_INLINE bool test_cross_edge_box_Z_axis(
@@ -112,11 +112,11 @@ enum eBT_PLANE_INTERSECTION_TYPE
 //	const btVector3 & pointb, btVector3 & extend)
 //{
 //
-//	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,1,0,0,1);
+//	return test_cross_edge_box(edge, absolute_edge, pointa, pointb, extend,1,0,0,1);
 //}
 
 
-#define TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,i_dir_0,i_dir_1,i_comp_0,i_comp_1)\
+#define TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend, i_dir_0, i_dir_1, i_comp_0, i_comp_1)\
 {\
 	const btScalar dir0 = -edge[i_dir_0];\
 	const btScalar dir1 = edge[i_dir_1];\
@@ -124,7 +124,7 @@ enum eBT_PLANE_INTERSECTION_TYPE
 	btScalar pmax = pointb[i_comp_0]*dir0 + pointb[i_comp_1]*dir1;\
 	if(pmin>pmax)\
 	{\
-		BT_SWAP_NUMBERS(pmin,pmax); \
+		BT_SWAP_NUMBERS(pmin, pmax); \
 	}\
 	const btScalar abs_dir0 = absolute_edge[i_dir_0];\
 	const btScalar abs_dir1 = absolute_edge[i_dir_1];\
@@ -133,19 +133,19 @@ enum eBT_PLANE_INTERSECTION_TYPE
 }\
 
 
-#define TEST_CROSS_EDGE_BOX_X_AXIS_MCR(edge,absolute_edge,pointa,pointb,_extend)\
+#define TEST_CROSS_EDGE_BOX_X_AXIS_MCR(edge, absolute_edge, pointa, pointb,_extend)\
 {\
-	TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,2,1,1,2);\
+	TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend,2,1,1,2);\
 }\
 
-#define TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(edge,absolute_edge,pointa,pointb,_extend)\
+#define TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(edge, absolute_edge, pointa, pointb,_extend)\
 {\
-	TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,0,2,2,0);\
+	TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend,0,2,2,0);\
 }\
 
-#define TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(edge,absolute_edge,pointa,pointb,_extend)\
+#define TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(edge, absolute_edge, pointa, pointb,_extend)\
 {\
-	TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,1,0,0,1);\
+	TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend,1,0,0,1);\
 }\
 
 
@@ -172,7 +172,7 @@ public:
 //		m_AR[1] = vepsi + m_R1to0[1].absolute();
 //		m_AR[2] = vepsi + m_R1to0[2].absolute();
 
-		int i,j;
+		int i, j;
 
         for(i=0;i<3;i++)
         {
@@ -191,7 +191,7 @@ public:
 
 
 	//! Calc the transformation relative  1 to 0. Inverts matrics by transposing
-	SIMD_FORCE_INLINE void calc_from_homogenic(const btTransform & trans0,const btTransform & trans1)
+	SIMD_FORCE_INLINE void calc_from_homogenic(const btTransform & trans0, const btTransform & trans1)
 	{
 
 		btTransform temp_trans = trans0.inverse();
@@ -205,7 +205,7 @@ public:
 	}
 
 	//! Calcs the full invertion of the matrices. Useful for scaling matrices
-	SIMD_FORCE_INLINE void calc_from_full_invert(const btTransform & trans0,const btTransform & trans1)
+	SIMD_FORCE_INLINE void calc_from_full_invert(const btTransform & trans0, const btTransform & trans1)
 	{
 		m_R1to0 = trans0.getBasis().inverse();
 		m_T1to0 = m_R1to0 * (-trans0.getOrigin());
@@ -240,13 +240,13 @@ public:
 			 const btVector3 & V2,
 			 const btVector3 & V3)
 	{
-		m_min[0] = BT_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = BT_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = BT_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = BT_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = BT_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = BT_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = BT_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = BT_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = BT_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = BT_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = BT_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = BT_MAX3(V1[2], V2[2], V3[2]);
 	}
 
 	btAABB(const btVector3 & V1,
@@ -254,13 +254,13 @@ public:
 			 const btVector3 & V3,
 			 btScalar margin)
 	{
-		m_min[0] = BT_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = BT_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = BT_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = BT_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = BT_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = BT_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = BT_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = BT_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = BT_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = BT_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = BT_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = BT_MAX3(V1[2], V2[2], V3[2]);
 
 		m_min[0] -= margin;
 		m_min[1] -= margin;
@@ -271,12 +271,12 @@ public:
 	}
 
 	btAABB(const btAABB &other):
-		m_min(other.m_min),m_max(other.m_max)
+		m_min(other.m_min), m_max(other.m_max)
 	{
 	}
 
-	btAABB(const btAABB &other,btScalar margin ):
-		m_min(other.m_min),m_max(other.m_max)
+	btAABB(const btAABB &other, btScalar margin ):
+		m_min(other.m_min), m_max(other.m_max)
 	{
 		m_min[0] -= margin;
 		m_min[1] -= margin;
@@ -323,13 +323,13 @@ public:
 							const CLASS_POINT & V2,
 							const CLASS_POINT & V3)
 	{
-		m_min[0] = BT_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = BT_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = BT_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = BT_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = BT_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = BT_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = BT_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = BT_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = BT_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = BT_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = BT_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = BT_MAX3(V1[2], V2[2], V3[2]);
 	}
 
 	template<typename CLASS_POINT>
@@ -338,13 +338,13 @@ public:
 							const CLASS_POINT & V2,
 							const CLASS_POINT & V3, btScalar margin)
 	{
-		m_min[0] = BT_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = BT_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = BT_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = BT_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = BT_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = BT_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = BT_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = BT_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = BT_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = BT_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = BT_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = BT_MAX3(V1[2], V2[2], V3[2]);
 
 		m_min[0] -= margin;
 		m_min[1] -= margin;
@@ -390,30 +390,30 @@ public:
 	//! Merges a Box
 	SIMD_FORCE_INLINE void merge(const btAABB & box)
 	{
-		m_min[0] = BT_MIN(m_min[0],box.m_min[0]);
-		m_min[1] = BT_MIN(m_min[1],box.m_min[1]);
-		m_min[2] = BT_MIN(m_min[2],box.m_min[2]);
+		m_min[0] = BT_MIN(m_min[0], box.m_min[0]);
+		m_min[1] = BT_MIN(m_min[1], box.m_min[1]);
+		m_min[2] = BT_MIN(m_min[2], box.m_min[2]);
 
-		m_max[0] = BT_MAX(m_max[0],box.m_max[0]);
-		m_max[1] = BT_MAX(m_max[1],box.m_max[1]);
-		m_max[2] = BT_MAX(m_max[2],box.m_max[2]);
+		m_max[0] = BT_MAX(m_max[0], box.m_max[0]);
+		m_max[1] = BT_MAX(m_max[1], box.m_max[1]);
+		m_max[2] = BT_MAX(m_max[2], box.m_max[2]);
 	}
 
 	//! Merges a point
 	template<typename CLASS_POINT>
 	SIMD_FORCE_INLINE void merge_point(const CLASS_POINT & point)
 	{
-		m_min[0] = BT_MIN(m_min[0],point[0]);
-		m_min[1] = BT_MIN(m_min[1],point[1]);
-		m_min[2] = BT_MIN(m_min[2],point[2]);
+		m_min[0] = BT_MIN(m_min[0], point[0]);
+		m_min[1] = BT_MIN(m_min[1], point[1]);
+		m_min[2] = BT_MIN(m_min[2], point[2]);
 
-		m_max[0] = BT_MAX(m_max[0],point[0]);
-		m_max[1] = BT_MAX(m_max[1],point[1]);
-		m_max[2] = BT_MAX(m_max[2],point[2]);
+		m_max[0] = BT_MAX(m_max[0], point[0]);
+		m_max[1] = BT_MAX(m_max[1], point[1]);
+		m_max[2] = BT_MAX(m_max[2], point[2]);
 	}
 
 	//! Gets the extend and center
-	SIMD_FORCE_INLINE void get_center_extend(btVector3 & center,btVector3 & extend)  const
+	SIMD_FORCE_INLINE void get_center_extend(btVector3 & center, btVector3 & extend)  const
 	{
 		center = (m_max+m_min)*0.5f;
 		extend = m_max - center;
@@ -422,13 +422,13 @@ public:
 	//! Finds the intersecting box between this box and the other.
 	SIMD_FORCE_INLINE void find_intersection(const btAABB & other, btAABB & intersection)  const
 	{
-		intersection.m_min[0] = BT_MAX(other.m_min[0],m_min[0]);
-		intersection.m_min[1] = BT_MAX(other.m_min[1],m_min[1]);
-		intersection.m_min[2] = BT_MAX(other.m_min[2],m_min[2]);
+		intersection.m_min[0] = BT_MAX(other.m_min[0], m_min[0]);
+		intersection.m_min[1] = BT_MAX(other.m_min[1], m_min[1]);
+		intersection.m_min[2] = BT_MAX(other.m_min[2], m_min[2]);
 
-		intersection.m_max[0] = BT_MIN(other.m_max[0],m_max[0]);
-		intersection.m_max[1] = BT_MIN(other.m_max[1],m_max[1]);
-		intersection.m_max[2] = BT_MIN(other.m_max[2],m_max[2]);
+		intersection.m_max[0] = BT_MIN(other.m_max[0], m_max[0]);
+		intersection.m_max[1] = BT_MIN(other.m_max[1], m_max[1]);
+		intersection.m_max[2] = BT_MIN(other.m_max[2], m_max[2]);
 	}
 
 
@@ -451,10 +451,10 @@ public:
 	\param vorigin A vec3f with the origin of the ray
 	\param vdir A vec3f with the direction of the ray
 	*/
-	SIMD_FORCE_INLINE bool collide_ray(const btVector3 & vorigin,const btVector3 & vdir)  const
+	SIMD_FORCE_INLINE bool collide_ray(const btVector3 & vorigin, const btVector3 & vdir)  const
 	{
-		btVector3 extents,center;
-		this->get_center_extend(center,extents);;
+		btVector3 extents, center;
+		this->get_center_extend(center, extents);;
 
 		btScalar Dx = vorigin[0] - center[0];
 		if(BT_GREATER(Dx, extents[0]) && Dx*vdir[0]>=0.0f)	return false;
@@ -519,18 +519,18 @@ public:
 
 	//! transcache is the transformation cache from box to this AABB
 	SIMD_FORCE_INLINE bool overlapping_trans_cache(
-		const btAABB & box,const BT_BOX_BOX_TRANSFORM_CACHE & transcache, bool fulltest) const
+		const btAABB & box, const BT_BOX_BOX_TRANSFORM_CACHE & transcache, bool fulltest) const
 	{
 
 		//Taken from OPCODE
-		btVector3 ea,eb;//extends
-		btVector3 ca,cb;//extends
-		get_center_extend(ca,ea);
-		box.get_center_extend(cb,eb);
+		btVector3 ea, eb;//extends
+		btVector3 ca, cb;//extends
+		get_center_extend(ca, ea);
+		box.get_center_extend(cb, eb);
 
 
 		btVector3 T;
-		btScalar t,t2;
+		btScalar t, t2;
 		int i;
 
 		// Class I : A's basis vectors
@@ -543,14 +543,14 @@ public:
 		// Class II : B's basis vectors
 		for(i=0;i<3;i++)
 		{
-			t = bt_mat3_dot_col(transcache.m_R1to0,T,i);
-			t2 = bt_mat3_dot_col(transcache.m_AR,ea,i) + eb[i];
-			if(BT_GREATER(t,t2))	return false;
+			t = bt_mat3_dot_col(transcache.m_R1to0, T,i);
+			t2 = bt_mat3_dot_col(transcache.m_AR, ea, i) + eb[i];
+			if(BT_GREATER(t, t2))	return false;
 		}
 		// Class III : 9 cross products
 		if(fulltest)
 		{
-			int j,m,n,o,p,q,r;
+			int j, m,n, o,p, q,r;
 			for(i=0;i<3;i++)
 			{
 				m = (i+1)%3;
@@ -564,7 +564,7 @@ public:
 					t = T[n]*transcache.m_R1to0[m][j] - T[m]*transcache.m_R1to0[n][j];
 					t2 = ea[o]*transcache.m_AR[p][j] + ea[p]*transcache.m_AR[o][j] +
 						eb[r]*transcache.m_AR[i][q] + eb[q]*transcache.m_AR[i][r];
-					if(BT_GREATER(t,t2))	return false;
+					if(BT_GREATER(t, t2))	return false;
 				}
 			}
 		}
@@ -588,8 +588,8 @@ public:
 	{
 		if(!collide_plane(triangle_plane)) return false;
 
-		btVector3 center,extends;
-		this->get_center_extend(center,extends);
+		btVector3 center, extends;
+		this->get_center_extend(center, extends);
 
 		const btVector3 v1(p1 - center);
 		const btVector3 v2(p2 - center);
@@ -599,30 +599,30 @@ public:
 		btVector3 diff(v2 - v1);
 		btVector3 abs_diff = diff.absolute();
 		//Test With X axis
-		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff,abs_diff,v1,v3,extends);
+		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff, abs_diff, v1, v3, extends);
 		//Test With Y axis
-		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff,abs_diff,v1,v3,extends);
+		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff, abs_diff, v1, v3, extends);
 		//Test With Z axis
-		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff,abs_diff,v1,v3,extends);
+		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v1, v3, extends);
 
 
 		diff = v3 - v2;
 		abs_diff = diff.absolute();
 		//Test With X axis
-		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff,abs_diff,v2,v1,extends);
+		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff, abs_diff, v2, v1, extends);
 		//Test With Y axis
-		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff,abs_diff,v2,v1,extends);
+		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff, abs_diff, v2, v1, extends);
 		//Test With Z axis
-		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff,abs_diff,v2,v1,extends);
+		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v2, v1, extends);
 
 		diff = v1 - v3;
 		abs_diff = diff.absolute();
 		//Test With X axis
-		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff,abs_diff,v3,v2,extends);
+		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff, abs_diff, v3, v2, extends);
 		//Test With Y axis
-		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff,abs_diff,v3,v2,extends);
+		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff, abs_diff, v3, v2, extends);
 		//Test With Z axis
-		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff,abs_diff,v3,v2,extends);
+		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v3, v2, extends);
 
 		return true;
 	}
@@ -630,7 +630,7 @@ public:
 
 
 //! Compairison of transformation objects
-SIMD_FORCE_INLINE bool btCompareTransformsEqual(const btTransform & t1,const btTransform & t2)
+SIMD_FORCE_INLINE bool btCompareTransformsEqual(const btTransform & t1, const btTransform & t2)
 {
 	if(!(t1.getOrigin() == t2.getOrigin()) ) return false;
 

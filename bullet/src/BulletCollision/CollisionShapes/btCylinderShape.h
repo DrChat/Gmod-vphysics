@@ -36,7 +36,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 	btVector3 getHalfExtentsWithMargin() const
 	{
 		btVector3 halfExtents = getHalfExtentsWithoutMargin();
-		btVector3 margin(getMargin(),getMargin(),getMargin());
+		btVector3 margin(getMargin(), getMargin(), getMargin());
 		halfExtents += margin;
 		return halfExtents;
 	}
@@ -48,22 +48,22 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 
 	btCylinderShape (const btVector3& halfExtents);
 	
-	void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
 
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 
 	virtual void setMargin(btScalar collisionMargin)
 	{
 		//correct the m_implicitShapeDimensions for the margin
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
+		btVector3 oldMargin(getMargin(), getMargin(), getMargin());
 		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		
 		btConvexInternalShape::setMargin(collisionMargin);
-		btVector3 newMargin(getMargin(),getMargin(),getMargin());
+		btVector3 newMargin(getMargin(), getMargin(), getMargin());
 		m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 	}
@@ -79,7 +79,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 			btVector3 vecnorm = vec;
 			if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 			{
-				vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
+				vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
 			} 
 			vecnorm.normalize();
 			supVertex+= getMargin() * vecnorm;
@@ -89,7 +89,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 
 
 	//use box inertia
-	//	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	//	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 
 	int	getUpAxis() const
@@ -111,7 +111,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 
 	virtual void	setLocalScaling(const btVector3& scaling)
 	{
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
+		btVector3 oldMargin(getMargin(), getMargin(), getMargin());
 		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		btVector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
@@ -142,7 +142,7 @@ public:
 	btCylinderShapeX (const btVector3& halfExtents);
 
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 	
 		//debugging
 	virtual const char*	getName()const
@@ -165,7 +165,7 @@ public:
 	btCylinderShapeZ (const btVector3& halfExtents);
 
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 
 		//debugging
 	virtual const char*	getName()const
@@ -200,7 +200,7 @@ SIMD_FORCE_INLINE	const char*	btCylinderShape::serialize(void* dataBuffer, btSer
 {
 	btCylinderShapeData* shapeData = (btCylinderShapeData*) dataBuffer;
 	
-	btConvexInternalShape::serialize(&shapeData->m_convexInternalShapeData,serializer);
+	btConvexInternalShape::serialize(&shapeData->m_convexInternalShapeData, serializer);
 
 	shapeData->m_upAxis = m_upAxis;
 	

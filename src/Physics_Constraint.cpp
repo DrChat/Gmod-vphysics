@@ -82,7 +82,7 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 	protected:
 		btScalar	m_dist;
 	public:
-		btDistanceConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, btScalar dist)
+		btDistanceConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB, btScalar dist)
 			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
 		{
 			m_dist = dist;

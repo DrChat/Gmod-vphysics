@@ -22,25 +22,25 @@ subject to the following restrictions:
 
 
 
-void SpuContactManifoldCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void SpuContactManifoldCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	btAssert(0);
 }
 
-btScalar SpuContactManifoldCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+btScalar SpuContactManifoldCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	btAssert(0);
 	return 1.f;
 }
 
 #ifndef __SPU__
-SpuContactManifoldCollisionAlgorithm::SpuContactManifoldCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObject* body0,const btCollisionObject* body1)
+SpuContactManifoldCollisionAlgorithm::SpuContactManifoldCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObject* body0, const btCollisionObject* body1)
 :btCollisionAlgorithm(ci)
 #ifdef USE_SEPDISTANCE_UTIL
-,m_sepDistance(body0->getCollisionShape()->getAngularMotionDisc(),body1->getCollisionShape()->getAngularMotionDisc())
+,m_sepDistance(body0->getCollisionShape()->getAngularMotionDisc(), body1->getCollisionShape()->getAngularMotionDisc())
 #endif //USE_SEPDISTANCE_UTIL
 {
-	m_manifoldPtr = m_dispatcher->getNewManifold(body0,body1);
+	m_manifoldPtr = m_dispatcher->getNewManifold(body0, body1);
 	m_shapeType0 = body0->getCollisionShape()->getShapeType();
 	m_shapeType1 = body1->getCollisionShape()->getShapeType();
 	m_collisionMargin0 = body0->getCollisionShape()->getMargin();

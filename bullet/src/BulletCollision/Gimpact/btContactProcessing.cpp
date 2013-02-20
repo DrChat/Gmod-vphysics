@@ -30,7 +30,7 @@ struct CONTACT_KEY_TOKEN
 	{
 	}
 
-	CONTACT_KEY_TOKEN(unsigned int key,int token)
+	CONTACT_KEY_TOKEN(unsigned int key, int token)
 	{
 		m_key = key;
 		m_value =  token;
@@ -88,7 +88,7 @@ void btContactArray::merge_contacts(
 
 	for ( i = 0;i<contacts.size() ;i++ )
 	{
-		keycontacts.push_back(CONTACT_KEY_TOKEN(contacts[i].calc_key_contact(),i));
+		keycontacts.push_back(CONTACT_KEY_TOKEN(contacts[i].calc_key_contact(), i));
 	}
 
 	//sort keys
@@ -135,7 +135,7 @@ void btContactArray::merge_contacts(
 
 			if(normal_contact_average && coincident_count>0)
 			{
-				pcontact->interpolate_normals(coincident_normals,coincident_count);
+				pcontact->interpolate_normals(coincident_normals, coincident_count);
 				coincident_count = 0;
 			}
 

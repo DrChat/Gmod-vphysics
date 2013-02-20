@@ -40,7 +40,7 @@ void computeAabb (btVector3& aabbMin, btVector3& aabbMax, btConvexInternalShape*
 	{
 		btScalar margin=convexShape->getMarginNV();
 		btVector3 halfExtents = convexShape->getImplicitShapeDimensions();
-		halfExtents += btVector3(margin,margin,margin);
+		halfExtents += btVector3(margin, margin, margin);
 		const btTransform& t = xform;
 		btMatrix3x3 abs_b = t.getBasis().absolute();  
 		btVector3 center = t.getOrigin();
@@ -57,7 +57,7 @@ void computeAabb (btVector3& aabbMin, btVector3& aabbMax, btConvexInternalShape*
 		//add the radius to y-axis to get full height
 		btScalar radius = halfExtents[0];
 		halfExtents[1] += radius;
-		halfExtents += btVector3(margin,margin,margin);
+		halfExtents += btVector3(margin, margin, margin);
 #if 0
 		int capsuleUpAxis = convexShape->getUpAxis();
 		btScalar halfHeight = convexShape->getHalfHeight();
@@ -79,7 +79,7 @@ void computeAabb (btVector3& aabbMin, btVector3& aabbMax, btConvexInternalShape*
 		btScalar margin = radius + convexShape->getMarginNV();
 		const btTransform& t = xform;
 		const btVector3& center = t.getOrigin();
-		btVector3 extent(margin,margin,margin);
+		btVector3 extent(margin, margin, margin);
 		aabbMin = center - extent;
 		aabbMax = center + extent;
 		break;
@@ -87,14 +87,14 @@ void computeAabb (btVector3& aabbMin, btVector3& aabbMax, btConvexInternalShape*
 	case CONVEX_HULL_SHAPE_PROXYTYPE:
 	{
 		ATTRIBUTE_ALIGNED16(char convexHullShape0[sizeof(btConvexHullShape)]);
-		cellDmaGet(&convexHullShape0, convexShapePtr  , sizeof(btConvexHullShape), DMA_TAG(1), 0, 0);
+		cellDmaGet(&convexHullShape0, convexShapePtr , sizeof(btConvexHullShape), DMA_TAG(1), 0, 0);
 		cellDmaWaitTagStatusAll(DMA_MASK(1));
 		btConvexHullShape* localPtr = (btConvexHullShape*)&convexHullShape0;
 		const btTransform& t = xform;
 		btScalar margin = convexShape->getMarginNV();
-		localPtr->getNonvirtualAabb(t,aabbMin,aabbMax,margin);
-		//spu_printf("SPU convex aabbMin=%f,%f,%f=\n",aabbMin.getX(),aabbMin.getY(),aabbMin.getZ());
-		//spu_printf("SPU convex aabbMax=%f,%f,%f=\n",aabbMax.getX(),aabbMax.getY(),aabbMax.getZ());
+		localPtr->getNonvirtualAabb(t, aabbMin, aabbMax, margin);
+		//spu_printf("SPU convex aabbMin=%f, %f, %f=\n", aabbMin.getX(), aabbMin.getY(), aabbMin.getZ());
+		//spu_printf("SPU convex aabbMax=%f, %f, %f=\n", aabbMax.getX(), aabbMax.getY(), aabbMax.getZ());
 		break;
 	}
 	default:
@@ -111,12 +111,12 @@ void dmaBvhShapeData (bvhMeshShape_LocalStoreMemory* bvhMeshShape, btBvhTriangle
 
 	dmaSize = sizeof(btTriangleIndexVertexArray);
 	dmaPpuAddress2 = reinterpret_cast<ppu_address_t>(triMeshShape->getMeshInterface());
-	//	spu_printf("trimeshShape->getMeshInterface() == %llx\n",dmaPpuAddress2);
+	//	spu_printf("trimeshShape->getMeshInterface() == %llx\n", dmaPpuAddress2);
 #ifdef __SPU__
-	cellDmaGet(&bvhMeshShape->gTriangleMeshInterfaceStorage, dmaPpuAddress2  , dmaSize, DMA_TAG(1), 0, 0);
+	cellDmaGet(&bvhMeshShape->gTriangleMeshInterfaceStorage, dmaPpuAddress2 , dmaSize, DMA_TAG(1), 0, 0);
 	bvhMeshShape->gTriangleMeshInterfacePtr = &bvhMeshShape->gTriangleMeshInterfaceStorage;
 #else
-	bvhMeshShape->gTriangleMeshInterfacePtr = (btTriangleIndexVertexArray*)cellDmaGetReadOnly(&bvhMeshShape->gTriangleMeshInterfaceStorage, dmaPpuAddress2  , dmaSize, DMA_TAG(1), 0, 0);
+	bvhMeshShape->gTriangleMeshInterfacePtr = (btTriangleIndexVertexArray*)cellDmaGetReadOnly(&bvhMeshShape->gTriangleMeshInterfaceStorage, dmaPpuAddress2 , dmaSize, DMA_TAG(1), 0, 0);
 #endif
 
 	//cellDmaWaitTagStatusAll(DMA_MASK(1));
@@ -125,15 +125,15 @@ void dmaBvhShapeData (bvhMeshShape_LocalStoreMemory* bvhMeshShape, btBvhTriangle
 	
 	dmaSize = sizeof(btOptimizedBvh);
 	dmaPpuAddress2 = reinterpret_cast<ppu_address_t>(triMeshShape->getOptimizedBvh());
-	//spu_printf("trimeshShape->getOptimizedBvh() == %llx\n",dmaPpuAddress2);
-	cellDmaGet(&bvhMeshShape->gOptimizedBvh, dmaPpuAddress2  , dmaSize, DMA_TAG(2), 0, 0);
+	//spu_printf("trimeshShape->getOptimizedBvh() == %llx\n", dmaPpuAddress2);
+	cellDmaGet(&bvhMeshShape->gOptimizedBvh, dmaPpuAddress2 , dmaSize, DMA_TAG(2), 0, 0);
 	//cellDmaWaitTagStatusAll(DMA_MASK(2));
 	cellDmaWaitTagStatusAll(DMA_MASK(1) | DMA_MASK(2));
 }
 
 void dmaBvhIndexedMesh (btIndexedMesh* IndexMesh, IndexedMeshArray& indexArray, int index, uint32_t dmaTag)
 {		
-	cellDmaGet(IndexMesh, (ppu_address_t)&indexArray[index]  , sizeof(btIndexedMesh), DMA_TAG(dmaTag), 0, 0);
+	cellDmaGet(IndexMesh, (ppu_address_t)&indexArray[index] , sizeof(btIndexedMesh), DMA_TAG(dmaTag), 0, 0);
 	
 }
 
@@ -144,7 +144,7 @@ void dmaBvhSubTreeHeaders (btBvhSubtreeInfo* subTreeHeaders, ppu_address_t subTr
 
 void dmaBvhSubTreeNodes (btQuantizedBvhNode* nodes, const btBvhSubtreeInfo& subtree, QuantizedNodeArray&	nodeArray, int dmaTag)
 {
-	cellDmaGet(nodes, reinterpret_cast<ppu_address_t>(&nodeArray[subtree.m_rootNodeIndex]) , subtree.m_subtreeSize* sizeof(btQuantizedBvhNode), DMA_TAG(2), 0, 0);
+	cellDmaGet(nodes, reinterpret_cast<ppu_address_t>(&nodeArray[subtree.m_rootNodeIndex]), subtree.m_subtreeSize* sizeof(btQuantizedBvhNode), DMA_TAG(2), 0, 0);
 }
 
 ///getShapeTypeSize could easily be optimized, but it is not likely a bottleneck
@@ -218,20 +218,20 @@ void dmaConvexVertexData (SpuConvexPolyhedronVertexData* convexVertexData, btCon
 	if (convexVertexData->gNumConvexPoints>MAX_NUM_SPU_CONVEX_POINTS)
 	{
 		btAssert(0);
-	//	spu_printf("SPU: Error: MAX_NUM_SPU_CONVEX_POINTS(%d) exceeded: %d\n",MAX_NUM_SPU_CONVEX_POINTS,convexVertexData->gNumConvexPoints);
+	//	spu_printf("SPU: Error: MAX_NUM_SPU_CONVEX_POINTS(%d) exceeded: %d\n", MAX_NUM_SPU_CONVEX_POINTS, convexVertexData->gNumConvexPoints);
 		return;
 	}
 			
 	register int dmaSize = convexVertexData->gNumConvexPoints*sizeof(btVector3);
 	ppu_address_t pointsPPU = (ppu_address_t) convexShapeSPU->getUnscaledPoints();
-	cellDmaGet(&convexVertexData->g_convexPointBuffer[0], pointsPPU  , dmaSize, DMA_TAG(2), 0, 0);
+	cellDmaGet(&convexVertexData->g_convexPointBuffer[0], pointsPPU , dmaSize, DMA_TAG(2), 0, 0);
 }
 
 void dmaCollisionShape (void* collisionShapeLocation, ppu_address_t collisionShapePtr, uint32_t dmaTag, int shapeType)
 {
 	register int dmaSize = getShapeTypeSize(shapeType);
-	cellDmaGet(collisionShapeLocation, collisionShapePtr  , dmaSize, DMA_TAG(dmaTag), 0, 0);
-	//cellDmaGetReadOnly(collisionShapeLocation, collisionShapePtr  , dmaSize, DMA_TAG(dmaTag), 0, 0);
+	cellDmaGet(collisionShapeLocation, collisionShapePtr , dmaSize, DMA_TAG(dmaTag), 0, 0);
+	//cellDmaGetReadOnly(collisionShapeLocation, collisionShapePtr , dmaSize, DMA_TAG(dmaTag), 0, 0);
 	//cellDmaWaitTagStatusAll(DMA_MASK(dmaTag));
 }
 
@@ -253,12 +253,12 @@ void dmaCompoundSubShapes (CompoundShape_LocalStoreMemory* compoundShapeLocation
 	for ( i = 0; i < childShapeCount; ++i)
 	{
 		btCompoundShapeChild& childShape = compoundShapeLocation->gSubshapes[i];
-		dmaCollisionShape (&compoundShapeLocation->gSubshapeShape[i],(ppu_address_t)childShape.m_childShape, dmaTag, childShape.m_childShapeType);
+		dmaCollisionShape (&compoundShapeLocation->gSubshapeShape[i], (ppu_address_t)childShape.m_childShape, dmaTag, childShape.m_childShapeType);
 	}
 }
 
 
-void	spuWalkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback,unsigned short int* quantizedQueryAabbMin,unsigned short int* quantizedQueryAabbMax,const btQuantizedBvhNode* rootNode,int startNodeIndex,int endNodeIndex)
+void	spuWalkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback, unsigned short int* quantizedQueryAabbMin, unsigned short int* quantizedQueryAabbMax, const btQuantizedBvhNode* rootNode, int startNodeIndex, int endNodeIndex)
 {
 
 	int curIndex = startNodeIndex;
@@ -277,14 +277,14 @@ void	spuWalkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback,unsigned 
 		btAssert (walkIterations < subTreeSize);
 
 		walkIterations++;
-		aabbOverlap = spuTestQuantizedAabbAgainstQuantizedAabb(quantizedQueryAabbMin,quantizedQueryAabbMax,rootNode->m_quantizedAabbMin,rootNode->m_quantizedAabbMax);
+		aabbOverlap = spuTestQuantizedAabbAgainstQuantizedAabb(quantizedQueryAabbMin, quantizedQueryAabbMax, rootNode->m_quantizedAabbMin, rootNode->m_quantizedAabbMax);
 		isLeafNode = rootNode->isLeafNode();
 
 		if (isLeafNode && aabbOverlap)
 		{
-			//printf("overlap with node %d\n",rootNode->getTriangleIndex());
-			nodeCallback->processNode(0,rootNode->getTriangleIndex());
-			//			spu_printf("SPU: overlap detected with triangleIndex:%d\n",rootNode->getTriangleIndex());
+			//printf("overlap with node %d\n", rootNode->getTriangleIndex());
+			nodeCallback->processNode(0, rootNode->getTriangleIndex());
+			//			spu_printf("SPU: overlap detected with triangleIndex:%d\n", rootNode->getTriangleIndex());
 		} 
 
 		if (aabbOverlap || isLeafNode)

@@ -58,13 +58,13 @@ public:
 };
 
 template<class T, int size>
-DoubleBuffer<T,size>::DoubleBuffer()
+DoubleBuffer<T, size>::DoubleBuffer()
 {
 	init ();
 }
 
 template<class T, int size>
-void DoubleBuffer<T,size>::init()
+void DoubleBuffer<T, size>::init()
 {
 	this->m_dmaPending = false;
 	this->m_frontBuffer = &this->m_buffer0[0];
@@ -73,7 +73,7 @@ void DoubleBuffer<T,size>::init()
 
 template<class T, int size>
 void
-DoubleBuffer<T,size>::backBufferDmaGet(uint64_t ea, unsigned int numBytes, unsigned int tag)
+DoubleBuffer<T, size>::backBufferDmaGet(uint64_t ea, unsigned int numBytes, unsigned int tag)
 {
 	m_dmaPending = true;
 	m_dmaTag = tag;
@@ -85,7 +85,7 @@ DoubleBuffer<T,size>::backBufferDmaGet(uint64_t ea, unsigned int numBytes, unsig
 
 template<class T, int size>
 void
-DoubleBuffer<T,size>::backBufferDmaPut(uint64_t ea, unsigned int numBytes, unsigned int tag)
+DoubleBuffer<T, size>::backBufferDmaPut(uint64_t ea, unsigned int numBytes, unsigned int tag)
 {
 	m_dmaPending = true;
 	m_dmaTag = tag;
@@ -94,21 +94,21 @@ DoubleBuffer<T,size>::backBufferDmaPut(uint64_t ea, unsigned int numBytes, unsig
 
 template<class T, int size>
 T *
-DoubleBuffer<T,size>::getFront()
+DoubleBuffer<T, size>::getFront()
 {
 	return m_frontBuffer;
 }
 
 template<class T, int size>
 T *
-DoubleBuffer<T,size>::getBack()
+DoubleBuffer<T, size>::getBack()
 {
 	return m_backBuffer;
 }
 
 template<class T, int size>
 T *
-DoubleBuffer<T,size>::swapBuffers()
+DoubleBuffer<T, size>::swapBuffers()
 {
 	if (m_dmaPending)
 	{

@@ -46,7 +46,7 @@ template <typename T>
 //template <class T> 
 class btAlignedObjectArray
 {
-	btAlignedAllocator<T , 16>	m_allocator;
+	btAlignedAllocator<T, 16>	m_allocator;
 
 	int					m_size;
 	int					m_capacity;
@@ -71,7 +71,7 @@ protected:
 		{
 			return (size ? size*2 : 1);
 		}
-		SIMD_FORCE_INLINE	void	copy(int start,int end, T* dest) const
+		SIMD_FORCE_INLINE	void	copy(int start, int end, T* dest) const
 		{
 			int i;
 			for (i=start;i<end;++i)
@@ -90,7 +90,7 @@ protected:
 			m_size = 0;
 			m_capacity = 0;
 		}
-		SIMD_FORCE_INLINE	void	destroy(int first,int last)
+		SIMD_FORCE_INLINE	void	destroy(int first, int last)
 		{
 			int i;
 			for (i=first; i<last;i++)
@@ -183,7 +183,7 @@ protected:
 		///clear the array, deallocated memory. Generally it is better to use array.resize(0), to reduce performance overhead of run-time memory (de)allocations.
 		SIMD_FORCE_INLINE	void	clear()
 		{
-			destroy(0,size());
+			destroy(0, size());
 			
 			deallocate();
 			
@@ -291,7 +291,7 @@ protected:
 		}
 
 	
-		/// return the pre-allocated (reserved) elements, this is at least as large as the total number of elements,see size() and reserve()
+		/// return the pre-allocated (reserved) elements, this is at least as large as the total number of elements, see size() and reserve()
 		SIMD_FORCE_INLINE	int capacity() const
 		{	
 			return m_capacity;
@@ -305,7 +305,7 @@ protected:
 
 				copy(0, size(), s);
 
-				destroy(0,size());
+				destroy(0, size());
 
 				deallocate();
 				
@@ -332,7 +332,7 @@ protected:
 	
 
 		template <typename L>
-		void quickSortInternal(const L& CompareFunc,int lo, int hi)
+		void quickSortInternal(const L& CompareFunc, int lo, int hi)
 		{
 		//  lo is the lower index, hi is the upper index
 		//  of the region of array a that is to be sorted
@@ -342,13 +342,13 @@ protected:
 			//  partition
 			do
 			{    
-				while (CompareFunc(m_data[i],x)) 
+				while (CompareFunc(m_data[i], x)) 
 					i++; 
-				while (CompareFunc(x,m_data[j])) 
+				while (CompareFunc(x, m_data[j])) 
 					j--;
 				if (i<=j)
 				{
-					swap(i,j);
+					swap(i, j);
 					i++; j--;
 				}
 			} while (i<=j);
@@ -367,7 +367,7 @@ protected:
 			//don't sort 0 or 1 elements
 			if (size()>1)
 			{
-				quickSortInternal(CompareFunc,0,size()-1);
+				quickSortInternal(CompareFunc,0, size()-1);
 			}
 		}
 
@@ -385,12 +385,12 @@ protected:
 			{
 				int child = 2*k;
 				
-				if ((child < n) && CompareFunc(pArr[child - 1] , pArr[child]))
+				if ((child < n) && CompareFunc(pArr[child - 1], pArr[child]))
 				{
 					child++;
 				}
 				/* pick larger child */
-				if (CompareFunc(temp , pArr[child - 1]))
+				if (CompareFunc(temp, pArr[child - 1]))
 				{
 					/* move child up */
 					pArr[k - 1] = pArr[child - 1];
@@ -404,13 +404,13 @@ protected:
 			pArr[k - 1] = temp;
 		} /*downHeap*/
 
-		void	swap(int index0,int index1)
+		void	swap(int index0, int index1)
 		{
 #ifdef BT_USE_MEMCPY
 			char	temp[sizeof(T)];
-			memcpy(temp,&m_data[index0],sizeof(T));
-			memcpy(&m_data[index0],&m_data[index1],sizeof(T));
-			memcpy(&m_data[index1],temp,sizeof(T));
+			memcpy(temp, &m_data[index0], sizeof(T));
+			memcpy(&m_data[index0], &m_data[index1], sizeof(T));
+			memcpy(&m_data[index1], temp, sizeof(T));
 #else
 			T temp = m_data[index0];
 			m_data[index0] = m_data[index1];
@@ -433,7 +433,7 @@ protected:
 		/* a[1..N] is now a heap */
 		while ( n>=1 ) 
 		{
-			swap(0,n-1); /* largest of a[0..n-1] */
+			swap(0, n-1); /* largest of a[0..n-1] */
 
 
 			n = n - 1;
@@ -484,7 +484,7 @@ protected:
 		int findIndex = findLinearSearch(key);
 		if (findIndex<size())
 		{
-			swap( findIndex,size()-1);
+			swap( findIndex, size()-1);
 			pop_back();
 		}
 	}

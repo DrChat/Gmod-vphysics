@@ -35,7 +35,7 @@ public:
 	btJacobianEntry(
 		const btMatrix3x3& world2A,
 		const btMatrix3x3& world2B,
-		const btVector3& rel_pos1,const btVector3& rel_pos2,
+		const btVector3& rel_pos1, const btVector3& rel_pos2,
 		const btVector3& jointAxis,
 		const btVector3& inertiaInvA, 
 		const btScalar massInvA,
@@ -58,7 +58,7 @@ public:
 		const btMatrix3x3& world2B,
 		const btVector3& inertiaInvA,
 		const btVector3& inertiaInvB)
-		:m_linearJointAxis(btVector3(btScalar(0.),btScalar(0.),btScalar(0.)))
+		:m_linearJointAxis(btVector3(btScalar(0.), btScalar(0.), btScalar(0.)))
 	{
 		m_aJ= world2A*jointAxis;
 		m_bJ = world2B*-jointAxis;
@@ -74,7 +74,7 @@ public:
 		const btVector3& axisInB,
 		const btVector3& inertiaInvA,
 		const btVector3& inertiaInvB)
-		: m_linearJointAxis(btVector3(btScalar(0.),btScalar(0.),btScalar(0.)))
+		: m_linearJointAxis(btVector3(btScalar(0.), btScalar(0.), btScalar(0.)))
 		, m_aJ(axisInA)
 		, m_bJ(-axisInB)
 	{
@@ -88,7 +88,7 @@ public:
 	//constraint on one rigidbody
 	btJacobianEntry(
 		const btMatrix3x3& world2A,
-		const btVector3& rel_pos1,const btVector3& rel_pos2,
+		const btVector3& rel_pos1, const btVector3& rel_pos2,
 		const btVector3& jointAxis,
 		const btVector3& inertiaInvA, 
 		const btScalar massInvA)
@@ -97,7 +97,7 @@ public:
 		m_aJ= world2A*(rel_pos1.cross(jointAxis));
 		m_bJ = world2A*(rel_pos2.cross(-jointAxis));
 		m_0MinvJt	= inertiaInvA * m_aJ;
-		m_1MinvJt = btVector3(btScalar(0.),btScalar(0.),btScalar(0.));
+		m_1MinvJt = btVector3(btScalar(0.), btScalar(0.), btScalar(0.));
 		m_Adiag = massInvA + m_0MinvJt.dot(m_aJ);
 
 		btAssert(m_Adiag > btScalar(0.0));
@@ -117,7 +117,7 @@ public:
 	
 
 	// for two constraints on sharing two same rigidbodies (for example two contact points between two rigidbodies)
-	btScalar	getNonDiagonal(const btJacobianEntry& jacB,const btScalar massInvA,const btScalar massInvB) const
+	btScalar	getNonDiagonal(const btJacobianEntry& jacB, const btScalar massInvA, const btScalar massInvB) const
 	{
 		const btJacobianEntry& jacA = *this;
 		btVector3 lin = jacA.m_linearJointAxis * jacB.m_linearJointAxis;
@@ -129,7 +129,7 @@ public:
 		return sum[0]+sum[1]+sum[2];
 	}
 
-	btScalar getRelativeVelocity(const btVector3& linvelA,const btVector3& angvelA,const btVector3& linvelB,const btVector3& angvelB)
+	btScalar getRelativeVelocity(const btVector3& linvelA, const btVector3& angvelA, const btVector3& linvelB, const btVector3& angvelB)
 	{
 		btVector3 linrel = linvelA - linvelB;
 		btVector3 angvela  = angvelA * m_aJ;

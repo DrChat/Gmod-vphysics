@@ -141,7 +141,7 @@ void SpuCollisionTaskProcess::issueTask2()
 
 
 
-	m_threadInterface->sendRequest(CMD_GATHER_AND_PROCESS_PAIRLIST, (ppu_address_t) &taskDesc,m_currentTask);
+	m_threadInterface->sendRequest(CMD_GATHER_AND_PROCESS_PAIRLIST, (ppu_address_t) &taskDesc, m_currentTask);
 
 	// if all tasks busy, wait for spu event to clear the task.
 	
@@ -166,7 +166,7 @@ void SpuCollisionTaskProcess::issueTask2()
 	  
 		m_threadInterface->waitForResponse(&taskId, &outputSize);
 
-//		printf("issueTask taskId %d completed, numBusy=%d\n",taskId,m_numBusyTasks);
+//		printf("issueTask taskId %d completed, numBusy=%d\n", taskId, m_numBusyTasks);
 
 		//printf("PPU: after issue, received event: %u %d\n", taskId, outputSize);
 
@@ -179,7 +179,7 @@ void SpuCollisionTaskProcess::issueTask2()
 	
 }
 
-void SpuCollisionTaskProcess::addWorkToTask(void* pairArrayPtr,int startIndex,int endIndex)
+void SpuCollisionTaskProcess::addWorkToTask(void* pairArrayPtr, int startIndex, int endIndex)
 {
 #ifdef DEBUG_SPU_TASK_SCHEDULING
 	printf("#");
@@ -303,7 +303,7 @@ SpuCollisionTaskProcess::flush2()
 		// SPURS support.
 		  m_threadInterface->waitForResponse(&taskId, &outputSize);
 	  }
-//		 printf("flush2 taskId %d completed, numBusy =%d \n",taskId,m_numBusyTasks);
+//		 printf("flush2 taskId %d completed, numBusy =%d \n", taskId, m_numBusyTasks);
 		//printf("PPU: flushing, received event: %u %d\n", taskId, outputSize);
 
 		//postProcess(taskId, outputSize);

@@ -69,14 +69,14 @@ public:
 	gim_pair_set():gim_array<GIM_PAIR>(32)
 	{
 	}
-	inline void push_pair(GUINT index1,GUINT index2)
+	inline void push_pair(GUINT index1, GUINT index2)
 	{
-		push_back(GIM_PAIR(index1,index2));
+		push_back(GIM_PAIR(index1, index2));
 	}
 
-	inline void push_pair_inv(GUINT index1,GUINT index2)
+	inline void push_pair_inv(GUINT index1, GUINT index2)
 	{
-		push_back(GIM_PAIR(index2,index1));
+		push_back(GIM_PAIR(index2, index1));
 	}
 };
 
@@ -95,8 +95,8 @@ public:
 	//! determines if this manager consist on only triangles, which special case will be optimized
 	virtual bool is_trimesh() = 0;
 	virtual GUINT get_primitive_count() = 0;
-	virtual void get_primitive_box(GUINT prim_index ,GIM_AABB & primbox) = 0;
-	virtual void get_primitive_triangle(GUINT prim_index,GIM_TRIANGLE & triangle) = 0;
+	virtual void get_primitive_box(GUINT prim_index, GIM_AABB & primbox) = 0;
+	virtual void get_primitive_triangle(GUINT prim_index, GIM_TRIANGLE & triangle) = 0;
 };
 
 
@@ -227,22 +227,22 @@ protected:
 			if(isLeafNode(nodecount))
 			{
 				GIM_AABB leafbox;
-				m_primitive_manager.get_primitive_box(getNodeData(nodecount),leafbox);
-				setNodeBound(nodecount,leafbox);
+				m_primitive_manager.get_primitive_box(getNodeData(nodecount), leafbox);
+				setNodeBound(nodecount, leafbox);
 			}
 			else
 			{
 				//get left bound
 				GUINT childindex = getLeftNodeIndex(nodecount);
 				GIM_AABB bound;
-				getNodeBound(childindex,bound);
+				getNodeBound(childindex, bound);
 				//get right bound
 				childindex = getRightNodeIndex(nodecount);
 				GIM_AABB bound2;
-				getNodeBound(childindex,bound2);
+				getNodeBound(childindex, bound2);
 				bound.merge(bound2);
 
-				setNodeBound(nodecount,bound);
+				setNodeBound(nodecount, bound);
 			}
 		}
 	}
@@ -288,11 +288,11 @@ public:
 	{
 		//obtain primitive boxes
 		gim_array<GIM_AABB_DATA> primitive_boxes;
-		primitive_boxes.resize(m_primitive_manager.get_primitive_count(),false);
+		primitive_boxes.resize(m_primitive_manager.get_primitive_count(), false);
 
 		for (GUINT i = 0;i<primitive_boxes.size() ;i++ )
 		{
-			 m_primitive_manager.get_primitive_box(i,primitive_boxes[i].m_bound);
+			 m_primitive_manager.get_primitive_box(i, primitive_boxes[i].m_bound);
 			 primitive_boxes[i].m_data = i;
 		}
 
@@ -308,7 +308,7 @@ public:
 		while (curIndex < numNodes)
 		{
 			GIM_AABB bound;
-			getNodeBound(curIndex,bound);
+			getNodeBound(curIndex, bound);
 
 			//catch bugs in tree data
 
@@ -341,12 +341,12 @@ public:
 	{
 		GIM_AABB transbox=box;
 		transbox.appy_transform(transform);
-		return boxQuery(transbox,collided_results);
+		return boxQuery(transbox, collided_results);
 	}
 
 	//! returns the indices of the primitives in the m_primitive_manager
 	SIMD_FORCE_INLINE bool rayQuery(
-		const btVector3 & ray_dir,const btVector3 & ray_origin ,
+		const btVector3 & ray_dir, const btVector3 & ray_origin ,
 		gim_array<GUINT> & collided_results) const
 	{
 		GUINT curIndex = 0;
@@ -355,11 +355,11 @@ public:
 		while (curIndex < numNodes)
 		{
 			GIM_AABB bound;
-			getNodeBound(curIndex,bound);
+			getNodeBound(curIndex, bound);
 
 			//catch bugs in tree data
 
-			bool aabbOverlap = bound.collide_ray(ray_origin,ray_dir);
+			bool aabbOverlap = bound.collide_ray(ray_origin, ray_dir);
 			bool isleafnode = isLeafNode(curIndex);
 
 			if (isleafnode && aabbOverlap)
@@ -436,9 +436,9 @@ public:
 		return m_box_tree.getScapeNodeIndex(nodeindex);
 	}
 
-	SIMD_FORCE_INLINE void getNodeTriangle(GUINT nodeindex,GIM_TRIANGLE & triangle) const
+	SIMD_FORCE_INLINE void getNodeTriangle(GUINT nodeindex, GIM_TRIANGLE & triangle) const
 	{
-		m_primitive_manager.get_primitive_triangle(getNodeData(nodeindex),triangle);
+		m_primitive_manager.get_primitive_triangle(getNodeData(nodeindex), triangle);
 	}
 
 };
@@ -459,7 +459,7 @@ public:
 
 
 /// GIM_BOX_SET collision methods
-template<typename BOX_SET_CLASS0,typename BOX_SET_CLASS1>
+template<typename BOX_SET_CLASS0, typename BOX_SET_CLASS1>
 class GIM_TREE_TREE_COLLIDER
 {
 public:
@@ -494,7 +494,7 @@ protected:
 	SIMD_FORCE_INLINE void retrieve_node0_triangle(GUINT node0)
 	{
 		if(node0_has_triangle) return;
-		m_boxset0->getNodeTriangle(node0,m_tri0);
+		m_boxset0->getNodeTriangle(node0, m_tri0);
 		//transform triangle
 		m_tri0.m_vertices[0] = trans_cache_0to1(m_tri0.m_vertices[0]);
 		m_tri0.m_vertices[1] = trans_cache_0to1(m_tri0.m_vertices[1]);
@@ -507,7 +507,7 @@ protected:
 	SIMD_FORCE_INLINE void retrieve_node1_triangle(GUINT node1)
 	{
 		if(node1_has_triangle) return;
-		m_boxset1->getNodeTriangle(node1,m_tri1);
+		m_boxset1->getNodeTriangle(node1, m_tri1);
 		//transform triangle
 		m_tri1.m_vertices[0] = trans_cache_1to0.transform(m_tri1.m_vertices[0]);
 		m_tri1.m_vertices[1] = trans_cache_1to0.transform(m_tri1.m_vertices[1]);
@@ -520,7 +520,7 @@ protected:
 	SIMD_FORCE_INLINE void retrieve_node0_info(GUINT node0)
 	{
 		if(node0 == current_node0) return;
-		m_boxset0->getNodeBound(node0,m_box0);
+		m_boxset0->getNodeBound(node0, m_box0);
 		node0_is_leaf = m_boxset0->isLeafNode(node0);
 		node0_has_triangle = false;
 		current_node0 = node0;
@@ -529,17 +529,17 @@ protected:
 	SIMD_FORCE_INLINE void retrieve_node1_info(GUINT node1)
 	{
 		if(node1 == current_node1) return;
-		m_boxset1->getNodeBound(node1,m_box1);
+		m_boxset1->getNodeBound(node1, m_box1);
 		node1_is_leaf = m_boxset1->isLeafNode(node1);
 		node1_has_triangle = false;
 		current_node1 = node1;
 	}
 
-	SIMD_FORCE_INLINE bool node_collision(GUINT node0 ,GUINT node1)
+	SIMD_FORCE_INLINE bool node_collision(GUINT node0, GUINT node1)
 	{
 		retrieve_node0_info(node0);
 		retrieve_node1_info(node1);
-		bool result = m_box0.overlapping_trans_cache(m_box1,trans_cache_1to0,true);
+		bool result = m_box0.overlapping_trans_cache(m_box1, trans_cache_1to0, true);
 		if(!result) return false;
 
 		if(t0_is_trimesh && node0_is_leaf)
@@ -550,7 +550,7 @@ protected:
 			m_box1.increment_margin(m_tri0.m_margin);
 
 			result = m_box1.collide_triangle_exact(
-				m_tri0.m_vertices[0],m_tri0.m_vertices[1],m_tri0.m_vertices[2],m_tri0_plane);
+				m_tri0.m_vertices[0], m_tri0.m_vertices[1], m_tri0.m_vertices[2], m_tri0_plane);
 
 			m_box1.increment_margin(-m_tri0.m_margin);
 
@@ -565,7 +565,7 @@ protected:
 			m_box0.increment_margin(m_tri1.m_margin);
 
 			result = m_box0.collide_triangle_exact(
-				m_tri1.m_vertices[0],m_tri1.m_vertices[1],m_tri1.m_vertices[2],m_tri1_plane);
+				m_tri1.m_vertices[0], m_tri1.m_vertices[1], m_tri1.m_vertices[2], m_tri1_plane);
 
 			m_box0.increment_margin(-m_tri1.m_margin);
 
@@ -591,21 +591,21 @@ protected:
 			GUINT node0 = stack_collisions.back().m_index1;
 			GUINT node1 = stack_collisions.back().m_index2;
 			stack_collisions.pop_back();
-			if(node_collision(node0,node1)) // a collision is found
+			if(node_collision(node0, node1)) // a collision is found
 			{
 				if(node0_is_leaf)
 				{
 					if(node1_is_leaf)
 					{
-						m_collision_pairs->push_pair(m_boxset0->getNodeData(node0),m_boxset1->getNodeData(node1));
+						m_collision_pairs->push_pair(m_boxset0->getNodeData(node0), m_boxset1->getNodeData(node1));
 					}
 					else
 					{
 						//collide left
-						stack_collisions.push_pair(node0,m_boxset1->getLeftNodeIndex(node1));
+						stack_collisions.push_pair(node0, m_boxset1->getLeftNodeIndex(node1));
 
 						//collide right
-						stack_collisions.push_pair(node0,m_boxset1->getRightNodeIndex(node1));
+						stack_collisions.push_pair(node0, m_boxset1->getRightNodeIndex(node1));
 					}
 				}
 				else
@@ -613,9 +613,9 @@ protected:
 					if(node1_is_leaf)
 					{
 						//collide left
-						stack_collisions.push_pair(m_boxset0->getLeftNodeIndex(node0),node1);
+						stack_collisions.push_pair(m_boxset0->getLeftNodeIndex(node0), node1);
 						//collide right
-						stack_collisions.push_pair(m_boxset0->getRightNodeIndex(node0),node1);
+						stack_collisions.push_pair(m_boxset0->getRightNodeIndex(node0), node1);
 					}
 					else
 					{
@@ -624,18 +624,18 @@ protected:
 						GUINT left1 = m_boxset1->getLeftNodeIndex(node1);
 						GUINT right1 = m_boxset1->getRightNodeIndex(node1);
 						//collide left
-						stack_collisions.push_pair(left0,left1);
+						stack_collisions.push_pair(left0, left1);
 						//collide right
-						stack_collisions.push_pair(left0,right1);
+						stack_collisions.push_pair(left0, right1);
 						//collide left
-						stack_collisions.push_pair(right0,left1);
+						stack_collisions.push_pair(right0, left1);
 						//collide right
-						stack_collisions.push_pair(right0,right1);
+						stack_collisions.push_pair(right0, right1);
 
 					}// else if node1 is not a leaf
 				}// else if node0 is not a leaf
 
-			}// if(node_collision(node0,node1))
+			}// if(node_collision(node0, node1))
 		}//while(stack_collisions.size())
 	}
 public:
@@ -647,7 +647,7 @@ public:
 		m_boxset0 = boxset1;
 		m_boxset1 = boxset2;
 
-		trans_cache_1to0.calc_from_homogenic(trans1,trans2);
+		trans_cache_1to0.calc_from_homogenic(trans1, trans2);
 
 		trans_cache_0to1 =  trans2.inverse();
 		trans_cache_0to1 *= trans1;

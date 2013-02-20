@@ -43,13 +43,13 @@ public:
 	btVector3 m_supportVecLocal;
 
 	LocalSupportVertexCallback(const btVector3& supportVecLocal)
-		: m_supportVertexLocal(btScalar(0.),btScalar(0.),btScalar(0.)),
+		: m_supportVertexLocal(btScalar(0.), btScalar(0.), btScalar(0.)),
 		m_maxDot(btScalar(-BT_LARGE_FLOAT)),
                 m_supportVecLocal(supportVecLocal)
 	{
 	}
 
-	virtual void internalProcessTriangleIndex(btVector3* triangle,int partId,int  triangleIndex)
+	virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int  triangleIndex)
 	{
 		(void)triangleIndex;
 		(void)partId;
@@ -78,7 +78,7 @@ public:
 
 btVector3	btConvexTriangleMeshShape::localGetSupportingVertexWithoutMargin(const btVector3& vec0)const
 {
-	btVector3 supVec(btScalar(0.),btScalar(0.),btScalar(0.));
+	btVector3 supVec(btScalar(0.), btScalar(0.), btScalar(0.));
 
 	btVector3 vec = vec0;
 	btScalar lenSqr = vec.length2();
@@ -92,14 +92,14 @@ btVector3	btConvexTriangleMeshShape::localGetSupportingVertexWithoutMargin(const
 	}
 
 	LocalSupportVertexCallback	supportCallback(vec);
-	btVector3 aabbMax(btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT));
-	m_stridingMesh->InternalProcessAllTriangles(&supportCallback,-aabbMax,aabbMax);
+	btVector3 aabbMax(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
+	m_stridingMesh->InternalProcessAllTriangles(&supportCallback,-aabbMax, aabbMax);
 	supVec = supportCallback.GetSupportVertexLocal();
 
 	return supVec;
 }
 
-void	btConvexTriangleMeshShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btConvexTriangleMeshShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 	//use 'w' component of supportVerticesOut?
 	{
@@ -116,8 +116,8 @@ void	btConvexTriangleMeshShape::batchedUnitVectorGetSupportingVertexWithoutMargi
 	{
 		const btVector3& vec = vectors[j];
 		LocalSupportVertexCallback	supportCallback(vec);
-		btVector3 aabbMax(btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT));
-		m_stridingMesh->InternalProcessAllTriangles(&supportCallback,-aabbMax,aabbMax);
+		btVector3 aabbMax(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
+		m_stridingMesh->InternalProcessAllTriangles(&supportCallback,-aabbMax, aabbMax);
 		supportVerticesOut[j] = supportCallback.GetSupportVertexLocal();
 	}
 	
@@ -134,7 +134,7 @@ btVector3	btConvexTriangleMeshShape::localGetSupportingVertex(const btVector3& v
 		btVector3 vecnorm = vec;
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
-			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
+			vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
 		} 
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;
@@ -164,12 +164,12 @@ int btConvexTriangleMeshShape::getNumEdges() const
 	return 0;
 }
 
-void btConvexTriangleMeshShape::getEdge(int ,btVector3& ,btVector3& ) const
+void btConvexTriangleMeshShape::getEdge(int, btVector3&, btVector3& ) const
 {
 	btAssert(0);	
 }
 
-void btConvexTriangleMeshShape::getVertex(int ,btVector3& ) const
+void btConvexTriangleMeshShape::getVertex(int, btVector3& ) const
 {
 	btAssert(0);
 }
@@ -179,13 +179,13 @@ int	btConvexTriangleMeshShape::getNumPlanes() const
 	return 0;
 }
 
-void btConvexTriangleMeshShape::getPlane(btVector3& ,btVector3& ,int  ) const
+void btConvexTriangleMeshShape::getPlane(btVector3&, btVector3&, int  ) const
 {
 	btAssert(0);
 }
 
 //not yet
-bool btConvexTriangleMeshShape::isInside(const btVector3& ,btScalar ) const
+bool btConvexTriangleMeshShape::isInside(const btVector3&, btScalar ) const
 {
 	btAssert(0);
 	return false;
@@ -298,7 +298,7 @@ void btConvexTriangleMeshShape::calculatePrincipalAxisTransform(btTransform& pri
    };
 
    CenterCallback centerCallback;
-   btVector3 aabbMax(btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT));
+   btVector3 aabbMax(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
    m_stridingMesh->InternalProcessAllTriangles(&centerCallback, -aabbMax, aabbMax);
    btVector3 center = centerCallback.getCenter();
    principal.setOrigin(center);

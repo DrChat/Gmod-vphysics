@@ -88,7 +88,7 @@ public:
 	{
 		btVector3 normal = (m_vertices[1]-m_vertices[0]).cross(m_vertices[2]-m_vertices[0]);
 		normal.normalize();
-		m_plane.setValue(normal[0],normal[1],normal[2],m_vertices[0].dot(normal));
+		m_plane.setValue(normal[0], normal[1], normal[2], m_vertices[0].dot(normal));
 	}
 
 	//! Test if triangles could collide
@@ -102,7 +102,7 @@ public:
     {
 		const btVector3 & e0 = m_vertices[edge_index];
 		const btVector3 & e1 = m_vertices[(edge_index+1)%3];
-		bt_edge_plane(e0,e1,m_plane,plane);
+		bt_edge_plane(e0, e1, m_plane, plane);
     }
 
     void applyTransform(const btTransform& t)
@@ -136,25 +136,25 @@ class btTriangleShapeEx: public btTriangleShape
 {
 public:
 
-	btTriangleShapeEx():btTriangleShape(btVector3(0,0,0),btVector3(0,0,0),btVector3(0,0,0))
+	btTriangleShapeEx():btTriangleShape(btVector3(0,0,0), btVector3(0,0,0), btVector3(0,0,0))
 	{
 	}
 
-	btTriangleShapeEx(const btVector3& p0,const btVector3& p1,const btVector3& p2):	btTriangleShape(p0,p1,p2)
+	btTriangleShapeEx(const btVector3& p0, const btVector3& p1, const btVector3& p2):	btTriangleShape(p0, p1, p2)
 	{
 	}
 
-	btTriangleShapeEx(const btTriangleShapeEx & other):	btTriangleShape(other.m_vertices1[0],other.m_vertices1[1],other.m_vertices1[2])
+	btTriangleShapeEx(const btTriangleShapeEx & other):	btTriangleShape(other.m_vertices1[0], other.m_vertices1[1], other.m_vertices1[2])
 	{
 	}
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax)const
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax)const
 	{
 		btVector3 tv0 = t(m_vertices1[0]);
 		btVector3 tv1 = t(m_vertices1[1]);
 		btVector3 tv2 = t(m_vertices1[2]);
 
-		btAABB trianglebox(tv0,tv1,tv2,m_collisionMargin);
+		btAABB trianglebox(tv0, tv1, tv2, m_collisionMargin);
 		aabbMin = trianglebox.m_min;
 		aabbMax = trianglebox.m_max;
 	}
@@ -170,7 +170,7 @@ public:
 	{
 		btVector3 normal = (m_vertices1[1]-m_vertices1[0]).cross(m_vertices1[2]-m_vertices1[0]);
 		normal.normalize();
-		plane.setValue(normal[0],normal[1],normal[2],m_vertices1[0].dot(normal));
+		plane.setValue(normal[0], normal[1], normal[2], m_vertices1[0].dot(normal));
 	}
 
 	bool overlap_test_conservative(const btTriangleShapeEx& other);

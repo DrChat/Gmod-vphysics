@@ -340,8 +340,8 @@ public:
 		bool						m_containsAnchor;
 		bool						m_collide;
 		int							m_clusterIndex;
-		Cluster() : m_leaf(0),m_ndamping(0),m_ldamping(0),m_adamping(0),m_matching(0) 
-		,m_maxSelfCollisionImpulse(100.f),
+		Cluster() : m_leaf(0), m_ndamping(0), m_ldamping(0), m_adamping(0), m_matching(0) 
+		, m_maxSelfCollisionImpulse(100.f),
 		m_selfCollisionImpulseFactor(0.01f),
 		m_containsAnchor(false)
 		{}
@@ -353,7 +353,7 @@ public:
 		btVector3					m_drift;
 		int							m_asVelocity:1;
 		int							m_asDrift:1;
-		Impulse() : m_velocity(0,0,0),m_drift(0,0,0),m_asVelocity(0),m_asDrift(0)	{}
+		Impulse() : m_velocity(0,0,0), m_drift(0,0,0), m_asVelocity(0), m_asDrift(0)	{}
 		Impulse						operator -() const
 		{
 			Impulse i=*this;
@@ -376,9 +376,9 @@ public:
 		btRigidBody*		m_rigid;
 		const btCollisionObject*	m_collisionObject;
 
-		Body() : m_soft(0),m_rigid(0),m_collisionObject(0)				{}
-		Body(Cluster* p) : m_soft(p),m_rigid(0),m_collisionObject(0)	{}
-		Body(const btCollisionObject* colObj) : m_soft(0),m_collisionObject(colObj)
+		Body() : m_soft(0), m_rigid(0), m_collisionObject(0)				{}
+		Body(Cluster* p) : m_soft(p), m_rigid(0), m_collisionObject(0)	{}
+		Body(const btCollisionObject* colObj) : m_soft(0), m_collisionObject(colObj)
 		{
 			m_rigid = (btRigidBody*)btRigidBody::upcast(m_collisionObject);
 		}
@@ -419,8 +419,8 @@ public:
 		}
 		btVector3					angularVelocity(const btVector3& rpos) const
 		{			
-			if(m_rigid) return(btCross(m_rigid->getAngularVelocity(),rpos));
-			if(m_soft)	return(btCross(m_soft->m_av,rpos));
+			if(m_rigid) return(btCross(m_rigid->getAngularVelocity(), rpos));
+			if(m_soft)	return(btCross(m_soft->m_av, rpos));
 			return(btVector3(0,0,0));
 		}
 		btVector3					angularVelocity() const
@@ -433,38 +433,38 @@ public:
 		{
 			return(linearVelocity()+angularVelocity(rpos));
 		}
-		void						applyVImpulse(const btVector3& impulse,const btVector3& rpos) const
+		void						applyVImpulse(const btVector3& impulse, const btVector3& rpos) const
 		{
-			if(m_rigid)	m_rigid->applyImpulse(impulse,rpos);
-			if(m_soft)	btSoftBody::clusterVImpulse(m_soft,rpos,impulse);
+			if(m_rigid)	m_rigid->applyImpulse(impulse, rpos);
+			if(m_soft)	btSoftBody::clusterVImpulse(m_soft, rpos, impulse);
 		}
-		void						applyDImpulse(const btVector3& impulse,const btVector3& rpos) const
+		void						applyDImpulse(const btVector3& impulse, const btVector3& rpos) const
 		{
-			if(m_rigid)	m_rigid->applyImpulse(impulse,rpos);
-			if(m_soft)	btSoftBody::clusterDImpulse(m_soft,rpos,impulse);
+			if(m_rigid)	m_rigid->applyImpulse(impulse, rpos);
+			if(m_soft)	btSoftBody::clusterDImpulse(m_soft, rpos, impulse);
 		}		
-		void						applyImpulse(const Impulse& impulse,const btVector3& rpos) const
+		void						applyImpulse(const Impulse& impulse, const btVector3& rpos) const
 		{
 			if(impulse.m_asVelocity)	
 			{
-//				printf("impulse.m_velocity = %f,%f,%f\n",impulse.m_velocity.getX(),impulse.m_velocity.getY(),impulse.m_velocity.getZ());
-				applyVImpulse(impulse.m_velocity,rpos);
+//				printf("impulse.m_velocity = %f, %f, %f\n", impulse.m_velocity.getX(), impulse.m_velocity.getY(), impulse.m_velocity.getZ());
+				applyVImpulse(impulse.m_velocity, rpos);
 			}
 			if(impulse.m_asDrift)		
 			{
-//				printf("impulse.m_drift = %f,%f,%f\n",impulse.m_drift.getX(),impulse.m_drift.getY(),impulse.m_drift.getZ());
-				applyDImpulse(impulse.m_drift,rpos);
+//				printf("impulse.m_drift = %f, %f, %f\n", impulse.m_drift.getX(), impulse.m_drift.getY(), impulse.m_drift.getZ());
+				applyDImpulse(impulse.m_drift, rpos);
 			}
 		}
 		void						applyVAImpulse(const btVector3& impulse) const
 		{
 			if(m_rigid)	m_rigid->applyTorqueImpulse(impulse);
-			if(m_soft)	btSoftBody::clusterVAImpulse(m_soft,impulse);
+			if(m_soft)	btSoftBody::clusterVAImpulse(m_soft, impulse);
 		}
 		void						applyDAImpulse(const btVector3& impulse) const
 		{
 			if(m_rigid)	m_rigid->applyTorqueImpulse(impulse);
-			if(m_soft)	btSoftBody::clusterDAImpulse(m_soft,impulse);
+			if(m_soft)	btSoftBody::clusterDAImpulse(m_soft, impulse);
 		}
 		void						applyAImpulse(const Impulse& impulse) const
 		{
@@ -474,7 +474,7 @@ public:
 		void						applyDCImpulse(const btVector3& impulse) const
 		{
 			if(m_rigid)	m_rigid->applyCentralImpulse(impulse);
-			if(m_soft)	btSoftBody::clusterDCImpulse(m_soft,impulse);
+			if(m_soft)	btSoftBody::clusterDCImpulse(m_soft, impulse);
 		}
 	};
 	/* Joint		*/ 
@@ -487,7 +487,7 @@ public:
 		};};
 		struct Specs
 		{
-			Specs() : erp(1),cfm(1),split(1) {}
+			Specs() : erp(1), cfm(1), split(1) {}
 			btScalar	erp;
 			btScalar	cfm;
 			btScalar	split;
@@ -503,8 +503,8 @@ public:
 		bool						m_delete;
 		virtual						~Joint() {}
 		Joint() : m_delete(false) {}
-		virtual void				Prepare(btScalar dt,int iterations);
-		virtual void				Solve(btScalar dt,btScalar sor)=0;
+		virtual void				Prepare(btScalar dt, int iterations);
+		virtual void				Solve(btScalar dt, btScalar sor)=0;
 		virtual void				Terminate(btScalar dt)=0;
 		virtual eType::_			Type() const=0;
 	};
@@ -516,8 +516,8 @@ public:
 			btVector3	position;
 		};		
 		btVector3					m_rpos[2];
-		void						Prepare(btScalar dt,int iterations);
-		void						Solve(btScalar dt,btScalar sor);
+		void						Prepare(btScalar dt, int iterations);
+		void						Solve(btScalar dt, btScalar sor);
 		void						Terminate(btScalar dt);
 		eType::_					Type() const { return(eType::Linear); }
 	};
@@ -527,7 +527,7 @@ public:
 		struct IControl
 		{
 			virtual void			Prepare(AJoint*)				{}
-			virtual btScalar		Speed(AJoint*,btScalar current) { return(current); }
+			virtual btScalar		Speed(AJoint*, btScalar current) { return(current); }
 			static IControl*		Default()						{ static IControl def;return(&def); }
 		};
 		struct Specs : Joint::Specs
@@ -538,8 +538,8 @@ public:
 		};		
 		btVector3					m_axis[2];
 		IControl*					m_icontrol;
-		void						Prepare(btScalar dt,int iterations);
-		void						Solve(btScalar dt,btScalar sor);
+		void						Prepare(btScalar dt, int iterations);
+		void						Solve(btScalar dt, btScalar sor);
 		void						Terminate(btScalar dt);
 		eType::_					Type() const { return(eType::Angular); }
 	};
@@ -551,8 +551,8 @@ public:
 		btVector3					m_rpos[2];
 		btVector3					m_normal;
 		btScalar					m_friction;
-		void						Prepare(btScalar dt,int iterations);
-		void						Solve(btScalar dt,btScalar sor);
+		void						Prepare(btScalar dt, int iterations);
+		void						Solve(btScalar dt, btScalar sor);
 		void						Terminate(btScalar dt);
 		eType::_					Type() const { return(eType::Contact); }
 	};
@@ -607,7 +607,7 @@ public:
 		btScalar			m_mint;
 		Face*				m_face;
 		int					m_tests;
-		RayFromToCaster(const btVector3& rayFrom,const btVector3& rayTo,btScalar mxt);
+		RayFromToCaster(const btVector3& rayFrom, const btVector3& rayTo, btScalar mxt);
 		void					Process(const btDbvtNode* leaf);
 
 		static inline btScalar	rayFromToTriangle(const btVector3& rayFrom,
@@ -623,8 +623,8 @@ public:
 	// Typedefs
 	//
 
-	typedef void								(*psolver_t)(btSoftBody*,btScalar,btScalar);
-	typedef void								(*vsolver_t)(btSoftBody*,btScalar);
+	typedef void								(*psolver_t)(btSoftBody*, btScalar, btScalar);
+	typedef void								(*vsolver_t)(btSoftBody*, btScalar);
 	typedef btAlignedObjectArray<Cluster*>		tClusterArray;
 	typedef btAlignedObjectArray<Note>			tNoteArray;
 	typedef btAlignedObjectArray<Node>			tNodeArray;
@@ -679,7 +679,7 @@ public:
 	//
 
 	/* ctor																	*/ 
-	btSoftBody(	btSoftBodyWorldInfo* worldInfo,int node_count,		const btVector3* x,		const btScalar* m);
+	btSoftBody(	btSoftBodyWorldInfo* worldInfo, int node_count,		const btVector3* x,		const btScalar* m);
 
 	/* ctor																	*/ 
 	btSoftBody(	btSoftBodyWorldInfo* worldInfo);
@@ -731,9 +731,9 @@ public:
 		const btVector3& o,
 		Face* feature);
 	/* Append node															*/ 
-	void				appendNode(	const btVector3& x,btScalar m);
+	void				appendNode(	const btVector3& x, btScalar m);
 	/* Append link															*/ 
-	void				appendLink(int model=-1,Material* mat=0);
+	void				appendLink(int model=-1, Material* mat=0);
 	void				appendLink(	int node0,
 		int node1,
 		Material* mat=0,
@@ -743,12 +743,12 @@ public:
 		Material* mat=0,
 		bool bcheckexist=false);
 	/* Append face															*/ 
-	void				appendFace(int model=-1,Material* mat=0);
+	void				appendFace(int model=-1, Material* mat=0);
 	void				appendFace(	int node0,
 		int node1,
 		int node2,
 		Material* mat=0);
-	void			appendTetra(int model,Material* mat);
+	void			appendTetra(int model, Material* mat);
 	//
 	void			appendTetra(int node0,
 										int node1,
@@ -759,26 +759,26 @@ public:
 
 	/* Append anchor														*/ 
 	void				appendAnchor(	int node,
-		btRigidBody* body, bool disableCollisionBetweenLinkedBodies=false,btScalar influence = 1);
-	void			appendAnchor(int node,btRigidBody* body, const btVector3& localPivot,bool disableCollisionBetweenLinkedBodies=false,btScalar influence = 1);
+		btRigidBody* body, bool disableCollisionBetweenLinkedBodies=false, btScalar influence = 1);
+	void			appendAnchor(int node, btRigidBody* body, const btVector3& localPivot, bool disableCollisionBetweenLinkedBodies=false, btScalar influence = 1);
 	/* Append linear joint													*/ 
-	void				appendLinearJoint(const LJoint::Specs& specs,Cluster* body0,Body body1);
-	void				appendLinearJoint(const LJoint::Specs& specs,Body body=Body());
-	void				appendLinearJoint(const LJoint::Specs& specs,btSoftBody* body);
+	void				appendLinearJoint(const LJoint::Specs& specs, Cluster* body0, Body body1);
+	void				appendLinearJoint(const LJoint::Specs& specs, Body body=Body());
+	void				appendLinearJoint(const LJoint::Specs& specs, btSoftBody* body);
 	/* Append linear joint													*/ 
-	void				appendAngularJoint(const AJoint::Specs& specs,Cluster* body0,Body body1);
-	void				appendAngularJoint(const AJoint::Specs& specs,Body body=Body());
-	void				appendAngularJoint(const AJoint::Specs& specs,btSoftBody* body);
+	void				appendAngularJoint(const AJoint::Specs& specs, Cluster* body0, Body body1);
+	void				appendAngularJoint(const AJoint::Specs& specs, Body body=Body());
+	void				appendAngularJoint(const AJoint::Specs& specs, btSoftBody* body);
 	/* Add force (or gravity) to the entire body							*/ 
 	void				addForce(		const btVector3& force);
 	/* Add force (or gravity) to a node of the body							*/ 
 	void				addForce(		const btVector3& force,
 		int node);
 	/* Add aero force to a node of the body */
-	void			    addAeroForceToNode(const btVector3& windVelocity,int nodeIndex);
+	void			    addAeroForceToNode(const btVector3& windVelocity, int nodeIndex);
 
 	/* Add aero force to a face of the body */
-	void			    addAeroForceToFace(const btVector3& windVelocity,int faceIndex);
+	void			    addAeroForceToFace(const btVector3& windVelocity, int faceIndex);
 
 	/* Add velocity to the entire body										*/ 
 	void				addVelocity(	const btVector3& velocity);
@@ -830,15 +830,15 @@ public:
 	static btVector3	clusterCom(const Cluster* cluster);
 	btVector3			clusterCom(int cluster) const;
 	/* Cluster velocity at rpos												*/ 
-	static btVector3	clusterVelocity(const Cluster* cluster,const btVector3& rpos);
+	static btVector3	clusterVelocity(const Cluster* cluster, const btVector3& rpos);
 	/* Cluster impulse														*/ 
-	static void			clusterVImpulse(Cluster* cluster,const btVector3& rpos,const btVector3& impulse);
-	static void			clusterDImpulse(Cluster* cluster,const btVector3& rpos,const btVector3& impulse);
-	static void			clusterImpulse(Cluster* cluster,const btVector3& rpos,const Impulse& impulse);
-	static void			clusterVAImpulse(Cluster* cluster,const btVector3& impulse);
-	static void			clusterDAImpulse(Cluster* cluster,const btVector3& impulse);
-	static void			clusterAImpulse(Cluster* cluster,const Impulse& impulse);
-	static void			clusterDCImpulse(Cluster* cluster,const btVector3& impulse);
+	static void			clusterVImpulse(Cluster* cluster, const btVector3& rpos, const btVector3& impulse);
+	static void			clusterDImpulse(Cluster* cluster, const btVector3& rpos, const btVector3& impulse);
+	static void			clusterImpulse(Cluster* cluster, const btVector3& rpos, const Impulse& impulse);
+	static void			clusterVAImpulse(Cluster* cluster, const btVector3& impulse);
+	static void			clusterDAImpulse(Cluster* cluster, const btVector3& impulse);
+	static void			clusterAImpulse(Cluster* cluster, const Impulse& impulse);
+	static void			clusterDCImpulse(Cluster* cluster, const btVector3& impulse);
 	/* Generate bending constraints based on distance in the adjency graph	*/ 
 	int					generateBendingConstraints(	int distance,
 		Material* mat=0);
@@ -850,12 +850,12 @@ public:
 	/* Generate clusters (K-mean)											*/ 
 	///generateClusters with k=0 will create a convex cluster for each tetrahedron or triangle
 	///otherwise an approximation will be used (better performance)
-	int					generateClusters(int k,int maxiterations=8192);
+	int					generateClusters(int k, int maxiterations=8192);
 	/* Refine																*/ 
-	void				refine(ImplicitFn* ifn,btScalar accurary,bool cut);
+	void				refine(ImplicitFn* ifn, btScalar accurary, bool cut);
 	/* CutLink																*/ 
-	bool				cutLink(int node0,int node1,btScalar position);
-	bool				cutLink(const Node* node0,const Node* node1,btScalar position);
+	bool				cutLink(int node0, int node1, btScalar position);
+	bool				cutLink(const Node* node0, const Node* node1, btScalar position);
 
 	///Ray casting using rayFrom and rayTo in worldspace, (not direction!)
 	bool				rayTest(const btVector3& rayFrom,
@@ -870,7 +870,7 @@ public:
 	/* staticSolve															*/ 
 	void				staticSolve(int iterations);
 	/* solveCommonConstraints												*/ 
-	static void			solveCommonConstraints(btSoftBody** bodies,int count,int iterations);
+	static void			solveCommonConstraints(btSoftBody** bodies, int count, int iterations);
 	/* solveClusters														*/ 
 	static void			solveClusters(const btAlignedObjectArray<btSoftBody*>& bodies);
 	/* integrateMotion														*/ 
@@ -943,7 +943,7 @@ public:
 	// ::btCollisionObject
 	//
 
-	virtual void getAabb(btVector3& aabbMin,btVector3& aabbMax) const
+	virtual void getAabb(btVector3& aabbMin, btVector3& aabbMax) const
 	{
 		aabbMin = m_bounds[0];
 		aabbMax = m_bounds[1];
@@ -954,11 +954,11 @@ public:
 	void				pointersToIndices();
 	void				indicesToPointers(const int* map=0);
 
-	int					rayTest(const btVector3& rayFrom,const btVector3& rayTo,
-		btScalar& mint,eFeature::_& feature,int& index,bool bcountonly) const;
+	int					rayTest(const btVector3& rayFrom, const btVector3& rayTo,
+		btScalar& mint, eFeature::_& feature, int& index, bool bcountonly) const;
 	void				initializeFaceTree();
 	btVector3			evaluateCom() const;
-	bool				checkContact(const btCollisionObjectWrapper* colObjWrap,const btVector3& x,btScalar margin,btSoftBody::sCti& cti) const;
+	bool				checkContact(const btCollisionObjectWrapper* colObjWrap, const btVector3& x, btScalar margin, btSoftBody::sCti& cti) const;
 	void				updateNormals();
 	void				updateBounds();
 	void				updatePose();
@@ -973,11 +973,11 @@ public:
 	void				applyClusters(bool drift);
 	void				dampClusters();
 	void				applyForces();	
-	static void			PSolve_Anchors(btSoftBody* psb,btScalar kst,btScalar ti);
-	static void			PSolve_RContacts(btSoftBody* psb,btScalar kst,btScalar ti);
-	static void			PSolve_SContacts(btSoftBody* psb,btScalar,btScalar ti);
-	static void			PSolve_Links(btSoftBody* psb,btScalar kst,btScalar ti);
-	static void			VSolve_Links(btSoftBody* psb,btScalar kst);
+	static void			PSolve_Anchors(btSoftBody* psb, btScalar kst, btScalar ti);
+	static void			PSolve_RContacts(btSoftBody* psb, btScalar kst, btScalar ti);
+	static void			PSolve_SContacts(btSoftBody* psb, btScalar, btScalar ti);
+	static void			PSolve_Links(btSoftBody* psb, btScalar kst, btScalar ti);
+	static void			VSolve_Links(btSoftBody* psb, btScalar kst);
 	static psolver_t	getSolver(ePSolver::_ solver);
 	static vsolver_t	getSolver(eVSolver::_ solver);
 

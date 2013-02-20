@@ -30,7 +30,7 @@ protected:
 	btScalar	m_ratio;
 
 public:
-	btGearConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& axisInA,const btVector3& axisInB, btScalar ratio=1.f);
+	btGearConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& axisInA, const btVector3& axisInB, btScalar ratio=1.f);
 	virtual ~btGearConstraint ();
 
 	///internal method used by the constraint solver, don't use them directly

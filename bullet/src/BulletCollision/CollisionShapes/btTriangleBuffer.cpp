@@ -21,7 +21,7 @@ subject to the following restrictions:
 
 
 
-void btTriangleBuffer::processTriangle(btVector3* triangle,int partId,int  triangleIndex)
+void btTriangleBuffer::processTriangle(btVector3* triangle, int partId, int  triangleIndex)
 {
 		btTriangle	tri;
 		tri.m_vertex0 = triangle[0];

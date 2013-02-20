@@ -34,15 +34,15 @@ ATTRIBUTE_ALIGNED16(class) btMultiSphereShape : public btConvexInternalAabbCachi
 public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 	
-	btMultiSphereShape (const btVector3* positions,const btScalar* radi,int numSpheres);
+	btMultiSphereShape (const btVector3* positions, const btScalar* radi, int numSpheres);
 
 	///CollisionShape Interface
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	/// btConvexShape Interface
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
 
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 	
 	int	getSphereCount() const
 	{

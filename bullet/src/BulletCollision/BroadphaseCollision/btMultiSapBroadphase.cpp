@@ -29,15 +29,15 @@ class btMultiSapSortedOverlappingPairCache : public btSortedOverlappingPairCache
 {
 public:
 
-	virtual btBroadphasePair*	addOverlappingPair(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1)
+	virtual btBroadphasePair*	addOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
 	{
-		return btSortedOverlappingPairCache::addOverlappingPair((btBroadphaseProxy*)proxy0->m_multiSapParentProxy,(btBroadphaseProxy*)proxy1->m_multiSapParentProxy);
+		return btSortedOverlappingPairCache::addOverlappingPair((btBroadphaseProxy*)proxy0->m_multiSapParentProxy, (btBroadphaseProxy*)proxy1->m_multiSapParentProxy);
 	}
 };
 
 */
 
-btMultiSapBroadphase::btMultiSapBroadphase(int /*maxProxies*/,btOverlappingPairCache* pairCache)
+btMultiSapBroadphase::btMultiSapBroadphase(int /*maxProxies*/, btOverlappingPairCache* pairCache)
 :m_overlappingPairs(pairCache),
 m_optimizedAabbTree(0),
 m_ownsPairCache(false),
@@ -55,7 +55,7 @@ m_invalidPair(0)
 		virtual ~btMultiSapOverlapFilterCallback()
 		{}
 		// return true when pairs need collision
-		virtual bool	needBroadphaseCollision(btBroadphaseProxy* childProxy0,btBroadphaseProxy* childProxy1) const
+		virtual bool	needBroadphaseCollision(btBroadphaseProxy* childProxy0, btBroadphaseProxy* childProxy1) const
 		{
 			btBroadphaseProxy* multiProxy0 = (btBroadphaseProxy*)childProxy0->m_multiSapParentProxy;
 			btBroadphaseProxy* multiProxy1 = (btBroadphaseProxy*)childProxy1->m_multiSapParentProxy;
@@ -72,7 +72,7 @@ m_invalidPair(0)
 
 	m_overlappingPairs->setOverlapFilterCallback(m_filterCallback);
 //	mem = btAlignedAlloc(sizeof(btSimpleBroadphase),16);
-//	m_simpleBroadphase = new (mem) btSimpleBroadphase(maxProxies,m_overlappingPairs);
+//	m_simpleBroadphase = new (mem) btSimpleBroadphase(maxProxies, m_overlappingPairs);
 }
 
 btMultiSapBroadphase::~btMultiSapBroadphase()
@@ -85,18 +85,18 @@ btMultiSapBroadphase::~btMultiSapBroadphase()
 }
 
 
-void	btMultiSapBroadphase::buildTree(const btVector3& bvhAabbMin,const btVector3& bvhAabbMax)
+void	btMultiSapBroadphase::buildTree(const btVector3& bvhAabbMin, const btVector3& bvhAabbMax)
 {
 	m_optimizedAabbTree = new btQuantizedBvh();
-	m_optimizedAabbTree->setQuantizationValues(bvhAabbMin,bvhAabbMax);
+	m_optimizedAabbTree->setQuantizationValues(bvhAabbMin, bvhAabbMax);
 	QuantizedNodeArray&	nodes = m_optimizedAabbTree->getLeafNodeArray();
 	for (int i=0;i<m_sapBroadphases.size();i++)
 	{
 		btQuantizedBvhNode node;
-		btVector3 aabbMin,aabbMax;
-		m_sapBroadphases[i]->getBroadphaseAabb(aabbMin,aabbMax);
-		m_optimizedAabbTree->quantize(&node.m_quantizedAabbMin[0],aabbMin,0);
-		m_optimizedAabbTree->quantize(&node.m_quantizedAabbMax[0],aabbMax,1);
+		btVector3 aabbMin, aabbMax;
+		m_sapBroadphases[i]->getBroadphaseAabb(aabbMin, aabbMax);
+		m_optimizedAabbTree->quantize(&node.m_quantizedAabbMin[0], aabbMin,0);
+		m_optimizedAabbTree->quantize(&node.m_quantizedAabbMax[0], aabbMax,1);
 		int partId = 0;
 		node.m_escapeIndexOrTriangleIndex = (partId<<(31-MAX_NUM_PARTS_IN_BITS)) | i;
 		nodes.push_back(node);
@@ -104,20 +104,20 @@ void	btMultiSapBroadphase::buildTree(const btVector3& bvhAabbMin,const btVector3
 	m_optimizedAabbTree->buildInternal();
 }
 
-btBroadphaseProxy*	btMultiSapBroadphase::createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax,int shapeType,void* userPtr, short int collisionFilterGroup,short int collisionFilterMask, btDispatcher* dispatcher,void* /*ignoreMe*/)
+btBroadphaseProxy*	btMultiSapBroadphase::createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax, int shapeType, void* userPtr, short int collisionFilterGroup, short int collisionFilterMask, btDispatcher* dispatcher, void* /*ignoreMe*/)
 {
 	//void* ignoreMe -> we could think of recursive multi-sap, if someone is interested
 
 	void* mem = btAlignedAlloc(sizeof(btMultiSapProxy),16);
-	btMultiSapProxy* proxy = new (mem)btMultiSapProxy(aabbMin,  aabbMax,shapeType,userPtr, collisionFilterGroup,collisionFilterMask);
+	btMultiSapProxy* proxy = new (mem)btMultiSapProxy(aabbMin,  aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask);
 	m_multiSapProxies.push_back(proxy);
 
 	///this should deal with inserting/removal into child broadphases
-	setAabb(proxy,aabbMin,aabbMax,dispatcher);
+	setAabb(proxy, aabbMin, aabbMax, dispatcher);
 	return proxy;
 }
 
-void	btMultiSapBroadphase::destroyProxy(btBroadphaseProxy* /*proxy*/,btDispatcher* /*dispatcher*/)
+void	btMultiSapBroadphase::destroyProxy(btBroadphaseProxy* /*proxy*/, btDispatcher* /*dispatcher*/)
 {
 	///not yet
 	btAssert(0);
@@ -135,8 +135,8 @@ void	btMultiSapBroadphase::addToChildBroadphase(btMultiSapProxy* parentMultiSapP
 }
 
 
-bool boxIsContainedWithinBox(const btVector3& amin,const btVector3& amax,const btVector3& bmin,const btVector3& bmax);
-bool boxIsContainedWithinBox(const btVector3& amin,const btVector3& amax,const btVector3& bmin,const btVector3& bmax)
+bool boxIsContainedWithinBox(const btVector3& amin, const btVector3& amax, const btVector3& bmin, const btVector3& bmax);
+bool boxIsContainedWithinBox(const btVector3& amin, const btVector3& amax, const btVector3& bmin, const btVector3& bmax)
 {
 return
 amin.getX() >= bmin.getX() && amax.getX() <= bmax.getX() &&
@@ -149,14 +149,14 @@ amin.getZ() >= bmin.getZ() && amax.getZ() <= bmax.getZ();
 
 
 
-void	btMultiSapBroadphase::getAabb(btBroadphaseProxy* proxy,btVector3& aabbMin, btVector3& aabbMax ) const
+void	btMultiSapBroadphase::getAabb(btBroadphaseProxy* proxy, btVector3& aabbMin, btVector3& aabbMax ) const
 {
 	btMultiSapProxy* multiProxy = static_cast<btMultiSapProxy*>(proxy);
 	aabbMin = multiProxy->m_aabbMin;
 	aabbMax = multiProxy->m_aabbMax;
 }
 
-void	btMultiSapBroadphase::rayTest(const btVector3& rayFrom,const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin,const btVector3& aabbMax)
+void	btMultiSapBroadphase::rayTest(const btVector3& rayFrom, const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin, const btVector3& aabbMax)
 {
 	for (int i=0;i<m_multiSapProxies.size();i++)
 	{
@@ -167,7 +167,7 @@ void	btMultiSapBroadphase::rayTest(const btVector3& rayFrom,const btVector3& ray
 
 //#include <stdio.h>
 
-void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aabbMin,const btVector3& aabbMax, btDispatcher* dispatcher)
+void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy, const btVector3& aabbMin, const btVector3& aabbMax, btDispatcher* dispatcher)
 {
 	btMultiSapProxy* multiProxy = static_cast<btMultiSapProxy*>(proxy);
 	multiProxy->m_aabbMin = aabbMin;
@@ -186,7 +186,7 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 		btMultiSapProxy*		m_multiProxy;
 		btDispatcher*			m_dispatcher;
 
-		MyNodeOverlapCallback(btMultiSapBroadphase* multiSap,btMultiSapProxy* multiProxy,btDispatcher* dispatcher)
+		MyNodeOverlapCallback(btMultiSapBroadphase* multiSap, btMultiSapProxy* multiProxy, btDispatcher* dispatcher)
 			:m_multiSap(multiSap),
 			m_multiProxy(multiProxy),
 			m_dispatcher(dispatcher)
@@ -212,37 +212,37 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 			if (containingBroadphaseIndex<0)
 			{
 				//add it
-				btBroadphaseProxy* childProxy = childBroadphase->createProxy(m_multiProxy->m_aabbMin,m_multiProxy->m_aabbMax,m_multiProxy->m_shapeType,m_multiProxy->m_clientObject,m_multiProxy->m_collisionFilterGroup,m_multiProxy->m_collisionFilterMask, m_dispatcher,m_multiProxy);
-				m_multiSap->addToChildBroadphase(m_multiProxy,childProxy,childBroadphase);
+				btBroadphaseProxy* childProxy = childBroadphase->createProxy(m_multiProxy->m_aabbMin, m_multiProxy->m_aabbMax, m_multiProxy->m_shapeType, m_multiProxy->m_clientObject, m_multiProxy->m_collisionFilterGroup, m_multiProxy->m_collisionFilterMask, m_dispatcher, m_multiProxy);
+				m_multiSap->addToChildBroadphase(m_multiProxy, childProxy, childBroadphase);
 
 			}
 		}
 	};
 
-	MyNodeOverlapCallback	myNodeCallback(this,multiProxy,dispatcher);
+	MyNodeOverlapCallback	myNodeCallback(this, multiProxy, dispatcher);
 
 
 
 	
 	if (m_optimizedAabbTree)
-		m_optimizedAabbTree->reportAabbOverlappingNodex(&myNodeCallback,aabbMin,aabbMax);
+		m_optimizedAabbTree->reportAabbOverlappingNodex(&myNodeCallback, aabbMin, aabbMax);
 
 	int i;
 
 	for ( i=0;i<multiProxy->m_bridgeProxies.size();i++)
 	{
-		btVector3 worldAabbMin,worldAabbMax;
-		multiProxy->m_bridgeProxies[i]->m_childBroadphase->getBroadphaseAabb(worldAabbMin,worldAabbMax);
-		bool overlapsBroadphase = TestAabbAgainstAabb2(worldAabbMin,worldAabbMax,multiProxy->m_aabbMin,multiProxy->m_aabbMax);
+		btVector3 worldAabbMin, worldAabbMax;
+		multiProxy->m_bridgeProxies[i]->m_childBroadphase->getBroadphaseAabb(worldAabbMin, worldAabbMax);
+		bool overlapsBroadphase = TestAabbAgainstAabb2(worldAabbMin, worldAabbMax, multiProxy->m_aabbMin, multiProxy->m_aabbMax);
 		if (!overlapsBroadphase)
 		{
 			//remove it now
 			btBridgeProxy* bridgeProxy = multiProxy->m_bridgeProxies[i];
 
 			btBroadphaseProxy* childProxy = bridgeProxy->m_childProxy;
-			bridgeProxy->m_childBroadphase->destroyProxy(childProxy,dispatcher);
+			bridgeProxy->m_childBroadphase->destroyProxy(childProxy, dispatcher);
 			
-			multiProxy->m_bridgeProxies.swap( i,multiProxy->m_bridgeProxies.size()-1);
+			multiProxy->m_bridgeProxies.swap( i, multiProxy->m_bridgeProxies.size()-1);
 			multiProxy->m_bridgeProxies.pop_back();
 
 		}
@@ -259,11 +259,11 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 		for (int i=0;i<numChildBroadphases;i++)
 		{
 			btBroadphaseInterface* childBroadphase = getBroadphaseArray()[i];
-			btVector3 worldAabbMin,worldAabbMax;
-			childBroadphase->getBroadphaseAabb(worldAabbMin,worldAabbMax);
-			bool overlapsBroadphase = TestAabbAgainstAabb2(worldAabbMin,worldAabbMax,multiProxy->m_aabbMin,multiProxy->m_aabbMax);
+			btVector3 worldAabbMin, worldAabbMax;
+			childBroadphase->getBroadphaseAabb(worldAabbMin, worldAabbMax);
+			bool overlapsBroadphase = TestAabbAgainstAabb2(worldAabbMin, worldAabbMax, multiProxy->m_aabbMin, multiProxy->m_aabbMax);
 			
-		//	fullyContained = fullyContained || boxIsContainedWithinBox(worldAabbMin,worldAabbMax,multiProxy->m_aabbMin,multiProxy->m_aabbMax);
+		//	fullyContained = fullyContained || boxIsContainedWithinBox(worldAabbMin, worldAabbMax, multiProxy->m_aabbMin, multiProxy->m_aabbMax);
 			int containingBroadphaseIndex = -1;
 			
 			//if already contains this
@@ -281,9 +281,9 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 			{
 				if (containingBroadphaseIndex<0)
 				{
-					btBroadphaseProxy* childProxy = childBroadphase->createProxy(aabbMin,aabbMax,multiProxy->m_shapeType,multiProxy->m_clientObject,multiProxy->m_collisionFilterGroup,multiProxy->m_collisionFilterMask, dispatcher);
+					btBroadphaseProxy* childProxy = childBroadphase->createProxy(aabbMin, aabbMax, multiProxy->m_shapeType, multiProxy->m_clientObject, multiProxy->m_collisionFilterGroup, multiProxy->m_collisionFilterMask, dispatcher);
 					childProxy->m_multiSapParentProxy = multiProxy;
-					addToChildBroadphase(multiProxy,childProxy,childBroadphase);
+					addToChildBroadphase(multiProxy, childProxy, childBroadphase);
 				}
 			} else
 			{
@@ -293,9 +293,9 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 					btBridgeProxy* bridgeProxy = multiProxy->m_bridgeProxies[containingBroadphaseIndex];
 
 					btBroadphaseProxy* childProxy = bridgeProxy->m_childProxy;
-					bridgeProxy->m_childBroadphase->destroyProxy(childProxy,dispatcher);
+					bridgeProxy->m_childBroadphase->destroyProxy(childProxy, dispatcher);
 					
-					multiProxy->m_bridgeProxies.swap( containingBroadphaseIndex,multiProxy->m_bridgeProxies.size()-1);
+					multiProxy->m_bridgeProxies.swap( containingBroadphaseIndex, multiProxy->m_bridgeProxies.size()-1);
 					multiProxy->m_bridgeProxies.pop_back();
 				}
 			}
@@ -308,9 +308,9 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 		{
 			///we don't pass the userPtr but our multisap proxy. We need to patch this, before processing an actual collision
 			///this is needed to be able to calculate the aabb overlap
-			btBroadphaseProxy* childProxy = m_simpleBroadphase->createProxy(aabbMin,aabbMax,multiProxy->m_shapeType,multiProxy->m_clientObject,multiProxy->m_collisionFilterGroup,multiProxy->m_collisionFilterMask, dispatcher);
+			btBroadphaseProxy* childProxy = m_simpleBroadphase->createProxy(aabbMin, aabbMax, multiProxy->m_shapeType, multiProxy->m_clientObject, multiProxy->m_collisionFilterGroup, multiProxy->m_collisionFilterMask, dispatcher);
 			childProxy->m_multiSapParentProxy = multiProxy;
-			addToChildBroadphase(multiProxy,childProxy,m_simpleBroadphase);
+			addToChildBroadphase(multiProxy, childProxy, m_simpleBroadphase);
 		}
 	}
 
@@ -318,9 +318,9 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 	{
 		///we don't pass the userPtr but our multisap proxy. We need to patch this, before processing an actual collision
 		///this is needed to be able to calculate the aabb overlap
-		btBroadphaseProxy* childProxy = m_simpleBroadphase->createProxy(aabbMin,aabbMax,multiProxy->m_shapeType,multiProxy->m_clientObject,multiProxy->m_collisionFilterGroup,multiProxy->m_collisionFilterMask, dispatcher);
+		btBroadphaseProxy* childProxy = m_simpleBroadphase->createProxy(aabbMin, aabbMax, multiProxy->m_shapeType, multiProxy->m_clientObject, multiProxy->m_collisionFilterGroup, multiProxy->m_collisionFilterMask, dispatcher);
 		childProxy->m_multiSapParentProxy = multiProxy;
-		addToChildBroadphase(multiProxy,childProxy,m_simpleBroadphase);
+		addToChildBroadphase(multiProxy, childProxy, m_simpleBroadphase);
 	}
 */
 
@@ -329,7 +329,7 @@ void	btMultiSapBroadphase::setAabb(btBroadphaseProxy* proxy,const btVector3& aab
 	for ( i=0;i<multiProxy->m_bridgeProxies.size();i++)
 	{
 		btBridgeProxy* bridgeProxyRef = multiProxy->m_bridgeProxies[i];
-		bridgeProxyRef->m_childBroadphase->setAabb(bridgeProxyRef->m_childProxy,aabbMin,aabbMax,dispatcher);
+		bridgeProxyRef->m_childBroadphase->setAabb(bridgeProxyRef->m_childProxy, aabbMin, aabbMax, dispatcher);
 	}
 
 }
@@ -366,7 +366,7 @@ void    btMultiSapBroadphase::calculateOverlappingPairs(btDispatcher* dispatcher
 	
 		btBroadphasePairArray&	overlappingPairArray = getOverlappingPairCache()->getOverlappingPairArray();
 
-	//	quicksort(overlappingPairArray,0,overlappingPairArray.size());
+	//	quicksort(overlappingPairArray,0, overlappingPairArray.size());
 
 		overlappingPairArray.quickSort(btMultiSapBroadphasePairSortPredicate());
 
@@ -403,7 +403,7 @@ void    btMultiSapBroadphase::calculateOverlappingPairs(btDispatcher* dispatcher
 
 			if (!isDuplicate)
 			{
-				bool hasOverlap = testAabbOverlap(pair.m_pProxy0,pair.m_pProxy1);
+				bool hasOverlap = testAabbOverlap(pair.m_pProxy0, pair.m_pProxy1);
 
 				if (hasOverlap)
 				{
@@ -422,9 +422,9 @@ void    btMultiSapBroadphase::calculateOverlappingPairs(btDispatcher* dispatcher
 			
 			if (needsRemoval)
 			{
-				getOverlappingPairCache()->cleanOverlappingPair(pair,dispatcher);
+				getOverlappingPairCache()->cleanOverlappingPair(pair, dispatcher);
 
-		//		m_overlappingPairArray.swap(i,m_overlappingPairArray.size()-1);
+		//		m_overlappingPairArray.swap(i, m_overlappingPairArray.size()-1);
 		//		m_overlappingPairArray.pop_back();
 				pair.m_pProxy0 = 0;
 				pair.m_pProxy1 = 0;
@@ -446,20 +446,20 @@ void    btMultiSapBroadphase::calculateOverlappingPairs(btDispatcher* dispatcher
 		m_invalidPair = 0;
 	#endif//CLEAN_INVALID_PAIRS
 		
-		//printf("overlappingPairArray.size()=%d\n",overlappingPairArray.size());
+		//printf("overlappingPairArray.size()=%d\n", overlappingPairArray.size());
 	}
 
 
 }
 
 
-bool	btMultiSapBroadphase::testAabbOverlap(btBroadphaseProxy* childProxy0,btBroadphaseProxy* childProxy1)
+bool	btMultiSapBroadphase::testAabbOverlap(btBroadphaseProxy* childProxy0, btBroadphaseProxy* childProxy1)
 {
 	btMultiSapProxy* multiSapProxy0 = (btMultiSapProxy*)childProxy0->m_multiSapParentProxy;
 		btMultiSapProxy* multiSapProxy1 = (btMultiSapProxy*)childProxy1->m_multiSapParentProxy;
 
-		return	TestAabbAgainstAabb2(multiSapProxy0->m_aabbMin,multiSapProxy0->m_aabbMax,
-			multiSapProxy1->m_aabbMin,multiSapProxy1->m_aabbMax);
+		return	TestAabbAgainstAabb2(multiSapProxy0->m_aabbMin, multiSapProxy0->m_aabbMax,
+			multiSapProxy1->m_aabbMin, multiSapProxy1->m_aabbMax);
 		
 }
 
@@ -469,7 +469,7 @@ void	btMultiSapBroadphase::printStats()
 /*	printf("---------------------------------\n");
 	
 		printf("btMultiSapBroadphase.h\n");
-		printf("numHandles = %d\n",m_multiSapProxies.size());
+		printf("numHandles = %d\n", m_multiSapProxies.size());
 			//find broadphase that contain this multiProxy
 		int numChildBroadphases = getBroadphaseArray().size();
 		for (int i=0;i<numChildBroadphases;i++)

@@ -56,7 +56,7 @@ email: projectileman@yahoo.com
 //	//find minmax
 //	if(pmin>pmax)
 //	{
-//		GIM_SWAP_NUMBERS(pmin,pmax);
+//		GIM_SWAP_NUMBERS(pmin, pmax);
 //	}
 //	//find extends
 //	const btScalar rad = extend[component_index0] * absolute_edge[dir_index0] +
@@ -73,7 +73,7 @@ email: projectileman@yahoo.com
 //	const btVector3 & pointb, btVector3 & extend)
 //{
 //
-//	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,2,1,1,2);
+//	return test_cross_edge_box(edge, absolute_edge, pointa, pointb, extend,2,1,1,2);
 //}
 //
 //
@@ -84,7 +84,7 @@ email: projectileman@yahoo.com
 //	const btVector3 & pointb, btVector3 & extend)
 //{
 //
-//	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,0,2,2,0);
+//	return test_cross_edge_box(edge, absolute_edge, pointa, pointb, extend,0,2,2,0);
 //}
 //
 //SIMD_FORCE_INLINE bool test_cross_edge_box_Z_axis(
@@ -94,10 +94,10 @@ email: projectileman@yahoo.com
 //	const btVector3 & pointb, btVector3 & extend)
 //{
 //
-//	return test_cross_edge_box(edge,absolute_edge,pointa,pointb,extend,1,0,0,1);
+//	return test_cross_edge_box(edge, absolute_edge, pointa, pointb, extend,1,0,0,1);
 //}
 
-#define TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,i_dir_0,i_dir_1,i_comp_0,i_comp_1)\
+#define TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend, i_dir_0, i_dir_1, i_comp_0, i_comp_1)\
 {\
 	const btScalar dir0 = -edge[i_dir_0];\
 	const btScalar dir1 = edge[i_dir_1];\
@@ -105,7 +105,7 @@ email: projectileman@yahoo.com
 	btScalar pmax = pointb[i_comp_0]*dir0 + pointb[i_comp_1]*dir1;\
 	if(pmin>pmax)\
 	{\
-		GIM_SWAP_NUMBERS(pmin,pmax); \
+		GIM_SWAP_NUMBERS(pmin, pmax); \
 	}\
 	const btScalar abs_dir0 = absolute_edge[i_dir_0];\
 	const btScalar abs_dir1 = absolute_edge[i_dir_1];\
@@ -114,19 +114,19 @@ email: projectileman@yahoo.com
 }\
 
 
-#define TEST_CROSS_EDGE_BOX_X_AXIS_MCR(edge,absolute_edge,pointa,pointb,_extend)\
+#define TEST_CROSS_EDGE_BOX_X_AXIS_MCR(edge, absolute_edge, pointa, pointb,_extend)\
 {\
-	TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,2,1,1,2);\
+	TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend,2,1,1,2);\
 }\
 
-#define TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(edge,absolute_edge,pointa,pointb,_extend)\
+#define TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(edge, absolute_edge, pointa, pointb,_extend)\
 {\
-	TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,0,2,2,0);\
+	TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend,0,2,2,0);\
 }\
 
-#define TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(edge,absolute_edge,pointa,pointb,_extend)\
+#define TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(edge, absolute_edge, pointa, pointb,_extend)\
 {\
-	TEST_CROSS_EDGE_BOX_MCR(edge,absolute_edge,pointa,pointb,_extend,1,0,0,1);\
+	TEST_CROSS_EDGE_BOX_MCR(edge, absolute_edge, pointa, pointb,_extend,1,0,0,1);\
 }\
 
 
@@ -154,13 +154,13 @@ public:
 
 	GIM_BOX_BOX_TRANSFORM_CACHE(mat4f  trans1_to_0)
 	{
-		COPY_MATRIX_3X3(m_R1to0,trans1_to_0)
-        MAT_GET_TRANSLATION(trans1_to_0,m_T1to0)
+		COPY_MATRIX_3X3(m_R1to0, trans1_to_0)
+        MAT_GET_TRANSLATION(trans1_to_0, m_T1to0)
 		calc_absolute_matrix();
 	}
 
 	//! Calc the transformation relative  1 to 0. Inverts matrics by transposing
-	SIMD_FORCE_INLINE void calc_from_homogenic(const btTransform & trans0,const btTransform & trans1)
+	SIMD_FORCE_INLINE void calc_from_homogenic(const btTransform & trans0, const btTransform & trans1)
 	{
 
 		m_R1to0 = trans0.getBasis().transpose();
@@ -173,7 +173,7 @@ public:
 	}
 
 	//! Calcs the full invertion of the matrices. Useful for scaling matrices
-	SIMD_FORCE_INLINE void calc_from_full_invert(const btTransform & trans0,const btTransform & trans1)
+	SIMD_FORCE_INLINE void calc_from_full_invert(const btTransform & trans0, const btTransform & trans1)
 	{
 		m_R1to0 = trans0.getBasis().inverse();
 		m_T1to0 = m_R1to0 * (-trans0.getOrigin());
@@ -208,13 +208,13 @@ public:
 			 const btVector3 & V2,
 			 const btVector3 & V3)
 	{
-		m_min[0] = GIM_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = GIM_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = GIM_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = GIM_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = GIM_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = GIM_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = GIM_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = GIM_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = GIM_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = GIM_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = GIM_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = GIM_MAX3(V1[2], V2[2], V3[2]);
 	}
 
 	GIM_AABB(const btVector3 & V1,
@@ -222,13 +222,13 @@ public:
 			 const btVector3 & V3,
 			 GREAL margin)
 	{
-		m_min[0] = GIM_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = GIM_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = GIM_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = GIM_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = GIM_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = GIM_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = GIM_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = GIM_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = GIM_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = GIM_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = GIM_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = GIM_MAX3(V1[2], V2[2], V3[2]);
 
 		m_min[0] -= margin;
 		m_min[1] -= margin;
@@ -239,12 +239,12 @@ public:
 	}
 
 	GIM_AABB(const GIM_AABB &other):
-		m_min(other.m_min),m_max(other.m_max)
+		m_min(other.m_min), m_max(other.m_max)
 	{
 	}
 
-	GIM_AABB(const GIM_AABB &other,btScalar margin ):
-		m_min(other.m_min),m_max(other.m_max)
+	GIM_AABB(const GIM_AABB &other, btScalar margin ):
+		m_min(other.m_min), m_max(other.m_max)
 	{
 		m_min[0] -= margin;
 		m_min[1] -= margin;
@@ -291,13 +291,13 @@ public:
 							const CLASS_POINT & V2,
 							const CLASS_POINT & V3)
 	{
-		m_min[0] = GIM_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = GIM_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = GIM_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = GIM_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = GIM_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = GIM_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = GIM_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = GIM_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = GIM_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = GIM_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = GIM_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = GIM_MAX3(V1[2], V2[2], V3[2]);
 	}
 
 	template<typename CLASS_POINT>
@@ -306,13 +306,13 @@ public:
 							const CLASS_POINT & V2,
 							const CLASS_POINT & V3, btScalar margin)
 	{
-		m_min[0] = GIM_MIN3(V1[0],V2[0],V3[0]);
-		m_min[1] = GIM_MIN3(V1[1],V2[1],V3[1]);
-		m_min[2] = GIM_MIN3(V1[2],V2[2],V3[2]);
+		m_min[0] = GIM_MIN3(V1[0], V2[0], V3[0]);
+		m_min[1] = GIM_MIN3(V1[1], V2[1], V3[1]);
+		m_min[2] = GIM_MIN3(V1[2], V2[2], V3[2]);
 
-		m_max[0] = GIM_MAX3(V1[0],V2[0],V3[0]);
-		m_max[1] = GIM_MAX3(V1[1],V2[1],V3[1]);
-		m_max[2] = GIM_MAX3(V1[2],V2[2],V3[2]);
+		m_max[0] = GIM_MAX3(V1[0], V2[0], V3[0]);
+		m_max[1] = GIM_MAX3(V1[1], V2[1], V3[1]);
+		m_max[2] = GIM_MAX3(V1[2], V2[2], V3[2]);
 
 		m_min[0] -= margin;
 		m_min[1] -= margin;
@@ -341,30 +341,30 @@ public:
 	//! Merges a Box
 	SIMD_FORCE_INLINE void merge(const GIM_AABB & box)
 	{
-		m_min[0] = GIM_MIN(m_min[0],box.m_min[0]);
-		m_min[1] = GIM_MIN(m_min[1],box.m_min[1]);
-		m_min[2] = GIM_MIN(m_min[2],box.m_min[2]);
+		m_min[0] = GIM_MIN(m_min[0], box.m_min[0]);
+		m_min[1] = GIM_MIN(m_min[1], box.m_min[1]);
+		m_min[2] = GIM_MIN(m_min[2], box.m_min[2]);
 
-		m_max[0] = GIM_MAX(m_max[0],box.m_max[0]);
-		m_max[1] = GIM_MAX(m_max[1],box.m_max[1]);
-		m_max[2] = GIM_MAX(m_max[2],box.m_max[2]);
+		m_max[0] = GIM_MAX(m_max[0], box.m_max[0]);
+		m_max[1] = GIM_MAX(m_max[1], box.m_max[1]);
+		m_max[2] = GIM_MAX(m_max[2], box.m_max[2]);
 	}
 
 	//! Merges a point
 	template<typename CLASS_POINT>
 	SIMD_FORCE_INLINE void merge_point(const CLASS_POINT & point)
 	{
-		m_min[0] = GIM_MIN(m_min[0],point[0]);
-		m_min[1] = GIM_MIN(m_min[1],point[1]);
-		m_min[2] = GIM_MIN(m_min[2],point[2]);
+		m_min[0] = GIM_MIN(m_min[0], point[0]);
+		m_min[1] = GIM_MIN(m_min[1], point[1]);
+		m_min[2] = GIM_MIN(m_min[2], point[2]);
 
-		m_max[0] = GIM_MAX(m_max[0],point[0]);
-		m_max[1] = GIM_MAX(m_max[1],point[1]);
-		m_max[2] = GIM_MAX(m_max[2],point[2]);
+		m_max[0] = GIM_MAX(m_max[0], point[0]);
+		m_max[1] = GIM_MAX(m_max[1], point[1]);
+		m_max[2] = GIM_MAX(m_max[2], point[2]);
 	}
 
 	//! Gets the extend and center
-	SIMD_FORCE_INLINE void get_center_extend(btVector3 & center,btVector3 & extend)  const
+	SIMD_FORCE_INLINE void get_center_extend(btVector3 & center, btVector3 & extend)  const
 	{
 		center = (m_max+m_min)*0.5f;
 		extend = m_max - center;
@@ -373,13 +373,13 @@ public:
 	//! Finds the intersecting box between this box and the other.
 	SIMD_FORCE_INLINE void find_intersection(const GIM_AABB & other, GIM_AABB & intersection)  const
 	{
-		intersection.m_min[0] = GIM_MAX(other.m_min[0],m_min[0]);
-		intersection.m_min[1] = GIM_MAX(other.m_min[1],m_min[1]);
-		intersection.m_min[2] = GIM_MAX(other.m_min[2],m_min[2]);
+		intersection.m_min[0] = GIM_MAX(other.m_min[0], m_min[0]);
+		intersection.m_min[1] = GIM_MAX(other.m_min[1], m_min[1]);
+		intersection.m_min[2] = GIM_MAX(other.m_min[2], m_min[2]);
 
-		intersection.m_max[0] = GIM_MIN(other.m_max[0],m_max[0]);
-		intersection.m_max[1] = GIM_MIN(other.m_max[1],m_max[1]);
-		intersection.m_max[2] = GIM_MIN(other.m_max[2],m_max[2]);
+		intersection.m_max[0] = GIM_MIN(other.m_max[0], m_max[0]);
+		intersection.m_max[1] = GIM_MIN(other.m_max[1], m_max[1]);
+		intersection.m_max[2] = GIM_MIN(other.m_max[2], m_max[2]);
 	}
 
 
@@ -402,10 +402,10 @@ public:
 	\param vorigin A vec3f with the origin of the ray
 	\param vdir A vec3f with the direction of the ray
 	*/
-	SIMD_FORCE_INLINE bool collide_ray(const btVector3 & vorigin,const btVector3 & vdir)
+	SIMD_FORCE_INLINE bool collide_ray(const btVector3 & vorigin, const btVector3 & vdir)
 	{
-		btVector3 extents,center;
-		this->get_center_extend(center,extents);;
+		btVector3 extents, center;
+		this->get_center_extend(center, extents);;
 
 		btScalar Dx = vorigin[0] - center[0];
 		if(GIM_GREATER(Dx, extents[0]) && Dx*vdir[0]>=0.0f)	return false;
@@ -462,18 +462,18 @@ public:
 
 	//! transcache is the transformation cache from box to this AABB
 	SIMD_FORCE_INLINE bool overlapping_trans_cache(
-		const GIM_AABB & box,const GIM_BOX_BOX_TRANSFORM_CACHE & transcache, bool fulltest)
+		const GIM_AABB & box, const GIM_BOX_BOX_TRANSFORM_CACHE & transcache, bool fulltest)
 	{
 
 		//Taken from OPCODE
-		btVector3 ea,eb;//extends
-		btVector3 ca,cb;//extends
-		get_center_extend(ca,ea);
-		box.get_center_extend(cb,eb);
+		btVector3 ea, eb;//extends
+		btVector3 ca, cb;//extends
+		get_center_extend(ca, ea);
+		box.get_center_extend(cb, eb);
 
 
 		btVector3 T;
-		btScalar t,t2;
+		btScalar t, t2;
 		int i;
 
 		// Class I : A's basis vectors
@@ -486,14 +486,14 @@ public:
 		// Class II : B's basis vectors
 		for(i=0;i<3;i++)
 		{
-			t = MAT_DOT_COL(transcache.m_R1to0,T,i);
-			t2 = MAT_DOT_COL(transcache.m_AR,ea,i) + eb[i];
-			if(GIM_GREATER(t,t2))	return false;
+			t = MAT_DOT_COL(transcache.m_R1to0, T,i);
+			t2 = MAT_DOT_COL(transcache.m_AR, ea, i) + eb[i];
+			if(GIM_GREATER(t, t2))	return false;
 		}
 		// Class III : 9 cross products
 		if(fulltest)
 		{
-			int j,m,n,o,p,q,r;
+			int j, m,n, o,p, q,r;
 			for(i=0;i<3;i++)
 			{
 				m = (i+1)%3;
@@ -507,7 +507,7 @@ public:
 					t = T[n]*transcache.m_R1to0[m][j] - T[m]*transcache.m_R1to0[n][j];
 					t2 = ea[o]*transcache.m_AR[p][j] + ea[p]*transcache.m_AR[o][j] +
 						eb[r]*transcache.m_AR[i][q] + eb[q]*transcache.m_AR[i][r];
-					if(GIM_GREATER(t,t2))	return false;
+					if(GIM_GREATER(t, t2))	return false;
 				}
 			}
 		}
@@ -531,8 +531,8 @@ public:
 	{
 		if(!collide_plane(triangle_plane)) return false;
 
-		btVector3 center,extends;
-		this->get_center_extend(center,extends);
+		btVector3 center, extends;
+		this->get_center_extend(center, extends);
 
 		const btVector3 v1(p1 - center);
 		const btVector3 v2(p2 - center);
@@ -542,30 +542,30 @@ public:
 		btVector3 diff(v2 - v1);
 		btVector3 abs_diff = diff.absolute();
 		//Test With X axis
-		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff,abs_diff,v1,v3,extends);
+		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff, abs_diff, v1, v3, extends);
 		//Test With Y axis
-		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff,abs_diff,v1,v3,extends);
+		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff, abs_diff, v1, v3, extends);
 		//Test With Z axis
-		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff,abs_diff,v1,v3,extends);
+		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v1, v3, extends);
 
 
 		diff = v3 - v2;
 		abs_diff = diff.absolute();
 		//Test With X axis
-		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff,abs_diff,v2,v1,extends);
+		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff, abs_diff, v2, v1, extends);
 		//Test With Y axis
-		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff,abs_diff,v2,v1,extends);
+		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff, abs_diff, v2, v1, extends);
 		//Test With Z axis
-		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff,abs_diff,v2,v1,extends);
+		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v2, v1, extends);
 
 		diff = v1 - v3;
 		abs_diff = diff.absolute();
 		//Test With X axis
-		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff,abs_diff,v3,v2,extends);
+		TEST_CROSS_EDGE_BOX_X_AXIS_MCR(diff, abs_diff, v3, v2, extends);
 		//Test With Y axis
-		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff,abs_diff,v3,v2,extends);
+		TEST_CROSS_EDGE_BOX_Y_AXIS_MCR(diff, abs_diff, v3, v2, extends);
 		//Test With Z axis
-		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff,abs_diff,v3,v2,extends);
+		TEST_CROSS_EDGE_BOX_Z_AXIS_MCR(diff, abs_diff, v3, v2, extends);
 
 		return true;
 	}
@@ -573,7 +573,7 @@ public:
 
 
 //! Compairison of transformation objects
-SIMD_FORCE_INLINE bool btCompareTransformsEqual(const btTransform & t1,const btTransform & t2)
+SIMD_FORCE_INLINE bool btCompareTransformsEqual(const btTransform & t1, const btTransform & t2)
 {
 	if(!(t1.getOrigin() == t2.getOrigin()) ) return false;
 

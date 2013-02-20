@@ -63,8 +63,8 @@ public:
 
 
 	SIMD_FORCE_INLINE void setVertices(
-		const btVector3 & v0,const btVector3 & v1,
-		const btVector3 & v2,const btVector3 & v3)
+		const btVector3 & v0, const btVector3 & v1,
+		const btVector3 & v2, const btVector3 & v3)
 	{
 		m_vertices[0] = v0;
 		m_vertices[1] = v1;
@@ -131,7 +131,7 @@ public:
     /*!
     \post Calls updateBound() for update the box set.
     */
-    void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+    void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
     {
         btAABB transformedbox = m_localAABB;
         transformedbox.appy_transform(t);
@@ -221,9 +221,9 @@ public:
 	//! Determines if this shape has tetrahedrons
 	virtual bool needsRetrieveTetrahedrons() const = 0;
 
-	virtual void getBulletTriangle(int prim_index,btTriangleShapeEx & triangle) const = 0;
+	virtual void getBulletTriangle(int prim_index, btTriangleShapeEx & triangle) const = 0;
 
-	virtual void getBulletTetrahedron(int prim_index,btTetrahedronShapeEx & tetrahedron) const = 0;
+	virtual void getBulletTetrahedron(int prim_index, btTetrahedronShapeEx & tetrahedron) const = 0;
 
 
 
@@ -237,19 +237,19 @@ public:
 	}
 
 	//! if this trimesh
-	SIMD_FORCE_INLINE void getPrimitiveTriangle(int index,btPrimitiveTriangle & triangle) const
+	SIMD_FORCE_INLINE void getPrimitiveTriangle(int index, btPrimitiveTriangle & triangle) const
 	{
-		getPrimitiveManager()->get_primitive_triangle(index,triangle);
+		getPrimitiveManager()->get_primitive_triangle(index, triangle);
 	}
 
 
 	//! Retrieves the bound from a child
     /*!
     */
-    virtual void getChildAabb(int child_index,const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+    virtual void getChildAabb(int child_index, const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
     {
         btAABB child_aabb;
-        getPrimitiveManager()->get_primitive_box(child_index,child_aabb);
+        getPrimitiveManager()->get_primitive_box(child_index, child_aabb);
         child_aabb.appy_transform(t);
         aabbMin = child_aabb.m_min;
         aabbMax = child_aabb.m_max;
@@ -284,7 +284,7 @@ public:
 	/*!
 	It gives the triangles in local space
 	*/
-	virtual void	processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const
+	virtual void	processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const
 	{
         (void) callback; (void) aabbMin; (void) aabbMax;
 	}
@@ -293,7 +293,7 @@ public:
 	/*!
 	It gives the triangles in local space
 	*/
-	virtual void processAllTrianglesRay(btTriangleCallback* /*callback*/,const btVector3& /*rayFrom*/, const btVector3& /*rayTo*/) const
+	virtual void processAllTrianglesRay(btTriangleCallback* /*callback*/, const btVector3& /*rayFrom*/, const btVector3& /*rayTo*/) const
 	{
 		
 	}
@@ -344,7 +344,7 @@ public:
 			return (int )m_compoundShape->getNumChildShapes();
 		}
 
-		virtual void get_primitive_box(int prim_index ,btAABB & primbox) const
+		virtual void get_primitive_box(int prim_index, btAABB & primbox) const
 		{
 			btTransform prim_trans;
 			if(m_compoundShape->childrenHasTransform())
@@ -356,10 +356,10 @@ public:
 				prim_trans.setIdentity();
 			}
 			const btCollisionShape* shape = m_compoundShape->getChildShape(prim_index);
-			shape->getAabb(prim_trans,primbox.m_min,primbox.m_max);
+			shape->getAabb(prim_trans, primbox.m_min, primbox.m_max);
 		}
 
-		virtual void get_primitive_triangle(int prim_index,btPrimitiveTriangle & triangle) const
+		virtual void get_primitive_triangle(int prim_index, btPrimitiveTriangle & triangle) const
 		{
 			btAssert(0);
             (void) prim_index; (void) triangle;
@@ -417,7 +417,7 @@ public:
 
 
 	//! Use this method for adding children. Only Convex shapes are allowed.
-	void addChildShape(const btTransform& localTransform,btCollisionShape* shape)
+	void addChildShape(const btTransform& localTransform, btCollisionShape* shape)
 	{
 		btAssert(shape->isConvex());
 		m_childTransforms.push_back(localTransform);
@@ -446,16 +446,16 @@ public:
 	//! Retrieves the bound from a child
     /*!
     */
-    virtual void getChildAabb(int child_index,const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+    virtual void getChildAabb(int child_index, const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
     {
 
     	if(childrenHasTransform())
     	{
-    		m_childShapes[child_index]->getAabb(t*m_childTransforms[child_index],aabbMin,aabbMax);
+    		m_childShapes[child_index]->getAabb(t*m_childTransforms[child_index], aabbMin, aabbMax);
     	}
     	else
     	{
-    		m_childShapes[child_index]->getAabb(t,aabbMin,aabbMax);
+    		m_childShapes[child_index]->getAabb(t, aabbMin, aabbMax);
     	}
     }
 
@@ -491,13 +491,13 @@ public:
 	}
 
 
-	virtual void getBulletTriangle(int prim_index,btTriangleShapeEx & triangle) const
+	virtual void getBulletTriangle(int prim_index, btTriangleShapeEx & triangle) const
 	{
         (void) prim_index; (void) triangle;
 		btAssert(0);
 	}
 
-	virtual void getBulletTetrahedron(int prim_index,btTetrahedronShapeEx & tetrahedron) const
+	virtual void getBulletTetrahedron(int prim_index, btTetrahedronShapeEx & tetrahedron) const
 	{
         (void) prim_index; (void) tetrahedron;
 		btAssert(0);
@@ -505,7 +505,7 @@ public:
 
 
 	//! Calculates the exact inertia tensor for this shape
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	virtual const char*	getName()const
 	{
@@ -611,8 +611,8 @@ public:
 				return;
 			}
 			m_meshInterface->getLockedReadOnlyVertexIndexBase(
-				&vertexbase,numverts,
-				type, stride,&indexbase, indexstride, numfaces,indicestype,m_part);
+				&vertexbase, numverts,
+				type, stride, &indexbase, indexstride, numfaces, indicestype, m_part);
 
 			m_lock_count = 1;
 		}
@@ -645,7 +645,7 @@ public:
 			return (int )numverts;
 		}
 
-		SIMD_FORCE_INLINE void get_indices(int face_index,unsigned int &i0,unsigned int &i1,unsigned int &i2) const
+		SIMD_FORCE_INLINE void get_indices(int face_index, unsigned int &i0, unsigned int &i1, unsigned int &i2) const
 		{
 			if(indicestype == PHY_SHORT)
 			{
@@ -681,32 +681,32 @@ public:
 			}
 		}
 
-		virtual void get_primitive_box(int prim_index ,btAABB & primbox) const
+		virtual void get_primitive_box(int prim_index, btAABB & primbox) const
 		{
 			btPrimitiveTriangle  triangle;
-			get_primitive_triangle(prim_index,triangle);
+			get_primitive_triangle(prim_index, triangle);
 			primbox.calc_from_triangle_margin(
 				triangle.m_vertices[0],
-				triangle.m_vertices[1],triangle.m_vertices[2],triangle.m_margin);
+				triangle.m_vertices[1], triangle.m_vertices[2], triangle.m_margin);
 		}
 
-		virtual void get_primitive_triangle(int prim_index,btPrimitiveTriangle & triangle) const
+		virtual void get_primitive_triangle(int prim_index, btPrimitiveTriangle & triangle) const
 		{
 			unsigned int indices[3];
-			get_indices(prim_index,indices[0],indices[1],indices[2]);
-			get_vertex(indices[0],triangle.m_vertices[0]);
-			get_vertex(indices[1],triangle.m_vertices[1]);
-			get_vertex(indices[2],triangle.m_vertices[2]);
+			get_indices(prim_index, indices[0], indices[1], indices[2]);
+			get_vertex(indices[0], triangle.m_vertices[0]);
+			get_vertex(indices[1], triangle.m_vertices[1]);
+			get_vertex(indices[2], triangle.m_vertices[2]);
 			triangle.m_margin = m_margin;
 		}
 
-		SIMD_FORCE_INLINE void get_bullet_triangle(int prim_index,btTriangleShapeEx & triangle) const
+		SIMD_FORCE_INLINE void get_bullet_triangle(int prim_index, btTriangleShapeEx & triangle) const
 		{
 			unsigned int indices[3];
-			get_indices(prim_index,indices[0],indices[1],indices[2]);
-			get_vertex(indices[0],triangle.m_vertices1[0]);
-			get_vertex(indices[1],triangle.m_vertices1[1]);
-			get_vertex(indices[2],triangle.m_vertices1[2]);
+			get_indices(prim_index, indices[0], indices[1], indices[2]);
+			get_vertex(indices[0], triangle.m_vertices1[0]);
+			get_vertex(indices[1], triangle.m_vertices1[1]);
+			get_vertex(indices[2], triangle.m_vertices1[2]);
 			triangle.setMargin(m_margin);
 		}
 
@@ -816,7 +816,7 @@ public:
 
 
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 
 
@@ -843,12 +843,12 @@ public:
 		return false;
 	}
 
-	virtual void getBulletTriangle(int prim_index,btTriangleShapeEx & triangle) const
+	virtual void getBulletTriangle(int prim_index, btTriangleShapeEx & triangle) const
 	{
-		m_primitive_manager.get_bullet_triangle(prim_index,triangle);
+		m_primitive_manager.get_bullet_triangle(prim_index, triangle);
 	}
 
-	virtual void getBulletTetrahedron(int prim_index,btTetrahedronShapeEx & tetrahedron) const
+	virtual void getBulletTetrahedron(int prim_index, btTetrahedronShapeEx & tetrahedron) const
 	{
         (void) prim_index;
         (void) tetrahedron;
@@ -864,7 +864,7 @@ public:
 
 	SIMD_FORCE_INLINE void getVertex(int vertex_index, btVector3 & vertex) const
 	{
-		m_primitive_manager.get_vertex(vertex_index,vertex);
+		m_primitive_manager.get_vertex(vertex_index, vertex);
 	}
 
 	SIMD_FORCE_INLINE void setMargin(btScalar margin)
@@ -894,8 +894,8 @@ public:
     	return (int)m_primitive_manager.m_part;
     }
 
-	virtual void	processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const;
-	virtual void	processAllTrianglesRay(btTriangleCallback* callback,const btVector3& rayFrom,const btVector3& rayTo) const;
+	virtual void	processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
+	virtual void	processAllTrianglesRay(btTriangleCallback* callback, const btVector3& rayFrom, const btVector3& rayTo) const;
 };
 
 
@@ -917,7 +917,7 @@ protected:
 	{
 		for (int i=0;i<meshInterface->getNumSubParts() ;++i )
 		{
-			btGImpactMeshShapePart * newpart = new btGImpactMeshShapePart(meshInterface,i);
+			btGImpactMeshShapePart * newpart = new btGImpactMeshShapePart(meshInterface, i);
 			m_mesh_parts.push_back(newpart);
 		}
 	}
@@ -1022,7 +1022,7 @@ public:
     	m_needs_update = true;
     }
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 
 	//! Obtains the primitive manager
@@ -1062,13 +1062,13 @@ public:
 		return false;
 	}
 
-	virtual void getBulletTriangle(int prim_index,btTriangleShapeEx & triangle) const
+	virtual void getBulletTriangle(int prim_index, btTriangleShapeEx & triangle) const
 	{
         (void) prim_index; (void) triangle;
 		btAssert(0);
 	}
 
-	virtual void getBulletTetrahedron(int prim_index,btTetrahedronShapeEx & tetrahedron) const
+	virtual void getBulletTetrahedron(int prim_index, btTetrahedronShapeEx & tetrahedron) const
 	{
         (void) prim_index; (void) tetrahedron;
 		btAssert(0);
@@ -1091,7 +1091,7 @@ public:
 	//! Retrieves the bound from a child
     /*!
     */
-    virtual void getChildAabb(int child_index,const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+    virtual void getChildAabb(int child_index, const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
     {
         (void) child_index; (void) t; (void) aabbMin; (void) aabbMax;
         btAssert(0);
@@ -1150,9 +1150,9 @@ public:
 	/*!
 	It gives the triangles in local space
 	*/
-	virtual void	processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+	virtual void	processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
-	virtual void	processAllTrianglesRay (btTriangleCallback* callback,const btVector3& rayFrom,const btVector3& rayTo) const;
+	virtual void	processAllTrianglesRay (btTriangleCallback* callback, const btVector3& rayFrom, const btVector3& rayTo) const;
 
 	virtual	int	calculateSerializeBufferSize() const;
 

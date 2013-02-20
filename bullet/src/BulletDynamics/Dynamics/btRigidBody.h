@@ -298,7 +298,7 @@ public:
 		m_invInertiaLocal = diagInvInertia;
 	}
 
-	void	setSleepingThresholds(btScalar linear,btScalar angular)
+	void	setSleepingThresholds(btScalar linear, btScalar angular)
 	{
 		m_linearSleepingThreshold = linear;
 		m_angularSleepingThreshold = angular;
@@ -386,7 +386,7 @@ public:
 	}
 
 	
-	void	getAabb(btVector3& aabbMin,btVector3& aabbMax) const;
+	void	getAabb(btVector3& aabbMin, btVector3& aabbMax) const;
 
 
 
@@ -489,7 +489,7 @@ public:
 
 	void	setAngularFactor(btScalar angFac)
 	{
-		m_angularFactor.setValue(angFac,angFac,angFac);
+		m_angularFactor.setValue(angFac, angFac, angFac);
 	}
 	const btVector3&	getAngularFactor() const
 	{

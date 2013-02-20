@@ -79,7 +79,7 @@ struct	btSubSimplexClosestResult
 
 		return valid;
 	}
-	void	setBarycentricCoordinates(btScalar a=btScalar(0.),btScalar b=btScalar(0.),btScalar c=btScalar(0.),btScalar d=btScalar(0.))
+	void	setBarycentricCoordinates(btScalar a=btScalar(0.), btScalar b=btScalar(0.), btScalar c=btScalar(0.), btScalar d=btScalar(0.))
 	{
 		m_barycentricCoords[0] = a;
 		m_barycentricCoords[1] = b;
@@ -128,7 +128,7 @@ public:
 
 	bool	closestPtPointTetrahedron(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& d, btSubSimplexClosestResult& finalResult);
 	int		pointOutsideOfPlane(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c, const btVector3& d);
-	bool	closestPtPointTriangle(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c,btSubSimplexClosestResult& result);
+	bool	closestPtPointTriangle(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c, btSubSimplexClosestResult& result);
 
 public:
 

@@ -62,16 +62,16 @@ ATTRIBUTE_ALIGNED16(struct) PfxSortData16 {
 	};
 
 #ifdef __SPU__
-	void set8(int elem,uint8_t data)   {vdata=(vec_uint4)spu_insert(data,(vec_uchar16)vdata,elem);}
-	void set16(int elem,uint16_t data) {vdata=(vec_uint4)spu_insert(data,(vec_ushort8)vdata,elem);}
-	void set32(int elem,uint32_t data) {vdata=(vec_uint4)spu_insert(data,(vec_uint4)vdata,elem);}
-	uint8_t get8(int elem)   const {return spu_extract((vec_uchar16)vdata,elem);}
-	uint16_t get16(int elem) const {return spu_extract((vec_ushort8)vdata,elem);}
-	uint32_t get32(int elem) const {return spu_extract((vec_uint4)vdata,elem);}
+	void set8(int elem, uint8_t data)   {vdata=(vec_uint4)spu_insert(data, (vec_uchar16)vdata, elem);}
+	void set16(int elem, uint16_t data) {vdata=(vec_uint4)spu_insert(data, (vec_ushort8)vdata, elem);}
+	void set32(int elem, uint32_t data) {vdata=(vec_uint4)spu_insert(data, (vec_uint4)vdata, elem);}
+	uint8_t get8(int elem)   const {return spu_extract((vec_uchar16)vdata, elem);}
+	uint16_t get16(int elem) const {return spu_extract((vec_ushort8)vdata, elem);}
+	uint32_t get32(int elem) const {return spu_extract((vec_uint4)vdata, elem);}
 #else
-	void set8(int elem,uint8_t data)   {i8data[elem] = data;}
-	void set16(int elem,uint16_t data) {i16data[elem] = data;}
-	void set32(int elem,uint32_t data) {i32data[elem] = data;}
+	void set8(int elem, uint8_t data)   {i8data[elem] = data;}
+	void set16(int elem, uint16_t data) {i16data[elem] = data;}
+	void set32(int elem, uint32_t data) {i32data[elem] = data;}
 	uint8_t get8(int elem)   const {return i8data[elem];}
 	uint16_t get16(int elem) const {return i16data[elem];}
 	uint32_t get32(int elem) const {return i32data[elem];}
@@ -83,21 +83,21 @@ typedef PfxSortData16 PfxConstraintPair;
 
 //J	PfxBroadphasePair‚Æ‹¤’Ê
 
-SIMD_FORCE_INLINE void pfxSetConstraintId(PfxConstraintPair &pair,uint32_t i)	{pair.set32(2,i);}
-SIMD_FORCE_INLINE void pfxSetNumConstraints(PfxConstraintPair &pair,uint8_t n)	{pair.set8(7,n);}
+SIMD_FORCE_INLINE void pfxSetConstraintId(PfxConstraintPair &pair, uint32_t i)	{pair.set32(2, i);}
+SIMD_FORCE_INLINE void pfxSetNumConstraints(PfxConstraintPair &pair, uint8_t n)	{pair.set8(7, n);}
 
 SIMD_FORCE_INLINE uint32_t pfxGetConstraintId1(const PfxConstraintPair &pair)	{return pair.get32(2);}
 SIMD_FORCE_INLINE uint8_t  pfxGetNumConstraints(const PfxConstraintPair &pair)	{return pair.get8(7);}
 
 typedef PfxSortData16 PfxBroadphasePair;
 
-SIMD_FORCE_INLINE void pfxSetRigidBodyIdA(PfxBroadphasePair &pair,uint16_t i)	{pair.set16(0,i);}
-SIMD_FORCE_INLINE void pfxSetRigidBodyIdB(PfxBroadphasePair &pair,uint16_t i)	{pair.set16(1,i);}
-SIMD_FORCE_INLINE void pfxSetMotionMaskA(PfxBroadphasePair &pair,uint8_t i)		{pair.set8(4,i);}
-SIMD_FORCE_INLINE void pfxSetMotionMaskB(PfxBroadphasePair &pair,uint8_t i)		{pair.set8(5,i);}
-SIMD_FORCE_INLINE void pfxSetBroadphaseFlag(PfxBroadphasePair &pair,uint8_t f)	{pair.set8(6,(pair.get8(6)&0xf0)|(f&0x0f));}
-SIMD_FORCE_INLINE void pfxSetActive(PfxBroadphasePair &pair,bool b)			{pair.set8(6,(pair.get8(6)&0x0f)|((b?1:0)<<4));}
-SIMD_FORCE_INLINE void pfxSetContactId(PfxBroadphasePair &pair,uint32_t i)		{pair.set32(2,i);}
+SIMD_FORCE_INLINE void pfxSetRigidBodyIdA(PfxBroadphasePair &pair, uint16_t i)	{pair.set16(0, i);}
+SIMD_FORCE_INLINE void pfxSetRigidBodyIdB(PfxBroadphasePair &pair, uint16_t i)	{pair.set16(1, i);}
+SIMD_FORCE_INLINE void pfxSetMotionMaskA(PfxBroadphasePair &pair, uint8_t i)		{pair.set8(4, i);}
+SIMD_FORCE_INLINE void pfxSetMotionMaskB(PfxBroadphasePair &pair, uint8_t i)		{pair.set8(5, i);}
+SIMD_FORCE_INLINE void pfxSetBroadphaseFlag(PfxBroadphasePair &pair, uint8_t f)	{pair.set8(6, (pair.get8(6)&0xf0)|(f&0x0f));}
+SIMD_FORCE_INLINE void pfxSetActive(PfxBroadphasePair &pair, bool b)			{pair.set8(6, (pair.get8(6)&0x0f)|((b?1:0)<<4));}
+SIMD_FORCE_INLINE void pfxSetContactId(PfxBroadphasePair &pair, uint32_t i)		{pair.set32(2, i);}
 
 SIMD_FORCE_INLINE uint16_t pfxGetRigidBodyIdA(const PfxBroadphasePair &pair)	{return pair.get16(0);}
 SIMD_FORCE_INLINE uint16_t pfxGetRigidBodyIdB(const PfxBroadphasePair &pair)	{return pair.get16(1);}
@@ -135,7 +135,7 @@ ATTRIBUTE_ALIGNED16(struct) PfxSolverBody {
 
 static SIMD_FORCE_INLINE vmVector3 btReadVector3(const double* p)
 {
-	float tmp[3] = {float(p[0]),float(p[1]),float(p[2])};
+	float tmp[3] = {float(p[0]), float(p[1]), float(p[2])};
 	vmVector3 v;
 	loadXYZ(v, tmp);
 	return v;
@@ -143,7 +143,7 @@ static SIMD_FORCE_INLINE vmVector3 btReadVector3(const double* p)
 
 static SIMD_FORCE_INLINE vmQuat btReadQuat(const double* p)
 {
-	float tmp[4] = {float(p[0]),float(p[1]),float(p[2]),float(p[4])};
+	float tmp[4] = {float(p[0]), float(p[1]), float(p[2]), float(p[4])};
 	vmQuat vq;
 	loadXYZW(vq, tmp);
 	return vq;
@@ -256,7 +256,7 @@ ATTRIBUTE_ALIGNED16(struct) btConstraintSolverIO {
 
 
 
-void	SolverThreadFunc(void* userPtr,void* lsMemory);
+void	SolverThreadFunc(void* userPtr, void* lsMemory);
 void*	SolverlsMemoryFunc();
 ///The btParallelConstraintSolver performs computations on constraint rows in parallel
 ///Using the cross-platform threading it supports Windows, Linux, Mac OSX and PlayStation 3 Cell SPUs
@@ -279,7 +279,7 @@ public:
 	
 	virtual ~btParallelConstraintSolver();
 
-	virtual btScalar solveGroup(btCollisionObject** bodies,int numBodies,btPersistentManifold** manifold,int numManifolds,btTypedConstraint** constraints,int numConstraints,const btContactSolverInfo& info, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc,btDispatcher* dispatcher);
+	virtual btScalar solveGroup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifold, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& info, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher);
 
 };
 

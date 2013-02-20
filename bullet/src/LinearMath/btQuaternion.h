@@ -468,7 +468,7 @@ public:
   /**@todo document this and it's use */
 	SIMD_FORCE_INLINE btQuaternion farthest( const btQuaternion& qd) const 
 	{
-		btQuaternion diff,sum;
+		btQuaternion diff, sum;
 		diff = *this - qd;
 		sum = *this + qd;
 		if( diff.dot(diff) > sum.dot(sum) )
@@ -479,7 +479,7 @@ public:
 	/**@todo document this and it's use */
 	SIMD_FORCE_INLINE btQuaternion nearest( const btQuaternion& qd) const 
 	{
-		btQuaternion diff,sum;
+		btQuaternion diff, sum;
 		diff = *this - qd;
 		sum = *this + qd;
 		if( diff.dot(diff) < sum.dot(sum) )
@@ -522,7 +522,7 @@ public:
 
 	static const btQuaternion&	getIdentity()
 	{
-		static const btQuaternion identityQuat(btScalar(0.),btScalar(0.),btScalar(0.),btScalar(1.));
+		static const btQuaternion identityQuat(btScalar(0.), btScalar(0.), btScalar(0.), btScalar(1.));
 		return identityQuat;
 	}
 
@@ -840,35 +840,35 @@ quatRotate(const btQuaternion& rotation, const btVector3& v)
 #elif defined(BT_USE_NEON)
     return btVector3((float32x4_t)vandq_s32((int32x4_t)q.get128(), btvFFF0Mask));
 #else	
-	return btVector3(q.getX(),q.getY(),q.getZ());
+	return btVector3(q.getX(), q.getY(), q.getZ());
 #endif
 }
 
 SIMD_FORCE_INLINE btQuaternion 
-shortestArcQuat(const btVector3& v0, const btVector3& v1) // Game Programming Gems 2.10. make sure v0,v1 are normalized
+shortestArcQuat(const btVector3& v0, const btVector3& v1) // Game Programming Gems 2.10. make sure v0, v1 are normalized
 {
 	btVector3 c = v0.cross(v1);
 	btScalar  d = v0.dot(v1);
 
 	if (d < -1.0 + SIMD_EPSILON)
 	{
-		btVector3 n,unused;
-		btPlaneSpace1(v0,n,unused);
-		return btQuaternion(n.x(),n.y(),n.z(),0.0f); // just pick any vector that is orthogonal to v0
+		btVector3 n, unused;
+		btPlaneSpace1(v0, n,unused);
+		return btQuaternion(n.x(), n.y(), n.z(),0.0f); // just pick any vector that is orthogonal to v0
 	}
 
 	btScalar  s = btSqrt((1.0f + d) * 2.0f);
 	btScalar rs = 1.0f / s;
 
-	return btQuaternion(c.getX()*rs,c.getY()*rs,c.getZ()*rs,s * 0.5f);
+	return btQuaternion(c.getX()*rs, c.getY()*rs, c.getZ()*rs, s * 0.5f);
 }
 
 SIMD_FORCE_INLINE btQuaternion 
-shortestArcQuatNormalize2(btVector3& v0,btVector3& v1)
+shortestArcQuatNormalize2(btVector3& v0, btVector3& v1)
 {
 	v0.normalize();
 	v1.normalize();
-	return shortestArcQuat(v0,v1);
+	return shortestArcQuat(v0, v1);
 }
 
 #endif //BT_SIMD__QUATERNION_H_

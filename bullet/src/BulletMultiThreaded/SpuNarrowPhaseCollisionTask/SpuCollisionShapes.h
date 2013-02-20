@@ -96,12 +96,12 @@ void dmaCompoundSubShapes (CompoundShape_LocalStoreMemory* compoundShapeLocation
 
 #define USE_BRANCHFREE_TEST 1
 #ifdef USE_BRANCHFREE_TEST
-SIMD_FORCE_INLINE unsigned int spuTestQuantizedAabbAgainstQuantizedAabb(unsigned short int* aabbMin1,unsigned short int* aabbMax1,const unsigned short int* aabbMin2,const unsigned short int* aabbMax2)
+SIMD_FORCE_INLINE unsigned int spuTestQuantizedAabbAgainstQuantizedAabb(unsigned short int* aabbMin1, unsigned short int* aabbMax1, const unsigned short int* aabbMin2, const unsigned short int* aabbMax2)
 {		
 #if defined(__CELLOS_LV2__) && defined (__SPU__)
-	vec_ushort8 vecMin = {aabbMin1[0],aabbMin2[0],aabbMin1[2],aabbMin2[2],aabbMin1[1],aabbMin2[1],0,0};
-	vec_ushort8 vecMax = {aabbMax2[0],aabbMax1[0],aabbMax2[2],aabbMax1[2],aabbMax2[1],aabbMax1[1],0,0};
-	vec_ushort8 isGt = spu_cmpgt(vecMin,vecMax);
+	vec_ushort8 vecMin = {aabbMin1[0], aabbMin2[0], aabbMin1[2], aabbMin2[2], aabbMin1[1], aabbMin2[1],0,0};
+	vec_ushort8 vecMax = {aabbMax2[0], aabbMax1[0], aabbMax2[2], aabbMax1[2], aabbMax2[1], aabbMax1[1],0,0};
+	vec_ushort8 isGt = spu_cmpgt(vecMin, vecMax);
 	return spu_extract(spu_gather(isGt),0)==0;
 
 #else
@@ -113,7 +113,7 @@ SIMD_FORCE_INLINE unsigned int spuTestQuantizedAabbAgainstQuantizedAabb(unsigned
 }
 #else
 
-SIMD_FORCE_INLINE unsigned int spuTestQuantizedAabbAgainstQuantizedAabb(const unsigned short int* aabbMin1,const unsigned short int* aabbMax1,const unsigned short int* aabbMin2,const unsigned short int*  aabbMax2)
+SIMD_FORCE_INLINE unsigned int spuTestQuantizedAabbAgainstQuantizedAabb(const unsigned short int* aabbMin1, const unsigned short int* aabbMax1, const unsigned short int* aabbMin2, const unsigned short int*  aabbMax2)
 {
 	unsigned int overlap = 1;
 	overlap = (aabbMin1[0] > aabbMax2[0] || aabbMax1[0] < aabbMin2[0]) ? 0 : overlap;
@@ -123,6 +123,6 @@ SIMD_FORCE_INLINE unsigned int spuTestQuantizedAabbAgainstQuantizedAabb(const un
 }
 #endif
 
-void	spuWalkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback,unsigned short int* quantizedQueryAabbMin,unsigned short int* quantizedQueryAabbMax,const btQuantizedBvhNode* rootNode,int startNodeIndex,int endNodeIndex);
+void	spuWalkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback, unsigned short int* quantizedQueryAabbMin, unsigned short int* quantizedQueryAabbMax, const btQuantizedBvhNode* rootNode, int startNodeIndex, int endNodeIndex);
 
 #endif

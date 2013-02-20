@@ -99,7 +99,7 @@ struct	btSoftBodyHelpers
 		int fixeds,
 		bool gendiags,
 		float* tex_coords=0);
-	static	float	CalculateUV(int resx,int resy,int ix,int iy,int id);
+	static	float	CalculateUV(int resx, int resy, int ix, int iy, int id);
 	/* Create an ellipsoid													*/ 
 	static	btSoftBody*		CreateEllipsoid(btSoftBodyWorldInfo& worldInfo,
 		const btVector3& center,

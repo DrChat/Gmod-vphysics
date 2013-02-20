@@ -63,7 +63,7 @@ email: projectileman@yahoo.com
 
 
 /// Vector copy
-#define VEC_COPY_2(b,a)				\
+#define VEC_COPY_2(b, a)				\
 {						\
    (b)[0] = (a)[0];				\
    (b)[1] = (a)[1];				\
@@ -71,7 +71,7 @@ email: projectileman@yahoo.com
 
 
 /// Copy 3D vector
-#define VEC_COPY(b,a)				\
+#define VEC_COPY(b, a)				\
 {						\
    (b)[0] = (a)[0];				\
    (b)[1] = (a)[1];				\
@@ -80,7 +80,7 @@ email: projectileman@yahoo.com
 
 
 /// Copy 4D vector
-#define VEC_COPY_4(b,a)				\
+#define VEC_COPY_4(b, a)				\
 {						\
    (b)[0] = (a)[0];				\
    (b)[1] = (a)[1];				\
@@ -89,15 +89,15 @@ email: projectileman@yahoo.com
 }\
 
 /// VECTOR SWAP
-#define VEC_SWAP(b,a)				\
+#define VEC_SWAP(b, a)				\
 {  \
-    GIM_SWAP_NUMBERS((b)[0],(a)[0]);\
-    GIM_SWAP_NUMBERS((b)[1],(a)[1]);\
-    GIM_SWAP_NUMBERS((b)[2],(a)[2]);\
+    GIM_SWAP_NUMBERS((b)[0], (a)[0]);\
+    GIM_SWAP_NUMBERS((b)[1], (a)[1]);\
+    GIM_SWAP_NUMBERS((b)[2], (a)[2]);\
 }\
 
 /// Vector difference
-#define VEC_DIFF_2(v21,v2,v1)			\
+#define VEC_DIFF_2(v21, v2, v1)			\
 {						\
    (v21)[0] = (v2)[0] - (v1)[0];		\
    (v21)[1] = (v2)[1] - (v1)[1];		\
@@ -105,7 +105,7 @@ email: projectileman@yahoo.com
 
 
 /// Vector difference
-#define VEC_DIFF(v21,v2,v1)			\
+#define VEC_DIFF(v21, v2, v1)			\
 {						\
    (v21)[0] = (v2)[0] - (v1)[0];		\
    (v21)[1] = (v2)[1] - (v1)[1];		\
@@ -114,7 +114,7 @@ email: projectileman@yahoo.com
 
 
 /// Vector difference
-#define VEC_DIFF_4(v21,v2,v1)			\
+#define VEC_DIFF_4(v21, v2, v1)			\
 {						\
    (v21)[0] = (v2)[0] - (v1)[0];		\
    (v21)[1] = (v2)[1] - (v1)[1];		\
@@ -124,7 +124,7 @@ email: projectileman@yahoo.com
 
 
 /// Vector sum
-#define VEC_SUM_2(v21,v2,v1)			\
+#define VEC_SUM_2(v21, v2, v1)			\
 {						\
    (v21)[0] = (v2)[0] + (v1)[0];		\
    (v21)[1] = (v2)[1] + (v1)[1];		\
@@ -132,7 +132,7 @@ email: projectileman@yahoo.com
 
 
 /// Vector sum
-#define VEC_SUM(v21,v2,v1)			\
+#define VEC_SUM(v21, v2, v1)			\
 {						\
    (v21)[0] = (v2)[0] + (v1)[0];		\
    (v21)[1] = (v2)[1] + (v1)[1];		\
@@ -141,7 +141,7 @@ email: projectileman@yahoo.com
 
 
 /// Vector sum
-#define VEC_SUM_4(v21,v2,v1)			\
+#define VEC_SUM_4(v21, v2, v1)			\
 {						\
    (v21)[0] = (v2)[0] + (v1)[0];		\
    (v21)[1] = (v2)[1] + (v1)[1];		\
@@ -151,7 +151,7 @@ email: projectileman@yahoo.com
 
 
 /// scalar times vector
-#define VEC_SCALE_2(c,a,b)			\
+#define VEC_SCALE_2(c, a,b)			\
 {						\
    (c)[0] = (a)*(b)[0];				\
    (c)[1] = (a)*(b)[1];				\
@@ -159,7 +159,7 @@ email: projectileman@yahoo.com
 
 
 /// scalar times vector
-#define VEC_SCALE(c,a,b)			\
+#define VEC_SCALE(c, a,b)			\
 {						\
    (c)[0] = (a)*(b)[0];				\
    (c)[1] = (a)*(b)[1];				\
@@ -168,7 +168,7 @@ email: projectileman@yahoo.com
 
 
 /// scalar times vector
-#define VEC_SCALE_4(c,a,b)			\
+#define VEC_SCALE_4(c, a,b)			\
 {						\
    (c)[0] = (a)*(b)[0];				\
    (c)[1] = (a)*(b)[1];				\
@@ -178,7 +178,7 @@ email: projectileman@yahoo.com
 
 
 /// accumulate scaled vector
-#define VEC_ACCUM_2(c,a,b)			\
+#define VEC_ACCUM_2(c, a,b)			\
 {						\
    (c)[0] += (a)*(b)[0];			\
    (c)[1] += (a)*(b)[1];			\
@@ -186,7 +186,7 @@ email: projectileman@yahoo.com
 
 
 /// accumulate scaled vector
-#define VEC_ACCUM(c,a,b)			\
+#define VEC_ACCUM(c, a,b)			\
 {						\
    (c)[0] += (a)*(b)[0];			\
    (c)[1] += (a)*(b)[1];			\
@@ -195,7 +195,7 @@ email: projectileman@yahoo.com
 
 
 /// accumulate scaled vector
-#define VEC_ACCUM_4(c,a,b)			\
+#define VEC_ACCUM_4(c, a,b)			\
 {						\
    (c)[0] += (a)*(b)[0];			\
    (c)[1] += (a)*(b)[1];			\
@@ -205,72 +205,72 @@ email: projectileman@yahoo.com
 
 
 /// Vector dot product
-#define VEC_DOT_2(a,b) ((a)[0]*(b)[0] + (a)[1]*(b)[1])
+#define VEC_DOT_2(a, b) ((a)[0]*(b)[0] + (a)[1]*(b)[1])
 
 
 /// Vector dot product
-#define VEC_DOT(a,b) ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2])
+#define VEC_DOT(a, b) ((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2])
 
 /// Vector dot product
-#define VEC_DOT_4(a,b)	((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2] + (a)[3]*(b)[3])
+#define VEC_DOT_4(a, b)	((a)[0]*(b)[0] + (a)[1]*(b)[1] + (a)[2]*(b)[2] + (a)[3]*(b)[3])
 
 /// vector impact parameter (squared)
-#define VEC_IMPACT_SQ(bsq,direction,position) {\
+#define VEC_IMPACT_SQ(bsq, direction, position) {\
    GREAL _llel_ = VEC_DOT(direction, position);\
    bsq = VEC_DOT(position, position) - _llel_*_llel_;\
 }\
 
 
 /// vector impact parameter
-#define VEC_IMPACT(bsq,direction,position)	{\
-   VEC_IMPACT_SQ(bsq,direction,position);		\
-   GIM_SQRT(bsq,bsq);					\
+#define VEC_IMPACT(bsq, direction, position)	{\
+   VEC_IMPACT_SQ(bsq, direction, position);		\
+   GIM_SQRT(bsq, bsq);					\
 }\
 
 /// Vector length
-#define VEC_LENGTH_2(a,l)\
+#define VEC_LENGTH_2(a, l)\
 {\
-    GREAL _pp = VEC_DOT_2(a,a);\
-    GIM_SQRT(_pp,l);\
-}\
-
-
-/// Vector length
-#define VEC_LENGTH(a,l)\
-{\
-    GREAL _pp = VEC_DOT(a,a);\
-    GIM_SQRT(_pp,l);\
+    GREAL _pp = VEC_DOT_2(a, a);\
+    GIM_SQRT(_pp, l);\
 }\
 
 
 /// Vector length
-#define VEC_LENGTH_4(a,l)\
+#define VEC_LENGTH(a, l)\
 {\
-    GREAL _pp = VEC_DOT_4(a,a);\
-    GIM_SQRT(_pp,l);\
-}\
-
-/// Vector inv length
-#define VEC_INV_LENGTH_2(a,l)\
-{\
-    GREAL _pp = VEC_DOT_2(a,a);\
-    GIM_INV_SQRT(_pp,l);\
+    GREAL _pp = VEC_DOT(a, a);\
+    GIM_SQRT(_pp, l);\
 }\
 
 
-/// Vector inv length
-#define VEC_INV_LENGTH(a,l)\
+/// Vector length
+#define VEC_LENGTH_4(a, l)\
 {\
-    GREAL _pp = VEC_DOT(a,a);\
-    GIM_INV_SQRT(_pp,l);\
+    GREAL _pp = VEC_DOT_4(a, a);\
+    GIM_SQRT(_pp, l);\
+}\
+
+/// Vector inv length
+#define VEC_INV_LENGTH_2(a, l)\
+{\
+    GREAL _pp = VEC_DOT_2(a, a);\
+    GIM_INV_SQRT(_pp, l);\
 }\
 
 
 /// Vector inv length
-#define VEC_INV_LENGTH_4(a,l)\
+#define VEC_INV_LENGTH(a, l)\
 {\
-    GREAL _pp = VEC_DOT_4(a,a);\
-    GIM_INV_SQRT(_pp,l);\
+    GREAL _pp = VEC_DOT(a, a);\
+    GIM_INV_SQRT(_pp, l);\
+}\
+
+
+/// Vector inv length
+#define VEC_INV_LENGTH_4(a, l)\
+{\
+    GREAL _pp = VEC_DOT_4(a, a);\
+    GIM_INV_SQRT(_pp, l);\
 }\
 
 
@@ -284,17 +284,17 @@ email: projectileman@yahoo.com
 
 
 /// Vector length
-#define VEC_CONJUGATE_LENGTH(a,l)\
+#define VEC_CONJUGATE_LENGTH(a, l)\
 {\
     GREAL _pp = 1.0 - a[0]*a[0] - a[1]*a[1] - a[2]*a[2];\
-    GIM_SQRT(_pp,l);\
+    GIM_SQRT(_pp, l);\
 }\
 
 
 /// Vector length
 #define VEC_NORMALIZE(a) {	\
     GREAL len;\
-    VEC_INV_LENGTH(a,len); \
+    VEC_INV_LENGTH(a, len); \
     if(len<G_REAL_INFINITY)\
     {\
         a[0] *= len;				\
@@ -304,9 +304,9 @@ email: projectileman@yahoo.com
 }\
 
 /// Set Vector size
-#define VEC_RENORMALIZE(a,newlen) {	\
+#define VEC_RENORMALIZE(a, newlen) {	\
     GREAL len;\
-    VEC_INV_LENGTH(a,len); \
+    VEC_INV_LENGTH(a, len); \
     if(len<G_REAL_INFINITY)\
     {\
         len *= newlen;\
@@ -317,7 +317,7 @@ email: projectileman@yahoo.com
 }\
 
 /// Vector cross
-#define VEC_CROSS(c,a,b)		\
+#define VEC_CROSS(c, a,b)		\
 {						\
    c[0] = (a)[1] * (b)[2] - (a)[2] * (b)[1];	\
    c[1] = (a)[2] * (b)[0] - (a)[0] * (b)[2];	\
@@ -327,7 +327,7 @@ email: projectileman@yahoo.com
 
 /*! Vector perp -- assumes that n is of unit length
  * accepts vector v, subtracts out any component parallel to n */
-#define VEC_PERPENDICULAR(vp,v,n)			\
+#define VEC_PERPENDICULAR(vp, v,n)			\
 {						\
    GREAL dot = VEC_DOT(v, n);			\
    vp[0] = (v)[0] - dot*(n)[0];		\
@@ -337,7 +337,7 @@ email: projectileman@yahoo.com
 
 
 /*! Vector parallel -- assumes that n is of unit length */
-#define VEC_PARALLEL(vp,v,n)			\
+#define VEC_PARALLEL(vp, v,n)			\
 {						\
    GREAL dot = VEC_DOT(v, n);			\
    vp[0] = (dot) * (n)[0];			\
@@ -347,7 +347,7 @@ email: projectileman@yahoo.com
 
 /*! Same as Vector parallel --  n can have any length
  * accepts vector v, subtracts out any component perpendicular to n */
-#define VEC_PROJECT(vp,v,n)			\
+#define VEC_PROJECT(vp, v,n)			\
 { \
 	GREAL scalar = VEC_DOT(v, n);			\
 	scalar/= VEC_DOT(n, n); \
@@ -358,7 +358,7 @@ email: projectileman@yahoo.com
 
 
 /*! accepts vector v*/
-#define VEC_UNPROJECT(vp,v,n)			\
+#define VEC_UNPROJECT(vp, v,n)			\
 { \
 	GREAL scalar = VEC_DOT(v, n);			\
 	scalar = VEC_DOT(n, n)/scalar; \
@@ -370,7 +370,7 @@ email: projectileman@yahoo.com
 
 /*! Vector reflection -- assumes n is of unit length
  Takes vector v, reflects it against reflector n, and returns vr */
-#define VEC_REFLECT(vr,v,n)			\
+#define VEC_REFLECT(vr, v,n)			\
 {						\
    GREAL dot = VEC_DOT(v, n);			\
    vr[0] = (v)[0] - 2.0 * (dot) * (n)[0];	\
@@ -381,7 +381,7 @@ email: projectileman@yahoo.com
 
 /*! Vector blending
 Takes two vectors a, b, blends them together with two scalars */
-#define VEC_BLEND_AB(vr,sa,a,sb,b)			\
+#define VEC_BLEND_AB(vr, sa, a,sb, b)			\
 {						\
    vr[0] = (sa) * (a)[0] + (sb) * (b)[0];	\
    vr[1] = (sa) * (a)[1] + (sb) * (b)[1];	\
@@ -390,21 +390,21 @@ Takes two vectors a, b, blends them together with two scalars */
 
 /*! Vector blending
 Takes two vectors a, b, blends them together with s <=1 */
-#define VEC_BLEND(vr,a,b,s) VEC_BLEND_AB(vr,(1-s),a,s,b)
+#define VEC_BLEND(vr, a,b, s) VEC_BLEND_AB(vr, (1-s), a,s, b)
 
-#define VEC_SET3(a,b,op,c) a[0]=b[0] op c[0]; a[1]=b[1] op c[1]; a[2]=b[2] op c[2];
+#define VEC_SET3(a, b,op, c) a[0]=b[0] op c[0]; a[1]=b[1] op c[1]; a[2]=b[2] op c[2];
 
 //! Finds the bigger cartesian coordinate from a vector
 #define VEC_MAYOR_COORD(vec, maxc)\
 {\
-	GREAL A[] = {fabs(vec[0]),fabs(vec[1]),fabs(vec[2])};\
+	GREAL A[] = {fabs(vec[0]), fabs(vec[1]), fabs(vec[2])};\
     maxc =  A[0]>A[1]?(A[0]>A[2]?0:2):(A[1]>A[2]?1:2);\
 }\
 
 //! Finds the 2 smallest cartesian coordinates from a vector
 #define VEC_MINOR_AXES(vec, i0, i1)\
 {\
-	VEC_MAYOR_COORD(vec,i0);\
+	VEC_MAYOR_COORD(vec, i0);\
 	i0 = (i0+1)%3;\
 	i1 = (i0+1)%3;\
 }\
@@ -412,27 +412,27 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 
-#define VEC_EQUAL(v1,v2) (v1[0]==v2[0]&&v1[1]==v2[1]&&v1[2]==v2[2])
+#define VEC_EQUAL(v1, v2) (v1[0]==v2[0]&&v1[1]==v2[1]&&v1[2]==v2[2])
 
-#define VEC_NEAR_EQUAL(v1,v2) (GIM_NEAR_EQUAL(v1[0],v2[0])&&GIM_NEAR_EQUAL(v1[1],v2[1])&&GIM_NEAR_EQUAL(v1[2],v2[2]))
+#define VEC_NEAR_EQUAL(v1, v2) (GIM_NEAR_EQUAL(v1[0], v2[0])&&GIM_NEAR_EQUAL(v1[1], v2[1])&&GIM_NEAR_EQUAL(v1[2], v2[2]))
 
 
 /// Vector cross
-#define X_AXIS_CROSS_VEC(dst,src)\
+#define X_AXIS_CROSS_VEC(dst, src)\
 {					   \
 	dst[0] = 0.0f;     \
 	dst[1] = -src[2];  \
 	dst[2] = src[1];  \
 }\
 
-#define Y_AXIS_CROSS_VEC(dst,src)\
+#define Y_AXIS_CROSS_VEC(dst, src)\
 {					   \
 	dst[0] = src[2];     \
 	dst[1] = 0.0f;  \
 	dst[2] = -src[0];  \
 }\
 
-#define Z_AXIS_CROSS_VEC(dst,src)\
+#define Z_AXIS_CROSS_VEC(dst, src)\
 {					   \
 	dst[0] = -src[1];     \
 	dst[1] = src[0];  \
@@ -509,7 +509,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 }\
 
 /*! matrix rotation  X */
-#define ROTX_CS(m,cosine,sine)		\
+#define ROTX_CS(m, cosine, sine)		\
 {					\
    /* rotation about the x-axis */	\
 					\
@@ -535,7 +535,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 }\
 
 /*! matrix rotation  Y */
-#define ROTY_CS(m,cosine,sine)		\
+#define ROTY_CS(m, cosine, sine)		\
 {					\
    /* rotation about the y-axis */	\
 					\
@@ -561,7 +561,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 }\
 
 /*! matrix rotation  Z */
-#define ROTZ_CS(m,cosine,sine)		\
+#define ROTZ_CS(m, cosine, sine)		\
 {					\
    /* rotation about the z-axis */	\
 					\
@@ -587,7 +587,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 }\
 
 /*! matrix copy */
-#define COPY_MATRIX_2X2(b,a)	\
+#define COPY_MATRIX_2X2(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[0][1];		\
@@ -599,7 +599,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix copy */
-#define COPY_MATRIX_2X3(b,a)	\
+#define COPY_MATRIX_2X3(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[0][1];		\
@@ -612,7 +612,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix copy */
-#define COPY_MATRIX_3X3(b,a)	\
+#define COPY_MATRIX_3X3(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[0][1];		\
@@ -629,7 +629,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix copy */
-#define COPY_MATRIX_4X4(b,a)	\
+#define COPY_MATRIX_4X4(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[0][1];		\
@@ -654,7 +654,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix transpose */
-#define TRANSPOSE_MATRIX_2X2(b,a)	\
+#define TRANSPOSE_MATRIX_2X2(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[1][0];		\
@@ -665,7 +665,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix transpose */
-#define TRANSPOSE_MATRIX_3X3(b,a)	\
+#define TRANSPOSE_MATRIX_3X3(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[1][0];		\
@@ -682,7 +682,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix transpose */
-#define TRANSPOSE_MATRIX_4X4(b,a)	\
+#define TRANSPOSE_MATRIX_4X4(b, a)	\
 {				\
    b[0][0] = a[0][0];		\
    b[0][1] = a[1][0];		\
@@ -707,7 +707,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define SCALE_MATRIX_2X2(b,s,a)		\
+#define SCALE_MATRIX_2X2(b, s,a)		\
 {					\
    b[0][0] = (s) * a[0][0];		\
    b[0][1] = (s) * a[0][1];		\
@@ -718,7 +718,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define SCALE_MATRIX_3X3(b,s,a)		\
+#define SCALE_MATRIX_3X3(b, s,a)		\
 {					\
    b[0][0] = (s) * a[0][0];		\
    b[0][1] = (s) * a[0][1];		\
@@ -735,7 +735,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define SCALE_MATRIX_4X4(b,s,a)		\
+#define SCALE_MATRIX_4X4(b, s,a)		\
 {					\
    b[0][0] = (s) * a[0][0];		\
    b[0][1] = (s) * a[0][1];		\
@@ -760,7 +760,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define SCALE_VEC_MATRIX_2X2(b,svec,a)		\
+#define SCALE_VEC_MATRIX_2X2(b, svec, a)		\
 {					\
    b[0][0] = svec[0] * a[0][0];		\
    b[1][0] = svec[0] * a[1][0];		\
@@ -771,7 +771,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar. Each columns is scaled by each scalar vector component */
-#define SCALE_VEC_MATRIX_3X3(b,svec,a)		\
+#define SCALE_VEC_MATRIX_3X3(b, svec, a)		\
 {					\
    b[0][0] = svec[0] * a[0][0];		\
    b[1][0] = svec[0] * a[1][0];		\
@@ -788,7 +788,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define SCALE_VEC_MATRIX_4X4(b,svec,a)		\
+#define SCALE_VEC_MATRIX_4X4(b, svec, a)		\
 {					\
    b[0][0] = svec[0] * a[0][0];		\
    b[1][0] = svec[0] * a[1][0];		\
@@ -813,7 +813,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define ACCUM_SCALE_MATRIX_2X2(b,s,a)		\
+#define ACCUM_SCALE_MATRIX_2X2(b, s,a)		\
 {					\
    b[0][0] += (s) * a[0][0];		\
    b[0][1] += (s) * a[0][1];		\
@@ -824,7 +824,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define ACCUM_SCALE_MATRIX_3X3(b,s,a)		\
+#define ACCUM_SCALE_MATRIX_3X3(b, s,a)		\
 {					\
    b[0][0] += (s) * a[0][0];		\
    b[0][1] += (s) * a[0][1];		\
@@ -841,7 +841,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! multiply matrix by scalar */
-#define ACCUM_SCALE_MATRIX_4X4(b,s,a)		\
+#define ACCUM_SCALE_MATRIX_4X4(b, s,a)		\
 {					\
    b[0][0] += (s) * a[0][0];		\
    b[0][1] += (s) * a[0][1];		\
@@ -866,7 +866,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 /*! matrix product */
 /*! c[x][y] = a[x][0]*b[0][y]+a[x][1]*b[1][y]+a[x][2]*b[2][y]+a[x][3]*b[3][y];*/
-#define MATRIX_PRODUCT_2X2(c,a,b)		\
+#define MATRIX_PRODUCT_2X2(c, a,b)		\
 {						\
    c[0][0] = a[0][0]*b[0][0]+a[0][1]*b[1][0];	\
    c[0][1] = a[0][0]*b[0][1]+a[0][1]*b[1][1];	\
@@ -878,7 +878,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 /*! matrix product */
 /*! c[x][y] = a[x][0]*b[0][y]+a[x][1]*b[1][y]+a[x][2]*b[2][y]+a[x][3]*b[3][y];*/
-#define MATRIX_PRODUCT_3X3(c,a,b)				\
+#define MATRIX_PRODUCT_3X3(c, a,b)				\
 {								\
    c[0][0] = a[0][0]*b[0][0]+a[0][1]*b[1][0]+a[0][2]*b[2][0];	\
    c[0][1] = a[0][0]*b[0][1]+a[0][1]*b[1][1]+a[0][2]*b[2][1];	\
@@ -896,7 +896,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 /*! matrix product */
 /*! c[x][y] = a[x][0]*b[0][y]+a[x][1]*b[1][y]+a[x][2]*b[2][y]+a[x][3]*b[3][y];*/
-#define MATRIX_PRODUCT_4X4(c,a,b)		\
+#define MATRIX_PRODUCT_4X4(c, a,b)		\
 {						\
    c[0][0] = a[0][0]*b[0][0]+a[0][1]*b[1][0]+a[0][2]*b[2][0]+a[0][3]*b[3][0];\
    c[0][1] = a[0][0]*b[0][1]+a[0][1]*b[1][1]+a[0][2]*b[2][1]+a[0][3]*b[3][1];\
@@ -921,7 +921,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix times vector */
-#define MAT_DOT_VEC_2X2(p,m,v)					\
+#define MAT_DOT_VEC_2X2(p, m,v)					\
 {								\
    p[0] = m[0][0]*v[0] + m[0][1]*v[1];				\
    p[1] = m[1][0]*v[0] + m[1][1]*v[1];				\
@@ -929,7 +929,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 
 
 /*! matrix times vector */
-#define MAT_DOT_VEC_3X3(p,m,v)					\
+#define MAT_DOT_VEC_3X3(p, m,v)					\
 {								\
    p[0] = m[0][0]*v[0] + m[0][1]*v[1] + m[0][2]*v[2];		\
    p[1] = m[1][0]*v[0] + m[1][1]*v[1] + m[1][2]*v[2];		\
@@ -940,7 +940,7 @@ Takes two vectors a, b, blends them together with s <=1 */
 /*! matrix times vector
 v is a vec4f
 */
-#define MAT_DOT_VEC_4X4(p,m,v)					\
+#define MAT_DOT_VEC_4X4(p, m,v)					\
 {								\
    p[0] = m[0][0]*v[0] + m[0][1]*v[1] + m[0][2]*v[2] + m[0][3]*v[3];	\
    p[1] = m[1][0]*v[0] + m[1][1]*v[1] + m[1][2]*v[2] + m[1][3]*v[3];	\
@@ -953,7 +953,7 @@ v is a vec3f
 and m is a mat4f<br>
 Last column is added as the position
 */
-#define MAT_DOT_VEC_3X4(p,m,v)					\
+#define MAT_DOT_VEC_3X4(p, m,v)					\
 {								\
    p[0] = m[0][0]*v[0] + m[0][1]*v[1] + m[0][2]*v[2] + m[0][3];	\
    p[1] = m[1][0]*v[0] + m[1][1]*v[1] + m[1][2]*v[2] + m[1][3];	\
@@ -963,7 +963,7 @@ Last column is added as the position
 
 /*! vector transpose times matrix */
 /*! p[j] = v[0]*m[0][j] + v[1]*m[1][j] + v[2]*m[2][j]; */
-#define VEC_DOT_MAT_3X3(p,v,m)					\
+#define VEC_DOT_MAT_3X3(p, v,m)					\
 {								\
    p[0] = v[0]*m[0][0] + v[1]*m[1][0] + v[2]*m[2][0];		\
    p[1] = v[0]*m[0][1] + v[1]*m[1][1] + v[2]*m[2][1];		\
@@ -974,14 +974,14 @@ Last column is added as the position
 /*! affine matrix times vector */
 /** The matrix is assumed to be an affine matrix, with last two
  * entries representing a translation */
-#define MAT_DOT_VEC_2X3(p,m,v)					\
+#define MAT_DOT_VEC_2X3(p, m,v)					\
 {								\
    p[0] = m[0][0]*v[0] + m[0][1]*v[1] + m[0][2];		\
    p[1] = m[1][0]*v[0] + m[1][1]*v[1] + m[1][2];		\
 }\
 
 //! Transform a plane
-#define MAT_TRANSFORM_PLANE_4X4(pout,m,plane)\
+#define MAT_TRANSFORM_PLANE_4X4(pout, m,plane)\
 {								\
    pout[0] = m[0][0]*plane[0] + m[0][1]*plane[1]  + m[0][2]*plane[2];\
    pout[1] = m[1][0]*plane[0] + m[1][1]*plane[1]  + m[1][2]*plane[2];\
@@ -1000,7 +1000,7 @@ Last column is added as the position
  * It will leave normals the wrong length !!!
  * See macro below for use on normals.
  */
-#define INV_TRANSP_MAT_DOT_VEC_2X2(p,m,v)			\
+#define INV_TRANSP_MAT_DOT_VEC_2X2(p, m,v)			\
 {								\
    GREAL det;						\
 								\
@@ -1024,7 +1024,7 @@ Last column is added as the position
  * and multiplies vector v into it, to yeild vector p
  * Vector p is then normalized.
  */
-#define NORM_XFORM_2X2(p,m,v)					\
+#define NORM_XFORM_2X2(p, m,v)					\
 {								\
    GREAL len;							\
 								\
@@ -1035,7 +1035,7 @@ Last column is added as the position
       p[1] = - m[0][1]*v[0] + m[0][0]*v[1];			\
 								\
       len = p[0]*p[0] + p[1]*p[1];				\
-      GIM_INV_SQRT(len,len);					\
+      GIM_INV_SQRT(len, len);					\
       p[0] *= len;						\
       p[1] *= len;						\
    } else {							\
@@ -1049,7 +1049,7 @@ Last column is added as the position
  * The outer product of vector v and vector transpose t yeilds
  * dyadic matrix m.
  */
-#define OUTER_PRODUCT_2X2(m,v,t)				\
+#define OUTER_PRODUCT_2X2(m, v,t)				\
 {								\
    m[0][0] = v[0] * t[0];					\
    m[0][1] = v[0] * t[1];					\
@@ -1064,7 +1064,7 @@ Last column is added as the position
  * The outer product of vector v and vector transpose t yeilds
  * dyadic matrix m.
  */
-#define OUTER_PRODUCT_3X3(m,v,t)				\
+#define OUTER_PRODUCT_3X3(m, v,t)				\
 {								\
    m[0][0] = v[0] * t[0];					\
    m[0][1] = v[0] * t[1];					\
@@ -1085,7 +1085,7 @@ Last column is added as the position
  * The outer product of vector v and vector transpose t yeilds
  * dyadic matrix m.
  */
-#define OUTER_PRODUCT_4X4(m,v,t)				\
+#define OUTER_PRODUCT_4X4(m, v,t)				\
 {								\
    m[0][0] = v[0] * t[0];					\
    m[0][1] = v[0] * t[1];					\
@@ -1114,7 +1114,7 @@ Last column is added as the position
  * The outer product of vector v and vector transpose t yeilds
  * dyadic matrix m.
  */
-#define ACCUM_OUTER_PRODUCT_2X2(m,v,t)				\
+#define ACCUM_OUTER_PRODUCT_2X2(m, v,t)				\
 {								\
    m[0][0] += v[0] * t[0];					\
    m[0][1] += v[0] * t[1];					\
@@ -1129,7 +1129,7 @@ Last column is added as the position
  * The outer product of vector v and vector transpose t yeilds
  * dyadic matrix m.
  */
-#define ACCUM_OUTER_PRODUCT_3X3(m,v,t)				\
+#define ACCUM_OUTER_PRODUCT_3X3(m, v,t)				\
 {								\
    m[0][0] += v[0] * t[0];					\
    m[0][1] += v[0] * t[1];					\
@@ -1150,7 +1150,7 @@ Last column is added as the position
  * The outer product of vector v and vector transpose t yeilds
  * dyadic matrix m.
  */
-#define ACCUM_OUTER_PRODUCT_4X4(m,v,t)				\
+#define ACCUM_OUTER_PRODUCT_4X4(m, v,t)				\
 {								\
    m[0][0] += v[0] * t[0];					\
    m[0][1] += v[0] * t[1];					\
@@ -1178,7 +1178,7 @@ Last column is added as the position
  *
  * Computes determinant of matrix m, returning d
  */
-#define DETERMINANT_2X2(d,m)					\
+#define DETERMINANT_2X2(d, m)					\
 {								\
    d = m[0][0] * m[1][1] - m[0][1] * m[1][0];			\
 }\
@@ -1188,7 +1188,7 @@ Last column is added as the position
  *
  * Computes determinant of matrix m, returning d
  */
-#define DETERMINANT_3X3(d,m)					\
+#define DETERMINANT_3X3(d, m)					\
 {								\
    d = m[0][0] * (m[1][1]*m[2][2] - m[1][2] * m[2][1]);		\
    d -= m[0][1] * (m[1][0]*m[2][2] - m[1][2] * m[2][0]);	\
@@ -1196,10 +1196,10 @@ Last column is added as the position
 }\
 
 
-/** i,j,th cofactor of a 4x4 matrix
+/** i, j,th cofactor of a 4x4 matrix
  *
  */
-#define COFACTOR_4X4_IJ(fac,m,i,j) 				\
+#define COFACTOR_4X4_IJ(fac, m,i, j) 				\
 {								\
    GUINT __ii[4], __jj[4], __k;						\
 								\
@@ -1226,7 +1226,7 @@ Last column is added as the position
  *
  * Computes determinant of matrix m, returning d
  */
-#define DETERMINANT_4X4(d,m)					\
+#define DETERMINANT_4X4(d, m)					\
 {								\
    GREAL cofac;						\
    COFACTOR_4X4_IJ (cofac, m, 0, 0);				\
@@ -1244,7 +1244,7 @@ Last column is added as the position
  *
  * Computes cofactor of matrix m, returning a
  */
-#define COFACTOR_2X2(a,m)					\
+#define COFACTOR_2X2(a, m)					\
 {								\
    a[0][0] = (m)[1][1];						\
    a[0][1] = - (m)[1][0];						\
@@ -1257,7 +1257,7 @@ Last column is added as the position
  *
  * Computes cofactor of matrix m, returning a
  */
-#define COFACTOR_3X3(a,m)					\
+#define COFACTOR_3X3(a, m)					\
 {								\
    a[0][0] = m[1][1]*m[2][2] - m[1][2]*m[2][1];			\
    a[0][1] = - (m[1][0]*m[2][2] - m[2][0]*m[1][2]);		\
@@ -1275,9 +1275,9 @@ Last column is added as the position
  *
  * Computes cofactor of matrix m, returning a
  */
-#define COFACTOR_4X4(a,m)					\
+#define COFACTOR_4X4(a, m)					\
 {								\
-   int i,j;							\
+   int i, j;							\
 								\
    for (i=0; i<4; i++) {					\
       for (j=0; j<4; j++) {					\
@@ -1292,7 +1292,7 @@ Last column is added as the position
  * Computes adjoint of matrix m, returning a
  * (Note that adjoint is just the transpose of the cofactor matrix)
  */
-#define ADJOINT_2X2(a,m)					\
+#define ADJOINT_2X2(a, m)					\
 {								\
    a[0][0] = (m)[1][1];						\
    a[1][0] = - (m)[1][0];						\
@@ -1306,7 +1306,7 @@ Last column is added as the position
  * Computes adjoint of matrix m, returning a
  * (Note that adjoint is just the transpose of the cofactor matrix)
  */
-#define ADJOINT_3X3(a,m)					\
+#define ADJOINT_3X3(a, m)					\
 {								\
    a[0][0] = m[1][1]*m[2][2] - m[1][2]*m[2][1];			\
    a[1][0] = - (m[1][0]*m[2][2] - m[2][0]*m[1][2]);		\
@@ -1325,7 +1325,7 @@ Last column is added as the position
  * Computes adjoint of matrix m, returning a
  * (Note that adjoint is just the transpose of the cofactor matrix)
  */
-#define ADJOINT_4X4(a,m)					\
+#define ADJOINT_4X4(a, m)					\
 {								\
    char _i_,_j_;							\
 								\
@@ -1341,7 +1341,7 @@ Last column is added as the position
  *
  * Computes adjoint of matrix m, scales it by s, returning a
  */
-#define SCALE_ADJOINT_2X2(a,s,m)				\
+#define SCALE_ADJOINT_2X2(a, s,m)				\
 {								\
    a[0][0] = (s) * m[1][1];					\
    a[1][0] = - (s) * m[1][0];					\
@@ -1354,7 +1354,7 @@ Last column is added as the position
  *
  * Computes adjoint of matrix m, scales it by s, returning a
  */
-#define SCALE_ADJOINT_3X3(a,s,m)				\
+#define SCALE_ADJOINT_3X3(a, s,m)				\
 {								\
    a[0][0] = (s) * (m[1][1] * m[2][2] - m[1][2] * m[2][1]);	\
    a[1][0] = (s) * (m[1][2] * m[2][0] - m[1][0] * m[2][2]);	\
@@ -1374,7 +1374,7 @@ Last column is added as the position
  *
  * Computes adjoint of matrix m, scales it by s, returning a
  */
-#define SCALE_ADJOINT_4X4(a,s,m)				\
+#define SCALE_ADJOINT_4X4(a, s,m)				\
 {								\
    char _i_,_j_; \
    for (_i_=0; _i_<4; _i_++) {					\
@@ -1390,7 +1390,7 @@ Last column is added as the position
  * Compute inverse of matrix a, returning determinant m and
  * inverse b
  */
-#define INVERT_2X2(b,det,a)			\
+#define INVERT_2X2(b, det, a)			\
 {						\
    GREAL _tmp_;					\
    DETERMINANT_2X2 (det, a);			\
@@ -1404,7 +1404,7 @@ Last column is added as the position
  * Compute inverse of matrix a, returning determinant m and
  * inverse b
  */
-#define INVERT_3X3(b,det,a)			\
+#define INVERT_3X3(b, det, a)			\
 {						\
    GREAL _tmp_;					\
    DETERMINANT_3X3 (det, a);			\
@@ -1418,7 +1418,7 @@ Last column is added as the position
  * Compute inverse of matrix a, returning determinant m and
  * inverse b
  */
-#define INVERT_4X4(b,det,a)			\
+#define INVERT_4X4(b, det, a)			\
 {						\
    GREAL _tmp_;					\
    DETERMINANT_4X4 (det, a);			\
@@ -1427,7 +1427,7 @@ Last column is added as the position
 }\
 
 //! Get the triple(3) row of a transform matrix
-#define MAT_GET_ROW(mat,vec3,rowindex)\
+#define MAT_GET_ROW(mat, vec3, rowindex)\
 {\
     vec3[0] = mat[rowindex][0];\
     vec3[1] = mat[rowindex][1];\
@@ -1435,7 +1435,7 @@ Last column is added as the position
 }\
 
 //! Get the tuple(2) row of a transform matrix
-#define MAT_GET_ROW2(mat,vec2,rowindex)\
+#define MAT_GET_ROW2(mat, vec2, rowindex)\
 {\
     vec2[0] = mat[rowindex][0];\
     vec2[1] = mat[rowindex][1];\
@@ -1443,7 +1443,7 @@ Last column is added as the position
 
 
 //! Get the quad (4) row of a transform matrix
-#define MAT_GET_ROW4(mat,vec4,rowindex)\
+#define MAT_GET_ROW4(mat, vec4, rowindex)\
 {\
     vec4[0] = mat[rowindex][0];\
     vec4[1] = mat[rowindex][1];\
@@ -1452,7 +1452,7 @@ Last column is added as the position
 }\
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_GET_COL(mat,vec3,colindex)\
+#define MAT_GET_COL(mat, vec3, colindex)\
 {\
     vec3[0] = mat[0][colindex];\
     vec3[1] = mat[1][colindex];\
@@ -1460,7 +1460,7 @@ Last column is added as the position
 }\
 
 //! Get the tuple(2) col of a transform matrix
-#define MAT_GET_COL2(mat,vec2,colindex)\
+#define MAT_GET_COL2(mat, vec2, colindex)\
 {\
     vec2[0] = mat[0][colindex];\
     vec2[1] = mat[1][colindex];\
@@ -1468,7 +1468,7 @@ Last column is added as the position
 
 
 //! Get the quad (4) col of a transform matrix
-#define MAT_GET_COL4(mat,vec4,colindex)\
+#define MAT_GET_COL4(mat, vec4, colindex)\
 {\
     vec4[0] = mat[0][colindex];\
     vec4[1] = mat[1][colindex];\
@@ -1477,26 +1477,26 @@ Last column is added as the position
 }\
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_GET_X(mat,vec3)\
+#define MAT_GET_X(mat, vec3)\
 {\
-    MAT_GET_COL(mat,vec3,0);\
+    MAT_GET_COL(mat, vec3,0);\
 }\
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_GET_Y(mat,vec3)\
+#define MAT_GET_Y(mat, vec3)\
 {\
-    MAT_GET_COL(mat,vec3,1);\
+    MAT_GET_COL(mat, vec3,1);\
 }\
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_GET_Z(mat,vec3)\
+#define MAT_GET_Z(mat, vec3)\
 {\
-    MAT_GET_COL(mat,vec3,2);\
+    MAT_GET_COL(mat, vec3,2);\
 }\
 
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_SET_X(mat,vec3)\
+#define MAT_SET_X(mat, vec3)\
 {\
     mat[0][0] = vec3[0];\
     mat[1][0] = vec3[1];\
@@ -1504,7 +1504,7 @@ Last column is added as the position
 }\
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_SET_Y(mat,vec3)\
+#define MAT_SET_Y(mat, vec3)\
 {\
     mat[0][1] = vec3[0];\
     mat[1][1] = vec3[1];\
@@ -1512,7 +1512,7 @@ Last column is added as the position
 }\
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_SET_Z(mat,vec3)\
+#define MAT_SET_Z(mat, vec3)\
 {\
     mat[0][2] = vec3[0];\
     mat[1][2] = vec3[1];\
@@ -1521,7 +1521,7 @@ Last column is added as the position
 
 
 //! Get the triple(3) col of a transform matrix
-#define MAT_GET_TRANSLATION(mat,vec3)\
+#define MAT_GET_TRANSLATION(mat, vec3)\
 {\
     vec3[0] = mat[0][3];\
     vec3[1] = mat[1][3];\
@@ -1529,7 +1529,7 @@ Last column is added as the position
 }\
 
 //! Set the triple(3) col of a transform matrix
-#define MAT_SET_TRANSLATION(mat,vec3)\
+#define MAT_SET_TRANSLATION(mat, vec3)\
 {\
     mat[0][3] = vec3[0];\
     mat[1][3] = vec3[1];\
@@ -1539,33 +1539,33 @@ Last column is added as the position
 
 
 //! Returns the dot product between a vec3f and the row of a matrix
-#define MAT_DOT_ROW(mat,vec3,rowindex) (vec3[0]*mat[rowindex][0] + vec3[1]*mat[rowindex][1] + vec3[2]*mat[rowindex][2])
+#define MAT_DOT_ROW(mat, vec3, rowindex) (vec3[0]*mat[rowindex][0] + vec3[1]*mat[rowindex][1] + vec3[2]*mat[rowindex][2])
 
 //! Returns the dot product between a vec2f and the row of a matrix
-#define MAT_DOT_ROW2(mat,vec2,rowindex) (vec2[0]*mat[rowindex][0] + vec2[1]*mat[rowindex][1])
+#define MAT_DOT_ROW2(mat, vec2, rowindex) (vec2[0]*mat[rowindex][0] + vec2[1]*mat[rowindex][1])
 
 //! Returns the dot product between a vec4f and the row of a matrix
-#define MAT_DOT_ROW4(mat,vec4,rowindex) (vec4[0]*mat[rowindex][0] + vec4[1]*mat[rowindex][1] + vec4[2]*mat[rowindex][2] + vec4[3]*mat[rowindex][3])
+#define MAT_DOT_ROW4(mat, vec4, rowindex) (vec4[0]*mat[rowindex][0] + vec4[1]*mat[rowindex][1] + vec4[2]*mat[rowindex][2] + vec4[3]*mat[rowindex][3])
 
 
 //! Returns the dot product between a vec3f and the col of a matrix
-#define MAT_DOT_COL(mat,vec3,colindex) (vec3[0]*mat[0][colindex] + vec3[1]*mat[1][colindex] + vec3[2]*mat[2][colindex])
+#define MAT_DOT_COL(mat, vec3, colindex) (vec3[0]*mat[0][colindex] + vec3[1]*mat[1][colindex] + vec3[2]*mat[2][colindex])
 
 //! Returns the dot product between a vec2f and the col of a matrix
-#define MAT_DOT_COL2(mat,vec2,colindex) (vec2[0]*mat[0][colindex] + vec2[1]*mat[1][colindex])
+#define MAT_DOT_COL2(mat, vec2, colindex) (vec2[0]*mat[0][colindex] + vec2[1]*mat[1][colindex])
 
 //! Returns the dot product between a vec4f and the col of a matrix
-#define MAT_DOT_COL4(mat,vec4,colindex) (vec4[0]*mat[0][colindex] + vec4[1]*mat[1][colindex] + vec4[2]*mat[2][colindex] + vec4[3]*mat[3][colindex])
+#define MAT_DOT_COL4(mat, vec4, colindex) (vec4[0]*mat[0][colindex] + vec4[1]*mat[1][colindex] + vec4[2]*mat[2][colindex] + vec4[3]*mat[3][colindex])
 
 /*!Transpose matrix times vector
 v is a vec3f
 and m is a mat4f<br>
 */
-#define INV_MAT_DOT_VEC_3X3(p,m,v)					\
+#define INV_MAT_DOT_VEC_3X3(p, m,v)					\
 {								\
-   p[0] = MAT_DOT_COL(m,v,0); \
-   p[1] = MAT_DOT_COL(m,v,1);	\
-   p[2] = MAT_DOT_COL(m,v,2);	\
+   p[0] = MAT_DOT_COL(m, v,0); \
+   p[1] = MAT_DOT_COL(m, v,1);	\
+   p[2] = MAT_DOT_COL(m, v,2);	\
 }\
 
 

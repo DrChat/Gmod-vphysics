@@ -79,7 +79,7 @@ public:
 
 	virtual	btChunk*	allocate(size_t size, int numElements) = 0;
 
-	virtual	void	finalizeChunk(btChunk* chunk, const char* structType, int chunkCode,void* oldPtr)= 0;
+	virtual	void	finalizeChunk(btChunk* chunk, const char* structType, int chunkCode, void* oldPtr)= 0;
 
 	virtual	 void*	findPointer(void* oldPtr)  = 0;
 
@@ -106,24 +106,24 @@ public:
 
 #define BT_HEADER_LENGTH 12
 #if defined(__sgi) || defined (__sparc) || defined (__sparc__) || defined (__PPC__) || defined (__ppc__) || defined (__BIG_ENDIAN__)
-#	define BT_MAKE_ID(a,b,c,d) ( (int)(a)<<24 | (int)(b)<<16 | (c)<<8 | (d) )
+#	define BT_MAKE_ID(a, b,c, d) ( (int)(a)<<24 | (int)(b)<<16 | (c)<<8 | (d) )
 #else
-#	define BT_MAKE_ID(a,b,c,d) ( (int)(d)<<24 | (int)(c)<<16 | (b)<<8 | (a) )
+#	define BT_MAKE_ID(a, b,c, d) ( (int)(d)<<24 | (int)(c)<<16 | (b)<<8 | (a) )
 #endif
 
-#define BT_SOFTBODY_CODE		BT_MAKE_ID('S','B','D','Y')
-#define BT_COLLISIONOBJECT_CODE BT_MAKE_ID('C','O','B','J')
-#define BT_RIGIDBODY_CODE		BT_MAKE_ID('R','B','D','Y')
-#define BT_CONSTRAINT_CODE		BT_MAKE_ID('C','O','N','S')
-#define BT_BOXSHAPE_CODE		BT_MAKE_ID('B','O','X','S')
-#define BT_QUANTIZED_BVH_CODE	BT_MAKE_ID('Q','B','V','H')
-#define BT_TRIANLGE_INFO_MAP	BT_MAKE_ID('T','M','A','P')
-#define BT_SHAPE_CODE			BT_MAKE_ID('S','H','A','P')
-#define BT_ARRAY_CODE			BT_MAKE_ID('A','R','A','Y')
-#define BT_SBMATERIAL_CODE		BT_MAKE_ID('S','B','M','T')
-#define BT_SBNODE_CODE			BT_MAKE_ID('S','B','N','D')
-#define BT_DYNAMICSWORLD_CODE	BT_MAKE_ID('D','W','L','D')
-#define BT_DNA_CODE				BT_MAKE_ID('D','N','A','1')
+#define BT_SOFTBODY_CODE		BT_MAKE_ID('S', 'B', 'D', 'Y')
+#define BT_COLLISIONOBJECT_CODE BT_MAKE_ID('C', 'O', 'B', 'J')
+#define BT_RIGIDBODY_CODE		BT_MAKE_ID('R', 'B', 'D', 'Y')
+#define BT_CONSTRAINT_CODE		BT_MAKE_ID('C', 'O', 'N', 'S')
+#define BT_BOXSHAPE_CODE		BT_MAKE_ID('B', 'O', 'X', 'S')
+#define BT_QUANTIZED_BVH_CODE	BT_MAKE_ID('Q', 'B', 'V', 'H')
+#define BT_TRIANLGE_INFO_MAP	BT_MAKE_ID('T', 'M', 'A', 'P')
+#define BT_SHAPE_CODE			BT_MAKE_ID('S', 'H', 'A', 'P')
+#define BT_ARRAY_CODE			BT_MAKE_ID('A', 'R', 'A', 'Y')
+#define BT_SBMATERIAL_CODE		BT_MAKE_ID('S', 'B', 'M', 'T')
+#define BT_SBNODE_CODE			BT_MAKE_ID('S', 'B', 'N', 'D')
+#define BT_DYNAMICSWORLD_CODE	BT_MAKE_ID('D', 'W', 'L', 'D')
+#define BT_DNA_CODE				BT_MAKE_ID('D', 'N', 'A', '1')
 
 
 struct	btPointerUid
@@ -145,14 +145,14 @@ class btDefaultSerializer	:	public btSerializer
 	btAlignedObjectArray<short*>			mStructs;
 	btAlignedObjectArray<short>			mTlens;
 	btHashMap<btHashInt, int>			mStructReverse;
-	btHashMap<btHashString,int>	mTypeLookup;
+	btHashMap<btHashString, int>	mTypeLookup;
 
 	
-	btHashMap<btHashPtr,void*>	m_chunkP;
+	btHashMap<btHashPtr, void*>	m_chunkP;
 	
-	btHashMap<btHashPtr,const char*>	m_nameMap;
+	btHashMap<btHashPtr, const char*>	m_nameMap;
 
-	btHashMap<btHashPtr,btPointerUid>	m_uniquePointers;
+	btHashMap<btHashPtr, btPointerUid>	m_uniquePointers;
 	int	m_uniqueIdGenerator;
 
 	int					m_totalSize;
@@ -183,8 +183,8 @@ protected:
 		void	writeDNA()
 		{
 			btChunk* dnaChunk = allocate(m_dnaLength,1);
-			memcpy(dnaChunk->m_oldPtr,m_dna,m_dnaLength);
-			finalizeChunk(dnaChunk,"DNA1",BT_DNA_CODE, m_dna);
+			memcpy(dnaChunk->m_oldPtr, m_dna, m_dnaLength);
+			finalizeChunk(dnaChunk, "DNA1", BT_DNA_CODE, m_dna);
 		}
 
 		int getReverseType(const char *type) const
@@ -198,7 +198,7 @@ protected:
 			return -1;
 		}
 
-		void initDNA(const char* bdnaOrg,int dnalen)
+		void initDNA(const char* bdnaOrg, int dnalen)
 		{
 			///was already initialized
 			if (m_dna)
@@ -209,7 +209,7 @@ protected:
 			
 
 			m_dna = btAlignedAlloc(dnalen,16);
-			memcpy(m_dna,bdnaOrg,dnalen);
+			memcpy(m_dna, bdnaOrg, dnalen);
 			m_dnaLength = dnalen;
 
 			int *intPtr=0;
@@ -350,7 +350,7 @@ protected:
 			{
 				short *strc = mStructs.at(i);
 				mStructReverse.insert(strc[0], i);
-				mTypeLookup.insert(btHashString(mTypes[strc[0]]),i);
+				mTypeLookup.insert(btHashString(mTypes[strc[0]]), i);
 			}
 		}
 
@@ -374,14 +374,14 @@ public:
 			if (VOID_IS_8)
 			{
 #if _WIN64
-				initDNA((const char*)sBulletDNAstr64,sBulletDNAlen64);
+				initDNA((const char*)sBulletDNAstr64, sBulletDNAlen64);
 #else
 				btAssert(0);
 #endif
 			} else
 			{
 #ifndef _WIN64
-				initDNA((const char*)sBulletDNAstr,sBulletDNAlen);
+				initDNA((const char*)sBulletDNAstr, sBulletDNAlen);
 #else
 				btAssert(0);
 #endif
@@ -390,10 +390,10 @@ public:
 #else //BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES
 			if (VOID_IS_8)
 			{
-				initDNA((const char*)sBulletDNAstr64,sBulletDNAlen64);
+				initDNA((const char*)sBulletDNAstr64, sBulletDNAlen64);
 			} else
 			{
-				initDNA((const char*)sBulletDNAstr,sBulletDNAlen);
+				initDNA((const char*)sBulletDNAstr, sBulletDNAlen);
 			}
 #endif //BT_INTERNAL_UPDATE_SERIALIZATION_STRUCTURES
 	
@@ -475,7 +475,7 @@ public:
 				for (int i=0;i<	m_chunkPtrs.size();i++)
 				{
 					int curLength = sizeof(btChunk)+m_chunkPtrs[i]->m_length;
-					memcpy(currentPtr,m_chunkPtrs[i], curLength);
+					memcpy(currentPtr, m_chunkPtrs[i], curLength);
 					btAlignedFree(m_chunkPtrs[i]);
 					currentPtr+=curLength;
 					mysize+=curLength;
@@ -508,7 +508,7 @@ public:
 			btPointerUid uid;
 			uid.m_uniqueIds[0] = m_uniqueIdGenerator;
 			uid.m_uniqueIds[1] = m_uniqueIdGenerator;
-			m_uniquePointers.insert(oldPtr,uid);
+			m_uniquePointers.insert(oldPtr, uid);
 			return uid.m_ptr;
 
 		}
@@ -523,7 +523,7 @@ public:
 			return	m_currentSize;
 		}
 
-		virtual	void	finalizeChunk(btChunk* chunk, const char* structType, int chunkCode,void* oldPtr)
+		virtual	void	finalizeChunk(btChunk* chunk, const char* structType, int chunkCode, void* oldPtr)
 		{
 			if (!(m_serializationFlags&BT_SERIALIZE_NO_DUPLICATE_ASSERT))
 			{
@@ -536,7 +536,7 @@ public:
 			
 			void* uniquePtr = getUniquePointer(oldPtr);
 			
-			m_chunkP.insert(oldPtr,uniquePtr);//chunk->m_oldPtr);
+			m_chunkP.insert(oldPtr, uniquePtr);//chunk->m_oldPtr);
 			chunk->m_oldPtr = uniquePtr;//oldPtr;
 			
 		}
@@ -591,7 +591,7 @@ public:
 
 		virtual	void	registerNameForPointer(const void* ptr, const char* name)
 		{
-			m_nameMap.insert(ptr,name);
+			m_nameMap.insert(ptr, name);
 		}
 
 		virtual void	serializeName(const char* name)
@@ -611,14 +611,14 @@ public:
 					newLen += padding;
 
 					//serialize name string now
-					btChunk* chunk = allocate(sizeof(char),newLen);
+					btChunk* chunk = allocate(sizeof(char), newLen);
 					char* destinationName = (char*)chunk->m_oldPtr;
 					for (int i=0;i<len;i++)
 					{
 						destinationName[i] = name[i];
 					}
 					destinationName[len] = 0;
-					finalizeChunk(chunk,"char",BT_ARRAY_CODE,(void*)name);
+					finalizeChunk(chunk, "char", BT_ARRAY_CODE, (void*)name);
 				}
 			}
 		}

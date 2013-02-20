@@ -42,7 +42,7 @@ public:
 
 	btScalar	m_hitFraction;
 
-	btTriangleRaycastCallback(const btVector3& from,const btVector3& to, unsigned int flags=0);
+	btTriangleRaycastCallback(const btVector3& from, const btVector3& to, unsigned int flags=0);
 	
 	virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex);
 

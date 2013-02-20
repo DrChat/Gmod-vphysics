@@ -123,7 +123,7 @@ public:
 	int testLimitValue(btScalar test_value);
 
 	//! apply the correction impulses for two bodies
-    btScalar solveAngularLimits(btScalar timeStep,btVector3& axis, btScalar jacDiagABInv,btRigidBody * body0, btRigidBody * body1);
+    btScalar solveAngularLimits(btScalar timeStep, btVector3& axis, btScalar jacDiagABInv, btRigidBody * body0, btRigidBody * body1);
 
 };
 
@@ -214,8 +214,8 @@ public:
     btScalar solveLinearAxis(
     	btScalar timeStep,
         btScalar jacDiagABInv,
-        btRigidBody& body1,const btVector3 &pointInA,
-        btRigidBody& body2,const btVector3 &pointInB,
+        btRigidBody& body1, const btVector3 &pointInA,
+        btRigidBody& body2, const btVector3 &pointInB,
         int limit_index,
         const btVector3 & axis_normal_on_a,
 		const btVector3 & anchorPos);
@@ -326,15 +326,15 @@ protected:
     }
 
 
-	int setAngularLimits(btConstraintInfo2 *info, int row_offset,const btTransform& transA,const btTransform& transB,const btVector3& linVelA,const btVector3& linVelB,const btVector3& angVelA,const btVector3& angVelB);
+	int setAngularLimits(btConstraintInfo2 *info, int row_offset, const btTransform& transA, const btTransform& transB, const btVector3& linVelA, const btVector3& linVelB, const btVector3& angVelA, const btVector3& angVelB);
 
-	int setLinearLimits(btConstraintInfo2 *info, int row, const btTransform& transA,const btTransform& transB,const btVector3& linVelA,const btVector3& linVelB,const btVector3& angVelA,const btVector3& angVelB);
+	int setLinearLimits(btConstraintInfo2 *info, int row, const btTransform& transA, const btTransform& transB, const btVector3& linVelA, const btVector3& linVelB, const btVector3& angVelA, const btVector3& angVelB);
 
     void buildLinearJacobian(
-        btJacobianEntry & jacLinear,const btVector3 & normalWorld,
-        const btVector3 & pivotAInW,const btVector3 & pivotBInW);
+        btJacobianEntry & jacLinear, const btVector3 & normalWorld,
+        const btVector3 & pivotAInW, const btVector3 & pivotBInW);
 
-    void buildAngularJacobian(btJacobianEntry & jacAngular,const btVector3 & jointAxisW);
+    void buildAngularJacobian(btJacobianEntry & jacAngular, const btVector3 & jointAxisW);
 
 	// tests linear limits
 	void calculateLinearInfo();
@@ -351,15 +351,15 @@ public:
 	///for backwards compatibility during the transition to 'getInfo/getInfo2'
 	bool		m_useSolveConstraintObsolete;
 
-    btGeneric6DofConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA);
+    btGeneric6DofConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB, bool useLinearReferenceFrameA);
     btGeneric6DofConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameB);
     
 	//! Calcs global transform of the offsets
 	/*!
 	Calcs the global transform for the joint offset for body A an B, and also calcs the agle differences between the bodies.
-	\sa btGeneric6DofConstraint.getCalculatedTransformA , btGeneric6DofConstraint.getCalculatedTransformB, btGeneric6DofConstraint.calculateAngleInfo
+	\sa btGeneric6DofConstraint.getCalculatedTransformA, btGeneric6DofConstraint.getCalculatedTransformB, btGeneric6DofConstraint.calculateAngleInfo
 	*/
-    void calculateTransforms(const btTransform& transA,const btTransform& transB);
+    void calculateTransforms(const btTransform& transA, const btTransform& transB);
 
 	void calculateTransforms();
 
@@ -412,7 +412,7 @@ public:
 
 	virtual void getInfo2 (btConstraintInfo2* info);
 
-	void getInfo2NonVirtual (btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btVector3& linVelA,const btVector3& linVelB,const btVector3& angVelA,const btVector3& angVelB);
+	void getInfo2NonVirtual (btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btVector3& linVelA, const btVector3& linVelB, const btVector3& angVelA, const btVector3& angVelB);
 
 
     void	updateRHS(btScalar	timeStep);
@@ -537,7 +537,7 @@ public:
 	virtual void calcAnchorPos(void); // overridable
 
 	int get_limit_motor_info2(	btRotationalLimitMotor * limot,
-								const btTransform& transA,const btTransform& transB,const btVector3& linVelA,const btVector3& linVelB,const btVector3& angVelA,const btVector3& angVelB,
+								const btTransform& transA, const btTransform& transB, const btVector3& linVelA, const btVector3& linVelB, const btVector3& angVelA, const btVector3& angVelB,
 								btConstraintInfo2 *info, int row, btVector3& ax1, int rotational, int rotAllowed = false);
 
 	// access for UseFrameOffset
@@ -588,7 +588,7 @@ SIMD_FORCE_INLINE	const char*	btGeneric6DofConstraint::serialize(void* dataBuffe
 {
 
 	btGeneric6DofConstraintData* dof = (btGeneric6DofConstraintData*)dataBuffer;
-	btTypedConstraint::serialize(&dof->m_typeConstraintData,serializer);
+	btTypedConstraint::serialize(&dof->m_typeConstraintData, serializer);
 
 	m_frameInA.serializeFloat(dof->m_rbAFrame);
 	m_frameInB.serializeFloat(dof->m_rbBFrame);

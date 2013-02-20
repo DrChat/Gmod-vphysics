@@ -29,8 +29,8 @@ struct btSimpleBroadphaseProxy : public btBroadphaseProxy
 	
 	btSimpleBroadphaseProxy() {};
 
-	btSimpleBroadphaseProxy(const btVector3& minpt,const btVector3& maxpt,int shapeType,void* userPtr,short int collisionFilterGroup,short int collisionFilterMask,void* multiSapProxy)
-	:btBroadphaseProxy(minpt,maxpt,userPtr,collisionFilterGroup,collisionFilterMask,multiSapProxy)
+	btSimpleBroadphaseProxy(const btVector3& minpt, const btVector3& maxpt, int shapeType, void* userPtr, short int collisionFilterGroup, short int collisionFilterMask, void* multiSapProxy)
+	:btBroadphaseProxy(minpt, maxpt, userPtr, collisionFilterGroup, collisionFilterMask, multiSapProxy)
 	{
 		(void)shapeType;
 	}
@@ -120,22 +120,22 @@ protected:
 	
 
 public:
-	btSimpleBroadphase(int maxProxies=16384,btOverlappingPairCache* overlappingPairCache=0);
+	btSimpleBroadphase(int maxProxies=16384, btOverlappingPairCache* overlappingPairCache=0);
 	virtual ~btSimpleBroadphase();
 
 
-		static bool	aabbOverlap(btSimpleBroadphaseProxy* proxy0,btSimpleBroadphaseProxy* proxy1);
+		static bool	aabbOverlap(btSimpleBroadphaseProxy* proxy0, btSimpleBroadphaseProxy* proxy1);
 
 
-	virtual btBroadphaseProxy*	createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax,int shapeType,void* userPtr ,short int collisionFilterGroup,short int collisionFilterMask, btDispatcher* dispatcher,void* multiSapProxy);
+	virtual btBroadphaseProxy*	createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax, int shapeType, void* userPtr, short int collisionFilterGroup, short int collisionFilterMask, btDispatcher* dispatcher, void* multiSapProxy);
 
 	virtual void	calculateOverlappingPairs(btDispatcher* dispatcher);
 
-	virtual void	destroyProxy(btBroadphaseProxy* proxy,btDispatcher* dispatcher);
-	virtual void	setAabb(btBroadphaseProxy* proxy,const btVector3& aabbMin,const btVector3& aabbMax, btDispatcher* dispatcher);
-	virtual void	getAabb(btBroadphaseProxy* proxy,btVector3& aabbMin, btVector3& aabbMax ) const;
+	virtual void	destroyProxy(btBroadphaseProxy* proxy, btDispatcher* dispatcher);
+	virtual void	setAabb(btBroadphaseProxy* proxy, const btVector3& aabbMin, const btVector3& aabbMax, btDispatcher* dispatcher);
+	virtual void	getAabb(btBroadphaseProxy* proxy, btVector3& aabbMin, btVector3& aabbMax ) const;
 
-	virtual void	rayTest(const btVector3& rayFrom,const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin=btVector3(0,0,0),const btVector3& aabbMax=btVector3(0,0,0));
+	virtual void	rayTest(const btVector3& rayFrom, const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin=btVector3(0,0,0), const btVector3& aabbMax=btVector3(0,0,0));
 	virtual void	aabbTest(const btVector3& aabbMin, const btVector3& aabbMax, btBroadphaseAabbCallback& callback);
 		
 	btOverlappingPairCache*	getOverlappingPairCache()
@@ -147,21 +147,21 @@ public:
 		return m_pairCache;
 	}
 
-	bool	testAabbOverlap(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1);
+	bool	testAabbOverlap(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1);
 
 
 	///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
 	///will add some transform later
-	virtual void getBroadphaseAabb(btVector3& aabbMin,btVector3& aabbMax) const
+	virtual void getBroadphaseAabb(btVector3& aabbMin, btVector3& aabbMax) const
 	{
 		aabbMin.setValue(-BT_LARGE_FLOAT,-BT_LARGE_FLOAT,-BT_LARGE_FLOAT);
-		aabbMax.setValue(BT_LARGE_FLOAT,BT_LARGE_FLOAT,BT_LARGE_FLOAT);
+		aabbMax.setValue(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 	}
 
 	virtual void	printStats()
 	{
 //		printf("btSimpleBroadphase.h\n");
-//		printf("numHandles = %d, maxHandles = %d\n",m_numHandles,m_maxHandles);
+//		printf("numHandles = %d, maxHandles = %d\n", m_numHandles, m_maxHandles);
 	}
 };
 

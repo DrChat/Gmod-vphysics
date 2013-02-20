@@ -90,11 +90,11 @@ enum GIM_SCALAR_TYPES
 //! Floating-point representation of an integer value.
 #define GIM_FR(x)					((GREAL&)(x))
 
-#define GIM_MAX(a,b) (a<b?b:a)
-#define GIM_MIN(a,b) (a>b?b:a)
+#define GIM_MAX(a, b) (a<b?b:a)
+#define GIM_MIN(a, b) (a>b?b:a)
 
-#define GIM_MAX3(a,b,c) GIM_MAX(a,GIM_MAX(b,c))
-#define GIM_MIN3(a,b,c) GIM_MIN(a,GIM_MIN(b,c))
+#define GIM_MAX3(a, b,c) GIM_MAX(a, GIM_MAX(b, c))
+#define GIM_MIN3(a, b,c) GIM_MIN(a, GIM_MIN(b, c))
 
 #define GIM_IS_ZERO(value) (value < G_EPSILON &&  value > -G_EPSILON)
 
@@ -102,21 +102,21 @@ enum GIM_SCALAR_TYPES
 
 #define GIM_IS_POSISITVE(value) (value >= G_EPSILON)
 
-#define GIM_NEAR_EQUAL(v1,v2) GIM_IS_ZERO((v1-v2))
+#define GIM_NEAR_EQUAL(v1, v2) GIM_IS_ZERO((v1-v2))
 
 ///returns a clamped number
-#define GIM_CLAMP(number,minval,maxval) (number<minval?minval:(number>maxval?maxval:number))
+#define GIM_CLAMP(number, minval, maxval) (number<minval?minval:(number>maxval?maxval:number))
 
 #define GIM_GREATER(x, y)	btFabs(x) > (y)
 
 ///Swap numbers
-#define GIM_SWAP_NUMBERS(a,b){ \
+#define GIM_SWAP_NUMBERS(a, b){ \
     a = a+b; \
     b = a-b; \
     a = a-b; \
 }\
 
-#define GIM_INV_SQRT(va,isva)\
+#define GIM_INV_SQRT(va, isva)\
 {\
     if(va<=0.0000001f)\
     {\
@@ -131,9 +131,9 @@ enum GIM_SCALAR_TYPES
     }\
 }\
 
-#define GIM_SQRT(va,sva)\
+#define GIM_SQRT(va, sva)\
 {\
-    GIM_INV_SQRT(va,sva);\
+    GIM_INV_SQRT(va, sva);\
     sva = 1.0f/sva;\
 }\
 
@@ -141,14 +141,14 @@ enum GIM_SCALAR_TYPES
 inline GREAL gim_inv_sqrt(GREAL f)
 {
     GREAL r;
-    GIM_INV_SQRT(f,r);
+    GIM_INV_SQRT(f, r);
     return r;
 }
 
 inline GREAL gim_sqrt(GREAL f)
 {
     GREAL r;
-    GIM_SQRT(f,r);
+    GIM_SQRT(f, r);
     return r;
 }
 

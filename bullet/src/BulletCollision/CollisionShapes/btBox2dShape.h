@@ -39,7 +39,7 @@ public:
 	btVector3 getHalfExtentsWithMargin() const
 	{
 		btVector3 halfExtents = getHalfExtentsWithoutMargin();
-		btVector3 margin(getMargin(),getMargin(),getMargin());
+		btVector3 margin(getMargin(), getMargin(), getMargin());
 		halfExtents += margin;
 		return halfExtents;
 	}
@@ -53,7 +53,7 @@ public:
 	virtual btVector3	localGetSupportingVertex(const btVector3& vec) const
 	{
 		btVector3 halfExtents = getHalfExtentsWithoutMargin();
-		btVector3 margin(getMargin(),getMargin(),getMargin());
+		btVector3 margin(getMargin(), getMargin(), getMargin());
 		halfExtents += margin;
 		
 		return btVector3(btFsels(vec.x(), halfExtents.x(), -halfExtents.x()),
@@ -70,7 +70,7 @@ public:
 			btFsels(vec.z(), halfExtents.z(), -halfExtents.z()));
 	}
 
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 	{
 		const btVector3& halfExtents = getHalfExtentsWithoutMargin();
 	
@@ -92,8 +92,8 @@ public:
 	{
 		m_vertices[0].setValue(-boxHalfExtents.getX(),-boxHalfExtents.getY(),0);
 		m_vertices[1].setValue(boxHalfExtents.getX(),-boxHalfExtents.getY(),0);
-		m_vertices[2].setValue(boxHalfExtents.getX(),boxHalfExtents.getY(),0);
-		m_vertices[3].setValue(-boxHalfExtents.getX(),boxHalfExtents.getY(),0);
+		m_vertices[2].setValue(boxHalfExtents.getX(), boxHalfExtents.getY(),0);
+		m_vertices[3].setValue(-boxHalfExtents.getX(), boxHalfExtents.getY(),0);
 
 		m_normals[0].setValue(0,-1,0);
 		m_normals[1].setValue(1,0,0);
@@ -106,24 +106,24 @@ public:
 		setSafeMargin(minDimension);
 
 		m_shapeType = BOX_2D_SHAPE_PROXYTYPE;
-		btVector3 margin(getMargin(),getMargin(),getMargin());
+		btVector3 margin(getMargin(), getMargin(), getMargin());
 		m_implicitShapeDimensions = (boxHalfExtents * m_localScaling) - margin;
 	};
 
 	virtual void setMargin(btScalar collisionMargin)
 	{
 		//correct the m_implicitShapeDimensions for the margin
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
+		btVector3 oldMargin(getMargin(), getMargin(), getMargin());
 		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		
 		btConvexInternalShape::setMargin(collisionMargin);
-		btVector3 newMargin(getMargin(),getMargin(),getMargin());
+		btVector3 newMargin(getMargin(), getMargin(), getMargin());
 		m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 	}
 	virtual void	setLocalScaling(const btVector3& scaling)
 	{
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
+		btVector3 oldMargin(getMargin(), getMargin(), getMargin());
 		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		btVector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
@@ -133,11 +133,11 @@ public:
 
 	}
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
 	
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 
 
@@ -169,12 +169,12 @@ public:
 
 
 
-	virtual void getPlane(btVector3& planeNormal,btVector3& planeSupport,int i ) const
+	virtual void getPlane(btVector3& planeNormal, btVector3& planeSupport, int i ) const
 	{
 		//this plane might not be aligned...
 		btVector4 plane ;
-		getPlaneEquation(plane,i);
-		planeNormal = btVector3(plane.getX(),plane.getY(),plane.getZ());
+		getPlaneEquation(plane, i);
+		planeNormal = btVector3(plane.getX(), plane.getY(), plane.getZ());
 		planeSupport = localGetSupportingVertex(-planeNormal);
 	}
 
@@ -197,7 +197,7 @@ public:
 	}
 
 
-	virtual void getVertex(int i,btVector3& vtx) const
+	virtual void getVertex(int i, btVector3& vtx) const
 	{
 		btVector3 halfExtents = getHalfExtentsWithoutMargin();
 
@@ -208,29 +208,29 @@ public:
 	}
 	
 
-	virtual void	getPlaneEquation(btVector4& plane,int i) const
+	virtual void	getPlaneEquation(btVector4& plane, int i) const
 	{
 		btVector3 halfExtents = getHalfExtentsWithoutMargin();
 
 		switch (i)
 		{
 		case 0:
-			plane.setValue(btScalar(1.),btScalar(0.),btScalar(0.),-halfExtents.x());
+			plane.setValue(btScalar(1.), btScalar(0.), btScalar(0.),-halfExtents.x());
 			break;
 		case 1:
-			plane.setValue(btScalar(-1.),btScalar(0.),btScalar(0.),-halfExtents.x());
+			plane.setValue(btScalar(-1.), btScalar(0.), btScalar(0.),-halfExtents.x());
 			break;
 		case 2:
-			plane.setValue(btScalar(0.),btScalar(1.),btScalar(0.),-halfExtents.y());
+			plane.setValue(btScalar(0.), btScalar(1.), btScalar(0.),-halfExtents.y());
 			break;
 		case 3:
-			plane.setValue(btScalar(0.),btScalar(-1.),btScalar(0.),-halfExtents.y());
+			plane.setValue(btScalar(0.), btScalar(-1.), btScalar(0.),-halfExtents.y());
 			break;
 		case 4:
-			plane.setValue(btScalar(0.),btScalar(0.),btScalar(1.),-halfExtents.z());
+			plane.setValue(btScalar(0.), btScalar(0.), btScalar(1.),-halfExtents.z());
 			break;
 		case 5:
-			plane.setValue(btScalar(0.),btScalar(0.),btScalar(-1.),-halfExtents.z());
+			plane.setValue(btScalar(0.), btScalar(0.), btScalar(-1.),-halfExtents.z());
 			break;
 		default:
 			btAssert(0);
@@ -238,8 +238,8 @@ public:
 	}
 
 	
-	virtual void getEdge(int i,btVector3& pa,btVector3& pb) const
-	//virtual void getEdge(int i,Edge& edge) const
+	virtual void getEdge(int i, btVector3& pa, btVector3& pb) const
+	//virtual void getEdge(int i, Edge& edge) const
 	{
 		int edgeVert0 = 0;
 		int edgeVert1 = 0;
@@ -301,15 +301,15 @@ public:
 
 		}
 
-		getVertex(edgeVert0,pa );
-		getVertex(edgeVert1,pb );
+		getVertex(edgeVert0, pa );
+		getVertex(edgeVert1, pb );
 	}
 
 
 
 
 	
-	virtual	bool isInside(const btVector3& pt,btScalar tolerance) const
+	virtual	bool isInside(const btVector3& pt, btScalar tolerance) const
 	{
 		btVector3 halfExtents = getHalfExtentsWithoutMargin();
 
@@ -342,22 +342,22 @@ public:
 		switch (index)
 		{
 		case 0:
-			penetrationVector.setValue(btScalar(1.),btScalar(0.),btScalar(0.));
+			penetrationVector.setValue(btScalar(1.), btScalar(0.), btScalar(0.));
 			break;
 		case 1:
-			penetrationVector.setValue(btScalar(-1.),btScalar(0.),btScalar(0.));
+			penetrationVector.setValue(btScalar(-1.), btScalar(0.), btScalar(0.));
 			break;
 		case 2:
-			penetrationVector.setValue(btScalar(0.),btScalar(1.),btScalar(0.));
+			penetrationVector.setValue(btScalar(0.), btScalar(1.), btScalar(0.));
 			break;
 		case 3:
-			penetrationVector.setValue(btScalar(0.),btScalar(-1.),btScalar(0.));
+			penetrationVector.setValue(btScalar(0.), btScalar(-1.), btScalar(0.));
 			break;
 		case 4:
-			penetrationVector.setValue(btScalar(0.),btScalar(0.),btScalar(1.));
+			penetrationVector.setValue(btScalar(0.), btScalar(0.), btScalar(1.));
 			break;
 		case 5:
-			penetrationVector.setValue(btScalar(0.),btScalar(0.),btScalar(-1.));
+			penetrationVector.setValue(btScalar(0.), btScalar(0.), btScalar(-1.));
 			break;
 		default:
 			btAssert(0);

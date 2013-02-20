@@ -76,7 +76,7 @@ public:
     	m_feature2 = contact.m_feature2;
     }
 
-    GIM_CONTACT(const btVector3 &point,const btVector3 & normal,
+    GIM_CONTACT(const btVector3 &point, const btVector3 & normal,
     	 			GREAL depth, GUINT feature1, GUINT feature2):
 				m_point(point),
 				m_normal(normal),
@@ -103,7 +103,7 @@ public:
 		return _hash;
     }
 
-    SIMD_FORCE_INLINE void interpolate_normals( btVector3 * normals,GUINT normal_count)
+    SIMD_FORCE_INLINE void interpolate_normals( btVector3 * normals, GUINT normal_count)
     {
     	btVector3 vec_sum(m_normal);
 		for(GUINT i=0;i<normal_count;i++)
@@ -114,7 +114,7 @@ public:
 		GREAL vec_sum_len = vec_sum.length2();
 		if(vec_sum_len <CONTACT_DIFF_EPSILON) return;
 
-		GIM_INV_SQRT(vec_sum_len,vec_sum_len); // 1/sqrt(vec_sum_len)
+		GIM_INV_SQRT(vec_sum_len, vec_sum_len); // 1/sqrt(vec_sum_len)
 
 		m_normal = vec_sum*vec_sum_len;
     }
@@ -129,7 +129,7 @@ public:
 	{
 	}
 
-	SIMD_FORCE_INLINE void push_contact(const btVector3 &point,const btVector3 & normal,
+	SIMD_FORCE_INLINE void push_contact(const btVector3 &point, const btVector3 & normal,
     	 			GREAL depth, GUINT feature1, GUINT feature2)
 	{
 		push_back_mem();
@@ -143,7 +143,7 @@ public:
 
 	SIMD_FORCE_INLINE void push_triangle_contacts(
 		const GIM_TRIANGLE_CONTACT_DATA & tricontact,
-		GUINT feature1,GUINT feature2)
+		GUINT feature1, GUINT feature2)
 	{
 		for(GUINT i = 0;i<tricontact.m_point_count ;i++ )
 		{

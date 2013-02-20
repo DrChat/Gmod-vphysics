@@ -33,11 +33,11 @@ struct btBoxBoxDetector : public btDiscreteCollisionDetectorInterface
 
 public:
 
-	btBoxBoxDetector(const btBoxShape* box1,const btBoxShape* box2);
+	btBoxBoxDetector(const btBoxShape* box1, const btBoxShape* box2);
 
 	virtual ~btBoxBoxDetector() {};
 
-	virtual void	getClosestPoints(const ClosestPointInput& input,Result& output,class btIDebugDraw* debugDraw,bool swapResults=false);
+	virtual void	getClosestPoints(const ClosestPointInput& input, Result& output, class btIDebugDraw* debugDraw, bool swapResults=false);
 
 };
 

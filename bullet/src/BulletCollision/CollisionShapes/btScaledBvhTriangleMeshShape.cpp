@@ -16,8 +16,8 @@ subject to the following restrictions:
 
 #include "btScaledBvhTriangleMeshShape.h"
 
-btScaledBvhTriangleMeshShape::btScaledBvhTriangleMeshShape(btBvhTriangleMeshShape* childShape,const btVector3& localScaling)
-:m_localScaling(localScaling),m_bvhTriMeshShape(childShape)
+btScaledBvhTriangleMeshShape::btScaledBvhTriangleMeshShape(btBvhTriangleMeshShape* childShape, const btVector3& localScaling)
+:m_localScaling(localScaling), m_bvhTriMeshShape(childShape)
 {
 	m_shapeType = SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE;
 }
@@ -35,7 +35,7 @@ class btScaledTriangleCallback : public btTriangleCallback
 
 public:
 
-	btScaledTriangleCallback(btTriangleCallback* originalCallback,const btVector3& localScaling)
+	btScaledTriangleCallback(btTriangleCallback* originalCallback, const btVector3& localScaling)
 		:m_originalCallback(originalCallback),
 		m_localScaling(localScaling)
 	{
@@ -47,16 +47,16 @@ public:
 		newTriangle[0] = triangle[0]*m_localScaling;
 		newTriangle[1] = triangle[1]*m_localScaling;
 		newTriangle[2] = triangle[2]*m_localScaling;
-		m_originalCallback->processTriangle(&newTriangle[0],partId,triangleIndex);
+		m_originalCallback->processTriangle(&newTriangle[0], partId, triangleIndex);
 	}
 };
 
-void	btScaledBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const
+void	btScaledBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const
 {
-	btScaledTriangleCallback scaledCallback(callback,m_localScaling);
+	btScaledTriangleCallback scaledCallback(callback, m_localScaling);
 	
 	btVector3 invLocalScaling(1.f/m_localScaling.getX(),1.f/m_localScaling.getY(),1.f/m_localScaling.getZ());
-	btVector3 scaledAabbMin,scaledAabbMax;
+	btVector3 scaledAabbMin, scaledAabbMax;
 
 	///support negative scaling
 	scaledAabbMin[0] = m_localScaling.getX() >= 0. ? aabbMin[0] * invLocalScaling[0] : aabbMax[0] * invLocalScaling[0];
@@ -70,11 +70,11 @@ void	btScaledBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callb
 	scaledAabbMax[3] = 0.f;
 	
 	
-	m_bvhTriMeshShape->processAllTriangles(&scaledCallback,scaledAabbMin,scaledAabbMax);
+	m_bvhTriMeshShape->processAllTriangles(&scaledCallback, scaledAabbMin, scaledAabbMax);
 }
 
 
-void	btScaledBvhTriangleMeshShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVector3& aabbMax) const
+void	btScaledBvhTriangleMeshShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax) const
 {
 	btVector3 localAabbMin = m_bvhTriMeshShape->getLocalAabbMin();
 	btVector3 localAabbMax = m_bvhTriMeshShape->getLocalAabbMax();
@@ -91,7 +91,7 @@ void	btScaledBvhTriangleMeshShape::getAabb(const btTransform& trans,btVector3& a
 
 	btVector3 localHalfExtents = btScalar(0.5)*(localAabbMax-localAabbMin);
 	btScalar margin = m_bvhTriMeshShape->getMargin();
-	localHalfExtents += btVector3(margin,margin,margin);
+	localHalfExtents += btVector3(margin, margin, margin);
 	btVector3 localCenter = btScalar(0.5)*(localAabbMax+localAabbMin);
 	
 	btMatrix3x3 abs_b = trans.getBasis().absolute();  
@@ -114,7 +114,7 @@ const btVector3& btScaledBvhTriangleMeshShape::getLocalScaling() const
 	return m_localScaling;
 }
 
-void	btScaledBvhTriangleMeshShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btScaledBvhTriangleMeshShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	///don't make this a movable object!
 //	btAssert(0);

@@ -144,7 +144,7 @@ public:
 		return !(*this == other);
 	}
 
-  /**@brief Set x,y,z and zero w 
+  /**@brief Set x, y,z and zero w 
    * @param x Value of x
    * @param y Value of y
    * @param z Value of z
@@ -170,7 +170,7 @@ public:
    * @param z Value of z
    * @param w Value of w
    */
-		SIMD_FORCE_INLINE void	setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z,const btScalar& _w)
+		SIMD_FORCE_INLINE void	setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
 		{
 			m_floats[0]=_x;
 			m_floats[1]=_y;
@@ -179,7 +179,7 @@ public:
 		}
   /**@brief No initialization constructor */
 		SIMD_FORCE_INLINE btQuadWord()
-		//	:m_floats[0](btScalar(0.)),m_floats[1](btScalar(0.)),m_floats[2](btScalar(0.)),m_floats[3](btScalar(0.))
+		//	:m_floats[0](btScalar(0.)), m_floats[1](btScalar(0.)), m_floats[2](btScalar(0.)), m_floats[3](btScalar(0.))
 		{
 		}
  
@@ -199,7 +199,7 @@ public:
    * @param z Value of z
    * @param w Value of w
    */
-		SIMD_FORCE_INLINE btQuadWord(const btScalar& _x, const btScalar& _y, const btScalar& _z,const btScalar& _w) 
+		SIMD_FORCE_INLINE btQuadWord(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w) 
 		{
 			m_floats[0] = _x, m_floats[1] = _y, m_floats[2] = _z, m_floats[3] = _w;
 		}

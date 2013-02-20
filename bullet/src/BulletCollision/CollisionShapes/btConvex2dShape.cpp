@@ -32,9 +32,9 @@ btVector3	btConvex2dShape::localGetSupportingVertexWithoutMargin(const btVector3
 	return m_childConvexShape->localGetSupportingVertexWithoutMargin(vec);
 }
 
-void	btConvex2dShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btConvex2dShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
-	m_childConvexShape->batchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
+	m_childConvexShape->batchedUnitVectorGetSupportingVertexWithoutMargin(vectors, supportVerticesOut, numVectors);
 }
 
 
@@ -44,22 +44,22 @@ btVector3	btConvex2dShape::localGetSupportingVertex(const btVector3& vec)const
 }
 
 
-void	btConvex2dShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btConvex2dShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	///this linear upscaling is not realistic, but we don't deal with large mass ratios...
-	m_childConvexShape->calculateLocalInertia(mass,inertia);
+	m_childConvexShape->calculateLocalInertia(mass, inertia);
 }
 
 
 	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-void btConvex2dShape::getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+void btConvex2dShape::getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 {
-	m_childConvexShape->getAabb(t,aabbMin,aabbMax);
+	m_childConvexShape->getAabb(t, aabbMin, aabbMax);
 }
 
-void btConvex2dShape::getAabbSlow(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+void btConvex2dShape::getAabbSlow(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 {
-	m_childConvexShape->getAabbSlow(t,aabbMin,aabbMax);
+	m_childConvexShape->getAabbSlow(t, aabbMin, aabbMax);
 }
 
 void	btConvex2dShape::setLocalScaling(const btVector3& scaling) 
@@ -88,5 +88,5 @@ int		btConvex2dShape::getNumPreferredPenetrationDirections() const
 	
 void	btConvex2dShape::getPreferredPenetrationDirection(int index, btVector3& penetrationVector) const
 {
-	m_childConvexShape->getPreferredPenetrationDirection(index,penetrationVector);
+	m_childConvexShape->getPreferredPenetrationDirection(index, penetrationVector);
 }

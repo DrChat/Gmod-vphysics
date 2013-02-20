@@ -74,7 +74,7 @@ public:
 
 	virtual ~btCompoundShape();
 
-	void	addChildShape(const btTransform& localTransform,btCollisionShape* shape);
+	void	addChildShape(const btTransform& localTransform, btCollisionShape* shape);
 
 	/// Remove all children shapes that contain the specified shape
 	virtual void removeChildShape(btCollisionShape* shape);
@@ -115,7 +115,7 @@ public:
 	}
 
 	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-	virtual	void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
 	/** Re-calculate the local Aabb. Is called at the end of removeChildShapes. 
 	Use this yourself if you modify the children or their transforms. */
@@ -128,7 +128,7 @@ public:
 		return m_localScaling;
 	}
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	virtual void	setMargin(btScalar margin)
 	{

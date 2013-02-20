@@ -36,11 +36,11 @@ SIMD_FORCE_INLINE void bt_calc_quantization_parameters(
 	btVector3 & outMinBound,
 	btVector3 & outMaxBound,
 	btVector3 & bvhQuantization,
-	const btVector3& srcMinBound,const btVector3& srcMaxBound,
+	const btVector3& srcMinBound, const btVector3& srcMaxBound,
 	btScalar quantizationMargin)
 {
 	//enlarge the AABB to avoid division by zero when initializing the quantization values
-	btVector3 clampValue(quantizationMargin,quantizationMargin,quantizationMargin);
+	btVector3 clampValue(quantizationMargin, quantizationMargin, quantizationMargin);
 	outMinBound = srcMinBound - clampValue;
 	outMaxBound = srcMaxBound + clampValue;
 	btVector3 aabbSize = outMaxBound - outMinBound;

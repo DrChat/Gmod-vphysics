@@ -68,7 +68,7 @@ void btVoronoiSimplexSolver::reset()
 	m_cachedValidClosest = false;
 	m_numVertices = 0;
 	m_needsUpdate = true;
-	m_lastW = btVector3(btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT),btScalar(BT_LARGE_FLOAT));
+	m_lastW = btVector3(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
 	m_cachedBC.reset();
 }
 
@@ -107,7 +107,7 @@ bool	btVoronoiSimplexSolver::updateClosestVectorAndPoints()
 				m_cachedP2 = m_simplexPointsQ[0];
 				m_cachedV = m_cachedP1-m_cachedP2; //== m_simplexVectorW[0]
 				m_cachedBC.reset();
-				m_cachedBC.setBarycentricCoordinates(btScalar(1.),btScalar(0.),btScalar(0.),btScalar(0.));
+				m_cachedBC.setBarycentricCoordinates(btScalar(1.), btScalar(0.), btScalar(0.), btScalar(0.));
 				m_cachedValidClosest = m_cachedBC.isValid();
 				break;
 			};
@@ -118,7 +118,7 @@ bool	btVoronoiSimplexSolver::updateClosestVectorAndPoints()
 					const btVector3& to = m_simplexVectorW[1];
 					btVector3 nearest;
 
-					btVector3 p (btScalar(0.),btScalar(0.),btScalar(0.));
+					btVector3 p (btScalar(0.), btScalar(0.), btScalar(0.));
 					btVector3 diff = p - from;
 					btVector3 v = to - from;
 					btScalar t = v.dot(diff);
@@ -142,7 +142,7 @@ bool	btVoronoiSimplexSolver::updateClosestVectorAndPoints()
 						//reduce to 1 point
 						m_cachedBC.m_usedVertices.usedVertexA = true;
 					}
-					m_cachedBC.setBarycentricCoordinates(1-t,t);
+					m_cachedBC.setBarycentricCoordinates(1-t, t);
 					nearest = from + t*v;
 
 					m_cachedP1 = m_simplexPointsP[0] + t * (m_simplexPointsP[1] - m_simplexPointsP[0]);
@@ -157,13 +157,13 @@ bool	btVoronoiSimplexSolver::updateClosestVectorAndPoints()
 		case 3: 
 			{ 
 				//closest point origin from triangle 
-				btVector3 p (btScalar(0.),btScalar(0.),btScalar(0.)); 
+				btVector3 p (btScalar(0.), btScalar(0.), btScalar(0.)); 
 
 				const btVector3& a = m_simplexVectorW[0]; 
 				const btVector3& b = m_simplexVectorW[1]; 
 				const btVector3& c = m_simplexVectorW[2]; 
 
-				closestPtPointTriangle(p,a,b,c,m_cachedBC); 
+				closestPtPointTriangle(p, a,b, c,m_cachedBC); 
 				m_cachedP1 = m_simplexPointsP[0] * m_cachedBC.m_barycentricCoords[0] + 
 				m_simplexPointsP[1] * m_cachedBC.m_barycentricCoords[1] + 
 				m_simplexPointsP[2] * m_cachedBC.m_barycentricCoords[2]; 
@@ -183,14 +183,14 @@ bool	btVoronoiSimplexSolver::updateClosestVectorAndPoints()
 			{
 
 				
-				btVector3 p (btScalar(0.),btScalar(0.),btScalar(0.));
+				btVector3 p (btScalar(0.), btScalar(0.), btScalar(0.));
 				
 				const btVector3& a = m_simplexVectorW[0];
 				const btVector3& b = m_simplexVectorW[1];
 				const btVector3& c = m_simplexVectorW[2];
 				const btVector3& d = m_simplexVectorW[3];
 
-				bool hasSeperation = closestPtPointTetrahedron(p,a,b,c,d,m_cachedBC);
+				bool hasSeperation = closestPtPointTetrahedron(p, a,b, c,d, m_cachedBC);
 
 				if (hasSeperation)
 				{
@@ -218,7 +218,7 @@ bool	btVoronoiSimplexSolver::updateClosestVectorAndPoints()
 					{
 						m_cachedValidClosest = true;
 						//degenerate case == false, penetration = true + zero
-						m_cachedV.setValue(btScalar(0.),btScalar(0.),btScalar(0.));
+						m_cachedV.setValue(btScalar(0.), btScalar(0.), btScalar(0.));
 					}
 					break;
 				}
@@ -327,7 +327,7 @@ void btVoronoiSimplexSolver::compute_points(btVector3& p1, btVector3& p2)
 
 
 
-bool	btVoronoiSimplexSolver::closestPtPointTriangle(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c,btSubSimplexClosestResult& result)
+bool	btVoronoiSimplexSolver::closestPtPointTriangle(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c, btSubSimplexClosestResult& result)
 {
 	result.m_usedVertices.reset();
 
@@ -364,9 +364,9 @@ bool	btVoronoiSimplexSolver::closestPtPointTriangle(const btVector3& p, const bt
 		result.m_closestPointOnSimplex = a + v * ab;
 		result.m_usedVertices.usedVertexA = true;
 		result.m_usedVertices.usedVertexB = true;
-		result.setBarycentricCoordinates(1-v,v,0);
+		result.setBarycentricCoordinates(1-v, v,0);
 		return true;
-        //return a + v * ab; // barycentric coordinates (1-v,v,0)
+        //return a + v * ab; // barycentric coordinates (1-v, v,0)
     }
 
     // Check if P in vertex region outside C
@@ -388,9 +388,9 @@ bool	btVoronoiSimplexSolver::closestPtPointTriangle(const btVector3& p, const bt
 		result.m_closestPointOnSimplex = a + w * ac;
 		result.m_usedVertices.usedVertexA = true;
 		result.m_usedVertices.usedVertexC = true;
-		result.setBarycentricCoordinates(1-w,0,w);
+		result.setBarycentricCoordinates(1-w,0, w);
 		return true;
-        //return a + w * ac; // barycentric coordinates (1-w,0,w)
+        //return a + w * ac; // barycentric coordinates (1-w,0, w)
     }
 
     // Check if P in edge region of BC, if so return projection of P onto BC
@@ -401,12 +401,12 @@ bool	btVoronoiSimplexSolver::closestPtPointTriangle(const btVector3& p, const bt
 		result.m_closestPointOnSimplex = b + w * (c - b);
 		result.m_usedVertices.usedVertexB = true;
 		result.m_usedVertices.usedVertexC = true;
-		result.setBarycentricCoordinates(0,1-w,w);
+		result.setBarycentricCoordinates(0,1-w, w);
 		return true;		
-       // return b + w * (c - b); // barycentric coordinates (0,1-w,w)
+       // return b + w * (c - b); // barycentric coordinates (0,1-w, w)
     }
 
-    // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+    // P inside face region. Compute Q through its barycentric coordinates (u, v,w)
     btScalar denom = btScalar(1.0) / (va + vb + vc);
     btScalar v = vb * denom;
     btScalar w = vc * denom;
@@ -415,7 +415,7 @@ bool	btVoronoiSimplexSolver::closestPtPointTriangle(const btVector3& p, const bt
 	result.m_usedVertices.usedVertexA = true;
 	result.m_usedVertices.usedVertexB = true;
 	result.m_usedVertices.usedVertexC = true;
-	result.setBarycentricCoordinates(1-v-w,v,w);
+	result.setBarycentricCoordinates(1-v-w, v,w);
 	
 	return true;
 //	return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = btScalar(1.0) - v - w
@@ -487,7 +487,7 @@ bool	btVoronoiSimplexSolver::closestPtPointTetrahedron(const btVector3& p, const
     // If point outside face abc then compute closest point on abc
 	if (pointOutsideABC) 
 	{
-        closestPtPointTriangle(p, a, b, c,tempResult);
+        closestPtPointTriangle(p, a, b, c, tempResult);
 		btVector3 q = tempResult.m_closestPointOnSimplex;
 		
         btScalar sqDist = (q - p).dot( q - p);
@@ -514,7 +514,7 @@ bool	btVoronoiSimplexSolver::closestPtPointTetrahedron(const btVector3& p, const
 	// Repeat test for face acd
 	if (pointOutsideACD) 
 	{
-        closestPtPointTriangle(p, a, c, d,tempResult);
+        closestPtPointTriangle(p, a, c, d, tempResult);
 		btVector3 q = tempResult.m_closestPointOnSimplex;
 		//convert result bitmask!
 
@@ -542,7 +542,7 @@ bool	btVoronoiSimplexSolver::closestPtPointTetrahedron(const btVector3& p, const
 	
 	if (pointOutsideADB)
 	{
-		closestPtPointTriangle(p, a, d, b,tempResult);
+		closestPtPointTriangle(p, a, d, b, tempResult);
 		btVector3 q = tempResult.m_closestPointOnSimplex;
 		//convert result bitmask!
 
@@ -570,7 +570,7 @@ bool	btVoronoiSimplexSolver::closestPtPointTetrahedron(const btVector3& p, const
 
 	if (pointOutsideBDC)
 	{
-        closestPtPointTriangle(p, b, d, c,tempResult);
+        closestPtPointTriangle(p, b, d, c, tempResult);
 		btVector3 q = tempResult.m_closestPointOnSimplex;
 		//convert result bitmask!
         btScalar sqDist = (q - p).dot( q - p);

@@ -87,15 +87,15 @@ class SpuContactResult : public btDiscreteCollisionDetectorInterface::Result
 			return m_spuManifold;
 		}
 
-		virtual void setShapeIdentifiersA(int partId0,int index0);
-		virtual void setShapeIdentifiersB(int partId1,int index1);
+		virtual void setShapeIdentifiersA(int partId0, int index0);
+		virtual void setShapeIdentifiersB(int partId1, int index1);
 
-		void	setContactInfo(btPersistentManifold* spuManifold, ppu_address_t	manifoldAddress,const btTransform& worldTrans0,const btTransform& worldTrans1, btScalar restitution0,btScalar restitution1, btScalar friction0,btScalar friction01, bool isSwapped);
+		void	setContactInfo(btPersistentManifold* spuManifold, ppu_address_t	manifoldAddress, const btTransform& worldTrans0, const btTransform& worldTrans1, btScalar restitution0, btScalar restitution1, btScalar friction0, btScalar friction01, bool isSwapped);
 
 
         void writeDoubleBufferedManifold(btPersistentManifold* lsManifold, btPersistentManifold* mmManifold);
 
-        virtual void addContactPoint(const btVector3& normalOnBInWorld,const btVector3& pointInWorld,btScalar depth);
+        virtual void addContactPoint(const btVector3& normalOnBInWorld, const btVector3& pointInWorld, btScalar depth);
 
 		void flush();
 };

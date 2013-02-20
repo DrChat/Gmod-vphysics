@@ -82,7 +82,7 @@ public:
 	}
 
 	///registerCollisionCreateFunc allows registration of custom/alternative collision create functions
-	void	registerCollisionCreateFunc(int proxyType0,int proxyType1, btCollisionAlgorithmCreateFunc* createFunc);
+	void	registerCollisionCreateFunc(int proxyType0, int proxyType1, btCollisionAlgorithmCreateFunc* createFunc);
 
 	int	getNumManifolds() const
 	{ 
@@ -108,20 +108,20 @@ public:
 
 	virtual ~btCollisionDispatcher();
 
-	virtual btPersistentManifold*	getNewManifold(const btCollisionObject* b0,const btCollisionObject* b1);
+	virtual btPersistentManifold*	getNewManifold(const btCollisionObject* b0, const btCollisionObject* b1);
 	
 	virtual void releaseManifold(btPersistentManifold* manifold);
 
 
 	virtual void clearManifold(btPersistentManifold* manifold);
 
-	btCollisionAlgorithm* findAlgorithm(const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,btPersistentManifold* sharedManifold = 0);
+	btCollisionAlgorithm* findAlgorithm(const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btPersistentManifold* sharedManifold = 0);
 		
-	virtual bool	needsCollision(const btCollisionObject* body0,const btCollisionObject* body1);
+	virtual bool	needsCollision(const btCollisionObject* body0, const btCollisionObject* body1);
 	
-	virtual bool	needsResponse(const btCollisionObject* body0,const btCollisionObject* body1);
+	virtual bool	needsResponse(const btCollisionObject* body0, const btCollisionObject* body1);
 	
-	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache,const btDispatcherInfo& dispatchInfo,btDispatcher* dispatcher) ;
+	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher) ;
 
 	void	setNearCallback(btNearCallback	nearCallback)
 	{

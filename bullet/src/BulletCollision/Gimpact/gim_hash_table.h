@@ -133,12 +133,12 @@ void gim_sort_hash_node_array(T * array, GUINT array_count)
 {
     if(array_count<GIM_MIN_RADIX_SORT_SIZE)
     {
-    	gim_heap_sort(array,array_count,GIM_HASH_NODE_CMP_MACRO());
+    	gim_heap_sort(array, array_count, GIM_HASH_NODE_CMP_MACRO());
     }
     else
     {
     	memcopy_elements_func cmpfunc;
-    	gim_radix_sort(array,array_count,GIM_HASH_NODE_GET_KEY(),cmpfunc);
+    	gim_radix_sort(array, array_count, GIM_HASH_NODE_GET_KEY(), cmpfunc);
     }
 }
 
@@ -164,7 +164,7 @@ inline GUINT gim_next_prime(GUINT number)
 {
     //Find nearest upper prime
     GUINT result_ind = 0;
-    gim_binary_search(gim_prime_list,0,(GIM_NUM_PRIME-2),number,result_ind);
+    gim_binary_search(gim_prime_list,0, (GIM_NUM_PRIME-2), number, result_ind);
 
     // inv: result_ind < 28
     return gim_prime_list[result_ind];
@@ -393,7 +393,7 @@ protected:
     //! insert an element in hash table
     /*!
     If the element exists, this won't insert the element
-    \return the index in the array of the existing element,or GIM_INVALID_HASH if the element has been inserted
+    \return the index in the array of the existing element, or GIM_INVALID_HASH if the element has been inserted
     If so, the element has been inserted at the last position of the array.
     */
     inline GUINT _insert_hash_table(GUINT hashkey, const T & value)
@@ -401,7 +401,7 @@ protected:
         if(hashkey==GIM_INVALID_HASH)
         {
             //Insert anyway
-            _insert_unsorted(hashkey,value);
+            _insert_unsorted(hashkey, value);
             return GIM_INVALID_HASH;
         }
 
@@ -413,14 +413,14 @@ protected:
 
         m_hash_table[cell_index] = m_nodes.size();
 
-        _insert_unsorted(hashkey,value);
+        _insert_unsorted(hashkey, value);
         return GIM_INVALID_HASH;
     }
 
     //! insert an element in hash table.
     /*!
     If the element exists, this replaces the element.
-    \return the index in the array of the existing element,or GIM_INVALID_HASH if the element has been inserted
+    \return the index in the array of the existing element, or GIM_INVALID_HASH if the element has been inserted
     If so, the element has been inserted at the last position of the array.
     */
     inline GUINT _insert_hash_table_replace(GUINT hashkey, const T & value)
@@ -428,7 +428,7 @@ protected:
         if(hashkey==GIM_INVALID_HASH)
         {
             //Insert anyway
-            _insert_unsorted(hashkey,value);
+            _insert_unsorted(hashkey, value);
             return GIM_INVALID_HASH;
         }
 
@@ -438,13 +438,13 @@ protected:
 
         if(value_key!= GIM_INVALID_HASH)
         {//replaces the existing
-            m_nodes[value_key] = _node_type(hashkey,value);
+            m_nodes[value_key] = _node_type(hashkey, value);
             return value_key;// index of the replaced element
         }
 
         m_hash_table[cell_index] = m_nodes.size();
 
-        _insert_unsorted(hashkey,value);
+        _insert_unsorted(hashkey, value);
         return GIM_INVALID_HASH;
 
     }
@@ -488,7 +488,7 @@ protected:
     */
     inline void _insert_in_pos(GUINT hashkey, const T & value, GUINT pos)
     {
-        m_nodes.insert(_node_type(hashkey,value),pos);
+        m_nodes.insert(_node_type(hashkey, value), pos);
         this->check_for_switching_to_hashtable();
     }
 
@@ -497,7 +497,7 @@ protected:
     {
         if(hashkey==GIM_INVALID_HASH || size()==0)
         {
-            m_nodes.push_back(_node_type(hashkey,value));
+            m_nodes.push_back(_node_type(hashkey, value));
             return GIM_INVALID_HASH;
         }
         //Insert at last position
@@ -509,7 +509,7 @@ protected:
         _node_type * ptr = m_nodes.pointer();
 
         bool found = gim_binary_search_ex(
-        	ptr,0,last_index,result_ind,hashkey,GIM_HASH_NODE_CMP_KEY_MACRO());
+        	ptr,0, last_index, result_ind, hashkey, GIM_HASH_NODE_CMP_KEY_MACRO());
 
 
         //Insert before found index
@@ -528,7 +528,7 @@ protected:
     {
         if(hashkey==GIM_INVALID_HASH || size()==0)
         {
-            m_nodes.push_back(_node_type(hashkey,value));
+            m_nodes.push_back(_node_type(hashkey, value));
             return GIM_INVALID_HASH;
         }
         //Insert at last position
@@ -538,12 +538,12 @@ protected:
         _node_type * ptr = m_nodes.pointer();
 
         bool found = gim_binary_search_ex(
-        	ptr,0,last_index,result_ind,hashkey,GIM_HASH_NODE_CMP_KEY_MACRO());
+        	ptr,0, last_index, result_ind, hashkey, GIM_HASH_NODE_CMP_KEY_MACRO());
 
         //Insert before found index
         if(found)
         {
-            m_nodes[result_ind] = _node_type(hashkey,value);
+            m_nodes[result_ind] = _node_type(hashkey, value);
         }
         else
         {
@@ -555,7 +555,7 @@ protected:
     //! Fast insertion in m_nodes array
     inline GUINT  _insert_unsorted(GUINT hashkey, const T & value)
     {
-        m_nodes.push_back(_node_type(hashkey,value));
+        m_nodes.push_back(_node_type(hashkey, value));
         m_sorted = false;
         return GIM_INVALID_HASH;
     }
@@ -627,7 +627,7 @@ public:
 
         _node_type * ptr = m_nodes.pointer();
         GUINT siz = m_nodes.size();
-        gim_sort_hash_node_array(ptr,siz);
+        gim_sort_hash_node_array(ptr, siz);
         m_sorted=true;
 
 
@@ -717,7 +717,7 @@ public:
 
     //! Finds the index of the element with the key
     /*!
-    \return the index in the array of the existing element,or GIM_INVALID_HASH if the element has been inserted
+    \return the index in the array of the existing element, or GIM_INVALID_HASH if the element has been inserted
     If so, the element has been inserted at the last position of the array.
     */
     inline GUINT find(GUINT hashkey)
@@ -742,7 +742,7 @@ public:
 			last_index--;
             _node_type *  ptr =  m_nodes.pointer();
 
-            bool found = gim_binary_search_ex(ptr,0,last_index,result_ind,hashkey,GIM_HASH_NODE_CMP_KEY_MACRO());
+            bool found = gim_binary_search_ex(ptr,0, last_index, result_ind, hashkey, GIM_HASH_NODE_CMP_KEY_MACRO());
 
 
             if(found) return result_ind;
@@ -852,13 +852,13 @@ public:
     {
         if(m_hash_table)
         {
-            return this->_insert_hash_table(hashkey,element);
+            return this->_insert_hash_table(hashkey, element);
         }
         if(this->is_sorted())
         {
-            return this->_insert_sorted(hashkey,element);
+            return this->_insert_sorted(hashkey, element);
         }
-        return this->_insert_unsorted(hashkey,element);
+        return this->_insert_unsorted(hashkey, element);
     }
 
     //! Insert an element into the hash, and could overrite an existing object with the same hash.
@@ -870,28 +870,28 @@ public:
     {
         if(m_hash_table)
         {
-            return this->_insert_hash_table_replace(hashkey,element);
+            return this->_insert_hash_table_replace(hashkey, element);
         }
         if(this->is_sorted())
         {
-            return this->_insert_sorted_replace(hashkey,element);
+            return this->_insert_sorted_replace(hashkey, element);
         }
-        this->_insert_unsorted(hashkey,element);
+        this->_insert_unsorted(hashkey, element);
         return m_nodes.size();
     }
 
 
 
-    //! Insert an element into the hash,But if this container is a sorted array, this inserts it unsorted
+    //! Insert an element into the hash, But if this container is a sorted array, this inserts it unsorted
     /*!
     */
-    inline GUINT insert_unsorted(GUINT hashkey,const T & element)
+    inline GUINT insert_unsorted(GUINT hashkey, const T & element)
     {
         if(m_hash_table)
         {
-            return this->_insert_hash_table(hashkey,element);
+            return this->_insert_hash_table(hashkey, element);
         }
-        return this->_insert_unsorted(hashkey,element);
+        return this->_insert_unsorted(hashkey, element);
     }
 
 

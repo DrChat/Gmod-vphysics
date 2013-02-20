@@ -44,7 +44,7 @@ void gim_contact_array::merge_contacts(
 	}
 
 	gim_array<GIM_RSORT_TOKEN> keycontacts(contacts.size());
-	keycontacts.resize(contacts.size(),false);
+	keycontacts.resize(contacts.size(), false);
 
 	//fill key contacts
 
@@ -57,7 +57,7 @@ void gim_contact_array::merge_contacts(
 	}
 
 	//sort keys
-	gim_heap_sort(keycontacts.pointer(),keycontacts.size(),GIM_RSORT_TOKEN_COMPARATOR());
+	gim_heap_sort(keycontacts.pointer(), keycontacts.size(), GIM_RSORT_TOKEN_COMPARATOR());
 
 	// Merge contacts
 
@@ -102,7 +102,7 @@ void gim_contact_array::merge_contacts(
 
 		    if(normal_contact_average && coincident_count>0)
 		    {
-		    	pcontact->interpolate_normals(coincident_normals,coincident_count);
+		    	pcontact->interpolate_normals(coincident_normals, coincident_count);
 		        coincident_count = 0;
 		    }
 

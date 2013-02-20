@@ -24,7 +24,7 @@ subject to the following restrictions:
 #include <float.h>
 #include <string.h>
 
-btBoxBoxDetector::btBoxBoxDetector(const btBoxShape* box1,const btBoxShape* box2)
+btBoxBoxDetector::btBoxBoxDetector(const btBoxShape* box1, const btBoxShape* box2)
 : m_box1(box1),
 m_box2(box2)
 {
@@ -32,7 +32,7 @@ m_box2(box2)
 }
 
 
-// given two boxes (p1,R1,side1) and (p2,R2,side2), collide them together and
+// given two boxes (p1, R1, side1) and (p2, R2, side2), collide them together and
 // generate contact points. this returns 0 if there is no contact otherwise
 // it returns the number of contacts generated.
 // `normal' returns the contact normal.
@@ -48,35 +48,35 @@ m_box2(box2)
 // collision functions. this function only fills in the position and depth
 // fields.
 struct dContactGeom;
-#define dDOTpq(a,b,p,q) ((a)[0]*(b)[0] + (a)[p]*(b)[q] + (a)[2*(p)]*(b)[2*(q)])
+#define dDOTpq(a, b,p, q) ((a)[0]*(b)[0] + (a)[p]*(b)[q] + (a)[2*(p)]*(b)[2*(q)])
 #define dInfinity FLT_MAX
 
 
-/*PURE_INLINE btScalar dDOT   (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,1,1); }
-PURE_INLINE btScalar dDOT13 (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,1,3); }
-PURE_INLINE btScalar dDOT31 (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,3,1); }
-PURE_INLINE btScalar dDOT33 (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,3,3); }
+/*PURE_INLINE btScalar dDOT   (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,1,1); }
+PURE_INLINE btScalar dDOT13 (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,1,3); }
+PURE_INLINE btScalar dDOT31 (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,3,1); }
+PURE_INLINE btScalar dDOT33 (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,3,3); }
 */
-static btScalar dDOT   (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,1,1); }
-static btScalar dDOT44 (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,4,4); }
-static btScalar dDOT41 (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,4,1); }
-static btScalar dDOT14 (const btScalar *a, const btScalar *b) { return dDOTpq(a,b,1,4); }
-#define dMULTIPLYOP1_331(A,op,B,C) \
+static btScalar dDOT   (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,1,1); }
+static btScalar dDOT44 (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,4,4); }
+static btScalar dDOT41 (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,4,1); }
+static btScalar dDOT14 (const btScalar *a, const btScalar *b) { return dDOTpq(a, b,1,4); }
+#define dMULTIPLYOP1_331(A, op, B,C) \
 {\
-  (A)[0] op dDOT41((B),(C)); \
-  (A)[1] op dDOT41((B+1),(C)); \
-  (A)[2] op dDOT41((B+2),(C)); \
+  (A)[0] op dDOT41((B), (C)); \
+  (A)[1] op dDOT41((B+1), (C)); \
+  (A)[2] op dDOT41((B+2), (C)); \
 }
 
-#define dMULTIPLYOP0_331(A,op,B,C) \
+#define dMULTIPLYOP0_331(A, op, B,C) \
 { \
-  (A)[0] op dDOT((B),(C)); \
-  (A)[1] op dDOT((B+4),(C)); \
-  (A)[2] op dDOT((B+8),(C)); \
+  (A)[0] op dDOT((B), (C)); \
+  (A)[1] op dDOT((B+4), (C)); \
+  (A)[2] op dDOT((B+8), (C)); \
 } 
 
-#define dMULTIPLY1_331(A,B,C) dMULTIPLYOP1_331(A,=,B,C)
-#define dMULTIPLY0_331(A,B,C) dMULTIPLYOP0_331(A,=,B,C)
+#define dMULTIPLY1_331(A, B,C) dMULTIPLYOP1_331(A,=, B,C)
+#define dMULTIPLY0_331(A, B,C) dMULTIPLYOP0_331(A,=, B,C)
 
 typedef btScalar dMatrix3[4*3];
 
@@ -91,9 +91,9 @@ void dLineClosestApproach (const btVector3& pa, const btVector3& ua,
   p[0] = pb[0] - pa[0];
   p[1] = pb[1] - pa[1];
   p[2] = pb[2] - pa[2];
-  btScalar uaub = dDOT(ua,ub);
-  btScalar q1 =  dDOT(ua,p);
-  btScalar q2 = -dDOT(ub,p);
+  btScalar uaub = dDOT(ua, ub);
+  btScalar q1 =  dDOT(ua, p);
+  btScalar q2 = -dDOT(ub, p);
   btScalar d = 1-uaub*uaub;
   if (d <= btScalar(0.0001f)) {
     // @@@ this needs to be made more robust
@@ -110,10 +110,10 @@ void dLineClosestApproach (const btVector3& pa, const btVector3& ua,
 
 
 // find all the intersection points between the 2D rectangle with vertices
-// at (+/-h[0],+/-h[1]) and the 2D quadrilateral with vertices (p[0],p[1]),
-// (p[2],p[3]),(p[4],p[5]),(p[6],p[7]).
+// at (+/-h[0],+/-h[1]) and the 2D quadrilateral with vertices (p[0], p[1]),
+// (p[2], p[3]), (p[4], p[5]), (p[6], p[7]).
 //
-// the intersection points are returned as x,y pairs in the 'ret' array.
+// the intersection points are returned as x, y pairs in the 'ret' array.
 // the number of intersection points is returned by the function (this will
 // be in the range 0 to 8).
 
@@ -121,7 +121,7 @@ static int intersectRectQuad2 (btScalar h[2], btScalar p[8], btScalar ret[16])
 {
   // q (and r) contain nq (and nr) coordinate points for the current (and
   // chopped) polygons
-  int nq=4,nr=0;
+  int nq=4, nr=0;
   btScalar buffer[16];
   btScalar *q = p;
   btScalar *r = ret;
@@ -166,7 +166,7 @@ static int intersectRectQuad2 (btScalar h[2], btScalar p[8], btScalar ret[16])
     }
   }
  done:
-  if (q != ret) memcpy (ret,q,nr*2*sizeof(btScalar));
+  if (q != ret) memcpy (ret, q,nr*2*sizeof(btScalar));
   return nr;
 }
 
@@ -184,9 +184,9 @@ static int intersectRectQuad2 (btScalar h[2], btScalar p[8], btScalar ret[16])
 void cullPoints2 (int n, btScalar p[], int m, int i0, int iret[]);
 void cullPoints2 (int n, btScalar p[], int m, int i0, int iret[])
 {
-  // compute the centroid of the polygon in cx,cy
-  int i,j;
-  btScalar a,cx,cy,q;
+  // compute the centroid of the polygon in cx, cy
+  int i, j;
+  btScalar a, cx, cy, q;
   if (n==1) {
     cx = p[0];
     cy = p[1];
@@ -219,7 +219,7 @@ void cullPoints2 (int n, btScalar p[], int m, int i0, int iret[])
 
   // compute the angle of each point w.r.t. the centroid
   btScalar A[8];
-  for (i=0; i<n; i++) A[i] = btAtan2(p[i*2+1]-cy,p[i*2]-cx);
+  for (i=0; i<n; i++) A[i] = btAtan2(p[i*2+1]-cy, p[i*2]-cx);
 
   // search for points that have angles closest to A[i0] + i*(2*pi/m).
   int avail[8];
@@ -230,7 +230,7 @@ void cullPoints2 (int n, btScalar p[], int m, int i0, int iret[])
   for (j=1; j<m; j++) {
     a = btScalar(j)*(2*M__PI/m) + A[i0];
     if (a > M__PI) a -= 2*M__PI;
-    btScalar maxdiff=1e9,diff;
+    btScalar maxdiff=1e9, diff;
 
     *iret = i0;			// iret is not allowed to keep this value, but it sometimes does, when diff=#QNAN0
 
@@ -258,23 +258,23 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 	     const btVector3& side1, const btVector3& p2,
 	     const dMatrix3 R2, const btVector3& side2,
 	     btVector3& normal, btScalar *depth, int *return_code,
-		 int maxc, dContactGeom * /*contact*/, int /*skip*/,btDiscreteCollisionDetectorInterface::Result& output);
+		 int maxc, dContactGeom * /*contact*/, int /*skip*/, btDiscreteCollisionDetectorInterface::Result& output);
 int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 	     const btVector3& side1, const btVector3& p2,
 	     const dMatrix3 R2, const btVector3& side2,
 	     btVector3& normal, btScalar *depth, int *return_code,
-		 int maxc, dContactGeom * /*contact*/, int /*skip*/,btDiscreteCollisionDetectorInterface::Result& output)
+		 int maxc, dContactGeom * /*contact*/, int /*skip*/, btDiscreteCollisionDetectorInterface::Result& output)
 {
   const btScalar fudge_factor = btScalar(1.05);
-  btVector3 p,pp,normalC(0.f,0.f,0.f);
+  btVector3 p, pp, normalC(0.f,0.f,0.f);
   const btScalar *normalR = 0;
-  btScalar A[3],B[3],R11,R12,R13,R21,R22,R23,R31,R32,R33,
-    Q11,Q12,Q13,Q21,Q22,Q23,Q31,Q32,Q33,s,s2,l;
-  int i,j,invert_normal,code;
+  btScalar A[3], B[3], R11, R12, R13, R21, R22, R23, R31, R32, R33,
+    Q11, Q12, Q13, Q21, Q22, Q23, Q31, Q32, Q33, s,s2, l;
+  int i, j,invert_normal, code;
 
   // get vector from centers of box 1 to box 2, relative to box 1
   p = p2 - p1;
-  dMULTIPLY1_331 (pp,R1,p);		// get pp = p relative to body 1
+  dMULTIPLY1_331 (pp, R1, p);		// get pp = p relative to body 1
 
   // get side lengths / 2
   A[0] = side1[0]*btScalar(0.5);
@@ -285,9 +285,9 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   B[2] = side2[2]*btScalar(0.5);
 
   // Rij is R1'*R2, i.e. the relative rotation between R1 and R2
-  R11 = dDOT44(R1+0,R2+0); R12 = dDOT44(R1+0,R2+1); R13 = dDOT44(R1+0,R2+2);
-  R21 = dDOT44(R1+1,R2+0); R22 = dDOT44(R1+1,R2+1); R23 = dDOT44(R1+1,R2+2);
-  R31 = dDOT44(R1+2,R2+0); R32 = dDOT44(R1+2,R2+1); R33 = dDOT44(R1+2,R2+2);
+  R11 = dDOT44(R1+0, R2+0); R12 = dDOT44(R1+0, R2+1); R13 = dDOT44(R1+0, R2+2);
+  R21 = dDOT44(R1+1, R2+0); R22 = dDOT44(R1+1, R2+1); R23 = dDOT44(R1+1, R2+2);
+  R31 = dDOT44(R1+2, R2+0); R32 = dDOT44(R1+2, R2+1); R33 = dDOT44(R1+2, R2+2);
 
   Q11 = btFabs(R11); Q12 = btFabs(R12); Q13 = btFabs(R13);
   Q21 = btFabs(R21); Q22 = btFabs(R22); Q23 = btFabs(R23);
@@ -303,7 +303,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   // set to a vector relative to body 1. invert_normal is 1 if the sign of
   // the normal should be flipped.
 
-#define TST(expr1,expr2,norm,cc) \
+#define TST(expr1, expr2, norm, cc) \
   s2 = btFabs(expr1) - (expr2); \
   if (s2 > 0) return 0; \
   if (s2 > s) { \
@@ -317,20 +317,20 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   invert_normal = 0;
   code = 0;
 
-  // separating axis = u1,u2,u3
-  TST (pp[0],(A[0] + B[0]*Q11 + B[1]*Q12 + B[2]*Q13),R1+0,1);
-  TST (pp[1],(A[1] + B[0]*Q21 + B[1]*Q22 + B[2]*Q23),R1+1,2);
-  TST (pp[2],(A[2] + B[0]*Q31 + B[1]*Q32 + B[2]*Q33),R1+2,3);
+  // separating axis = u1, u2, u3
+  TST (pp[0], (A[0] + B[0]*Q11 + B[1]*Q12 + B[2]*Q13), R1+0,1);
+  TST (pp[1], (A[1] + B[0]*Q21 + B[1]*Q22 + B[2]*Q23), R1+1,2);
+  TST (pp[2], (A[2] + B[0]*Q31 + B[1]*Q32 + B[2]*Q33), R1+2,3);
 
-  // separating axis = v1,v2,v3
-  TST (dDOT41(R2+0,p),(A[0]*Q11 + A[1]*Q21 + A[2]*Q31 + B[0]),R2+0,4);
-  TST (dDOT41(R2+1,p),(A[0]*Q12 + A[1]*Q22 + A[2]*Q32 + B[1]),R2+1,5);
-  TST (dDOT41(R2+2,p),(A[0]*Q13 + A[1]*Q23 + A[2]*Q33 + B[2]),R2+2,6);
+  // separating axis = v1, v2, v3
+  TST (dDOT41(R2+0, p), (A[0]*Q11 + A[1]*Q21 + A[2]*Q31 + B[0]), R2+0,4);
+  TST (dDOT41(R2+1, p), (A[0]*Q12 + A[1]*Q22 + A[2]*Q32 + B[1]), R2+1,5);
+  TST (dDOT41(R2+2, p), (A[0]*Q13 + A[1]*Q23 + A[2]*Q33 + B[2]), R2+2,6);
 
   // note: cross product axes need to be scaled when s is computed.
-  // normal (n1,n2,n3) is relative to box 1.
+  // normal (n1, n2, n3) is relative to box 1.
 #undef TST
-#define TST(expr1,expr2,n1,n2,n3,cc) \
+#define TST(expr1, expr2, n1, n2, n3, cc) \
   s2 = btFabs(expr1) - (expr2); \
   if (s2 > SIMD_EPSILON) return 0; \
   l = btSqrt((n1)*(n1) + (n2)*(n2) + (n3)*(n3)); \
@@ -359,20 +359,20 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   Q32 += fudge2;
   Q33 += fudge2;
 
-  // separating axis = u1 x (v1,v2,v3)
-  TST(pp[2]*R21-pp[1]*R31,(A[1]*Q31+A[2]*Q21+B[1]*Q13+B[2]*Q12),0,-R31,R21,7);
-  TST(pp[2]*R22-pp[1]*R32,(A[1]*Q32+A[2]*Q22+B[0]*Q13+B[2]*Q11),0,-R32,R22,8);
-  TST(pp[2]*R23-pp[1]*R33,(A[1]*Q33+A[2]*Q23+B[0]*Q12+B[1]*Q11),0,-R33,R23,9);
+  // separating axis = u1 x (v1, v2, v3)
+  TST(pp[2]*R21-pp[1]*R31, (A[1]*Q31+A[2]*Q21+B[1]*Q13+B[2]*Q12),0,-R31, R21,7);
+  TST(pp[2]*R22-pp[1]*R32, (A[1]*Q32+A[2]*Q22+B[0]*Q13+B[2]*Q11),0,-R32, R22,8);
+  TST(pp[2]*R23-pp[1]*R33, (A[1]*Q33+A[2]*Q23+B[0]*Q12+B[1]*Q11),0,-R33, R23,9);
 
-  // separating axis = u2 x (v1,v2,v3)
-  TST(pp[0]*R31-pp[2]*R11,(A[0]*Q31+A[2]*Q11+B[1]*Q23+B[2]*Q22),R31,0,-R11,10);
-  TST(pp[0]*R32-pp[2]*R12,(A[0]*Q32+A[2]*Q12+B[0]*Q23+B[2]*Q21),R32,0,-R12,11);
-  TST(pp[0]*R33-pp[2]*R13,(A[0]*Q33+A[2]*Q13+B[0]*Q22+B[1]*Q21),R33,0,-R13,12);
+  // separating axis = u2 x (v1, v2, v3)
+  TST(pp[0]*R31-pp[2]*R11, (A[0]*Q31+A[2]*Q11+B[1]*Q23+B[2]*Q22), R31,0,-R11,10);
+  TST(pp[0]*R32-pp[2]*R12, (A[0]*Q32+A[2]*Q12+B[0]*Q23+B[2]*Q21), R32,0,-R12,11);
+  TST(pp[0]*R33-pp[2]*R13, (A[0]*Q33+A[2]*Q13+B[0]*Q22+B[1]*Q21), R33,0,-R13,12);
 
-  // separating axis = u3 x (v1,v2,v3)
-  TST(pp[1]*R11-pp[0]*R21,(A[0]*Q21+A[1]*Q11+B[1]*Q33+B[2]*Q32),-R21,R11,0,13);
-  TST(pp[1]*R12-pp[0]*R22,(A[0]*Q22+A[1]*Q12+B[0]*Q33+B[2]*Q31),-R22,R12,0,14);
-  TST(pp[1]*R13-pp[0]*R23,(A[0]*Q23+A[1]*Q13+B[0]*Q32+B[1]*Q31),-R23,R13,0,15);
+  // separating axis = u3 x (v1, v2, v3)
+  TST(pp[1]*R11-pp[0]*R21, (A[0]*Q21+A[1]*Q11+B[1]*Q33+B[2]*Q32),-R21, R11,0,13);
+  TST(pp[1]*R12-pp[0]*R22, (A[0]*Q22+A[1]*Q12+B[0]*Q33+B[2]*Q31),-R22, R12,0,14);
+  TST(pp[1]*R13-pp[0]*R23, (A[0]*Q23+A[1]*Q13+B[0]*Q32+B[1]*Q31),-R23, R13,0,15);
 
 #undef TST
 
@@ -386,7 +386,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
     normal[2] = normalR[8];
   }
   else {
-    dMULTIPLY0_331 (normal,R1,normalC);
+    dMULTIPLY0_331 (normal, R1, normalC);
   }
   if (invert_normal) {
     normal[0] = -normal[0];
@@ -404,7 +404,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
     btScalar sign;
     for (i=0; i<3; i++) pa[i] = p1[i];
     for (j=0; j<3; j++) {
-      sign = (dDOT14(normal,R1+j) > 0) ? btScalar(1.0) : btScalar(-1.0);
+      sign = (dDOT14(normal, R1+j) > 0) ? btScalar(1.0) : btScalar(-1.0);
       for (i=0; i<3; i++) pa[i] += sign * A[j] * R1[i*4+j];
     }
 
@@ -412,16 +412,16 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
     btVector3 pb;
     for (i=0; i<3; i++) pb[i] = p2[i];
     for (j=0; j<3; j++) {
-      sign = (dDOT14(normal,R2+j) > 0) ? btScalar(-1.0) : btScalar(1.0);
+      sign = (dDOT14(normal, R2+j) > 0) ? btScalar(-1.0) : btScalar(1.0);
       for (i=0; i<3; i++) pb[i] += sign * B[j] * R2[i*4+j];
     }
 
-    btScalar alpha,beta;
-    btVector3 ua,ub;
+    btScalar alpha, beta;
+    btVector3 ua, ub;
     for (i=0; i<3; i++) ua[i] = R1[((code)-7)/3 + i*4];
     for (i=0; i<3; i++) ub[i] = R2[((code)-7)%3 + i*4];
 
-    dLineClosestApproach (pa,ua,pb,ub,&alpha,&beta);
+    dLineClosestApproach (pa, ua, pb, ub, &alpha, &beta);
     for (i=0; i<3; i++) pa[i] += ua[i]*alpha;
     for (i=0; i<3; i++) pb[i] += ub[i]*beta;
 
@@ -434,9 +434,9 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 #ifdef USE_CENTER_POINT
 	    for (i=0; i<3; i++) 
 			pointInWorld[i] = (pa[i]+pb[i])*btScalar(0.5);
-		output.addContactPoint(-normal,pointInWorld,-*depth);
+		output.addContactPoint(-normal, pointInWorld,-*depth);
 #else
-		output.addContactPoint(-normal,pb,-*depth);
+		output.addContactPoint(-normal, pb,-*depth);
 
 #endif //
 		*return_code = code;
@@ -469,7 +469,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 
   // nr = normal vector of reference face dotted with axes of incident box.
   // anr = absolute values of nr.
-  btVector3 normal2,nr,anr;
+  btVector3 normal2, nr, anr;
   if (code <= 3) {
     normal2[0] = normal[0];
     normal2[1] = normal[1];
@@ -480,15 +480,15 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
     normal2[1] = -normal[1];
     normal2[2] = -normal[2];
   }
-  dMULTIPLY1_331 (nr,Rb,normal2);
+  dMULTIPLY1_331 (nr, Rb, normal2);
   anr[0] = btFabs (nr[0]);
   anr[1] = btFabs (nr[1]);
   anr[2] = btFabs (nr[2]);
 
   // find the largest compontent of anr: this corresponds to the normal
   // for the indident face. the other axis numbers of the indicent face
-  // are stored in a1,a2.
-  int lanr,a1,a2;
+  // are stored in a1, a2.
+  int lanr, a1, a2;
   if (anr[1] > anr[0]) {
     if (anr[1] > anr[2]) {
       a1 = 0;
@@ -524,7 +524,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   }
 
   // find the normal and non-normal axis numbers of the reference box
-  int codeN,code1,code2;
+  int codeN, code1, code2;
   if (code <= 3) codeN = code-1; else codeN = code-4;
   if (codeN==0) {
     code1 = 1;
@@ -540,17 +540,17 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   }
 
   // find the four corners of the incident face, in reference-face coordinates
-  btScalar quad[8];	// 2D coordinate of incident face (x,y pairs)
-  btScalar c1,c2,m11,m12,m21,m22;
-  c1 = dDOT14 (center,Ra+code1);
-  c2 = dDOT14 (center,Ra+code2);
+  btScalar quad[8];	// 2D coordinate of incident face (x, y pairs)
+  btScalar c1, c2, m11, m12, m21, m22;
+  c1 = dDOT14 (center, Ra+code1);
+  c2 = dDOT14 (center, Ra+code2);
   // optimize this? - we have already computed this data above, but it is not
   // stored in an easy-to-index format. for now it's quicker just to recompute
   // the four dot products.
-  m11 = dDOT44 (Ra+code1,Rb+a1);
-  m12 = dDOT44 (Ra+code1,Rb+a2);
-  m21 = dDOT44 (Ra+code2,Rb+a1);
-  m22 = dDOT44 (Ra+code2,Rb+a2);
+  m11 = dDOT44 (Ra+code1, Rb+a1);
+  m12 = dDOT44 (Ra+code1, Rb+a2);
+  m21 = dDOT44 (Ra+code2, Rb+a1);
+  m22 = dDOT44 (Ra+code2, Rb+a2);
   {
     btScalar k1 = m11*Sb[a1];
     btScalar k2 = m21*Sb[a1];
@@ -573,7 +573,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 
   // intersect the incident and reference faces
   btScalar ret[16];
-  int n = intersectRectQuad2 (rect,quad,ret);
+  int n = intersectRectQuad2 (rect, quad, ret);
   if (n < 1) return 0;		// this should never happen
 
   // convert the intersection points into reference-face coordinates,
@@ -593,7 +593,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
     btScalar k2 = -m21*(ret[j*2]-c1) + m11*(ret[j*2+1]-c2);
     for (i=0; i<3; i++) point[cnum*3+i] =
 			  center[i] + k1*Rb[i*4+a1] + k2*Rb[i*4+a2];
-    dep[cnum] = Sa[codeN] - dDOT(normal2,point+cnum*3);
+    dep[cnum] = Sa[codeN] - dDOT(normal2, point+cnum*3);
     if (dep[cnum] >= 0) {
       ret[cnum*2] = ret[j*2];
       ret[cnum*2+1] = ret[j*2+1];
@@ -616,7 +616,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 		btVector3 pointInWorld;
 		for (i=0; i<3; i++) 
 			pointInWorld[i] = point[j*3+i] + pa[i];
-		output.addContactPoint(-normal,pointInWorld,-dep[j]);
+		output.addContactPoint(-normal, pointInWorld,-dep[j]);
 
     }
 	  } else
@@ -628,7 +628,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 			for (i=0; i<3; i++) 
 				pointInWorld[i] = point[j*3+i] + pa[i]-normal[i]*dep[j];
 				//pointInWorld[i] = point[j*3+i] + pa[i];
-			output.addContactPoint(-normal,pointInWorld,-dep[j]);
+			output.addContactPoint(-normal, pointInWorld,-dep[j]);
 		}
 	  }
   }
@@ -645,10 +645,10 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
     }
 
     int iret[8];
-    cullPoints2 (cnum,ret,maxc,i1,iret);
+    cullPoints2 (cnum, ret, maxc, i1, iret);
 
     for (j=0; j < maxc; j++) {
-//      dContactGeom *con = CONTACT(contact,skip*j);
+//      dContactGeom *con = CONTACT(contact, skip*j);
   //    for (i=0; i<3; i++) con->pos[i] = point[iret[j]*3+i] + pa[i];
     //  con->depth = dep[iret[j]];
 
@@ -657,10 +657,10 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
 			posInWorld[i] = point[iret[j]*3+i] + pa[i];
 		if (code<4) 
 	   {
-			output.addContactPoint(-normal,posInWorld,-dep[iret[j]]);
+			output.addContactPoint(-normal, posInWorld,-dep[iret[j]]);
 		} else
 		{
-			output.addContactPoint(-normal,posInWorld-normal*dep[iret[j]],-dep[iret[j]]);
+			output.addContactPoint(-normal, posInWorld-normal*dep[iret[j]],-dep[iret[j]]);
 		}
     }
     cnum = maxc;
@@ -670,7 +670,7 @@ int dBoxBox2 (const btVector3& p1, const dMatrix3 R1,
   return cnum;
 }
 
-void	btBoxBoxDetector::getClosestPoints(const ClosestPointInput& input,Result& output,class btIDebugDraw* /*debugDraw*/,bool /*swapResults*/)
+void	btBoxBoxDetector::getClosestPoints(const ClosestPointInput& input, Result& output, class btIDebugDraw* /*debugDraw*/, bool /*swapResults*/)
 {
 	
 	const btTransform& transformA = input.m_transformA;

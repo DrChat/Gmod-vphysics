@@ -23,7 +23,7 @@ subject to the following restrictions:
 #include "LinearMath/btQuaternion.h"
 #include "LinearMath/btSerializer.h"
 
-btConvexHullShape ::btConvexHullShape (const btScalar* points,int numPoints,int stride) : btPolyhedralConvexAabbCachingShape ()
+btConvexHullShape ::btConvexHullShape (const btScalar* points, int numPoints, int stride) : btPolyhedralConvexAabbCachingShape ()
 {
 	m_shapeType = CONVEX_HULL_SHAPE_PROXYTYPE;
 	m_unscaledPoints.resize(numPoints);
@@ -59,7 +59,7 @@ void btConvexHullShape::addPoint(const btVector3& point, bool recalculateLocalAa
 
 btVector3	btConvexHullShape::localGetSupportingVertexWithoutMargin(const btVector3& vec)const
 {
-	btVector3 supVec(btScalar(0.),btScalar(0.),btScalar(0.));
+	btVector3 supVec(btScalar(0.), btScalar(0.), btScalar(0.));
 	btScalar maxDot = btScalar(-BT_LARGE_FLOAT);
 
     // Here we take advantage of dot(a, b*c) = dot(a*b, c).  Note: This is true mathematically, but not numerically. 
@@ -73,7 +73,7 @@ btVector3	btConvexHullShape::localGetSupportingVertexWithoutMargin(const btVecto
     return supVec;
 }
 
-void	btConvexHullShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btConvexHullShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 	btScalar newDot;
 	//use 'w' component of supportVerticesOut?
@@ -86,7 +86,7 @@ void	btConvexHullShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const 
 
     for (int j=0;j<numVectors;j++)
     {
-        btVector3 vec = vectors[j] * m_localScaling;        // dot(a*b,c) = dot(a,b*c)
+        btVector3 vec = vectors[j] * m_localScaling;        // dot(a*b, c) = dot(a, b*c)
         if( 0 <  m_unscaledPoints.size() )
         {
             int i = (int) vec.maxDot( &m_unscaledPoints[0], m_unscaledPoints.size(), newDot);
@@ -112,7 +112,7 @@ btVector3	btConvexHullShape::localGetSupportingVertex(const btVector3& vec)const
 		btVector3 vecnorm = vec;
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
-			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
+			vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
 		} 
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;
@@ -140,7 +140,7 @@ int btConvexHullShape::getNumEdges() const
 	return m_unscaledPoints.size();
 }
 
-void btConvexHullShape::getEdge(int i,btVector3& pa,btVector3& pb) const
+void btConvexHullShape::getEdge(int i, btVector3& pa, btVector3& pb) const
 {
 
 	int index0 = i%m_unscaledPoints.size();
@@ -149,7 +149,7 @@ void btConvexHullShape::getEdge(int i,btVector3& pa,btVector3& pb) const
 	pb = getScaledPoint(index1);
 }
 
-void btConvexHullShape::getVertex(int i,btVector3& vtx) const
+void btConvexHullShape::getVertex(int i, btVector3& vtx) const
 {
 	vtx = getScaledPoint(i);
 }
@@ -159,14 +159,14 @@ int	btConvexHullShape::getNumPlanes() const
 	return 0;
 }
 
-void btConvexHullShape::getPlane(btVector3& ,btVector3& ,int ) const
+void btConvexHullShape::getPlane(btVector3&, btVector3&, int ) const
 {
 
 	btAssert(0);
 }
 
 //not yet
-bool btConvexHullShape::isInside(const btVector3& ,btScalar ) const
+bool btConvexHullShape::isInside(const btVector3&, btScalar ) const
 {
 	btAssert(0);
 	return false;
@@ -194,19 +194,19 @@ const char*	btConvexHullShape::serialize(void* dataBuffer, btSerializer* seriali
 		int sz = sizeof(btVector3Data);
 	//	int sz2 = sizeof(btVector3DoubleData);
 	//	int sz3 = sizeof(btVector3FloatData);
-		btChunk* chunk = serializer->allocate(sz,numElem);
+		btChunk* chunk = serializer->allocate(sz, numElem);
 		btVector3Data* memPtr = (btVector3Data*)chunk->m_oldPtr;
-		for (int i=0;i<numElem;i++,memPtr++)
+		for (int i=0;i<numElem;i++, memPtr++)
 		{
 			m_unscaledPoints[i].serialize(*memPtr);
 		}
-		serializer->finalizeChunk(chunk,btVector3DataName,BT_ARRAY_CODE,(void*)&m_unscaledPoints[0]);
+		serializer->finalizeChunk(chunk, btVector3DataName, BT_ARRAY_CODE, (void*)&m_unscaledPoints[0]);
 	}
 	
 	return "btConvexHullShapeData";
 }
 
-void btConvexHullShape::project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin,btVector3& witnesPtMax) const
+void btConvexHullShape::project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin, btVector3& witnesPtMax) const
 {
 #if 1
 	minProj = FLT_MAX;
@@ -240,8 +240,8 @@ void btConvexHullShape::project(const btTransform& trans, const btVector3& dir, 
 
 	if(minProj>maxProj)
 	{
-		btSwap(minProj,maxProj);
-		btSwap(witnesPtMin,witnesPtMax);
+		btSwap(minProj, maxProj);
+		btSwap(witnesPtMin, witnesPtMax);
 	}
 
 

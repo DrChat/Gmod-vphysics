@@ -66,15 +66,15 @@ void processSampleTask(void* userPtr, void* lsMemory)
 
 			uint64_t ppuArrayAddress = reinterpret_cast<uint64_t>(eaPtr);
 
-			//			spu_printf("array location is at %llx, batchSize = %d, DMA size = %d\n",ppuArrayAddress,batchSize,dmaArraySize);
+			//			spu_printf("array location is at %llx, batchSize = %d, DMA size = %d\n", ppuArrayAddress, batchSize, dmaArraySize);
 
 			if (dmaArraySize>=16)
 			{
-				cellDmaLargeGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress  , dmaArraySize, DMA_TAG(1), 0, 0);	
+				cellDmaLargeGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress , dmaArraySize, DMA_TAG(1), 0, 0);	
 				cellDmaWaitTagStatusAll(DMA_MASK(1));
 			} else
 			{
-				stallingUnalignedDmaSmallGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress  , dmaArraySize);
+				stallingUnalignedDmaSmallGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress , dmaArraySize);
 			}
 
 
@@ -86,11 +86,11 @@ void processSampleTask(void* userPtr, void* lsMemory)
 				void* shortAdd = localMemory->gPointerArray[i];
 				uint64_t ppuRigidBodyAddress = reinterpret_cast<uint64_t>(shortAdd);
 
-				//	spu_printf("cellDmaGet at CMD_SAMPLE_INTEGRATE_BODIES from %llx to %llx\n",ppuRigidBodyAddress,localPtr);
+				//	spu_printf("cellDmaGet at CMD_SAMPLE_INTEGRATE_BODIES from %llx to %llx\n", ppuRigidBodyAddress, localPtr);
 
 				int dmaBodySize = sizeof(btRigidBody);
 
-				cellDmaGet((void*)localPtr, ppuRigidBodyAddress  , dmaBodySize, DMA_TAG(1), 0, 0);	
+				cellDmaGet((void*)localPtr, ppuRigidBodyAddress , dmaBodySize, DMA_TAG(1), 0, 0);	
 				cellDmaWaitTagStatusAll(DMA_MASK(1));
 
 
@@ -104,9 +104,9 @@ void processSampleTask(void* userPtr, void* lsMemory)
 						body->predictIntegratedTransform(timeStep, predictedTrans);
 						body->proceedToTransform( predictedTrans);
 						void* ptr = (void*)localPtr;
-						//	spu_printf("cellDmaLargePut from %llx to LS %llx\n",ptr,ppuRigidBodyAddress);
+						//	spu_printf("cellDmaLargePut from %llx to LS %llx\n", ptr, ppuRigidBodyAddress);
 
-						cellDmaLargePut(ptr, ppuRigidBodyAddress  , dmaBodySize, DMA_TAG(1), 0, 0);
+						cellDmaLargePut(ptr, ppuRigidBodyAddress , dmaBodySize, DMA_TAG(1), 0, 0);
 						cellDmaWaitTagStatusAll(DMA_MASK(1));
 
 					}
@@ -133,15 +133,15 @@ void processSampleTask(void* userPtr, void* lsMemory)
 
 			uint64_t ppuArrayAddress = reinterpret_cast<uint64_t>(eaPtr);
 
-			//			spu_printf("array location is at %llx, batchSize = %d, DMA size = %d\n",ppuArrayAddress,batchSize,dmaArraySize);
+			//			spu_printf("array location is at %llx, batchSize = %d, DMA size = %d\n", ppuArrayAddress, batchSize, dmaArraySize);
 
 			if (dmaArraySize>=16)
 			{
-				cellDmaLargeGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress  , dmaArraySize, DMA_TAG(1), 0, 0);	
+				cellDmaLargeGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress , dmaArraySize, DMA_TAG(1), 0, 0);	
 				cellDmaWaitTagStatusAll(DMA_MASK(1));
 			} else
 			{
-				stallingUnalignedDmaSmallGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress  , dmaArraySize);
+				stallingUnalignedDmaSmallGet((void*)&localMemory->gPointerArray[0], ppuArrayAddress , dmaArraySize);
 			}
 
 
@@ -153,11 +153,11 @@ void processSampleTask(void* userPtr, void* lsMemory)
 				void* shortAdd = localMemory->gPointerArray[i];
 				uint64_t ppuRigidBodyAddress = reinterpret_cast<uint64_t>(shortAdd);
 
-				//	spu_printf("cellDmaGet at CMD_SAMPLE_INTEGRATE_BODIES from %llx to %llx\n",ppuRigidBodyAddress,localPtr);
+				//	spu_printf("cellDmaGet at CMD_SAMPLE_INTEGRATE_BODIES from %llx to %llx\n", ppuRigidBodyAddress, localPtr);
 
 				int dmaBodySize = sizeof(btRigidBody);
 
-				cellDmaGet((void*)localPtr, ppuRigidBodyAddress  , dmaBodySize, DMA_TAG(1), 0, 0);	
+				cellDmaGet((void*)localPtr, ppuRigidBodyAddress , dmaBodySize, DMA_TAG(1), 0, 0);	
 				cellDmaWaitTagStatusAll(DMA_MASK(1));
 
 
@@ -174,10 +174,10 @@ void processSampleTask(void* userPtr, void* lsMemory)
 							//damping
 							body->applyDamping(timeStep);
 
-							body->predictIntegratedTransform(timeStep,body->getInterpolationWorldTransform());
+							body->predictIntegratedTransform(timeStep, body->getInterpolationWorldTransform());
 
 							void* ptr = (void*)localPtr;
-							cellDmaLargePut(ptr, ppuRigidBodyAddress  , dmaBodySize, DMA_TAG(1), 0, 0);
+							cellDmaLargePut(ptr, ppuRigidBodyAddress , dmaBodySize, DMA_TAG(1), 0, 0);
 							cellDmaWaitTagStatusAll(DMA_MASK(1));
 						}
 					}

@@ -24,13 +24,13 @@ btActivatingCollisionAlgorithm::btActivatingCollisionAlgorithm (const btCollisio
 //m_colObj1(0)
 {
 }
-btActivatingCollisionAlgorithm::btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* ,const btCollisionObjectWrapper* )
+btActivatingCollisionAlgorithm::btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper*, const btCollisionObjectWrapper* )
 :btCollisionAlgorithm(ci)
 //,
 //m_colObj0(0),
 //m_colObj1(0)
 {
-//	if (ci.m_dispatcher1->needsCollision(colObj0,colObj1))
+//	if (ci.m_dispatcher1->needsCollision(colObj0, colObj1))
 //	{
 //		m_colObj0 = colObj0;
 //		m_colObj1 = colObj1;

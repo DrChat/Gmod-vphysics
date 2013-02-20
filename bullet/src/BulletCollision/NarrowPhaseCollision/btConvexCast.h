@@ -35,7 +35,7 @@ public:
 	/// alternatively, add a callback method to decide about closest/all results
 	struct	CastResult
 	{
-		//virtual bool	addRayResult(const btVector3& normal,btScalar	fraction) = 0;
+		//virtual bool	addRayResult(const btVector3& normal, btScalar	fraction) = 0;
 				
 		virtual void	DebugDraw(btScalar	fraction) {(void)fraction;}
 		virtual void	drawCoordSystem(const btTransform& trans) {(void)trans;}

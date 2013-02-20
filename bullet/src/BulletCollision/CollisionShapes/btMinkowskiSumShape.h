@@ -32,14 +32,14 @@ public:
 
 BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btMinkowskiSumShape(const btConvexShape* shapeA,const btConvexShape* shapeB);
+	btMinkowskiSumShape(const btConvexShape* shapeA, const btConvexShape* shapeB);
 
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
 
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	void	setTransformA(const btTransform&	transA) { m_transA = transA;}
 	void	setTransformB(const btTransform&	transB) { m_transB = transB;}

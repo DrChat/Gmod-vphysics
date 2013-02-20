@@ -100,9 +100,9 @@ protected:
 	
 	btVector3	m_localScaling;
 
-	virtual btScalar	getRawHeightFieldValue(int x,int y) const;
-	void		quantizeWithClamp(int* out, const btVector3& point,int isMax) const;
-	void		getVertex(int x,int y,btVector3& vertex) const;
+	virtual btScalar	getRawHeightFieldValue(int x, int y) const;
+	void		quantizeWithClamp(int* out, const btVector3& point, int isMax) const;
+	void		getVertex(int x, int y, btVector3& vertex) const;
 
 
 
@@ -126,7 +126,7 @@ public:
 	  data types, and allows for a non-zero minimum height value.
 	  heightScale is needed for any integer-based heightfield data types.
 	 */
-	btHeightfieldTerrainShape(int heightStickWidth,int heightStickLength,
+	btHeightfieldTerrainShape(int heightStickWidth, int heightStickLength,
 	                          const void* heightfieldData, btScalar heightScale,
 	                          btScalar minHeight, btScalar maxHeight,
 	                          int upAxis, PHY_ScalarType heightDataType,
@@ -139,7 +139,7 @@ public:
 	  compatibility reasons, heightScale is calculated as maxHeight / 65535 
 	  (and is only used when useFloatData = false).
  	 */
-	btHeightfieldTerrainShape(int heightStickWidth,int heightStickLength,const void* heightfieldData, btScalar maxHeight,int upAxis,bool useFloatData,bool flipQuadEdges);
+	btHeightfieldTerrainShape(int heightStickWidth, int heightStickLength, const void* heightfieldData, btScalar maxHeight, int upAxis, bool useFloatData, bool flipQuadEdges);
 
 	virtual ~btHeightfieldTerrainShape();
 
@@ -149,11 +149,11 @@ public:
 	///could help compatibility with Ogre heightfields. See https://code.google.com/p/bullet/issues/detail?id=625	
 	void setUseZigzagSubdivision(bool useZigzagSubdivision=true) { m_useZigzagSubdivision = useZigzagSubdivision;}
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
-	virtual void	processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+	virtual void	processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	virtual void	setLocalScaling(const btVector3& scaling);
 	

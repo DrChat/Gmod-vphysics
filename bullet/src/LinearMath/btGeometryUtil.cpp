@@ -62,9 +62,9 @@ bool	btGeometryUtil::areVerticesBehindPlane(const btVector3& planeNormal, const 
 	return true;
 }
 
-bool notExist(const btVector3& planeEquation,const btAlignedObjectArray<btVector3>& planeEquations);
+bool notExist(const btVector3& planeEquation, const btAlignedObjectArray<btVector3>& planeEquations);
 
-bool notExist(const btVector3& planeEquation,const btAlignedObjectArray<btVector3>& planeEquations)
+bool notExist(const btVector3& planeEquation, const btAlignedObjectArray<btVector3>& planeEquations)
 {
 	int numbrushes = planeEquations.size();
 	for (int i=0;i<numbrushes;i++)
@@ -96,7 +96,7 @@ void	btGeometryUtil::getPlaneEquationsFromVertices(btAlignedObjectArray<btVector
 
 				const btVector3& N3 = vertices[k];
 
-				btVector3 planeEquation,edge0,edge1;
+				btVector3 planeEquation, edge0, edge1;
 				edge0 = N2-N1;
 				edge1 = N3-N1;
 				btScalar normalSign = btScalar(1.);
@@ -106,12 +106,12 @@ void	btGeometryUtil::getPlaneEquationsFromVertices(btAlignedObjectArray<btVector
 					if (planeEquation.length2() > btScalar(0.0001))
 					{
 						planeEquation.normalize();
-						if (notExist(planeEquation,planeEquationsOut))
+						if (notExist(planeEquation, planeEquationsOut))
 						{
 							planeEquation[3] = -planeEquation.dot(N1);
 							
 								//check if inside, and replace supportingVertexOut if needed
-								if (areVerticesBehindPlane(planeEquation,vertices,btScalar(0.01)))
+								if (areVerticesBehindPlane(planeEquation, vertices, btScalar(0.01)))
 								{
 									planeEquationsOut.push_back(planeEquation);
 								}
@@ -126,7 +126,7 @@ void	btGeometryUtil::getPlaneEquationsFromVertices(btAlignedObjectArray<btVector
 
 }
 
-void	btGeometryUtil::getVerticesFromPlaneEquations(const btAlignedObjectArray<btVector3>& planeEquations , btAlignedObjectArray<btVector3>& verticesOut )
+void	btGeometryUtil::getVerticesFromPlaneEquations(const btAlignedObjectArray<btVector3>& planeEquations, btAlignedObjectArray<btVector3>& verticesOut )
 {
 	const int numbrushes = planeEquations.size();
 	// brute force:
@@ -172,7 +172,7 @@ void	btGeometryUtil::getVerticesFromPlaneEquations(const btAlignedObjectArray<bt
 						potentialVertex *= quotient;
 
 						//check if inside, and replace supportingVertexOut if needed
-						if (isPointInsidePlanes(planeEquations,potentialVertex,btScalar(0.01)))
+						if (isPointInsidePlanes(planeEquations, potentialVertex, btScalar(0.01)))
 						{
 							verticesOut.push_back(potentialVertex);
 						}

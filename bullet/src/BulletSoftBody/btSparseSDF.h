@@ -25,7 +25,7 @@ template <const int DWORDLEN>
 unsigned int HsiehHash(const void* pdata)
 {
 	const unsigned short*	data=(const unsigned short*)pdata;
-	unsigned				hash=DWORDLEN<<2,tmp;
+	unsigned				hash=DWORDLEN<<2, tmp;
 	for(int i=0;i<DWORDLEN;++i)
 	{
 		hash	+=	data[0];
@@ -85,7 +85,7 @@ struct	btSparseSdf
 	//
 	void					Reset()
 	{
-		for(int i=0,ni=cells.size();i<ni;++i)
+		for(int i=0, ni=cells.size();i<ni;++i)
 		{
 			Cell*	pc=cells[i];
 			cells[i]=0;
@@ -122,7 +122,7 @@ struct	btSparseSdf
 				pp=pc;pc=pn;
 			}
 		}
-		//printf("GC[%d]: %d cells, PpQ: %f\r\n",puid,ncells,nprobes/(btScalar)nqueries);
+		//printf("GC[%d]: %d cells, PpQ: %f\r\n", puid, ncells, nprobes/(btScalar)nqueries);
 		nqueries=1;
 		nprobes=1;
 		++puid;	///@todo: Reset puid's when int range limit is reached	*/ 
@@ -161,7 +161,7 @@ struct	btSparseSdf
 		const IntFrac	ix=Decompose(scx.x());
 		const IntFrac	iy=Decompose(scx.y());
 		const IntFrac	iz=Decompose(scx.z());
-		const unsigned	h=Hash(ix.b,iy.b,iz.b,shape);
+		const unsigned	h=Hash(ix.b, iy.b, iz.b, shape);
 		Cell*&			root=cells[static_cast<int>(h%cells.size())];
 		Cell*			c=root;
 		++nqueries;
@@ -190,7 +190,7 @@ struct	btSparseSdf
 		}
 		c->puid=puid;
 		/* Extract infos		*/ 
-		const int		o[]={	ix.i,iy.i,iz.i};
+		const int		o[]={	ix.i, iy.i, iz.i};
 		const btScalar	d[]={	c->d[o[0]+0][o[1]+0][o[2]+0],
 			c->d[o[0]+1][o[1]+0][o[2]+0],
 			c->d[o[0]+1][o[1]+1][o[2]+0],
@@ -201,28 +201,28 @@ struct	btSparseSdf
 			c->d[o[0]+0][o[1]+1][o[2]+1]};
 		/* Normal	*/ 
 #if 1
-		const btScalar	gx[]={	d[1]-d[0],d[2]-d[3],
-			d[5]-d[4],d[6]-d[7]};
-		const btScalar	gy[]={	d[3]-d[0],d[2]-d[1],
-			d[7]-d[4],d[6]-d[5]};
-		const btScalar	gz[]={	d[4]-d[0],d[5]-d[1],
-			d[7]-d[3],d[6]-d[2]};
-		normal.setX(Lerp(	Lerp(gx[0],gx[1],iy.f),
-			Lerp(gx[2],gx[3],iy.f),iz.f));
-		normal.setY(Lerp(	Lerp(gy[0],gy[1],ix.f),
-			Lerp(gy[2],gy[3],ix.f),iz.f));
-		normal.setZ(Lerp(	Lerp(gz[0],gz[1],ix.f),
-			Lerp(gz[2],gz[3],ix.f),iy.f));
+		const btScalar	gx[]={	d[1]-d[0], d[2]-d[3],
+			d[5]-d[4], d[6]-d[7]};
+		const btScalar	gy[]={	d[3]-d[0], d[2]-d[1],
+			d[7]-d[4], d[6]-d[5]};
+		const btScalar	gz[]={	d[4]-d[0], d[5]-d[1],
+			d[7]-d[3], d[6]-d[2]};
+		normal.setX(Lerp(	Lerp(gx[0], gx[1], iy.f),
+			Lerp(gx[2], gx[3], iy.f), iz.f));
+		normal.setY(Lerp(	Lerp(gy[0], gy[1], ix.f),
+			Lerp(gy[2], gy[3], ix.f), iz.f));
+		normal.setZ(Lerp(	Lerp(gz[0], gz[1], ix.f),
+			Lerp(gz[2], gz[3], ix.f), iy.f));
 		normal		=	normal.normalized();
 #else
-		normal		=	btVector3(d[1]-d[0],d[3]-d[0],d[4]-d[0]).normalized();
+		normal		=	btVector3(d[1]-d[0], d[3]-d[0], d[4]-d[0]).normalized();
 #endif
 		/* Distance	*/ 
-		const btScalar	d0=Lerp(Lerp(d[0],d[1],ix.f),
-			Lerp(d[3],d[2],ix.f),iy.f);
-		const btScalar	d1=Lerp(Lerp(d[4],d[5],ix.f),
-			Lerp(d[7],d[6],ix.f),iy.f);
-		return(Lerp(d0,d1,iz.f)-margin);
+		const btScalar	d0=Lerp(Lerp(d[0], d[1], ix.f),
+			Lerp(d[3], d[2], ix.f), iy.f);
+		const btScalar	d1=Lerp(Lerp(d[4], d[5], ix.f),
+			Lerp(d[7], d[6], ix.f), iy.f);
+		return(Lerp(d0, d1, iz.f)-margin);
 	}
 	//
 	void					BuildCell(Cell& c)
@@ -240,7 +240,7 @@ struct	btSparseSdf
 				for(int i=0;i<=CELLSIZE;++i)
 				{
 					const btScalar	x=voxelsz*i+org.x();
-					c.d[i][j][k]=DistanceToShape(	btVector3(x,y,z),
+					c.d[i][j][k]=DistanceToShape(	btVector3(x, y,z),
 						c.pclient);
 				}
 			}
@@ -256,7 +256,7 @@ struct	btSparseSdf
 		{
 			btGjkEpaSolver2::sResults	res;
 			const btConvexShape*				csh=static_cast<const btConvexShape*>(shape);
-			return(btGjkEpaSolver2::SignedDistance(x,0,csh,unit,res));
+			return(btGjkEpaSolver2::SignedDistance(x,0, csh, unit, res));
 		}
 		return(0);
 	}
@@ -274,7 +274,7 @@ struct	btSparseSdf
 		return(r);
 	}
 	//
-	static inline btScalar	Lerp(btScalar a,btScalar b,btScalar t)
+	static inline btScalar	Lerp(btScalar a, btScalar b, btScalar t)
 	{
 		return(a+(b-a)*t);
 	}
@@ -282,11 +282,11 @@ struct	btSparseSdf
 
 
 	//
-	static inline unsigned int	Hash(int x,int y,int z,const btCollisionShape* shape)
+	static inline unsigned int	Hash(int x, int y, int z, const btCollisionShape* shape)
 	{
 		struct btS
 		{ 
-			int x,y,z;
+			int x, y,z;
 			void* p;
 		};
 

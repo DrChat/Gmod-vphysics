@@ -34,17 +34,17 @@ public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
 
-	btScaledBvhTriangleMeshShape(btBvhTriangleMeshShape* childShape,const btVector3& localScaling);
+	btScaledBvhTriangleMeshShape(btBvhTriangleMeshShape* childShape, const btVector3& localScaling);
 
 	virtual ~btScaledBvhTriangleMeshShape();
 
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 	virtual void	setLocalScaling(const btVector3& scaling);
 	virtual const btVector3& getLocalScaling() const;
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
-	virtual void	processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+	virtual void	processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
 	btBvhTriangleMeshShape*	getChildShape()
 	{
@@ -85,7 +85,7 @@ SIMD_FORCE_INLINE	int	btScaledBvhTriangleMeshShape::calculateSerializeBufferSize
 SIMD_FORCE_INLINE	const char*	btScaledBvhTriangleMeshShape::serialize(void* dataBuffer, btSerializer* serializer) const
 {
 	btScaledTriangleMeshShapeData* scaledMeshData = (btScaledTriangleMeshShapeData*) dataBuffer;
-	m_bvhTriMeshShape->serialize(&scaledMeshData->m_trimeshShapeData,serializer);
+	m_bvhTriMeshShape->serialize(&scaledMeshData->m_trimeshShapeData, serializer);
 	scaledMeshData->m_trimeshShapeData.m_collisionShapeData.m_shapeType = SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE;
 	m_localScaling.serializeFloat(scaledMeshData->m_localScaling);
 	return "btScaledTriangleMeshShapeData";

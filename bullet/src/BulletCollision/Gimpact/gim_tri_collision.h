@@ -74,7 +74,7 @@ struct GIM_TRIANGLE_CONTACT_DATA
 	
 
     //! classify points that are closer
-    template<typename DISTANCE_FUNC,typename CLASS_PLANE>
+    template<typename DISTANCE_FUNC, typename CLASS_PLANE>
     SIMD_FORCE_INLINE void mergepoints_generic(const CLASS_PLANE & plane,
     				GREAL margin, const btVector3 * points, GUINT point_count, DISTANCE_FUNC distance_func)
     {	
@@ -87,7 +87,7 @@ struct GIM_TRIANGLE_CONTACT_DATA
 
 		for(_k=0;_k<point_count;_k++)
 		{
-			GREAL _dist = -distance_func(plane,points[_k]) + margin;
+			GREAL _dist = -distance_func(plane, points[_k]) + margin;
 
 			if(_dist>=0.0f)
 			{
@@ -134,17 +134,17 @@ public:
 
     SIMD_FORCE_INLINE GIM_AABB get_box()  const
     {
-    	return GIM_AABB(m_vertices[0],m_vertices[1],m_vertices[2],m_margin);
+    	return GIM_AABB(m_vertices[0], m_vertices[1], m_vertices[2], m_margin);
     }
 
     SIMD_FORCE_INLINE void get_normal(btVector3 &normal)  const
     {
-    	TRIANGLE_NORMAL(m_vertices[0],m_vertices[1],m_vertices[2],normal);
+    	TRIANGLE_NORMAL(m_vertices[0], m_vertices[1], m_vertices[2], normal);
     }
 
     SIMD_FORCE_INLINE void get_plane(btVector4 &plane)  const
     {
-    	TRIANGLE_PLANE(m_vertices[0],m_vertices[1],m_vertices[2],plane);;
+    	TRIANGLE_PLANE(m_vertices[0], m_vertices[1], m_vertices[2], plane);;
     }
 
     SIMD_FORCE_INLINE void apply_transform(const btTransform & trans)
@@ -154,16 +154,16 @@ public:
     	m_vertices[2] = trans(m_vertices[2]);
     }
 
-    SIMD_FORCE_INLINE void get_edge_plane(GUINT edge_index,const btVector3 &triangle_normal,btVector4 &plane)  const
+    SIMD_FORCE_INLINE void get_edge_plane(GUINT edge_index, const btVector3 &triangle_normal, btVector4 &plane)  const
     {
 		const btVector3 & e0 = m_vertices[edge_index];
 		const btVector3 & e1 = m_vertices[(edge_index+1)%3];
-		EDGE_PLANE(e0,e1,triangle_normal,plane);
+		EDGE_PLANE(e0, e1, triangle_normal, plane);
     }
 
     //! Gets the relative transformation of this triangle
     /*!
-    The transformation is oriented to the triangle normal , and aligned to the 1st edge of this triangle. The position corresponds to vertice 0:
+    The transformation is oriented to the triangle normal, and aligned to the 1st edge of this triangle. The position corresponds to vertice 0:
     - triangle normal corresponds to Z axis.
     - 1st normalized edge corresponds to X axis,
 
@@ -174,15 +174,15 @@ public:
 
     	btVector3 zaxis;
     	get_normal(zaxis);
-    	MAT_SET_Z(matrix,zaxis);
+    	MAT_SET_Z(matrix, zaxis);
 
     	btVector3 xaxis = m_vertices[1] - m_vertices[0];
     	VEC_NORMALIZE(xaxis);
-    	MAT_SET_X(matrix,xaxis);
+    	MAT_SET_X(matrix, xaxis);
 
     	//y axis
     	xaxis = zaxis.cross(xaxis);
-    	MAT_SET_Y(matrix,xaxis);
+    	MAT_SET_Y(matrix, xaxis);
 
     	triangle_transform.setOrigin(m_vertices[0]);
     }
@@ -208,17 +208,17 @@ public:
 		GIM_TRIANGLE_CONTACT_DATA & contact_data) const
 	{
 		//test box collisioin
-		GIM_AABB boxu(m_vertices[0],m_vertices[1],m_vertices[2],m_margin);
-		GIM_AABB boxv(other.m_vertices[0],other.m_vertices[1],other.m_vertices[2],other.m_margin);
+		GIM_AABB boxu(m_vertices[0], m_vertices[1], m_vertices[2], m_margin);
+		GIM_AABB boxv(other.m_vertices[0], other.m_vertices[1], other.m_vertices[2], other.m_margin);
 		if(!boxu.has_collision(boxv)) return false;
 
 		//do hard test
-		return collide_triangle_hard_test(other,contact_data);
+		return collide_triangle_hard_test(other, contact_data);
 	}
 
 	/*!
 
-	Solve the System for u,v parameters:
+	Solve the System for u, v parameters:
 
 	u*axe1[i1] + v*axe2[i1] = vecproj[i1]
 	u*axe1[i2] + v*axe2[i2] = vecproj[i2]
@@ -297,16 +297,16 @@ if 0.0<= u+v <=1.0 then they are inside of triangle
 	{
 		//Test with edge 0
 		btVector4 edge_plane;
-		this->get_edge_plane(0,tri_normal,edge_plane);
-		GREAL dist = DISTANCE_PLANE_POINT(edge_plane,point);
+		this->get_edge_plane(0, tri_normal, edge_plane);
+		GREAL dist = DISTANCE_PLANE_POINT(edge_plane, point);
 		if(dist-m_margin>0.0f) return false; // outside plane
 
-		this->get_edge_plane(1,tri_normal,edge_plane);
-		dist = DISTANCE_PLANE_POINT(edge_plane,point);
+		this->get_edge_plane(1, tri_normal, edge_plane);
+		dist = DISTANCE_PLANE_POINT(edge_plane, point);
 		if(dist-m_margin>0.0f) return false; // outside plane
 
-		this->get_edge_plane(2,tri_normal,edge_plane);
-		dist = DISTANCE_PLANE_POINT(edge_plane,point);
+		this->get_edge_plane(2, tri_normal, edge_plane);
+		dist = DISTANCE_PLANE_POINT(edge_plane, point);
 		if(dist-m_margin>0.0f) return false; // outside plane
 		return true;
 	}
@@ -322,13 +322,13 @@ if 0.0<= u+v <=1.0 then they are inside of triangle
 		{
 			btVector3 dif1 = m_vertices[1] - m_vertices[0];
 			btVector3 dif2 = m_vertices[2] - m_vertices[0];
-    		VEC_CROSS(faceplane,dif1,dif2);
+    		VEC_CROSS(faceplane, dif1, dif2);
     		faceplane[3] = m_vertices[0].dot(faceplane);
 		}
 
-		GUINT res = LINE_PLANE_COLLISION(faceplane,vDir,vPoint,pout,tparam, btScalar(0), tmax);
+		GUINT res = LINE_PLANE_COLLISION(faceplane, vDir, vPoint, pout, tparam, btScalar(0), tmax);
 		if(res == 0) return false;
-		if(! is_point_inside(pout,faceplane)) return false;
+		if(! is_point_inside(pout, faceplane)) return false;
 
 		if(res==2) //invert normal
 		{
@@ -336,7 +336,7 @@ if 0.0<= u+v <=1.0 then they are inside of triangle
 		}
 		else
 		{
-			triangle_normal.setValue(faceplane[0],faceplane[1],faceplane[2]);
+			triangle_normal.setValue(faceplane[0], faceplane[1], faceplane[2]);
 		}
 
 		VEC_NORMALIZE(triangle_normal);
@@ -355,16 +355,16 @@ if 0.0<= u+v <=1.0 then they are inside of triangle
 		{
 			btVector3 dif1 = m_vertices[1] - m_vertices[0];
 			btVector3 dif2 = m_vertices[2] - m_vertices[0];
-    		VEC_CROSS(faceplane,dif1,dif2);
+    		VEC_CROSS(faceplane, dif1, dif2);
     		faceplane[3] = m_vertices[0].dot(faceplane);
 		}
 
-		GUINT res = LINE_PLANE_COLLISION(faceplane,vDir,vPoint,pout,tparam, btScalar(0), tmax);
+		GUINT res = LINE_PLANE_COLLISION(faceplane, vDir, vPoint, pout, tparam, btScalar(0), tmax);
 		if(res != 1) return false;
 
-		if(!is_point_inside(pout,faceplane)) return false;
+		if(!is_point_inside(pout, faceplane)) return false;
 
-		triangle_normal.setValue(faceplane[0],faceplane[1],faceplane[2]);
+		triangle_normal.setValue(faceplane[0], faceplane[1], faceplane[2]);
 
 		VEC_NORMALIZE(triangle_normal);
 

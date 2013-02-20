@@ -32,14 +32,14 @@ class btSphereSphereCollisionAlgorithm : public btActivatingCollisionAlgorithm
 	btPersistentManifold*	m_manifoldPtr;
 	
 public:
-	btSphereSphereCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* col0Wrap,const btCollisionObjectWrapper* col1Wrap);
+	btSphereSphereCollisionAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* col0Wrap, const btCollisionObjectWrapper* col1Wrap);
 
 	btSphereSphereCollisionAlgorithm(const btCollisionAlgorithmConstructionInfo& ci)
 		: btActivatingCollisionAlgorithm(ci) {}
 
-	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
-	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
 	virtual	void	getAllContactManifolds(btManifoldArray&	manifoldArray)
 	{
@@ -53,10 +53,10 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* col0Wrap,const btCollisionObjectWrapper* col1Wrap)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* col0Wrap, const btCollisionObjectWrapper* col1Wrap)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btSphereSphereCollisionAlgorithm));
-			return new(mem) btSphereSphereCollisionAlgorithm(0,ci,col0Wrap,col1Wrap);
+			return new(mem) btSphereSphereCollisionAlgorithm(0, ci, col0Wrap, col1Wrap);
 		}
 	};
 

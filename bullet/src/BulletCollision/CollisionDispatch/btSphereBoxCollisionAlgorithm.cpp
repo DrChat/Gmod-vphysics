@@ -21,8 +21,8 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h"
 //#include <stdio.h>
 
-btSphereBoxCollisionAlgorithm::btSphereBoxCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* col0Wrap,const btCollisionObjectWrapper* col1Wrap, bool isSwapped)
-: btActivatingCollisionAlgorithm(ci,col0Wrap,col1Wrap),
+btSphereBoxCollisionAlgorithm::btSphereBoxCollisionAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* col0Wrap, const btCollisionObjectWrapper* col1Wrap, bool isSwapped)
+: btActivatingCollisionAlgorithm(ci, col0Wrap, col1Wrap),
 m_ownManifold(false),
 m_manifoldPtr(mf),
 m_isSwapped(isSwapped)
@@ -30,9 +30,9 @@ m_isSwapped(isSwapped)
 	const btCollisionObjectWrapper* sphereObjWrap = m_isSwapped? col1Wrap : col0Wrap;
 	const btCollisionObjectWrapper* boxObjWrap = m_isSwapped? col0Wrap : col1Wrap;
 	
-	if (!m_manifoldPtr && m_dispatcher->needsCollision(sphereObjWrap->getCollisionObject(),boxObjWrap->getCollisionObject()))
+	if (!m_manifoldPtr && m_dispatcher->needsCollision(sphereObjWrap->getCollisionObject(), boxObjWrap->getCollisionObject()))
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(sphereObjWrap->getCollisionObject(),boxObjWrap->getCollisionObject());
+		m_manifoldPtr = m_dispatcher->getNewManifold(sphereObjWrap->getCollisionObject(), boxObjWrap->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -86,7 +86,7 @@ void btSphereBoxCollisionAlgorithm::processCollision (const btCollisionObjectWra
 
 }
 
-btScalar btSphereBoxCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* col0,btCollisionObject* col1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+btScalar btSphereBoxCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* col0, btCollisionObject* col1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	(void)resultOut;
 	(void)dispatchInfo;

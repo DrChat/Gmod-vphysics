@@ -70,7 +70,7 @@ public:
 
 		if(m_size>0)
 		{
-            m_data = (T*)gim_realloc(m_data,m_size*sizeof(T),newsize*sizeof(T));
+            m_data = (T*)gim_realloc(m_data, m_size*sizeof(T), newsize*sizeof(T));
 		}
 		else
 		{
@@ -208,7 +208,7 @@ public:
 
 	inline void swap(GUINT i, GUINT j)
 	{
-	    gim_swap_elements(m_data,i,j);
+	    gim_swap_elements(m_data, i,j);
 	}
 
 	inline void push_back(const T & obj)
@@ -228,7 +228,7 @@ public:
 	inline void push_back_memcpy(const T & obj)
 	{
 	    this->growingCheck();
-	    irr_simd_memcpy(&m_data[m_size],&obj,sizeof(T));
+	    irr_simd_memcpy(&m_data[m_size], &obj, sizeof(T));
 	    m_size++;
 	}
 
@@ -249,7 +249,7 @@ public:
 	{
 	    if(index<m_size-1)
 	    {
-	        swap(index,m_size-1);
+	        swap(index, m_size-1);
 	    }
 	    pop_back();
 	}
@@ -259,7 +259,7 @@ public:
 	    m_size--;
 	    for(GUINT i = index;i<m_size;i++)
 	    {
-	        gim_simd_memcpy(m_data+i,m_data+i+1,sizeof(T));
+	        gim_simd_memcpy(m_data+i, m_data+i+1, sizeof(T));
 	    }
 	}
 
@@ -274,12 +274,12 @@ public:
 	    this->growingCheck();
 	    for(GUINT i = m_size;i>index;i--)
 	    {
-	        gim_simd_memcpy(m_data+i,m_data+i-1,sizeof(T));
+	        gim_simd_memcpy(m_data+i, m_data+i-1, sizeof(T));
 	    }
 	    m_size++;
 	}
 
-	inline void insert(const T & obj,GUINT index)
+	inline void insert(const T & obj, GUINT index)
 	{
 	    insert_mem(index);
 	    m_data[index] = obj;

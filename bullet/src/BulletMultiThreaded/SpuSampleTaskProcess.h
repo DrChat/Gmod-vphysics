@@ -66,7 +66,7 @@ public:
 	///call initialize in the beginning of the frame, before addCollisionPairToTask
 	void initialize();
 
-	void issueTask(void* sampleMainMemPtr,int sampleValue,int sampleCommand);
+	void issueTask(void* sampleMainMemPtr, int sampleValue, int sampleCommand);
 
 	///call flush to submit potential outstanding work to SPUs and wait for all involved SPUs to be finished
 	void flush();
@@ -81,7 +81,7 @@ public:
 #include <SpuFakeDma.h>
 
 void * SamplelsMemoryFunc();
-void SampleThreadFunc(void* userPtr,void* lsMemory);
+void SampleThreadFunc(void* userPtr, void* lsMemory);
 
 //#define DEBUG_LIBSPE2_MAINLOOP
 

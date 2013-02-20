@@ -323,7 +323,7 @@ long _maxdot_large( const float *vv, const float *vec, unsigned long count, floa
         index += localCount/4;
 #else
         {
-            for( unsigned int i=0; i<localCount/4; i++,index++)   
+            for( unsigned int i=0; i<localCount/4; i++, index++)   
             { // do four dot products at a time. Carefully avoid touching the w element.
                 float4 v0 = vertices[0];
                 float4 v1 = vertices[1];
@@ -710,7 +710,7 @@ long _mindot_large( const float *vv, const float *vec, unsigned long count, floa
         index += localCount/4;
 #else
         {
-            for( unsigned int i=0; i<localCount/4; i++,index++)   
+            for( unsigned int i=0; i<localCount/4; i++, index++)   
             { // do four dot products at a time. Carefully avoid touching the w element.
                 float4 v0 = vertices[0];
                 float4 v1 = vertices[1];

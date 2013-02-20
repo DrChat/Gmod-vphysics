@@ -51,7 +51,7 @@ btHashedOverlappingPairCache::~btHashedOverlappingPairCache()
 
 
 
-void	btHashedOverlappingPairCache::cleanOverlappingPair(btBroadphasePair& pair,btDispatcher* dispatcher)
+void	btHashedOverlappingPairCache::cleanOverlappingPair(btBroadphasePair& pair, btDispatcher* dispatcher)
 {
 	if (pair.m_algorithm)
 	{
@@ -66,7 +66,7 @@ void	btHashedOverlappingPairCache::cleanOverlappingPair(btBroadphasePair& pair,b
 
 
 
-void	btHashedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy,btDispatcher* dispatcher)
+void	btHashedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy, btDispatcher* dispatcher)
 {
 
 	class	CleanPairCallback : public btOverlapCallback
@@ -76,7 +76,7 @@ void	btHashedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy,
 		btDispatcher* m_dispatcher;
 
 	public:
-		CleanPairCallback(btBroadphaseProxy* cleanProxy,btOverlappingPairCache* pairCache,btDispatcher* dispatcher)
+		CleanPairCallback(btBroadphaseProxy* cleanProxy, btOverlappingPairCache* pairCache, btDispatcher* dispatcher)
 			:m_cleanProxy(cleanProxy),
 			m_pairCache(pairCache),
 			m_dispatcher(dispatcher)
@@ -87,23 +87,23 @@ void	btHashedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy,
 			if ((pair.m_pProxy0 == m_cleanProxy) ||
 				(pair.m_pProxy1 == m_cleanProxy))
 			{
-				m_pairCache->cleanOverlappingPair(pair,m_dispatcher);
+				m_pairCache->cleanOverlappingPair(pair, m_dispatcher);
 			}
 			return false;
 		}
 		
 	};
 
-	CleanPairCallback cleanPairs(proxy,this,dispatcher);
+	CleanPairCallback cleanPairs(proxy, this, dispatcher);
 
-	processAllOverlappingPairs(&cleanPairs,dispatcher);
+	processAllOverlappingPairs(&cleanPairs, dispatcher);
 
 }
 
 
 
 
-void	btHashedOverlappingPairCache::removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy,btDispatcher* dispatcher)
+void	btHashedOverlappingPairCache::removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy, btDispatcher* dispatcher)
 {
 
 	class	RemovePairCallback : public btOverlapCallback
@@ -126,7 +126,7 @@ void	btHashedOverlappingPairCache::removeOverlappingPairsContainingProxy(btBroad
 
 	RemovePairCallback removeCallback(proxy);
 
-	processAllOverlappingPairs(&removeCallback,dispatcher);
+	processAllOverlappingPairs(&removeCallback, dispatcher);
 }
 
 
@@ -137,7 +137,7 @@ btBroadphasePair* btHashedOverlappingPairCache::findPair(btBroadphaseProxy* prox
 {
 	gFindPairs++;
 	if(proxy0->m_uniqueId>proxy1->m_uniqueId) 
-		btSwap(proxy0,proxy1);
+		btSwap(proxy0, proxy1);
 	int proxyId1 = proxy0->getUid();
 	int proxyId2 = proxy1->getUid();
 
@@ -202,7 +202,7 @@ void	btHashedOverlappingPairCache::growTables()
 			int proxyId2 = pair.m_pProxy1->getUid();
 			/*if (proxyId1 > proxyId2) 
 				btSwap(proxyId1, proxyId2);*/
-			int	hashValue = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1),static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));	// New hash value with new mask
+			int	hashValue = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1), static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));	// New hash value with new mask
 			m_next[i] = m_hashTable[hashValue];
 			m_hashTable[hashValue] = i;
 		}
@@ -214,14 +214,14 @@ void	btHashedOverlappingPairCache::growTables()
 btBroadphasePair* btHashedOverlappingPairCache::internalAddPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
 {
 	if(proxy0->m_uniqueId>proxy1->m_uniqueId) 
-		btSwap(proxy0,proxy1);
+		btSwap(proxy0, proxy1);
 	int proxyId1 = proxy0->getUid();
 	int proxyId2 = proxy1->getUid();
 
 	/*if (proxyId1 > proxyId2) 
 		btSwap(proxyId1, proxyId2);*/
 
-	int	hash = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1),static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));	// New hash value with new mask
+	int	hash = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1), static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));	// New hash value with new mask
 
 
 	btBroadphasePair* pair = internalFindPair(proxy0, proxy1, hash);
@@ -234,7 +234,7 @@ btBroadphasePair* btHashedOverlappingPairCache::internalAddPair(btBroadphaseProx
 		if(	(m_overlappingPairArray[i].m_pProxy0==proxy0)&&
 			(m_overlappingPairArray[i].m_pProxy1==proxy1))
 			{
-			printf("Adding duplicated %u<>%u\r\n",proxyId1,proxyId2);
+			printf("Adding duplicated %u<>%u\r\n", proxyId1, proxyId2);
 			internalFindPair(proxy0, proxy1, hash);
 			}
 		}*/
@@ -244,7 +244,7 @@ btBroadphasePair* btHashedOverlappingPairCache::internalAddPair(btBroadphaseProx
 
 	//this is where we add an actual pair, so also call the 'ghost'
 	if (m_ghostPairCallback)
-		m_ghostPairCallback->addOverlappingPair(proxy0,proxy1);
+		m_ghostPairCallback->addOverlappingPair(proxy0, proxy1);
 
 	int newCapacity = m_overlappingPairArray.capacity();
 
@@ -252,7 +252,7 @@ btBroadphasePair* btHashedOverlappingPairCache::internalAddPair(btBroadphaseProx
 	{
 		growTables();
 		//hash with new capacity
-		hash = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1),static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));
+		hash = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1), static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));
 	}
 	
 	pair = new (mem) btBroadphasePair(*proxy0,*proxy1);
@@ -270,18 +270,18 @@ btBroadphasePair* btHashedOverlappingPairCache::internalAddPair(btBroadphaseProx
 
 
 
-void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1,btDispatcher* dispatcher)
+void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1, btDispatcher* dispatcher)
 {
 	gRemovePairs++;
 	if(proxy0->m_uniqueId>proxy1->m_uniqueId) 
-		btSwap(proxy0,proxy1);
+		btSwap(proxy0, proxy1);
 	int proxyId1 = proxy0->getUid();
 	int proxyId2 = proxy1->getUid();
 
 	/*if (proxyId1 > proxyId2) 
 		btSwap(proxyId1, proxyId2);*/
 
-	int	hash = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1),static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));
+	int	hash = static_cast<int>(getHash(static_cast<unsigned int>(proxyId1), static_cast<unsigned int>(proxyId2)) & (m_overlappingPairArray.capacity()-1));
 
 	btBroadphasePair* pair = internalFindPair(proxy0, proxy1, hash);
 	if (pair == NULL)
@@ -289,7 +289,7 @@ void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 		return 0;
 	}
 
-	cleanOverlappingPair(*pair,dispatcher);
+	cleanOverlappingPair(*pair, dispatcher);
 
 	void* userData = pair->m_internalInfo1;
 
@@ -327,7 +327,7 @@ void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 	int lastPairIndex = m_overlappingPairArray.size() - 1;
 
 	if (m_ghostPairCallback)
-		m_ghostPairCallback->removeOverlappingPair(proxy0, proxy1,dispatcher);
+		m_ghostPairCallback->removeOverlappingPair(proxy0, proxy1, dispatcher);
 
 	// If the removed pair is the last pair, we are done.
 	if (lastPairIndex == pairIndex)
@@ -374,19 +374,19 @@ void* btHashedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 }
 //#include <stdio.h>
 
-void	btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback,btDispatcher* dispatcher)
+void	btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback, btDispatcher* dispatcher)
 {
 
 	int i;
 
-//	printf("m_overlappingPairArray.size()=%d\n",m_overlappingPairArray.size());
+//	printf("m_overlappingPairArray.size()=%d\n", m_overlappingPairArray.size());
 	for (i=0;i<m_overlappingPairArray.size();)
 	{
 	
 		btBroadphasePair* pair = &m_overlappingPairArray[i];
 		if (callback->processOverlap(*pair))
 		{
-			removeOverlappingPair(pair->m_pProxy0,pair->m_pProxy1,dispatcher);
+			removeOverlappingPair(pair->m_pProxy0, pair->m_pProxy1, dispatcher);
 
 			gOverlappingPairs--;
 		} else
@@ -408,7 +408,7 @@ void	btHashedOverlappingPairCache::sortOverlappingPairs(btDispatcher* dispatcher
 
 	for (i=0;i<tmpPairs.size();i++)
 	{
-		removeOverlappingPair(tmpPairs[i].m_pProxy0,tmpPairs[i].m_pProxy1,dispatcher);
+		removeOverlappingPair(tmpPairs[i].m_pProxy0, tmpPairs[i].m_pProxy1, dispatcher);
 	}
 	
 	for (i = 0; i < m_next.size(); i++)
@@ -420,14 +420,14 @@ void	btHashedOverlappingPairCache::sortOverlappingPairs(btDispatcher* dispatcher
 
 	for (i=0;i<tmpPairs.size();i++)
 	{
-		addOverlappingPair(tmpPairs[i].m_pProxy0,tmpPairs[i].m_pProxy1);
+		addOverlappingPair(tmpPairs[i].m_pProxy0, tmpPairs[i].m_pProxy1);
 	}
 
 	
 }
 
 
-void*	btSortedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1, btDispatcher* dispatcher )
+void*	btSortedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1, btDispatcher* dispatcher )
 {
 	if (!hasDeferredRemoval())
 	{
@@ -439,11 +439,11 @@ void*	btSortedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 			gOverlappingPairs--;
 			btBroadphasePair& pair = m_overlappingPairArray[findIndex];
 			void* userData = pair.m_internalInfo1;
-			cleanOverlappingPair(pair,dispatcher);
+			cleanOverlappingPair(pair, dispatcher);
 			if (m_ghostPairCallback)
-				m_ghostPairCallback->removeOverlappingPair(proxy0, proxy1,dispatcher);
+				m_ghostPairCallback->removeOverlappingPair(proxy0, proxy1, dispatcher);
 			
-			m_overlappingPairArray.swap(findIndex,m_overlappingPairArray.capacity()-1);
+			m_overlappingPairArray.swap(findIndex, m_overlappingPairArray.capacity()-1);
 			m_overlappingPairArray.pop_back();
 			return userData;
 		}
@@ -459,12 +459,12 @@ void*	btSortedOverlappingPairCache::removeOverlappingPair(btBroadphaseProxy* pro
 
 
 
-btBroadphasePair*	btSortedOverlappingPairCache::addOverlappingPair(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1)
+btBroadphasePair*	btSortedOverlappingPairCache::addOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
 {
 	//don't add overlap with own
 	btAssert(proxy0 != proxy1);
 
-	if (!needsBroadphaseCollision(proxy0,proxy1))
+	if (!needsBroadphaseCollision(proxy0, proxy1))
 		return 0;
 	
 	void* mem = &m_overlappingPairArray.expandNonInitializing();
@@ -483,9 +483,9 @@ btBroadphasePair*	btSortedOverlappingPairCache::addOverlappingPair(btBroadphaseP
 ///use a different solution. It is mainly used for Removing overlapping pairs. Removal could be delayed.
 ///we could keep a linked list in each proxy, and store pair in one of the proxies (with lowest memory address)
 ///Also we can use a 2D bitmap, which can be useful for a future GPU implementation
- btBroadphasePair*	btSortedOverlappingPairCache::findPair(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1)
+ btBroadphasePair*	btSortedOverlappingPairCache::findPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
 {
-	if (!needsBroadphaseCollision(proxy0,proxy1))
+	if (!needsBroadphaseCollision(proxy0, proxy1))
 		return 0;
 
 	btBroadphasePair tmpPair(*proxy0,*proxy1);
@@ -511,7 +511,7 @@ btBroadphasePair*	btSortedOverlappingPairCache::addOverlappingPair(btBroadphaseP
 
 //#include <stdio.h>
 
-void	btSortedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback,btDispatcher* dispatcher)
+void	btSortedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback* callback, btDispatcher* dispatcher)
 {
 
 	int i;
@@ -522,10 +522,10 @@ void	btSortedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback*
 		btBroadphasePair* pair = &m_overlappingPairArray[i];
 		if (callback->processOverlap(*pair))
 		{
-			cleanOverlappingPair(*pair,dispatcher);
+			cleanOverlappingPair(*pair, dispatcher);
 			pair->m_pProxy0 = 0;
 			pair->m_pProxy1 = 0;
-			m_overlappingPairArray.swap(i,m_overlappingPairArray.size()-1);
+			m_overlappingPairArray.swap(i, m_overlappingPairArray.size()-1);
 			m_overlappingPairArray.pop_back();
 			gOverlappingPairs--;
 		} else
@@ -552,7 +552,7 @@ btSortedOverlappingPairCache::~btSortedOverlappingPairCache()
 {
 }
 
-void	btSortedOverlappingPairCache::cleanOverlappingPair(btBroadphasePair& pair,btDispatcher* dispatcher)
+void	btSortedOverlappingPairCache::cleanOverlappingPair(btBroadphasePair& pair, btDispatcher* dispatcher)
 {
 	if (pair.m_algorithm)
 	{
@@ -566,7 +566,7 @@ void	btSortedOverlappingPairCache::cleanOverlappingPair(btBroadphasePair& pair,b
 }
 
 
-void	btSortedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy,btDispatcher* dispatcher)
+void	btSortedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy, btDispatcher* dispatcher)
 {
 
 	class	CleanPairCallback : public btOverlapCallback
@@ -576,7 +576,7 @@ void	btSortedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy,
 		btDispatcher* m_dispatcher;
 
 	public:
-		CleanPairCallback(btBroadphaseProxy* cleanProxy,btOverlappingPairCache* pairCache,btDispatcher* dispatcher)
+		CleanPairCallback(btBroadphaseProxy* cleanProxy, btOverlappingPairCache* pairCache, btDispatcher* dispatcher)
 			:m_cleanProxy(cleanProxy),
 			m_pairCache(pairCache),
 			m_dispatcher(dispatcher)
@@ -587,21 +587,21 @@ void	btSortedOverlappingPairCache::cleanProxyFromPairs(btBroadphaseProxy* proxy,
 			if ((pair.m_pProxy0 == m_cleanProxy) ||
 				(pair.m_pProxy1 == m_cleanProxy))
 			{
-				m_pairCache->cleanOverlappingPair(pair,m_dispatcher);
+				m_pairCache->cleanOverlappingPair(pair, m_dispatcher);
 			}
 			return false;
 		}
 		
 	};
 
-	CleanPairCallback cleanPairs(proxy,this,dispatcher);
+	CleanPairCallback cleanPairs(proxy, this, dispatcher);
 
-	processAllOverlappingPairs(&cleanPairs,dispatcher);
+	processAllOverlappingPairs(&cleanPairs, dispatcher);
 
 }
 
 
-void	btSortedOverlappingPairCache::removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy,btDispatcher* dispatcher)
+void	btSortedOverlappingPairCache::removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy, btDispatcher* dispatcher)
 {
 
 	class	RemovePairCallback : public btOverlapCallback
@@ -623,7 +623,7 @@ void	btSortedOverlappingPairCache::removeOverlappingPairsContainingProxy(btBroad
 
 	RemovePairCallback removeCallback(proxy);
 
-	processAllOverlappingPairs(&removeCallback,dispatcher);
+	processAllOverlappingPairs(&removeCallback, dispatcher);
 }
 
 void	btSortedOverlappingPairCache::sortOverlappingPairs(btDispatcher* dispatcher)

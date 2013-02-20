@@ -24,7 +24,7 @@ subject to the following restrictions:
 /// btDispatcher uses these types
 /// IMPORTANT NOTE:The types are ordered polyhedral, implicit convex and concave
 /// to facilitate type checking
-/// CUSTOM_POLYHEDRAL_SHAPE_TYPE,CUSTOM_CONVEX_SHAPE_TYPE and CUSTOM_CONCAVE_SHAPE_TYPE can be used to extend Bullet without modifying source code
+/// CUSTOM_POLYHEDRAL_SHAPE_TYPE, CUSTOM_CONVEX_SHAPE_TYPE and CUSTOM_CONCAVE_SHAPE_TYPE can be used to extend Bullet without modifying source code
 enum BroadphaseNativeTypes
 {
 	// polyhedral convex shapes
@@ -115,11 +115,11 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 	}
 
 	//used for memory pools
-	btBroadphaseProxy() :m_clientObject(0),m_multiSapParentProxy(0)
+	btBroadphaseProxy() :m_clientObject(0), m_multiSapParentProxy(0)
 	{
 	}
 
-	btBroadphaseProxy(const btVector3& aabbMin,const btVector3& aabbMax,void* userPtr,short int collisionFilterGroup, short int collisionFilterMask,void* multiSapParentProxy=0)
+	btBroadphaseProxy(const btVector3& aabbMin, const btVector3& aabbMax, void* userPtr, short int collisionFilterGroup, short int collisionFilterMask, void* multiSapParentProxy=0)
 		:m_clientObject(userPtr),
 		m_collisionFilterGroup(collisionFilterGroup),
 		m_collisionFilterMask(collisionFilterMask),
@@ -203,7 +203,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 				m_internalInfo1(other.m_internalInfo1)
 	{
 	}
-	btBroadphasePair(btBroadphaseProxy& proxy0,btBroadphaseProxy& proxy1)
+	btBroadphasePair(btBroadphaseProxy& proxy0, btBroadphaseProxy& proxy1)
 	{
 
 		//keep them sorted, so the std::set operations work

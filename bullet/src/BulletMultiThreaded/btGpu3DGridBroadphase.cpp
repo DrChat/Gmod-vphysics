@@ -43,7 +43,7 @@ static bt3DGridBroadphaseParams s3DGridBroadphaseParams;
 
 
 
-btGpu3DGridBroadphase::btGpu3DGridBroadphase(	const btVector3& worldAabbMin,const btVector3& worldAabbMax, 
+btGpu3DGridBroadphase::btGpu3DGridBroadphase(	const btVector3& worldAabbMin, const btVector3& worldAabbMax, 
 										int gridSizeX, int gridSizeY, int gridSizeZ, 
 										int maxSmallProxies, int maxLargeProxies, int maxPairsPerBody,
 										int maxBodiesPerCell,
@@ -62,7 +62,7 @@ btGpu3DGridBroadphase::btGpu3DGridBroadphase(	const btVector3& worldAabbMin,cons
 
 
 btGpu3DGridBroadphase::btGpu3DGridBroadphase(	btOverlappingPairCache* overlappingPairCache,
-										const btVector3& worldAabbMin,const btVector3& worldAabbMax, 
+										const btVector3& worldAabbMin, const btVector3& worldAabbMax, 
 										int gridSizeX, int gridSizeY, int gridSizeZ, 
 										int maxSmallProxies, int maxLargeProxies, int maxPairsPerBody,
 										int maxBodiesPerCell,
@@ -87,7 +87,7 @@ btGpu3DGridBroadphase::~btGpu3DGridBroadphase()
 
 
 
-void btGpu3DGridBroadphase::_initialize(	const btVector3& worldAabbMin,const btVector3& worldAabbMax, 
+void btGpu3DGridBroadphase::_initialize(	const btVector3& worldAabbMin, const btVector3& worldAabbMax, 
 										int gridSizeX, int gridSizeY, int gridSizeZ, 
 										int maxSmallProxies, int maxLargeProxies, int maxPairsPerBody,
 										int maxBodiesPerCell,
@@ -254,12 +254,12 @@ void btGpu3DGridBroadphase::addPairsToCache(btDispatcher* dispatcher)
 			}
 			if(indx1_s & BT_3DGRID_PAIR_NEW_FLG)
 			{
-				m_pairCache->addOverlappingPair(proxy0,proxy1);
+				m_pairCache->addOverlappingPair(proxy0, proxy1);
 				m_numPairsAdded++;
 			}
 			else
 			{
-				m_pairCache->removeOverlappingPair(proxy0,proxy1,dispatcher);
+				m_pairCache->removeOverlappingPair(proxy0, proxy1, dispatcher);
 				m_numPairsRemoved++;
 			}
 		}
@@ -268,7 +268,7 @@ void btGpu3DGridBroadphase::addPairsToCache(btDispatcher* dispatcher)
 
 
 
-btBroadphaseProxy* btGpu3DGridBroadphase::createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax,int shapeType,void* userPtr ,short int collisionFilterGroup,short int collisionFilterMask, btDispatcher* dispatcher,void* multiSapProxy)
+btBroadphaseProxy* btGpu3DGridBroadphase::createProxy(  const btVector3& aabbMin,  const btVector3& aabbMax, int shapeType, void* userPtr, short int collisionFilterGroup, short int collisionFilterMask, btDispatcher* dispatcher, void* multiSapProxy)
 {
 	btBroadphaseProxy*  proxy;
 	bool bIsLarge = isLargeProxy(aabbMin, aabbMax);
@@ -282,7 +282,7 @@ btBroadphaseProxy* btGpu3DGridBroadphase::createProxy(  const btVector3& aabbMin
 		}
 		btAssert((aabbMin[0]<= aabbMax[0]) && (aabbMin[1]<= aabbMax[1]) && (aabbMin[2]<= aabbMax[2]));
 		int newHandleIndex = allocLargeHandle();
-		proxy = new (&m_pLargeHandles[newHandleIndex])btSimpleBroadphaseProxy(aabbMin,aabbMax,shapeType,userPtr,collisionFilterGroup,collisionFilterMask,multiSapProxy);
+		proxy = new (&m_pLargeHandles[newHandleIndex])btSimpleBroadphaseProxy(aabbMin, aabbMax, shapeType, userPtr, collisionFilterGroup, collisionFilterMask, multiSapProxy);
 	}
 	else
 	{
@@ -301,7 +301,7 @@ void btGpu3DGridBroadphase::destroyProxy(btBroadphaseProxy* proxy, btDispatcher*
 		
 		btSimpleBroadphaseProxy* proxy0 = static_cast<btSimpleBroadphaseProxy*>(proxy);
 		freeLargeHandle(proxy0);
-		m_pairCache->removeOverlappingPairsContainingProxy(proxy,dispatcher);
+		m_pairCache->removeOverlappingPairsContainingProxy(proxy, dispatcher);
 	}
 	else
 	{
@@ -347,7 +347,7 @@ bool btGpu3DGridBroadphase::isLargeProxy(btBroadphaseProxy* proxy)
 
 void btGpu3DGridBroadphase::addLarge2LargePairsToCache(btDispatcher* dispatcher)
 {
-	int i,j;
+	int i, j;
 	if (m_numLargeHandles <= 0)
 	{
 		return;
@@ -371,18 +371,18 @@ void btGpu3DGridBroadphase::addLarge2LargePairsToCache(btDispatcher* dispatcher)
 			btAssert(proxy0 != proxy1);
 			btSimpleBroadphaseProxy* p0 = getSimpleProxyFromProxy(proxy0);
 			btSimpleBroadphaseProxy* p1 = getSimpleProxyFromProxy(proxy1);
-			if(aabbOverlap(p0,p1))
+			if(aabbOverlap(p0, p1))
 			{
-				if (!m_pairCache->findPair(proxy0,proxy1))
+				if (!m_pairCache->findPair(proxy0, proxy1))
 				{
-					m_pairCache->addOverlappingPair(proxy0,proxy1);
+					m_pairCache->addOverlappingPair(proxy0, proxy1);
 				}
 			} 
 			else
 			{
-				if(m_pairCache->findPair(proxy0,proxy1))
+				if(m_pairCache->findPair(proxy0, proxy1))
 				{
-					m_pairCache->removeOverlappingPair(proxy0,proxy1,dispatcher);
+					m_pairCache->removeOverlappingPair(proxy0, proxy1, dispatcher);
 				}
 			}
 		}
@@ -393,7 +393,7 @@ void btGpu3DGridBroadphase::addLarge2LargePairsToCache(btDispatcher* dispatcher)
 
 
 
-void btGpu3DGridBroadphase::rayTest(const btVector3& rayFrom,const btVector3& rayTo, btBroadphaseRayCallback& rayCallback,const btVector3& aabbMin,const btVector3& aabbMax)
+void btGpu3DGridBroadphase::rayTest(const btVector3& rayFrom, const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin, const btVector3& aabbMax)
 {
 	btSimpleBroadphase::rayTest(rayFrom, rayTo, rayCallback);
 	for (int i=0; i <= m_LastLargeHandleIndex; i++)

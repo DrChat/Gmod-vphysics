@@ -55,13 +55,13 @@ public:
 			return m_spuCollisionTaskProcess;
 	}
 	
-	SpuGatheringCollisionDispatcher (class	btThreadSupportInterface*	threadInterface, unsigned int	maxNumOutstandingTasks,btCollisionConfiguration* collisionConfiguration);
+	SpuGatheringCollisionDispatcher (class	btThreadSupportInterface*	threadInterface, unsigned int	maxNumOutstandingTasks, btCollisionConfiguration* collisionConfiguration);
 	
 	virtual ~SpuGatheringCollisionDispatcher();
 
-	bool	supportsDispatchPairOnSpu(int proxyType0,int proxyType1);
+	bool	supportsDispatchPairOnSpu(int proxyType0, int proxyType1);
 
-	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache,const btDispatcherInfo& dispatchInfo,btDispatcher* dispatcher) ;
+	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher) ;
 
 };
 

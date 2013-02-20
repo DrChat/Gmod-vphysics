@@ -46,13 +46,13 @@ struct	sResults
 
 static int		StackSizeRequirement();
 
-static bool		Distance(	const btConvexShape* shape0,const btTransform& wtrs0,
-							const btConvexShape* shape1,const btTransform& wtrs1,
+static bool		Distance(	const btConvexShape* shape0, const btTransform& wtrs0,
+							const btConvexShape* shape1, const btTransform& wtrs1,
 							const btVector3& guess,
 							sResults& results);
 
-static bool		Penetration(const btConvexShape* shape0,const btTransform& wtrs0,
-							const btConvexShape* shape1,const btTransform& wtrs1,
+static bool		Penetration(const btConvexShape* shape0, const btTransform& wtrs0,
+							const btConvexShape* shape1, const btTransform& wtrs1,
 							const btVector3& guess,
 							sResults& results,
 							bool usemargins=true);
@@ -63,8 +63,8 @@ static btScalar	SignedDistance(	const btVector3& position,
 								const btTransform& wtrs,
 								sResults& results);
 							
-static bool		SignedDistance(	const btConvexShape* shape0,const btTransform& wtrs0,
-								const btConvexShape* shape1,const btTransform& wtrs1,
+static bool		SignedDistance(	const btConvexShape* shape0, const btTransform& wtrs0,
+								const btConvexShape* shape1, const btTransform& wtrs1,
 								const btVector3& guess,
 								sResults& results);
 #endif //__SPU__

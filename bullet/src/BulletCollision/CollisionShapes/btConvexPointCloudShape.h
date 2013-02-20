@@ -37,7 +37,7 @@ public:
 		m_numPoints = 0;
 	}
 
-	btConvexPointCloudShape(btVector3* points,int numPoints, const btVector3& localScaling,bool computeAabb = true)
+	btConvexPointCloudShape(btVector3* points, int numPoints, const btVector3& localScaling, bool computeAabb = true)
 	{
 		m_localScaling = localScaling;
 		m_shapeType = CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE;
@@ -48,7 +48,7 @@ public:
 			recalcLocalAabb();
 	}
 
-	void setPoints (btVector3* points, int numPoints, bool computeAabb = true,const btVector3& localScaling=btVector3(1.f,1.f,1.f))
+	void setPoints (btVector3* points, int numPoints, bool computeAabb = true, const btVector3& localScaling=btVector3(1.f,1.f,1.f))
 	{
 		m_unscaledPoints = points;
 		m_numPoints = numPoints;
@@ -81,7 +81,7 @@ public:
 #ifndef __SPU__
 	virtual btVector3	localGetSupportingVertex(const btVector3& vec)const;
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 #endif
 
 
@@ -90,11 +90,11 @@ public:
 
 	virtual int	getNumVertices() const;
 	virtual int getNumEdges() const;
-	virtual void getEdge(int i,btVector3& pa,btVector3& pb) const;
-	virtual void getVertex(int i,btVector3& vtx) const;
+	virtual void getEdge(int i, btVector3& pa, btVector3& pb) const;
+	virtual void getVertex(int i, btVector3& vtx) const;
 	virtual int	getNumPlanes() const;
-	virtual void getPlane(btVector3& planeNormal,btVector3& planeSupport,int i ) const;
-	virtual	bool isInside(const btVector3& pt,btScalar tolerance) const;
+	virtual void getPlane(btVector3& planeNormal, btVector3& planeSupport, int i ) const;
+	virtual	bool isInside(const btVector3& pt, btScalar tolerance) const;
 
 	///in case we receive negative scaling
 	virtual void	setLocalScaling(const btVector3& scaling);

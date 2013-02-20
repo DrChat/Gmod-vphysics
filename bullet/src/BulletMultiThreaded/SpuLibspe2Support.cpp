@@ -202,7 +202,7 @@ void SpuLibspe2Support::internal_startSPU()
 			/*
 			else
 			{
-				printf("started thread %d\n",i);
+				printf("started thread %d\n", i);
 			}*/
 		}		
 	}

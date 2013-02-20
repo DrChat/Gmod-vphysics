@@ -117,28 +117,28 @@ public:
 
 		btVector4 edgeplane;
 
-		EDGE_PLANE(tripoints[0],tripoints[1],tri_plane,edgeplane);
+		EDGE_PLANE(tripoints[0], tripoints[1], tri_plane, edgeplane);
 
 		GUINT clipped_count = PLANE_CLIP_TRIANGLE3D(
-			edgeplane,srcpoints[0],srcpoints[1],srcpoints[2],temp_points);
+			edgeplane, srcpoints[0], srcpoints[1], srcpoints[2], temp_points);
 
 		if(clipped_count == 0) return 0;
 
 		// edge 1
 
-		EDGE_PLANE(tripoints[1],tripoints[2],tri_plane,edgeplane);
+		EDGE_PLANE(tripoints[1], tripoints[2], tri_plane, edgeplane);
 
 		clipped_count = PLANE_CLIP_POLYGON3D(
-			edgeplane,temp_points,clipped_count,temp_points1);
+			edgeplane, temp_points, clipped_count, temp_points1);
 
 		if(clipped_count == 0) return 0;
 
 		// edge 2
 
-		EDGE_PLANE(tripoints[2],tripoints[0],tri_plane,edgeplane);
+		EDGE_PLANE(tripoints[2], tripoints[0], tri_plane, edgeplane);
 
 		clipped_count = PLANE_CLIP_POLYGON3D(
-			edgeplane,temp_points1,clipped_count,clip_points);
+			edgeplane, temp_points1, clipped_count, clip_points);
 
 		return clipped_count;
 
@@ -150,35 +150,35 @@ public:
 		btVector3 temp_points1[MAX_TRI_CLIPPING];
 
 		GUINT clipped_count= PLANE_CLIP_TRIANGLE_GENERIC(
-			0,srcpoints[0],srcpoints[1],srcpoints[2],temp_points,
-			DISTANCE_EDGE(tripoints[0],tripoints[1],i0,i1));
+			0, srcpoints[0], srcpoints[1], srcpoints[2], temp_points,
+			DISTANCE_EDGE(tripoints[0], tripoints[1], i0, i1));
 		
 		
 		if(clipped_count == 0) return 0;
 
 		// edge 1
 		clipped_count = PLANE_CLIP_POLYGON_GENERIC(
-			0,temp_points,clipped_count,temp_points1,
-			DISTANCE_EDGE(tripoints[1],tripoints[2],i0,i1));
+			0, temp_points, clipped_count, temp_points1,
+			DISTANCE_EDGE(tripoints[1], tripoints[2], i0, i1));
 
 		if(clipped_count == 0) return 0;
 
 		// edge 2
 		clipped_count = PLANE_CLIP_POLYGON_GENERIC(
-			0,temp_points1,clipped_count,clipped_points,
-			DISTANCE_EDGE(tripoints[2],tripoints[0],i0,i1));
+			0, temp_points1, clipped_count, clipped_points,
+			DISTANCE_EDGE(tripoints[2], tripoints[0], i0, i1));
 
 		return clipped_count;*/
 	}
 
 	SIMD_FORCE_INLINE void sort_isect(
-		GREAL & isect0,GREAL & isect1,GUINT &e0,GUINT &e1,btVector3 & vec0,btVector3 & vec1)
+		GREAL & isect0, GREAL & isect1, GUINT &e0, GUINT &e1, btVector3 & vec0, btVector3 & vec1)
 	{
 		if(isect1<isect0)
 		{
 			//swap
-			GIM_SWAP_NUMBERS(isect0,isect1);
-			GIM_SWAP_NUMBERS(e0,e1);
+			GIM_SWAP_NUMBERS(isect0, isect1);
+			GIM_SWAP_NUMBERS(e0, e1);
 			btVector3 tmp = vec0;
 			vec0 = vec1;
 			vec1 = tmp;
@@ -202,7 +202,7 @@ public:
 		// Compute direction of intersection line
 		edge_edge_dir = tu_plane.cross(tv_plane);
 		GREAL Dlen;
-		VEC_LENGTH(edge_edge_dir,Dlen);
+		VEC_LENGTH(edge_edge_dir, Dlen);
 
 		if(Dlen<0.0001)
 		{
@@ -213,31 +213,31 @@ public:
 
 
 		// Compute interval for triangle 1
-		GUINT tu_e0,tu_e1;//edge indices
-		GREAL tu_scale_e0,tu_scale_e1;//edge scale
-		if(!compute_intervals(du[0],du[1],du[2],
-			du0du1,du0du2,tu_scale_e0,tu_scale_e1,tu_e0,tu_e1)) return 0;
+		GUINT tu_e0, tu_e1;//edge indices
+		GREAL tu_scale_e0, tu_scale_e1;//edge scale
+		if(!compute_intervals(du[0], du[1], du[2],
+			du0du1, du0du2, tu_scale_e0, tu_scale_e1, tu_e0, tu_e1)) return 0;
 
 		// Compute interval for triangle 2
-		GUINT tv_e0,tv_e1;//edge indices
-		GREAL tv_scale_e0,tv_scale_e1;//edge scale
+		GUINT tv_e0, tv_e1;//edge indices
+		GREAL tv_scale_e0, tv_scale_e1;//edge scale
 
-		if(!compute_intervals(dv[0],dv[1],dv[2],
-			dv0dv1,dv0dv2,tv_scale_e0,tv_scale_e1,tv_e0,tv_e1)) return 0;
+		if(!compute_intervals(dv[0], dv[1], dv[2],
+			dv0dv1, dv0dv2, tv_scale_e0, tv_scale_e1, tv_e0, tv_e1)) return 0;
 
 		//proyected vertices
-		btVector3 up_e0 = tu_vertices[tu_e0].lerp(tu_vertices[(tu_e0+1)%3],tu_scale_e0);
-		btVector3 up_e1 = tu_vertices[tu_e1].lerp(tu_vertices[(tu_e1+1)%3],tu_scale_e1);
+		btVector3 up_e0 = tu_vertices[tu_e0].lerp(tu_vertices[(tu_e0+1)%3], tu_scale_e0);
+		btVector3 up_e1 = tu_vertices[tu_e1].lerp(tu_vertices[(tu_e1+1)%3], tu_scale_e1);
 
-		btVector3 vp_e0 = tv_vertices[tv_e0].lerp(tv_vertices[(tv_e0+1)%3],tv_scale_e0);
-		btVector3 vp_e1 = tv_vertices[tv_e1].lerp(tv_vertices[(tv_e1+1)%3],tv_scale_e1);
+		btVector3 vp_e0 = tv_vertices[tv_e0].lerp(tv_vertices[(tv_e0+1)%3], tv_scale_e0);
+		btVector3 vp_e1 = tv_vertices[tv_e1].lerp(tv_vertices[(tv_e1+1)%3], tv_scale_e1);
 
 		//proyected intervals
-		GREAL isect_u[] = {up_e0.dot(edge_edge_dir),up_e1.dot(edge_edge_dir)};
-		GREAL isect_v[] = {vp_e0.dot(edge_edge_dir),vp_e1.dot(edge_edge_dir)};
+		GREAL isect_u[] = {up_e0.dot(edge_edge_dir), up_e1.dot(edge_edge_dir)};
+		GREAL isect_v[] = {vp_e0.dot(edge_edge_dir), vp_e1.dot(edge_edge_dir)};
 
-		sort_isect(isect_u[0],isect_u[1],tu_e0,tu_e1,up_e0,up_e1);
-		sort_isect(isect_v[0],isect_v[1],tv_e0,tv_e1,vp_e0,vp_e1);
+		sort_isect(isect_u[0], isect_u[1], tu_e0, tu_e1, up_e0, up_e1);
+		sort_isect(isect_v[0], isect_v[1], tv_e0, tv_e1, vp_e0, vp_e1);
 
 		const GREAL midpoint_u = 0.5f*(isect_u[0]+isect_u[1]); // midpoint
 		const GREAL midpoint_v = 0.5f*(isect_v[0]+isect_v[1]); // midpoint
@@ -260,13 +260,13 @@ public:
 			if(isect_u[1]+ MIN_EDGE_EDGE_DIS<isect_v[0]) //calc distance between two lines instead
 			{
 				SEGMENT_COLLISION(
-					tu_vertices[tu_e1],tu_vertices[(tu_e1+1)%3],
-					tv_vertices[tv_e0],tv_vertices[(tv_e0+1)%3],
+					tu_vertices[tu_e1], tu_vertices[(tu_e1+1)%3],
+					tv_vertices[tv_e0], tv_vertices[(tv_e0+1)%3],
 					closest_point_u,
 					closest_point_v);
 
 				edge_edge_dir = closest_point_u-closest_point_v;
-				VEC_LENGTH(edge_edge_dir,distances[2]);
+				VEC_LENGTH(edge_edge_dir, distances[2]);
 				edge_edge_dir *= 1.0f/distances[2];// normalize
 			}
 			else
@@ -294,13 +294,13 @@ public:
 			if(isect_v[1]+MIN_EDGE_EDGE_DIS<isect_u[0]) //calc distance between two lines instead
 			{
 				SEGMENT_COLLISION(
-					tu_vertices[tu_e0],tu_vertices[(tu_e0+1)%3],
-					tv_vertices[tv_e1],tv_vertices[(tv_e1+1)%3],
+					tu_vertices[tu_e0], tu_vertices[(tu_e0+1)%3],
+					tv_vertices[tv_e1], tv_vertices[(tv_e1+1)%3],
 					closest_point_u,
 					closest_point_v);
 
 				edge_edge_dir = closest_point_u-closest_point_v;
-				VEC_LENGTH(edge_edge_dir,distances[2]);
+				VEC_LENGTH(edge_edge_dir, distances[2]);
 				edge_edge_dir *= 1.0f/distances[2];// normalize
 			}
 			else
@@ -339,11 +339,11 @@ public:
 		//create planes
 		// plane v vs U points
 
-		TRIANGLE_PLANE(tv_vertices[0],tv_vertices[1],tv_vertices[2],tv_plane);
+		TRIANGLE_PLANE(tv_vertices[0], tv_vertices[1], tv_vertices[2], tv_plane);
 
-		du[0] = DISTANCE_PLANE_POINT(tv_plane,tu_vertices[0]);
-		du[1] = DISTANCE_PLANE_POINT(tv_plane,tu_vertices[1]);
-		du[2] = DISTANCE_PLANE_POINT(tv_plane,tu_vertices[2]);
+		du[0] = DISTANCE_PLANE_POINT(tv_plane, tu_vertices[0]);
+		du[1] = DISTANCE_PLANE_POINT(tv_plane, tu_vertices[1]);
+		du[2] = DISTANCE_PLANE_POINT(tv_plane, tu_vertices[2]);
 
 
 		du0du1 = du[0] * du[1];
@@ -354,17 +354,17 @@ public:
 		{
 			if(du[0]<0) //we need test behind the triangle plane
 			{
-				distances[0] = GIM_MAX3(du[0],du[1],du[2]);
+				distances[0] = GIM_MAX3(du[0], du[1], du[2]);
 				distances[0] = -distances[0];
 				if(distances[0]>margin) return false; //never intersect
 
 				//reorder triangle v
-				VEC_SWAP(tv_vertices[0],tv_vertices[1]);
-				VEC_SCALE_4(tv_plane,-1.0f,tv_plane);
+				VEC_SWAP(tv_vertices[0], tv_vertices[1]);
+				VEC_SCALE_4(tv_plane,-1.0f, tv_plane);
 			}
 			else
 			{
-				distances[0] = GIM_MIN3(du[0],du[1],du[2]);
+				distances[0] = GIM_MIN3(du[0], du[1], du[2]);
 				if(distances[0]>margin) return false; //never intersect
 			}
 		}
@@ -376,26 +376,26 @@ public:
 			if(distances[0]<0.0f)
 			{
 				//reorder triangle v
-				VEC_SWAP(tv_vertices[0],tv_vertices[1]);
-				VEC_SCALE_4(tv_plane,-1.0f,tv_plane);
+				VEC_SWAP(tv_vertices[0], tv_vertices[1]);
+				VEC_SCALE_4(tv_plane,-1.0f, tv_plane);
 
-				distances[0] = GIM_MAX3(du[0],du[1],du[2]);
+				distances[0] = GIM_MAX3(du[0], du[1], du[2]);
 				distances[0] = -distances[0];
 			}
 			else
 			{
-				distances[0] = GIM_MIN3(du[0],du[1],du[2]);
+				distances[0] = GIM_MIN3(du[0], du[1], du[2]);
 			}
 		}
 
 
 		// plane U vs V points
 
-		TRIANGLE_PLANE(tu_vertices[0],tu_vertices[1],tu_vertices[2],tu_plane);
+		TRIANGLE_PLANE(tu_vertices[0], tu_vertices[1], tu_vertices[2], tu_plane);
 
-		dv[0] = DISTANCE_PLANE_POINT(tu_plane,tv_vertices[0]);
-		dv[1] = DISTANCE_PLANE_POINT(tu_plane,tv_vertices[1]);
-		dv[2] = DISTANCE_PLANE_POINT(tu_plane,tv_vertices[2]);
+		dv[0] = DISTANCE_PLANE_POINT(tu_plane, tv_vertices[0]);
+		dv[1] = DISTANCE_PLANE_POINT(tu_plane, tv_vertices[1]);
+		dv[2] = DISTANCE_PLANE_POINT(tu_plane, tv_vertices[2]);
 
 		dv0dv1 = dv[0] * dv[1];
 		dv0dv2 = dv[0] * dv[2];
@@ -405,17 +405,17 @@ public:
 		{
 			if(dv[0]<0) //we need test behind the triangle plane
 			{
-				distances[1] = GIM_MAX3(dv[0],dv[1],dv[2]);
+				distances[1] = GIM_MAX3(dv[0], dv[1], dv[2]);
 				distances[1] = -distances[1];
 				if(distances[1]>margin) return false; //never intersect
 
 				//reorder triangle u
-				VEC_SWAP(tu_vertices[0],tu_vertices[1]);
-				VEC_SCALE_4(tu_plane,-1.0f,tu_plane);
+				VEC_SWAP(tu_vertices[0], tu_vertices[1]);
+				VEC_SCALE_4(tu_plane,-1.0f, tu_plane);
 			}
 			else
 			{
-				distances[1] = GIM_MIN3(dv[0],dv[1],dv[2]);
+				distances[1] = GIM_MIN3(dv[0], dv[1], dv[2]);
 				if(distances[1]>margin) return false; //never intersect
 			}
 		}
@@ -427,15 +427,15 @@ public:
 			if(distances[1]<0.0f)
 			{
 				//reorder triangle v
-				VEC_SWAP(tu_vertices[0],tu_vertices[1]);
-				VEC_SCALE_4(tu_plane,-1.0f,tu_plane);
+				VEC_SWAP(tu_vertices[0], tu_vertices[1]);
+				VEC_SCALE_4(tu_plane,-1.0f, tu_plane);
 
-				distances[1] = GIM_MAX3(dv[0],dv[1],dv[2]);
+				distances[1] = GIM_MAX3(dv[0], dv[1], dv[2]);
 				distances[1] = -distances[1];
 			}
 			else
 			{
-				distances[1] = GIM_MIN3(dv[0],dv[1],dv[2]);
+				distances[1] = GIM_MIN3(dv[0], dv[1], dv[2]);
 			}
 		}
 
@@ -459,7 +459,7 @@ public:
 			contacts.m_penetration_depth = -distances[2] + margin;
 			contacts.m_points[0] = closest_point_v;
 			contacts.m_point_count = 1;
-			VEC_COPY(contacts.m_separating_normal,edge_edge_dir);
+			VEC_COPY(contacts.m_separating_normal, edge_edge_dir);
 
 			return true;
 		}
@@ -471,15 +471,15 @@ public:
 		//TODO
 		if(bl == 0) //clip U points against V
 		{
-			point_count = clip_triangle(tv_plane,tv_vertices,tu_vertices,contact_points);
+			point_count = clip_triangle(tv_plane, tv_vertices, tu_vertices, contact_points);
 			if(point_count == 0) return false;						
-			contacts.merge_points(tv_plane,margin,contact_points,point_count);			
+			contacts.merge_points(tv_plane, margin, contact_points, point_count);			
 		}
 		else //clip V points against U
 		{
-			point_count = clip_triangle(tu_plane,tu_vertices,tv_vertices,contact_points);
+			point_count = clip_triangle(tu_plane, tu_vertices, tv_vertices, contact_points);
 			if(point_count == 0) return false;			
-			contacts.merge_points(tu_plane,margin,contact_points,point_count);
+			contacts.merge_points(tu_plane, margin, contact_points, point_count);
 			contacts.m_separating_normal *= -1.f;
 		}
 		if(contacts.m_point_count == 0) return false;
@@ -514,28 +514,28 @@ public:
 
 		btVector4 edgeplane;
 
-		EDGE_PLANE(tripoints[0],tripoints[1],tri_plane,edgeplane);
+		EDGE_PLANE(tripoints[0], tripoints[1], tri_plane, edgeplane);
 
 		GUINT clipped_count = PLANE_CLIP_TRIANGLE3D(
-			edgeplane,srcpoints[0],srcpoints[1],srcpoints[2],temp_points);
+			edgeplane, srcpoints[0], srcpoints[1], srcpoints[2], temp_points);
 
 		if(clipped_count == 0) return 0;
 
 		// edge 1
 
-		EDGE_PLANE(tripoints[1],tripoints[2],tri_plane,edgeplane);
+		EDGE_PLANE(tripoints[1], tripoints[2], tri_plane, edgeplane);
 
 		clipped_count = PLANE_CLIP_POLYGON3D(
-			edgeplane,temp_points,clipped_count,temp_points1);
+			edgeplane, temp_points, clipped_count, temp_points1);
 
 		if(clipped_count == 0) return 0;
 
 		// edge 2
 
-		EDGE_PLANE(tripoints[2],tripoints[0],tri_plane,edgeplane);
+		EDGE_PLANE(tripoints[2], tripoints[0], tri_plane, edgeplane);
 
 		clipped_count = PLANE_CLIP_POLYGON3D(
-			edgeplane,temp_points1,clipped_count,clipped_points);
+			edgeplane, temp_points1, clipped_count, clipped_points);
 
 		return clipped_count;
 	}
@@ -571,10 +571,10 @@ public:
 		// plane v vs U points
 
 
-		TRIANGLE_PLANE(tv_vertices[0],tv_vertices[1],tv_vertices[2],contacts1.m_separating_normal);
+		TRIANGLE_PLANE(tv_vertices[0], tv_vertices[1], tv_vertices[2], contacts1.m_separating_normal);
 
 		clipped_count = clip_triangle(
-			contacts1.m_separating_normal,tv_vertices,tu_vertices,clipped_points);
+			contacts1.m_separating_normal, tv_vertices, tu_vertices, clipped_points);
 
 		if(clipped_count == 0 )
 		{
@@ -582,7 +582,7 @@ public:
 		}
 
 		//find most deep interval face1
-		contacts1.merge_points(contacts1.m_separating_normal,margin,clipped_points,clipped_count);
+		contacts1.merge_points(contacts1.m_separating_normal, margin, clipped_points, clipped_count);
 		if(contacts1.m_point_count == 0) return false; // too far
 
 		//Normal pointing to triangle1
@@ -590,10 +590,10 @@ public:
 
 		//Clip tri1 by tri2 edges
 
-		TRIANGLE_PLANE(tu_vertices[0],tu_vertices[1],tu_vertices[2],contacts2.m_separating_normal);
+		TRIANGLE_PLANE(tu_vertices[0], tu_vertices[1], tu_vertices[2], contacts2.m_separating_normal);
 
 		clipped_count = clip_triangle(
-			contacts2.m_separating_normal,tu_vertices,tv_vertices,clipped_points);
+			contacts2.m_separating_normal, tu_vertices, tv_vertices, clipped_points);
 
 		if(clipped_count == 0 )
 		{
@@ -601,7 +601,7 @@ public:
 		}
 
 		//find most deep interval face1
-		contacts2.merge_points(contacts2.m_separating_normal,margin,clipped_points,clipped_count);
+		contacts2.merge_points(contacts2.m_separating_normal, margin, clipped_points, clipped_count);
 		if(contacts2.m_point_count == 0) return false; // too far
 
 		contacts2.m_separating_normal *= -1.f;
@@ -629,8 +629,8 @@ bool GIM_TRIANGLE::collide_triangle_hard_test(
 {
 	GIM_TRIANGLE_CALCULATION_CACHE calc_cache;	
 	return calc_cache.triangle_collision(
-					m_vertices[0],m_vertices[1],m_vertices[2],m_margin,
-					other.m_vertices[0],other.m_vertices[1],other.m_vertices[2],other.m_margin,
+					m_vertices[0], m_vertices[1], m_vertices[2], m_margin,
+					other.m_vertices[0], other.m_vertices[1], other.m_vertices[2], other.m_margin,
 					contact_data);
 
 }

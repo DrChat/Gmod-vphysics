@@ -36,7 +36,7 @@ struct btTriIndex
 	int m_PartIdTriangleIndex;
 	class btCollisionShape*	m_childShape;
 
-	btTriIndex(int partId,int triangleIndex,btCollisionShape* shape)
+	btTriIndex(int partId, int triangleIndex, btCollisionShape* shape)
 	{
 		m_PartIdTriangleIndex = (partId<<(31-MAX_NUM_PARTS_IN_BITS)) | triangleIndex;
 		m_childShape = shape;
@@ -76,16 +76,16 @@ class btSoftBodyTriangleCallback : public btTriangleCallback
 	const btDispatcherInfo* m_dispatchInfoPtr;
 	btScalar m_collisionMarginTriangle;
 
-	btHashMap<btHashKey<btTriIndex>,btTriIndex> m_shapeCache;
+	btHashMap<btHashKey<btTriIndex>, btTriIndex> m_shapeCache;
 
 public:
 	int	m_triangleCount;
 
 	//	btPersistentManifold*	m_manifoldPtr;
 
-	btSoftBodyTriangleCallback(btDispatcher* dispatcher,const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,bool isSwapped);
+	btSoftBodyTriangleCallback(btDispatcher* dispatcher, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, bool isSwapped);
 
-	void	setTimeStepAndCounters(btScalar collisionMarginTriangle,const btCollisionObjectWrapper* triObjWrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	void	setTimeStepAndCounters(btScalar collisionMarginTriangle, const btCollisionObjectWrapper* triObjWrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
 	virtual ~btSoftBodyTriangleCallback();
 
@@ -117,13 +117,13 @@ class btSoftBodyConcaveCollisionAlgorithm  : public btCollisionAlgorithm
 
 public:
 
-	btSoftBodyConcaveCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,bool isSwapped);
+	btSoftBodyConcaveCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, bool isSwapped);
 
 	virtual ~btSoftBodyConcaveCollisionAlgorithm();
 
-	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
-	btScalar	calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut);
+	btScalar	calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 
 	virtual	void	getAllContactManifolds(btManifoldArray&	manifoldArray)
 	{
@@ -134,19 +134,19 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btSoftBodyConcaveCollisionAlgorithm));
-			return new(mem) btSoftBodyConcaveCollisionAlgorithm(ci,body0Wrap,body1Wrap,false);
+			return new(mem) btSoftBodyConcaveCollisionAlgorithm(ci, body0Wrap, body1Wrap, false);
 		}
 	};
 
 	struct SwappedCreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap)
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
 		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(btSoftBodyConcaveCollisionAlgorithm));
-			return new(mem) btSoftBodyConcaveCollisionAlgorithm(ci,body0Wrap,body1Wrap,true);
+			return new(mem) btSoftBodyConcaveCollisionAlgorithm(ci, body0Wrap, body1Wrap, true);
 		}
 	};
 

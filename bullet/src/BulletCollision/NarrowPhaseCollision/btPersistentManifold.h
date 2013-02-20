@@ -29,7 +29,7 @@ struct btCollisionResult;
 extern btScalar gContactBreakingThreshold;
 
 typedef bool (*ContactDestroyedCallback)(void* userPersistentData);
-typedef bool (*ContactProcessedCallback)(btManifoldPoint& cp,void* body0,void* body1);
+typedef bool (*ContactProcessedCallback)(btManifoldPoint& cp, void* body0, void* body1);
 extern ContactDestroyedCallback	gContactDestroyedCallback;
 extern ContactProcessedCallback gContactProcessedCallback;
 
@@ -70,7 +70,7 @@ ATTRIBUTE_ALIGNED128( class) btPersistentManifold : public btTypedObject
 	/// sort cached points so most isolated points come first
 	int	sortCachedPoints(const btManifoldPoint& pt);
 
-	int		findContactPoint(const btManifoldPoint* unUsed, int numUnused,const btManifoldPoint& pt);
+	int		findContactPoint(const btManifoldPoint* unUsed, int numUnused, const btManifoldPoint& pt);
 
 public:
 
@@ -83,9 +83,9 @@ public:
 
 	btPersistentManifold();
 
-	btPersistentManifold(const btCollisionObject* body0,const btCollisionObject* body1,int , btScalar contactBreakingThreshold,btScalar contactProcessingThreshold)
+	btPersistentManifold(const btCollisionObject* body0, const btCollisionObject* body1, int, btScalar contactBreakingThreshold, btScalar contactProcessingThreshold)
 		: btTypedObject(BT_PERSISTENT_MANIFOLD_TYPE),
-	m_body0(body0),m_body1(body1),m_cachedPoints(0),
+	m_body0(body0), m_body1(body1), m_cachedPoints(0),
 		m_contactBreakingThreshold(contactBreakingThreshold),
 		m_contactProcessingThreshold(contactProcessingThreshold)
 	{
@@ -94,7 +94,7 @@ public:
 	SIMD_FORCE_INLINE const btCollisionObject* getBody0() const { return m_body0;}
 	SIMD_FORCE_INLINE const btCollisionObject* getBody1() const { return m_body1;}
 
-	void	setBodies(const btCollisionObject* body0,const btCollisionObject* body1)
+	void	setBodies(const btCollisionObject* body0, const btCollisionObject* body1)
 	{
 		m_body0 = body0;
 		m_body1 = body1;
@@ -172,7 +172,7 @@ public:
 		btAssert(m_pointCache[lastUsedIndex].m_userPersistentData==0);
 		m_cachedPoints--;
 	}
-	void replaceContactPoint(const btManifoldPoint& newPoint,int insertIndex)
+	void replaceContactPoint(const btManifoldPoint& newPoint, int insertIndex)
 	{
 		btAssert(validContactDistance(newPoint));
 
@@ -215,7 +215,7 @@ public:
 		return pt.m_distance1 <= getContactBreakingThreshold();
 	}
 	/// calculated new worldspace coordinates and depth, and reject points that exceed the collision margin
-	void	refreshContactPoints(  const btTransform& trA,const btTransform& trB);
+	void	refreshContactPoints(  const btTransform& trA, const btTransform& trB);
 
 	
 	SIMD_FORCE_INLINE	void	clearManifold()

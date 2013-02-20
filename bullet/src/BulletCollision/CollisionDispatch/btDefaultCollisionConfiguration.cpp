@@ -40,7 +40,7 @@ subject to the following restrictions:
 
 
 btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(const btDefaultCollisionConstructionInfo& constructionInfo)
-//btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(btStackAlloc*	stackAlloc,btPoolAllocator*	persistentManifoldPool,btPoolAllocator*	collisionAlgorithmPool)
+//btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(btStackAlloc*	stackAlloc, btPoolAllocator*	persistentManifoldPool, btPoolAllocator*	collisionAlgorithmPool)
 {
 
 	void* mem = btAlignedAlloc(sizeof(btVoronoiSimplexSolver),16);
@@ -58,7 +58,7 @@ btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(const btDefault
 	
 	//default CreationFunctions, filling the m_doubleDispatch table
 	mem = btAlignedAlloc(sizeof(btConvexConvexAlgorithm::CreateFunc),16);
-	m_convexConvexCreateFunc = new(mem) btConvexConvexAlgorithm::CreateFunc(m_simplexSolver,m_pdSolver);
+	m_convexConvexCreateFunc = new(mem) btConvexConvexAlgorithm::CreateFunc(m_simplexSolver, m_pdSolver);
 	mem = btAlignedAlloc(sizeof(btConvexConcaveCollisionAlgorithm::CreateFunc),16);
 	m_convexConcaveCreateFunc = new (mem)btConvexConcaveCollisionAlgorithm::CreateFunc;
 	mem = btAlignedAlloc(sizeof(btConvexConcaveCollisionAlgorithm::CreateFunc),16);
@@ -102,9 +102,9 @@ btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(const btDefault
 	int maxSize3 = sizeof(btCompoundCollisionAlgorithm);
 	int sl = sizeof(btConvexSeparatingDistanceUtil);
 	sl = sizeof(btGjkPairDetector);
-	int	collisionAlgorithmMaxElementSize = btMax(maxSize,constructionInfo.m_customCollisionAlgorithmMaxElementSize);
-	collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize,maxSize2);
-	collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize,maxSize3);
+	int	collisionAlgorithmMaxElementSize = btMax(maxSize, constructionInfo.m_customCollisionAlgorithmMaxElementSize);
+	collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize, maxSize2);
+	collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize, maxSize3);
 
 	if (constructionInfo.m_stackAlloc)
 	{
@@ -125,7 +125,7 @@ btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(const btDefault
 	{
 		m_ownsPersistentManifoldPool = true;
 		void* mem = btAlignedAlloc(sizeof(btPoolAllocator),16);
-		m_persistentManifoldPool = new (mem) btPoolAllocator(sizeof(btPersistentManifold),constructionInfo.m_defaultMaxPersistentManifoldPoolSize);
+		m_persistentManifoldPool = new (mem) btPoolAllocator(sizeof(btPersistentManifold), constructionInfo.m_defaultMaxPersistentManifoldPoolSize);
 	}
 	
 	if (constructionInfo.m_collisionAlgorithmPool)
@@ -136,7 +136,7 @@ btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(const btDefault
 	{
 		m_ownsCollisionAlgorithmPool = true;
 		void* mem = btAlignedAlloc(sizeof(btPoolAllocator),16);
-		m_collisionAlgorithmPool = new(mem) btPoolAllocator(collisionAlgorithmMaxElementSize,constructionInfo.m_defaultMaxCollisionAlgorithmPoolSize);
+		m_collisionAlgorithmPool = new(mem) btPoolAllocator(collisionAlgorithmMaxElementSize, constructionInfo.m_defaultMaxCollisionAlgorithmPoolSize);
 	}
 
 
@@ -211,7 +211,7 @@ btDefaultCollisionConfiguration::~btDefaultCollisionConfiguration()
 }
 
 
-btCollisionAlgorithmCreateFunc* btDefaultCollisionConfiguration::getCollisionAlgorithmCreateFunc(int proxyType0,int proxyType1)
+btCollisionAlgorithmCreateFunc* btDefaultCollisionConfiguration::getCollisionAlgorithmCreateFunc(int proxyType0, int proxyType1)
 {
 
 

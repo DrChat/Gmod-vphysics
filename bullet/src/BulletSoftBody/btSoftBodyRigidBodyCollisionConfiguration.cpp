@@ -58,15 +58,15 @@ btSoftBodyRigidBodyCollisionConfiguration::btSoftBodyRigidBodyCollisionConfigura
 		int maxSize1 = sizeof(btSoftRigidCollisionAlgorithm);
 		int maxSize2 = sizeof(btSoftBodyConcaveCollisionAlgorithm);
 
-		int	collisionAlgorithmMaxElementSize = btMax(maxSize0,maxSize1);
-		collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize,maxSize2);
+		int	collisionAlgorithmMaxElementSize = btMax(maxSize0, maxSize1);
+		collisionAlgorithmMaxElementSize = btMax(collisionAlgorithmMaxElementSize, maxSize2);
 		
 		if (collisionAlgorithmMaxElementSize > curElemSize)
 		{
 			m_collisionAlgorithmPool->~btPoolAllocator();
 			btAlignedFree(m_collisionAlgorithmPool);
 			void* mem = btAlignedAlloc(sizeof(btPoolAllocator),16);
-			m_collisionAlgorithmPool = new(mem) btPoolAllocator(collisionAlgorithmMaxElementSize,constructionInfo.m_defaultMaxCollisionAlgorithmPoolSize);
+			m_collisionAlgorithmPool = new(mem) btPoolAllocator(collisionAlgorithmMaxElementSize, constructionInfo.m_defaultMaxCollisionAlgorithmPoolSize);
 		}
 	}
 
@@ -93,7 +93,7 @@ btSoftBodyRigidBodyCollisionConfiguration::~btSoftBodyRigidBodyCollisionConfigur
 }
 
 ///creation of soft-soft and soft-rigid, and otherwise fallback to base class implementation
-btCollisionAlgorithmCreateFunc* btSoftBodyRigidBodyCollisionConfiguration::getCollisionAlgorithmCreateFunc(int proxyType0,int proxyType1)
+btCollisionAlgorithmCreateFunc* btSoftBodyRigidBodyCollisionConfiguration::getCollisionAlgorithmCreateFunc(int proxyType0, int proxyType1)
 {
 
 	///try to handle the softbody interactions first
@@ -130,5 +130,5 @@ btCollisionAlgorithmCreateFunc* btSoftBodyRigidBodyCollisionConfiguration::getCo
 #endif
 
 	///fallback to the regular rigid collision shape
-	return btDefaultCollisionConfiguration::getCollisionAlgorithmCreateFunc(proxyType0,proxyType1);
+	return btDefaultCollisionConfiguration::getCollisionAlgorithmCreateFunc(proxyType0, proxyType1);
 }

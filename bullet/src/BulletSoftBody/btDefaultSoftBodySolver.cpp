@@ -40,7 +40,7 @@ void btDefaultSoftBodySolver::copyBackToSoftBodies(bool bMove)
 
 }
 
-void btDefaultSoftBodySolver::optimize( btAlignedObjectArray< btSoftBody * > &softBodies , bool forceUpdate)
+void btDefaultSoftBodySolver::optimize( btAlignedObjectArray< btSoftBody * > &softBodies, bool forceUpdate)
 {
 	m_softBodySet.copyFromArray( softBodies );
 }

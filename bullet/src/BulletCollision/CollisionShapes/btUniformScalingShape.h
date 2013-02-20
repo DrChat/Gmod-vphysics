@@ -39,9 +39,9 @@ ATTRIBUTE_ALIGNED16(class) btUniformScalingShape : public btConvexShape
 
 	virtual btVector3	localGetSupportingVertex(const btVector3& vec)const;
 
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	btScalar	getUniformScalingFactor() const
 	{
@@ -69,9 +69,9 @@ ATTRIBUTE_ALIGNED16(class) btUniformScalingShape : public btConvexShape
 
 
 	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-	void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
-	virtual void getAabbSlow(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabbSlow(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
 	virtual void	setLocalScaling(const btVector3& scaling) ;
 	virtual const btVector3& getLocalScaling() const ;

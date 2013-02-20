@@ -39,7 +39,7 @@ public:
 	ATTRIBUTE_ALIGNED16(unsigned int mCommonBuff[32]);
 
 	virtual unsigned int getSharedParam(int i) = 0;
-	virtual void setSharedParam(int i,unsigned int p) = 0;
+	virtual void setSharedParam(int i, unsigned int p) = 0;
 
 	virtual void lock() = 0;
 	virtual void unlock() = 0;
@@ -79,7 +79,7 @@ public:
 
 	virtual void deleteBarrier(btBarrier* barrier)=0;
 
-    virtual void deleteCriticalSection(btCriticalSection* criticalSection)=0;
+	virtual void deleteCriticalSection(btCriticalSection* criticalSection)=0;
 	
 	virtual void*	getThreadLocalMemory(int taskId) { return 0; }
 

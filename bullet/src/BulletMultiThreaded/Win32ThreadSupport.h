@@ -26,7 +26,7 @@ subject to the following restrictions:
 #include "btThreadSupportInterface.h"
 
 
-typedef void (*Win32ThreadFunc)(void* userPtr,void* lsMemory);
+typedef void (*Win32ThreadFunc)(void* userPtr, void* lsMemory);
 typedef void* (*Win32lsMemorySetupFunc)();
 
 
@@ -133,7 +133,7 @@ public:
 
 	virtual void deleteBarrier(btBarrier* barrier);
 
-        virtual void deleteCriticalSection(btCriticalSection* criticalSection);
+		virtual void deleteCriticalSection(btCriticalSection* criticalSection);
 };
 
 #endif //BT_WIN32_THREAD_SUPPORT_H

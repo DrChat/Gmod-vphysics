@@ -63,14 +63,14 @@ public:
 	{
 		reserve(32);
 	}
-	inline void push_pair(int index1,int index2)
+	inline void push_pair(int index1, int index2)
 	{
-		push_back(GIM_PAIR(index1,index2));
+		push_back(GIM_PAIR(index1, index2));
 	}
 
-	inline void push_pair_inv(int index1,int index2)
+	inline void push_pair_inv(int index1, int index2)
 	{
-		push_back(GIM_PAIR(index2,index1));
+		push_back(GIM_PAIR(index2, index1));
 	}
 };
 
@@ -236,9 +236,9 @@ public:
 	//! determines if this manager consist on only triangles, which special case will be optimized
 	virtual bool is_trimesh() const = 0;
 	virtual int get_primitive_count() const = 0;
-	virtual void get_primitive_box(int prim_index ,btAABB & primbox) const = 0;
+	virtual void get_primitive_box(int prim_index, btAABB & primbox) const = 0;
 	//! retrieves only the points of the triangle, and the collision margin
-	virtual void get_primitive_triangle(int prim_index,btPrimitiveTriangle & triangle) const= 0;
+	virtual void get_primitive_triangle(int prim_index, btPrimitiveTriangle & triangle) const= 0;
 };
 
 
@@ -309,12 +309,12 @@ public:
 	{
 		btAABB transbox=box;
 		transbox.appy_transform(transform);
-		return boxQuery(transbox,collided_results);
+		return boxQuery(transbox, collided_results);
 	}
 
 	//! returns the indices of the primitives in the m_primitive_manager
 	bool rayQuery(
-		const btVector3 & ray_dir,const btVector3 & ray_origin ,
+		const btVector3 & ray_dir, const btVector3 & ray_origin ,
 		btAlignedObjectArray<int> & collided_results) const;
 
 	//! tells if this set has hierarcht
@@ -372,9 +372,9 @@ public:
 		return m_box_tree.getEscapeNodeIndex(nodeindex);
 	}
 
-	SIMD_FORCE_INLINE void getNodeTriangle(int nodeindex,btPrimitiveTriangle & triangle) const
+	SIMD_FORCE_INLINE void getNodeTriangle(int nodeindex, btPrimitiveTriangle & triangle) const
 	{
-		m_primitive_manager->get_primitive_triangle(getNodeData(nodeindex),triangle);
+		m_primitive_manager->get_primitive_triangle(getNodeData(nodeindex), triangle);
 	}
 
 

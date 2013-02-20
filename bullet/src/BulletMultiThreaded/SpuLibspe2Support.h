@@ -129,7 +129,7 @@ class SpuLibspe2Support : public btThreadSupportInterface
 	
 public:
 	//Setup and initialize SPU/CELL/Libspe2
-	SpuLibspe2Support(spe_program_handle_t *speprog,int numThreads);
+	SpuLibspe2Support(spe_program_handle_t *speprog, int numThreads);
 	
 	// SPE program handle ptr.
 	spe_program_handle_t *program;

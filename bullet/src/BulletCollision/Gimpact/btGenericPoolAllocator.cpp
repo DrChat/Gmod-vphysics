@@ -176,7 +176,7 @@ btGenericMemoryPool * btGenericPoolAllocator::push_new_pool()
 
 	m_pools[m_pool_count] = newptr;
 
-	m_pools[m_pool_count]->init_pool(m_pool_element_size,m_pool_element_count);
+	m_pools[m_pool_count]->init_pool(m_pool_element_size, m_pool_element_count);
 
 	m_pool_count++;
 	return newptr;
@@ -254,7 +254,7 @@ bool btGenericPoolAllocator::freeMemory(void * pointer)
 class GIM_STANDARD_ALLOCATOR: public btGenericPoolAllocator
 {
 public:
-	GIM_STANDARD_ALLOCATOR():btGenericPoolAllocator(BT_DEFAULT_POOL_ELEMENT_SIZE,BT_DEFAULT_POOL_SIZE)
+	GIM_STANDARD_ALLOCATOR():btGenericPoolAllocator(BT_DEFAULT_POOL_ELEMENT_SIZE, BT_DEFAULT_POOL_SIZE)
 	{
 	}
 };
@@ -272,7 +272,7 @@ void * btPoolRealloc(void *ptr, size_t oldsize, size_t newsize)
 {
 	void * newptr = btPoolAlloc(newsize);
     size_t copysize = oldsize<newsize?oldsize:newsize;
-    memcpy(newptr,ptr,copysize);
+    memcpy(newptr, ptr, copysize);
     btPoolFree(ptr);
     return newptr;
 }

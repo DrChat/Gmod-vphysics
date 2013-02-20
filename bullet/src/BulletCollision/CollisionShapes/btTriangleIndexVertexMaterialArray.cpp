@@ -17,8 +17,8 @@ subject to the following restrictions:
 
 #include "btTriangleIndexVertexMaterialArray.h"
 
-btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray(int numTriangles,int* triangleIndexBase,int triangleIndexStride,
-                                   int numVertices,btScalar* vertexBase,int vertexStride,
+btTriangleIndexVertexMaterialArray::btTriangleIndexVertexMaterialArray(int numTriangles, int* triangleIndexBase, int triangleIndexStride,
+                                   int numVertices, btScalar* vertexBase, int vertexStride,
                                    int numMaterials, unsigned char* materialBase, int materialStride,
                                    int* triangleMaterialsBase, int materialIndexStride) :
 btTriangleIndexVertexArray(numTriangles, triangleIndexBase, triangleIndexStride, numVertices, vertexBase, vertexStride)

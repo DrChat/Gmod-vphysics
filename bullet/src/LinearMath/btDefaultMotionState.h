@@ -13,7 +13,7 @@ ATTRIBUTE_ALIGNED16(struct)	btDefaultMotionState : public btMotionState
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btDefaultMotionState(const btTransform& startTrans = btTransform::getIdentity(),const btTransform& centerOfMassOffset = btTransform::getIdentity())
+	btDefaultMotionState(const btTransform& startTrans = btTransform::getIdentity(), const btTransform& centerOfMassOffset = btTransform::getIdentity())
 		: m_graphicsWorldTrans(startTrans),
 		m_centerOfMassOffset(centerOfMassOffset),
 		m_startWorldTrans(startTrans),

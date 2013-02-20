@@ -1,6 +1,8 @@
 #ifndef CPHYSICSKEYPARSER_H
 #define CPHYSICSKEYPARSER_H
 
+class KeyValues;
+
 class CPhysicsKeyParser : public IVPhysicsKeyParser
 {
 	public:

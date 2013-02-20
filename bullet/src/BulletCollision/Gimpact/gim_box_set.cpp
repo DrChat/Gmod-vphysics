@@ -37,8 +37,8 @@ GUINT GIM_BOX_TREE::_calc_splitting_axis(
 {
 	GUINT i;
 
-	btVector3 means(btScalar(0.),btScalar(0.),btScalar(0.));
-	btVector3 variance(btScalar(0.),btScalar(0.),btScalar(0.));
+	btVector3 means(btScalar(0.), btScalar(0.), btScalar(0.));
+	btVector3 variance(btScalar(0.), btScalar(0.), btScalar(0.));
 	GUINT numIndices = endIndex-startIndex;
 
 	for (i=startIndex;i<endIndex;i++)
@@ -88,7 +88,7 @@ GUINT GIM_BOX_TREE::_sort_and_calc_splitting_index(
 		if (center > splitValue)
 		{
 			//swap
-			primitive_boxes.swap(i,splitIndex);
+			primitive_boxes.swap(i, splitIndex);
 			splitIndex++;
 		}
 	}
@@ -147,10 +147,10 @@ void GIM_BOX_TREE::_build_sub_tree(gim_array<GIM_AABB_DATA> & primitive_boxes, G
 	//calculate Best Splitting Axis and where to split it. Sort the incoming 'leafNodes' array within range 'startIndex/endIndex'.
 
 	//split axis
-	splitIndex = _calc_splitting_axis(primitive_boxes,startIndex,endIndex);
+	splitIndex = _calc_splitting_axis(primitive_boxes, startIndex, endIndex);
 
 	splitIndex = _sort_and_calc_splitting_index(
-			primitive_boxes,startIndex,endIndex,splitIndex);
+			primitive_boxes, startIndex, endIndex, splitIndex);
 
 	//configure this inner node : the left node index
 	m_node_array[current_index].m_left = m_num_nodes;
@@ -161,7 +161,7 @@ void GIM_BOX_TREE::_build_sub_tree(gim_array<GIM_AABB_DATA> & primitive_boxes, G
 	m_node_array[current_index].m_right = m_num_nodes;
 
 	//build right child tree
-	_build_sub_tree(primitive_boxes, splitIndex ,endIndex);
+	_build_sub_tree(primitive_boxes, splitIndex, endIndex);
 
 	//configure this inner node : the escape index
 	m_node_array[current_index].m_escapeIndex  = m_num_nodes - current_index;

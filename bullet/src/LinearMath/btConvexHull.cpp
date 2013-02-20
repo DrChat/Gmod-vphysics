@@ -29,9 +29,9 @@ subject to the following restrictions:
 class int3  
 {
 public:
-	int x,y,z;
+	int x, y,z;
 	int3(){};
-	int3(int _x,int _y, int _z){x=_x;y=_y;z=_z;}
+	int3(int _x, int _y, int _z){x=_x;y=_y;z=_z;}
 	const int& operator[](int i) const {return (&x)[i];}
 	int& operator[](int i) {return (&x)[i];}
 };
@@ -50,8 +50,8 @@ inline int coplanar( const btPlane &a, const btPlane &b ) { return (a==b || a==P
 btVector3  PlaneLineIntersection(const btPlane &plane, const btVector3 &p0, const btVector3 &p1);
 btVector3  PlaneProject(const btPlane &plane, const btVector3 &point);
 
-btVector3  ThreePlaneIntersection(const btPlane &p0,const btPlane &p1, const btPlane &p2);
-btVector3  ThreePlaneIntersection(const btPlane &p0,const btPlane &p1, const btPlane &p2)
+btVector3  ThreePlaneIntersection(const btPlane &p0, const btPlane &p1, const btPlane &p2);
+btVector3  ThreePlaneIntersection(const btPlane &p0, const btPlane &p1, const btPlane &p2)
 {
 	btVector3 N1 = p0.normal;
 	btVector3 N2 = p1.normal;
@@ -74,7 +74,7 @@ btVector3  ThreePlaneIntersection(const btPlane &p0,const btPlane &p1, const btP
 	potentialVertex += n1n2;
 	potentialVertex *= quotient;
 
-	btVector3 result(potentialVertex.getX(),potentialVertex.getY(),potentialVertex.getZ());
+	btVector3 result(potentialVertex.getX(), potentialVertex.getY(), potentialVertex.getZ());
 	return result;
 
 }
@@ -89,21 +89,21 @@ btVector3 PlaneLineIntersection(const btPlane &plane, const btVector3 &p0, const
 	// returns the point where the line p0-p1 intersects the plane n&d
 				static btVector3 dif;
 		dif = p1-p0;
-				btScalar dn= btDot(plane.normal,dif);
-				btScalar t = -(plane.dist+btDot(plane.normal,p0) )/dn;
+				btScalar dn= btDot(plane.normal, dif);
+				btScalar t = -(plane.dist+btDot(plane.normal, p0) )/dn;
 				return p0 + (dif*t);
 }
 
 btVector3 PlaneProject(const btPlane &plane, const btVector3 &point)
 {
-	return point - plane.normal * (btDot(point,plane.normal)+plane.dist);
+	return point - plane.normal * (btDot(point, plane.normal)+plane.dist);
 }
 
 btVector3 TriNormal(const btVector3 &v0, const btVector3 &v1, const btVector3 &v2)
 {
 	// return the normal of the triangle
 	// inscribed by v0, v1, and v2
-	btVector3 cp=btCross(v1-v0,v2-v1);
+	btVector3 cp=btCross(v1-v0, v2-v1);
 	btScalar m=cp.length();
 	if(m==0) return btVector3(1,0,0);
 	return cp*(btScalar(1.0)/m);
@@ -113,24 +113,24 @@ btVector3 TriNormal(const btVector3 &v0, const btVector3 &v1, const btVector3 &v
 btScalar DistanceBetweenLines(const btVector3 &ustart, const btVector3 &udir, const btVector3 &vstart, const btVector3 &vdir, btVector3 *upoint, btVector3 *vpoint)
 {
 	static btVector3 cp;
-	cp = btCross(udir,vdir).normalized();
+	cp = btCross(udir, vdir).normalized();
 
-	btScalar distu = -btDot(cp,ustart);
-	btScalar distv = -btDot(cp,vstart);
+	btScalar distu = -btDot(cp, ustart);
+	btScalar distv = -btDot(cp, vstart);
 	btScalar dist = (btScalar)fabs(distu-distv);
 	if(upoint) 
 		{
 		btPlane plane;
-		plane.normal = btCross(vdir,cp).normalized();
-		plane.dist = -btDot(plane.normal,vstart);
-		*upoint = PlaneLineIntersection(plane,ustart,ustart+udir);
+		plane.normal = btCross(vdir, cp).normalized();
+		plane.dist = -btDot(plane.normal, vstart);
+		*upoint = PlaneLineIntersection(plane, ustart, ustart+udir);
 	}
 	if(vpoint) 
 		{
 		btPlane plane;
-		plane.normal = btCross(udir,cp).normalized();
-		plane.dist = -btDot(plane.normal,ustart);
-		*vpoint = PlaneLineIntersection(plane,vstart,vstart+vdir);
+		plane.normal = btCross(udir, cp).normalized();
+		plane.dist = -btDot(plane.normal, ustart);
+		*vpoint = PlaneLineIntersection(plane, vstart, vstart+vdir);
 	}
 	return dist;
 }
@@ -153,7 +153,7 @@ btScalar planetestepsilon = PAPERWIDTH;
 
 typedef ConvexH::HalfEdge HalfEdge;
 
-ConvexH::ConvexH(int vertices_size,int edges_size,int facets_size)
+ConvexH::ConvexH(int vertices_size, int edges_size, int facets_size)
 {
 	vertices.resize(vertices_size);
 	edges.resize(edges_size);
@@ -163,16 +163,16 @@ ConvexH::ConvexH(int vertices_size,int edges_size,int facets_size)
 
 int PlaneTest(const btPlane &p, const btVector3 &v);
 int PlaneTest(const btPlane &p, const btVector3 &v) {
-	btScalar a  = btDot(v,p.normal)+p.dist;
+	btScalar a  = btDot(v, p.normal)+p.dist;
 	int   flag = (a>planetestepsilon)?OVER:((a<-planetestepsilon)?UNDER:COPLANAR);
 	return flag;
 }
 
-int SplitTest(ConvexH &convex,const btPlane &plane);
-int SplitTest(ConvexH &convex,const btPlane &plane) {
+int SplitTest(ConvexH &convex, const btPlane &plane);
+int SplitTest(ConvexH &convex, const btPlane &plane) {
 	int flag=0;
 	for(int i=0;i<convex.vertices.size();i++) {
-		flag |= PlaneTest(plane,convex.vertices[i]);
+		flag |= PlaneTest(plane, convex.vertices[i]);
 	}
 	return flag;
 }
@@ -214,14 +214,14 @@ public:
 
 
 template<class T>
-int maxdirfiltered(const T *p,int count,const T &dir,btAlignedObjectArray<int> &allow)
+int maxdirfiltered(const T *p, int count, const T &dir, btAlignedObjectArray<int> &allow)
 {
 	btAssert(count);
 	int m=-1;
 	for(int i=0;i<count;i++) 
 		if(allow[i])
 		{
-			if(m==-1 || btDot(p[i],dir)>btDot(p[m],dir))
+			if(m==-1 || btDot(p[i], dir)>btDot(p[m], dir))
 				m=i;
 		}
 	btAssert(m!=-1);
@@ -231,8 +231,8 @@ int maxdirfiltered(const T *p,int count,const T &dir,btAlignedObjectArray<int> &
 btVector3 orth(const btVector3 &v);
 btVector3 orth(const btVector3 &v)
 {
-	btVector3 a=btCross(v,btVector3(0,0,1));
-	btVector3 b=btCross(v,btVector3(0,1,0));
+	btVector3 a=btCross(v, btVector3(0,0,1));
+	btVector3 b=btCross(v, btVector3(0,1,0));
 	if (a.length() > b.length())
 	{
 		return a.normalized();
@@ -243,21 +243,21 @@ btVector3 orth(const btVector3 &v)
 
 
 template<class T>
-int maxdirsterid(const T *p,int count,const T &dir,btAlignedObjectArray<int> &allow)
+int maxdirsterid(const T *p, int count, const T &dir, btAlignedObjectArray<int> &allow)
 {
 	int m=-1;
 	while(m==-1)
 	{
-		m = maxdirfiltered(p,count,dir,allow);
+		m = maxdirfiltered(p, count, dir, allow);
 		if(allow[m]==3) return m;
 		T u = orth(dir);
-		T v = btCross(u,dir);
+		T v = btCross(u, dir);
 		int ma=-1;
 		for(btScalar x = btScalar(0.0) ; x<= btScalar(360.0) ; x+= btScalar(45.0))
 		{
 			btScalar s = btSin(SIMD_RADS_PER_DEG*(x));
 			btScalar c = btCos(SIMD_RADS_PER_DEG*(x));
-			int mb = maxdirfiltered(p,count,dir+(u*s+v*c)*btScalar(0.025),allow);
+			int mb = maxdirfiltered(p, count, dir+(u*s+v*c)*btScalar(0.025), allow);
 			if(ma==m && mb==m)
 			{
 				allow[m]=3;
@@ -270,7 +270,7 @@ int maxdirsterid(const T *p,int count,const T &dir,btAlignedObjectArray<int> &al
 				{
 					btScalar s = btSin(SIMD_RADS_PER_DEG*(xx));
 					btScalar c = btCos(SIMD_RADS_PER_DEG*(xx));
-					int md = maxdirfiltered(p,count,dir+(u*s+v*c)*btScalar(0.025),allow);
+					int md = maxdirfiltered(p, count, dir+(u*s+v*c)*btScalar(0.025), allow);
 					if(mc==m && md==m)
 					{
 						allow[m]=3;
@@ -291,8 +291,8 @@ int maxdirsterid(const T *p,int count,const T &dir,btAlignedObjectArray<int> &al
 
 
 
-int operator ==(const int3 &a,const int3 &b);
-int operator ==(const int3 &a,const int3 &b) 
+int operator ==(const int3 &a, const int3 &b);
+int operator ==(const int3 &a, const int3 &b) 
 {
 	for(int i=0;i<3;i++) 
 	{
@@ -302,14 +302,14 @@ int operator ==(const int3 &a,const int3 &b)
 }
 
 
-int above(btVector3* vertices,const int3& t, const btVector3 &p, btScalar epsilon);
-int above(btVector3* vertices,const int3& t, const btVector3 &p, btScalar epsilon) 
+int above(btVector3* vertices, const int3& t, const btVector3 &p, btScalar epsilon);
+int above(btVector3* vertices, const int3& t, const btVector3 &p, btScalar epsilon) 
 {
-	btVector3 n=TriNormal(vertices[t[0]],vertices[t[1]],vertices[t[2]]);
-	return (btDot(n,p-vertices[t[0]]) > epsilon); // EPSILON???
+	btVector3 n=TriNormal(vertices[t[0]], vertices[t[1]], vertices[t[2]]);
+	return (btDot(n, p-vertices[t[0]]) > epsilon); // EPSILON???
 }
-int hasedge(const int3 &t, int a,int b);
-int hasedge(const int3 &t, int a,int b)
+int hasedge(const int3 &t, int a, int b);
+int hasedge(const int3 &t, int a, int b)
 {
 	for(int i=0;i<3;i++)
 	{
@@ -323,14 +323,14 @@ int hasvert(const int3 &t, int v)
 {
 	return (t[0]==v || t[1]==v || t[2]==v) ;
 }
-int shareedge(const int3 &a,const int3 &b);
-int shareedge(const int3 &a,const int3 &b)
+int shareedge(const int3 &a, const int3 &b);
+int shareedge(const int3 &a, const int3 &b)
 {
 	int i;
 	for(i=0;i<3;i++)
 	{
 		int i1= (i+1)%3;
-		if(hasedge(a,b[i1],b[i])) return 1;
+		if(hasedge(a, b[i1], b[i])) return 1;
 	}
 	return 0;
 }
@@ -346,7 +346,7 @@ public:
 	int id;
 	int vmax;
 	btScalar rise;
-	btHullTriangle(int a,int b,int c):int3(a,b,c),n(-1,-1,-1)
+	btHullTriangle(int a, int b, int c):int3(a, b,c), n(-1,-1,-1)
 	{
 		vmax=-1;
 		rise = btScalar(0.0);
@@ -354,11 +354,11 @@ public:
 	~btHullTriangle()
 	{
 	}
-	int &neib(int a,int b);
+	int &neib(int a, int b);
 };
 
 
-int &btHullTriangle::neib(int a,int b)
+int &btHullTriangle::neib(int a, int b)
 {
 	static int er=-1;
 	int i;
@@ -372,7 +372,7 @@ int &btHullTriangle::neib(int a,int b)
 	btAssert(0);
 	return er;
 }
-void HullLibrary::b2bfix(btHullTriangle* s,btHullTriangle*t)
+void HullLibrary::b2bfix(btHullTriangle* s, btHullTriangle*t)
 {
 	int i;
 	for(i=0;i<3;i++) 
@@ -381,16 +381,16 @@ void HullLibrary::b2bfix(btHullTriangle* s,btHullTriangle*t)
 		int i2=(i+2)%3;
 		int a = (*s)[i1];
 		int b = (*s)[i2];
-		btAssert(m_tris[s->neib(a,b)]->neib(b,a) == s->id);
-		btAssert(m_tris[t->neib(a,b)]->neib(b,a) == t->id);
-		m_tris[s->neib(a,b)]->neib(b,a) = t->neib(b,a);
-		m_tris[t->neib(b,a)]->neib(a,b) = s->neib(a,b);
+		btAssert(m_tris[s->neib(a, b)]->neib(b, a) == s->id);
+		btAssert(m_tris[t->neib(a, b)]->neib(b, a) == t->id);
+		m_tris[s->neib(a, b)]->neib(b, a) = t->neib(b, a);
+		m_tris[t->neib(b, a)]->neib(a, b) = s->neib(a, b);
 	}
 }
 
-void HullLibrary::removeb2b(btHullTriangle* s,btHullTriangle*t)
+void HullLibrary::removeb2b(btHullTriangle* s, btHullTriangle*t)
 {
-	b2bfix(s,t);
+	b2bfix(s, t);
 	deAllocateTriangle(s);
 
 	deAllocateTriangle(t);
@@ -416,14 +416,14 @@ void HullLibrary::checkit(btHullTriangle *t)
 		(void)b;
 
 		btAssert(a!=b);
-		btAssert( m_tris[t->n[i]]->neib(b,a) == t->id);
+		btAssert( m_tris[t->n[i]]->neib(b, a) == t->id);
 	}
 }
 
-btHullTriangle*	HullLibrary::allocateTriangle(int a,int b,int c)
+btHullTriangle*	HullLibrary::allocateTriangle(int a, int b, int c)
 {
 	void* mem = btAlignedAlloc(sizeof(btHullTriangle),16);
-	btHullTriangle* tr = new (mem)btHullTriangle(a,b,c);
+	btHullTriangle* tr = new (mem)btHullTriangle(a, b,c);
 	tr->id = m_tris.size();
 	m_tris.push_back(tr);
 
@@ -439,25 +439,25 @@ void	HullLibrary::deAllocateTriangle(btHullTriangle* tri)
 }
 
 
-void HullLibrary::extrude(btHullTriangle *t0,int v)
+void HullLibrary::extrude(btHullTriangle *t0, int v)
 {
 	int3 t= *t0;
 	int n = m_tris.size();
-	btHullTriangle* ta = allocateTriangle(v,t[1],t[2]);
-	ta->n = int3(t0->n[0],n+1,n+2);
-	m_tris[t0->n[0]]->neib(t[1],t[2]) = n+0;
-	btHullTriangle* tb = allocateTriangle(v,t[2],t[0]);
-	tb->n = int3(t0->n[1],n+2,n+0);
-	m_tris[t0->n[1]]->neib(t[2],t[0]) = n+1;
-	btHullTriangle* tc = allocateTriangle(v,t[0],t[1]);
-	tc->n = int3(t0->n[2],n+0,n+1);
-	m_tris[t0->n[2]]->neib(t[0],t[1]) = n+2;
+	btHullTriangle* ta = allocateTriangle(v, t[1], t[2]);
+	ta->n = int3(t0->n[0], n+1, n+2);
+	m_tris[t0->n[0]]->neib(t[1], t[2]) = n+0;
+	btHullTriangle* tb = allocateTriangle(v, t[2], t[0]);
+	tb->n = int3(t0->n[1], n+2, n+0);
+	m_tris[t0->n[1]]->neib(t[2], t[0]) = n+1;
+	btHullTriangle* tc = allocateTriangle(v, t[0], t[1]);
+	tc->n = int3(t0->n[2], n+0, n+1);
+	m_tris[t0->n[2]]->neib(t[0], t[1]) = n+2;
 	checkit(ta);
 	checkit(tb);
 	checkit(tc);
-	if(hasvert(*m_tris[ta->n[0]],v)) removeb2b(ta,m_tris[ta->n[0]]);
-	if(hasvert(*m_tris[tb->n[0]],v)) removeb2b(tb,m_tris[tb->n[0]]);
-	if(hasvert(*m_tris[tc->n[0]],v)) removeb2b(tc,m_tris[tc->n[0]]);
+	if(hasvert(*m_tris[ta->n[0]], v)) removeb2b(ta, m_tris[ta->n[0]]);
+	if(hasvert(*m_tris[tb->n[0]], v)) removeb2b(tb, m_tris[tb->n[0]]);
+	if(hasvert(*m_tris[tc->n[0]], v)) removeb2b(tc, m_tris[tc->n[0]]);
 	deAllocateTriangle(t0);
 
 }
@@ -479,17 +479,17 @@ btHullTriangle* HullLibrary::extrudable(btScalar epsilon)
 
 
 
-int4 HullLibrary::FindSimplex(btVector3 *verts,int verts_count,btAlignedObjectArray<int> &allow)
+int4 HullLibrary::FindSimplex(btVector3 *verts, int verts_count, btAlignedObjectArray<int> &allow)
 {
 	btVector3 basis[3];
 	basis[0] = btVector3( btScalar(0.01), btScalar(0.02), btScalar(1.0) );      
-	int p0 = maxdirsterid(verts,verts_count, basis[0],allow);   
-	int	p1 = maxdirsterid(verts,verts_count,-basis[0],allow);
+	int p0 = maxdirsterid(verts, verts_count, basis[0], allow);   
+	int	p1 = maxdirsterid(verts, verts_count,-basis[0], allow);
 	basis[0] = verts[p0]-verts[p1];
 	if(p0==p1 || basis[0]==btVector3(0,0,0)) 
 		return int4(-1,-1,-1,-1);
-	basis[1] = btCross(btVector3(     btScalar(1),btScalar(0.02), btScalar(0)),basis[0]);
-	basis[2] = btCross(btVector3(btScalar(-0.02),     btScalar(1), btScalar(0)),basis[0]);
+	basis[1] = btCross(btVector3(     btScalar(1), btScalar(0.02), btScalar(0)), basis[0]);
+	basis[2] = btCross(btVector3(btScalar(-0.02),     btScalar(1), btScalar(0)), basis[0]);
 	if (basis[1].length() > basis[2].length())
 	{
 		basis[1].normalize();
@@ -497,30 +497,30 @@ int4 HullLibrary::FindSimplex(btVector3 *verts,int verts_count,btAlignedObjectAr
 		basis[1] = basis[2];
 		basis[1].normalize ();
 	}
-	int p2 = maxdirsterid(verts,verts_count,basis[1],allow);
+	int p2 = maxdirsterid(verts, verts_count, basis[1], allow);
 	if(p2 == p0 || p2 == p1)
 	{
-		p2 = maxdirsterid(verts,verts_count,-basis[1],allow);
+		p2 = maxdirsterid(verts, verts_count,-basis[1], allow);
 	}
 	if(p2 == p0 || p2 == p1) 
 		return int4(-1,-1,-1,-1);
 	basis[1] = verts[p2] - verts[p0];
-	basis[2] = btCross(basis[1],basis[0]).normalized();
-	int p3 = maxdirsterid(verts,verts_count,basis[2],allow);
-	if(p3==p0||p3==p1||p3==p2) p3 = maxdirsterid(verts,verts_count,-basis[2],allow);
+	basis[2] = btCross(basis[1], basis[0]).normalized();
+	int p3 = maxdirsterid(verts, verts_count, basis[2], allow);
+	if(p3==p0||p3==p1||p3==p2) p3 = maxdirsterid(verts, verts_count,-basis[2], allow);
 	if(p3==p0||p3==p1||p3==p2) 
 		return int4(-1,-1,-1,-1);
 	btAssert(!(p0==p1||p0==p2||p0==p3||p1==p2||p1==p3||p2==p3));
-	if(btDot(verts[p3]-verts[p0],btCross(verts[p1]-verts[p0],verts[p2]-verts[p0])) <0) {btSwap(p2,p3);}
-	return int4(p0,p1,p2,p3);
+	if(btDot(verts[p3]-verts[p0], btCross(verts[p1]-verts[p0], verts[p2]-verts[p0])) <0) {btSwap(p2, p3);}
+	return int4(p0, p1, p2, p3);
 }
 
-int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
+int HullLibrary::calchullgen(btVector3 *verts, int verts_count, int vlimit)
 {
 	if(verts_count <4) return 0;
 	if(vlimit==0) vlimit=1000000000;
 	int j;
-	btVector3 bmin(*verts),bmax(*verts);
+	btVector3 bmin(*verts), bmax(*verts);
 	btAlignedObjectArray<int> isextreme;
 	isextreme.reserve(verts_count);
 	btAlignedObjectArray<int> allow;
@@ -537,16 +537,16 @@ int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
 	btAssert (epsilon != 0.0);
 
 
-	int4 p = FindSimplex(verts,verts_count,allow);
+	int4 p = FindSimplex(verts, verts_count, allow);
 	if(p.x==-1) return 0; // simplex failed
 
 
 
 	btVector3 center = (verts[p[0]]+verts[p[1]]+verts[p[2]]+verts[p[3]]) / btScalar(4.0);  // a valid interior point
-	btHullTriangle *t0 = allocateTriangle(p[2],p[3],p[1]); t0->n=int3(2,3,1);
-	btHullTriangle *t1 = allocateTriangle(p[3],p[2],p[0]); t1->n=int3(3,2,0);
-	btHullTriangle *t2 = allocateTriangle(p[0],p[1],p[3]); t2->n=int3(0,1,3);
-	btHullTriangle *t3 = allocateTriangle(p[1],p[0],p[2]); t3->n=int3(1,0,2);
+	btHullTriangle *t0 = allocateTriangle(p[2], p[3], p[1]); t0->n=int3(2,3,1);
+	btHullTriangle *t1 = allocateTriangle(p[3], p[2], p[0]); t1->n=int3(3,2,0);
+	btHullTriangle *t2 = allocateTriangle(p[0], p[1], p[3]); t2->n=int3(0,1,3);
+	btHullTriangle *t3 = allocateTriangle(p[1], p[0], p[2]); t3->n=int3(1,0,2);
 	isextreme[p[0]]=isextreme[p[1]]=isextreme[p[2]]=isextreme[p[3]]=1;
 	checkit(t0);checkit(t1);checkit(t2);checkit(t3);
 
@@ -555,9 +555,9 @@ int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
 		btHullTriangle *t=m_tris[j];
 		btAssert(t);
 		btAssert(t->vmax<0);
-		btVector3 n=TriNormal(verts[(*t)[0]],verts[(*t)[1]],verts[(*t)[2]]);
-		t->vmax = maxdirsterid(verts,verts_count,n,allow);
-		t->rise = btDot(n,verts[t->vmax]-verts[(*t)[0]]);
+		btVector3 n=TriNormal(verts[(*t)[0]], verts[(*t)[1]], verts[(*t)[2]]);
+		t->vmax = maxdirsterid(verts, verts_count, n,allow);
+		t->rise = btDot(n, verts[t->vmax]-verts[(*t)[0]]);
 	}
 	btHullTriangle *te;
 	vlimit-=4;
@@ -573,9 +573,9 @@ int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
 		while(j--) {
 			if(!m_tris[j]) continue;
 			int3 t=*m_tris[j];
-			if(above(verts,t,verts[v],btScalar(0.01)*epsilon)) 
+			if(above(verts, t,verts[v], btScalar(0.01)*epsilon)) 
 			{
-				extrude(m_tris[j],v);
+				extrude(m_tris[j], v);
 			}
 		}
 		// now check for those degenerate cases where we have a flipped triangle or a really skinny triangle
@@ -583,13 +583,13 @@ int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
 		while(j--)
 		{
 			if(!m_tris[j]) continue;
-			if(!hasvert(*m_tris[j],v)) break;
+			if(!hasvert(*m_tris[j], v)) break;
 			int3 nt=*m_tris[j];
-			if(above(verts,nt,center,btScalar(0.01)*epsilon)  || btCross(verts[nt[1]]-verts[nt[0]],verts[nt[2]]-verts[nt[1]]).length()< epsilon*epsilon*btScalar(0.1) )
+			if(above(verts, nt, center, btScalar(0.01)*epsilon)  || btCross(verts[nt[1]]-verts[nt[0]], verts[nt[2]]-verts[nt[1]]).length()< epsilon*epsilon*btScalar(0.1) )
 			{
 				btHullTriangle *nb = m_tris[m_tris[j]->n[0]];
-				btAssert(nb);btAssert(!hasvert(*nb,v));btAssert(nb->id<j);
-				extrude(nb,v);
+				btAssert(nb);btAssert(!hasvert(*nb, v));btAssert(nb->id<j);
+				extrude(nb, v);
 				j=m_tris.size(); 
 			}
 		} 
@@ -599,15 +599,15 @@ int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
 			btHullTriangle *t=m_tris[j];
 			if(!t) continue;
 			if(t->vmax>=0) break;
-			btVector3 n=TriNormal(verts[(*t)[0]],verts[(*t)[1]],verts[(*t)[2]]);
-			t->vmax = maxdirsterid(verts,verts_count,n,allow);
+			btVector3 n=TriNormal(verts[(*t)[0]], verts[(*t)[1]], verts[(*t)[2]]);
+			t->vmax = maxdirsterid(verts, verts_count, n,allow);
 			if(isextreme[t->vmax]) 
 			{
 				t->vmax=-1; // already done that vertex - algorithm needs to be able to terminate.
 			}
 			else
 			{
-				t->rise = btDot(n,verts[t->vmax]-verts[(*t)[0]]);
+				t->rise = btDot(n, verts[t->vmax]-verts[(*t)[0]]);
 			}
 		}
 		vlimit --;
@@ -615,9 +615,9 @@ int HullLibrary::calchullgen(btVector3 *verts,int verts_count, int vlimit)
 	return 1;
 }
 
-int HullLibrary::calchull(btVector3 *verts,int verts_count, TUIntArray& tris_out, int &tris_count,int vlimit) 
+int HullLibrary::calchull(btVector3 *verts, int verts_count, TUIntArray& tris_out, int &tris_count, int vlimit) 
 {
-	int rc=calchullgen(verts,verts_count,  vlimit) ;
+	int rc=calchullgen(verts, verts_count,  vlimit) ;
 	if(!rc) return 0;
 	btAlignedObjectArray<int> ts;
 	int i;
@@ -647,7 +647,7 @@ int HullLibrary::calchull(btVector3 *verts,int verts_count, TUIntArray& tris_out
 
 
 
-bool HullLibrary::ComputeHull(unsigned int vcount,const btVector3 *vertices,PHullResult &result,unsigned int vlimit)
+bool HullLibrary::ComputeHull(unsigned int vcount, const btVector3 *vertices, PHullResult &result, unsigned int vlimit)
 {
 	
 	int    tris_count;
@@ -706,7 +706,7 @@ HullError HullLibrary::CreateConvexHull(const HullDesc       &desc,           //
 
 	unsigned int ovcount;
 
-	bool ok = CleanupVertices(desc.mVcount,desc.mVertices, desc.mVertexStride, ovcount, &vertexSource[0], desc.mNormalEpsilon, scale ); // normalize point cloud, remove duplicates!
+	bool ok = CleanupVertices(desc.mVcount, desc.mVertices, desc.mVertexStride, ovcount, &vertexSource[0], desc.mNormalEpsilon, scale ); // normalize point cloud, remove duplicates!
 
 	if ( ok )
 	{
@@ -723,7 +723,7 @@ HullError HullLibrary::CreateConvexHull(const HullDesc       &desc,           //
 			}
 		}
 
-		ok = ComputeHull(ovcount,&vertexSource[0],hr,desc.mMaxVertices);
+		ok = ComputeHull(ovcount, &vertexSource[0], hr, desc.mMaxVertices);
 
 		if ( ok )
 		{
@@ -732,7 +732,7 @@ HullError HullLibrary::CreateConvexHull(const HullDesc       &desc,           //
 			btAlignedObjectArray<btVector3>	vertexScratch;
 			vertexScratch.resize(static_cast<int>(hr.mVcount));
 
-			BringOutYourDead(hr.mVertices,hr.mVcount, &vertexScratch[0], ovcount, &hr.m_Indices[0], hr.mIndexCount );
+			BringOutYourDead(hr.mVertices, hr.mVcount, &vertexScratch[0], ovcount, &hr.m_Indices[0], hr.mIndexCount );
 
 			ret = QE_OK;
 
@@ -748,7 +748,7 @@ HullError HullLibrary::CreateConvexHull(const HullDesc       &desc,           //
 
 				memcpy(&result.m_OutputVertices[0], &vertexScratch[0], sizeof(btVector3)*ovcount );
 
-  			if ( desc.HasHullFlag(QF_REVERSE_ORDER) )
+			if ( desc.HasHullFlag(QF_REVERSE_ORDER) )
 				{
 
 					const unsigned int *source = &hr.m_Indices[0];
@@ -829,7 +829,7 @@ HullError HullLibrary::ReleaseResult(HullResult &result) // release memory alloc
 }
 
 
-static void addPoint(unsigned int &vcount,btVector3 *p,btScalar x,btScalar y,btScalar z)
+static void addPoint(unsigned int &vcount, btVector3 *p, btScalar x, btScalar y, btScalar z)
 {
 	// XXX, might be broken
 	btVector3& dest = p[vcount];
@@ -839,8 +839,8 @@ static void addPoint(unsigned int &vcount,btVector3 *p,btScalar x,btScalar y,btS
 	vcount++;
 }
 
-btScalar GetDist(btScalar px,btScalar py,btScalar pz,const btScalar *p2);
-btScalar GetDist(btScalar px,btScalar py,btScalar pz,const btScalar *p2)
+btScalar GetDist(btScalar px, btScalar py, btScalar pz, const btScalar *p2);
+btScalar GetDist(btScalar px, btScalar py, btScalar pz, const btScalar *p2)
 {
 
 	btScalar dx = px - p2[0];
@@ -938,14 +938,14 @@ bool  HullLibrary::CleanupVertices(unsigned int svcount,
 		btScalar z1 = center[2] - dz;
 		btScalar z2 = center[2] + dz;
 
-		addPoint(vcount,vertices,x1,y1,z1);
-		addPoint(vcount,vertices,x2,y1,z1);
-		addPoint(vcount,vertices,x2,y2,z1);
-		addPoint(vcount,vertices,x1,y2,z1);
-		addPoint(vcount,vertices,x1,y1,z2);
-		addPoint(vcount,vertices,x2,y1,z2);
-		addPoint(vcount,vertices,x2,y2,z2);
-		addPoint(vcount,vertices,x1,y2,z2);
+		addPoint(vcount, vertices, x1, y1, z1);
+		addPoint(vcount, vertices, x2, y1, z1);
+		addPoint(vcount, vertices, x2, y2, z1);
+		addPoint(vcount, vertices, x1, y2, z1);
+		addPoint(vcount, vertices, x1, y1, z2);
+		addPoint(vcount, vertices, x2, y1, z2);
+		addPoint(vcount, vertices, x2, y2, z2);
+		addPoint(vcount, vertices, x1, y2, z2);
 
 		return true; // return cube
 
@@ -1014,8 +1014,8 @@ bool  HullLibrary::CleanupVertices(unsigned int svcount,
 					// now let us see if it is further from the center of the point cloud than the one we already recorded.
 					// in which case we keep this one instead.
 
-					btScalar dist1 = GetDist(px,py,pz,center);
-					btScalar dist2 = GetDist(v[0],v[1],v[2],center);
+					btScalar dist1 = GetDist(px, py, pz, center);
+					btScalar dist2 = GetDist(v[0], v[1], v[2], center);
 
 					if ( dist1 > dist2 )
 					{
@@ -1095,14 +1095,14 @@ bool  HullLibrary::CleanupVertices(unsigned int svcount,
 
 			vcount = 0; // add box
 
-			addPoint(vcount,vertices,x1,y1,z1);
-			addPoint(vcount,vertices,x2,y1,z1);
-			addPoint(vcount,vertices,x2,y2,z1);
-			addPoint(vcount,vertices,x1,y2,z1);
-			addPoint(vcount,vertices,x1,y1,z2);
-			addPoint(vcount,vertices,x2,y1,z2);
-			addPoint(vcount,vertices,x2,y2,z2);
-			addPoint(vcount,vertices,x1,y2,z2);
+			addPoint(vcount, vertices, x1, y1, z1);
+			addPoint(vcount, vertices, x2, y1, z1);
+			addPoint(vcount, vertices, x2, y2, z1);
+			addPoint(vcount, vertices, x1, y2, z1);
+			addPoint(vcount, vertices, x1, y1, z2);
+			addPoint(vcount, vertices, x2, y1, z2);
+			addPoint(vcount, vertices, x2, y2, z2);
+			addPoint(vcount, vertices, x1, y2, z2);
 
 			return true;
 		}
@@ -1111,7 +1111,7 @@ bool  HullLibrary::CleanupVertices(unsigned int svcount,
 	return true;
 }
 
-void HullLibrary::BringOutYourDead(const btVector3* verts,unsigned int vcount, btVector3* overts,unsigned int &ocount,unsigned int *indices,unsigned indexcount)
+void HullLibrary::BringOutYourDead(const btVector3* verts, unsigned int vcount, btVector3* overts, unsigned int &ocount, unsigned int *indices, unsigned indexcount)
 {
 	btAlignedObjectArray<int>tmpIndices;
 	tmpIndices.resize(m_vertexIndexMapping.size());
@@ -1124,7 +1124,7 @@ void HullLibrary::BringOutYourDead(const btVector3* verts,unsigned int vcount, b
 
 	TUIntArray usedIndices;
 	usedIndices.resize(static_cast<int>(vcount));
-	memset(&usedIndices[0],0,sizeof(unsigned int)*vcount);
+	memset(&usedIndices[0],0, sizeof(unsigned int)*vcount);
 
 	ocount = 0;
 

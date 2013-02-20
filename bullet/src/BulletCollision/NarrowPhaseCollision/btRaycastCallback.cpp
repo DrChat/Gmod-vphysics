@@ -23,7 +23,7 @@ subject to the following restrictions:
 #include "BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver.h"
 #include "btRaycastCallback.h"
 
-btTriangleRaycastCallback::btTriangleRaycastCallback(const btVector3& from,const btVector3& to, unsigned int flags)
+btTriangleRaycastCallback::btTriangleRaycastCallback(const btVector3& from, const btVector3& to, unsigned int flags)
 	:
 	m_from(from),
 	m_to(to),
@@ -36,7 +36,7 @@ btTriangleRaycastCallback::btTriangleRaycastCallback(const btVector3& from,const
 
 
 
-void btTriangleRaycastCallback::processTriangle(btVector3* triangle,int partId, int triangleIndex)
+void btTriangleRaycastCallback::processTriangle(btVector3* triangle, int partId, int triangleIndex)
 {
 	const btVector3 &vert0=triangle[0];
 	const btVector3 &vert1=triangle[1];
@@ -105,11 +105,11 @@ void btTriangleRaycastCallback::processTriangle(btVector3* triangle,int partId, 
 					 //@BP Mod - Allow for unflipped normal when raycasting against backfaces
 						if (((m_flags & kF_KeepUnflippedNormal) == 0) && (dist_a <= btScalar(0.0)))
 						{
-							m_hitFraction = reportHit(-triangleNormal,distance,partId,triangleIndex);
+							m_hitFraction = reportHit(-triangleNormal, distance, partId, triangleIndex);
 						}
 						else
 						{
-							m_hitFraction = reportHit(triangleNormal,distance,partId,triangleIndex);
+							m_hitFraction = reportHit(triangleNormal, distance, partId, triangleIndex);
 						}
 					}
 				}
@@ -144,14 +144,14 @@ btTriangleConvexcastCallback::processTriangle (btVector3* triangle, int partId, 
 #ifdef USE_SUBSIMPLEX_CONVEX_CAST
 	btSubsimplexConvexCast convexCaster(m_convexShape, &triangleShape, &simplexSolver);
 #else
-	//btGjkConvexCast	convexCaster(m_convexShape,&triangleShape,&simplexSolver);
-	btContinuousConvexCollision convexCaster(m_convexShape,&triangleShape,&simplexSolver,&gjkEpaPenetrationSolver);
+	//btGjkConvexCast	convexCaster(m_convexShape, &triangleShape, &simplexSolver);
+	btContinuousConvexCollision convexCaster(m_convexShape, &triangleShape, &simplexSolver, &gjkEpaPenetrationSolver);
 #endif //#USE_SUBSIMPLEX_CONVEX_CAST
 	
 	btConvexCast::CastResult castResult;
 	castResult.m_fraction = btScalar(1.);
 	castResult.m_allowedPenetration = m_allowedPenetration;
-	if (convexCaster.calcTimeOfImpact(m_convexShapeFrom,m_convexShapeTo,m_triangleToWorld, m_triangleToWorld, castResult))
+	if (convexCaster.calcTimeOfImpact(m_convexShapeFrom, m_convexShapeTo, m_triangleToWorld, m_triangleToWorld, castResult))
 	{
 		//add hit
 		if (castResult.m_normal.length2() > btScalar(0.0001))

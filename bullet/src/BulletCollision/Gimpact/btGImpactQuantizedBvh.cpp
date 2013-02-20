@@ -79,7 +79,7 @@ void btQuantizedBvhTree::calc_quantization(
 	}
 
 	bt_calc_quantization_parameters(
-		m_global_bound.m_min,m_global_bound.m_max,m_bvhQuantization,global_bound.m_min,global_bound.m_max,boundMargin);
+		m_global_bound.m_min, m_global_bound.m_max, m_bvhQuantization, global_bound.m_min, global_bound.m_max, boundMargin);
 
 }
 
@@ -91,8 +91,8 @@ int btQuantizedBvhTree::_calc_splitting_axis(
 
 	int i;
 
-	btVector3 means(btScalar(0.),btScalar(0.),btScalar(0.));
-	btVector3 variance(btScalar(0.),btScalar(0.),btScalar(0.));
+	btVector3 means(btScalar(0.), btScalar(0.), btScalar(0.));
+	btVector3 variance(btScalar(0.), btScalar(0.), btScalar(0.));
 	int numIndices = endIndex-startIndex;
 
 	for (i=startIndex;i<endIndex;i++)
@@ -128,7 +128,7 @@ int btQuantizedBvhTree::_sort_and_calc_splitting_index(
 	// average of centers
 	btScalar splitValue = 0.0f;
 
-	btVector3 means(btScalar(0.),btScalar(0.),btScalar(0.));
+	btVector3 means(btScalar(0.), btScalar(0.), btScalar(0.));
 	for (i=startIndex;i<endIndex;i++)
 	{
 		btVector3 center = btScalar(0.5)*(primitive_boxes[i].m_bound.m_max +
@@ -148,8 +148,8 @@ int btQuantizedBvhTree::_sort_and_calc_splitting_index(
 		if (center[splitAxis] > splitValue)
 		{
 			//swap
-			primitive_boxes.swap(i,splitIndex);
-			//swapLeafNodes(i,splitIndex);
+			primitive_boxes.swap(i, splitIndex);
+			//swapLeafNodes(i, splitIndex);
 			splitIndex++;
 		}
 	}
@@ -188,7 +188,7 @@ void btQuantizedBvhTree::_build_sub_tree(GIM_BVH_DATA_ARRAY & primitive_boxes, i
 	if ((endIndex-startIndex)==1)
 	{
 	    //We have a leaf node
-	    setNodeBound(curIndex,primitive_boxes[startIndex].m_bound);
+	    setNodeBound(curIndex, primitive_boxes[startIndex].m_bound);
 		m_node_array[curIndex].setDataIndex(primitive_boxes[startIndex].m_data);
 
 		return;
@@ -196,10 +196,10 @@ void btQuantizedBvhTree::_build_sub_tree(GIM_BVH_DATA_ARRAY & primitive_boxes, i
 	//calculate Best Splitting Axis and where to split it. Sort the incoming 'leafNodes' array within range 'startIndex/endIndex'.
 
 	//split axis
-	int splitIndex = _calc_splitting_axis(primitive_boxes,startIndex,endIndex);
+	int splitIndex = _calc_splitting_axis(primitive_boxes, startIndex, endIndex);
 
 	splitIndex = _sort_and_calc_splitting_index(
-			primitive_boxes,startIndex,endIndex,
+			primitive_boxes, startIndex, endIndex,
 			splitIndex//split axis
 			);
 
@@ -214,7 +214,7 @@ void btQuantizedBvhTree::_build_sub_tree(GIM_BVH_DATA_ARRAY & primitive_boxes, i
 		node_bound.merge(primitive_boxes[i].m_bound);
 	}
 
-	setNodeBound(curIndex,node_bound);
+	setNodeBound(curIndex, node_bound);
 
 
 	//build left branch
@@ -222,7 +222,7 @@ void btQuantizedBvhTree::_build_sub_tree(GIM_BVH_DATA_ARRAY & primitive_boxes, i
 
 
 	//build right branch
-	 _build_sub_tree(primitive_boxes, splitIndex ,endIndex);
+	 _build_sub_tree(primitive_boxes, splitIndex, endIndex);
 
 	m_node_array[curIndex].setEscapeIndex(m_num_nodes - curIndex);
 
@@ -252,8 +252,8 @@ void btGImpactQuantizedBvh::refit()
 		if(isLeafNode(nodecount))
 		{
 			btAABB leafbox;
-			m_primitive_manager->get_primitive_box(getNodeData(nodecount),leafbox);
-			setNodeBound(nodecount,leafbox);
+			m_primitive_manager->get_primitive_box(getNodeData(nodecount), leafbox);
+			setNodeBound(nodecount, leafbox);
 		}
 		else
 		{
@@ -267,18 +267,18 @@ void btGImpactQuantizedBvh::refit()
 			int child_node = getLeftNode(nodecount);
 			if(child_node)
 			{
-				getNodeBound(child_node,temp_box);
+				getNodeBound(child_node, temp_box);
 				bound.merge(temp_box);
 			}
 
 			child_node = getRightNode(nodecount);
 			if(child_node)
 			{
-				getNodeBound(child_node,temp_box);
+				getNodeBound(child_node, temp_box);
 				bound.merge(temp_box);
 			}
 
-			setNodeBound(nodecount,bound);
+			setNodeBound(nodecount, bound);
 		}
 	}
 }
@@ -292,7 +292,7 @@ void btGImpactQuantizedBvh::buildSet()
 
 	for (int i = 0;i<primitive_boxes.size() ;i++ )
 	{
-		 m_primitive_manager->get_primitive_box(i,primitive_boxes[i].m_bound);
+		 m_primitive_manager->get_primitive_box(i, primitive_boxes[i].m_bound);
 		 primitive_boxes[i].m_data = i;
 	}
 
@@ -310,8 +310,8 @@ bool btGImpactQuantizedBvh::boxQuery(const btAABB & box, btAlignedObjectArray<in
 	unsigned short quantizedMin[3];
 	unsigned short quantizedMax[3];
 
-	m_box_tree.quantizePoint(quantizedMin,box.m_min);
-	m_box_tree.quantizePoint(quantizedMax,box.m_max);
+	m_box_tree.quantizePoint(quantizedMin, box.m_min);
+	m_box_tree.quantizePoint(quantizedMax, box.m_max);
 
 
 	while (curIndex < numNodes)
@@ -319,7 +319,7 @@ bool btGImpactQuantizedBvh::boxQuery(const btAABB & box, btAlignedObjectArray<in
 
 		//catch bugs in tree data
 
-		bool aabbOverlap = m_box_tree.testQuantizedBoxOverlapp(curIndex, quantizedMin,quantizedMax);
+		bool aabbOverlap = m_box_tree.testQuantizedBoxOverlapp(curIndex, quantizedMin, quantizedMax);
 		bool isleafnode = isLeafNode(curIndex);
 
 		if (isleafnode && aabbOverlap)
@@ -346,7 +346,7 @@ bool btGImpactQuantizedBvh::boxQuery(const btAABB & box, btAlignedObjectArray<in
 
 //! returns the indices of the primitives in the m_primitive_manager
 bool btGImpactQuantizedBvh::rayQuery(
-	const btVector3 & ray_dir,const btVector3 & ray_origin ,
+	const btVector3 & ray_dir, const btVector3 & ray_origin ,
 	btAlignedObjectArray<int> & collided_results) const
 {
 	int curIndex = 0;
@@ -355,11 +355,11 @@ bool btGImpactQuantizedBvh::rayQuery(
 	while (curIndex < numNodes)
 	{
 		btAABB bound;
-		getNodeBound(curIndex,bound);
+		getNodeBound(curIndex, bound);
 
 		//catch bugs in tree data
 
-		bool aabbOverlap = bound.collide_ray(ray_origin,ray_dir);
+		bool aabbOverlap = bound.collide_ray(ray_origin, ray_dir);
 		bool isleafnode = isLeafNode(curIndex);
 
 		if (isleafnode && aabbOverlap)
@@ -386,14 +386,14 @@ bool btGImpactQuantizedBvh::rayQuery(
 SIMD_FORCE_INLINE bool _quantized_node_collision(
 	const btGImpactQuantizedBvh * boxset0, const btGImpactQuantizedBvh * boxset1,
 	const BT_BOX_BOX_TRANSFORM_CACHE & trans_cache_1to0,
-	int node0 ,int node1, bool complete_primitive_tests)
+	int node0, int node1, bool complete_primitive_tests)
 {
 	btAABB box0;
-	boxset0->getNodeBound(node0,box0);
+	boxset0->getNodeBound(node0, box0);
 	btAABB box1;
-	boxset1->getNodeBound(node1,box1);
+	boxset1->getNodeBound(node1, box1);
 
-	return box0.overlapping_trans_cache(box1,trans_cache_1to0,complete_primitive_tests );
+	return box0.overlapping_trans_cache(box1, trans_cache_1to0, complete_primitive_tests );
 //	box1.appy_transform_trans_cache(trans_cache_1to0);
 //	return box0.has_collision(box1);
 
@@ -411,8 +411,8 @@ static void _find_quantized_collision_pairs_recursive(
 
 
 	if( _quantized_node_collision(
-		boxset0,boxset1,trans_cache_1to0,
-		node0,node1,complete_primitive_tests) ==false) return;//avoid colliding internal nodes
+		boxset0, boxset1, trans_cache_1to0,
+		node0, node1, complete_primitive_tests) ==false) return;//avoid colliding internal nodes
 
 	if(boxset0->isLeafNode(node0))
 	{
@@ -420,7 +420,7 @@ static void _find_quantized_collision_pairs_recursive(
 		{
 			// collision result
 			collision_pairs->push_pair(
-				boxset0->getNodeData(node0),boxset1->getNodeData(node1));
+				boxset0->getNodeData(node0), boxset1->getNodeData(node1));
 			return;
 		}
 		else
@@ -429,15 +429,15 @@ static void _find_quantized_collision_pairs_recursive(
 			//collide left recursive
 
 			_find_quantized_collision_pairs_recursive(
-								boxset0,boxset1,
-								collision_pairs,trans_cache_1to0,
-								node0,boxset1->getLeftNode(node1),false);
+								boxset0, boxset1,
+								collision_pairs, trans_cache_1to0,
+								node0, boxset1->getLeftNode(node1), false);
 
 			//collide right recursive
 			_find_quantized_collision_pairs_recursive(
-								boxset0,boxset1,
-								collision_pairs,trans_cache_1to0,
-								node0,boxset1->getRightNode(node1),false);
+								boxset0, boxset1,
+								collision_pairs, trans_cache_1to0,
+								node0, boxset1->getRightNode(node1), false);
 
 
 		}
@@ -449,17 +449,17 @@ static void _find_quantized_collision_pairs_recursive(
 
 			//collide left recursive
 			_find_quantized_collision_pairs_recursive(
-								boxset0,boxset1,
-								collision_pairs,trans_cache_1to0,
-								boxset0->getLeftNode(node0),node1,false);
+								boxset0, boxset1,
+								collision_pairs, trans_cache_1to0,
+								boxset0->getLeftNode(node0), node1, false);
 
 
 			//collide right recursive
 
 			_find_quantized_collision_pairs_recursive(
-								boxset0,boxset1,
-								collision_pairs,trans_cache_1to0,
-								boxset0->getRightNode(node0),node1,false);
+								boxset0, boxset1,
+								collision_pairs, trans_cache_1to0,
+								boxset0->getRightNode(node0), node1, false);
 
 
 		}
@@ -470,31 +470,31 @@ static void _find_quantized_collision_pairs_recursive(
 
 
 			_find_quantized_collision_pairs_recursive(
-				boxset0,boxset1,
-				collision_pairs,trans_cache_1to0,
-				boxset0->getLeftNode(node0),boxset1->getLeftNode(node1),false);
+				boxset0, boxset1,
+				collision_pairs, trans_cache_1to0,
+				boxset0->getLeftNode(node0), boxset1->getLeftNode(node1), false);
 
 			//collide left0 right1
 
 			_find_quantized_collision_pairs_recursive(
-				boxset0,boxset1,
-				collision_pairs,trans_cache_1to0,
-				boxset0->getLeftNode(node0),boxset1->getRightNode(node1),false);
+				boxset0, boxset1,
+				collision_pairs, trans_cache_1to0,
+				boxset0->getLeftNode(node0), boxset1->getRightNode(node1), false);
 
 
 			//collide right0 left1
 
 			_find_quantized_collision_pairs_recursive(
-				boxset0,boxset1,
-				collision_pairs,trans_cache_1to0,
-				boxset0->getRightNode(node0),boxset1->getLeftNode(node1),false);
+				boxset0, boxset1,
+				collision_pairs, trans_cache_1to0,
+				boxset0->getRightNode(node0), boxset1->getLeftNode(node1), false);
 
 			//collide right0 right1
 
 			_find_quantized_collision_pairs_recursive(
-				boxset0,boxset1,
-				collision_pairs,trans_cache_1to0,
-				boxset0->getRightNode(node0),boxset1->getRightNode(node1),false);
+				boxset0, boxset1,
+				collision_pairs, trans_cache_1to0,
+				boxset0->getRightNode(node0), boxset1->getRightNode(node1), false);
 
 		}// else if node1 is not a leaf
 	}// else if node0 is not a leaf
@@ -510,15 +510,15 @@ void btGImpactQuantizedBvh::find_collision(const btGImpactQuantizedBvh * boxset0
 
 	BT_BOX_BOX_TRANSFORM_CACHE trans_cache_1to0;
 
-	trans_cache_1to0.calc_from_homogenic(trans0,trans1);
+	trans_cache_1to0.calc_from_homogenic(trans0, trans1);
 
 #ifdef TRI_COLLISION_PROFILING
 	bt_begin_gim02_q_tree_time();
 #endif //TRI_COLLISION_PROFILING
 
 	_find_quantized_collision_pairs_recursive(
-		boxset0,boxset1,
-		&collision_pairs,trans_cache_1to0,0,0,true);
+		boxset0, boxset1,
+		&collision_pairs, trans_cache_1to0,0,0, true);
 #ifdef TRI_COLLISION_PROFILING
 	bt_end_gim02_q_tree_time();
 #endif //TRI_COLLISION_PROFILING

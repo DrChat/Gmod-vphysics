@@ -44,7 +44,7 @@ public:
 
 	virtual void updateSoftBodies( );
 
-	virtual void optimize( btAlignedObjectArray< btSoftBody * > &softBodies,bool forceUpdate=false );
+	virtual void optimize( btAlignedObjectArray< btSoftBody * > &softBodies, bool forceUpdate=false );
 
 	virtual void copyBackToSoftBodies(bool bMove = true);
 

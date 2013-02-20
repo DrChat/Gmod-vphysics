@@ -87,13 +87,13 @@ protected:
 	unsigned int	m_numOverflows;
 // 
 public:
-	btGpu3DGridBroadphase(const btVector3& worldAabbMin,const btVector3& worldAabbMax, 
+	btGpu3DGridBroadphase(const btVector3& worldAabbMin, const btVector3& worldAabbMax, 
 					   int gridSizeX, int gridSizeY, int gridSizeZ, 
 					   int maxSmallProxies, int maxLargeProxies, int maxPairsPerBody,
 					   int maxBodiesPerCell = 8,
 					   btScalar cellFactorAABB = btScalar(1.0f));
 	btGpu3DGridBroadphase(	btOverlappingPairCache* overlappingPairCache,
-						const btVector3& worldAabbMin,const btVector3& worldAabbMax, 
+						const btVector3& worldAabbMin, const btVector3& worldAabbMax, 
 						int gridSizeX, int gridSizeY, int gridSizeZ, 
 						int maxSmallProxies, int maxLargeProxies, int maxPairsPerBody,
 						int maxBodiesPerCell = 8,
@@ -101,15 +101,15 @@ public:
 	virtual ~btGpu3DGridBroadphase();
 	virtual void	calculateOverlappingPairs(btDispatcher* dispatcher);
 
-	virtual btBroadphaseProxy*	createProxy(const btVector3& aabbMin,  const btVector3& aabbMax,int shapeType,void* userPtr ,short int collisionFilterGroup,short int collisionFilterMask, btDispatcher* dispatcher,void* multiSapProxy);
-	virtual void	destroyProxy(btBroadphaseProxy* proxy,btDispatcher* dispatcher);
-	virtual void	rayTest(const btVector3& rayFrom,const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin=btVector3(0,0,0),const btVector3& aabbMax=btVector3(0,0,0));
+	virtual btBroadphaseProxy*	createProxy(const btVector3& aabbMin,  const btVector3& aabbMax, int shapeType, void* userPtr, short int collisionFilterGroup, short int collisionFilterMask, btDispatcher* dispatcher, void* multiSapProxy);
+	virtual void	destroyProxy(btBroadphaseProxy* proxy, btDispatcher* dispatcher);
+	virtual void	rayTest(const btVector3& rayFrom, const btVector3& rayTo, btBroadphaseRayCallback& rayCallback, const btVector3& aabbMin=btVector3(0,0,0), const btVector3& aabbMax=btVector3(0,0,0));
 
     
 	virtual void	resetPool(btDispatcher* dispatcher);
 
 protected:
-	void _initialize(	const btVector3& worldAabbMin,const btVector3& worldAabbMax, 
+	void _initialize(	const btVector3& worldAabbMin, const btVector3& worldAabbMax, 
 						int gridSizeX, int gridSizeY, int gridSizeZ, 
 						int maxSmallProxies, int maxLargeProxies, int maxPairsPerBody,
 						int maxBodiesPerCell = 8,

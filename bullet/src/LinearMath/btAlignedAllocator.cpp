@@ -69,7 +69,7 @@ static inline void *btAlignedAllocDefault(size_t size, int alignment)
   char *real;
   real = (char *)sAllocFunc(size + sizeof(void *) + (alignment-1));
   if (real) {
-	ret = btAlignPointer(real + sizeof(void *),alignment);
+	ret = btAlignPointer(real + sizeof(void *), alignment);
     *((void **)(ret)-1) = (void *)(real);
   } else {
     ret = (void *)(real);
@@ -108,7 +108,7 @@ void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc)
 //this generic allocator provides the total allocated number of bytes
 #include <stdio.h>
 
-void*   btAlignedAllocInternal  (size_t size, int alignment,int line,char* filename)
+void*   btAlignedAllocInternal  (size_t size, int alignment, int line, char* filename)
 {
  void *ret;
  char *real;
@@ -127,14 +127,14 @@ void*   btAlignedAllocInternal  (size_t size, int alignment,int line,char* filen
    ret = (void *)(real);//??
  }
 
- printf("allocation#%d at address %x, from %s,line %d, size %d\n",gNumAlignedAllocs,real, filename,line,size);
+ printf("allocation#%d at address %x, from %s, line %d, size %d\n", gNumAlignedAllocs, real, filename, line, size);
 
  int* ptr = (int*)ret;
  *ptr = 12;
  return (ret);
 }
 
-void    btAlignedFreeInternal   (void* ptr,int line,char* filename)
+void    btAlignedFreeInternal   (void* ptr, int line, char* filename)
 {
 
  void* real;
@@ -145,7 +145,7 @@ void    btAlignedFreeInternal   (void* ptr,int line,char* filename)
        int size = *((int*)(ptr)-2);
        gTotalBytesAlignedAllocs -= size;
 
-	   printf("free #%d at address %x, from %s,line %d, size %d\n",gNumAlignedFree,real, filename,line,size);
+	   printf("free #%d at address %x, from %s, line %d, size %d\n", gNumAlignedFree, real, filename, line, size);
 
    sFreeFunc(real);
  } else
@@ -161,7 +161,7 @@ void*	btAlignedAllocInternal	(size_t size, int alignment)
 	gNumAlignedAllocs++;
 	void* ptr;
 	ptr = sAlignedAllocFunc(size, alignment);
-//	printf("btAlignedAllocInternal %d, %x\n",size,ptr);
+//	printf("btAlignedAllocInternal %d, %x\n", size, ptr);
 	return ptr;
 }
 
@@ -173,7 +173,7 @@ void	btAlignedFreeInternal	(void* ptr)
 	}
 
 	gNumAlignedFree++;
-//	printf("btAlignedFreeInternal %x\n",ptr);
+//	printf("btAlignedFreeInternal %x\n", ptr);
 	sAlignedFreeFunc(ptr);
 }
 

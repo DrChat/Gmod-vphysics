@@ -57,7 +57,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 	for (int i=0;i<getNumVertices();i++)
 	{
 		btVector3& newVertex = orgVertices.expand();
-		getVertex(i,newVertex);
+		getVertex(i, newVertex);
 	}
 	
 	btConvexHullComputer conv;
@@ -65,7 +65,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 	if (shiftVerticesByMargin)
 	{
 		btAlignedObjectArray<btVector3> planeEquations;
-		btGeometryUtil::getPlaneEquationsFromVertices(orgVertices,planeEquations);
+		btGeometryUtil::getPlaneEquationsFromVertices(orgVertices, planeEquations);
 
 		btAlignedObjectArray<btVector3> shiftedPlaneEquations;
 		for (int p=0;p<planeEquations.size();p++)
@@ -78,13 +78,13 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 
 		btAlignedObjectArray<btVector3> tmpVertices;
 
-		btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations,tmpVertices);
+		btGeometryUtil::getVerticesFromPlaneEquations(shiftedPlaneEquations, tmpVertices);
 	
-		conv.compute(&tmpVertices[0].getX(), sizeof(btVector3),tmpVertices.size(),0.f,0.f);
+		conv.compute(&tmpVertices[0].getX(), sizeof(btVector3), tmpVertices.size(),0.f,0.f);
 	} else
 	{
 		
-		conv.compute(&orgVertices[0].getX(), sizeof(btVector3),orgVertices.size(),0.f,0.f);
+		conv.compute(&orgVertices[0].getX(), sizeof(btVector3), orgVertices.size(),0.f,0.f);
 	}
 
 
@@ -109,7 +109,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 	for (int i=0;i<numFaces;i++)
 	{
 		int face = convexUtil->faces[i];
-		//printf("face=%d\n",face);
+		//printf("face=%d\n", face);
 		const btConvexHullComputer::Edge*  firstEdge = &convexUtil->edges[face];
 		const btConvexHullComputer::Edge*  edge = firstEdge;
 
@@ -180,12 +180,12 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 		btFace& faceA = tmpFaces[refFace];
 		todoFaces.pop_back();
 
-		btVector3 faceNormalA(faceA.m_plane[0],faceA.m_plane[1],faceA.m_plane[2]);
+		btVector3 faceNormalA(faceA.m_plane[0], faceA.m_plane[1], faceA.m_plane[2]);
 		for (int j=todoFaces.size()-1;j>=0;j--)
 		{
 			int i = todoFaces[j];
 			btFace& faceB = tmpFaces[i];
-			btVector3 faceNormalB(faceB.m_plane[0],faceB.m_plane[1],faceB.m_plane[2]);
+			btVector3 faceNormalB(faceB.m_plane[0], faceB.m_plane[1], faceB.m_plane[2]);
 			if (faceNormalA.dot(faceNormalB)>faceWeldThreshold)
 			{
 				coplanarFaceGroup.push_back(i);
@@ -207,7 +207,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 //				m_polyhedron->m_faces.push_back(tmpFaces[coplanarFaceGroup[i]]);
 
 				btFace& face = tmpFaces[coplanarFaceGroup[i]];
-				btVector3 faceNormal(face.m_plane[0],face.m_plane[1],face.m_plane[2]);
+				btVector3 faceNormal(face.m_plane[0], face.m_plane[1], face.m_plane[2]);
 				averageFaceNormal+=faceNormal;
 				for (int f=0;f<face.m_indices.size();f++)
 				{
@@ -226,7 +226,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 						}
 					}
 					if (!found)
-						orgpoints.push_back(GrahamVector3(pt,orgIndex));
+						orgpoints.push_back(GrahamVector3(pt, orgIndex));
 				}
 			}
 
@@ -239,7 +239,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 			btAlignedObjectArray<GrahamVector3> hull;
 
 			averageFaceNormal.normalize();
-			GrahamScanConvexHull2D(orgpoints,hull,averageFaceNormal);
+			GrahamScanConvexHull2D(orgpoints, hull, averageFaceNormal);
 
 			for (int i=0;i<hull.size();i++)
 			{
@@ -349,7 +349,7 @@ btVector3	btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const b
         btVector3 temp[128];
         int inner_count = MIN(getNumVertices() - k, 128);
         for( i = 0; i < inner_count; i++ )
-            getVertex(i,temp[i]); 
+            getVertex(i, temp[i]); 
         i = (int) vec.maxDot( temp, inner_count, newDot);
 		if (newDot > maxDot)
 		{
@@ -364,7 +364,7 @@ btVector3	btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const b
 
 
 
-void	btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 #ifndef __SPU__
 	int i;
@@ -386,7 +386,7 @@ void	btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(
             btVector3 temp[128];
             int inner_count = MIN(getNumVertices() - k, 128);
             for( i = 0; i < inner_count; i++ )
-                getVertex(i,temp[i]); 
+                getVertex(i, temp[i]); 
             i = (int) vec.maxDot( temp, inner_count, newDot);
             if (newDot > supportVerticesOut[j][3])
             {
@@ -401,7 +401,7 @@ void	btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(
 
 
 
-void	btPolyhedralConvexShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btPolyhedralConvexShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 #ifndef __SPU__
 	//not yet, return box inertia
@@ -410,8 +410,8 @@ void	btPolyhedralConvexShape::calculateLocalInertia(btScalar mass,btVector3& ine
 
 	btTransform ident;
 	ident.setIdentity();
-	btVector3 aabbMin,aabbMax;
-	getAabb(ident,aabbMin,aabbMax);
+	btVector3 aabbMin, aabbMax;
+	getAabb(ident, aabbMin, aabbMax);
 	btVector3 halfExtents = (aabbMax-aabbMin)*btScalar(0.5);
 
 	btScalar lx=btScalar(2.)*(halfExtents.x()+margin);
@@ -422,7 +422,7 @@ void	btPolyhedralConvexShape::calculateLocalInertia(btScalar mass,btVector3& ine
 	const btScalar z2 = lz*lz;
 	const btScalar scaledmass = mass * btScalar(0.08333333);
 
-	inertia = scaledmass * (btVector3(y2+z2,x2+z2,x2+y2));
+	inertia = scaledmass * (btVector3(y2+z2, x2+z2, x2+y2));
 #endif //__SPU__
 }
 
@@ -442,9 +442,9 @@ m_isLocalAabbValid(false)
 {
 }
 
-void btPolyhedralConvexAabbCachingShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVector3& aabbMax) const
+void btPolyhedralConvexAabbCachingShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax) const
 {
-	getNonvirtualAabb(trans,aabbMin,aabbMax,getMargin());
+	getNonvirtualAabb(trans, aabbMin, aabbMax, getMargin());
 }
 
 void	btPolyhedralConvexAabbCachingShape::recalcLocalAabb()
@@ -484,7 +484,7 @@ void	btPolyhedralConvexAabbCachingShape::recalcLocalAabb()
 
 	for (int i=0;i<3;i++)
 	{
-		btVector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
 		vec[i] = btScalar(1.);
 		btVector3 tmp = localGetSupportingVertex(vec);
 		m_localAabbMax[i] = tmp[i];

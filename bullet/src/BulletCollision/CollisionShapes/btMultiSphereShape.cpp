@@ -22,7 +22,7 @@ subject to the following restrictions:
 #include "LinearMath/btQuaternion.h"
 #include "LinearMath/btSerializer.h"
 
-btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScalar* radi,int numSpheres)
+btMultiSphereShape::btMultiSphereShape (const btVector3* positions, const btScalar* radi, int numSpheres)
 :btConvexInternalAabbCachingShape ()
 {
 	m_shapeType = MULTI_SPHERE_SHAPE_PROXYTYPE;
@@ -91,7 +91,7 @@ btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScala
 
 }
 
- void	btMultiSphereShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+ void	btMultiSphereShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 
 	for (int j=0;j<numVectors;j++)
@@ -135,12 +135,12 @@ btMultiSphereShape::btMultiSphereShape (const btVector3* positions,const btScala
 
 
 
-void	btMultiSphereShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btMultiSphereShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	//as an approximation, take the inertia of the box that bounds the spheres
 
-	btVector3 localAabbMin,localAabbMax;
-	getCachedLocalAabb(localAabbMin,localAabbMax);
+	btVector3 localAabbMin, localAabbMax;
+	getCachedLocalAabb(localAabbMin, localAabbMax);
 	btVector3 halfExtents = (localAabbMax-localAabbMin)*btScalar(0.5);
 
 	btScalar lx=btScalar(2.)*(halfExtents.x());
@@ -166,14 +166,14 @@ const char*	btMultiSphereShape::serialize(void* dataBuffer, btSerializer* serial
 	shapeData->m_localPositionArraySize = numElem;
 	if (numElem)
 	{
-		btChunk* chunk = serializer->allocate(sizeof(btPositionAndRadius),numElem);
+		btChunk* chunk = serializer->allocate(sizeof(btPositionAndRadius), numElem);
 		btPositionAndRadius* memPtr = (btPositionAndRadius*)chunk->m_oldPtr;
-		for (int i=0;i<numElem;i++,memPtr++)
+		for (int i=0;i<numElem;i++, memPtr++)
 		{
 			m_localPositionArray[i].serializeFloat(memPtr->m_pos);
 			memPtr->m_radius = float(m_radiArray[i]);
 		}
-		serializer->finalizeChunk(chunk,"btPositionAndRadius",BT_ARRAY_CODE,(void*)&m_localPositionArray[0]);
+		serializer->finalizeChunk(chunk, "btPositionAndRadius", BT_ARRAY_CODE, (void*)&m_localPositionArray[0]);
 	}
 	
 	return "btMultiSphereShapeData";

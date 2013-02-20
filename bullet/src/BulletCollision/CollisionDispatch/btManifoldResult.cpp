@@ -25,7 +25,7 @@ ContactAddedCallback		gContactAddedCallback=0;
 
 
 ///User can override this material combiner by implementing gContactAddedCallback and setting body0->m_collisionFlags |= btCollisionObject::customMaterialCallback;
-inline btScalar	calculateCombinedRollingFriction(const btCollisionObject* body0,const btCollisionObject* body1)
+inline btScalar	calculateCombinedRollingFriction(const btCollisionObject* body0, const btCollisionObject* body1)
 {
 	btScalar friction = body0->getRollingFriction() * body1->getRollingFriction();
 
@@ -40,7 +40,7 @@ inline btScalar	calculateCombinedRollingFriction(const btCollisionObject* body0,
 
 
 ///User can override this material combiner by implementing gContactAddedCallback and setting body0->m_collisionFlags |= btCollisionObject::customMaterialCallback;
-btScalar	btManifoldResult::calculateCombinedFriction(const btCollisionObject* body0,const btCollisionObject* body1)
+btScalar	btManifoldResult::calculateCombinedFriction(const btCollisionObject* body0, const btCollisionObject* body1)
 {
 	btScalar friction = body0->getFriction() * body1->getFriction();
 
@@ -53,19 +53,19 @@ btScalar	btManifoldResult::calculateCombinedFriction(const btCollisionObject* bo
 
 }
 
-btScalar	btManifoldResult::calculateCombinedRestitution(const btCollisionObject* body0,const btCollisionObject* body1)
+btScalar	btManifoldResult::calculateCombinedRestitution(const btCollisionObject* body0, const btCollisionObject* body1)
 {
 	return body0->getRestitution() * body1->getRestitution();
 }
 
 
 
-btManifoldResult::btManifoldResult(const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap)
+btManifoldResult::btManifoldResult(const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
 		:m_manifoldPtr(0),
 		m_body0Wrap(body0Wrap),
 		m_body1Wrap(body1Wrap)
 #ifdef DEBUG_PART_INDEX
-		,m_partId0(-1),
+		, m_partId0(-1),
 	m_partId1(-1),
 	m_index0(-1),
 	m_index1(-1)
@@ -74,7 +74,7 @@ btManifoldResult::btManifoldResult(const btCollisionObjectWrapper* body0Wrap,con
 }
 
 
-void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld,const btVector3& pointInWorld,btScalar depth)
+void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld, const btVector3& pointInWorld, btScalar depth)
 {
 	btAssert(m_manifoldPtr);
 	//order in manifold needs to match
@@ -100,16 +100,16 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld,const b
 		localB = m_body1Wrap->getCollisionObject()->getWorldTransform().invXform(pointInWorld);
 	}
 
-	btManifoldPoint newPt(localA,localB,normalOnBInWorld,depth);
+	btManifoldPoint newPt(localA, localB, normalOnBInWorld, depth);
 	newPt.m_positionWorldOnA = pointA;
 	newPt.m_positionWorldOnB = pointInWorld;
 	
 	int insertIndex = m_manifoldPtr->getCacheEntry(newPt);
 
-	newPt.m_combinedFriction = calculateCombinedFriction(m_body0Wrap->getCollisionObject(),m_body1Wrap->getCollisionObject());
-	newPt.m_combinedRestitution = calculateCombinedRestitution(m_body0Wrap->getCollisionObject(),m_body1Wrap->getCollisionObject());
-	newPt.m_combinedRollingFriction = calculateCombinedRollingFriction(m_body0Wrap->getCollisionObject(),m_body1Wrap->getCollisionObject());
-	btPlaneSpace1(newPt.m_normalWorldOnB,newPt.m_lateralFrictionDir1,newPt.m_lateralFrictionDir2);
+	newPt.m_combinedFriction = calculateCombinedFriction(m_body0Wrap->getCollisionObject(), m_body1Wrap->getCollisionObject());
+	newPt.m_combinedRestitution = calculateCombinedRestitution(m_body0Wrap->getCollisionObject(), m_body1Wrap->getCollisionObject());
+	newPt.m_combinedRollingFriction = calculateCombinedRollingFriction(m_body0Wrap->getCollisionObject(), m_body1Wrap->getCollisionObject());
+	btPlaneSpace1(newPt.m_normalWorldOnB, newPt.m_lateralFrictionDir1, newPt.m_lateralFrictionDir2);
 	
 
 	
@@ -127,12 +127,12 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld,const b
 		newPt.m_index0  = m_index0;
 		newPt.m_index1  = m_index1;
 	}
-	//printf("depth=%f\n",depth);
+	//printf("depth=%f\n", depth);
 	///@todo, check this for any side effects
 	if (insertIndex >= 0)
 	{
 		//const btManifoldPoint& oldPoint = m_manifoldPtr->getContactPoint(insertIndex);
-		m_manifoldPtr->replaceContactPoint(newPt,insertIndex);
+		m_manifoldPtr->replaceContactPoint(newPt, insertIndex);
 	} else
 	{
 		insertIndex = m_manifoldPtr->addManifoldPoint(newPt);
@@ -147,7 +147,7 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld,const b
 		//experimental feature info, for per-triangle material etc.
 		const btCollisionObjectWrapper* obj0Wrap = isSwapped? m_body1Wrap : m_body0Wrap;
 		const btCollisionObjectWrapper* obj1Wrap = isSwapped? m_body0Wrap : m_body1Wrap;
-		(*gContactAddedCallback)(m_manifoldPtr->getContactPoint(insertIndex),obj0Wrap,newPt.m_partId0,newPt.m_index0,obj1Wrap,newPt.m_partId1,newPt.m_index1);
+		(*gContactAddedCallback)(m_manifoldPtr->getContactPoint(insertIndex), obj0Wrap, newPt.m_partId0, newPt.m_index0, obj1Wrap, newPt.m_partId1, newPt.m_index1);
 	}
 
 }

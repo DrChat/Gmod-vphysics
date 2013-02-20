@@ -40,7 +40,7 @@ subject to the following restrictions:
 		
 #define DEBUG_DMA		
 #ifdef DEBUG_DMA
-#define dUASSERT(a,b) if (!(a)) { printf(b);}
+#define dUASSERT(a, b) if (!(a)) { printf(b);}
 #define uintsize ppu_address_t
 		
 #define cellDmaLargeGet(ls, ea, size, tag, tid, rid) if (  (((uintsize)ls%16) != ((uintsize)ea%16)) || ((((uintsize)ea%16) || ((uintsize)ls%16)) && (( ((uintsize)ls%16) != ((uintsize)size%16) ) || ( ((uintsize)ea%16) != ((uintsize)size%16) ) ) ) || ( ((uintsize)size%16) && ((uintsize)size!=1) && ((uintsize)size!=2) && ((uintsize)size!=4) && ((uintsize)size!=8) ) || (size >= 16384) || !(uintsize)ls || !(uintsize)ea) { \
@@ -51,7 +51,7 @@ subject to the following restrictions:
 															dUASSERT(size < 16384, "size too big: "); \
 															dUASSERT( ((uintsize)ea%16)==((uintsize)ls%16), "wrong Quadword alignment of LS and EA: "); \
 	    													dUASSERT(ea != 0, "Nullpointer EA: "); dUASSERT(ls != 0, "Nullpointer LS: ");\
-															printf("GET %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ea,(unsigned int)ls,(unsigned int)size);\
+															printf("GET %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ea, (unsigned int)ls, (unsigned int)size);\
 															} \
 															mfc_get(ls, ea, size, tag, tid, rid)
 #define cellDmaGet(ls, ea, size, tag, tid, rid) if (  (((uintsize)ls%16) != ((uintsize)ea%16)) || ((((uintsize)ea%16) || ((uintsize)ls%16)) && (( ((uintsize)ls%16) != ((uintsize)size%16) ) || ( ((uintsize)ea%16) != ((uintsize)size%16) ) ) ) || ( ((uintsize)size%16) && ((uintsize)size!=1) && ((uintsize)size!=2) && ((uintsize)size!=4) && ((uintsize)size!=8) ) || (size >= 16384) || !(uintsize)ls || !(uintsize)ea) { \
@@ -62,7 +62,7 @@ subject to the following restrictions:
     													dUASSERT(size < 16384, "size too big: "); \
 														dUASSERT( ((uintsize)ea%16)==((uintsize)ls%16), "wrong Quadword alignment of LS and EA: "); \
     													dUASSERT(ea != 0, "Nullpointer EA: "); dUASSERT(ls != 0, "Nullpointer LS: ");\
-    													printf("GET %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ea,(unsigned int)ls,(unsigned int)size);\
+    													printf("GET %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ea, (unsigned int)ls, (unsigned int)size);\
 														} \
 														mfc_get(ls, ea, size, tag, tid, rid)
 #define cellDmaLargePut(ls, ea, size, tag, tid, rid) if (  (((uintsize)ls%16) != ((uintsize)ea%16)) || ((((uintsize)ea%16) || ((uintsize)ls%16)) && (( ((uintsize)ls%16) != ((uintsize)size%16) ) || ( ((uintsize)ea%16) != ((uintsize)size%16) ) ) ) || ( ((uintsize)size%16) && ((uintsize)size!=1) && ((uintsize)size!=2) && ((uintsize)size!=4) && ((uintsize)size!=8) ) || (size >= 16384) || !(uintsize)ls || !(uintsize)ea) { \
@@ -73,7 +73,7 @@ subject to the following restrictions:
         													dUASSERT(size < 16384, "size too big: "); \
 															dUASSERT( ((uintsize)ea%16)==((uintsize)ls%16), "wrong Quadword alignment of LS and EA: "); \
         													dUASSERT(ea != 0, "Nullpointer EA: "); dUASSERT(ls != 0, "Nullpointer LS: ");\
-    														printf("PUT %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ls,(unsigned int)ea,(unsigned int)size); \
+    														printf("PUT %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ls, (unsigned int)ea, (unsigned int)size); \
 															} \
 															mfc_put(ls, ea, size, tag, tid, rid)
 #define cellDmaSmallGet(ls, ea, size, tag, tid, rid) if (  (((uintsize)ls%16) != ((uintsize)ea%16)) || ((((uintsize)ea%16) || ((uintsize)ls%16)) && (( ((uintsize)ls%16) != ((uintsize)size%16) ) || ( ((uintsize)ea%16) != ((uintsize)size%16) ) ) ) || ( ((uintsize)size%16) && ((uintsize)size!=1) && ((uintsize)size!=2) && ((uintsize)size!=4) && ((uintsize)size!=8) ) || (size >= 16384) || !(uintsize)ls || !(uintsize)ea) { \
@@ -84,7 +84,7 @@ subject to the following restrictions:
     															dUASSERT(size < 16384, "size too big: "); \
     															dUASSERT( ((uintsize)ea%16)==((uintsize)ls%16), "wrong Quadword alignment of LS and EA: "); \
     	    													dUASSERT(ea != 0, "Nullpointer EA: "); dUASSERT(ls != 0, "Nullpointer LS: ");\
-    															printf("GET %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ea,(unsigned int)ls,(unsigned int)size);\
+    															printf("GET %s:%d from: 0x%x, to: 0x%x - %d bytes\n", __FILE__, __LINE__, (unsigned int)ea, (unsigned int)ls, (unsigned int)size);\
 																} \
 																mfc_get(ls, ea, size, tag, tid, rid)
 #define cellDmaWaitTagStatusAll(ignore) mfc_write_tag_mask(ignore) ; mfc_read_tag_status_all()

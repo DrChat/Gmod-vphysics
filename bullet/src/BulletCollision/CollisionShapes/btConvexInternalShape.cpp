@@ -19,7 +19,7 @@ subject to the following restrictions:
 
 
 btConvexInternalShape::btConvexInternalShape()
-: m_localScaling(btScalar(1.),btScalar(1.),btScalar(1.)),
+: m_localScaling(btScalar(1.), btScalar(1.), btScalar(1.)),
 m_collisionMargin(CONVEX_DISTANCE_MARGIN)
 {
 }
@@ -32,14 +32,14 @@ void	btConvexInternalShape::setLocalScaling(const btVector3& scaling)
 
 
 
-void	btConvexInternalShape::getAabbSlow(const btTransform& trans,btVector3&minAabb,btVector3&maxAabb) const
+void	btConvexInternalShape::getAabbSlow(const btTransform& trans, btVector3&minAabb, btVector3&maxAabb) const
 {
 #ifndef __SPU__
 	//use localGetSupportingVertexWithoutMargin?
 	btScalar margin = getMargin();
 	for (int i=0;i<3;i++)
 	{
-		btVector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
 		vec[i] = btScalar(1.);
 
 		btVector3 sv = localGetSupportingVertex(vec*trans.getBasis());
@@ -66,7 +66,7 @@ btVector3	btConvexInternalShape::localGetSupportingVertex(const btVector3& vec)c
 		btVector3 vecnorm = vec;
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
-			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
+			vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
 		} 
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;
@@ -90,9 +90,9 @@ m_isLocalAabbValid(false)
 }
 
 
-void btConvexInternalAabbCachingShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVector3& aabbMax) const
+void btConvexInternalAabbCachingShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax) const
 {
-	getNonvirtualAabb(trans,aabbMin,aabbMax,getMargin());
+	getNonvirtualAabb(trans, aabbMin, aabbMax, getMargin());
 }
 
 void	btConvexInternalAabbCachingShape::setLocalScaling(const btVector3& scaling)
@@ -139,7 +139,7 @@ void	btConvexInternalAabbCachingShape::recalcLocalAabb()
 
 	for (int i=0;i<3;i++)
 	{
-		btVector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
 		vec[i] = btScalar(1.);
 		btVector3 tmp = localGetSupportingVertex(vec);
 		m_localAabbMax[i] = tmp[i]+m_collisionMargin;

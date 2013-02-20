@@ -17,7 +17,7 @@ subject to the following restrictions:
 #include "btMinkowskiSumShape.h"
 
 
-btMinkowskiSumShape::btMinkowskiSumShape(const btConvexShape* shapeA,const btConvexShape* shapeB)
+btMinkowskiSumShape::btMinkowskiSumShape(const btConvexShape* shapeA, const btConvexShape* shapeB)
 : btConvexInternalShape (),
 m_shapeA(shapeA),
 m_shapeB(shapeB)
@@ -34,7 +34,7 @@ btVector3 btMinkowskiSumShape::localGetSupportingVertexWithoutMargin(const btVec
 	return  supVertexA - supVertexB;
 }
 
-void	btMinkowskiSumShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btMinkowskiSumShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 	///@todo: could make recursive use of batching. probably this shape is not used frequently.
 	for (int i=0;i<numVectors;i++)
@@ -52,7 +52,7 @@ btScalar	btMinkowskiSumShape::getMargin() const
 }
 
 
-void	btMinkowskiSumShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btMinkowskiSumShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	(void)mass;
 	btAssert(0);

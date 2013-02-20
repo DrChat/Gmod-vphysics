@@ -38,7 +38,7 @@ class btPlaneShape : public btStaticPlaneShape
 public:
 
 	btPlaneShape(const btVector3& v, float f)
-		:btStaticPlaneShape(v,f)
+		:btStaticPlaneShape(v, f)
 	{
 	}
 
@@ -51,7 +51,7 @@ public:
 	}
 
 
-	void get_plane_equation_transformed(const btTransform & trans,btVector4 &equation) const 
+	void get_plane_equation_transformed(const btTransform & trans, btVector4 &equation) const 
 	{
 		equation[0] = trans.getBasis().getRow(0).dot(m_planeNormal);
 		equation[1] = trans.getBasis().getRow(1).dot(m_planeNormal);
@@ -111,7 +111,7 @@ public:
 
 		virtual btCollisionShape * getChildShape(int index)
 		{
-			m_parent->m_gim_shape->getBulletTriangle(index,m_parent->m_trishape);
+			m_parent->m_gim_shape->getBulletTriangle(index, m_parent->m_trishape);
 			return &m_parent->m_trishape;
 		}
 		virtual ~TriangleShapeRetriever() {}
@@ -123,7 +123,7 @@ public:
 
 		virtual btCollisionShape * getChildShape(int index)
 		{
-			m_parent->m_gim_shape->getBulletTetrahedron(index,m_parent->m_tetrashape);
+			m_parent->m_gim_shape->getBulletTetrahedron(index, m_parent->m_tetrashape);
 			return &m_parent->m_tetrashape;
 		}
 	};
@@ -193,8 +193,8 @@ float btGImpactCollisionAlgorithm::getAverageTriangleCollisionTime()
 
 
 
-btGImpactCollisionAlgorithm::btGImpactCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap)
-: btActivatingCollisionAlgorithm(ci,body0Wrap,body1Wrap)
+btGImpactCollisionAlgorithm::btGImpactCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
+: btActivatingCollisionAlgorithm(ci, body0Wrap, body1Wrap)
 {
 	m_manifoldPtr = NULL;
 	m_convex_algorithm = NULL;
@@ -215,10 +215,10 @@ void btGImpactCollisionAlgorithm::addContactPoint(const btCollisionObjectWrapper
 				const btVector3 & normal,
 				btScalar distance)
 {
-	m_resultOut->setShapeIdentifiersA(m_part0,m_triface0);
-	m_resultOut->setShapeIdentifiersB(m_part1,m_triface1);
-	checkManifold(body0Wrap,body1Wrap);
-	m_resultOut->addContactPoint(normal,point,distance);
+	m_resultOut->setShapeIdentifiersA(m_part0, m_triface0);
+	m_resultOut->setShapeIdentifiersB(m_part1, m_triface1);
+	checkManifold(body0Wrap, body1Wrap);
+	m_resultOut->addContactPoint(normal, point, distance);
 }
 
 
@@ -232,13 +232,13 @@ void btGImpactCollisionAlgorithm::shape_vs_shape_collision(
 
 	{
 		
-		btCollisionAlgorithm* algor = newAlgorithm(body0Wrap,body1Wrap);
+		btCollisionAlgorithm* algor = newAlgorithm(body0Wrap, body1Wrap);
 		// post :	checkManifold is called
 
-		m_resultOut->setShapeIdentifiersA(m_part0,m_triface0);
-		m_resultOut->setShapeIdentifiersB(m_part1,m_triface1);
+		m_resultOut->setShapeIdentifiersA(m_part0, m_triface0);
+		m_resultOut->setShapeIdentifiersB(m_part1, m_triface1);
 		
-		algor->processCollision(body0Wrap,body1Wrap,*m_dispatchInfo,m_resultOut);
+		algor->processCollision(body0Wrap, body1Wrap,*m_dispatchInfo, m_resultOut);
 		
 		algor->~btCollisionAlgorithm();
 		m_dispatcher->freeCollisionAlgorithm(algor);
@@ -253,13 +253,13 @@ void btGImpactCollisionAlgorithm::convex_vs_convex_collision(
 					  const btCollisionShape* shape1)
 {
 
-	m_resultOut->setShapeIdentifiersA(m_part0,m_triface0);
-	m_resultOut->setShapeIdentifiersB(m_part1,m_triface1);
+	m_resultOut->setShapeIdentifiersA(m_part0, m_triface0);
+	m_resultOut->setShapeIdentifiersB(m_part1, m_triface1);
 
-	btCollisionObjectWrapper ob0(body0Wrap,shape0,body0Wrap->getCollisionObject(),body0Wrap->getWorldTransform(),m_part0,m_triface0);
-	btCollisionObjectWrapper ob1(body1Wrap,shape1,body1Wrap->getCollisionObject(),body1Wrap->getWorldTransform(),m_part1,m_triface1);
-	checkConvexAlgorithm(&ob0,&ob1);
-	m_convex_algorithm->processCollision(&ob0,&ob1,*m_dispatchInfo,m_resultOut);
+	btCollisionObjectWrapper ob0(body0Wrap, shape0, body0Wrap->getCollisionObject(), body0Wrap->getWorldTransform(), m_part0, m_triface0);
+	btCollisionObjectWrapper ob1(body1Wrap, shape1, body1Wrap->getCollisionObject(), body1Wrap->getWorldTransform(), m_part1, m_triface1);
+	checkConvexAlgorithm(&ob0, &ob1);
+	m_convex_algorithm->processCollision(&ob0, &ob1,*m_dispatchInfo, m_resultOut);
 
 
 }
@@ -271,11 +271,11 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact_find_pairs(
 					  const btTransform & trans0,
 					  const btTransform & trans1,
 					  const btGImpactShapeInterface * shape0,
-					  const btGImpactShapeInterface * shape1,btPairSet & pairset)
+					  const btGImpactShapeInterface * shape1, btPairSet & pairset)
 {
 	if(shape0->hasBoxSet() && shape1->hasBoxSet())
 	{
-		btGImpactBoxSet::find_collision(shape0->getBoxSet(),trans0,shape1->getBoxSet(),trans1,pairset);
+		btGImpactBoxSet::find_collision(shape0->getBoxSet(), trans0, shape1->getBoxSet(), trans1, pairset);
 	}
 	else
 	{
@@ -285,16 +285,16 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact_find_pairs(
 
 		while(i--)
 		{
-			shape0->getChildAabb(i,trans0,boxshape0.m_min,boxshape0.m_max);
+			shape0->getChildAabb(i, trans0, boxshape0.m_min, boxshape0.m_max);
 
 			int j = shape1->getNumChildShapes();
 			while(j--)
 			{
-				shape1->getChildAabb(i,trans1,boxshape1.m_min,boxshape1.m_max);
+				shape1->getChildAabb(i, trans1, boxshape1.m_min, boxshape1.m_max);
 
 				if(boxshape1.has_collision(boxshape0))
 				{
-					pairset.push_pair(i,j);
+					pairset.push_pair(i, j);
 				}
 			}
 		}
@@ -320,20 +320,20 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape_find_pairs(
 		btTransform trans1to0 = trans0.inverse();
 		trans1to0 *= trans1;
 
-		shape1->getAabb(trans1to0,boxshape.m_min,boxshape.m_max);
+		shape1->getAabb(trans1to0, boxshape.m_min, boxshape.m_max);
 
 		shape0->getBoxSet()->boxQuery(boxshape, collided_primitives);
 	}
 	else
 	{
-		shape1->getAabb(trans1,boxshape.m_min,boxshape.m_max);
+		shape1->getAabb(trans1, boxshape.m_min, boxshape.m_max);
 
 		btAABB boxshape0;
 		int i = shape0->getNumChildShapes();
 
 		while(i--)
 		{
-			shape0->getChildAabb(i,trans0,boxshape0.m_min,boxshape0.m_max);
+			shape0->getChildAabb(i, trans0, boxshape0.m_min, boxshape0.m_max);
 
 			if(boxshape.has_collision(boxshape0))
 			{
@@ -369,14 +369,14 @@ void btGImpactCollisionAlgorithm::collide_gjk_triangles(const btCollisionObjectW
 
 
 
-		shape0->getBulletTriangle(m_triface0,tri0);
-		shape1->getBulletTriangle(m_triface1,tri1);
+		shape0->getBulletTriangle(m_triface0, tri0);
+		shape1->getBulletTriangle(m_triface1, tri1);
 
 
 		//collide two convex shapes
 		if(tri0.overlap_test_conservative(tri1))
 		{
-			convex_vs_convex_collision(body0Wrap,body1Wrap,&tri0,&tri1);
+			convex_vs_convex_collision(body0Wrap, body1Wrap, &tri0, &tri1);
 		}
 
 	}
@@ -411,8 +411,8 @@ void btGImpactCollisionAlgorithm::collide_sat_triangles(const btCollisionObjectW
 		pair_pointer+=2;
 
 
-		shape0->getPrimitiveTriangle(m_triface0,ptri0);
-		shape1->getPrimitiveTriangle(m_triface1,ptri1);
+		shape0->getPrimitiveTriangle(m_triface0, ptri0);
+		shape1->getPrimitiveTriangle(m_triface1, ptri1);
 
 		#ifdef TRI_COLLISION_PROFILING
 		bt_begin_gim02_tri_time();
@@ -431,7 +431,7 @@ void btGImpactCollisionAlgorithm::collide_sat_triangles(const btCollisionObjectW
 
 		if(ptri0.overlap_test_conservative(ptri1))
 		{
-			if(ptri0.find_triangle_collision_clip_method(ptri1,contact_data))
+			if(ptri0.find_triangle_collision_clip_method(ptri1, contact_data))
 			{
 
 				int j = contact_data.m_point_count;
@@ -472,7 +472,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 
 		while(m_part0--)
 		{
-			gimpact_vs_gimpact(body0Wrap,body1Wrap,meshshape0->getMeshPart(m_part0),shape1);
+			gimpact_vs_gimpact(body0Wrap, body1Wrap, meshshape0->getMeshPart(m_part0), shape1);
 		}
 
 		return;
@@ -486,7 +486,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 		while(m_part1--)
 		{
 
-			gimpact_vs_gimpact(body0Wrap,body1Wrap,shape0,meshshape1->getMeshPart(m_part1));
+			gimpact_vs_gimpact(body0Wrap, body1Wrap, shape0, meshshape1->getMeshPart(m_part1));
 
 		}
 
@@ -499,7 +499,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 
 	btPairSet pairset;
 
-	gimpact_vs_gimpact_find_pairs(orgtrans0,orgtrans1,shape0,shape1,pairset);
+	gimpact_vs_gimpact_find_pairs(orgtrans0, orgtrans1, shape0, shape1, pairset);
 
 	if(pairset.size()== 0) return;
 
@@ -510,9 +510,9 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 		const btGImpactMeshShapePart * shapepart1 = static_cast<const btGImpactMeshShapePart * >(shape1);
 		//specialized function
 		#ifdef BULLET_TRIANGLE_COLLISION
-		collide_gjk_triangles(body0Wrap,body1Wrap,shapepart0,shapepart1,&pairset[0].m_index1,pairset.size());
+		collide_gjk_triangles(body0Wrap, body1Wrap, shapepart0, shapepart1, &pairset[0].m_index1, pairset.size());
 		#else
-		collide_sat_triangles(body0Wrap,body1Wrap,shapepart0,shapepart1,&pairset[0].m_index1,pairset.size());
+		collide_sat_triangles(body0Wrap, body1Wrap, shapepart0, shapepart1, &pairset[0].m_index1, pairset.size());
 		#endif
 
 		return;
@@ -551,11 +551,11 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 			tr1 = orgtrans1*shape1->getChildTransform(m_triface1);
 		}
 
-		btCollisionObjectWrapper ob0(body0Wrap,colshape0,body0Wrap->getCollisionObject(),tr0,m_part0,m_triface0);
-		btCollisionObjectWrapper ob1(body1Wrap,colshape1,body1Wrap->getCollisionObject(),tr1,m_part1,m_triface1);
+		btCollisionObjectWrapper ob0(body0Wrap, colshape0, body0Wrap->getCollisionObject(), tr0, m_part0, m_triface0);
+		btCollisionObjectWrapper ob1(body1Wrap, colshape1, body1Wrap->getCollisionObject(), tr1, m_part1, m_triface1);
 
 		//collide two convex shapes
-		convex_vs_convex_collision(&ob0,&ob1,colshape0,colshape1);
+		convex_vs_convex_collision(&ob0, &ob1, colshape0, colshape1);
 	}
 
 	shape0->unlockChildShapes();
@@ -565,7 +565,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_gimpact(
 void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrapper* body0Wrap,
 				  const btCollisionObjectWrapper * body1Wrap,
 				  const btGImpactShapeInterface * shape0,
-				  const btCollisionShape * shape1,bool swapped)
+				  const btCollisionShape * shape1, bool swapped)
 {
 	if(shape0->getGImpactShapeType()==CONST_GIMPACT_TRIMESH_SHAPE)
 	{
@@ -579,7 +579,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 			gimpact_vs_shape(body0Wrap,
 				  body1Wrap,
 				  meshshape0->getMeshPart(part),
-				  shape1,swapped);
+				  shape1, swapped);
 
 		}
 
@@ -592,7 +592,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 	{
 		const btGImpactMeshShapePart * shapepart = static_cast<const btGImpactMeshShapePart *>(shape0);
 		const btStaticPlaneShape * planeshape = static_cast<const btStaticPlaneShape * >(shape1);
-		gimpacttrimeshpart_vs_plane_collision(body0Wrap,body1Wrap,shapepart,planeshape,swapped);
+		gimpacttrimeshpart_vs_plane_collision(body0Wrap, body1Wrap, shapepart, planeshape, swapped);
 		return;
 	}
 
@@ -603,13 +603,13 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 	if(shape1->isCompound())
 	{
 		const btCompoundShape * compoundshape = static_cast<const btCompoundShape *>(shape1);
-		gimpact_vs_compoundshape(body0Wrap,body1Wrap,shape0,compoundshape,swapped);
+		gimpact_vs_compoundshape(body0Wrap, body1Wrap, shape0, compoundshape, swapped);
 		return;
 	}
 	else if(shape1->isConcave())
 	{
 		const btConcaveShape * concaveshape = static_cast<const btConcaveShape *>(shape1);
-		gimpact_vs_concave(body0Wrap,body1Wrap,shape0,concaveshape,swapped);
+		gimpact_vs_concave(body0Wrap, body1Wrap, shape0, concaveshape, swapped);
 		return;
 	}
 
@@ -620,7 +620,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 
 	btAlignedObjectArray<int> collided_results;
 
-	gimpact_vs_shape_find_pairs(orgtrans0,orgtrans1,shape0,shape1,collided_results);
+	gimpact_vs_shape_find_pairs(orgtrans0, orgtrans1, shape0, shape1, collided_results);
 
 	if(collided_results.size() == 0) return;
 
@@ -652,7 +652,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 			tr0 = orgtrans0*shape0->getChildTransform(child_index);
 		}
 
-		btCollisionObjectWrapper ob0(body0Wrap,colshape0,body0Wrap->getCollisionObject(),body0Wrap->getWorldTransform(),m_part0,m_triface0);
+		btCollisionObjectWrapper ob0(body0Wrap, colshape0, body0Wrap->getCollisionObject(), body0Wrap->getWorldTransform(), m_part0, m_triface0);
 		const btCollisionObjectWrapper* prevObj0 = m_resultOut->getBody0Wrap();
 		
 		if (m_resultOut->getBody0Wrap()->getCollisionObject()==ob0.getCollisionObject())
@@ -667,12 +667,12 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 		if(swapped)
 		{
 			
-			shape_vs_shape_collision(body1Wrap,&ob0,shape1,colshape0);
+			shape_vs_shape_collision(body1Wrap, &ob0, shape1, colshape0);
 		}
 		else
 		{
 			
-			shape_vs_shape_collision(&ob0,body1Wrap,colshape0,shape1);
+			shape_vs_shape_collision(&ob0, body1Wrap, colshape0, shape1);
 		}
 		m_resultOut->setBody0Wrap(prevObj0);
 
@@ -685,7 +685,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_shape(const btCollisionObjectWrappe
 void btGImpactCollisionAlgorithm::gimpact_vs_compoundshape(const btCollisionObjectWrapper* body0Wrap,
 				  const btCollisionObjectWrapper* body1Wrap,
 				  const btGImpactShapeInterface * shape0,
-				  const btCompoundShape * shape1,bool swapped)
+				  const btCompoundShape * shape1, bool swapped)
 {
 	btTransform orgtrans1 = body1Wrap->getWorldTransform();
 
@@ -696,7 +696,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_compoundshape(const btCollisionObje
 		const btCollisionShape * colshape1 = shape1->getChildShape(i);
 		btTransform childtrans1 = orgtrans1*shape1->getChildTransform(i);
 
-		btCollisionObjectWrapper ob1(body1Wrap,colshape1,body1Wrap->getCollisionObject(),childtrans1,-1,i);
+		btCollisionObjectWrapper ob1(body1Wrap, colshape1, body1Wrap->getCollisionObject(), childtrans1,-1, i);
 		
 		const btCollisionObjectWrapper* tmp = 0;
 		if (m_resultOut->getBody0Wrap()->getCollisionObject()==ob1.getCollisionObject())
@@ -710,7 +710,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_compoundshape(const btCollisionObje
 		}
 		//collide child shape
 		gimpact_vs_shape(body0Wrap, &ob1,
-					  shape0,colshape1,swapped);
+					  shape0, colshape1, swapped);
 
 		if (m_resultOut->getBody0Wrap()->getCollisionObject()==ob1.getCollisionObject())
 		{
@@ -726,7 +726,7 @@ void btGImpactCollisionAlgorithm::gimpacttrimeshpart_vs_plane_collision(
 					  const btCollisionObjectWrapper * body0Wrap,
 					  const btCollisionObjectWrapper * body1Wrap,
 					  const btGImpactMeshShapePart * shape0,
-					  const btStaticPlaneShape * shape1,bool swapped)
+					  const btStaticPlaneShape * shape1, bool swapped)
 {
 
 
@@ -735,12 +735,12 @@ void btGImpactCollisionAlgorithm::gimpacttrimeshpart_vs_plane_collision(
 
 	const btPlaneShape * planeshape = static_cast<const btPlaneShape *>(shape1);
 	btVector4 plane;
-	planeshape->get_plane_equation_transformed(orgtrans1,plane);
+	planeshape->get_plane_equation_transformed(orgtrans1, plane);
 
 	//test box against plane
 
 	btAABB tribox;
-	shape0->getAabb(orgtrans0,tribox.m_min,tribox.m_max);
+	shape0->getAabb(orgtrans0, tribox.m_min, tribox.m_max);
 	tribox.increment_margin(planeshape->getMargin());
 
 	if( tribox.plane_classify(plane)!= BT_CONST_COLLIDE_PLANE) return;
@@ -753,7 +753,7 @@ void btGImpactCollisionAlgorithm::gimpacttrimeshpart_vs_plane_collision(
 	int vi = shape0->getVertexCount();
 	while(vi--)
 	{
-		shape0->getVertex(vi,vertex);
+		shape0->getVertex(vi, vertex);
 		vertex = orgtrans0(vertex);
 
 		btScalar distance = vertex.dot(plane) - plane[3] - margin;
@@ -795,7 +795,7 @@ public:
 
 	virtual void processTriangle(btVector3* triangle, int partId, int triangleIndex)
 	{
-		btTriangleShapeEx tri1(triangle[0],triangle[1],triangle[2]);
+		btTriangleShapeEx tri1(triangle[0], triangle[1], triangle[2]);
 		tri1.setMargin(margin);
         if(swapped)
         {
@@ -808,7 +808,7 @@ public:
             algorithm->setFace1(triangleIndex);
         }
 
-		btCollisionObjectWrapper ob1Wrap(body1Wrap,&tri1,body1Wrap->getCollisionObject(),body1Wrap->getWorldTransform(),partId,triangleIndex);
+		btCollisionObjectWrapper ob1Wrap(body1Wrap, &tri1, body1Wrap->getCollisionObject(), body1Wrap->getWorldTransform(), partId, triangleIndex);
 		const btCollisionObjectWrapper * tmp = 0;
 
 		if (algorithm->internalGetResultOut()->getBody0Wrap()->getCollisionObject()==ob1Wrap.getCollisionObject())
@@ -822,7 +822,7 @@ public:
 		}
 		
 		algorithm->gimpact_vs_shape(
-							body0Wrap,&ob1Wrap,gimpactshape0,&tri1,swapped);
+							body0Wrap, &ob1Wrap, gimpactshape0, &tri1, swapped);
 
 		if (algorithm->internalGetResultOut()->getBody0Wrap()->getCollisionObject()==ob1Wrap.getCollisionObject())
 		{
@@ -842,7 +842,7 @@ void btGImpactCollisionAlgorithm::gimpact_vs_concave(
 				  const btCollisionObjectWrapper* body0Wrap,
 				  const btCollisionObjectWrapper * body1Wrap,
 				  const btGImpactShapeInterface * shape0,
-				  const btConcaveShape * shape1,bool swapped)
+				  const btConcaveShape * shape1, bool swapped)
 {
 	//create the callback
 	btGImpactTriangleCallback tricallback;
@@ -858,16 +858,16 @@ void btGImpactCollisionAlgorithm::gimpact_vs_concave(
 
 	gimpactInConcaveSpace = body1Wrap->getWorldTransform().inverse() * body0Wrap->getWorldTransform();
 
-	btVector3 minAABB,maxAABB;
-	shape0->getAabb(gimpactInConcaveSpace,minAABB,maxAABB);
+	btVector3 minAABB, maxAABB;
+	shape0->getAabb(gimpactInConcaveSpace, minAABB, maxAABB);
 
-	shape1->processAllTriangles(&tricallback,minAABB,maxAABB);
+	shape1->processAllTriangles(&tricallback, minAABB, maxAABB);
 
 }
 
 
 
-void btGImpactCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btGImpactCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
     clearCache();
 
@@ -884,11 +884,11 @@ void btGImpactCollisionAlgorithm::processCollision (const btCollisionObjectWrapp
 		{
 			gimpactshape1 = static_cast<const btGImpactShapeInterface *>(body1Wrap->getCollisionShape());
 
-			gimpact_vs_gimpact(body0Wrap,body1Wrap,gimpactshape0,gimpactshape1);
+			gimpact_vs_gimpact(body0Wrap, body1Wrap, gimpactshape0, gimpactshape1);
 		}
 		else
 		{
-			gimpact_vs_shape(body0Wrap,body1Wrap,gimpactshape0,body1Wrap->getCollisionShape(),false);
+			gimpact_vs_shape(body0Wrap, body1Wrap, gimpactshape0, body1Wrap->getCollisionShape(), false);
 		}
 
 	}
@@ -896,12 +896,12 @@ void btGImpactCollisionAlgorithm::processCollision (const btCollisionObjectWrapp
 	{
 		gimpactshape1 = static_cast<const btGImpactShapeInterface *>(body1Wrap->getCollisionShape());
 
-		gimpact_vs_shape(body1Wrap,body0Wrap,gimpactshape1,body0Wrap->getCollisionShape(),true);
+		gimpact_vs_shape(body1Wrap, body0Wrap, gimpactshape1, body0Wrap->getCollisionShape(), true);
 	}
 }
 
 
-btScalar btGImpactCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+btScalar btGImpactCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	return 1.f;
 
@@ -921,12 +921,12 @@ void btGImpactCollisionAlgorithm::registerAlgorithm(btCollisionDispatcher * disp
 
 	for ( i = 0;i < MAX_BROADPHASE_COLLISION_TYPES ;i++ )
 	{
-		dispatcher->registerCollisionCreateFunc(GIMPACT_SHAPE_PROXYTYPE,i ,&s_gimpact_cf);
+		dispatcher->registerCollisionCreateFunc(GIMPACT_SHAPE_PROXYTYPE, i, &s_gimpact_cf);
 	}
 
 	for ( i = 0;i < MAX_BROADPHASE_COLLISION_TYPES ;i++ )
 	{
-		dispatcher->registerCollisionCreateFunc(i,GIMPACT_SHAPE_PROXYTYPE ,&s_gimpact_cf);
+		dispatcher->registerCollisionCreateFunc(i, GIMPACT_SHAPE_PROXYTYPE, &s_gimpact_cf);
 	}
 
 }

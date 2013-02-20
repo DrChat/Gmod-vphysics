@@ -89,14 +89,14 @@ struct	btSimdScalar
 SIMD_FORCE_INLINE btSimdScalar 
 operator*(const btSimdScalar& v1, const btSimdScalar& v2) 
 {
-	return btSimdScalar(_mm_mul_ps(v1.get128(),v2.get128()));
+	return btSimdScalar(_mm_mul_ps(v1.get128(), v2.get128()));
 }
 
 ///@brief Return the elementwise product of two btSimdScalar
 SIMD_FORCE_INLINE btSimdScalar 
 operator+(const btSimdScalar& v1, const btSimdScalar& v2) 
 {
-	return btSimdScalar(_mm_add_ps(v1.get128(),v2.get128()));
+	return btSimdScalar(_mm_add_ps(v1.get128(), v2.get128()));
 }
 
 
@@ -148,7 +148,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 
 
 	//Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
-	SIMD_FORCE_INLINE void applyImpulse(const btVector3& linearComponent, const btVector3& angularComponent,const btScalar impulseMagnitude)
+	SIMD_FORCE_INLINE void applyImpulse(const btVector3& linearComponent, const btVector3& angularComponent, const btScalar impulseMagnitude)
 	{
 		if (m_originalBody)
 		{
@@ -157,7 +157,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 		}
 	}
 
-	SIMD_FORCE_INLINE void internalApplyPushImpulse(const btVector3& linearComponent, const btVector3& angularComponent,btScalar impulseMagnitude)
+	SIMD_FORCE_INLINE void internalApplyPushImpulse(const btVector3& linearComponent, const btVector3& angularComponent, btScalar impulseMagnitude)
 	{
 		if (m_originalBody)
 		{
@@ -239,7 +239,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 
 
 	//Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position
-	SIMD_FORCE_INLINE void internalApplyImpulse(const btVector3& linearComponent, const btVector3& angularComponent,const btScalar impulseMagnitude)
+	SIMD_FORCE_INLINE void internalApplyImpulse(const btVector3& linearComponent, const btVector3& angularComponent, const btScalar impulseMagnitude)
 	{
 		if (m_originalBody)
 		{
@@ -276,7 +276,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 			if (m_pushVelocity[0]!=0.f || m_pushVelocity[1]!=0 || m_pushVelocity[2]!=0 || m_turnVelocity[0]!=0.f || m_turnVelocity[1]!=0 || m_turnVelocity[2]!=0)
 			{
 			//	btQuaternion orn = m_worldTransform.getRotation();
-				btTransformUtil::integrateTransform(m_worldTransform,m_pushVelocity,m_turnVelocity*splitImpulseTurnErp,timeStep,newTransform);
+				btTransformUtil::integrateTransform(m_worldTransform, m_pushVelocity, m_turnVelocity*splitImpulseTurnErp, timeStep, newTransform);
 				m_worldTransform = newTransform;
 			}
 			//m_worldTransform.setRotation(orn);

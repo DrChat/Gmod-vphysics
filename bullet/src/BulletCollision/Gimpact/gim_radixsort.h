@@ -42,7 +42,7 @@ class less_comparator
 {
 	public:
 
-	template<class T,class Z>
+	template<class T, class Z>
 	inline int operator() ( const T& a, const Z& b )
 	{
 		return ( a<b?-1:(a>b?1:0));
@@ -78,7 +78,7 @@ class copy_elements_func
 {
 public:
 	template<class T>
-	inline void operator()(T& a,T& b)
+	inline void operator()(T& a, T& b)
 	{
 		a = b;
 	}
@@ -89,9 +89,9 @@ class memcopy_elements_func
 {
 public:
 	template<class T>
-	inline void operator()(T& a,T& b)
+	inline void operator()(T& a, T& b)
 	{
-		gim_simd_memcpy(&a,&b,sizeof(T));
+		gim_simd_memcpy(&a, &b, sizeof(T));
 	}
 };
 
@@ -220,7 +220,7 @@ template<typename T, class GETKEY_CLASS>
 void gim_radix_sort_array_tokens(
 			T* array ,
 			GIM_RSORT_TOKEN * sorted_tokens,
-			GUINT element_count,GETKEY_CLASS uintkey_macro)
+			GUINT element_count, GETKEY_CLASS uintkey_macro)
 {
 	GIM_RSORT_TOKEN * _unsorted = (GIM_RSORT_TOKEN *) gim_alloc(sizeof(GIM_RSORT_TOKEN)*element_count);
     for (GUINT _i=0;_i<element_count;++_i)
@@ -228,7 +228,7 @@ void gim_radix_sort_array_tokens(
         _unsorted[_i].m_key = uintkey_macro(array[_i]);
         _unsorted[_i].m_value = _i;
     }
-    gim_radix_sort_rtokens(_unsorted,sorted_tokens,element_count);
+    gim_radix_sort_rtokens(_unsorted, sorted_tokens, element_count);
     gim_free(_unsorted);
     gim_free(_unsorted);
 }
@@ -247,9 +247,9 @@ void gim_radix_sort(
 	GETKEY_CLASS get_uintkey_macro, COPY_CLASS copy_elements_macro)
 {
 	GIM_RSORT_TOKEN * _sorted = (GIM_RSORT_TOKEN  *) gim_alloc(sizeof(GIM_RSORT_TOKEN)*element_count);
-    gim_radix_sort_array_tokens(array,_sorted,element_count,get_uintkey_macro);
+    gim_radix_sort_array_tokens(array,_sorted, element_count, get_uintkey_macro);
     T * _original_array = (T *) gim_alloc(sizeof(T)*element_count);
-    gim_simd_memcpy(_original_array,array,sizeof(T)*element_count);
+    gim_simd_memcpy(_original_array, array, sizeof(T)*element_count);
     for (GUINT _i=0;_i<element_count;++_i)
     {
         copy_elements_macro(array[_i],_original_array[_sorted[_i].m_value]);
@@ -272,7 +272,7 @@ If the element is not found, it returns the nearest upper element position, may 
 template<class T, typename KEYCLASS, typename COMP_CLASS>
 bool  gim_binary_search_ex(
 		const T* _array, GUINT _start_i,
-		GUINT _end_i,GUINT & _result_index,
+		GUINT _end_i, GUINT & _result_index,
 		const KEYCLASS & _search_key,
 		COMP_CLASS _comp_macro)
 {
@@ -304,7 +304,7 @@ bool  gim_binary_search_ex(
 
 
 
-//! Failsafe Iterative binary search,Template version
+//! Failsafe Iterative binary search, Template version
 /*!
 If the element is not found, it returns the nearest upper element position, may be the further position after the last element.
 \param _array
@@ -316,8 +316,8 @@ If the element is not found, it returns the nearest upper element position, may 
 */
 template<class T>
 bool gim_binary_search(
-	const T*_array,GUINT _start_i,
-	GUINT _end_i,const T & _search_key,
+	const T*_array, GUINT _start_i,
+	GUINT _end_i, const T & _search_key,
 	GUINT & _result_index)
 {
 	GUINT _i = _start_i;
@@ -348,7 +348,7 @@ bool gim_binary_search(
 
 ///heap sort from http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Sort/Heap/
 template <typename T, typename COMP_CLASS>
-void gim_down_heap(T *pArr, GUINT k, GUINT n,COMP_CLASS CompareFunc)
+void gim_down_heap(T *pArr, GUINT k, GUINT n, COMP_CLASS CompareFunc)
 {
 	/*  PRE: a[k+1..N] is a heap */
 	/* POST:  a[k..N]  is a heap */
@@ -359,12 +359,12 @@ void gim_down_heap(T *pArr, GUINT k, GUINT n,COMP_CLASS CompareFunc)
 	{
 		int child = 2*k;
 
-		if ((child < (int)n) && CompareFunc(pArr[child - 1] , pArr[child])<0)
+		if ((child < (int)n) && CompareFunc(pArr[child - 1], pArr[child])<0)
 		{
 			child++;
 		}
 		/* pick larger child */
-		if (CompareFunc(temp , pArr[child - 1])<0)
+		if (CompareFunc(temp, pArr[child - 1])<0)
 		{
 			/* move child up */
 			pArr[k - 1] = pArr[child - 1];
@@ -393,7 +393,7 @@ void gim_heap_sort(T *pArr, GUINT element_count, COMP_CLASS CompareFunc)
 	/* a[1..N] is now a heap */
 	while ( n>=2 )
 	{
-		gim_swap_elements(pArr,0,n-1); /* largest of a[0..n-1] */
+		gim_swap_elements(pArr,0, n-1); /* largest of a[0..n-1] */
 		--n;
 		/* restore a[1..i-1] heap */
 		gim_down_heap(pArr, 1, n, CompareFunc);

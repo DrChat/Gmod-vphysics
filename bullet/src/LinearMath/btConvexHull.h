@@ -116,8 +116,8 @@ class btPlane
 	public:
 	btVector3	normal;
 	btScalar	dist;   // distance below origin - the D from plane equasion Ax+By+Cz+D=0
-			btPlane(const btVector3 &n,btScalar d):normal(n),dist(d){}
-			btPlane():normal(),dist(0){}
+			btPlane(const btVector3 &n, btScalar d):normal(n), dist(d){}
+			btPlane():normal(), dist(0){}
 	
 };
 
@@ -133,7 +133,7 @@ class ConvexH
 		unsigned char v;  // the vertex at the start of this edge (index into vertices list)
 		unsigned char p;  // the facet on which this edge lies (index into facets list)
 		HalfEdge(){}
-		HalfEdge(short _ea,unsigned char _v, unsigned char _p):ea(_ea),v(_v),p(_p){}
+		HalfEdge(short _ea, unsigned char _v, unsigned char _p):ea(_ea), v(_v), p(_p){}
 	};
 	ConvexH()
 	{
@@ -144,16 +144,16 @@ class ConvexH
 	btAlignedObjectArray<btVector3> vertices;
 	btAlignedObjectArray<HalfEdge> edges;
 	btAlignedObjectArray<btPlane>  facets;
-	ConvexH(int vertices_size,int edges_size,int facets_size);
+	ConvexH(int vertices_size, int edges_size, int facets_size);
 };
 
 
 class int4
 {
 public:
-	int x,y,z,w;
+	int x, y,z, w;
 	int4(){};
-	int4(int _x,int _y, int _z,int _w){x=_x;y=_y;z=_z;w=_w;}
+	int4(int _x, int _y, int _z, int _w){x=_x;y=_y;z=_z;w=_w;}
 	const int& operator[](int i) const {return (&x)[i];}
 	int& operator[](int i) {return (&x)[i];}
 };
@@ -197,27 +197,27 @@ public:
 
 private:
 
-	bool ComputeHull(unsigned int vcount,const btVector3 *vertices,PHullResult &result,unsigned int vlimit);
+	bool ComputeHull(unsigned int vcount, const btVector3 *vertices, PHullResult &result, unsigned int vlimit);
 
-	class btHullTriangle*	allocateTriangle(int a,int b,int c);
+	class btHullTriangle*	allocateTriangle(int a, int b, int c);
 	void	deAllocateTriangle(btHullTriangle*);
-	void b2bfix(btHullTriangle* s,btHullTriangle*t);
+	void b2bfix(btHullTriangle* s, btHullTriangle*t);
 
-	void removeb2b(btHullTriangle* s,btHullTriangle*t);
+	void removeb2b(btHullTriangle* s, btHullTriangle*t);
 
 	void checkit(btHullTriangle *t);
 
 	btHullTriangle* extrudable(btScalar epsilon);
 
-	int calchull(btVector3 *verts,int verts_count, TUIntArray& tris_out, int &tris_count,int vlimit);
+	int calchull(btVector3 *verts, int verts_count, TUIntArray& tris_out, int &tris_count, int vlimit);
 
-	int calchullgen(btVector3 *verts,int verts_count, int vlimit);
+	int calchullgen(btVector3 *verts, int verts_count, int vlimit);
 
-	int4 FindSimplex(btVector3 *verts,int verts_count,btAlignedObjectArray<int> &allow);
+	int4 FindSimplex(btVector3 *verts, int verts_count, btAlignedObjectArray<int> &allow);
 
-	class ConvexH* ConvexHCrop(ConvexH& convex,const btPlane& slice);
+	class ConvexH* ConvexHCrop(ConvexH& convex, const btPlane& slice);
 
-	void extrude(class btHullTriangle* t0,int v);
+	void extrude(class btHullTriangle* t0, int v);
 
 	ConvexH* test_cube();
 
@@ -225,7 +225,7 @@ private:
 	//After the hull is generated it give you back a set of polygon faces which index the *original* point cloud.
 	//The thing is, often times, there are many 'dead vertices' in the point cloud that are on longer referenced by the hull.
 	//The routine 'BringOutYourDead' find only the referenced vertices, copies them to an new buffer, and re-indexes the hull so that it is a minimal representation.
-	void BringOutYourDead(const btVector3* verts,unsigned int vcount, btVector3* overts,unsigned int &ocount,unsigned int* indices,unsigned indexcount);
+	void BringOutYourDead(const btVector3* verts, unsigned int vcount, btVector3* overts, unsigned int &ocount, unsigned int* indices, unsigned indexcount);
 
 	bool CleanupVertices(unsigned int svcount,
 			     const btVector3* svertices,

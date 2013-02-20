@@ -35,7 +35,7 @@ subject to the following restrictions:
 #include "btThreadSupportInterface.h"
 
 
-typedef void (*PosixThreadFunc)(void* userPtr,void* lsMemory);
+typedef void (*PosixThreadFunc)(void* userPtr, void* lsMemory);
 typedef void* (*PosixlsMemorySetupFunc)();
 
 // PosixThreadSupport helps to initialize/shutdown libspe2, start/stop SPU tasks and communication

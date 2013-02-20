@@ -69,9 +69,9 @@ static SIMD_FORCE_INLINE void segmentsClosestPoints(
 {
 	// compute the parameters of the closest points on each line segment
 
-	btScalar dirA_dot_dirB = btDot(dirA,dirB);
-	btScalar dirA_dot_trans = btDot(dirA,translation);
-	btScalar dirB_dot_trans = btDot(dirB,translation);
+	btScalar dirA_dot_dirB = btDot(dirA, dirB);
+	btScalar dirA_dot_trans = btDot(dirA, translation);
+	btScalar dirB_dot_trans = btDot(dirB, translation);
 
 	btScalar denom = 1.0f - dirA_dot_dirB * dirA_dot_dirB;
 
@@ -156,7 +156,7 @@ static SIMD_FORCE_INLINE btScalar capsuleCapsuleDistance(
 	{
 		//degenerate case where 2 capsules are likely at the same location: take a vector tangential to 'directionA'
 		btVector3 q;
-		btPlaneSpace1(directionA,normalOnB,q);
+		btPlaneSpace1(directionA, normalOnB, q);
 	} else
 	{
 		// compute the contact normal
@@ -191,8 +191,8 @@ btConvexConvexAlgorithm::CreateFunc::~CreateFunc()
 { 
 }
 
-btConvexConvexAlgorithm::btConvexConvexAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver,int numPerturbationIterations, int minimumPointsPerturbationThreshold)
-: btActivatingCollisionAlgorithm(ci,body0Wrap,body1Wrap),
+btConvexConvexAlgorithm::btConvexConvexAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+: btActivatingCollisionAlgorithm(ci, body0Wrap, body1Wrap),
 m_simplexSolver(simplexSolver),
 m_pdSolver(pdSolver),
 m_ownManifold (false),
@@ -237,7 +237,7 @@ struct btPerturbedContactResult : public btManifoldResult
 	btIDebugDraw*	m_debugDrawer;
 
 
-	btPerturbedContactResult(btManifoldResult* originalResult,const btTransform& transformA,const btTransform& transformB,const btTransform& unPerturbedTransform,bool perturbA,btIDebugDraw* debugDrawer)
+	btPerturbedContactResult(btManifoldResult* originalResult, const btTransform& transformA, const btTransform& transformB, const btTransform& unPerturbedTransform, bool perturbA, btIDebugDraw* debugDrawer)
 		:m_originalManifoldResult(originalResult),
 		m_transformA(transformA),
 		m_transformB(transformB),
@@ -250,9 +250,9 @@ struct btPerturbedContactResult : public btManifoldResult
 	{
 	}
 
-	virtual void addContactPoint(const btVector3& normalOnBInWorld,const btVector3& pointInWorld,btScalar orgDepth)
+	virtual void addContactPoint(const btVector3& normalOnBInWorld, const btVector3& pointInWorld, btScalar orgDepth)
 	{
-		btVector3 endPt,startPt;
+		btVector3 endPt, startPt;
 		btScalar newDepth;
 		btVector3 newNormal;
 
@@ -272,13 +272,13 @@ struct btPerturbedContactResult : public btManifoldResult
 
 //#define DEBUG_CONTACTS 1
 #ifdef DEBUG_CONTACTS
-		m_debugDrawer->drawLine(startPt,endPt,btVector3(1,0,0));
-		m_debugDrawer->drawSphere(startPt,0.05,btVector3(0,1,0));
-		m_debugDrawer->drawSphere(endPt,0.05,btVector3(0,0,1));
+		m_debugDrawer->drawLine(startPt, endPt, btVector3(1,0,0));
+		m_debugDrawer->drawSphere(startPt,0.05, btVector3(0,1,0));
+		m_debugDrawer->drawSphere(endPt,0.05, btVector3(0,0,1));
 #endif //DEBUG_CONTACTS
 
 		
-		m_originalManifoldResult->addContactPoint(normalOnBInWorld,startPt,newDepth);
+		m_originalManifoldResult->addContactPoint(normalOnBInWorld, startPt, newDepth);
 	}
 
 };
@@ -289,13 +289,13 @@ extern btScalar gContactBreakingThreshold;
 //
 // Convex-Convex collision algorithm
 //
-void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 
 	if (!m_manifoldPtr)
 	{
 		//swapped?
-		m_manifoldPtr = m_dispatcher->getNewManifold(body0Wrap->getCollisionObject(),body1Wrap->getCollisionObject());
+		m_manifoldPtr = m_dispatcher->getNewManifold(body0Wrap->getCollisionObject(), body1Wrap->getCollisionObject());
 		m_ownManifold = true;
 	}
 	resultOut->setPersistentManifold(m_manifoldPtr);
@@ -319,14 +319,14 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 		
 		btScalar threshold = m_manifoldPtr->getContactBreakingThreshold();
 
-		btScalar dist = capsuleCapsuleDistance(normalOnB,	pointOnBWorld,capsuleA->getHalfHeight(),capsuleA->getRadius(),
-			capsuleB->getHalfHeight(),capsuleB->getRadius(),capsuleA->getUpAxis(),capsuleB->getUpAxis(),
-			body0Wrap->getWorldTransform(),body1Wrap->getWorldTransform(),threshold);
+		btScalar dist = capsuleCapsuleDistance(normalOnB,	pointOnBWorld, capsuleA->getHalfHeight(), capsuleA->getRadius(),
+			capsuleB->getHalfHeight(), capsuleB->getRadius(), capsuleA->getUpAxis(), capsuleB->getUpAxis(),
+			body0Wrap->getWorldTransform(), body1Wrap->getWorldTransform(), threshold);
 
 		if (dist<threshold)
 		{
 			btAssert(normalOnB.length2()>=(SIMD_EPSILON*SIMD_EPSILON));
-			resultOut->addContactPoint(normalOnB,pointOnBWorld,dist);	
+			resultOut->addContactPoint(normalOnB, pointOnBWorld, dist);	
 		}
 		resultOut->refreshContactPoints();
 		return;
@@ -339,7 +339,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 #ifdef USE_SEPDISTANCE_UTIL2
 	if (dispatchInfo.m_useConvexConservativeDistanceUtil)
 	{
-		m_sepDistance.updateSeparatingDistance(body0->getWorldTransform(),body1->getWorldTransform());
+		m_sepDistance.updateSeparatingDistance(body0->getWorldTransform(), body1->getWorldTransform());
 	}
 
 	if (!dispatchInfo.m_useConvexConservativeDistanceUtil || m_sepDistance.getConservativeSeparatingDistance()<=0.f)
@@ -350,7 +350,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 	
 	btGjkPairDetector::ClosestPointInput input;
 
-	btGjkPairDetector	gjkPairDetector(min0,min1,m_simplexSolver,m_pdSolver);
+	btGjkPairDetector	gjkPairDetector(min0, min1, m_simplexSolver, m_pdSolver);
 	//TODO: if (dispatchInfo.m_useContinuous)
 	gjkPairDetector.setMinkowskiA(min0);
 	gjkPairDetector.setMinkowskiB(min1);
@@ -401,9 +401,9 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 
 		struct btDummyResult : public btDiscreteCollisionDetectorInterface::Result
 		{
-			virtual void setShapeIdentifiersA(int partId0,int index0){}
-			virtual void setShapeIdentifiersB(int partId1,int index1){}
-			virtual void addContactPoint(const btVector3& normalOnBInWorld,const btVector3& pointInWorld,btScalar depth) 
+			virtual void setShapeIdentifiersA(int partId0, int index0){}
+			virtual void setShapeIdentifiersB(int partId1, int index1){}
+			virtual void addContactPoint(const btVector3& normalOnBInWorld, const btVector3& pointInWorld, btScalar depth) 
 			{
 			}
 		};
@@ -426,9 +426,9 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 			{
 			}
 			
-			virtual void setShapeIdentifiersA(int partId0,int index0){}
-			virtual void setShapeIdentifiersB(int partId1,int index1){}
-			virtual void addContactPoint(const btVector3& normalOnBInWorld,const btVector3& pointInWorldOrg,btScalar depthOrg) 
+			virtual void setShapeIdentifiersA(int partId0, int index0){}
+			virtual void setShapeIdentifiersB(int partId1, int index1){}
+			virtual void addContactPoint(const btVector3& normalOnBInWorld, const btVector3& pointInWorldOrg, btScalar depthOrg) 
 			{
 				m_reportedDistance = depthOrg;
 				m_reportedNormalOnWorld = normalOnBInWorld;
@@ -439,7 +439,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 				{
 					m_foundResult = true;					
 				}
-				m_originalResult->addContactPoint(normalOnBInWorld,adjustedPointB,m_reportedDistance);
+				m_originalResult->addContactPoint(normalOnBInWorld, adjustedPointB, m_reportedDistance);
 			}
 		};
 
@@ -451,7 +451,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 		btScalar min0Margin = min0->getShapeType()==BOX_SHAPE_PROXYTYPE? 0.f : min0->getMargin();
 		btScalar min1Margin = min1->getShapeType()==BOX_SHAPE_PROXYTYPE? 0.f : min1->getMargin();
 
-		btWithoutMarginResult	withoutMargin(resultOut, min0Margin,min1Margin);
+		btWithoutMarginResult	withoutMargin(resultOut, min0Margin, min1Margin);
 
 		btPolyhedralConvexShape* polyhedronA = (btPolyhedralConvexShape*) min0;
 		btPolyhedralConvexShape* polyhedronB = (btPolyhedralConvexShape*) min1;
@@ -478,12 +478,12 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 			{
 #ifdef ZERO_MARGIN
 				gjkPairDetector.setIgnoreMargin(true);
-				gjkPairDetector.getClosestPoints(input,*resultOut,dispatchInfo.m_debugDraw);
+				gjkPairDetector.getClosestPoints(input,*resultOut, dispatchInfo.m_debugDraw);
 #else
 
 
-				gjkPairDetector.getClosestPoints(input,withoutMargin,dispatchInfo.m_debugDraw);
-				//gjkPairDetector.getClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+				gjkPairDetector.getClosestPoints(input, withoutMargin, dispatchInfo.m_debugDraw);
+				//gjkPairDetector.getClosestPoints(input, dummy, dispatchInfo.m_debugDraw);
 #endif //ZERO_MARGIN
 				//btScalar l2 = gjkPairDetector.getCachedSeparatingAxis().length2();
 				//if (l2>SIMD_EPSILON)
@@ -502,7 +502,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 			if (foundSepAxis)
 			{
 				
-//				printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
+//				printf("sepNormalWorldSpace=%f, %f, %f\n", sepNormalWorldSpace.getX(), sepNormalWorldSpace.getY(), sepNormalWorldSpace.getZ());
 
 				btPolyhedralContactClipping::clipHullAgainstHull(sepNormalWorldSpace, *polyhedronA->getConvexPolyhedron(), *polyhedronB->getConvexPolyhedron(),
 					body0Wrap->getWorldTransform(), 
@@ -544,15 +544,15 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 					body0Wrap->getWorldTransform(), 
 					body1Wrap->getWorldTransform(),
 					sepNormalWorldSpace,*resultOut);
-				//	 printf("sepNormalWorldSpace=%f,%f,%f\n",sepNormalWorldSpace.getX(),sepNormalWorldSpace.getY(),sepNormalWorldSpace.getZ());
+				//	 printf("sepNormalWorldSpace=%f, %f, %f\n", sepNormalWorldSpace.getX(), sepNormalWorldSpace.getY(), sepNormalWorldSpace.getZ());
 
 				} else
 				{
 #ifdef ZERO_MARGIN
 					gjkPairDetector.setIgnoreMargin(true);
-					gjkPairDetector.getClosestPoints(input,*resultOut,dispatchInfo.m_debugDraw);
+					gjkPairDetector.getClosestPoints(input,*resultOut, dispatchInfo.m_debugDraw);
 #else
-					gjkPairDetector.getClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
+					gjkPairDetector.getClosestPoints(input, dummy, dispatchInfo.m_debugDraw);
 #endif//ZERO_MARGIN
 					
 					btScalar l2 = gjkPairDetector.getCachedSeparatingAxis().length2();
@@ -587,7 +587,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 
 	}
 	
-	gjkPairDetector.getClosestPoints(input,*resultOut,dispatchInfo.m_debugDraw);
+	gjkPairDetector.getClosestPoints(input,*resultOut, dispatchInfo.m_debugDraw);
 
 	//now perform 'm_numPerturbationIterations' collision queries with the perturbated collision objects
 	
@@ -596,7 +596,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 	{
 		
 		int i;
-		btVector3 v0,v1;
+		btVector3 v0, v1;
 		btVector3 sepNormalWorldSpace;
 		btScalar l2 = gjkPairDetector.getCachedSeparatingAxis().length2();
 	
@@ -604,7 +604,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 		{
 			sepNormalWorldSpace = gjkPairDetector.getCachedSeparatingAxis()*(1.f/l2);
 			
-			btPlaneSpace1(sepNormalWorldSpace,v0,v1);
+			btPlaneSpace1(sepNormalWorldSpace, v0, v1);
 
 
 			bool perturbeA = true;
@@ -637,9 +637,9 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 			{
 				if (v0.length2()>SIMD_EPSILON)
 				{
-				btQuaternion perturbeRot(v0,perturbeAngle);
+				btQuaternion perturbeRot(v0, perturbeAngle);
 				btScalar iterationAngle = i*(SIMD_2_PI/btScalar(m_numPerturbationIterations));
-				btQuaternion rotq(sepNormalWorldSpace,iterationAngle);
+				btQuaternion rotq(sepNormalWorldSpace, iterationAngle);
 				
 				
 				if (perturbeA)
@@ -658,8 +658,8 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 	#endif
 				}
 				
-				btPerturbedContactResult perturbedResultOut(resultOut,input.m_transformA,input.m_transformB,unPerturbedTransform,perturbeA,dispatchInfo.m_debugDraw);
-				gjkPairDetector.getClosestPoints(input,perturbedResultOut,dispatchInfo.m_debugDraw);
+				btPerturbedContactResult perturbedResultOut(resultOut, input.m_transformA, input.m_transformB, unPerturbedTransform, perturbeA, dispatchInfo.m_debugDraw);
+				gjkPairDetector.getClosestPoints(input, perturbedResultOut, dispatchInfo.m_debugDraw);
 				}
 			}
 		}
@@ -670,7 +670,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 #ifdef USE_SEPDISTANCE_UTIL2
 	if (dispatchInfo.m_useConvexConservativeDistanceUtil && (sepDist>SIMD_EPSILON))
 	{
-		m_sepDistance.initSeparatingDistance(gjkPairDetector.getCachedSeparatingAxis(),sepDist,body0->getWorldTransform(),body1->getWorldTransform());
+		m_sepDistance.initSeparatingDistance(gjkPairDetector.getCachedSeparatingAxis(), sepDist, body0->getWorldTransform(), body1->getWorldTransform());
 	}
 #endif //USE_SEPDISTANCE_UTIL2
 
@@ -687,7 +687,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 
 
 bool disableCcd = false;
-btScalar	btConvexConvexAlgorithm::calculateTimeOfImpact(btCollisionObject* col0,btCollisionObject* col1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+btScalar	btConvexConvexAlgorithm::calculateTimeOfImpact(btCollisionObject* col0, btCollisionObject* col1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	(void)resultOut;
 	(void)dispatchInfo;
@@ -723,12 +723,12 @@ btScalar	btConvexConvexAlgorithm::calculateTimeOfImpact(btCollisionObject* col0,
 		btSphereShape	sphere1(col1->getCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
 		btConvexCast::CastResult result;
 		btVoronoiSimplexSolver voronoiSimplex;
-		//SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
+		//SubsimplexConvexCast ccd0(&sphere, min0, &voronoiSimplex);
 		///Simplification, one object is simplified as a sphere
-		btGjkConvexCast ccd1( convex0 ,&sphere1,&voronoiSimplex);
-		//ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-		if (ccd1.calcTimeOfImpact(col0->getWorldTransform(),col0->getInterpolationWorldTransform(),
-			col1->getWorldTransform(),col1->getInterpolationWorldTransform(),result))
+		btGjkConvexCast ccd1( convex0, &sphere1, &voronoiSimplex);
+		//ContinuousConvexCollision ccd(min0, min1, &voronoiSimplex,0);
+		if (ccd1.calcTimeOfImpact(col0->getWorldTransform(), col0->getInterpolationWorldTransform(),
+			col1->getWorldTransform(), col1->getInterpolationWorldTransform(), result))
 		{
 		
 			//store result.m_fraction in both bodies
@@ -756,12 +756,12 @@ btScalar	btConvexConvexAlgorithm::calculateTimeOfImpact(btCollisionObject* col0,
 		btSphereShape	sphere0(col0->getCcdSweptSphereRadius()); //todo: allow non-zero sphere sizes, for better approximation
 		btConvexCast::CastResult result;
 		btVoronoiSimplexSolver voronoiSimplex;
-		//SubsimplexConvexCast ccd0(&sphere,min0,&voronoiSimplex);
+		//SubsimplexConvexCast ccd0(&sphere, min0, &voronoiSimplex);
 		///Simplification, one object is simplified as a sphere
-		btGjkConvexCast ccd1(&sphere0,convex1,&voronoiSimplex);
-		//ContinuousConvexCollision ccd(min0,min1,&voronoiSimplex,0);
-		if (ccd1.calcTimeOfImpact(col0->getWorldTransform(),col0->getInterpolationWorldTransform(),
-			col1->getWorldTransform(),col1->getInterpolationWorldTransform(),result))
+		btGjkConvexCast ccd1(&sphere0, convex1, &voronoiSimplex);
+		//ContinuousConvexCollision ccd(min0, min1, &voronoiSimplex,0);
+		if (ccd1.calcTimeOfImpact(col0->getWorldTransform(), col0->getInterpolationWorldTransform(),
+			col1->getWorldTransform(), col1->getInterpolationWorldTransform(), result))
 		{
 		
 			//store result.m_fraction in both bodies

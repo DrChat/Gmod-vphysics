@@ -29,7 +29,7 @@ subject to the following restrictions:
 
 
 
-SpuGatheringCollisionDispatcher::SpuGatheringCollisionDispatcher(class	btThreadSupportInterface*	threadInterface, unsigned int	maxNumOutstandingTasks,btCollisionConfiguration* collisionConfiguration)
+SpuGatheringCollisionDispatcher::SpuGatheringCollisionDispatcher(class	btThreadSupportInterface*	threadInterface, unsigned int	maxNumOutstandingTasks, btCollisionConfiguration* collisionConfiguration)
 :btCollisionDispatcher(collisionConfiguration),
 m_spuCollisionTaskProcess(0),
 m_threadInterface(threadInterface),
@@ -39,7 +39,7 @@ m_maxNumOutstandingTasks(maxNumOutstandingTasks)
 }
 
 
-bool	SpuGatheringCollisionDispatcher::supportsDispatchPairOnSpu(int proxyType0,int proxyType1)
+bool	SpuGatheringCollisionDispatcher::supportsDispatchPairOnSpu(int proxyType0, int proxyType1)
 {
 	bool supported0 = (
 		(proxyType0 == BOX_SHAPE_PROXYTYPE) ||
@@ -104,7 +104,7 @@ public:
 
 
 		//PPU version
-		//(*m_dispatcher->getNearCallback())(collisionPair,*m_dispatcher,m_dispatchInfo);
+		//(*m_dispatcher->getNearCallback())(collisionPair,*m_dispatcher, m_dispatchInfo);
 
 		//only support discrete collision detection for now, we could fallback on PPU/unoptimized version for TOI/CCD
 		btAssert(m_dispatchInfo.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE);
@@ -125,11 +125,11 @@ public:
 				ci.m_dispatcher1 = m_dispatcher;
 				ci.m_manifold = 0;
 
-				if (m_dispatcher->needsCollision(colObj0,colObj1))
+				if (m_dispatcher->needsCollision(colObj0, colObj1))
 				{
 					int	proxyType0 = colObj0->getCollisionShape()->getShapeType();
 					int	proxyType1 = colObj1->getCollisionShape()->getShapeType();
-					bool supportsSpuDispatch = m_dispatcher->supportsDispatchPairOnSpu(proxyType0,proxyType1) 
+					bool supportsSpuDispatch = m_dispatcher->supportsDispatchPairOnSpu(proxyType0, proxyType1) 
 						&& ((colObj0->getCollisionFlags() & btCollisionObject::CF_DISABLE_SPU_COLLISION_PROCESSING) == 0)
 						&& ((colObj1->getCollisionFlags() & btCollisionObject::CF_DISABLE_SPU_COLLISION_PROCESSING) == 0);
 
@@ -138,7 +138,7 @@ public:
 						btCompoundShape* compound = (btCompoundShape*)colObj0->getCollisionShape();
 						if (compound->getNumChildShapes()>MAX_SPU_COMPOUND_SUBSHAPES)
 						{
-							//printf("PPU fallback, compound->getNumChildShapes(%d)>%d\n",compound->getNumChildShapes(),MAX_SPU_COMPOUND_SUBSHAPES);
+							//printf("PPU fallback, compound->getNumChildShapes(%d)>%d\n", compound->getNumChildShapes(), MAX_SPU_COMPOUND_SUBSHAPES);
 							supportsSpuDispatch = false;
 						}
 					}
@@ -148,7 +148,7 @@ public:
 						btCompoundShape* compound = (btCompoundShape*)colObj1->getCollisionShape();
 						if (compound->getNumChildShapes()>MAX_SPU_COMPOUND_SUBSHAPES)
 						{
-							//printf("PPU fallback, compound->getNumChildShapes(%d)>%d\n",compound->getNumChildShapes(),MAX_SPU_COMPOUND_SUBSHAPES);
+							//printf("PPU fallback, compound->getNumChildShapes(%d)>%d\n", compound->getNumChildShapes(), MAX_SPU_COMPOUND_SUBSHAPES);
 							supportsSpuDispatch = false;
 						}
 					}
@@ -162,14 +162,14 @@ public:
 #else
 						void* mem = m_dispatcher->allocateCollisionAlgorithm(so);
 #endif
-						collisionPair.m_algorithm = new(mem) SpuContactManifoldCollisionAlgorithm(ci,colObj0,colObj1);
+						collisionPair.m_algorithm = new(mem) SpuContactManifoldCollisionAlgorithm(ci, colObj0, colObj1);
 						collisionPair.m_internalTmpValue =  2;
 					} else
 					{
-						btCollisionObjectWrapper ob0(0,colObj0->getCollisionShape(),colObj0,colObj0->getWorldTransform(),-1,-1);
-						btCollisionObjectWrapper ob1(0,colObj1->getCollisionShape(),colObj1,colObj1->getWorldTransform(),-1,-1);
+						btCollisionObjectWrapper ob0(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(),-1,-1);
+						btCollisionObjectWrapper ob1(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(),-1,-1);
 
-						collisionPair.m_algorithm = m_dispatcher->findAlgorithm(&ob0,&ob1);
+						collisionPair.m_algorithm = m_dispatcher->findAlgorithm(&ob0, &ob1);
 						collisionPair.m_internalTmpValue = 3;
 					}
 				} 
@@ -179,7 +179,7 @@ public:
 	}
 };
 
-void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairCache* pairCache,const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher) 
+void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher) 
 {
 
 	if (dispatchInfo.m_enableSPU)
@@ -190,19 +190,19 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 			BT_PROFILE("processAllOverlappingPairs");
 
 			if (!m_spuCollisionTaskProcess)
-				m_spuCollisionTaskProcess = new SpuCollisionTaskProcess(m_threadInterface,m_maxNumOutstandingTasks);
+				m_spuCollisionTaskProcess = new SpuCollisionTaskProcess(m_threadInterface, m_maxNumOutstandingTasks);
 		
 			m_spuCollisionTaskProcess->setNumTasks(m_maxNumOutstandingTasks);
-	//		printf("m_maxNumOutstandingTasks =%d\n",m_maxNumOutstandingTasks);
+	//		printf("m_maxNumOutstandingTasks =%d\n", m_maxNumOutstandingTasks);
 
 			m_spuCollisionTaskProcess->initialize2(dispatchInfo.m_useEpa);
 			
 		
 			///modified version of btCollisionDispatcher::dispatchAllCollisionPairs:
 			{
-				btSpuCollisionPairCallback	collisionCallback(dispatchInfo,this);
+				btSpuCollisionPairCallback	collisionCallback(dispatchInfo, this);
 
-				pairCache->processAllOverlappingPairs(&collisionCallback,dispatcher);
+				pairCache->processAllOverlappingPairs(&collisionCallback, dispatcher);
 			}
 		}
 
@@ -225,7 +225,7 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 					//Performance Hint: tweak this number during benchmarking
 					
 					int endIndex = (i+pairRange) < numTotalPairs ? i+pairRange : numTotalPairs;
-					m_spuCollisionTaskProcess->addWorkToTask(pairPtr,i,endIndex);
+					m_spuCollisionTaskProcess->addWorkToTask(pairPtr, i,endIndex);
 					i = endIndex;
 				}
 			}
@@ -242,22 +242,22 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 							btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
 							btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
 	
-							if (dispatcher->needsCollision(colObj0,colObj1))
+							if (dispatcher->needsCollision(colObj0, colObj1))
 							{
 							//discrete collision detection query
-								btCollisionObjectWrapper ob0(0,colObj0->getCollisionShape(),colObj0,colObj0->getWorldTransform(),-1,-1);
-								btCollisionObjectWrapper ob1(0,colObj1->getCollisionShape(),colObj1,colObj1->getWorldTransform(),-1,-1);
+								btCollisionObjectWrapper ob0(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(),-1,-1);
+								btCollisionObjectWrapper ob1(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(),-1,-1);
 
-								btManifoldResult contactPointResult(&ob0,&ob1);
+								btManifoldResult contactPointResult(&ob0, &ob1);
 								
 								if (dispatchInfo.m_dispatchFunc == 		btDispatcherInfo::DISPATCH_DISCRETE)
 								{
 									
-									collisionPair.m_algorithm->processCollision(&ob0,&ob1,dispatchInfo,&contactPointResult);
+									collisionPair.m_algorithm->processCollision(&ob0, &ob1, dispatchInfo, &contactPointResult);
 								} else
 								{
 									//continuous collision detection query, time of impact (toi)
-									btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0,colObj1,dispatchInfo,&contactPointResult);
+									btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
 									if (dispatchInfo.m_timeOfImpact > toi)
 										dispatchInfo.m_timeOfImpact = toi;
 	
@@ -278,6 +278,6 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 	{
 		///PPU fallback
 		///!Need to make sure to clear all 'algorithms' when switching between SPU and PPU
-		btCollisionDispatcher::dispatchAllCollisionPairs(pairCache,dispatchInfo,dispatcher);
+		btCollisionDispatcher::dispatchAllCollisionPairs(pairCache, dispatchInfo, dispatcher);
 	}
 }

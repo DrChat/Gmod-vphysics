@@ -26,7 +26,7 @@ subject to the following restrictions:
 #define CALC_EXACT_INERTIA 1
 
 
-void btGImpactCompoundShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void btGImpactCompoundShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	lockChildShapes();
 #ifdef CALC_EXACT_INERTIA
@@ -38,14 +38,14 @@ void btGImpactCompoundShape::calculateLocalInertia(btScalar mass,btVector3& iner
 	while(i--)
 	{
 		btVector3 temp_inertia;
-		m_childShapes[i]->calculateLocalInertia(shapemass,temp_inertia);
+		m_childShapes[i]->calculateLocalInertia(shapemass, temp_inertia);
 		if(childrenHasTransform())
 		{
-			inertia = gim_inertia_add_transformed( inertia,temp_inertia,m_childTransforms[i]);
+			inertia = gim_inertia_add_transformed( inertia, temp_inertia, m_childTransforms[i]);
 		}
 		else
 		{
-			inertia = gim_inertia_add_transformed( inertia,temp_inertia,btTransform::getIdentity());
+			inertia = gim_inertia_add_transformed( inertia, temp_inertia, btTransform::getIdentity());
 		}
 
 	}
@@ -62,7 +62,7 @@ void btGImpactCompoundShape::calculateLocalInertia(btScalar mass,btVector3& iner
 	const btScalar z2 = lz*lz;
 	const btScalar scaledmass = mass * btScalar(0.08333333);
 
-	inertia = scaledmass * (btVector3(y2+z2,x2+z2,x2+y2));
+	inertia = scaledmass * (btVector3(y2+z2, x2+z2, x2+y2));
 
 #endif
 	unlockChildShapes();
@@ -70,7 +70,7 @@ void btGImpactCompoundShape::calculateLocalInertia(btScalar mass,btVector3& iner
 
 
 
-void btGImpactMeshShapePart::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void btGImpactMeshShapePart::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	lockChildShapes();
 
@@ -84,8 +84,8 @@ void btGImpactMeshShapePart::calculateLocalInertia(btScalar mass,btVector3& iner
 	while(i--)
 	{
 		btVector3 pointintertia;
-		this->getVertex(i,pointintertia);
-		pointintertia = gim_get_point_inertia(pointintertia,pointmass);
+		this->getVertex(i, pointintertia);
+		pointintertia = gim_get_point_inertia(pointintertia, pointmass);
 		inertia+=pointintertia;
 	}
 
@@ -101,14 +101,14 @@ void btGImpactMeshShapePart::calculateLocalInertia(btScalar mass,btVector3& iner
 	const btScalar z2 = lz*lz;
 	const btScalar scaledmass = mass * btScalar(0.08333333);
 
-	inertia = scaledmass * (btVector3(y2+z2,x2+z2,x2+y2));
+	inertia = scaledmass * (btVector3(y2+z2, x2+z2, x2+y2));
 
 #endif
 
 	unlockChildShapes();
 }
 
-void btGImpactMeshShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void btGImpactMeshShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 
 #ifdef CALC_EXACT_INERTIA
@@ -120,7 +120,7 @@ void btGImpactMeshShape::calculateLocalInertia(btScalar mass,btVector3& inertia)
 	while(i--)
 	{
 		btVector3 partinertia;
-		getMeshPart(i)->calculateLocalInertia(partmass,partinertia);
+		getMeshPart(i)->calculateLocalInertia(partmass, partinertia);
 		inertia+=partinertia;
 	}
 
@@ -136,7 +136,7 @@ void btGImpactMeshShape::calculateLocalInertia(btScalar mass,btVector3& inertia)
 	const btScalar z2 = lz*lz;
 	const btScalar scaledmass = mass * btScalar(0.08333333);
 
-	inertia = scaledmass * (btVector3(y2+z2,x2+z2,x2+y2));
+	inertia = scaledmass * (btVector3(y2+z2, x2+z2, x2+y2));
 
 #endif
 }
@@ -145,7 +145,7 @@ void btGImpactMeshShape::rayTest(const btVector3& rayFrom, const btVector3& rayT
 {
 }
 
-void btGImpactMeshShapePart::processAllTrianglesRay(btTriangleCallback* callback,const btVector3& rayFrom, const btVector3& rayTo) const
+void btGImpactMeshShapePart::processAllTrianglesRay(btTriangleCallback* callback, const btVector3& rayFrom, const btVector3& rayTo) const
 {
 	lockChildShapes();
 
@@ -165,13 +165,13 @@ void btGImpactMeshShapePart::processAllTrianglesRay(btTriangleCallback* callback
 	int i = collided.size();
 	while(i--)
 	{
-		getPrimitiveTriangle(collided[i],triangle);
-		callback->processTriangle(triangle.m_vertices,part,collided[i]);
+		getPrimitiveTriangle(collided[i], triangle);
+		callback->processTriangle(triangle.m_vertices, part, collided[i]);
 	}
 	unlockChildShapes();
 }
 
-void btGImpactMeshShapePart::processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const
+void btGImpactMeshShapePart::processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const
 {
 	lockChildShapes();
 	btAABB box;
@@ -179,7 +179,7 @@ void btGImpactMeshShapePart::processAllTriangles(btTriangleCallback* callback,co
 	box.m_max = aabbMax;
 
 	btAlignedObjectArray<int> collided;
-	m_box_set.boxQuery(box,collided);
+	m_box_set.boxQuery(box, collided);
 
 	if(collided.size()==0)
 	{
@@ -192,23 +192,23 @@ void btGImpactMeshShapePart::processAllTriangles(btTriangleCallback* callback,co
 	int i = collided.size();
 	while(i--)
 	{
-		this->getPrimitiveTriangle(collided[i],triangle);
-		callback->processTriangle(triangle.m_vertices,part,collided[i]);
+		this->getPrimitiveTriangle(collided[i], triangle);
+		callback->processTriangle(triangle.m_vertices, part, collided[i]);
 	}
 	unlockChildShapes();
 
 }
 
-void btGImpactMeshShape::processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const
+void btGImpactMeshShape::processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const
 {
 	int i = m_mesh_parts.size();
 	while(i--)
 	{
-		m_mesh_parts[i]->processAllTriangles(callback,aabbMin,aabbMax);
+		m_mesh_parts[i]->processAllTriangles(callback, aabbMin, aabbMax);
 	}
 }
 
-void btGImpactMeshShape::processAllTrianglesRay(btTriangleCallback* callback,const btVector3& rayFrom, const btVector3& rayTo) const
+void btGImpactMeshShape::processAllTrianglesRay(btTriangleCallback* callback, const btVector3& rayFrom, const btVector3& rayTo) const
 {
 	int i = m_mesh_parts.size();
 	while(i--)
@@ -223,7 +223,7 @@ const char*	btGImpactMeshShape::serialize(void* dataBuffer, btSerializer* serial
 {
 	btGImpactMeshShapeData* trimeshData = (btGImpactMeshShapeData*) dataBuffer;
 
-	btCollisionShape::serialize(&trimeshData->m_collisionShapeData,serializer);
+	btCollisionShape::serialize(&trimeshData->m_collisionShapeData, serializer);
 
 	m_meshInterface->serialize(&trimeshData->m_meshInterface, serializer);
 

@@ -131,7 +131,7 @@ public:
 	void setFromOpenGLMatrix(const btScalar *m)
 	{
 		m_basis.setFromOpenGLSubMatrix(m);
-		m_origin.setValue(m[12],m[13],m[14]);
+		m_origin.setValue(m[12], m[13], m[14]);
 	}
 
   /**@brief Fill an array representation

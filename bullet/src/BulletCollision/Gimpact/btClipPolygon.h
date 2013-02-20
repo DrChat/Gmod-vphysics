@@ -28,14 +28,14 @@ subject to the following restrictions:
 #include "LinearMath/btGeometryUtil.h"
 
 
-SIMD_FORCE_INLINE btScalar bt_distance_point_plane(const btVector4 & plane,const btVector3 &point)
+SIMD_FORCE_INLINE btScalar bt_distance_point_plane(const btVector4 & plane, const btVector3 &point)
 {
 	return point.dot(plane) - plane[3];
 }
 
 /*! Vector blending
 Takes two vectors a, b, blends them together*/
-SIMD_FORCE_INLINE void bt_vec_blend(btVector3 &vr, const btVector3 &va,const btVector3 &vb, btScalar blend_factor)
+SIMD_FORCE_INLINE void bt_vec_blend(btVector3 &vr, const btVector3 &va, const btVector3 &vb, btScalar blend_factor)
 {
 	vr = (1-blend_factor)*va + blend_factor*vb;
 }
@@ -54,7 +54,7 @@ SIMD_FORCE_INLINE void bt_plane_clip_polygon_collect(
 	if(_classif!=_prevclassif)
 	{
 		btScalar blendfactor = -dist0/(dist1-dist0);
-		bt_vec_blend(clipped[clipped_count],point0,point1,blendfactor);
+		bt_vec_blend(clipped[clipped_count], point0, point1, blendfactor);
 		clipped_count++;
 	}
 	if(!_classif)
@@ -79,7 +79,7 @@ SIMD_FORCE_INLINE int bt_plane_clip_polygon(
 
 
     //clip first point
-	btScalar firstdist = bt_distance_point_plane(plane,polygon_points[0]);;
+	btScalar firstdist = bt_distance_point_plane(plane, polygon_points[0]);;
 	if(!(firstdist>SIMD_EPSILON))
 	{
 		clipped[clipped_count] = polygon_points[0];
@@ -89,10 +89,10 @@ SIMD_FORCE_INLINE int bt_plane_clip_polygon(
 	btScalar olddist = firstdist;
 	for(int i=1;i<polygon_point_count;i++)
 	{
-		btScalar dist = bt_distance_point_plane(plane,polygon_points[i]);
+		btScalar dist = bt_distance_point_plane(plane, polygon_points[i]);
 
 		bt_plane_clip_polygon_collect(
-						polygon_points[i-1],polygon_points[i],
+						polygon_points[i-1], polygon_points[i],
 						olddist,
 						dist,
 						clipped,
@@ -105,7 +105,7 @@ SIMD_FORCE_INLINE int bt_plane_clip_polygon(
 	//RETURN TO FIRST  point
 
 	bt_plane_clip_polygon_collect(
-					polygon_points[polygon_point_count-1],polygon_points[0],
+					polygon_points[polygon_point_count-1], polygon_points[0],
 					olddist,
 					firstdist,
 					clipped,
@@ -130,7 +130,7 @@ SIMD_FORCE_INLINE int bt_plane_clip_triangle(
     int clipped_count = 0;
 
     //clip first point0
-	btScalar firstdist = bt_distance_point_plane(plane,point0);;
+	btScalar firstdist = bt_distance_point_plane(plane, point0);;
 	if(!(firstdist>SIMD_EPSILON))
 	{
 		clipped[clipped_count] = point0;
@@ -139,10 +139,10 @@ SIMD_FORCE_INLINE int bt_plane_clip_triangle(
 
 	// point 1
 	btScalar olddist = firstdist;
-	btScalar dist = bt_distance_point_plane(plane,point1);
+	btScalar dist = bt_distance_point_plane(plane, point1);
 
 	bt_plane_clip_polygon_collect(
-					point0,point1,
+					point0, point1,
 					olddist,
 					dist,
 					clipped,
@@ -152,10 +152,10 @@ SIMD_FORCE_INLINE int bt_plane_clip_triangle(
 
 
 	// point 2
-	dist = bt_distance_point_plane(plane,point2);
+	dist = bt_distance_point_plane(plane, point2);
 
 	bt_plane_clip_polygon_collect(
-					point1,point2,
+					point1, point2,
 					olddist,
 					dist,
 					clipped,
@@ -166,7 +166,7 @@ SIMD_FORCE_INLINE int bt_plane_clip_triangle(
 
 	//RETURN TO FIRST  point0
 	bt_plane_clip_polygon_collect(
-					point2,point0,
+					point2, point0,
 					olddist,
 					firstdist,
 					clipped,

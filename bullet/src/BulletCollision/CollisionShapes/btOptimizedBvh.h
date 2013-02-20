@@ -38,18 +38,18 @@ public:
 
 	virtual ~btOptimizedBvh();
 
-	void	build(btStridingMeshInterface* triangles,bool useQuantizedAabbCompression, const btVector3& bvhAabbMin, const btVector3& bvhAabbMax);
+	void	build(btStridingMeshInterface* triangles, bool useQuantizedAabbCompression, const btVector3& bvhAabbMin, const btVector3& bvhAabbMax);
 
-	void	refit(btStridingMeshInterface* triangles,const btVector3& aabbMin,const btVector3& aabbMax);
+	void	refit(btStridingMeshInterface* triangles, const btVector3& aabbMin, const btVector3& aabbMax);
 
-	void	refitPartial(btStridingMeshInterface* triangles,const btVector3& aabbMin, const btVector3& aabbMax);
+	void	refitPartial(btStridingMeshInterface* triangles, const btVector3& aabbMin, const btVector3& aabbMax);
 
-	void	updateBvhNodes(btStridingMeshInterface* meshInterface,int firstNode,int endNode,int index);
+	void	updateBvhNodes(btStridingMeshInterface* meshInterface, int firstNode, int endNode, int index);
 
 	/// Data buffer MUST be 16 byte aligned
 	virtual bool serializeInPlace(void *o_alignedDataBuffer, unsigned i_dataBufferSize, bool i_swapEndian) const
 	{
-		return btQuantizedBvh::serialize(o_alignedDataBuffer,i_dataBufferSize,i_swapEndian);
+		return btQuantizedBvh::serialize(o_alignedDataBuffer, i_dataBufferSize, i_swapEndian);
 
 	}
 

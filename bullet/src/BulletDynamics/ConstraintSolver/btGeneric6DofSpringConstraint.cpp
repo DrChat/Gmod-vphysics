@@ -18,7 +18,7 @@ subject to the following restrictions:
 #include "LinearMath/btTransformUtil.h"
 
 
-btGeneric6DofSpringConstraint::btGeneric6DofSpringConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA)
+btGeneric6DofSpringConstraint::btGeneric6DofSpringConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB, bool useLinearReferenceFrameA)
 	: btGeneric6DofConstraint(rbA, rbB, frameInA, frameInB, useLinearReferenceFrameA)
 {
     init();
@@ -162,7 +162,7 @@ void btGeneric6DofSpringConstraint::getInfo2(btConstraintInfo2* info)
 }
 
 
-void btGeneric6DofSpringConstraint::setAxis(const btVector3& axis1,const btVector3& axis2)
+void btGeneric6DofSpringConstraint::setAxis(const btVector3& axis1, const btVector3& axis2)
 {
 	btVector3 zAxis = axis1.normalized();
 	btVector3 yAxis = axis2.normalized();

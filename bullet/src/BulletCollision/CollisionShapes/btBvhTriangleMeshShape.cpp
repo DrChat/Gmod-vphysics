@@ -41,7 +41,7 @@ m_ownsBvh(false)
 
 }
 
-btBvhTriangleMeshShape::btBvhTriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression,const btVector3& bvhAabbMin,const btVector3& bvhAabbMax,bool buildBvh)
+btBvhTriangleMeshShape::btBvhTriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression, const btVector3& bvhAabbMin, const btVector3& bvhAabbMax, bool buildBvh)
 :btTriangleMeshShape(meshInterface),
 m_bvh(0),
 m_triangleInfoMap(0),
@@ -57,7 +57,7 @@ m_ownsBvh(false)
 		void* mem = btAlignedAlloc(sizeof(btOptimizedBvh),16);
 		m_bvh = new (mem) btOptimizedBvh();
 		
-		m_bvh->build(meshInterface,m_useQuantizedAabbCompression,bvhAabbMin,bvhAabbMax);
+		m_bvh->build(meshInterface, m_useQuantizedAabbCompression, bvhAabbMin, bvhAabbMax);
 		m_ownsBvh = true;
 	}
 
@@ -65,18 +65,18 @@ m_ownsBvh(false)
 
 }
 
-void	btBvhTriangleMeshShape::partialRefitTree(const btVector3& aabbMin,const btVector3& aabbMax)
+void	btBvhTriangleMeshShape::partialRefitTree(const btVector3& aabbMin, const btVector3& aabbMax)
 {
-	m_bvh->refitPartial( m_meshInterface,aabbMin,aabbMax );
+	m_bvh->refitPartial( m_meshInterface, aabbMin, aabbMax );
 	
 	m_localAabbMin.setMin(aabbMin);
 	m_localAabbMax.setMax(aabbMax);
 }
 
 
-void	btBvhTriangleMeshShape::refitTree(const btVector3& aabbMin,const btVector3& aabbMax)
+void	btBvhTriangleMeshShape::refitTree(const btVector3& aabbMin, const btVector3& aabbMax)
 {
-	m_bvh->refit( m_meshInterface, aabbMin,aabbMax );
+	m_bvh->refit( m_meshInterface, aabbMin, aabbMax );
 	
 	recalcLocalAabb();
 }
@@ -97,7 +97,7 @@ void	btBvhTriangleMeshShape::performRaycast (btTriangleCallback* callback, const
 		btStridingMeshInterface*	m_meshInterface;
 		btTriangleCallback* m_callback;
 
-		MyNodeOverlapCallback(btTriangleCallback* callback,btStridingMeshInterface* meshInterface)
+		MyNodeOverlapCallback(btTriangleCallback* callback, btStridingMeshInterface* meshInterface)
 			:m_meshInterface(meshInterface),
 			m_callback(callback)
 		{
@@ -138,25 +138,25 @@ void	btBvhTriangleMeshShape::performRaycast (btTriangleCallback* callback, const
 				{
 					float* graphicsbase = (float*)(vertexbase+graphicsindex*stride);
 					
-					m_triangle[j] = btVector3(graphicsbase[0]*meshScaling.getX(),graphicsbase[1]*meshScaling.getY(),graphicsbase[2]*meshScaling.getZ());		
+					m_triangle[j] = btVector3(graphicsbase[0]*meshScaling.getX(), graphicsbase[1]*meshScaling.getY(), graphicsbase[2]*meshScaling.getZ());		
 				}
 				else
 				{
 					double* graphicsbase = (double*)(vertexbase+graphicsindex*stride);
 					
-					m_triangle[j] = btVector3(btScalar(graphicsbase[0])*meshScaling.getX(),btScalar(graphicsbase[1])*meshScaling.getY(),btScalar(graphicsbase[2])*meshScaling.getZ());		
+					m_triangle[j] = btVector3(btScalar(graphicsbase[0])*meshScaling.getX(), btScalar(graphicsbase[1])*meshScaling.getY(), btScalar(graphicsbase[2])*meshScaling.getZ());		
 				}
 			}
 
 			/* Perform ray vs. triangle collision here */
-			m_callback->processTriangle(m_triangle,nodeSubPart,nodeTriangleIndex);
+			m_callback->processTriangle(m_triangle, nodeSubPart, nodeTriangleIndex);
 			m_meshInterface->unLockReadOnlyVertexBase(nodeSubPart);
 		}
 	};
 
-	MyNodeOverlapCallback	myNodeCallback(callback,m_meshInterface);
+	MyNodeOverlapCallback	myNodeCallback(callback, m_meshInterface);
 
-	m_bvh->reportRayOverlappingNodex(&myNodeCallback,raySource,rayTarget);
+	m_bvh->reportRayOverlappingNodex(&myNodeCallback, raySource, rayTarget);
 }
 
 void	btBvhTriangleMeshShape::performConvexcast (btTriangleCallback* callback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin, const btVector3& aabbMax)
@@ -166,7 +166,7 @@ void	btBvhTriangleMeshShape::performConvexcast (btTriangleCallback* callback, co
 		btStridingMeshInterface*	m_meshInterface;
 		btTriangleCallback* m_callback;
 
-		MyNodeOverlapCallback(btTriangleCallback* callback,btStridingMeshInterface* meshInterface)
+		MyNodeOverlapCallback(btTriangleCallback* callback, btStridingMeshInterface* meshInterface)
 			:m_meshInterface(meshInterface),
 			m_callback(callback)
 		{
@@ -207,34 +207,34 @@ void	btBvhTriangleMeshShape::performConvexcast (btTriangleCallback* callback, co
 				{
 					float* graphicsbase = (float*)(vertexbase+graphicsindex*stride);
 
-					m_triangle[j] = btVector3(graphicsbase[0]*meshScaling.getX(),graphicsbase[1]*meshScaling.getY(),graphicsbase[2]*meshScaling.getZ());		
+					m_triangle[j] = btVector3(graphicsbase[0]*meshScaling.getX(), graphicsbase[1]*meshScaling.getY(), graphicsbase[2]*meshScaling.getZ());		
 				}
 				else
 				{
 					double* graphicsbase = (double*)(vertexbase+graphicsindex*stride);
 					
-					m_triangle[j] = btVector3(btScalar(graphicsbase[0])*meshScaling.getX(),btScalar(graphicsbase[1])*meshScaling.getY(),btScalar(graphicsbase[2])*meshScaling.getZ());		
+					m_triangle[j] = btVector3(btScalar(graphicsbase[0])*meshScaling.getX(), btScalar(graphicsbase[1])*meshScaling.getY(), btScalar(graphicsbase[2])*meshScaling.getZ());		
 				}
 			}
 
 			/* Perform ray vs. triangle collision here */
-			m_callback->processTriangle(m_triangle,nodeSubPart,nodeTriangleIndex);
+			m_callback->processTriangle(m_triangle, nodeSubPart, nodeTriangleIndex);
 			m_meshInterface->unLockReadOnlyVertexBase(nodeSubPart);
 		}
 	};
 
-	MyNodeOverlapCallback	myNodeCallback(callback,m_meshInterface);
+	MyNodeOverlapCallback	myNodeCallback(callback, m_meshInterface);
 
 	m_bvh->reportBoxCastOverlappingNodex (&myNodeCallback, raySource, rayTarget, aabbMin, aabbMax);
 }
 
 //perform bvh tree traversal and report overlapping triangles to 'callback'
-void	btBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const
+void	btBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const
 {
 
 #ifdef DISABLE_BVH
 	//brute force traverse all triangles
-	btTriangleMeshShape::processAllTriangles(callback,aabbMin,aabbMax);
+	btTriangleMeshShape::processAllTriangles(callback, aabbMin, aabbMax);
 #else
 
 	//first get all the nodes
@@ -247,7 +247,7 @@ void	btBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback,co
 		btVector3				m_triangle[3];
 
 
-		MyNodeOverlapCallback(btTriangleCallback* callback,btStridingMeshInterface* meshInterface)
+		MyNodeOverlapCallback(btTriangleCallback* callback, btStridingMeshInterface* meshInterface)
 			:m_meshInterface(meshInterface),
 			m_callback(callback)
 		{
@@ -287,7 +287,7 @@ void	btBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback,co
 
 
 #ifdef DEBUG_TRIANGLE_MESH
-				printf("%d ,",graphicsindex);
+				printf("%d, ",graphicsindex);
 #endif //DEBUG_TRIANGLE_MESH
 				if (type == PHY_FLOAT)
 				{
@@ -308,19 +308,19 @@ void	btBvhTriangleMeshShape::processAllTriangles(btTriangleCallback* callback,co
 						btScalar(graphicsbase[2])*meshScaling.getZ());
 				}
 #ifdef DEBUG_TRIANGLE_MESH
-				printf("triangle vertices:%f,%f,%f\n",triangle[j].x(),triangle[j].y(),triangle[j].z());
+				printf("triangle vertices:%f, %f, %f\n", triangle[j].x(), triangle[j].y(), triangle[j].z());
 #endif //DEBUG_TRIANGLE_MESH
 			}
 
-			m_callback->processTriangle(m_triangle,nodeSubPart,nodeTriangleIndex);
+			m_callback->processTriangle(m_triangle, nodeSubPart, nodeTriangleIndex);
 			m_meshInterface->unLockReadOnlyVertexBase(nodeSubPart);
 		}
 
 	};
 
-	MyNodeOverlapCallback	myNodeCallback(callback,m_meshInterface);
+	MyNodeOverlapCallback	myNodeCallback(callback, m_meshInterface);
 
-	m_bvh->reportAabbOverlappingNodex(&myNodeCallback,aabbMin,aabbMax);
+	m_bvh->reportAabbOverlappingNodex(&myNodeCallback, aabbMin, aabbMax);
 
 
 #endif//DISABLE_BVH
@@ -348,7 +348,7 @@ void   btBvhTriangleMeshShape::buildOptimizedBvh()
 	void* mem = btAlignedAlloc(sizeof(btOptimizedBvh),16);
 	m_bvh = new(mem) btOptimizedBvh();
 	//rebuild the bvh...
-	m_bvh->build(m_meshInterface,m_useQuantizedAabbCompression,m_localAabbMin,m_localAabbMax);
+	m_bvh->build(m_meshInterface, m_useQuantizedAabbCompression, m_localAabbMin, m_localAabbMax);
 	m_ownsBvh = true;
 }
 
@@ -373,7 +373,7 @@ const char*	btBvhTriangleMeshShape::serialize(void* dataBuffer, btSerializer* se
 {
 	btTriangleMeshShapeData* trimeshData = (btTriangleMeshShapeData*) dataBuffer;
 
-	btCollisionShape::serialize(&trimeshData->m_collisionShapeData,serializer);
+	btCollisionShape::serialize(&trimeshData->m_collisionShapeData, serializer);
 
 	m_meshInterface->serialize(&trimeshData->m_meshInterface, serializer);
 
@@ -407,7 +407,7 @@ const char*	btBvhTriangleMeshShape::serialize(void* dataBuffer, btSerializer* se
 			int sz = m_bvh->calculateSerializeBufferSizeNew();
 			btChunk* chunk = serializer->allocate(sz,1);
 			const char* structType = m_bvh->serialize(chunk->m_oldPtr, serializer);
-			serializer->finalizeChunk(chunk,structType,BT_QUANTIZED_BVH_CODE,m_bvh);
+			serializer->finalizeChunk(chunk, structType, BT_QUANTIZED_BVH_CODE, m_bvh);
 		}
 	} else
 	{
@@ -429,7 +429,7 @@ const char*	btBvhTriangleMeshShape::serialize(void* dataBuffer, btSerializer* se
 			int sz = m_triangleInfoMap->calculateSerializeBufferSize();
 			btChunk* chunk = serializer->allocate(sz,1);
 			const char* structType = m_triangleInfoMap->serialize(chunk->m_oldPtr, serializer);
-			serializer->finalizeChunk(chunk,structType,BT_TRIANLGE_INFO_MAP,m_triangleInfoMap);
+			serializer->finalizeChunk(chunk, structType, BT_TRIANLGE_INFO_MAP, m_triangleInfoMap);
 		}
 	} else
 	{
@@ -446,7 +446,7 @@ void	btBvhTriangleMeshShape::serializeSingleBvh(btSerializer* serializer) const
 		int len = m_bvh->calculateSerializeBufferSizeNew(); //make sure not to use calculateSerializeBufferSize because it is used for in-place
 		btChunk* chunk = serializer->allocate(len,1);
 		const char* structType = m_bvh->serialize(chunk->m_oldPtr, serializer);
-		serializer->finalizeChunk(chunk,structType,BT_QUANTIZED_BVH_CODE,(void*)m_bvh);
+		serializer->finalizeChunk(chunk, structType, BT_QUANTIZED_BVH_CODE, (void*)m_bvh);
 	}
 }
 
@@ -457,7 +457,7 @@ void	btBvhTriangleMeshShape::serializeSingleTriangleInfoMap(btSerializer* serial
 		int len = m_triangleInfoMap->calculateSerializeBufferSize();
 		btChunk* chunk = serializer->allocate(len,1);
 		const char* structType = m_triangleInfoMap->serialize(chunk->m_oldPtr, serializer);
-		serializer->finalizeChunk(chunk,structType,BT_TRIANLGE_INFO_MAP,(void*)m_triangleInfoMap);
+		serializer->finalizeChunk(chunk, structType, BT_TRIANLGE_INFO_MAP, (void*)m_triangleInfoMap);
 	}
 }
 

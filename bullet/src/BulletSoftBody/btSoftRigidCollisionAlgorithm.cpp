@@ -27,7 +27,7 @@ subject to the following restrictions:
 
 //#include <stdio.h>
 
-btSoftRigidCollisionAlgorithm::btSoftRigidCollisionAlgorithm(btPersistentManifold* /*mf*/,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* ,const btCollisionObjectWrapper* , bool isSwapped)
+btSoftRigidCollisionAlgorithm::btSoftRigidCollisionAlgorithm(btPersistentManifold* /*mf*/, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper*, const btCollisionObjectWrapper*, bool isSwapped)
 : btCollisionAlgorithm(ci),
 //m_ownManifold(false),
 //m_manifoldPtr(mf),
@@ -53,7 +53,7 @@ btSoftRigidCollisionAlgorithm::~btSoftRigidCollisionAlgorithm()
 
 #include <stdio.h>
 
-void btSoftRigidCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btSoftRigidCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	(void)dispatchInfo;
 	(void)resultOut;
@@ -71,7 +71,7 @@ void btSoftRigidCollisionAlgorithm::processCollision (const btCollisionObjectWra
 
 }
 
-btScalar btSoftRigidCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* col0,btCollisionObject* col1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+btScalar btSoftRigidCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* col0, btCollisionObject* col1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	(void)resultOut;
 	(void)dispatchInfo;

@@ -15,7 +15,7 @@ subject to the following restrictions:
 
 #include "btUniformScalingShape.h"
 
-btUniformScalingShape::btUniformScalingShape(	btConvexShape* convexChildShape,btScalar uniformScalingFactor):
+btUniformScalingShape::btUniformScalingShape(	btConvexShape* convexChildShape, btScalar uniformScalingFactor):
 btConvexShape (), m_childConvexShape(convexChildShape),
 m_uniformScalingFactor(uniformScalingFactor)
 {
@@ -34,9 +34,9 @@ btVector3	btUniformScalingShape::localGetSupportingVertexWithoutMargin(const btV
 	return tmpVertex*m_uniformScalingFactor;
 }
 
-void	btUniformScalingShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btUniformScalingShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
-	m_childConvexShape->batchedUnitVectorGetSupportingVertexWithoutMargin(vectors,supportVerticesOut,numVectors);
+	m_childConvexShape->batchedUnitVectorGetSupportingVertexWithoutMargin(vectors, supportVerticesOut, numVectors);
 	int i;
 	for (i=0;i<numVectors;i++)
 	{
@@ -53,24 +53,24 @@ btVector3	btUniformScalingShape::localGetSupportingVertex(const btVector3& vec)c
 }
 
 
-void	btUniformScalingShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btUniformScalingShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 
 	///this linear upscaling is not realistic, but we don't deal with large mass ratios...
 	btVector3 tmpInertia;
-	m_childConvexShape->calculateLocalInertia(mass,tmpInertia);
+	m_childConvexShape->calculateLocalInertia(mass, tmpInertia);
 	inertia = tmpInertia * m_uniformScalingFactor;
 }
 
 
 	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-void btUniformScalingShape::getAabb(const btTransform& trans,btVector3& aabbMin,btVector3& aabbMax) const
+void btUniformScalingShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax) const
 {
-	getAabbSlow(trans,aabbMin,aabbMax);
+	getAabbSlow(trans, aabbMin, aabbMax);
 
 }
 
-void btUniformScalingShape::getAabbSlow(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+void btUniformScalingShape::getAabbSlow(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 {
 #if 1
 	btVector3 _directions[] =
@@ -100,14 +100,14 @@ void btUniformScalingShape::getAabbSlow(const btTransform& t,btVector3& aabbMin,
 	
 	batchedUnitVectorGetSupportingVertexWithoutMargin(_directions, _supporting, 6);
 	
-	btVector3 aabbMin1(0,0,0),aabbMax1(0,0,0);
+	btVector3 aabbMin1(0,0,0), aabbMax1(0,0,0);
 
 	for ( int i = 0; i < 3; ++i )
 	{
 		aabbMax1[i] = t(_supporting[i])[i];
 		aabbMin1[i] = t(_supporting[i + 3])[i];
 	}
-	btVector3 marginVec(getMargin(),getMargin(),getMargin());
+	btVector3 marginVec(getMargin(), getMargin(), getMargin());
 	aabbMin = aabbMin1-marginVec;
 	aabbMax = aabbMax1+marginVec;
 	
@@ -116,7 +116,7 @@ void btUniformScalingShape::getAabbSlow(const btTransform& t,btVector3& aabbMin,
 	btScalar margin = getMargin();
 	for (int i=0;i<3;i++)
 	{
-		btVector3 vec(btScalar(0.),btScalar(0.),btScalar(0.));
+		btVector3 vec(btScalar(0.), btScalar(0.), btScalar(0.));
 		vec[i] = btScalar(1.);
 		btVector3 sv = localGetSupportingVertex(vec*t.getBasis());
 		btVector3 tmp = t(sv);
@@ -156,5 +156,5 @@ int		btUniformScalingShape::getNumPreferredPenetrationDirections() const
 	
 void	btUniformScalingShape::getPreferredPenetrationDirection(int index, btVector3& penetrationVector) const
 {
-	m_childConvexShape->getPreferredPenetrationDirection(index,penetrationVector);
+	m_childConvexShape->getPreferredPenetrationDirection(index, penetrationVector);
 }

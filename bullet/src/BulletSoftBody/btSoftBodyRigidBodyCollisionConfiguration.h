@@ -40,7 +40,7 @@ public:
 	virtual ~btSoftBodyRigidBodyCollisionConfiguration();
 
 	///creation of soft-soft and soft-rigid, and otherwise fallback to base class implementation
-	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0,int proxyType1);
+	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0, int proxyType1);
 
 };
 

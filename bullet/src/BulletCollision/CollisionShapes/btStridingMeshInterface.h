@@ -36,7 +36,7 @@ ATTRIBUTE_ALIGNED16(class ) btStridingMeshInterface
 	public:
 		BT_DECLARE_ALIGNED_ALLOCATOR();
 		
-		btStridingMeshInterface() :m_scaling(btScalar(1.),btScalar(1.),btScalar(1.))
+		btStridingMeshInterface() :m_scaling(btScalar(1.), btScalar(1.), btScalar(1.))
 		{
 
 		}
@@ -45,19 +45,19 @@ ATTRIBUTE_ALIGNED16(class ) btStridingMeshInterface
 
 
 
-		virtual void	InternalProcessAllTriangles(btInternalTriangleIndexCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+		virtual void	InternalProcessAllTriangles(btInternalTriangleIndexCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
 		///brute force method to calculate aabb
-		void	calculateAabbBruteForce(btVector3& aabbMin,btVector3& aabbMax);
+		void	calculateAabbBruteForce(btVector3& aabbMin, btVector3& aabbMax);
 
 		/// get read and write access to a subpart of a triangle mesh
 		/// this subpart has a continuous array of vertices and indices
 		/// in this way the mesh can be handled as chunks of memory with striding
 		/// very similar to OpenGL vertexarray support
 		/// make a call to unLockVertexBase when the read and write access is finished	
-		virtual void	getLockedVertexIndexBase(unsigned char **vertexbase, int& numverts,PHY_ScalarType& type, int& stride,unsigned char **indexbase,int & indexstride,int& numfaces,PHY_ScalarType& indicestype,int subpart=0)=0;
+		virtual void	getLockedVertexIndexBase(unsigned char **vertexbase, int& numverts, PHY_ScalarType& type, int& stride, unsigned char **indexbase, int & indexstride, int& numfaces, PHY_ScalarType& indicestype, int subpart=0)=0;
 		
-		virtual void	getLockedReadOnlyVertexIndexBase(const unsigned char **vertexbase, int& numverts,PHY_ScalarType& type, int& stride,const unsigned char **indexbase,int & indexstride,int& numfaces,PHY_ScalarType& indicestype,int subpart=0) const=0;
+		virtual void	getLockedReadOnlyVertexIndexBase(const unsigned char **vertexbase, int& numverts, PHY_ScalarType& type, int& stride, const unsigned char **indexbase, int & indexstride, int& numfaces, PHY_ScalarType& indicestype, int subpart=0) const=0;
 	
 		/// unLockVertexBase finishes the access to a subpart of the triangle mesh
 		/// make a call to unLockVertexBase when the read and write access (using getLockedVertexIndexBase) is finished

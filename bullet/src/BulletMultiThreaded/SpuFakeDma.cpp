@@ -27,7 +27,7 @@ void*	cellDmaLargeGetReadOnly(void *ls, uint64_t ea, uint32_t size, uint32_t tag
 {
 
 #if defined (__SPU__) || defined (USE_LIBSPE2)
-	cellDmaLargeGet(ls,ea,size,tag,tid,rid);
+	cellDmaLargeGet(ls, ea, size, tag, tid, rid);
 	return ls;
 #else
 	return (void*)(ppu_address_t)ea;
@@ -37,7 +37,7 @@ void*	cellDmaLargeGetReadOnly(void *ls, uint64_t ea, uint32_t size, uint32_t tag
 void*	cellDmaSmallGetReadOnly(void *ls, uint64_t ea, uint32_t size, uint32_t tag, uint32_t tid, uint32_t rid)
 {
 #if defined (__SPU__) || defined (USE_LIBSPE2)
-	mfc_get(ls,ea,size,tag,0,0);
+	mfc_get(ls, ea, size, tag,0,0);
 	return ls;
 #else
 	return (void*)(ppu_address_t)ea;
@@ -50,7 +50,7 @@ void*	cellDmaSmallGetReadOnly(void *ls, uint64_t ea, uint32_t size, uint32_t tag
 void*	cellDmaGetReadOnly(void *ls, uint64_t ea, uint32_t size, uint32_t tag, uint32_t tid, uint32_t rid)
 {
 #if defined (__SPU__) || defined (USE_LIBSPE2)
-	cellDmaGet(ls,ea,size,tag,tid,rid);
+	cellDmaGet(ls, ea, size, tag, tid, rid);
 	return ls;
 #else
 	return (void*)(ppu_address_t)ea;
@@ -81,7 +81,7 @@ int stallingUnalignedDmaSmallGet(void *ls, uint64_t ea, uint32_t size)
 
 //#define FORCE_cellDmaUnalignedGet 1
 #ifdef FORCE_cellDmaUnalignedGet
-	cellDmaUnalignedGet(tmpTarget,ea,size,DMA_TAG(1),0,0);
+	cellDmaUnalignedGet(tmpTarget, ea, size, DMA_TAG(1),0,0);
 #else
 	char* remainingTmpTarget = tmpTarget;
 	uint64_t remainingEa = ea;
@@ -96,13 +96,13 @@ int stallingUnalignedDmaSmallGet(void *ls, uint64_t ea, uint32_t size)
 		case 8:
 		case 16:
 			{
-				mfc_get(remainingTmpTarget,remainingEa,remainingSize,DMA_TAG(1),0,0);
+				mfc_get(remainingTmpTarget, remainingEa, remainingSize, DMA_TAG(1),0,0);
 				remainingSize=0;
 				break;
 			}
 		default:
 			{
-				//spu_printf("unaligned DMA with non-natural size:%d\n",remainingSize);
+				//spu_printf("unaligned DMA with non-natural size:%d\n", remainingSize);
 				int actualSize = 0;
 
 				if (remainingSize > 16)
@@ -116,7 +116,7 @@ int stallingUnalignedDmaSmallGet(void *ls, uint64_t ea, uint32_t size)
 						else
 							if (remainingSize >2)
 								actualSize=2;
-				mfc_get(remainingTmpTarget,remainingEa,actualSize,DMA_TAG(1),0,0);
+				mfc_get(remainingTmpTarget, remainingEa, actualSize, DMA_TAG(1),0,0);
 				remainingSize-=actualSize;
 				remainingTmpTarget+=actualSize;
 				remainingEa += actualSize;
@@ -130,7 +130,7 @@ int stallingUnalignedDmaSmallGet(void *ls, uint64_t ea, uint32_t size)
 	//copy into final destination
 #ifdef USE_MEMCPY
 		
-		memcpy(tmpTarget,mainMem,size);
+		memcpy(tmpTarget, mainMem, size);
 #else
 		for ( i=0;i<size;i++)
 		{
@@ -160,7 +160,7 @@ int	cellDmaLargeGet(void *ls, uint64_t ea, uint32_t size, uint32_t tag, uint32_t
 	char* localStore = (char*)ls;
 
 #ifdef USE_MEMCPY
-	memcpy(localStore,mainMem,size);
+	memcpy(localStore, mainMem, size);
 #else
 	for (uint32_t i=0;i<size;i++)
 	{
@@ -175,10 +175,10 @@ int	cellDmaGet(void *ls, uint64_t ea, uint32_t size, uint32_t tag, uint32_t tid,
 	char* mainMem = (char*)ea;
 	char* localStore = (char*)ls;
 
-//	printf("mainMem=%x, localStore=%x",mainMem,localStore);
+//	printf("mainMem=%x, localStore=%x", mainMem, localStore);
 
 #ifdef USE_MEMCPY
-	memcpy(localStore,mainMem,size);
+	memcpy(localStore, mainMem, size);
 #else
 	for (uint32_t i=0;i<size;i++)
 	{
@@ -194,7 +194,7 @@ int cellDmaLargePut(const void *ls, uint64_t ea, uint32_t size, uint32_t tag, ui
 	char* mainMem = (char*)ea;
 	const char* localStore = (const char*)ls;
 #ifdef USE_MEMCPY
-	memcpy(mainMem,localStore,size);
+	memcpy(mainMem, localStore, size);
 #else
 	for (uint32_t i=0;i<size;i++)
 	{

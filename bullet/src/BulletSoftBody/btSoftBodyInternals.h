@@ -34,11 +34,11 @@ template <typename T>
 struct btSymMatrix
 {
 	btSymMatrix() : dim(0)					{}
-	btSymMatrix(int n,const T& init=T())	{ resize(n,init); }
-	void					resize(int n,const T& init=T())			{ dim=n;store.resize((n*(n+1))/2,init); }
-	int						index(int c,int r) const				{ if(c>r) btSwap(c,r);btAssert(r<dim);return((r*(r+1))/2+c); }
-	T&						operator()(int c,int r)					{ return(store[index(c,r)]); }
-	const T&				operator()(int c,int r) const			{ return(store[index(c,r)]); }
+	btSymMatrix(int n, const T& init=T())	{ resize(n, init); }
+	void					resize(int n, const T& init=T())			{ dim=n;store.resize((n*(n+1))/2, init); }
+	int						index(int c, int r) const				{ if(c>r) btSwap(c, r);btAssert(r<dim);return((r*(r+1))/2+c); }
+	T&						operator()(int c, int r)					{ return(store[index(c, r)]); }
+	const T&				operator()(int c, int r) const			{ return(store[index(c, r)]); }
 	btAlignedObjectArray<T>	store;
 	int						dim;
 };	
@@ -62,26 +62,26 @@ public:
 
 	}
 
-	void	processAllTriangles(btTriangleCallback* /*callback*/,const btVector3& /*aabbMin*/,const btVector3& /*aabbMax*/) const
+	void	processAllTriangles(btTriangleCallback* /*callback*/, const btVector3& /*aabbMin*/, const btVector3& /*aabbMax*/) const
 	{
 		//not yet
 		btAssert(0);
 	}
 
 	///getAabb returns the axis aligned bounding box in the coordinate frame of the given transform t.
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 	{
 		/* t is usually identity, except when colliding against btCompoundShape. See Issue 512 */
 		const btVector3	mins=m_body->m_bounds[0];
 		const btVector3	maxs=m_body->m_bounds[1];
-		const btVector3	crns[]={t*btVector3(mins.x(),mins.y(),mins.z()),
-			t*btVector3(maxs.x(),mins.y(),mins.z()),
-			t*btVector3(maxs.x(),maxs.y(),mins.z()),
-			t*btVector3(mins.x(),maxs.y(),mins.z()),
-			t*btVector3(mins.x(),mins.y(),maxs.z()),
-			t*btVector3(maxs.x(),mins.y(),maxs.z()),
-			t*btVector3(maxs.x(),maxs.y(),maxs.z()),
-			t*btVector3(mins.x(),maxs.y(),maxs.z())};
+		const btVector3	crns[]={t*btVector3(mins.x(), mins.y(), mins.z()),
+			t*btVector3(maxs.x(), mins.y(), mins.z()),
+			t*btVector3(maxs.x(), maxs.y(), mins.z()),
+			t*btVector3(mins.x(), maxs.y(), mins.z()),
+			t*btVector3(mins.x(), mins.y(), maxs.z()),
+			t*btVector3(maxs.x(), mins.y(), maxs.z()),
+			t*btVector3(maxs.x(), maxs.y(), maxs.z()),
+			t*btVector3(mins.x(), maxs.y(), maxs.z())};
 		aabbMin=aabbMax=crns[0];
 		for(int i=1;i<8;++i)
 		{
@@ -100,7 +100,7 @@ public:
 		static const btVector3 dummy(1,1,1);
 		return dummy;
 	}
-	virtual void	calculateLocalInertia(btScalar /*mass*/,btVector3& /*inertia*/) const
+	virtual void	calculateLocalInertia(btScalar /*mass*/, btVector3& /*inertia*/) const
 	{
 		///not yet
 		btAssert(0);
@@ -126,11 +126,11 @@ public:
 	virtual btVector3	localGetSupportingVertex(const btVector3& vec) const
 	{
 		btSoftBody::Node* const *						n=&m_cluster->m_nodes[0];
-		btScalar										d=btDot(vec,n[0]->m_x);
+		btScalar										d=btDot(vec, n[0]->m_x);
 		int												j=0;
-		for(int i=1,ni=m_cluster->m_nodes.size();i<ni;++i)
+		for(int i=1, ni=m_cluster->m_nodes.size();i<ni;++i)
 		{
-			const btScalar	k=btDot(vec,n[i]->m_x);
+			const btScalar	k=btDot(vec, n[i]->m_x);
 			if(k>d) { d=k;j=i; }
 		}
 		return(n[j]->m_x);
@@ -140,14 +140,14 @@ public:
 		return(localGetSupportingVertex(vec));
 	}
 	//notice that the vectors should be unit length
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 	{}
 
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const
 	{}
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 	{}
 
 	virtual int	getShapeType() const { return SOFTBODY_SHAPE_PROXYTYPE; }
@@ -173,23 +173,23 @@ public:
 template <typename T>
 static inline void			ZeroInitialize(T& value)
 {
-	memset(&value,0,sizeof(T));
+	memset(&value,0, sizeof(T));
 }
 //
 template <typename T>
-static inline bool			CompLess(const T& a,const T& b)
+static inline bool			CompLess(const T& a, const T& b)
 { return(a<b); }
 //
 template <typename T>
-static inline bool			CompGreater(const T& a,const T& b)
+static inline bool			CompGreater(const T& a, const T& b)
 { return(a>b); }
 //
 template <typename T>
-static inline T				Lerp(const T& a,const T& b,btScalar t)
+static inline T				Lerp(const T& a, const T& b, btScalar t)
 { return(a+(b-a)*t); }
 //
 template <typename T>
-static inline T				InvLerp(const T& a,const T& b,btScalar t)
+static inline T				InvLerp(const T& a, const T& b, btScalar t)
 { return((b+a*t-b*t)/(a*b)); }
 //
 static inline btMatrix3x3	Lerp(	const btMatrix3x3& a,
@@ -197,13 +197,13 @@ static inline btMatrix3x3	Lerp(	const btMatrix3x3& a,
 								 btScalar t)
 {
 	btMatrix3x3	r;
-	r[0]=Lerp(a[0],b[0],t);
-	r[1]=Lerp(a[1],b[1],t);
-	r[2]=Lerp(a[2],b[2],t);
+	r[0]=Lerp(a[0], b[0], t);
+	r[1]=Lerp(a[1], b[1], t);
+	r[2]=Lerp(a[2], b[2], t);
 	return(r);
 }
 //
-static inline btVector3		Clamp(const btVector3& v,btScalar maxlength)
+static inline btVector3		Clamp(const btVector3& v, btScalar maxlength)
 {
 	const btScalar sql=v.length2();
 	if(sql>(maxlength*maxlength))
@@ -213,7 +213,7 @@ static inline btVector3		Clamp(const btVector3& v,btScalar maxlength)
 }
 //
 template <typename T>
-static inline T				Clamp(const T& x,const T& l,const T& h)
+static inline T				Clamp(const T& x, const T& l, const T& h)
 { return(x<l?l:x>h?h:x); }
 //
 template <typename T>
@@ -229,16 +229,16 @@ static inline T				Sign(const T& x)
 { return((T)(x<0?-1:+1)); }
 //
 template <typename T>
-static inline bool			SameSign(const T& x,const T& y)
+static inline bool			SameSign(const T& x, const T& y)
 { return((x*y)>0); }
 //
-static inline btScalar		ClusterMetric(const btVector3& x,const btVector3& y)
+static inline btScalar		ClusterMetric(const btVector3& x, const btVector3& y)
 {
 	const btVector3	d=x-y;
 	return(btFabs(d[0])+btFabs(d[1])+btFabs(d[2]));
 }
 //
-static inline btMatrix3x3	ScaleAlongAxis(const btVector3& a,btScalar s)
+static inline btMatrix3x3	ScaleAlongAxis(const btVector3& a, btScalar s)
 {
 	const btScalar	xx=a.x()*a.x();
 	const btScalar	yy=a.y()*a.y();
@@ -247,9 +247,9 @@ static inline btMatrix3x3	ScaleAlongAxis(const btVector3& a,btScalar s)
 	const btScalar	yz=a.y()*a.z();
 	const btScalar	zx=a.z()*a.x();
 	btMatrix3x3		m;
-	m[0]=btVector3(1-xx+xx*s,xy*s-xy,zx*s-zx);
-	m[1]=btVector3(xy*s-xy,1-yy+yy*s,yz*s-yz);
-	m[2]=btVector3(zx*s-zx,yz*s-yz,1-zz+zz*s);
+	m[0]=btVector3(1-xx+xx*s, xy*s-xy, zx*s-zx);
+	m[1]=btVector3(xy*s-xy,1-yy+yy*s, yz*s-yz);
+	m[2]=btVector3(zx*s-zx, yz*s-yz,1-zz+zz*s);
 	return(m);
 }
 //
@@ -266,8 +266,8 @@ static inline btMatrix3x3	Diagonal(btScalar x)
 {
 	btMatrix3x3	m;
 	m[0]=btVector3(x,0,0);
-	m[1]=btVector3(0,x,0);
-	m[2]=btVector3(0,0,x);
+	m[1]=btVector3(0, x,0);
+	m[2]=btVector3(0,0, x);
 	return(m);
 }
 //
@@ -297,15 +297,15 @@ static inline btMatrix3x3	Mul(const btMatrix3x3& a,
 //
 static inline void			Orthogonalize(btMatrix3x3& m)
 {
-	m[2]=btCross(m[0],m[1]).normalized();
-	m[1]=btCross(m[2],m[0]).normalized();
-	m[0]=btCross(m[1],m[2]).normalized();
+	m[2]=btCross(m[0], m[1]).normalized();
+	m[1]=btCross(m[2], m[0]).normalized();
+	m[0]=btCross(m[1], m[2]).normalized();
 }
 //
-static inline btMatrix3x3	MassMatrix(btScalar im,const btMatrix3x3& iwi,const btVector3& r)
+static inline btMatrix3x3	MassMatrix(btScalar im, const btMatrix3x3& iwi, const btVector3& r)
 {
 	const btMatrix3x3	cr=Cross(r);
-	return(Sub(Diagonal(im),cr*iwi*cr));
+	return(Sub(Diagonal(im), cr*iwi*cr));
 }
 
 //
@@ -315,34 +315,34 @@ static inline btMatrix3x3	ImpulseMatrix(	btScalar dt,
 										  const btMatrix3x3& iwi,
 										  const btVector3& r)
 {
-	return(Diagonal(1/dt)*Add(Diagonal(ima),MassMatrix(imb,iwi,r)).inverse());
+	return(Diagonal(1/dt)*Add(Diagonal(ima), MassMatrix(imb, iwi, r)).inverse());
 }
 
 //
-static inline btMatrix3x3	ImpulseMatrix(	btScalar ima,const btMatrix3x3& iia,const btVector3& ra,
-										  btScalar imb,const btMatrix3x3& iib,const btVector3& rb)	
+static inline btMatrix3x3	ImpulseMatrix(	btScalar ima, const btMatrix3x3& iia, const btVector3& ra,
+										  btScalar imb, const btMatrix3x3& iib, const btVector3& rb)	
 {
-	return(Add(MassMatrix(ima,iia,ra),MassMatrix(imb,iib,rb)).inverse());
+	return(Add(MassMatrix(ima, iia, ra), MassMatrix(imb, iib, rb)).inverse());
 }
 
 //
 static inline btMatrix3x3	AngularImpulseMatrix(	const btMatrix3x3& iia,
 												 const btMatrix3x3& iib)
 {
-	return(Add(iia,iib).inverse());
+	return(Add(iia, iib).inverse());
 }
 
 //
 static inline btVector3		ProjectOnAxis(	const btVector3& v,
 										  const btVector3& a)
 {
-	return(a*btDot(v,a));
+	return(a*btDot(v, a));
 }
 //
 static inline btVector3		ProjectOnPlane(	const btVector3& v,
 										   const btVector3& a)
 {
-	return(v-ProjectOnAxis(v,a));
+	return(v-ProjectOnAxis(v, a));
 }
 
 //
@@ -355,7 +355,7 @@ static inline void			ProjectOrigin(	const btVector3& a,
 	const btScalar	m2=d.length2();
 	if(m2>SIMD_EPSILON)
 	{	
-		const btScalar	t=Clamp<btScalar>(-btDot(a,d)/m2,0,1);
+		const btScalar	t=Clamp<btScalar>(-btDot(a, d)/m2,0,1);
 		const btVector3	p=a+d*t;
 		const btScalar	l2=p.length2();
 		if(l2<sqd)
@@ -372,28 +372,28 @@ static inline void			ProjectOrigin(	const btVector3& a,
 										  btVector3& prj,
 										  btScalar& sqd)
 {
-	const btVector3&	q=btCross(b-a,c-a);
+	const btVector3&	q=btCross(b-a, c-a);
 	const btScalar		m2=q.length2();
 	if(m2>SIMD_EPSILON)
 	{
 		const btVector3	n=q/btSqrt(m2);
-		const btScalar	k=btDot(a,n);
+		const btScalar	k=btDot(a, n);
 		const btScalar	k2=k*k;
 		if(k2<sqd)
 		{
 			const btVector3	p=n*k;
-			if(	(btDot(btCross(a-p,b-p),q)>0)&&
-				(btDot(btCross(b-p,c-p),q)>0)&&
-				(btDot(btCross(c-p,a-p),q)>0))
+			if(	(btDot(btCross(a-p, b-p), q)>0)&&
+				(btDot(btCross(b-p, c-p), q)>0)&&
+				(btDot(btCross(c-p, a-p), q)>0))
 			{			
 				prj=p;
 				sqd=k2;
 			}
 			else
 			{
-				ProjectOrigin(a,b,prj,sqd);
-				ProjectOrigin(b,c,prj,sqd);
-				ProjectOrigin(c,a,prj,sqd);
+				ProjectOrigin(a, b,prj, sqd);
+				ProjectOrigin(b, c,prj, sqd);
+				ProjectOrigin(c, a,prj, sqd);
 			}
 		}
 	}
@@ -414,11 +414,11 @@ static inline btVector3		BaryCoord(	const btVector3& a,
 									  const btVector3& c,
 									  const btVector3& p)
 {
-	const btScalar	w[]={	btCross(a-p,b-p).length(),
-		btCross(b-p,c-p).length(),
-		btCross(c-p,a-p).length()};
+	const btScalar	w[]={	btCross(a-p, b-p).length(),
+		btCross(b-p, c-p).length(),
+		btCross(c-p, a-p).length()};
 	const btScalar	isum=1/(w[0]+w[1]+w[2]);
-	return(btVector3(w[1]*isum,w[2]*isum,w[0]*isum));
+	return(btVector3(w[1]*isum, w[2]*isum, w[0]*isum));
 }
 
 //
@@ -429,18 +429,18 @@ static btScalar				ImplicitSolve(	btSoftBody::ImplicitFn* fn,
 										  const int maxiterations=256)
 {
 	btScalar	span[2]={0,1};
-	btScalar	values[2]={fn->Eval(a),fn->Eval(b)};
+	btScalar	values[2]={fn->Eval(a), fn->Eval(b)};
 	if(values[0]>values[1])
 	{
-		btSwap(span[0],span[1]);
-		btSwap(values[0],values[1]);
+		btSwap(span[0], span[1]);
+		btSwap(values[0], values[1]);
 	}
 	if(values[0]>-accuracy) return(-1);
 	if(values[1]<+accuracy) return(-1);
 	for(int i=0;i<maxiterations;++i)
 	{
-		const btScalar	t=Lerp(span[0],span[1],values[0]/(values[0]-values[1]));
-		const btScalar	v=fn->Eval(Lerp(a,b,t));
+		const btScalar	t=Lerp(span[0], span[1], values[0]/(values[0]-values[1]));
+		const btScalar	v=fn->Eval(Lerp(a, b,t));
 		if((t<=0)||(t>=1))		break;
 		if(btFabs(v)<accuracy)	return(t);
 		if(v<0)
@@ -469,7 +469,7 @@ static inline btDbvtVolume	VolumeOf(	const btSoftBody::Face& f,
 		&f.m_n[1]->m_x,
 		&f.m_n[2]->m_x};
 	btDbvtVolume		vol=btDbvtVolume::FromPoints(pts,3);
-	vol.Expand(btVector3(margin,margin,margin));
+	vol.Expand(btVector3(margin, margin, margin));
 	return(vol);
 }
 
@@ -486,7 +486,7 @@ static inline btScalar			AreaOf(		const btVector3& x0,
 {
 	const btVector3	a=x1-x0;
 	const btVector3	b=x2-x0;
-	const btVector3	cr=btCross(a,b);
+	const btVector3	cr=btCross(a, b);
 	const btScalar	area=cr.length();
 	return(area);
 }
@@ -500,7 +500,7 @@ static inline btScalar		VolumeOf(	const btVector3& x0,
 	const btVector3	a=x1-x0;
 	const btVector3	b=x2-x0;
 	const btVector3	c=x3-x0;
-	return(btDot(a,btCross(b,c)));
+	return(btDot(a, btCross(b, c)));
 }
 
 //
@@ -513,7 +513,7 @@ static void					EvaluateMedium(	const btSoftBodyWorldInfo* wfi,
 	medium.m_density	=	wfi->air_density;
 	if(wfi->water_density>0)
 	{
-		const btScalar	depth=-(btDot(x,wfi->water_normal)+wfi->water_offset);
+		const btScalar	depth=-(btDot(x, wfi->water_normal)+wfi->water_offset);
 		if(depth>0)
 		{
 			medium.m_density	=	wfi->water_density;
@@ -530,7 +530,7 @@ static inline void			ApplyClampedForce(	btSoftBody::Node& n,
 	const btScalar	dtim=dt*n.m_im;
 	if((f*dtim).length2()>n.m_v.length2())
 	{/* Clamp	*/ 
-		n.m_f-=ProjectOnAxis(n.m_v,f.normalized())/dtim;						
+		n.m_f-=ProjectOnAxis(n.m_v, f.normalized())/dtim;						
 	}
 	else
 	{/* Apply	*/ 
@@ -556,7 +556,7 @@ static inline int		MatchEdge(	const btSoftBody::Node* a,
 //
 struct	btEigen
 {
-	static int			system(btMatrix3x3& a,btMatrix3x3* vectors,btVector3* values=0)
+	static int			system(btMatrix3x3& a, btMatrix3x3* vectors, btVector3* values=0)
 	{
 		static const int		maxiterations=16;
 		static const btScalar	accuracy=(btScalar)0.0001;
@@ -564,7 +564,7 @@ struct	btEigen
 		int						iterations=0;
 		vectors->setIdentity();
 		do	{
-			int				p=0,q=1;
+			int				p=0, q=1;
 			if(btFabs(a[p][q])<btFabs(a[0][2])) { p=0;q=2; }
 			if(btFabs(a[p][q])<btFabs(a[1][2])) { p=1;q=2; }
 			if(btFabs(a[p][q])>accuracy)
@@ -576,32 +576,32 @@ struct	btEigen
 				{
 					const btScalar	c=1/btSqrt(t*t+1);
 					const btScalar	s=c*t;
-					mulPQ(a,c,s,p,q);
-					mulTPQ(a,c,s,p,q);
-					mulPQ(v,c,s,p,q);
+					mulPQ(a, c,s, p,q);
+					mulTPQ(a, c,s, p,q);
+					mulPQ(v, c,s, p,q);
 				} else break;
 			} else break;
 		} while((++iterations)<maxiterations);
 		if(values)
 		{
-			*values=btVector3(a[0][0],a[1][1],a[2][2]);
+			*values=btVector3(a[0][0], a[1][1], a[2][2]);
 		}
 		return(iterations);
 	}
 private:
-	static inline void	mulTPQ(btMatrix3x3& a,btScalar c,btScalar s,int p,int q)
+	static inline void	mulTPQ(btMatrix3x3& a, btScalar c, btScalar s, int p, int q)
 	{
-		const btScalar	m[2][3]={	{a[p][0],a[p][1],a[p][2]},
-		{a[q][0],a[q][1],a[q][2]}};
+		const btScalar	m[2][3]={	{a[p][0], a[p][1], a[p][2]},
+		{a[q][0], a[q][1], a[q][2]}};
 		int i;
 
 		for(i=0;i<3;++i) a[p][i]=c*m[0][i]-s*m[1][i];
 		for(i=0;i<3;++i) a[q][i]=c*m[1][i]+s*m[0][i];
 	}
-	static inline void	mulPQ(btMatrix3x3& a,btScalar c,btScalar s,int p,int q)
+	static inline void	mulPQ(btMatrix3x3& a, btScalar c, btScalar s, int p, int q)
 	{
-		const btScalar	m[2][3]={	{a[0][p],a[1][p],a[2][p]},
-		{a[0][q],a[1][q],a[2][q]}};
+		const btScalar	m[2][3]={	{a[0][p], a[1][p], a[2][p]},
+		{a[0][q], a[1][q], a[2][q]}};
 		int i;
 
 		for(i=0;i<3;++i) a[i][p]=c*m[0][i]-s*m[1][i];
@@ -613,7 +613,7 @@ private:
 // Polar decomposition,
 // "Computing the Polar Decomposition with Applications", Nicholas J. Higham, 1986.
 //
-static inline int			PolarDecompose(	const btMatrix3x3& m,btMatrix3x3& q,btMatrix3x3& s)
+static inline int			PolarDecompose(	const btMatrix3x3& m, btMatrix3x3& q, btMatrix3x3& s)
 {
 	static const btPolarDecomposition polar;  
 	return polar.decompose(m, q, s);
@@ -643,7 +643,7 @@ struct btSoftColliders
 			threshold	=(btScalar)0;
 		}
 		bool				SolveContact(	const btGjkEpaSolver2::sResults& res,
-			btSoftBody::Body ba,const btSoftBody::Body bb,
+			btSoftBody::Body ba, const btSoftBody::Body bb,
 			btSoftBody::CJoint& joint)
 		{
 			if(res.distance<m_margin)
@@ -656,10 +656,10 @@ struct btSoftColliders
 				const btVector3		va=ba.velocity(ra);
 				const btVector3		vb=bb.velocity(rb);
 				const btVector3		vrel=va-vb;
-				const btScalar		rvac=btDot(vrel,norm);
+				const btScalar		rvac=btDot(vrel, norm);
 				 btScalar		depth=res.distance-m_margin;
 				
-//				printf("depth=%f\n",depth);
+//				printf("depth=%f\n", depth);
 				const btVector3		iv=norm*rvac;
 				const btVector3		fv=vrel-iv;
 				joint.m_bodies[0]	=	ba;
@@ -677,11 +677,11 @@ struct btSoftColliders
 				joint.m_drift		=	depth*norm;
 
 				joint.m_normal		=	norm;
-//				printf("normal=%f,%f,%f\n",res.normal.getX(),res.normal.getY(),res.normal.getZ());
+//				printf("normal=%f, %f, %f\n", res.normal.getX(), res.normal.getY(), res.normal.getZ());
 				joint.m_delete		=	false;
 				joint.m_friction	=	fv.length2()<(rvac*friction*rvac*friction)?1:friction;
-				joint.m_massmatrix	=	ImpulseMatrix(	ba.invMass(),ba.invWorldInertia(),joint.m_rpos[0],
-					bb.invMass(),bb.invWorldInertia(),joint.m_rpos[1]);
+				joint.m_massmatrix	=	ImpulseMatrix(	ba.invMass(), ba.invWorldInertia(), joint.m_rpos[0],
+					bb.invMass(), bb.invWorldInertia(), joint.m_rpos[1]);
 
 				return(true);
 			}
@@ -708,12 +708,12 @@ struct btSoftColliders
 				return;
 
 			btGjkEpaSolver2::sResults	res;		
-			if(btGjkEpaSolver2::SignedDistance(	&cshape,btTransform::getIdentity(),
-				rshape,m_colObjWrap->getWorldTransform(),
-				btVector3(1,0,0),res))
+			if(btGjkEpaSolver2::SignedDistance(	&cshape, btTransform::getIdentity(),
+				rshape, m_colObjWrap->getWorldTransform(),
+				btVector3(1,0,0), res))
 			{
 				btSoftBody::CJoint	joint;
-				if(SolveContact(res,cluster,m_colObjWrap->getCollisionObject(),joint))//prb,joint))
+				if(SolveContact(res, cluster, m_colObjWrap->getCollisionObject(), joint))//prb, joint))
 				{
 					btSoftBody::CJoint*	pj=new(btAlignedAlloc(sizeof(btSoftBody::CJoint),16)) btSoftBody::CJoint();
 					*pj=joint;psb->m_joints.push_back(pj);
@@ -730,22 +730,22 @@ struct btSoftColliders
 				}
 			}
 		}
-		void		ProcessColObj(btSoftBody* ps,const btCollisionObjectWrapper* colObWrap)
+		void		ProcessColObj(btSoftBody* ps, const btCollisionObjectWrapper* colObWrap)
 		{
 			psb			=	ps;
 			m_colObjWrap			=	colObWrap;
 			idt			=	ps->m_sst.isdt;
 			m_margin		=	m_colObjWrap->getCollisionShape()->getMargin()+psb->getCollisionShape()->getMargin();
 			///Bullet rigid body uses multiply instead of minimum to determine combined friction. Some customization would be useful.
-			friction	=	btMin(psb->m_cfg.kDF,m_colObjWrap->getCollisionObject()->getFriction());
+			friction	=	btMin(psb->m_cfg.kDF, m_colObjWrap->getCollisionObject()->getFriction());
 			btVector3			mins;
 			btVector3			maxs;
 
 			ATTRIBUTE_ALIGNED16(btDbvtVolume)		volume;
-			colObWrap->getCollisionShape()->getAabb(colObWrap->getWorldTransform(),mins,maxs);
-			volume=btDbvtVolume::FromMM(mins,maxs);
+			colObWrap->getCollisionShape()->getAabb(colObWrap->getWorldTransform(), mins, maxs);
+			volume=btDbvtVolume::FromMM(mins, maxs);
 			volume.Expand(btVector3(1,1,1)*m_margin);
-			ps->m_cdbvt.collideTV(ps->m_cdbvt.m_root,volume,*this);
+			ps->m_cdbvt.collideTV(ps->m_cdbvt.m_root, volume,*this);
 		}	
 	};
 	//
@@ -754,7 +754,7 @@ struct btSoftColliders
 	struct	CollideCL_SS : ClusterBase
 	{
 		btSoftBody*	bodies[2];
-		void		Process(const btDbvtNode* la,const btDbvtNode* lb)
+		void		Process(const btDbvtNode* la, const btDbvtNode* lb)
 		{
 			btSoftBody::Cluster*		cla=(btSoftBody::Cluster*)la->data;
 			btSoftBody::Cluster*		clb=(btSoftBody::Cluster*)lb->data;
@@ -771,16 +771,16 @@ struct btSoftColliders
 				btSoftClusterCollisionShape	csa(cla);
 				btSoftClusterCollisionShape	csb(clb);
 				btGjkEpaSolver2::sResults	res;		
-				if(btGjkEpaSolver2::SignedDistance(	&csa,btTransform::getIdentity(),
-					&csb,btTransform::getIdentity(),
-					cla->m_com-clb->m_com,res))
+				if(btGjkEpaSolver2::SignedDistance(	&csa, btTransform::getIdentity(),
+					&csb, btTransform::getIdentity(),
+					cla->m_com-clb->m_com, res))
 				{
 					btSoftBody::CJoint	joint;
-					if(SolveContact(res,cla,clb,joint))
+					if(SolveContact(res, cla, clb, joint))
 					{
 						btSoftBody::CJoint*	pj=new(btAlignedAlloc(sizeof(btSoftBody::CJoint),16)) btSoftBody::CJoint();
 						*pj=joint;bodies[0]->m_joints.push_back(pj);
-						pj->m_erp	*=	btMax(bodies[0]->m_cfg.kSSHR_CL,bodies[1]->m_cfg.kSSHR_CL);
+						pj->m_erp	*=	btMax(bodies[0]->m_cfg.kSSHR_CL, bodies[1]->m_cfg.kSSHR_CL);
 						pj->m_split	*=	(bodies[0]->m_cfg.kSS_SPLT_CL+bodies[1]->m_cfg.kSS_SPLT_CL)/2;
 					}
 				}
@@ -788,19 +788,19 @@ struct btSoftColliders
 			{
 				static int count=0;
 				count++;
-				//printf("count=%d\n",count);
+				//printf("count=%d\n", count);
 				
 			}
 		}
-		void		ProcessSoftSoft(btSoftBody* psa,btSoftBody* psb)
+		void		ProcessSoftSoft(btSoftBody* psa, btSoftBody* psb)
 		{
 			idt			=	psa->m_sst.isdt;
 			//m_margin		=	(psa->getCollisionShape()->getMargin()+psb->getCollisionShape()->getMargin())/2;
 			m_margin		=	(psa->getCollisionShape()->getMargin()+psb->getCollisionShape()->getMargin());
-			friction	=	btMin(psa->m_cfg.kDF,psb->m_cfg.kDF);
+			friction	=	btMin(psa->m_cfg.kDF, psb->m_cfg.kDF);
 			bodies[0]	=	psa;
 			bodies[1]	=	psb;
-			psa->m_cdbvt.collideTT(psa->m_cdbvt.m_root,psb->m_cdbvt.m_root,*this);
+			psa->m_cdbvt.collideTT(psa->m_cdbvt.m_root, psb->m_cdbvt.m_root,*this);
 		}	
 	};
 	//
@@ -819,7 +819,7 @@ struct btSoftColliders
 			btSoftBody::RContact	c;
 
 			if(	(!n.m_battach)&&
-				psb->checkContact(m_colObj1Wrap,n.m_x,m,c.m_cti))
+				psb->checkContact(m_colObj1Wrap, n.m_x, m,c.m_cti))
 			{
 				const btScalar	ima=n.m_im;
 				const btScalar	imb= m_rigidBody? m_rigidBody->getInvMass() : 0.f;
@@ -833,11 +833,11 @@ struct btSoftColliders
 					const btVector3		va=m_rigidBody ? m_rigidBody->getVelocityInLocalPoint(ra)*psb->m_sst.sdt : btVector3(0,0,0);
 					const btVector3		vb=n.m_x-n.m_q;	
 					const btVector3		vr=vb-va;
-					const btScalar		dn=btDot(vr,c.m_cti.m_normal);
+					const btScalar		dn=btDot(vr, c.m_cti.m_normal);
 					const btVector3		fv=vr-c.m_cti.m_normal*dn;
 					const btScalar		fc=psb->m_cfg.kDF*m_colObj1Wrap->getCollisionObject()->getFriction();
 					c.m_node	=	&n;
-					c.m_c0		=	ImpulseMatrix(psb->m_sst.sdt,ima,imb,iwi,ra);
+					c.m_c0		=	ImpulseMatrix(psb->m_sst.sdt, ima, imb, iwi, ra);
 					c.m_c1		=	ra;
 					c.m_c2		=	ima*psb->m_sst.sdt;
 			        c.m_c3		=	fv.length2()<(dn*fc*dn*fc)?0:1-fc;
@@ -870,14 +870,14 @@ struct btSoftColliders
 			ProjectOrigin(	face->m_n[0]->m_x-o,
 				face->m_n[1]->m_x-o,
 				face->m_n[2]->m_x-o,
-				p,d);
+				p, d);
 			const btScalar	m=mrg+(o-node->m_q).length()*2;
 			if(d<(m*m))
 			{
-				const btSoftBody::Node*	n[]={face->m_n[0],face->m_n[1],face->m_n[2]};
-				const btVector3			w=BaryCoord(n[0]->m_x,n[1]->m_x,n[2]->m_x,p+o);
+				const btSoftBody::Node*	n[]={face->m_n[0], face->m_n[1], face->m_n[2]};
+				const btVector3			w=BaryCoord(n[0]->m_x, n[1]->m_x, n[2]->m_x, p+o);
 				const btScalar			ma=node->m_im;
-				btScalar				mb=BaryEval(n[0]->m_im,n[1]->m_im,n[2]->m_im,w);
+				btScalar				mb=BaryEval(n[0]->m_im, n[1]->m_im, n[2]->m_im, w);
 				if(	(n[0]->m_im<=0)||
 					(n[1]->m_im<=0)||
 					(n[2]->m_im<=0))
@@ -893,7 +893,7 @@ struct btSoftColliders
 					c.m_node		=	node;
 					c.m_face		=	face;
 					c.m_weights		=	w;
-					c.m_friction	=	btMax(psb[0]->m_cfg.kDF,psb[1]->m_cfg.kDF);
+					c.m_friction	=	btMax(psb[0]->m_cfg.kDF, psb[1]->m_cfg.kDF);
 					c.m_cfm[0]		=	ma/ms*psb[0]->m_cfg.kSHR;
 					c.m_cfm[1]		=	mb/ms*psb[1]->m_cfg.kSHR;
 					psb[0]->m_scontacts.push_back(c);

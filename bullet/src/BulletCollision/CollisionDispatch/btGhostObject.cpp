@@ -30,7 +30,7 @@ btGhostObject::~btGhostObject()
 }
 
 
-void btGhostObject::addOverlappingObjectInternal(btBroadphaseProxy* otherProxy,btBroadphaseProxy* thisProxy)
+void btGhostObject::addOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btBroadphaseProxy* thisProxy)
 {
 	btCollisionObject* otherObject = (btCollisionObject*)otherProxy->m_clientObject;
 	btAssert(otherObject);
@@ -43,7 +43,7 @@ void btGhostObject::addOverlappingObjectInternal(btBroadphaseProxy* otherProxy,b
 	}
 }
 
-void btGhostObject::removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy,btDispatcher* dispatcher,btBroadphaseProxy* thisProxy)
+void btGhostObject::removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btDispatcher* dispatcher, btBroadphaseProxy* thisProxy)
 {
 	btCollisionObject* otherObject = (btCollisionObject*)otherProxy->m_clientObject;
 	btAssert(otherObject);
@@ -67,7 +67,7 @@ btPairCachingGhostObject::~btPairCachingGhostObject()
 	btAlignedFree( m_hashPairCache );
 }
 
-void btPairCachingGhostObject::addOverlappingObjectInternal(btBroadphaseProxy* otherProxy,btBroadphaseProxy* thisProxy)
+void btPairCachingGhostObject::addOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btBroadphaseProxy* thisProxy)
 {
 	btBroadphaseProxy*actualThisProxy = thisProxy ? thisProxy : getBroadphaseHandle();
 	btAssert(actualThisProxy);
@@ -78,11 +78,11 @@ void btPairCachingGhostObject::addOverlappingObjectInternal(btBroadphaseProxy* o
 	if (index==m_overlappingObjects.size())
 	{
 		m_overlappingObjects.push_back(otherObject);
-		m_hashPairCache->addOverlappingPair(actualThisProxy,otherProxy);
+		m_hashPairCache->addOverlappingPair(actualThisProxy, otherProxy);
 	}
 }
 
-void btPairCachingGhostObject::removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy,btDispatcher* dispatcher,btBroadphaseProxy* thisProxy1)
+void btPairCachingGhostObject::removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btDispatcher* dispatcher, btBroadphaseProxy* thisProxy1)
 {
 	btCollisionObject* otherObject = (btCollisionObject*)otherProxy->m_clientObject;
 	btBroadphaseProxy* actualThisProxy = thisProxy1 ? thisProxy1 : getBroadphaseHandle();
@@ -94,14 +94,14 @@ void btPairCachingGhostObject::removeOverlappingObjectInternal(btBroadphaseProxy
 	{
 		m_overlappingObjects[index] = m_overlappingObjects[m_overlappingObjects.size()-1];
 		m_overlappingObjects.pop_back();
-		m_hashPairCache->removeOverlappingPair(actualThisProxy,otherProxy,dispatcher);
+		m_hashPairCache->removeOverlappingPair(actualThisProxy, otherProxy, dispatcher);
 	}
 }
 
 
 void	btGhostObject::convexSweepTest(const btConvexShape* castShape, const btTransform& convexFromWorld, const btTransform& convexToWorld, btCollisionWorld::ConvexResultCallback& resultCallback, btScalar allowedCcdPenetration) const
 {
-	btTransform	convexFromTrans,convexToTrans;
+	btTransform	convexFromTrans, convexToTrans;
 	convexFromTrans = convexFromWorld;
 	convexToTrans = convexToWorld;
 	btVector3 castShapeAabbMin, castShapeAabbMax;
@@ -124,14 +124,14 @@ void	btGhostObject::convexSweepTest(const btConvexShape* castShape, const btTran
 		//only perform raycast if filterMask matches
 		if(resultCallback.needsCollision(collisionObject->getBroadphaseHandle())) {
 			//RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
-			btVector3 collisionObjectAabbMin,collisionObjectAabbMax;
-			collisionObject->getCollisionShape()->getAabb(collisionObject->getWorldTransform(),collisionObjectAabbMin,collisionObjectAabbMax);
+			btVector3 collisionObjectAabbMin, collisionObjectAabbMax;
+			collisionObject->getCollisionShape()->getAabb(collisionObject->getWorldTransform(), collisionObjectAabbMin, collisionObjectAabbMax);
 			AabbExpand (collisionObjectAabbMin, collisionObjectAabbMax, castShapeAabbMin, castShapeAabbMax);
 			btScalar hitLambda = btScalar(1.); //could use resultCallback.m_closestHitFraction, but needs testing
 			btVector3 hitNormal;
-			if (btRayAabb(convexFromWorld.getOrigin(),convexToWorld.getOrigin(),collisionObjectAabbMin,collisionObjectAabbMax,hitLambda,hitNormal))
+			if (btRayAabb(convexFromWorld.getOrigin(), convexToWorld.getOrigin(), collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, hitNormal))
 			{
-				btCollisionWorld::objectQuerySingle(castShape, convexFromTrans,convexToTrans,
+				btCollisionWorld::objectQuerySingle(castShape, convexFromTrans, convexToTrans,
 					collisionObject,
 						collisionObject->getCollisionShape(),
 						collisionObject->getWorldTransform(),
@@ -160,7 +160,7 @@ void	btGhostObject::rayTest(const btVector3& rayFromWorld, const btVector3& rayT
 		//only perform raycast if filterMask matches
 		if(resultCallback.needsCollision(collisionObject->getBroadphaseHandle())) 
 		{
-			btCollisionWorld::rayTestSingle(rayFromTrans,rayToTrans,
+			btCollisionWorld::rayTestSingle(rayFromTrans, rayToTrans,
 							collisionObject,
 								collisionObject->getCollisionShape(),
 								collisionObject->getWorldTransform(),

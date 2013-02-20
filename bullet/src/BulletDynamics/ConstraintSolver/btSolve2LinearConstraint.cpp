@@ -31,17 +31,17 @@ void btSolve2LinearConstraint::resolveUnilateralPairConstraint(
 						
 						const btVector3& invInertiaADiag,
 						const btScalar invMassA,
-						const btVector3& linvelA,const btVector3& angvelA,
+						const btVector3& linvelA, const btVector3& angvelA,
 						const btVector3& rel_posA1,
 						const btVector3& invInertiaBDiag,
 						const btScalar invMassB,
-						const btVector3& linvelB,const btVector3& angvelB,
+						const btVector3& linvelB, const btVector3& angvelB,
 						const btVector3& rel_posA2,
 
 					  btScalar depthA, const btVector3& normalA, 
-					  const btVector3& rel_posB1,const btVector3& rel_posB2,
+					  const btVector3& rel_posB1, const btVector3& rel_posB2,
 					  btScalar depthB, const btVector3& normalB, 
-					  btScalar& imp0,btScalar& imp1)
+					  btScalar& imp0, btScalar& imp1)
 {
 	(void)linvelA;
 	(void)linvelB;
@@ -61,13 +61,13 @@ void btSolve2LinearConstraint::resolveUnilateralPairConstraint(
 
 
 	//this jacobian entry could be re-used for all iterations
-	btJacobianEntry jacA(world2A,world2B,rel_posA1,rel_posA2,normalA,invInertiaADiag,invMassA,
-		invInertiaBDiag,invMassB);
-	btJacobianEntry jacB(world2A,world2B,rel_posB1,rel_posB2,normalB,invInertiaADiag,invMassA,
-		invInertiaBDiag,invMassB);
+	btJacobianEntry jacA(world2A, world2B, rel_posA1, rel_posA2, normalA, invInertiaADiag, invMassA,
+		invInertiaBDiag, invMassB);
+	btJacobianEntry jacB(world2A, world2B, rel_posB1, rel_posB2, normalB, invInertiaADiag, invMassA,
+		invInertiaBDiag, invMassB);
 	
-	//const btScalar vel0 = jacA.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
-	//const btScalar vel1 = jacB.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
+	//const btScalar vel0 = jacA.getRelativeVelocity(linvelA, angvelA, linvelB, angvelB);
+	//const btScalar vel1 = jacB.getRelativeVelocity(linvelA, angvelA, linvelB, angvelB);
 
 	const btScalar vel0 = normalA.dot(body1->getVelocityInLocalPoint(rel_posA1)-body2->getVelocityInLocalPoint(rel_posA1));
 	const btScalar vel1 = normalB.dot(body1->getVelocityInLocalPoint(rel_posB1)-body2->getVelocityInLocalPoint(rel_posB1));
@@ -92,7 +92,7 @@ void btSolve2LinearConstraint::resolveUnilateralPairConstraint(
 	// 
 
 
-	btScalar nonDiag = jacA.getNonDiagonal(jacB,invMassA,invMassB);
+	btScalar nonDiag = jacA.getNonDiagonal(jacB, invMassA, invMassB);
 	btScalar	invDet = btScalar(1.0) / (jacA.getDiagonal() * jacB.getDiagonal() - nonDiag * nonDiag );
 	
 	//imp0 = dv0 * jacA.getDiagonal() * invDet + dv1 * -nonDiag * invDet;
@@ -119,17 +119,17 @@ void btSolve2LinearConstraint::resolveBilateralPairConstraint(
 						
 						const btVector3& invInertiaADiag,
 						const btScalar invMassA,
-						const btVector3& linvelA,const btVector3& angvelA,
+						const btVector3& linvelA, const btVector3& angvelA,
 						const btVector3& rel_posA1,
 						const btVector3& invInertiaBDiag,
 						const btScalar invMassB,
-						const btVector3& linvelB,const btVector3& angvelB,
+						const btVector3& linvelB, const btVector3& angvelB,
 						const btVector3& rel_posA2,
 
 					  btScalar depthA, const btVector3& normalA, 
-					  const btVector3& rel_posB1,const btVector3& rel_posB2,
+					  const btVector3& rel_posB1, const btVector3& rel_posB2,
 					  btScalar depthB, const btVector3& normalB, 
-					  btScalar& imp0,btScalar& imp1)
+					  btScalar& imp0, btScalar& imp1)
 {
 
 	(void)linvelA;
@@ -150,13 +150,13 @@ void btSolve2LinearConstraint::resolveBilateralPairConstraint(
 
 
 	//this jacobian entry could be re-used for all iterations
-	btJacobianEntry jacA(world2A,world2B,rel_posA1,rel_posA2,normalA,invInertiaADiag,invMassA,
-		invInertiaBDiag,invMassB);
-	btJacobianEntry jacB(world2A,world2B,rel_posB1,rel_posB2,normalB,invInertiaADiag,invMassA,
-		invInertiaBDiag,invMassB);
+	btJacobianEntry jacA(world2A, world2B, rel_posA1, rel_posA2, normalA, invInertiaADiag, invMassA,
+		invInertiaBDiag, invMassB);
+	btJacobianEntry jacB(world2A, world2B, rel_posB1, rel_posB2, normalB, invInertiaADiag, invMassA,
+		invInertiaBDiag, invMassB);
 	
-	//const btScalar vel0 = jacA.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
-	//const btScalar vel1 = jacB.getRelativeVelocity(linvelA,angvelA,linvelB,angvelB);
+	//const btScalar vel0 = jacA.getRelativeVelocity(linvelA, angvelA, linvelB, angvelB);
+	//const btScalar vel1 = jacB.getRelativeVelocity(linvelA, angvelA, linvelB, angvelB);
 
 	const btScalar vel0 = normalA.dot(body1->getVelocityInLocalPoint(rel_posA1)-body2->getVelocityInLocalPoint(rel_posA1));
 	const btScalar vel1 = normalB.dot(body1->getVelocityInLocalPoint(rel_posB1)-body2->getVelocityInLocalPoint(rel_posB1));
@@ -176,7 +176,7 @@ void btSolve2LinearConstraint::resolveBilateralPairConstraint(
 	// 
 
 
-	btScalar nonDiag = jacA.getNonDiagonal(jacB,invMassA,invMassB);
+	btScalar nonDiag = jacA.getNonDiagonal(jacB, invMassA, invMassB);
 	btScalar	invDet = btScalar(1.0) / (jacA.getDiagonal() * jacB.getDiagonal() - nonDiag * nonDiag );
 	
 	//imp0 = dv0 * jacA.getDiagonal() * invDet + dv1 * -nonDiag * invDet;
@@ -237,17 +237,17 @@ void btSolve2LinearConstraint::resolveBilateralPairConstraint(
 /*
 void btSolve2LinearConstraint::resolveAngularConstraint(	const btMatrix3x3& invInertiaAWS,
 											const btScalar invMassA,
-											const btVector3& linvelA,const btVector3& angvelA,
+											const btVector3& linvelA, const btVector3& angvelA,
 											const btVector3& rel_posA1,
 											const btMatrix3x3& invInertiaBWS,
 											const btScalar invMassB,
-											const btVector3& linvelB,const btVector3& angvelB,
+											const btVector3& linvelB, const btVector3& angvelB,
 											const btVector3& rel_posA2,
 
 											btScalar depthA, const btVector3& normalA, 
-											const btVector3& rel_posB1,const btVector3& rel_posB2,
+											const btVector3& rel_posB1, const btVector3& rel_posB2,
 											btScalar depthB, const btVector3& normalB, 
-											btScalar& imp0,btScalar& imp1)
+											btScalar& imp0, btScalar& imp1)
 {
 
 }

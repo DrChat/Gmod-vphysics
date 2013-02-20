@@ -37,7 +37,7 @@ void GIM_TRIANGLE_CONTACT::merge_points(const btVector4 & plane,
 
     for ( _k=0;_k<point_count;_k++)
     {
-        btScalar _dist = - bt_distance_point_plane(plane,points[_k]) + margin;
+        btScalar _dist = - bt_distance_point_plane(plane, points[_k]) + margin;
 
         if (_dist>=0.0f)
         {
@@ -66,20 +66,20 @@ bool btPrimitiveTriangle::overlap_test_conservative(const btPrimitiveTriangle& o
 {
     btScalar total_margin = m_margin + other.m_margin;
     // classify points on other triangle
-    btScalar dis0 = bt_distance_point_plane(m_plane,other.m_vertices[0]) - total_margin;
+    btScalar dis0 = bt_distance_point_plane(m_plane, other.m_vertices[0]) - total_margin;
 
-    btScalar dis1 = bt_distance_point_plane(m_plane,other.m_vertices[1]) - total_margin;
+    btScalar dis1 = bt_distance_point_plane(m_plane, other.m_vertices[1]) - total_margin;
 
-    btScalar dis2 = bt_distance_point_plane(m_plane,other.m_vertices[2]) - total_margin;
+    btScalar dis2 = bt_distance_point_plane(m_plane, other.m_vertices[2]) - total_margin;
 
     if (dis0>0.0f&&dis1>0.0f&&dis2>0.0f) return false;
 
     // classify points on this triangle
-    dis0 = bt_distance_point_plane(other.m_plane,m_vertices[0]) - total_margin;
+    dis0 = bt_distance_point_plane(other.m_plane, m_vertices[0]) - total_margin;
 
-    dis1 = bt_distance_point_plane(other.m_plane,m_vertices[1]) - total_margin;
+    dis1 = bt_distance_point_plane(other.m_plane, m_vertices[1]) - total_margin;
 
-    dis2 = bt_distance_point_plane(other.m_plane,m_vertices[2]) - total_margin;
+    dis2 = bt_distance_point_plane(other.m_plane, m_vertices[2]) - total_margin;
 
     if (dis0>0.0f&&dis1>0.0f&&dis2>0.0f) return false;
 
@@ -95,11 +95,11 @@ int btPrimitiveTriangle::clip_triangle(btPrimitiveTriangle & other, btVector3 * 
 
     btVector4 edgeplane;
 
-    get_edge_plane(0,edgeplane);
+    get_edge_plane(0, edgeplane);
 
 
     int clipped_count = bt_plane_clip_triangle(
-                            edgeplane,other.m_vertices[0],other.m_vertices[1],other.m_vertices[2],temp_points);
+                            edgeplane, other.m_vertices[0], other.m_vertices[1], other.m_vertices[2], temp_points);
 
     if (clipped_count == 0) return 0;
 
@@ -107,18 +107,18 @@ int btPrimitiveTriangle::clip_triangle(btPrimitiveTriangle & other, btVector3 * 
 
 
     // edge 1
-    get_edge_plane(1,edgeplane);
+    get_edge_plane(1, edgeplane);
 
 
-    clipped_count = bt_plane_clip_polygon(edgeplane,temp_points,clipped_count,temp_points1);
+    clipped_count = bt_plane_clip_polygon(edgeplane, temp_points, clipped_count, temp_points1);
 
     if (clipped_count == 0) return 0;
 
     // edge 2
-    get_edge_plane(2,edgeplane);
+    get_edge_plane(2, edgeplane);
 
     clipped_count = bt_plane_clip_polygon(
-                        edgeplane,temp_points1,clipped_count,clipped_points);
+                        edgeplane, temp_points1, clipped_count, clipped_points);
 
     return clipped_count;
 }
@@ -137,7 +137,7 @@ bool btPrimitiveTriangle::find_triangle_collision_clip_method(btPrimitiveTriangl
     contacts1.m_separating_normal = m_plane;
 
 
-    clipped_count = clip_triangle(other,clipped_points);
+    clipped_count = clip_triangle(other, clipped_points);
 
     if (clipped_count == 0 )
     {
@@ -145,7 +145,7 @@ bool btPrimitiveTriangle::find_triangle_collision_clip_method(btPrimitiveTriangl
     }
 
     //find most deep interval face1
-    contacts1.merge_points(contacts1.m_separating_normal,margin,clipped_points,clipped_count);
+    contacts1.merge_points(contacts1.m_separating_normal, margin, clipped_points, clipped_count);
     if (contacts1.m_point_count == 0) return false; // too far
     //Normal pointing to this triangle
     contacts1.m_separating_normal *= -1.f;
@@ -155,7 +155,7 @@ bool btPrimitiveTriangle::find_triangle_collision_clip_method(btPrimitiveTriangl
     GIM_TRIANGLE_CONTACT contacts2;
     contacts2.m_separating_normal = other.m_plane;
 
-    clipped_count = other.clip_triangle(*this,clipped_points);
+    clipped_count = other.clip_triangle(*this, clipped_points);
 
     if (clipped_count == 0 )
     {
@@ -163,7 +163,7 @@ bool btPrimitiveTriangle::find_triangle_collision_clip_method(btPrimitiveTriangl
     }
 
     //find most deep interval face1
-    contacts2.merge_points(contacts2.m_separating_normal,margin,clipped_points,clipped_count);
+    contacts2.merge_points(contacts2.m_separating_normal, margin, clipped_points, clipped_count);
     if (contacts2.m_point_count == 0) return false; // too far
 
 
@@ -195,20 +195,20 @@ bool btTriangleShapeEx::overlap_test_conservative(const btTriangleShapeEx& other
     other.buildTriPlane(plane1);
 
     // classify points on other triangle
-    btScalar dis0 = bt_distance_point_plane(plane0,other.m_vertices1[0]) - total_margin;
+    btScalar dis0 = bt_distance_point_plane(plane0, other.m_vertices1[0]) - total_margin;
 
-    btScalar dis1 = bt_distance_point_plane(plane0,other.m_vertices1[1]) - total_margin;
+    btScalar dis1 = bt_distance_point_plane(plane0, other.m_vertices1[1]) - total_margin;
 
-    btScalar dis2 = bt_distance_point_plane(plane0,other.m_vertices1[2]) - total_margin;
+    btScalar dis2 = bt_distance_point_plane(plane0, other.m_vertices1[2]) - total_margin;
 
     if (dis0>0.0f&&dis1>0.0f&&dis2>0.0f) return false;
 
     // classify points on this triangle
-    dis0 = bt_distance_point_plane(plane1,m_vertices1[0]) - total_margin;
+    dis0 = bt_distance_point_plane(plane1, m_vertices1[0]) - total_margin;
 
-    dis1 = bt_distance_point_plane(plane1,m_vertices1[1]) - total_margin;
+    dis1 = bt_distance_point_plane(plane1, m_vertices1[1]) - total_margin;
 
-    dis2 = bt_distance_point_plane(plane1,m_vertices1[2]) - total_margin;
+    dis2 = bt_distance_point_plane(plane1, m_vertices1[2]) - total_margin;
 
     if (dis0>0.0f&&dis1>0.0f&&dis2>0.0f) return false;
 

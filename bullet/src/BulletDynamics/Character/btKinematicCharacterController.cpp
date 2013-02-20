@@ -50,7 +50,7 @@ public:
 		m_me = me;
 	}
 
-	virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace)
+	virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
 	{
 		if (rayResult.m_collisionObject == m_me)
 			return 1.0;
@@ -72,7 +72,7 @@ public:
 	{
 	}
 
-	virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace)
+	virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
 	{
 		if (convexResult.m_hitCollisionObject == m_me)
 			return btScalar(1.0);
@@ -127,7 +127,7 @@ btVector3 btKinematicCharacterController::perpindicularComponent (const btVector
 	return direction - parallelComponent(direction, normal);
 }
 
-btKinematicCharacterController::btKinematicCharacterController (btPairCachingGhostObject* ghostObject,btConvexShape* convexShape,btScalar stepHeight, int upAxis)
+btKinematicCharacterController::btKinematicCharacterController (btPairCachingGhostObject* ghostObject, btConvexShape* convexShape, btScalar stepHeight, int upAxis)
 {
 	m_upAxis = upAxis;
 	m_addedMargin = 0.02;
@@ -169,7 +169,7 @@ bool btKinematicCharacterController::recoverFromPenetration ( btCollisionWorld* 
 	// paircache and the ghostobject's internal paircache at the same time.    /BW
 
 	btVector3 minAabb, maxAabb;
-	m_convexShape->getAabb(m_ghostObject->getWorldTransform(), minAabb,maxAabb);
+	m_convexShape->getAabb(m_ghostObject->getWorldTransform(), minAabb, maxAabb);
 	collisionWorld->getBroadphase()->setAabb(m_ghostObject->getBroadphaseHandle(), 
 						 minAabb, 
 						 maxAabb, 
@@ -223,7 +223,7 @@ bool btKinematicCharacterController::recoverFromPenetration ( btCollisionWorld* 
 	btTransform newTrans = m_ghostObject->getWorldTransform();
 	newTrans.setOrigin(m_currentPosition);
 	m_ghostObject->setWorldTransform(newTrans);
-//	printf("m_touchingNormal = %f,%f,%f\n",m_touchingNormal[0],m_touchingNormal[1],m_touchingNormal[2]);
+//	printf("m_touchingNormal = %f, %f, %f\n", m_touchingNormal[0], m_touchingNormal[1], m_touchingNormal[2]);
 	return penetration;
 }
 
@@ -290,14 +290,14 @@ void btKinematicCharacterController::updateTargetPositionBasedOnCollision (const
 		if (0)//tangentMag != 0.0)
 		{
 			btVector3 parComponent = parallelDir * btScalar (tangentMag*movementLength);
-//			printf("parComponent=%f,%f,%f\n",parComponent[0],parComponent[1],parComponent[2]);
+//			printf("parComponent=%f, %f, %f\n", parComponent[0], parComponent[1], parComponent[2]);
 			m_targetPosition +=  parComponent;
 		}
 
 		if (normalMag != 0.0)
 		{
 			btVector3 perpComponent = perpindicularDir * btScalar (normalMag*movementLength);
-//			printf("perpComponent=%f,%f,%f\n",perpComponent[0],perpComponent[1],perpComponent[2]);
+//			printf("perpComponent=%f, %f, %f\n", perpComponent[0], perpComponent[1], perpComponent[2]);
 			m_targetPosition += perpComponent;
 		}
 	} else
@@ -308,8 +308,8 @@ void btKinematicCharacterController::updateTargetPositionBasedOnCollision (const
 
 void btKinematicCharacterController::stepForwardAndStrafe ( btCollisionWorld* collisionWorld, const btVector3& walkMove)
 {
-	// printf("m_normalizedDirection=%f,%f,%f\n",
-	// 	m_normalizedDirection[0],m_normalizedDirection[1],m_normalizedDirection[2]);
+	// printf("m_normalizedDirection=%f, %f, %f\n",
+	// 	m_normalizedDirection[0], m_normalizedDirection[1], m_normalizedDirection[2]);
 	// phase 2: forward and strafe
 	btTransform start, end;
 	m_targetPosition = m_currentPosition + walkMove;
@@ -319,7 +319,7 @@ void btKinematicCharacterController::stepForwardAndStrafe ( btCollisionWorld* co
 	
 	btScalar fraction = 1.0;
 	btScalar distance2 = (m_currentPosition-m_targetPosition).length2();
-//	printf("distance2=%f\n",distance2);
+//	printf("distance2=%f\n", distance2);
 
 	if (m_touchingContact)
 	{
@@ -512,7 +512,7 @@ void btKinematicCharacterController::preStep (  btCollisionWorld* collisionWorld
 
 	m_currentPosition = m_ghostObject->getWorldTransform().getOrigin();
 	m_targetPosition = m_currentPosition;
-//	printf("m_targetPosition=%f,%f,%f\n",m_targetPosition[0],m_targetPosition[1],m_targetPosition[2]);
+//	printf("m_targetPosition=%f, %f, %f\n", m_targetPosition[0], m_targetPosition[1], m_targetPosition[2]);
 
 	
 }
@@ -548,8 +548,8 @@ void btKinematicCharacterController::playerStep (  btCollisionWorld* collisionWo
 	btTransform xform;
 	xform = m_ghostObject->getWorldTransform ();
 
-//	printf("walkDirection(%f,%f,%f)\n",walkDirection[0],walkDirection[1],walkDirection[2]);
-//	printf("walkSpeed=%f\n",walkSpeed);
+//	printf("walkDirection(%f, %f, %f)\n", walkDirection[0], walkDirection[1], walkDirection[2]);
+//	printf("walkSpeed=%f\n", walkSpeed);
 
 	stepUp (collisionWorld);
 	if (m_useWalkDirection) {

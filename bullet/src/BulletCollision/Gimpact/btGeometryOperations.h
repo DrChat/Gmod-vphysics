@@ -35,25 +35,25 @@ subject to the following restrictions:
 #define PARALELENORMALS 0.000001f
 
 
-#define BT_CLAMP(number,minval,maxval) (number<minval?minval:(number>maxval?maxval:number))
+#define BT_CLAMP(number, minval, maxval) (number<minval?minval:(number>maxval?maxval:number))
 
 /// Calc a plane from a triangle edge an a normal. plane is a vec4f
-SIMD_FORCE_INLINE void bt_edge_plane(const btVector3 & e1,const btVector3 &  e2, const btVector3 & normal,btVector4 & plane)
+SIMD_FORCE_INLINE void bt_edge_plane(const btVector3 & e1, const btVector3 &  e2, const btVector3 & normal, btVector4 & plane)
 {
 	btVector3 planenormal = (e2-e1).cross(normal);
 	planenormal.normalize();
-	plane.setValue(planenormal[0],planenormal[1],planenormal[2],e2.dot(planenormal));
+	plane.setValue(planenormal[0], planenormal[1], planenormal[2], e2.dot(planenormal));
 }
 
 
 
 //***************** SEGMENT and LINE FUNCTIONS **********************************///
 
-/*! Finds the closest point(cp) to (v) on a segment (e1,e2)
+/*! Finds the closest point(cp) to (v) on a segment (e1, e2)
  */
 SIMD_FORCE_INLINE void bt_closest_point_on_segment(
 	btVector3 & cp, const btVector3 & v,
-	const btVector3  &e1,const btVector3 &e2)
+	const btVector3  &e1, const btVector3 &e2)
 {
     btVector3 n = e2-e1;
     cp = v - e1;
@@ -98,7 +98,7 @@ SIMD_FORCE_INLINE int bt_line_plane_collision(
 	    return 0;
 	}
 
-	btScalar _dis = bt_distance_point_plane(plane,vPoint);
+	btScalar _dis = bt_distance_point_plane(plane, vPoint);
 	char returnvalue = _dis<0.0f? 2:1;
 	tparam = -_dis/_dotdir;
 
@@ -161,12 +161,12 @@ SIMD_FORCE_INLINE void bt_segment_collision(
     		else if(_M[1]<_M[3])
     		{
     			vPointB = invert_b_order?vB1:vB2;
-    			bt_closest_point_on_segment(vPointA,vPointB,vA1,vA2);
+    			bt_closest_point_on_segment(vPointA, vPointB, vA1, vA2);
     		}
     		else
     		{
     			vPointA = vA2;
-    			bt_closest_point_on_segment(vPointB,vPointA,vB1,vB2);
+    			bt_closest_point_on_segment(vPointB, vPointA, vB1, vB2);
     		}
     	}
     	else
@@ -179,22 +179,22 @@ SIMD_FORCE_INLINE void bt_segment_collision(
     		else if(_M[3]<_M[1])
     		{
     			vPointA = vA2;
-    			bt_closest_point_on_segment(vPointB,vPointA,vB1,vB2);
+    			bt_closest_point_on_segment(vPointB, vPointA, vB1, vB2);
     		}
     		else
     		{
     			vPointB = invert_b_order?vB1:vB2;
-    			bt_closest_point_on_segment(vPointA,vPointB,vA1,vA2);
+    			bt_closest_point_on_segment(vPointA, vPointB, vA1, vA2);
     		}
     	}
     	return;
     }
 
     N = N.cross(BD);
-    _M.setValue(N[0],N[1],N[2],vB1.dot(N));
+    _M.setValue(N[0], N[1], N[2], vB1.dot(N));
 
 	// get point A as the plane collision point
-    bt_line_plane_collision(_M,AD,vA1,vPointA,tp,btScalar(0), btScalar(1));
+    bt_line_plane_collision(_M, AD, vA1, vPointA, tp, btScalar(0), btScalar(1));
 
     /*Closest point on segment*/
     vPointB = vPointA - vB1;

@@ -40,7 +40,7 @@ public:
 
 	virtual btStackAlloc*	getStackAllocator() = 0;
 
-	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0,int proxyType1) =0;
+	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0, int proxyType1) =0;
 
 };
 

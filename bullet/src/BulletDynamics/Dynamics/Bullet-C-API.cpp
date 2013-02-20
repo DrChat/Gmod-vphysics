@@ -93,16 +93,16 @@ plDynamicsWorldHandle plCreateDynamicsWorld(plPhysicsSdkHandle physicsSdkHandle)
 	mem = btAlignedAlloc(sizeof(btCollisionDispatcher),16);
 	btDispatcher*				dispatcher = new (mem)btCollisionDispatcher(collisionConfiguration);
 	mem = btAlignedAlloc(sizeof(btAxisSweep3),16);
-	btBroadphaseInterface*		pairCache = new (mem)btAxisSweep3(physicsSdk->m_worldAabbMin,physicsSdk->m_worldAabbMax);
+	btBroadphaseInterface*		pairCache = new (mem)btAxisSweep3(physicsSdk->m_worldAabbMin, physicsSdk->m_worldAabbMax);
 	mem = btAlignedAlloc(sizeof(btSequentialImpulseConstraintSolver),16);
 	btConstraintSolver*			constraintSolver = new(mem) btSequentialImpulseConstraintSolver();
 
 	mem = btAlignedAlloc(sizeof(btDiscreteDynamicsWorld),16);
-	return (plDynamicsWorldHandle) new (mem)btDiscreteDynamicsWorld(dispatcher,pairCache,constraintSolver,collisionConfiguration);
+	return (plDynamicsWorldHandle) new (mem)btDiscreteDynamicsWorld(dispatcher, pairCache, constraintSolver, collisionConfiguration);
 }
 void           plDeleteDynamicsWorld(plDynamicsWorldHandle world)
 {
-	//todo: also clean up the other allocations, axisSweep, pairCache,dispatcher,constraintSolver,collisionConfiguration
+	//todo: also clean up the other allocations, axisSweep, pairCache, dispatcher, constraintSolver, collisionConfiguration
 	btDynamicsWorld* dynamicsWorld = reinterpret_cast< btDynamicsWorld* >(world);
 	btAlignedFree(dynamicsWorld);
 }
@@ -145,10 +145,10 @@ plRigidBodyHandle plCreateRigidBody(	void* user_data,  float mass, plCollisionSh
 	btAssert(shape);
 	if (mass)
 	{
-		shape->calculateLocalInertia(mass,localInertia);
+		shape->calculateLocalInertia(mass, localInertia);
 	}
 	void* mem = btAlignedAlloc(sizeof(btRigidBody),16);
-	btRigidBody::btRigidBodyConstructionInfo rbci(mass, 0,shape,localInertia);
+	btRigidBody::btRigidBodyConstructionInfo rbci(mass, 0, shape, localInertia);
 	btRigidBody* body = new (mem)btRigidBody(rbci);
 	body->setWorldTransform(trans);
 	body->setUserPointer(user_data);
@@ -175,7 +175,7 @@ plCollisionShapeHandle plNewSphereShape(plReal radius)
 plCollisionShapeHandle plNewBoxShape(plReal x, plReal y, plReal z)
 {
 	void* mem = btAlignedAlloc(sizeof(btBoxShape),16);
-	return (plCollisionShapeHandle) new (mem)btBoxShape(btVector3(x,y,z));
+	return (plCollisionShapeHandle) new (mem)btBoxShape(btVector3(x, y,z));
 }
 
 plCollisionShapeHandle plNewCapsuleShape(plReal radius, plReal height)
@@ -183,21 +183,21 @@ plCollisionShapeHandle plNewCapsuleShape(plReal radius, plReal height)
 	//capsule is convex hull of 2 spheres, so use btMultiSphereShape
 	
 	const int numSpheres = 2;
-	btVector3 positions[numSpheres] = {btVector3(0,height,0),btVector3(0,-height,0)};
-	btScalar radi[numSpheres] = {radius,radius};
+	btVector3 positions[numSpheres] = {btVector3(0, height,0), btVector3(0,-height,0)};
+	btScalar radi[numSpheres] = {radius, radius};
 	void* mem = btAlignedAlloc(sizeof(btMultiSphereShape),16);
-	return (plCollisionShapeHandle) new (mem)btMultiSphereShape(positions,radi,numSpheres);
+	return (plCollisionShapeHandle) new (mem)btMultiSphereShape(positions, radi, numSpheres);
 }
 plCollisionShapeHandle plNewConeShape(plReal radius, plReal height)
 {
 	void* mem = btAlignedAlloc(sizeof(btConeShape),16);
-	return (plCollisionShapeHandle) new (mem)btConeShape(radius,height);
+	return (plCollisionShapeHandle) new (mem)btConeShape(radius, height);
 }
 
 plCollisionShapeHandle plNewCylinderShape(plReal radius, plReal height)
 {
 	void* mem = btAlignedAlloc(sizeof(btCylinderShape),16);
-	return (plCollisionShapeHandle) new (mem)btCylinderShape(btVector3(radius,height,radius));
+	return (plCollisionShapeHandle) new (mem)btCylinderShape(btVector3(radius, height, radius));
 }
 
 /* Convex Meshes */
@@ -220,7 +220,7 @@ plCollisionShapeHandle plNewCompoundShape()
 	return (plCollisionShapeHandle) new (mem)btCompoundShape();
 }
 
-void	plAddChildShape(plCollisionShapeHandle compoundShapeHandle,plCollisionShapeHandle childShapeHandle, plVector3 childPos,plQuaternion childOrn)
+void	plAddChildShape(plCollisionShapeHandle compoundShapeHandle, plCollisionShapeHandle childShapeHandle, plVector3 childPos, plQuaternion childOrn)
 {
 	btCollisionShape* colShape = reinterpret_cast<btCollisionShape*>(compoundShapeHandle);
 	btAssert(colShape->getShapeType() == COMPOUND_SHAPE_PROXYTYPE);
@@ -228,15 +228,15 @@ void	plAddChildShape(plCollisionShapeHandle compoundShapeHandle,plCollisionShape
 	btCollisionShape* childShape = reinterpret_cast<btCollisionShape*>(childShapeHandle);
 	btTransform	localTrans;
 	localTrans.setIdentity();
-	localTrans.setOrigin(btVector3(childPos[0],childPos[1],childPos[2]));
-	localTrans.setRotation(btQuaternion(childOrn[0],childOrn[1],childOrn[2],childOrn[3]));
-	compoundShape->addChildShape(localTrans,childShape);
+	localTrans.setOrigin(btVector3(childPos[0], childPos[1], childPos[2]));
+	localTrans.setRotation(btQuaternion(childOrn[0], childOrn[1], childOrn[2], childOrn[3]));
+	compoundShape->addChildShape(localTrans, childShape);
 }
 
-void plSetEuler(plReal yaw,plReal pitch,plReal roll, plQuaternion orient)
+void plSetEuler(plReal yaw, plReal pitch, plReal roll, plQuaternion orient)
 {
 	btQuaternion orn;
-	orn.setEuler(yaw,pitch,roll);
+	orn.setEuler(yaw, pitch, roll);
 	orient[0] = orn.getX();
 	orient[1] = orn.getY();
 	orient[2] = orn.getZ();
@@ -245,17 +245,17 @@ void plSetEuler(plReal yaw,plReal pitch,plReal roll, plQuaternion orient)
 }
 
 
-//	extern  void		plAddTriangle(plMeshInterfaceHandle meshHandle, plVector3 v0,plVector3 v1,plVector3 v2);
+//	extern  void		plAddTriangle(plMeshInterfaceHandle meshHandle, plVector3 v0, plVector3 v1, plVector3 v2);
 //	extern  plCollisionShapeHandle plNewStaticTriangleMeshShape(plMeshInterfaceHandle);
 
 
-void		plAddVertex(plCollisionShapeHandle cshape, plReal x,plReal y,plReal z)
+void		plAddVertex(plCollisionShapeHandle cshape, plReal x, plReal y, plReal z)
 {
 	btCollisionShape* colShape = reinterpret_cast<btCollisionShape*>( cshape);
 	(void)colShape;
 	btAssert(colShape->getShapeType()==CONVEX_HULL_SHAPE_PROXYTYPE);
 	btConvexHullShape* convexHullShape = reinterpret_cast<btConvexHullShape*>( cshape);
-	convexHullShape->addPoint(btVector3(x,y,z));
+	convexHullShape->addPoint(btVector3(x, y,z));
 
 }
 
@@ -269,7 +269,7 @@ void plSetScaling(plCollisionShapeHandle cshape, plVector3 cscaling)
 {
 	btCollisionShape* shape = reinterpret_cast<btCollisionShape*>( cshape);
 	btAssert(shape);
-	btVector3 scaling(cscaling[0],cscaling[1],cscaling[2]);
+	btVector3 scaling(cscaling[0], cscaling[1], cscaling[2]);
 	shape->setLocalScaling(scaling);	
 }
 
@@ -279,7 +279,7 @@ void plSetPosition(plRigidBodyHandle object, const plVector3 position)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
-	btVector3 pos(position[0],position[1],position[2]);
+	btVector3 pos(position[0], position[1], position[2]);
 	btTransform worldTrans = body->getWorldTransform();
 	worldTrans.setOrigin(pos);
 	body->setWorldTransform(worldTrans);
@@ -289,7 +289,7 @@ void plSetOrientation(plRigidBodyHandle object, const plQuaternion orientation)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
-	btQuaternion orn(orientation[0],orientation[1],orientation[2],orientation[3]);
+	btQuaternion orn(orientation[0], orientation[1], orientation[2], orientation[3]);
 	btTransform worldTrans = body->getWorldTransform();
 	worldTrans.setRotation(orn);
 	body->setWorldTransform(worldTrans);
@@ -311,7 +311,7 @@ void	plGetOpenGLMatrix(plRigidBodyHandle object, plReal* matrix)
 
 }
 
-void	plGetPosition(plRigidBodyHandle object,plVector3 position)
+void	plGetPosition(plRigidBodyHandle object, plVector3 position)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -321,7 +321,7 @@ void	plGetPosition(plRigidBodyHandle object,plVector3 position)
 	position[2] = pos.getZ();
 }
 
-void plGetOrientation(plRigidBodyHandle object,plQuaternion orientation)
+void plGetOrientation(plRigidBodyHandle object, plQuaternion orientation)
 {
 	btRigidBody* body = reinterpret_cast< btRigidBody* >(object);
 	btAssert(body);
@@ -364,11 +364,11 @@ double plNearestPoints(float p1[3], float p2[3], float p3[3], float q1[3], float
 	
 	Solver = &Solver1;	
 		
-	btGjkPairDetector convexConvex(&trishapeA ,&trishapeB,&sGjkSimplexSolver,Solver);
+	btGjkPairDetector convexConvex(&trishapeA, &trishapeB, &sGjkSimplexSolver, Solver);
 	
 	convexConvex.m_catchDegeneracies = 1;
 	
-	// btGjkPairDetector convexConvex(&trishapeA ,&trishapeB,&sGjkSimplexSolver,0);
+	// btGjkPairDetector convexConvex(&trishapeA, &trishapeB, &sGjkSimplexSolver,0);
 	
 	btPointCollector gjkOutput;
 	btGjkPairDetector::ClosestPointInput input;

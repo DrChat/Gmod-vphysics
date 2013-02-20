@@ -76,19 +76,19 @@ class btDispatcher
 public:
 	virtual ~btDispatcher() ;
 
-	virtual btCollisionAlgorithm* findAlgorithm(const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,btPersistentManifold* sharedManifold=0) = 0;
+	virtual btCollisionAlgorithm* findAlgorithm(const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btPersistentManifold* sharedManifold=0) = 0;
 
-	virtual btPersistentManifold*	getNewManifold(const btCollisionObject* b0,const btCollisionObject* b1)=0;
+	virtual btPersistentManifold*	getNewManifold(const btCollisionObject* b0, const btCollisionObject* b1)=0;
 
 	virtual void releaseManifold(btPersistentManifold* manifold)=0;
 
 	virtual void clearManifold(btPersistentManifold* manifold)=0;
 
-	virtual bool	needsCollision(const btCollisionObject* body0,const btCollisionObject* body1) = 0;
+	virtual bool	needsCollision(const btCollisionObject* body0, const btCollisionObject* body1) = 0;
 
-	virtual bool	needsResponse(const btCollisionObject* body0,const btCollisionObject* body1)=0;
+	virtual bool	needsResponse(const btCollisionObject* body0, const btCollisionObject* body1)=0;
 
-	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache,const btDispatcherInfo& dispatchInfo,btDispatcher* dispatcher)  =0;
+	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher)  =0;
 
 	virtual int getNumManifolds() const = 0;
 

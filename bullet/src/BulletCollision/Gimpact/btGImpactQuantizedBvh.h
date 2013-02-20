@@ -76,7 +76,7 @@ ATTRIBUTE_ALIGNED16	(struct) BT_QUANTIZED_BVH_NODE
 	}
 
 	SIMD_FORCE_INLINE bool testQuantizedBoxOverlapp(
-		unsigned short * quantizedMin,unsigned short * quantizedMax) const
+		unsigned short * quantizedMin, unsigned short * quantizedMax) const
 	{
 		if(m_quantizedAabbMin[0] > quantizedMax[0] ||
 		   m_quantizedAabbMax[0] < quantizedMin[0] ||
@@ -132,15 +132,15 @@ public:
 	SIMD_FORCE_INLINE void quantizePoint(
 		unsigned short * quantizedpoint, const btVector3 & point) const
 	{
-		bt_quantize_clamp(quantizedpoint,point,m_global_bound.m_min,m_global_bound.m_max,m_bvhQuantization);
+		bt_quantize_clamp(quantizedpoint, point, m_global_bound.m_min, m_global_bound.m_max, m_bvhQuantization);
 	}
 
 
 	SIMD_FORCE_INLINE bool testQuantizedBoxOverlapp(
 		int node_index,
-		unsigned short * quantizedMin,unsigned short * quantizedMax) const
+		unsigned short * quantizedMin, unsigned short * quantizedMax) const
 	{
-		return m_node_array[node_index].testQuantizedBoxOverlapp(quantizedMin,quantizedMax);
+		return m_node_array[node_index].testQuantizedBoxOverlapp(quantizedMin, quantizedMax);
 	}
 
 	SIMD_FORCE_INLINE void clearNodes()
@@ -170,11 +170,11 @@ public:
 	{
 		bound.m_min = bt_unquantize(
 			m_node_array[nodeindex].m_quantizedAabbMin,
-			m_global_bound.m_min,m_bvhQuantization);
+			m_global_bound.m_min, m_bvhQuantization);
 
 		bound.m_max = bt_unquantize(
 			m_node_array[nodeindex].m_quantizedAabbMax,
-			m_global_bound.m_min,m_bvhQuantization);
+			m_global_bound.m_min, m_bvhQuantization);
 	}
 
 	SIMD_FORCE_INLINE void setNodeBound(int nodeindex, const btAABB & bound)
@@ -285,12 +285,12 @@ public:
 	{
 		btAABB transbox=box;
 		transbox.appy_transform(transform);
-		return boxQuery(transbox,collided_results);
+		return boxQuery(transbox, collided_results);
 	}
 
 	//! returns the indices of the primitives in the m_primitive_manager
 	bool rayQuery(
-		const btVector3 & ray_dir,const btVector3 & ray_origin ,
+		const btVector3 & ray_dir, const btVector3 & ray_origin ,
 		btAlignedObjectArray<int> & collided_results) const;
 
 	//! tells if this set has hierarcht
@@ -348,9 +348,9 @@ public:
 		return m_box_tree.getEscapeNodeIndex(nodeindex);
 	}
 
-	SIMD_FORCE_INLINE void getNodeTriangle(int nodeindex,btPrimitiveTriangle & triangle) const
+	SIMD_FORCE_INLINE void getNodeTriangle(int nodeindex, btPrimitiveTriangle & triangle) const
 	{
-		m_primitive_manager->get_primitive_triangle(getNodeData(nodeindex),triangle);
+		m_primitive_manager->get_primitive_triangle(getNodeData(nodeindex), triangle);
 	}
 
 

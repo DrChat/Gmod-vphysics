@@ -27,7 +27,7 @@ void btConvexPointCloudShape::setLocalScaling(const btVector3& scaling)
 #ifndef __SPU__
 btVector3	btConvexPointCloudShape::localGetSupportingVertexWithoutMargin(const btVector3& vec0)const
 {
-	btVector3 supVec(btScalar(0.),btScalar(0.),btScalar(0.));
+	btVector3 supVec(btScalar(0.), btScalar(0.), btScalar(0.));
 	btScalar maxDot = btScalar(-BT_LARGE_FLOAT);
 
 	btVector3 vec = vec0;
@@ -52,7 +52,7 @@ btVector3	btConvexPointCloudShape::localGetSupportingVertexWithoutMargin(const b
 	return supVec;
 }
 
-void	btConvexPointCloudShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btConvexPointCloudShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
     for( int j = 0; j < numVectors; j++ )
     {
@@ -81,7 +81,7 @@ btVector3	btConvexPointCloudShape::localGetSupportingVertex(const btVector3& vec
 		btVector3 vecnorm = vec;
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
-			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
+			vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
 		} 
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;
@@ -109,12 +109,12 @@ int btConvexPointCloudShape::getNumEdges() const
 	return 0;
 }
 
-void btConvexPointCloudShape::getEdge(int i,btVector3& pa,btVector3& pb) const
+void btConvexPointCloudShape::getEdge(int i, btVector3& pa, btVector3& pb) const
 {
 	btAssert (0);
 }
 
-void btConvexPointCloudShape::getVertex(int i,btVector3& vtx) const
+void btConvexPointCloudShape::getVertex(int i, btVector3& vtx) const
 {
 	vtx = m_unscaledPoints[i]*m_localScaling;
 }
@@ -124,14 +124,14 @@ int	btConvexPointCloudShape::getNumPlanes() const
 	return 0;
 }
 
-void btConvexPointCloudShape::getPlane(btVector3& ,btVector3& ,int ) const
+void btConvexPointCloudShape::getPlane(btVector3&, btVector3&, int ) const
 {
 
 	btAssert(0);
 }
 
 //not yet
-bool btConvexPointCloudShape::isInside(const btVector3& ,btScalar ) const
+bool btConvexPointCloudShape::isInside(const btVector3&, btScalar ) const
 {
 	btAssert(0);
 	return false;

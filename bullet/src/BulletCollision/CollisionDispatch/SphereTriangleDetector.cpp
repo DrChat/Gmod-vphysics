@@ -19,7 +19,7 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionShapes/btSphereShape.h"
 
 
-SphereTriangleDetector::SphereTriangleDetector(btSphereShape* sphere,btTriangleShape* triangle,btScalar contactBreakingThreshold)
+SphereTriangleDetector::SphereTriangleDetector(btSphereShape* sphere, btTriangleShape* triangle, btScalar contactBreakingThreshold)
 :m_sphere(sphere),
 m_triangle(triangle),
 m_contactBreakingThreshold(contactBreakingThreshold)
@@ -27,31 +27,31 @@ m_contactBreakingThreshold(contactBreakingThreshold)
 
 }
 
-void	SphereTriangleDetector::getClosestPoints(const ClosestPointInput& input,Result& output,class btIDebugDraw* debugDraw,bool swapResults)
+void	SphereTriangleDetector::getClosestPoints(const ClosestPointInput& input, Result& output, class btIDebugDraw* debugDraw, bool swapResults)
 {
 
 	(void)debugDraw;
 	const btTransform& transformA = input.m_transformA;
 	const btTransform& transformB = input.m_transformB;
 
-	btVector3 point,normal;
+	btVector3 point, normal;
 	btScalar timeOfImpact = btScalar(1.);
 	btScalar depth = btScalar(0.);
 //	output.m_distance = btScalar(BT_LARGE_FLOAT);
 	//move sphere into triangle space
 	btTransform	sphereInTr = transformB.inverseTimes(transformA);
 
-	if (collide(sphereInTr.getOrigin(),point,normal,depth,timeOfImpact,m_contactBreakingThreshold))
+	if (collide(sphereInTr.getOrigin(), point, normal, depth, timeOfImpact, m_contactBreakingThreshold))
 	{
 		if (swapResults)
 		{
 			btVector3 normalOnB = transformB.getBasis()*normal;
 			btVector3 normalOnA = -normalOnB;
 			btVector3 pointOnA = transformB*point+normalOnB*depth;
-			output.addContactPoint(normalOnA,pointOnA,depth);
+			output.addContactPoint(normalOnA, pointOnA, depth);
 		} else
 		{
-			output.addContactPoint(transformB.getBasis()*normal,transformB*point,depth);
+			output.addContactPoint(transformB.getBasis()*normal, transformB*point, depth);
 		}
 	}
 
@@ -61,9 +61,9 @@ void	SphereTriangleDetector::getClosestPoints(const ClosestPointInput& input,Res
 
 // See also geometrictools.com
 // Basic idea: D = |p - (lo + t0*lv)| where t0 = lv . (p - lo) / lv . lv
-btScalar SegmentSqrDistance(const btVector3& from, const btVector3& to,const btVector3 &p, btVector3 &nearest);
+btScalar SegmentSqrDistance(const btVector3& from, const btVector3& to, const btVector3 &p, btVector3 &nearest);
 
-btScalar SegmentSqrDistance(const btVector3& from, const btVector3& to,const btVector3 &p, btVector3 &nearest) {
+btScalar SegmentSqrDistance(const btVector3& from, const btVector3& to, const btVector3 &p, btVector3 &nearest) {
 	btVector3 diff = p - from;
 	btVector3 v = to - from;
 	btScalar t = v.dot(diff);
@@ -84,14 +84,14 @@ btScalar SegmentSqrDistance(const btVector3& from, const btVector3& to,const btV
 	return diff.dot(diff);	
 }
 
-bool SphereTriangleDetector::facecontains(const btVector3 &p,const btVector3* vertices,btVector3& normal)  {
+bool SphereTriangleDetector::facecontains(const btVector3 &p, const btVector3* vertices, btVector3& normal)  {
 	btVector3 lp(p);
 	btVector3 lnormal(normal);
 	
 	return pointInTriangle(vertices, lnormal, &lp);
 }
 
-bool SphereTriangleDetector::collide(const btVector3& sphereCenter,btVector3 &point, btVector3& resultNormal, btScalar& depth, btScalar &timeOfImpact, btScalar contactBreakingThreshold)
+bool SphereTriangleDetector::collide(const btVector3& sphereCenter, btVector3 &point, btVector3& resultNormal, btScalar& depth, btScalar &timeOfImpact, btScalar contactBreakingThreshold)
 {
 
 	const btVector3* vertices = &m_triangle->getVertexPtr(0);
@@ -117,7 +117,7 @@ bool SphereTriangleDetector::collide(const btVector3& sphereCenter,btVector3 &po
 	bool hasContact = false;
 	btVector3 contactPoint;
 	if (isInsideContactPlane) {
-		if (facecontains(sphereCenter,vertices,normal)) {
+		if (facecontains(sphereCenter, vertices, normal)) {
 			// Inside the contact wedge - touches a point on the shell plane
 			hasContact = true;
 			contactPoint = sphereCenter - normal*distanceFromPlane;
@@ -130,9 +130,9 @@ bool SphereTriangleDetector::collide(const btVector3& sphereCenter,btVector3 &po
 				btVector3 pa;
 				btVector3 pb;
 				
-				m_triangle->getEdge(i,pa,pb);
+				m_triangle->getEdge(i, pa, pb);
 
-				btScalar distanceSqr = SegmentSqrDistance(pa,pb,sphereCenter, nearestOnEdge);
+				btScalar distanceSqr = SegmentSqrDistance(pa, pb, sphereCenter, nearestOnEdge);
 				if (distanceSqr < contactCapsuleRadiusSqr) {
 					// Yep, we're inside a capsule
 					hasContact = true;

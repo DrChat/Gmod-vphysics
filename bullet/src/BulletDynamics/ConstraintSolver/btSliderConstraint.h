@@ -158,7 +158,7 @@ public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 	
 	// constructors
-    btSliderConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB ,bool useLinearReferenceFrameA);
+    btSliderConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB, bool useLinearReferenceFrameA);
     btSliderConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameA);
 
 	// overrides
@@ -169,7 +169,7 @@ public:
 	
 	virtual void getInfo2 (btConstraintInfo2* info);
 
-	void getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB,const btVector3& linVelA,const btVector3& linVelB, btScalar rbAinvMass,btScalar rbBinvMass);
+	void getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btVector3& linVelA, const btVector3& linVelB, btScalar rbAinvMass, btScalar rbBinvMass);
 
 
 	// access
@@ -250,7 +250,7 @@ public:
 	bool getSolveAngLimit() { return m_solveAngLim; }
 	btScalar getAngDepth() { return m_angDepth; }
 	// shared code used by ODE solver
-	void	calculateTransforms(const btTransform& transA,const btTransform& transB);
+	void	calculateTransforms(const btTransform& transA, const btTransform& transB);
 	void	testLinLimits();
 	void	testAngLimits();
 	// access for PE Solver
@@ -264,7 +264,7 @@ public:
 	{ 
 		m_frameInA=frameA; 
 		m_frameInB=frameB;
-		calculateTransforms(m_rbA.getCenterOfMassTransform(),m_rbB.getCenterOfMassTransform());
+		calculateTransforms(m_rbA.getCenterOfMassTransform(), m_rbB.getCenterOfMassTransform());
 		buildJacobian();
 	} 
 
@@ -312,7 +312,7 @@ SIMD_FORCE_INLINE	const char*	btSliderConstraint::serialize(void* dataBuffer, bt
 {
 
 	btSliderConstraintData* sliderData = (btSliderConstraintData*) dataBuffer;
-	btTypedConstraint::serialize(&sliderData->m_typeConstraintData,serializer);
+	btTypedConstraint::serialize(&sliderData->m_typeConstraintData, serializer);
 
 	m_frameInA.serializeFloat(sliderData->m_rbAFrame);
 	m_frameInB.serializeFloat(sliderData->m_rbBFrame);

@@ -17,7 +17,7 @@ subject to the following restrictions:
 
 
 
-btConeShape::btConeShape (btScalar radius,btScalar height): btConvexInternalShape (),
+btConeShape::btConeShape (btScalar radius, btScalar height): btConvexInternalShape (),
 m_radius (radius),
 m_height(height)
 {
@@ -27,14 +27,14 @@ m_height(height)
 	m_sinAngle = (m_radius / btSqrt(m_radius * m_radius + m_height * m_height));
 }
 
-btConeShapeZ::btConeShapeZ (btScalar radius,btScalar height):
-btConeShape(radius,height)
+btConeShapeZ::btConeShapeZ (btScalar radius, btScalar height):
+btConeShape(radius, height)
 {
 	setConeUpIndex(2);
 }
 
-btConeShapeX::btConeShapeX (btScalar radius,btScalar height):
-btConeShape(radius,height)
+btConeShapeX::btConeShapeX (btScalar radius, btScalar height):
+btConeShape(radius, height)
 {
 	setConeUpIndex(0);
 }
@@ -104,7 +104,7 @@ btVector3	btConeShape::localGetSupportingVertexWithoutMargin(const btVector3& ve
 		return coneLocalSupport(vec);
 }
 
-void	btConeShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+void	btConeShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 	for (int i=0;i<numVectors;i++)
 	{
@@ -122,7 +122,7 @@ btVector3	btConeShape::localGetSupportingVertex(const btVector3& vec)  const
 		btVector3 vecnorm = vec;
 		if (vecnorm .length2() < (SIMD_EPSILON*SIMD_EPSILON))
 		{
-			vecnorm.setValue(btScalar(-1.),btScalar(-1.),btScalar(-1.));
+			vecnorm.setValue(btScalar(-1.), btScalar(-1.), btScalar(-1.));
 		} 
 		vecnorm.normalize();
 		supVertex+= getMargin() * vecnorm;

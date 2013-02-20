@@ -46,13 +46,14 @@ static btClock gProfileClock;
 #endif //_XBOX
 
 #include <time.h>
+#include <stdio.h>
 
 
 #else //_WIN32
 #include <sys/time.h>
 #endif //_WIN32
 
-#define mymin(a,b) (a > b ? a : b)
+#define mymin(a, b) ((a) > (b) ? (a) : (b))
 
 struct btClockData
 {
@@ -141,7 +142,7 @@ unsigned long int btClock::getTimeMilliseconds()
 		if (msecOff < -100 || msecOff > 100)
 		{
 			// Adjust the starting time forwards.
-			LONGLONG msecAdjustment = mymin(msecOff * 
+			LONGLONG msecAdjustment = min(msecOff * 
 				m_data->mClockFrequency.QuadPart / 1000, elapsedTime - 
 				m_data->mPrevElapsedTime);
 			m_data->mStartTime.QuadPart += msecAdjustment;
@@ -199,7 +200,7 @@ unsigned long int btClock::getTimeMicroseconds()
 		if (msecOff < -100 || msecOff > 100)
 		{
 			// Adjust the starting time forwards.
-			LONGLONG msecAdjustment = mymin(msecOff * 
+			LONGLONG msecAdjustment = min(msecOff * 
 				m_data->mClockFrequency.QuadPart / 1000, elapsedTime - 
 				m_data->mPrevElapsedTime);
 			m_data->mStartTime.QuadPart += msecAdjustment;
@@ -473,7 +474,7 @@ void	CProfileManager::Reset( void )
 { 
 	gProfileClock.reset();
 	Root.Reset();
-    Root.Call();
+	Root.Call();
 	FrameCounter = 0;
 	Profile_Get_Ticks(&ResetTime);
 }
@@ -499,15 +500,13 @@ float CProfileManager::Get_Time_Since_Reset( void )
 	return (float)time / Profile_Get_Tick_Rate();
 }
 
-#include <stdio.h>
-
 void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spacing)
 {
 	profileIterator->First();
 	if (profileIterator->Is_Done())
 		return;
 
-	float accumulated_time=0,parent_time = profileIterator->Is_Root() ? CProfileManager::Get_Time_Since_Reset() : profileIterator->Get_Current_Parent_Total_Time();
+	float accumulated_time=0, parent_time = profileIterator->Is_Root() ? CProfileManager::Get_Time_Since_Reset() : profileIterator->Get_Current_Parent_Total_Time();
 	int i;
 	int frames_since_reset = CProfileManager::Get_Frame_Count_Since_Reset();
 	for (i=0;i<spacing;i++)	printf(".");
@@ -519,7 +518,7 @@ void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spaci
 	
 	int numChildren = 0;
 	
-	for (i = 0; !profileIterator->Is_Done(); i++,profileIterator->Next())
+	for (i = 0; !profileIterator->Is_Done(); i++, profileIterator->Next())
 	{
 		numChildren++;
 		float current_total_time = profileIterator->Get_Current_Total_Time();
@@ -528,7 +527,7 @@ void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spaci
 		{
 			int i;	for (i=0;i<spacing;i++)	printf(".");
 		}
-		printf("%d -- %s (%.2f %%) :: %.3f ms / frame (%d calls)\n",i, profileIterator->Get_Current_Name(), fraction,(current_total_time / (double)frames_since_reset),profileIterator->Get_Current_Total_Calls());
+		printf("%d -- %s (%.2f %%) :: %.3f ms / frame (%d calls)\n", i, profileIterator->Get_Current_Name(), fraction, (current_total_time / (double)frames_since_reset), profileIterator->Get_Current_Total_Calls());
 		totalTime += current_total_time;
 		//recurse into children
 	}
@@ -538,12 +537,12 @@ void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spaci
 		printf("what's wrong\n");
 	}
 	for (i=0;i<spacing;i++)	printf(".");
-	printf("%s (%.3f %%) :: %.3f ms\n", "Unaccounted:",parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f, parent_time - accumulated_time);
+	printf("%s (%.3f %%) :: %.3f ms\n", "Unaccounted:", parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f, parent_time - accumulated_time);
 	
 	for (i=0;i<numChildren;i++)
 	{
 		profileIterator->Enter_Child(i);
-		dumpRecursive(profileIterator,spacing+3);
+		dumpRecursive(profileIterator, spacing+3);
 		profileIterator->Enter_Parent();
 	}
 }

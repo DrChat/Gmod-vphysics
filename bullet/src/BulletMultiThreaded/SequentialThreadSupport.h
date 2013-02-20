@@ -24,7 +24,7 @@ subject to the following restrictions:
 
 #include "btThreadSupportInterface.h"
 
-typedef void (*SequentialThreadFunc)(void* userPtr,void* lsMemory);
+typedef void (*SequentialThreadFunc)(void* userPtr, void* lsMemory);
 typedef void* (*SequentiallsMemorySetupFunc)();
 
 

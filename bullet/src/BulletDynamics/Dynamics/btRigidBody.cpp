@@ -34,7 +34,7 @@ btRigidBody::btRigidBody(const btRigidBody::btRigidBodyConstructionInfo& constru
 
 btRigidBody::btRigidBody(btScalar mass, btMotionState *motionState, btCollisionShape *collisionShape, const btVector3 &localInertia)
 {
-	btRigidBodyConstructionInfo cinfo(mass,motionState,collisionShape,localInertia);
+	btRigidBodyConstructionInfo cinfo(mass, motionState, collisionShape, localInertia);
 	setupRigidBody(cinfo);
 }
 
@@ -44,7 +44,7 @@ void	btRigidBody::setupRigidBody(const btRigidBody::btRigidBodyConstructionInfo&
 	m_internalType=CO_RIGID_BODY;
 
 	m_linearVelocity.setValue(btScalar(0.0), btScalar(0.0), btScalar(0.0));
-	m_angularVelocity.setValue(btScalar(0.),btScalar(0.),btScalar(0.));
+	m_angularVelocity.setValue(btScalar(0.), btScalar(0.), btScalar(0.));
 	m_angularFactor.setValue(1,1,1);
 	m_linearFactor.setValue(1,1,1);
 	m_gravity.setValue(btScalar(0.0), btScalar(0.0), btScalar(0.0));
@@ -101,9 +101,9 @@ void	btRigidBody::setupRigidBody(const btRigidBody::btRigidBodyConstructionInfo&
 }
 
 
-void btRigidBody::predictIntegratedTransform(btScalar timeStep,btTransform& predictedTransform) 
+void btRigidBody::predictIntegratedTransform(btScalar timeStep, btTransform& predictedTransform) 
 {
-	btTransformUtil::integrateTransform(m_worldTransform,m_linearVelocity,m_angularVelocity,timeStep,predictedTransform);
+	btTransformUtil::integrateTransform(m_worldTransform, m_linearVelocity, m_angularVelocity, timeStep, predictedTransform);
 }
 
 void			btRigidBody::saveKinematicState(btScalar timeStep)
@@ -114,19 +114,19 @@ void			btRigidBody::saveKinematicState(btScalar timeStep)
 		//if we use motionstate to synchronize world transforms, get the new kinematic/animated world transform
 		if (getMotionState())
 			getMotionState()->getWorldTransform(m_worldTransform);
-		btVector3 linVel,angVel;
+		btVector3 linVel, angVel;
 		
-		btTransformUtil::calculateVelocity(m_interpolationWorldTransform,m_worldTransform,timeStep,m_linearVelocity,m_angularVelocity);
+		btTransformUtil::calculateVelocity(m_interpolationWorldTransform, m_worldTransform, timeStep, m_linearVelocity, m_angularVelocity);
 		m_interpolationLinearVelocity = m_linearVelocity;
 		m_interpolationAngularVelocity = m_angularVelocity;
 		m_interpolationWorldTransform = m_worldTransform;
-		//printf("angular = %f %f %f\n",m_angularVelocity.getX(),m_angularVelocity.getY(),m_angularVelocity.getZ());
+		//printf("angular = %f %f %f\n", m_angularVelocity.getX(), m_angularVelocity.getY(), m_angularVelocity.getZ());
 	}
 }
 	
-void	btRigidBody::getAabb(btVector3& aabbMin,btVector3& aabbMax) const
+void	btRigidBody::getAabb(btVector3& aabbMin, btVector3& aabbMax) const
 {
-	getCollisionShape()->getAabb(m_worldTransform,aabbMin,aabbMax);
+	getCollisionShape()->getAabb(m_worldTransform, aabbMin, aabbMax);
 }
 
 
@@ -192,7 +192,7 @@ void			btRigidBody::applyDamping(btScalar timeStep)
 				m_linearVelocity -=  dir * dampVel;
 			} else
 			{
-				m_linearVelocity.setValue(btScalar(0.),btScalar(0.),btScalar(0.));
+				m_linearVelocity.setValue(btScalar(0.), btScalar(0.), btScalar(0.));
 			}
 		}
 
@@ -206,7 +206,7 @@ void			btRigidBody::applyDamping(btScalar timeStep)
 				m_angularVelocity -=  dir * angDampVel;
 			} else
 			{
-				m_angularVelocity.setValue(btScalar(0.),btScalar(0.),btScalar(0.));
+				m_angularVelocity.setValue(btScalar(0.), btScalar(0.), btScalar(0.));
 			}
 		}
 	}
@@ -394,7 +394,7 @@ void btRigidBody::serializeSingleObject(class btSerializer* serializer) const
 {
 	btChunk* chunk = serializer->allocate(calculateSerializeBufferSize(),1);
 	const char* structType = serialize(chunk->m_oldPtr, serializer);
-	serializer->finalizeChunk(chunk,structType,BT_RIGIDBODY_CODE,(void*)this);
+	serializer->finalizeChunk(chunk, structType, BT_RIGIDBODY_CODE, (void*)this);
 }
 
 

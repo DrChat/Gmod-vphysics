@@ -23,9 +23,9 @@ subject to the following restrictions:
 #include "SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 
 #define checkPThreadFunction(returnValue) \
-    if(0 != returnValue) { \
-        printf("PThread problem at line %i in file %s: %i %d\n", __LINE__, __FILE__, returnValue, errno); \
-    }
+	if(0 != returnValue) { \
+		printf("PThread problem at line %i in file %s: %i %d\n", __LINE__, __FILE__, returnValue, errno); \
+	}
 
 // The number of threads should be equal to the number of available cores
 // Todo: each worker should be linked to a single core, using SetThreadIdealProcessor.
@@ -54,21 +54,21 @@ static sem_t* createSem(const char* baseName)
 {
 	static int semCount = 0;
 #ifdef NAMED_SEMAPHORES
-        /// Named semaphore begin
-        char name[32];
-        snprintf(name, 32, "/%s-%d-%4.4d", baseName, getpid(), semCount++); 
-        sem_t* tempSem = sem_open(name, O_CREAT, 0600, 0);
+		/// Named semaphore begin
+		char name[32];
+		snprintf(name, 32, "/%s-%d-%4.4d", baseName, getpid(), semCount++); 
+		sem_t* tempSem = sem_open(name, O_CREAT, 0600, 0);
 
-        if (tempSem != reinterpret_cast<sem_t *>(SEM_FAILED))
-        {
+		if (tempSem != reinterpret_cast<sem_t *>(SEM_FAILED))
+		{
 //        printf("Created \"%s\" Semaphore %p\n", name, tempSem);
-        }
-        else
+		}
+		else
 	{
 		//printf("Error creating Semaphore %d\n", errno);
 		exit(-1);
 	}
-        /// Named semaphore end
+		/// Named semaphore end
 #else
 	sem_t* tempSem = new sem_t;
 	checkPThreadFunction(sem_init(tempSem, 0, 0));
@@ -94,22 +94,22 @@ static void *threadFunction(void *argument)
 	
 	while (1)
 	{
-            checkPThreadFunction(sem_wait(status->startSemaphore));
+			checkPThreadFunction(sem_wait(status->startSemaphore));
 		
 		void* userPtr = status->m_userPtr;
 
 		if (userPtr)
 		{
 			btAssert(status->m_status);
-			status->m_userThreadFunc(userPtr,status->m_lsMemory);
+			status->m_userThreadFunc(userPtr, status->m_lsMemory);
 			status->m_status = 2;
 			checkPThreadFunction(sem_post(mainSemaphore));
-	                status->threadUsed++;
+					status->threadUsed++;
 		} else {
 			//exit Thread
 			status->m_status = 3;
 			checkPThreadFunction(sem_post(mainSemaphore));
-			printf("Thread with taskId %i exiting\n",status->m_taskId);
+			printf("Thread with taskId %i exiting\n", status->m_taskId);
 			break;
 		}
 		
@@ -167,18 +167,18 @@ void PosixThreadSupport::waitForResponse(unsigned int *puiArgument0, unsigned in
 
 	btAssert(m_activeSpuStatus.size());
 
-        // wait for any of the threads to finish
+		// wait for any of the threads to finish
 	checkPThreadFunction(sem_wait(mainSemaphore));
-        
+		
 	// get at least one thread which has finished
-        size_t last = -1;
-        
-        for(size_t t=0; t < size_t(m_activeSpuStatus.size()); ++t) {
-            if(2 == m_activeSpuStatus[t].m_status) {
-                last = t;
-                break;
-            }
-        }
+		size_t last = -1;
+		
+		for(size_t t=0; t < size_t(m_activeSpuStatus.size()); ++t) {
+			if(2 == m_activeSpuStatus[t].m_status) {
+				last = t;
+				break;
+			}
+		}
 
 	btSpuStatus& spuStatus = m_activeSpuStatus[last];
 
@@ -196,21 +196,21 @@ void PosixThreadSupport::waitForResponse(unsigned int *puiArgument0, unsigned in
 
 void PosixThreadSupport::startThreads(ThreadConstructionInfo& threadConstructionInfo)
 {
-        printf("%s creating %i threads.\n", __FUNCTION__, threadConstructionInfo.m_numThreads);
+		printf("%s creating %i threads.\n", __FUNCTION__, threadConstructionInfo.m_numThreads);
 	m_activeSpuStatus.resize(threadConstructionInfo.m_numThreads);
-        
+		
 	mainSemaphore = createSem("main");                
 	//checkPThreadFunction(sem_wait(mainSemaphore));
    
 	for (int i=0;i < threadConstructionInfo.m_numThreads;i++)
 	{
-		printf("starting thread %d\n",i);
+		printf("starting thread %d\n", i);
 
 		btSpuStatus&	spuStatus = m_activeSpuStatus[i];
 
 		spuStatus.startSemaphore = createSem("threadLocal");                
-                
-                checkPThreadFunction(pthread_create(&spuStatus.thread, NULL, &threadFunction, (void*)&spuStatus));
+				
+				checkPThreadFunction(pthread_create(&spuStatus.thread, NULL, &threadFunction, (void*)&spuStatus));
 
 		spuStatus.m_userPtr=0;
 
@@ -219,9 +219,9 @@ void PosixThreadSupport::startThreads(ThreadConstructionInfo& threadConstruction
 		spuStatus.m_status = 0;
 		spuStatus.m_lsMemory = threadConstructionInfo.m_lsMemoryFunc();
 		spuStatus.m_userThreadFunc = threadConstructionInfo.m_userThreadFunc;
-        spuStatus.threadUsed = 0;
+		spuStatus.threadUsed = 0;
 
-		printf("started thread %d \n",i);
+		printf("started thread %d \n", i);
 		
 	}
 
@@ -237,21 +237,21 @@ void PosixThreadSupport::stopSPU()
 {
 	for(size_t t=0; t < size_t(m_activeSpuStatus.size()); ++t) 
 	{
-            btSpuStatus&	spuStatus = m_activeSpuStatus[t];
-            printf("%s: Thread %i used: %ld\n", __FUNCTION__, int(t), spuStatus.threadUsed);
+			btSpuStatus&	spuStatus = m_activeSpuStatus[t];
+			printf("%s: Thread %i used: %ld\n", __FUNCTION__, int(t), spuStatus.threadUsed);
 
 	spuStatus.m_userPtr = 0;       
- 	checkPThreadFunction(sem_post(spuStatus.startSemaphore));
+	checkPThreadFunction(sem_post(spuStatus.startSemaphore));
 	checkPThreadFunction(sem_wait(mainSemaphore));
 
 	printf("destroy semaphore\n"); 
-            destroySem(spuStatus.startSemaphore);
-            printf("semaphore destroyed\n");
+			destroySem(spuStatus.startSemaphore);
+			printf("semaphore destroyed\n");
 		checkPThreadFunction(pthread_join(spuStatus.thread,0));
 
-        }
+		}
 	printf("destroy main semaphore\n");
-        destroySem(mainSemaphore);
+		destroySem(mainSemaphore);
 	printf("main semaphore destroyed\n");
 	m_activeSpuStatus.clear();
 }
@@ -276,7 +276,7 @@ public:
 	{
 		return mCommonBuff[i];
 	}
-	virtual void setSharedParam(int i,unsigned int p)
+	virtual void setSharedParam(int i, unsigned int p)
 	{
 		mCommonBuff[i] = p;
 	}
@@ -357,7 +357,7 @@ public:
 			m_called = 0;
 			pthread_cond_broadcast(&m_cond);
 		} else {
-			pthread_cond_wait(&m_cond,&m_mutex);
+			pthread_cond_wait(&m_cond, &m_mutex);
 		}
 		pthread_mutex_unlock(&m_mutex);
 		
@@ -370,8 +370,8 @@ public:
 			pthread_cond_destroy(&m_cond);
 		}
 		m_called = 0;
-		pthread_mutex_init(&m_mutex,NULL);
-		pthread_cond_init(&m_cond,NULL);
+		pthread_mutex_init(&m_mutex, NULL);
+		pthread_cond_init(&m_cond, NULL);
 		m_numThreads = numThreads;
 	}
 	virtual int  getMaxCount()

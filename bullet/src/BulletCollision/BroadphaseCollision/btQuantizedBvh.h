@@ -217,18 +217,18 @@ protected:
 	{
 		if (m_useQuantization)
 		{
-			quantize(&m_quantizedContiguousNodes[nodeIndex].m_quantizedAabbMin[0] ,aabbMin,0);
+			quantize(&m_quantizedContiguousNodes[nodeIndex].m_quantizedAabbMin[0], aabbMin,0);
 		} else
 		{
 			m_contiguousNodes[nodeIndex].m_aabbMinOrg = aabbMin;
 
 		}
 	}
-	void	setInternalNodeAabbMax(int nodeIndex,const btVector3& aabbMax)
+	void	setInternalNodeAabbMax(int nodeIndex, const btVector3& aabbMax)
 	{
 		if (m_useQuantization)
 		{
-			quantize(&m_quantizedContiguousNodes[nodeIndex].m_quantizedAabbMax[0],aabbMax,1);
+			quantize(&m_quantizedContiguousNodes[nodeIndex].m_quantizedAabbMax[0], aabbMax,1);
 		} else
 		{
 			m_contiguousNodes[nodeIndex].m_aabbMaxOrg = aabbMax;
@@ -270,14 +270,14 @@ protected:
 
 	}
 
-	void mergeInternalNodeAabb(int nodeIndex,const btVector3& newAabbMin,const btVector3& newAabbMax) 
+	void mergeInternalNodeAabb(int nodeIndex, const btVector3& newAabbMin, const btVector3& newAabbMax) 
 	{
 		if (m_useQuantization)
 		{
 			unsigned short int quantizedAabbMin[3];
 			unsigned short int quantizedAabbMax[3];
-			quantize(quantizedAabbMin,newAabbMin,0);
-			quantize(quantizedAabbMax,newAabbMax,1);
+			quantize(quantizedAabbMin, newAabbMin,0);
+			quantize(quantizedAabbMax, newAabbMax,1);
 			for (int i=0;i<3;i++)
 			{
 				if (m_quantizedContiguousNodes[nodeIndex].m_quantizedAabbMin[i] > quantizedAabbMin[i])
@@ -295,39 +295,39 @@ protected:
 		}
 	}
 
-	void	swapLeafNodes(int firstIndex,int secondIndex);
+	void	swapLeafNodes(int firstIndex, int secondIndex);
 
-	void	assignInternalNodeFromLeafNode(int internalNode,int leafNodeIndex);
+	void	assignInternalNodeFromLeafNode(int internalNode, int leafNodeIndex);
 
 protected:
 
 	
 
-	void	buildTree	(int startIndex,int endIndex);
+	void	buildTree	(int startIndex, int endIndex);
 
-	int	calcSplittingAxis(int startIndex,int endIndex);
+	int	calcSplittingAxis(int startIndex, int endIndex);
 
-	int	sortAndCalcSplittingIndex(int startIndex,int endIndex,int splitAxis);
+	int	sortAndCalcSplittingIndex(int startIndex, int endIndex, int splitAxis);
 	
-	void	walkStacklessTree(btNodeOverlapCallback* nodeCallback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+	void	walkStacklessTree(btNodeOverlapCallback* nodeCallback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
-	void	walkStacklessQuantizedTreeAgainstRay(btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin, const btVector3& aabbMax, int startNodeIndex,int endNodeIndex) const;
-	void	walkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback,unsigned short int* quantizedQueryAabbMin,unsigned short int* quantizedQueryAabbMax,int startNodeIndex,int endNodeIndex) const;
-	void	walkStacklessTreeAgainstRay(btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin, const btVector3& aabbMax, int startNodeIndex,int endNodeIndex) const;
+	void	walkStacklessQuantizedTreeAgainstRay(btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin, const btVector3& aabbMax, int startNodeIndex, int endNodeIndex) const;
+	void	walkStacklessQuantizedTree(btNodeOverlapCallback* nodeCallback, unsigned short int* quantizedQueryAabbMin, unsigned short int* quantizedQueryAabbMax, int startNodeIndex, int endNodeIndex) const;
+	void	walkStacklessTreeAgainstRay(btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin, const btVector3& aabbMax, int startNodeIndex, int endNodeIndex) const;
 
 	///tree traversal designed for small-memory processors like PS3 SPU
-	void	walkStacklessQuantizedTreeCacheFriendly(btNodeOverlapCallback* nodeCallback,unsigned short int* quantizedQueryAabbMin,unsigned short int* quantizedQueryAabbMax) const;
+	void	walkStacklessQuantizedTreeCacheFriendly(btNodeOverlapCallback* nodeCallback, unsigned short int* quantizedQueryAabbMin, unsigned short int* quantizedQueryAabbMax) const;
 
 	///use the 16-byte stackless 'skipindex' node tree to do a recursive traversal
-	void	walkRecursiveQuantizedTreeAgainstQueryAabb(const btQuantizedBvhNode* currentNode,btNodeOverlapCallback* nodeCallback,unsigned short int* quantizedQueryAabbMin,unsigned short int* quantizedQueryAabbMax) const;
+	void	walkRecursiveQuantizedTreeAgainstQueryAabb(const btQuantizedBvhNode* currentNode, btNodeOverlapCallback* nodeCallback, unsigned short int* quantizedQueryAabbMin, unsigned short int* quantizedQueryAabbMax) const;
 
 	///use the 16-byte stackless 'skipindex' node tree to do a recursive traversal
-	void	walkRecursiveQuantizedTreeAgainstQuantizedTree(const btQuantizedBvhNode* treeNodeA,const btQuantizedBvhNode* treeNodeB,btNodeOverlapCallback* nodeCallback) const;
+	void	walkRecursiveQuantizedTreeAgainstQuantizedTree(const btQuantizedBvhNode* treeNodeA, const btQuantizedBvhNode* treeNodeB, btNodeOverlapCallback* nodeCallback) const;
 	
 
 
 
-	void	updateSubtreeHeaders(int leftChildNodexIndex,int rightChildNodexIndex);
+	void	updateSubtreeHeaders(int leftChildNodexIndex, int rightChildNodexIndex);
 
 public:
 	
@@ -339,17 +339,17 @@ public:
 
 	
 	///***************************************** expert/internal use only *************************
-	void	setQuantizationValues(const btVector3& bvhAabbMin,const btVector3& bvhAabbMax,btScalar quantizationMargin=btScalar(1.0));
+	void	setQuantizationValues(const btVector3& bvhAabbMin, const btVector3& bvhAabbMax, btScalar quantizationMargin=btScalar(1.0));
 	QuantizedNodeArray&	getLeafNodeArray() {			return	m_quantizedLeafNodes;	}
 	///buildInternal is expert use only: assumes that setQuantizationValues and LeafNodeArray are initialized
 	void	buildInternal();
 	///***************************************** expert/internal use only *************************
 
-	void	reportAabbOverlappingNodex(btNodeOverlapCallback* nodeCallback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+	void	reportAabbOverlappingNodex(btNodeOverlapCallback* nodeCallback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 	void	reportRayOverlappingNodex (btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget) const;
-	void	reportBoxCastOverlappingNodex(btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin,const btVector3& aabbMax) const;
+	void	reportBoxCastOverlappingNodex(btNodeOverlapCallback* nodeCallback, const btVector3& raySource, const btVector3& rayTarget, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
-		SIMD_FORCE_INLINE void quantize(unsigned short* out, const btVector3& point,int isMax) const
+		SIMD_FORCE_INLINE void quantize(unsigned short* out, const btVector3& point, int isMax) const
 	{
 
 		btAssert(m_useQuantization);
@@ -385,30 +385,30 @@ public:
 		{
 			if (newPoint.getX() < point.getX())
 			{
-				printf("unconservative X, diffX = %f, oldX=%f,newX=%f\n",newPoint.getX()-point.getX(), newPoint.getX(),point.getX());
+				printf("unconservative X, diffX = %f, oldX=%f, newX=%f\n", newPoint.getX()-point.getX(), newPoint.getX(), point.getX());
 			}
 			if (newPoint.getY() < point.getY())
 			{
-				printf("unconservative Y, diffY = %f, oldY=%f,newY=%f\n",newPoint.getY()-point.getY(), newPoint.getY(),point.getY());
+				printf("unconservative Y, diffY = %f, oldY=%f, newY=%f\n", newPoint.getY()-point.getY(), newPoint.getY(), point.getY());
 			}
 			if (newPoint.getZ() < point.getZ())
 			{
 
-				printf("unconservative Z, diffZ = %f, oldZ=%f,newZ=%f\n",newPoint.getZ()-point.getZ(), newPoint.getZ(),point.getZ());
+				printf("unconservative Z, diffZ = %f, oldZ=%f, newZ=%f\n", newPoint.getZ()-point.getZ(), newPoint.getZ(), point.getZ());
 			}
 		} else
 		{
 			if (newPoint.getX() > point.getX())
 			{
-				printf("unconservative X, diffX = %f, oldX=%f,newX=%f\n",newPoint.getX()-point.getX(), newPoint.getX(),point.getX());
+				printf("unconservative X, diffX = %f, oldX=%f, newX=%f\n", newPoint.getX()-point.getX(), newPoint.getX(), point.getX());
 			}
 			if (newPoint.getY() > point.getY())
 			{
-				printf("unconservative Y, diffY = %f, oldY=%f,newY=%f\n",newPoint.getY()-point.getY(), newPoint.getY(),point.getY());
+				printf("unconservative Y, diffY = %f, oldY=%f, newY=%f\n", newPoint.getY()-point.getY(), newPoint.getY(), point.getY());
 			}
 			if (newPoint.getZ() > point.getZ())
 			{
-				printf("unconservative Z, diffZ = %f, oldZ=%f,newZ=%f\n",newPoint.getZ()-point.getZ(), newPoint.getZ(),point.getZ());
+				printf("unconservative Z, diffZ = %f, oldZ=%f, newZ=%f\n", newPoint.getZ()-point.getZ(), newPoint.getZ(), point.getZ());
 			}
 		}
 #endif //DEBUG_CHECK_DEQUANTIZATION
@@ -416,7 +416,7 @@ public:
 	}
 
 
-	SIMD_FORCE_INLINE void quantizeWithClamp(unsigned short* out, const btVector3& point2,int isMax) const
+	SIMD_FORCE_INLINE void quantizeWithClamp(unsigned short* out, const btVector3& point2, int isMax) const
 	{
 
 		btAssert(m_useQuantization);
@@ -425,7 +425,7 @@ public:
 		clampedPoint.setMax(m_bvhAabbMin);
 		clampedPoint.setMin(m_bvhAabbMax);
 
-		quantize(out,clampedPoint,isMax);
+		quantize(out, clampedPoint, isMax);
 
 	}
 	

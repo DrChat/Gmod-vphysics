@@ -102,13 +102,13 @@ public:
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 	
-	btHingeConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB, const btVector3& axisInA,const btVector3& axisInB, bool useReferenceFrameA = false);
+	btHingeConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB, const btVector3& axisInA, const btVector3& axisInB, bool useReferenceFrameA = false);
 
-	btHingeConstraint(btRigidBody& rbA,const btVector3& pivotInA,const btVector3& axisInA, bool useReferenceFrameA = false);
+	btHingeConstraint(btRigidBody& rbA, const btVector3& pivotInA, const btVector3& axisInA, bool useReferenceFrameA = false);
 	
-	btHingeConstraint(btRigidBody& rbA,btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool useReferenceFrameA = false);
+	btHingeConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame, bool useReferenceFrameA = false);
 
-	btHingeConstraint(btRigidBody& rbA,const btTransform& rbAFrame, bool useReferenceFrameA = false);
+	btHingeConstraint(btRigidBody& rbA, const btTransform& rbAFrame, bool useReferenceFrameA = false);
 
 
 	virtual void	buildJacobian();
@@ -119,10 +119,10 @@ public:
 
 	virtual void getInfo2 (btConstraintInfo2* info);
 
-	void	getInfo2NonVirtual(btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btVector3& angVelA,const btVector3& angVelB);
+	void	getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btVector3& angVelA, const btVector3& angVelB);
 
-	void	getInfo2Internal(btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btVector3& angVelA,const btVector3& angVelB);
-	void	getInfo2InternalUsingFrameOffset(btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btVector3& angVelA,const btVector3& angVelB);
+	void	getInfo2Internal(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btVector3& angVelA, const btVector3& angVelB);
+	void	getInfo2InternalUsingFrameOffset(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btVector3& angVelA, const btVector3& angVelB);
 		
 
 	void	updateRHS(btScalar	timeStep);
@@ -163,7 +163,7 @@ public:
 		m_angularOnly = angularOnly;
 	}
 
-	void	enableAngularMotor(bool enableMotor,btScalar targetVelocity,btScalar maxMotorImpulse)
+	void	enableAngularMotor(bool enableMotor, btScalar targetVelocity, btScalar maxMotorImpulse)
 	{
 		m_enableAngularMotor  = enableMotor;
 		m_motorTargetVelocity = targetVelocity;
@@ -179,7 +179,7 @@ public:
 	void setMotorTarget(btScalar targetAngle, btScalar dt);
 
 
-	void	setLimit(btScalar low,btScalar high,btScalar _softness = 0.9f, btScalar _biasFactor = 0.3f, btScalar _relaxationFactor = 1.0f)
+	void	setLimit(btScalar low, btScalar high, btScalar _softness = 0.9f, btScalar _biasFactor = 0.3f, btScalar _relaxationFactor = 1.0f)
 	{
 #ifdef	_BT_USE_CENTER_LIMIT_
 		m_limit.set(low, high, _softness, _biasFactor, _relaxationFactor);
@@ -198,21 +198,21 @@ public:
 		btPlaneSpace1(axisInA, rbAxisA1, rbAxisA2);
 		btVector3 pivotInA = m_rbAFrame.getOrigin();
 //		m_rbAFrame.getOrigin() = pivotInA;
-		m_rbAFrame.getBasis().setValue( rbAxisA1.getX(),rbAxisA2.getX(),axisInA.getX(),
-										rbAxisA1.getY(),rbAxisA2.getY(),axisInA.getY(),
-										rbAxisA1.getZ(),rbAxisA2.getZ(),axisInA.getZ() );
+		m_rbAFrame.getBasis().setValue( rbAxisA1.getX(), rbAxisA2.getX(), axisInA.getX(),
+										rbAxisA1.getY(), rbAxisA2.getY(), axisInA.getY(),
+										rbAxisA1.getZ(), rbAxisA2.getZ(), axisInA.getZ() );
 
 		btVector3 axisInB = m_rbA.getCenterOfMassTransform().getBasis() * axisInA;
 
-		btQuaternion rotationArc = shortestArcQuat(axisInA,axisInB);
-		btVector3 rbAxisB1 =  quatRotate(rotationArc,rbAxisA1);
+		btQuaternion rotationArc = shortestArcQuat(axisInA, axisInB);
+		btVector3 rbAxisB1 =  quatRotate(rotationArc, rbAxisA1);
 		btVector3 rbAxisB2 = axisInB.cross(rbAxisB1);
 
 		m_rbBFrame.getOrigin() = m_rbB.getCenterOfMassTransform().inverse()(m_rbA.getCenterOfMassTransform()(pivotInA));
 
-		m_rbBFrame.getBasis().setValue( rbAxisB1.getX(),rbAxisB2.getX(),axisInB.getX(),
-										rbAxisB1.getY(),rbAxisB2.getY(),axisInB.getY(),
-										rbAxisB1.getZ(),rbAxisB2.getZ(),axisInB.getZ() );
+		m_rbBFrame.getBasis().setValue( rbAxisB1.getX(), rbAxisB2.getX(), axisInB.getX(),
+										rbAxisB1.getY(), rbAxisB2.getY(), axisInB.getY(),
+										rbAxisB1.getZ(), rbAxisB2.getZ(), axisInB.getZ() );
 		m_rbBFrame.getBasis() = m_rbB.getCenterOfMassTransform().getBasis().inverse() * m_rbBFrame.getBasis();
 
 	}
@@ -238,9 +238,9 @@ public:
 
 	btScalar getHingeAngle();
 
-	btScalar getHingeAngle(const btTransform& transA,const btTransform& transB);
+	btScalar getHingeAngle(const btTransform& transA, const btTransform& transB);
 
-	void testLimit(const btTransform& transA,const btTransform& transB);
+	void testLimit(const btTransform& transA, const btTransform& transB);
 
 
 	const btTransform& getAFrame() const { return m_rbAFrame; };	
@@ -353,7 +353,7 @@ SIMD_FORCE_INLINE	int	btHingeConstraint::calculateSerializeBufferSize() const
 SIMD_FORCE_INLINE	const char*	btHingeConstraint::serialize(void* dataBuffer, btSerializer* serializer) const
 {
 	btHingeConstraintData* hingeData = (btHingeConstraintData*)dataBuffer;
-	btTypedConstraint::serialize(&hingeData->m_typeConstraintData,serializer);
+	btTypedConstraint::serialize(&hingeData->m_typeConstraintData, serializer);
 
 	m_rbAFrame.serialize(hingeData->m_rbAFrame);
 	m_rbBFrame.serialize(hingeData->m_rbBFrame);

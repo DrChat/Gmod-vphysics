@@ -31,7 +31,7 @@ btSoftRigidDynamicsWorld::btSoftRigidDynamicsWorld(
 	btConstraintSolver* constraintSolver,
 	btCollisionConfiguration* collisionConfiguration,
 	btSoftBodySolver *softBodySolver ) : 
-		btDiscreteDynamicsWorld(dispatcher,pairCache,constraintSolver,collisionConfiguration),
+		btDiscreteDynamicsWorld(dispatcher, pairCache, constraintSolver, collisionConfiguration),
 		m_softBodySolver( softBodySolver ),
 		m_ownsSolver(false)
 {
@@ -52,7 +52,7 @@ btSoftRigidDynamicsWorld::btSoftRigidDynamicsWorld(
 	m_sbi.m_sparsesdf.Reset();
 
 	m_sbi.air_density		=	(btScalar)1.2;
-	m_sbi.water_density	=	0;
+	m_sbi.water_density		=	0;
 	m_sbi.water_offset		=	0;
 	m_sbi.water_normal		=	btVector3(0,0,0);
 	m_sbi.m_gravity.setValue(0,-10,0);
@@ -125,7 +125,7 @@ void	btSoftRigidDynamicsWorld::solveSoftBodiesConstraints( btScalar timeStep )
 
 }
 
-void	btSoftRigidDynamicsWorld::addSoftBody(btSoftBody* body,short int collisionFilterGroup,short int collisionFilterMask)
+void	btSoftRigidDynamicsWorld::addSoftBody(btSoftBody* body, short int collisionFilterGroup, short int collisionFilterMask)
 {
 	m_softBodies.push_back(body);
 
@@ -167,15 +167,15 @@ void	btSoftRigidDynamicsWorld::debugDrawWorld()
 			btSoftBody*	psb=(btSoftBody*)this->m_softBodies[i];
 			if (getDebugDrawer() && (getDebugDrawer()->getDebugMode() & (btIDebugDraw::DBG_DrawWireframe)))
 			{
-				btSoftBodyHelpers::DrawFrame(psb,m_debugDrawer);
-				btSoftBodyHelpers::Draw(psb,m_debugDrawer,m_drawFlags);
+				btSoftBodyHelpers::DrawFrame(psb, m_debugDrawer);
+				btSoftBodyHelpers::Draw(psb, m_debugDrawer, m_drawFlags);
 			}
 			
 			if (m_debugDrawer && (m_debugDrawer->getDebugMode() & btIDebugDraw::DBG_DrawAabb))
 			{
-				if(m_drawNodeTree)		btSoftBodyHelpers::DrawNodeTree(psb,m_debugDrawer);
-				if(m_drawFaceTree)		btSoftBodyHelpers::DrawFaceTree(psb,m_debugDrawer);
-				if(m_drawClusterTree)	btSoftBodyHelpers::DrawClusterTree(psb,m_debugDrawer);
+				if(m_drawNodeTree)		btSoftBodyHelpers::DrawNodeTree(psb, m_debugDrawer);
+				if(m_drawFaceTree)		btSoftBodyHelpers::DrawFaceTree(psb, m_debugDrawer);
+				if(m_drawClusterTree)	btSoftBodyHelpers::DrawClusterTree(psb, m_debugDrawer);
 			}
 		}		
 	}	
@@ -195,7 +195,7 @@ struct btSoftSingleRayCallback : public btBroadphaseRayCallback
 	const btSoftRigidDynamicsWorld*	m_world;
 	btCollisionWorld::RayResultCallback&	m_resultCallback;
 
-	btSoftSingleRayCallback(const btVector3& rayFromWorld,const btVector3& rayToWorld,const btSoftRigidDynamicsWorld* world,btCollisionWorld::RayResultCallback& resultCallback)
+	btSoftSingleRayCallback(const btVector3& rayFromWorld, const btVector3& rayToWorld, const btSoftRigidDynamicsWorld* world, btCollisionWorld::RayResultCallback& resultCallback)
 	:m_rayFromWorld(rayFromWorld),
 	m_rayToWorld(rayToWorld),
 	m_world(world),
@@ -235,22 +235,22 @@ struct btSoftSingleRayCallback : public btBroadphaseRayCallback
 		if(m_resultCallback.needsCollision(collisionObject->getBroadphaseHandle())) 
 		{
 			//RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
-			//btVector3 collisionObjectAabbMin,collisionObjectAabbMax;
+			//btVector3 collisionObjectAabbMin, collisionObjectAabbMax;
 #if 0
 #ifdef RECALCULATE_AABB
-			btVector3 collisionObjectAabbMin,collisionObjectAabbMax;
-			collisionObject->getCollisionShape()->getAabb(collisionObject->getWorldTransform(),collisionObjectAabbMin,collisionObjectAabbMax);
+			btVector3 collisionObjectAabbMin, collisionObjectAabbMax;
+			collisionObject->getCollisionShape()->getAabb(collisionObject->getWorldTransform(), collisionObjectAabbMin, collisionObjectAabbMax);
 #else
-			//getBroadphase()->getAabb(collisionObject->getBroadphaseHandle(),collisionObjectAabbMin,collisionObjectAabbMax);
+			//getBroadphase()->getAabb(collisionObject->getBroadphaseHandle(), collisionObjectAabbMin, collisionObjectAabbMax);
 			const btVector3& collisionObjectAabbMin = collisionObject->getBroadphaseHandle()->m_aabbMin;
 			const btVector3& collisionObjectAabbMax = collisionObject->getBroadphaseHandle()->m_aabbMax;
 #endif
 #endif
 			//btScalar hitLambda = m_resultCallback.m_closestHitFraction;
 			//culling already done by broadphase
-			//if (btRayAabb(m_rayFromWorld,m_rayToWorld,collisionObjectAabbMin,collisionObjectAabbMax,hitLambda,m_hitNormal))
+			//if (btRayAabb(m_rayFromWorld, m_rayToWorld, collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, m_hitNormal))
 			{
-				m_world->rayTestSingle(m_rayFromTrans,m_rayToTrans,
+				m_world->rayTestSingle(m_rayFromTrans, m_rayToTrans,
 					collisionObject,
 						collisionObject->getCollisionShape(),
 						collisionObject->getWorldTransform(),
@@ -266,10 +266,10 @@ void	btSoftRigidDynamicsWorld::rayTest(const btVector3& rayFromWorld, const btVe
 	BT_PROFILE("rayTest");
 	/// use the broadphase to accelerate the search for objects, based on their aabb
 	/// and for each object with ray-aabb overlap, perform an exact ray test
-	btSoftSingleRayCallback rayCB(rayFromWorld,rayToWorld,this,resultCallback);
+	btSoftSingleRayCallback rayCB(rayFromWorld, rayToWorld, this, resultCallback);
 
 #ifndef USE_BRUTEFORCE_RAYBROADPHASE
-	m_broadphasePairCache->rayTest(rayFromWorld,rayToWorld,rayCB);
+	m_broadphasePairCache->rayTest(rayFromWorld, rayToWorld, rayCB);
 #else
 	for (int i=0;i<this->getNumCollisionObjects();i++)
 	{
@@ -280,7 +280,7 @@ void	btSoftRigidDynamicsWorld::rayTest(const btVector3& rayFromWorld, const btVe
 }
 
 
-void	btSoftRigidDynamicsWorld::rayTestSingle(const btTransform& rayFromTrans,const btTransform& rayToTrans,
+void	btSoftRigidDynamicsWorld::rayTestSingle(const btTransform& rayFromTrans, const btTransform& rayToTrans,
 					  btCollisionObject* collisionObject,
 					  const btCollisionShape* collisionShape,
 					  const btTransform& colObjWorldTransform,
@@ -319,13 +319,13 @@ void	btSoftRigidDynamicsWorld::rayTestSingle(const btTransform& rayFromTrans,con
 						 normal,
 						 softResult.fraction);
 					bool	normalInWorldSpace = true;
-					resultCallback.addSingleResult(rayResult,normalInWorldSpace);
+					resultCallback.addSingleResult(rayResult, normalInWorldSpace);
 				}
 			}
 		}
 	} 
 	else {
-		btCollisionWorld::rayTestSingle(rayFromTrans,rayToTrans,collisionObject,collisionShape,colObjWorldTransform,resultCallback);
+		btCollisionWorld::rayTestSingle(rayFromTrans, rayToTrans, collisionObject, collisionShape, colObjWorldTransform, resultCallback);
 	}
 }
 
@@ -342,7 +342,7 @@ void	btSoftRigidDynamicsWorld::serializeSoftBodies(btSerializer* serializer)
 			int len = colObj->calculateSerializeBufferSize();
 			btChunk* chunk = serializer->allocate(len,1);
 			const char* structType = colObj->serialize(chunk->m_oldPtr, serializer);
-			serializer->finalizeChunk(chunk,structType,BT_SOFTBODY_CODE,colObj);
+			serializer->finalizeChunk(chunk, structType, BT_SOFTBODY_CODE, colObj);
 		}
 	}
 

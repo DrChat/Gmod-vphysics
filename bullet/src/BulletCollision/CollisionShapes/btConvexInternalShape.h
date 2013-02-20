@@ -85,14 +85,14 @@ public:
 	}
 
 	///getAabb's default implementation is brute force, expected derived classes to implement a fast dedicated version
-	void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+	void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 	{
-		getAabbSlow(t,aabbMin,aabbMax);
+		getAabbSlow(t, aabbMin, aabbMax);
 	}
 
 
 	
-	virtual void getAabbSlow(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabbSlow(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
 
 	virtual void	setLocalScaling(const btVector3& scaling);
@@ -203,19 +203,19 @@ protected:
 		aabbMax = m_localAabbMax;
 	}
 
-	inline void getNonvirtualAabb(const btTransform& trans,btVector3& aabbMin,btVector3& aabbMax, btScalar margin) const
+	inline void getNonvirtualAabb(const btTransform& trans, btVector3& aabbMin, btVector3& aabbMax, btScalar margin) const
 	{
 
 		//lazy evaluation of local aabb
 		btAssert(m_isLocalAabbValid);
-		btTransformAabb(m_localAabbMin,m_localAabbMax,margin,trans,aabbMin,aabbMax);
+		btTransformAabb(m_localAabbMin, m_localAabbMax, margin, trans, aabbMin, aabbMax);
 	}
 		
 public:
 		
 	virtual void	setLocalScaling(const btVector3& scaling);
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
 	void	recalcLocalAabb();
 

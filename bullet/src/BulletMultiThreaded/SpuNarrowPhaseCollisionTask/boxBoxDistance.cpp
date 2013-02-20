@@ -103,7 +103,7 @@ static const float voronoiTol = -1.0e-5f;
          axisType = CROSS_AXIS;                                                                 \
          edgeDimA = dima;                                                                       \
          edgeDimB = dimb;                                                                       \
-         axisA = cross(identity.getCol##dima(),matrixAB.getCol##dimb()) * l_recip;            \
+         axisA = cross(identity.getCol##dima(), matrixAB.getCol##dimb()) * l_recip;            \
       }                                                                                         \
    }                                                                                            \
 }
@@ -436,7 +436,7 @@ VertexAFaceBTests(
    edgeOffAB[ad] -= tA;                                                                         \
    edgeOffBA[bd] -= tB;                                                                         \
                                                                                                 \
-   return dot(edgeOffAB,edgeOffAB);                                                             \
+   return dot(edgeOffAB, edgeOffAB);                                                             \
 }
 
 float
@@ -814,15 +814,15 @@ boxBoxDistance(vmVector3& normal, BoxPoint& boxPointA, BoxPoint& boxPointB,
 
 	vmVector3  gapsA   = absPerElem(offsetAB) - boxA.mHalf - absMatrixAB * boxB.mHalf;
 
-	AaxisTest(0,X,true);
-	AaxisTest(1,Y,false);
-	AaxisTest(2,Z,false);
+	AaxisTest(0, X,true);
+	AaxisTest(1, Y,false);
+	AaxisTest(2, Z,false);
 
 	vmVector3  gapsB   = absPerElem(offsetBA) - boxB.mHalf - absMatrixBA * boxA.mHalf;
 
-	BaxisTest(0,X);
-	BaxisTest(1,Y);
-	BaxisTest(2,Z);
+	BaxisTest(0, X);
+	BaxisTest(1, Y);
+	BaxisTest(2, Z);
 
 	// cross product axes
 
@@ -853,15 +853,15 @@ boxBoxDistance(vmVector3& normal, BoxPoint& boxPointA, BoxPoint& boxPointB,
 
 	vmMatrix3 gapsAxB = absPerElem(projOffset) - projAhalf - transpose(projBhalf);
 
-	CrossAxisTest(0,0,X);
-	CrossAxisTest(0,1,Y);
-	CrossAxisTest(0,2,Z);
-	CrossAxisTest(1,0,X);
-	CrossAxisTest(1,1,Y);
-	CrossAxisTest(1,2,Z);
-	CrossAxisTest(2,0,X);
-	CrossAxisTest(2,1,Y);
-	CrossAxisTest(2,2,Z);
+	CrossAxisTest(0,0, X);
+	CrossAxisTest(0,1, Y);
+	CrossAxisTest(0,2, Z);
+	CrossAxisTest(1,0, X);
+	CrossAxisTest(1,1, Y);
+	CrossAxisTest(1,2, Z);
+	CrossAxisTest(2,0, X);
+	CrossAxisTest(2,1, Y);
+	CrossAxisTest(2,2, Z);
 
 	// need to pick the face on each box whose normal best matches the separating axis.
 	// will transform vectors to be in the coordinate system of this face to simplify things later.
@@ -870,7 +870,7 @@ boxBoxDistance(vmVector3& normal, BoxPoint& boxPointA, BoxPoint& boxPointB,
 	int dimA[3], dimB[3];
 
 	if ( axisType == A_AXIS ) {
-		if ( dot(axisA,offsetAB) < 0.0f )
+		if ( dot(axisA, offsetAB) < 0.0f )
 			axisA = -axisA;
 		axisB = matrixBA * -axisA;
 
@@ -883,7 +883,7 @@ boxBoxDistance(vmVector3& normal, BoxPoint& boxPointA, BoxPoint& boxPointB,
 		else
 			faceDimB = 2;
 	} else if ( axisType == B_AXIS ) {
-		if ( dot(axisB,offsetBA) < 0.0f )
+		if ( dot(axisB, offsetBA) < 0.0f )
 			axisB = -axisB;
 		axisA = matrixAB * -axisB;
 
@@ -898,7 +898,7 @@ boxBoxDistance(vmVector3& normal, BoxPoint& boxPointA, BoxPoint& boxPointB,
 	}
 
 	if ( axisType == CROSS_AXIS ) {
-		if ( dot(axisA,offsetAB) < 0.0f )
+		if ( dot(axisA, offsetAB) < 0.0f )
 			axisA = -axisA;
 		axisB = matrixBA * -axisA;
 
@@ -1002,8 +1002,8 @@ boxBoxDistance(vmVector3& normal, BoxPoint& boxPointA, BoxPoint& boxPointB,
 
 	vmVector3 signsA_perm, signsB_perm, scalesA_perm, scalesB_perm, faceOffsetAB_perm, faceOffsetBA_perm;
 
-	signsA_perm = copySignPerElem(vmVector3(1.0f),aperm_row * axisA);
-	signsB_perm = copySignPerElem(vmVector3(1.0f),bperm_row * axisB);
+	signsA_perm = copySignPerElem(vmVector3(1.0f), aperm_row * axisA);
+	signsB_perm = copySignPerElem(vmVector3(1.0f), bperm_row * axisB);
 	scalesA_perm = mulPerElem( signsA_perm, halfA_perm );
 	scalesB_perm = mulPerElem( signsB_perm, halfB_perm );
 

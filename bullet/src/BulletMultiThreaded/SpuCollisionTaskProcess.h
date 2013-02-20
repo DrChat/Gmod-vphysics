@@ -128,7 +128,7 @@ public:
 	void initialize2(bool useEpa = false);
 
 	///batch up additional work to a current task for SPU processing. When batch is full, it issues the task.
-	void addWorkToTask(void* pairArrayPtr,int startIndex,int endIndex);
+	void addWorkToTask(void* pairArrayPtr, int startIndex, int endIndex);
 
 	///call flush to submit potential outstanding work to SPUs and wait for all involved SPUs to be finished
 	void flush2();
@@ -145,7 +145,7 @@ public:
 
 
 #define MIDPHASE_TASK_PTR(task) (&m_workUnitTaskBuffers[0] + MIDPHASE_WORKUNIT_TASK_SIZE*task)
-#define MIDPHASE_ENTRY_PTR(task,page,entry) (MIDPHASE_TASK_PTR(task) + MIDPHASE_WORKUNIT_PAGE_SIZE*page + sizeof(SpuGatherAndProcessWorkUnitInput)*entry)
+#define MIDPHASE_ENTRY_PTR(task, page, entry) (MIDPHASE_TASK_PTR(task) + MIDPHASE_WORKUNIT_PAGE_SIZE*page + sizeof(SpuGatherAndProcessWorkUnitInput)*entry)
 #define MIDPHASE_OUTPUT_PTR(task) (&m_contactOutputBuffers[0] + MIDPHASE_MAX_CONTACT_BUFFER_SIZE*task)
 #define MIDPHASE_TREENODES_PTR(task) (&m_complexShapeBuffers[0] + MIDPHASE_COMPLEX_SHAPE_BUFFER_SIZE*task)
 

@@ -36,33 +36,33 @@ public:
 	
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 	
-	btCapsuleShape(btScalar radius,btScalar height);
+	btCapsuleShape(btScalar radius, btScalar height);
 
 	///CollisionShape Interface
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	/// btConvexShape Interface
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec)const;
 
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 	
 	virtual void setMargin(btScalar collisionMargin)
 	{
 		//correct the m_implicitShapeDimensions for the margin
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
+		btVector3 oldMargin(getMargin(), getMargin(), getMargin());
 		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		
 		btConvexInternalShape::setMargin(collisionMargin);
-		btVector3 newMargin(getMargin(),getMargin(),getMargin());
+		btVector3 newMargin(getMargin(), getMargin(), getMargin());
 		m_implicitShapeDimensions = implicitShapeDimensionsWithMargin - newMargin;
 
 	}
 
 	virtual void getAabb (const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 	{
-			btVector3 halfExtents(getRadius(),getRadius(),getRadius());
+			btVector3 halfExtents(getRadius(), getRadius(), getRadius());
 			halfExtents[m_upAxis] = getRadius() + getHalfHeight();
-			halfExtents += btVector3(getMargin(),getMargin(),getMargin());
+			halfExtents += btVector3(getMargin(), getMargin(), getMargin());
 			btMatrix3x3 abs_b = t.getBasis().absolute();  
 			btVector3 center = t.getOrigin();
             btVector3 extent = halfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
@@ -94,7 +94,7 @@ public:
 
 	virtual void	setLocalScaling(const btVector3& scaling)
 	{
-		btVector3 oldMargin(getMargin(),getMargin(),getMargin());
+		btVector3 oldMargin(getMargin(), getMargin(), getMargin());
 		btVector3 implicitShapeDimensionsWithMargin = m_implicitShapeDimensions+oldMargin;
 		btVector3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / m_localScaling;
 
@@ -126,7 +126,7 @@ class btCapsuleShapeX : public btCapsuleShape
 {
 public:
 
-	btCapsuleShapeX(btScalar radius,btScalar height);
+	btCapsuleShapeX(btScalar radius, btScalar height);
 		
 	//debugging
 	virtual const char*	getName()const
@@ -143,7 +143,7 @@ public:
 class btCapsuleShapeZ : public btCapsuleShape
 {
 public:
-	btCapsuleShapeZ(btScalar radius,btScalar height);
+	btCapsuleShapeZ(btScalar radius, btScalar height);
 
 		//debugging
 	virtual const char*	getName()const
@@ -174,7 +174,7 @@ SIMD_FORCE_INLINE	const char*	btCapsuleShape::serialize(void* dataBuffer, btSeri
 {
 	btCapsuleShapeData* shapeData = (btCapsuleShapeData*) dataBuffer;
 	
-	btConvexInternalShape::serialize(&shapeData->m_convexInternalShapeData,serializer);
+	btConvexInternalShape::serialize(&shapeData->m_convexInternalShapeData, serializer);
 
 	shapeData->m_upAxis = m_upAxis;
 	

@@ -31,7 +31,7 @@ protected:
 public:
 
 
-	btContactConstraint(btPersistentManifold* contactManifold,btRigidBody& rbA,btRigidBody& rbB);
+	btContactConstraint(btPersistentManifold* contactManifold, btRigidBody& rbA, btRigidBody& rbB);
 
 	void	setContactManifold(btPersistentManifold* contactManifold);
 
@@ -58,13 +58,13 @@ public:
 };
 
 ///very basic collision resolution without friction
-btScalar resolveSingleCollision(btRigidBody* body1, class btCollisionObject* colObj2, const btVector3& contactPositionWorld,const btVector3& contactNormalOnB, const struct btContactSolverInfo& solverInfo,btScalar distance);
+btScalar resolveSingleCollision(btRigidBody* body1, class btCollisionObject* colObj2, const btVector3& contactPositionWorld, const btVector3& contactNormalOnB, const struct btContactSolverInfo& solverInfo, btScalar distance);
 
 
 ///resolveSingleBilateral is an obsolete methods used for vehicle friction between two dynamic objects
 void resolveSingleBilateral(btRigidBody& body1, const btVector3& pos1,
-                      btRigidBody& body2, const btVector3& pos2,
-                      btScalar distance, const btVector3& normal,btScalar& impulse ,btScalar timeStep);
+					  btRigidBody& body2, const btVector3& pos2,
+					  btScalar distance, const btVector3& normal, btScalar& impulse, btScalar timeStep);
 
 
 

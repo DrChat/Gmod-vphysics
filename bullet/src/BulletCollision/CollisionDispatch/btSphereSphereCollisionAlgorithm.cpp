@@ -19,14 +19,14 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 #include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h"
 
-btSphereSphereCollisionAlgorithm::btSphereSphereCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* col0Wrap,const btCollisionObjectWrapper* col1Wrap)
-: btActivatingCollisionAlgorithm(ci,col0Wrap,col1Wrap),
+btSphereSphereCollisionAlgorithm::btSphereSphereCollisionAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* col0Wrap, const btCollisionObjectWrapper* col1Wrap)
+: btActivatingCollisionAlgorithm(ci, col0Wrap, col1Wrap),
 m_ownManifold(false),
 m_manifoldPtr(mf)
 {
 	if (!m_manifoldPtr)
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(col0Wrap->getCollisionObject(),col1Wrap->getCollisionObject());
+		m_manifoldPtr = m_dispatcher->getNewManifold(col0Wrap->getCollisionObject(), col1Wrap->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -40,7 +40,7 @@ btSphereSphereCollisionAlgorithm::~btSphereSphereCollisionAlgorithm()
 	}
 }
 
-void btSphereSphereCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* col0Wrap,const btCollisionObjectWrapper* col1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btSphereSphereCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* col0Wrap, const btCollisionObjectWrapper* col1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	(void)dispatchInfo;
 
@@ -86,7 +86,7 @@ void btSphereSphereCollisionAlgorithm::processCollision (const btCollisionObject
 	/// report a contact. internally this will be kept persistent, and contact reduction is done
 	
 	
-	resultOut->addContactPoint(normalOnSurfaceB,pos1,dist);
+	resultOut->addContactPoint(normalOnSurfaceB, pos1, dist);
 
 #ifndef CLEAR_MANIFOLD
 	resultOut->refreshContactPoints();
@@ -94,7 +94,7 @@ void btSphereSphereCollisionAlgorithm::processCollision (const btCollisionObject
 
 }
 
-btScalar btSphereSphereCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* col0,btCollisionObject* col1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+btScalar btSphereSphereCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* col0, btCollisionObject* col1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	(void)col0;
 	(void)col1;

@@ -34,22 +34,22 @@ ATTRIBUTE_ALIGNED16(class) btConeShape : public btConvexInternalShape
 public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 	
-	btConeShape (btScalar radius,btScalar height);
+	btConeShape (btScalar radius, btScalar height);
 	
 	virtual btVector3	localGetSupportingVertex(const btVector3& vec) const;
 	virtual btVector3	localGetSupportingVertexWithoutMargin(const btVector3& vec) const;
-	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const;
+	virtual void	batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const;
 
 	btScalar getRadius() const { return m_radius;}
 	btScalar getHeight() const { return m_height;}
 
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const
 	{
 		btTransform identity;
 		identity.setIdentity();
-		btVector3 aabbMin,aabbMax;
-		getAabb(identity,aabbMin,aabbMax);
+		btVector3 aabbMin, aabbMax;
+		getAabb(identity, aabbMin, aabbMax);
 
 		btVector3 halfExtents = (aabbMax-aabbMin)*btScalar(0.5);
 
@@ -63,7 +63,7 @@ public:
 		const btScalar z2 = lz*lz;
 		const btScalar scaledmass = mass * btScalar(0.08333333);
 
-		inertia = scaledmass * (btVector3(y2+z2,x2+z2,x2+y2));
+		inertia = scaledmass * (btVector3(y2+z2, x2+z2, x2+y2));
 
 //		inertia.x() = scaledmass * (y2+z2);
 //		inertia.y() = scaledmass * (x2+z2);
@@ -97,7 +97,7 @@ public:
 class btConeShapeX : public btConeShape
 {
 	public:
-		btConeShapeX(btScalar radius,btScalar height);
+		btConeShapeX(btScalar radius, btScalar height);
 
 	virtual btVector3	getAnisotropicRollingFrictionDirection() const
 	{
@@ -110,7 +110,7 @@ class btConeShapeX : public btConeShape
 class btConeShapeZ : public btConeShape
 {
 	public:
-		btConeShapeZ(btScalar radius,btScalar height);
+		btConeShapeZ(btScalar radius, btScalar height);
 
 	virtual btVector3	getAnisotropicRollingFrictionDirection() const
 	{

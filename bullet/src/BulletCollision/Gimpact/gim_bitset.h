@@ -60,7 +60,7 @@ public:
 	inline bool resize(GUINT newsize)
 	{
 		GUINT oldsize = m_container.size();
-		m_container.resize(newsize/GUINT_BIT_COUNT + 1,false);
+		m_container.resize(newsize/GUINT_BIT_COUNT + 1, false);
 		while(oldsize<m_container.size())
 		{
 			m_container[oldsize] = 0;

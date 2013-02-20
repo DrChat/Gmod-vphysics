@@ -33,16 +33,16 @@ protected:
 public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btStaticPlaneShape(const btVector3& planeNormal,btScalar planeConstant);
+	btStaticPlaneShape(const btVector3& planeNormal, btScalar planeConstant);
 
 	virtual ~btStaticPlaneShape();
 
 
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
-	virtual void	processAllTriangles(btTriangleCallback* callback,const btVector3& aabbMin,const btVector3& aabbMax) const;
+	virtual void	processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const;
 
 	virtual void	setLocalScaling(const btVector3& scaling);
 	virtual const btVector3& getLocalScaling() const;
@@ -89,7 +89,7 @@ SIMD_FORCE_INLINE	int	btStaticPlaneShape::calculateSerializeBufferSize() const
 SIMD_FORCE_INLINE	const char*	btStaticPlaneShape::serialize(void* dataBuffer, btSerializer* serializer) const
 {
 	btStaticPlaneShapeData* planeData = (btStaticPlaneShapeData*) dataBuffer;
-	btCollisionShape::serialize(&planeData->m_collisionShapeData,serializer);
+	btCollisionShape::serialize(&planeData->m_collisionShapeData, serializer);
 
 	m_localScaling.serializeFloat(planeData->m_localScaling);
 	m_planeNormal.serializeFloat(planeData->m_planeNormal);

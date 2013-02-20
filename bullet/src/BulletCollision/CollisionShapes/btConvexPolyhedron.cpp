@@ -39,12 +39,12 @@ inline bool IsAlmostZero(const btVector3& v)
 
 struct btInternalVertexPair
 {
-	btInternalVertexPair(short int v0,short int v1)
+	btInternalVertexPair(short int v0, short int v1)
 		:m_v0(v0),
 		m_v1(v1)
 	{
 		if (m_v1>m_v0)
-			btSwap(m_v0,m_v1);
+			btSwap(m_v0, m_v1);
 	}
 	short int m_v0;
 	short int m_v1;
@@ -101,7 +101,7 @@ bool btConvexPolyhedron::testContainment() const
 void	btConvexPolyhedron::initialize()
 {
 
-	btHashMap<btInternalVertexPair,btInternalEdge> edges;
+	btHashMap<btInternalVertexPair, btInternalEdge> edges;
 
 	btScalar TotalArea = 0.0f;
 	
@@ -113,7 +113,7 @@ void	btConvexPolyhedron::initialize()
 		for(int j=0;j<NbTris;j++)
 		{
 			int k = (j+1)%numVertices;
-			btInternalVertexPair vp(m_faces[i].m_indices[j],m_faces[i].m_indices[k]);
+			btInternalVertexPair vp(m_faces[i].m_indices[j], m_faces[i].m_indices[k]);
 			btInternalEdge* edptr = edges.find(vp);
 			btVector3 edge = m_vertices[vp.m_v1]-m_vertices[vp.m_v0];
 			edge.normalize();
@@ -145,7 +145,7 @@ void	btConvexPolyhedron::initialize()
 			{
 				btInternalEdge ed;
 				ed.m_face0 = i;
-				edges.insert(vp,ed);
+				edges.insert(vp, ed);
 			}
 		}
 	}
@@ -159,7 +159,7 @@ void	btConvexPolyhedron::initialize()
 		for(int j=0;j<numVertices;j++)
 		{
 			int k = (j+1)%numVertices;
-			btInternalVertexPair vp(m_faces[i].m_indices[j],m_faces[i].m_indices[k]);
+			btInternalVertexPair vp(m_faces[i].m_indices[j], m_faces[i].m_indices[k]);
 			btInternalEdge* edptr = edges.find(vp);
 			btAssert(edptr);
 			btAssert(edptr->m_face0>=0);
@@ -274,7 +274,7 @@ void	btConvexPolyhedron::initialize()
 #endif
 }
 
-void btConvexPolyhedron::project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin,btVector3& witnesPtMax) const
+void btConvexPolyhedron::project(const btTransform& trans, const btVector3& dir, btScalar& minProj, btScalar& maxProj, btVector3& witnesPtMin, btVector3& witnesPtMax) const
 {
 	minProj = FLT_MAX;
 	maxProj = -FLT_MAX;
@@ -296,7 +296,7 @@ void btConvexPolyhedron::project(const btTransform& trans, const btVector3& dir,
 	}
 	if(minProj>maxProj)
 	{
-		btSwap(minProj,maxProj);
-		btSwap(witnesPtMin,witnesPtMax);
+		btSwap(minProj, maxProj);
+		btSwap(witnesPtMin, witnesPtMax);
 	}
 }

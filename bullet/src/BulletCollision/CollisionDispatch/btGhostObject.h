@@ -50,7 +50,7 @@ public:
 	///this method is mainly for expert/internal use only.
 	virtual void	addOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btBroadphaseProxy* thisProxy=0);
 	///this method is mainly for expert/internal use only.
-	virtual void	removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy,btDispatcher* dispatcher,btBroadphaseProxy* thisProxy=0);
+	virtual void	removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btDispatcher* dispatcher, btBroadphaseProxy* thisProxy=0);
 
 	int	getNumOverlappingObjects() const
 	{
@@ -109,7 +109,7 @@ public:
 	///this method is mainly for expert/internal use only.
 	virtual void	addOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btBroadphaseProxy* thisProxy=0);
 
-	virtual void	removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy,btDispatcher* dispatcher,btBroadphaseProxy* thisProxy=0);
+	virtual void	removeOverlappingObjectInternal(btBroadphaseProxy* otherProxy, btDispatcher* dispatcher, btBroadphaseProxy* thisProxy=0);
 
 	btHashedOverlappingPairCache*	getOverlappingPairCache()
 	{
@@ -134,7 +134,7 @@ public:
 		
 	}
 
-	virtual btBroadphasePair*	addOverlappingPair(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1)
+	virtual btBroadphasePair*	addOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
 	{
 		btCollisionObject* colObj0 = (btCollisionObject*) proxy0->m_clientObject;
 		btCollisionObject* colObj1 = (btCollisionObject*) proxy1->m_clientObject;
@@ -147,24 +147,24 @@ public:
 		return 0;
 	}
 
-	virtual void*	removeOverlappingPair(btBroadphaseProxy* proxy0,btBroadphaseProxy* proxy1,btDispatcher* dispatcher)
+	virtual void*	removeOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1, btDispatcher* dispatcher)
 	{
 		btCollisionObject* colObj0 = (btCollisionObject*) proxy0->m_clientObject;
 		btCollisionObject* colObj1 = (btCollisionObject*) proxy1->m_clientObject;
 		btGhostObject* ghost0 = 		btGhostObject::upcast(colObj0);
 		btGhostObject* ghost1 = 		btGhostObject::upcast(colObj1);
 		if (ghost0)
-			ghost0->removeOverlappingObjectInternal(proxy1,dispatcher,proxy0);
+			ghost0->removeOverlappingObjectInternal(proxy1, dispatcher, proxy0);
 		if (ghost1)
-			ghost1->removeOverlappingObjectInternal(proxy0,dispatcher,proxy1);
+			ghost1->removeOverlappingObjectInternal(proxy0, dispatcher, proxy1);
 		return 0;
 	}
 
-	virtual void	removeOverlappingPairsContainingProxy(btBroadphaseProxy* /*proxy0*/,btDispatcher* /*dispatcher*/)
+	virtual void	removeOverlappingPairsContainingProxy(btBroadphaseProxy* /*proxy0*/, btDispatcher* /*dispatcher*/)
 	{
 		btAssert(0);
 		//need to keep track of all ghost objects and call them here
-		//m_hashPairCache->removeOverlappingPairsContainingProxy(proxy0,dispatcher);
+		//m_hashPairCache->removeOverlappingPairsContainingProxy(proxy0, dispatcher);
 	}
 
 	

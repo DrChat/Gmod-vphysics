@@ -23,7 +23,7 @@ btCapsuleShape::btCapsuleShape(btScalar radius, btScalar height) : btConvexInter
 {
 	m_shapeType = CAPSULE_SHAPE_PROXYTYPE;
 	m_upAxis = 1;
-	m_implicitShapeDimensions.setValue(radius,0.5f*height,radius);
+	m_implicitShapeDimensions.setValue(radius,0.5f*height, radius);
 }
 
  
@@ -80,7 +80,7 @@ btCapsuleShape::btCapsuleShape(btScalar radius, btScalar height) : btConvexInter
 
 }
 
- void	btCapsuleShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors,btVector3* supportVerticesOut,int numVectors) const
+ void	btCapsuleShape::batchedUnitVectorGetSupportingVertexWithoutMargin(const btVector3* vectors, btVector3* supportVerticesOut, int numVectors) const
 {
 
 	
@@ -120,7 +120,7 @@ btCapsuleShape::btCapsuleShape(btScalar radius, btScalar height) : btConvexInter
 }
 
 
-void	btCapsuleShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btCapsuleShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	//as an approximation, take the inertia of the box that bounds the spheres
 
@@ -130,7 +130,7 @@ void	btCapsuleShape::calculateLocalInertia(btScalar mass,btVector3& inertia) con
 	
 	btScalar radius = getRadius();
 
-	btVector3 halfExtents(radius,radius,radius);
+	btVector3 halfExtents(radius, radius, radius);
 	halfExtents[getUpAxis()]+=getHalfHeight();
 
 	btScalar margin = CONVEX_DISTANCE_MARGIN;
@@ -149,10 +149,10 @@ void	btCapsuleShape::calculateLocalInertia(btScalar mass,btVector3& inertia) con
 
 }
 
-btCapsuleShapeX::btCapsuleShapeX(btScalar radius,btScalar height)
+btCapsuleShapeX::btCapsuleShapeX(btScalar radius, btScalar height)
 {
 	m_upAxis = 0;
-	m_implicitShapeDimensions.setValue(0.5f*height, radius,radius);
+	m_implicitShapeDimensions.setValue(0.5f*height, radius, radius);
 }
 
 
@@ -160,10 +160,10 @@ btCapsuleShapeX::btCapsuleShapeX(btScalar radius,btScalar height)
 
 
 
-btCapsuleShapeZ::btCapsuleShapeZ(btScalar radius,btScalar height)
+btCapsuleShapeZ::btCapsuleShapeZ(btScalar radius, btScalar height)
 {
 	m_upAxis = 2;
-	m_implicitShapeDimensions.setValue(radius,radius,0.5f*height);
+	m_implicitShapeDimensions.setValue(radius, radius,0.5f*height);
 }
 
 

@@ -36,13 +36,13 @@ class btContinuousConvexCollision : public btConvexCast
 	const btConvexShape*	m_convexB1;
 	const btStaticPlaneShape*	m_planeShape;
 
-	void computeClosestPoints( const btTransform& transA, const btTransform& transB,struct btPointCollector& pointCollector);
+	void computeClosestPoints( const btTransform& transA, const btTransform& transB, struct btPointCollector& pointCollector);
 
 public:
 
-	btContinuousConvexCollision (const btConvexShape*	shapeA,const btConvexShape*	shapeB ,btSimplexSolverInterface* simplexSolver,btConvexPenetrationDepthSolver* penetrationDepthSolver);
+	btContinuousConvexCollision (const btConvexShape*	shapeA, const btConvexShape*	shapeB, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* penetrationDepthSolver);
 
-	btContinuousConvexCollision(const btConvexShape*	shapeA,const btStaticPlaneShape*	plane );
+	btContinuousConvexCollision(const btConvexShape*	shapeA, const btStaticPlaneShape*	plane );
 
 	virtual bool	calcTimeOfImpact(
 				const btTransform& fromA,

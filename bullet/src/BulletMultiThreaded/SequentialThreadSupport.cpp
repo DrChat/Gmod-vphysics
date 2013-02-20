@@ -41,7 +41,7 @@ void SequentialThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiAr
 		{
 			btSpuStatus&	spuStatus = m_activeSpuStatus[0];
 			spuStatus.m_userPtr=(void*)uiArgument0;
-			spuStatus.m_userThreadFunc(spuStatus.m_userPtr,spuStatus.m_lsMemory);
+			spuStatus.m_userThreadFunc(spuStatus.m_userPtr, spuStatus.m_lsMemory);
 		}
 	break;
 	default:
@@ -89,7 +89,7 @@ void SequentialThreadSupport::stopSPU()
 
 void SequentialThreadSupport::setNumTasks(int numTasks)
 {
-	printf("SequentialThreadSupport::setNumTasks(%d) is not implemented and has no effect\n",numTasks);
+	printf("SequentialThreadSupport::setNumTasks(%d) is not implemented and has no effect\n", numTasks);
 }
 
 
@@ -134,7 +134,7 @@ public:
 		return mCommonBuff[i+1];
 	}
 	
-	void setSharedParam(int i,unsigned int p)
+	void setSharedParam(int i, unsigned int p)
 	{
 		btAssert(i>=0&&i<31);
 		mCommonBuff[i+1] = p;

@@ -73,7 +73,7 @@ void btSliderConstraint::initParams()
 
 	m_useOffsetForConstraintFrame = USE_OFFSET_FOR_CONSTANT_FRAME;
 
-	calculateTransforms(m_rbA.getCenterOfMassTransform(),m_rbB.getCenterOfMassTransform());
+	calculateTransforms(m_rbA.getCenterOfMassTransform(), m_rbB.getCenterOfMassTransform());
 }
 
 
@@ -122,7 +122,7 @@ void btSliderConstraint::getInfo1(btConstraintInfo1* info)
 		info->m_numConstraintRows = 4; // Fixed 2 linear + 2 angular
 		info->nub = 2; 
 		//prepare constraint
-		calculateTransforms(m_rbA.getCenterOfMassTransform(),m_rbB.getCenterOfMassTransform());
+		calculateTransforms(m_rbA.getCenterOfMassTransform(), m_rbB.getCenterOfMassTransform());
 		testAngLimits();
 		testLinLimits();
 		if(getSolveLinLimit() || getPoweredLinMotor())
@@ -147,7 +147,7 @@ void btSliderConstraint::getInfo1NonVirtual(btConstraintInfo1* info)
 
 void btSliderConstraint::getInfo2(btConstraintInfo2* info)
 {
-	getInfo2NonVirtual(info,m_rbA.getCenterOfMassTransform(),m_rbB.getCenterOfMassTransform(), m_rbA.getLinearVelocity(),m_rbB.getLinearVelocity(), m_rbA.getInvMass(),m_rbB.getInvMass());
+	getInfo2NonVirtual(info, m_rbA.getCenterOfMassTransform(), m_rbB.getCenterOfMassTransform(), m_rbA.getLinearVelocity(), m_rbB.getLinearVelocity(), m_rbA.getInvMass(), m_rbB.getInvMass());
 }
 
 
@@ -156,7 +156,7 @@ void btSliderConstraint::getInfo2(btConstraintInfo2* info)
 
 
 
-void btSliderConstraint::calculateTransforms(const btTransform& transA,const btTransform& transB)
+void btSliderConstraint::calculateTransforms(const btTransform& transA, const btTransform& transB)
 {
 	if(m_useLinearReferenceFrameA || (!m_useSolveConstraintObsolete))
 	{
@@ -265,7 +265,7 @@ btVector3 btSliderConstraint::getAncorInB(void)
 }
 
 
-void btSliderConstraint::getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA,const btTransform& transB, const btVector3& linVelA,const btVector3& linVelB, btScalar rbAinvMass,btScalar rbBinvMass  )
+void btSliderConstraint::getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btVector3& linVelA, const btVector3& linVelB, btScalar rbAinvMass, btScalar rbBinvMass  )
 {
 	const btTransform& trA = getCalculatedTransformA();
 	const btTransform& trB = getCalculatedTransformB();
@@ -334,7 +334,7 @@ void btSliderConstraint::getInfo2NonVirtual(btConstraintInfo2* info, const btTra
 	info->m_J2angularAxis[s+2] = -q[2];
 	// compute the right hand side of the constraint equation. set relative
 	// body velocities along p and q to bring the slider back into alignment.
-	// if ax1A,ax1B are the unit length slider axes as computed from bodyA and
+	// if ax1A, ax1B are the unit length slider axes as computed from bodyA and
 	// bodyB, we need to rotate both bodies along the axis u = (ax1 x ax2).
 	// if "theta" is the angle between ax1 and ax2, we need an angular velocity
 	// along u to cover angle erp*theta in one step :

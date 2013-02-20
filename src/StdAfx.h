@@ -1,6 +1,5 @@
 #include <ctype.h>
 #include <tier1/tier1.h>
-#include <tier1/KeyValues.h>
 #include <tier1/utlsymbol.h>
 
 #include <vphysics_interface.h>
@@ -23,7 +22,7 @@
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
-#if defined(_WIN32) //&& defined(_DEBUG)
+#if defined(_WIN32)
 #	define DEBUG_DRAW 1
 #endif
 

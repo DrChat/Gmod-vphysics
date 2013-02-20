@@ -43,10 +43,10 @@ m_index1a(0)
 void	btPersistentManifold::DebugPersistency()
 {
 	int i;
-	printf("DebugPersistency : numPoints %d\n",m_cachedPoints);
+	printf("DebugPersistency : numPoints %d\n", m_cachedPoints);
 	for (i=0;i<m_cachedPoints;i++)
 	{
-		printf("m_pointCache[%d].m_userPersistentData = %x\n",i,m_pointCache[i].m_userPersistentData);
+		printf("m_pointCache[%d].m_userPersistentData = %x\n", i,m_pointCache[i].m_userPersistentData);
 	}
 }
 #endif //DEBUG_PERSISTENCY
@@ -86,11 +86,11 @@ void btPersistentManifold::clearUserCache(btManifoldPoint& pt)
 	
 }
 
-static inline btScalar calcArea4Points(const btVector3 &p0,const btVector3 &p1,const btVector3 &p2,const btVector3 &p3)
+static inline btScalar calcArea4Points(const btVector3 &p0, const btVector3 &p1, const btVector3 &p2, const btVector3 &p3)
 {
 	// It calculates possible 3 area constructed from random 4 points and returns the biggest one.
 
-	btVector3 a[3],b[3];
+	btVector3 a[3], b[3];
 	a[0] = p0 - p1;
 	a[1] = p0 - p2;
 	a[2] = p0 - p3;
@@ -103,7 +103,7 @@ static inline btScalar calcArea4Points(const btVector3 &p0,const btVector3 &p1,c
 	btVector3 tmp1 = a[1].cross(b[1]);
 	btVector3 tmp2 = a[2].cross(b[2]);
 
-	return btMax(btMax(tmp0.length2(),tmp1.length2()),tmp2.length2());
+	return btMax(btMax(tmp0.length2(), tmp1.length2()), tmp2.length2());
 }
 
 int btPersistentManifold::sortCachedPoints(const btManifoldPoint& pt) 
@@ -125,7 +125,7 @@ int btPersistentManifold::sortCachedPoints(const btManifoldPoint& pt)
 		}
 #endif //KEEP_DEEPEST_POINT
 		
-		btScalar res0(btScalar(0.)),res1(btScalar(0.)),res2(btScalar(0.)),res3(btScalar(0.));
+		btScalar res0(btScalar(0.)), res1(btScalar(0.)), res2(btScalar(0.)), res3(btScalar(0.));
 
 	if (gContactCalcArea3Points)
 	{
@@ -163,22 +163,22 @@ int btPersistentManifold::sortCachedPoints(const btManifoldPoint& pt)
 	else
 	{
 		if(maxPenetrationIndex != 0) {
-			res0 = calcArea4Points(pt.m_localPointA,m_pointCache[1].m_localPointA,m_pointCache[2].m_localPointA,m_pointCache[3].m_localPointA);
+			res0 = calcArea4Points(pt.m_localPointA, m_pointCache[1].m_localPointA, m_pointCache[2].m_localPointA, m_pointCache[3].m_localPointA);
 		}
 
 		if(maxPenetrationIndex != 1) {
-			res1 = calcArea4Points(pt.m_localPointA,m_pointCache[0].m_localPointA,m_pointCache[2].m_localPointA,m_pointCache[3].m_localPointA);
+			res1 = calcArea4Points(pt.m_localPointA, m_pointCache[0].m_localPointA, m_pointCache[2].m_localPointA, m_pointCache[3].m_localPointA);
 		}
 
 		if(maxPenetrationIndex != 2) {
-			res2 = calcArea4Points(pt.m_localPointA,m_pointCache[0].m_localPointA,m_pointCache[1].m_localPointA,m_pointCache[3].m_localPointA);
+			res2 = calcArea4Points(pt.m_localPointA, m_pointCache[0].m_localPointA, m_pointCache[1].m_localPointA, m_pointCache[3].m_localPointA);
 		}
 
 		if(maxPenetrationIndex != 3) {
-			res3 = calcArea4Points(pt.m_localPointA,m_pointCache[0].m_localPointA,m_pointCache[1].m_localPointA,m_pointCache[2].m_localPointA);
+			res3 = calcArea4Points(pt.m_localPointA, m_pointCache[0].m_localPointA, m_pointCache[1].m_localPointA, m_pointCache[2].m_localPointA);
 		}
 	}
-	btVector4 maxvec(res0,res1,res2,res3);
+	btVector4 maxvec(res0, res1, res2, res3);
 	int biggestarea = maxvec.closestAxis4();
 	return biggestarea;
 	
@@ -244,11 +244,11 @@ btScalar	btPersistentManifold::getContactBreakingThreshold() const
 
 
 
-void btPersistentManifold::refreshContactPoints(const btTransform& trA,const btTransform& trB)
+void btPersistentManifold::refreshContactPoints(const btTransform& trA, const btTransform& trB)
 {
 	int i;
 #ifdef DEBUG_PERSISTENCY
-	printf("refreshContactPoints posA = (%f,%f,%f) posB = (%f,%f,%f)\n",
+	printf("refreshContactPoints posA = (%f, %f, %f) posB = (%f, %f, %f)\n",
 		trA.getOrigin().getX(),
 		trA.getOrigin().getY(),
 		trA.getOrigin().getZ(),
@@ -268,7 +268,7 @@ void btPersistentManifold::refreshContactPoints(const btTransform& trA,const btT
 
 	/// then 
 	btScalar distance2d;
-	btVector3 projectedDifference,projectedPoint;
+	btVector3 projectedDifference, projectedPoint;
 	for (i=getNumContacts()-1;i>=0;i--)
 	{
 		
@@ -290,7 +290,7 @@ void btPersistentManifold::refreshContactPoints(const btTransform& trA,const btT
 			{
 				//contact point processed callback
 				if (gContactProcessedCallback)
-					(*gContactProcessedCallback)(manifoldPoint,(void*)m_body0,(void*)m_body1);
+					(*gContactProcessedCallback)(manifoldPoint, (void*)m_body0, (void*)m_body1);
 			}
 		}
 	}

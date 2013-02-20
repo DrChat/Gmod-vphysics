@@ -26,14 +26,14 @@ subject to the following restrictions:
 
 #define USE_PERSISTENT_CONTACTS 1
 
-btBox2dBox2dCollisionAlgorithm::btBox2dBox2dCollisionAlgorithm(btPersistentManifold* mf,const btCollisionAlgorithmConstructionInfo& ci,const btCollisionObjectWrapper* obj0Wrap,const btCollisionObjectWrapper* obj1Wrap)
-: btActivatingCollisionAlgorithm(ci,obj0Wrap,obj1Wrap),
+btBox2dBox2dCollisionAlgorithm::btBox2dBox2dCollisionAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* obj0Wrap, const btCollisionObjectWrapper* obj1Wrap)
+: btActivatingCollisionAlgorithm(ci, obj0Wrap, obj1Wrap),
 m_ownManifold(false),
 m_manifoldPtr(mf)
 {
-	if (!m_manifoldPtr && m_dispatcher->needsCollision(obj0Wrap->getCollisionObject(),obj1Wrap->getCollisionObject()))
+	if (!m_manifoldPtr && m_dispatcher->needsCollision(obj0Wrap->getCollisionObject(), obj1Wrap->getCollisionObject()))
 	{
-		m_manifoldPtr = m_dispatcher->getNewManifold(obj0Wrap->getCollisionObject(),obj1Wrap->getCollisionObject());
+		m_manifoldPtr = m_dispatcher->getNewManifold(obj0Wrap->getCollisionObject(), obj1Wrap->getCollisionObject());
 		m_ownManifold = true;
 	}
 }
@@ -53,7 +53,7 @@ btBox2dBox2dCollisionAlgorithm::~btBox2dBox2dCollisionAlgorithm()
 void b2CollidePolygons(btManifoldResult* manifold,  const btBox2dShape* polyA, const btTransform& xfA, const btBox2dShape* polyB, const btTransform& xfB);
 
 //#include <stdio.h>
-void btBox2dBox2dCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut)
+void btBox2dBox2dCollisionAlgorithm::processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
 	if (!m_manifoldPtr)
 		return;
@@ -64,7 +64,7 @@ void btBox2dBox2dCollisionAlgorithm::processCollision (const btCollisionObjectWr
 
 	resultOut->setPersistentManifold(m_manifoldPtr);
 
-	b2CollidePolygons(resultOut,box0,body0Wrap->getWorldTransform(),box1,body1Wrap->getWorldTransform());
+	b2CollidePolygons(resultOut, box0, body0Wrap->getWorldTransform(), box1, body1Wrap->getWorldTransform());
 
 	//  refreshContactPoints is only necessary when using persistent contact points. otherwise all points are newly added
 	if (m_ownManifold)
@@ -74,7 +74,7 @@ void btBox2dBox2dCollisionAlgorithm::processCollision (const btCollisionObjectWr
 
 }
 
-btScalar btBox2dBox2dCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* /*body0*/,btCollisionObject* /*body1*/,const btDispatcherInfo& /*dispatchInfo*/,btManifoldResult* /*resultOut*/)
+btScalar btBox2dBox2dCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* /*body0*/, btCollisionObject* /*body1*/, const btDispatcherInfo& /*dispatchInfo*/, btManifoldResult* /*resultOut*/)
 {
 	//not yet
 	return 1.f;
@@ -89,11 +89,11 @@ struct ClipVertex
 	//b2ContactID id;
 };
 
-#define b2Dot(a,b) (a).dot(b)
-#define b2Mul(a,b) (a)*(b)
-#define b2MulT(a,b) (a).transpose()*(b)
-#define b2Cross(a,b) (a).cross(b)
-#define btCrossS(a,s) btVector3(s * a.getY(), -s * a.getX(),0.f)
+#define b2Dot(a, b) (a).dot(b)
+#define b2Mul(a, b) (a)*(b)
+#define b2MulT(a, b) (a).transpose()*(b)
+#define b2Cross(a, b) (a).cross(b)
+#define btCrossS(a, s) btVector3(s * a.getY(), -s * a.getX(),0.f)
 
 int b2_maxManifoldPoints =2;
 
@@ -409,7 +409,7 @@ void b2CollidePolygons(btManifoldResult* manifold,
 			//cp->localPoint1 = b2MulT(xfA, clipPoints2[i].v);
 			//cp->localPoint2 = b2MulT(xfB, clipPoints2[i].v);
 
-			manifold->addContactPoint(-manifoldNormal,clipPoints2[i].v,separation);
+			manifold->addContactPoint(-manifoldNormal, clipPoints2[i].v, separation);
 
 //			cp->id = clipPoints2[i].id;
 //			cp->id.features.flip = flip;

@@ -24,8 +24,8 @@ subject to the following restrictions:
 
 
 
-btContactConstraint::btContactConstraint(btPersistentManifold* contactManifold,btRigidBody& rbA,btRigidBody& rbB)
-:btTypedConstraint(CONTACT_CONSTRAINT_TYPE,rbA,rbB),
+btContactConstraint::btContactConstraint(btPersistentManifold* contactManifold, btRigidBody& rbA, btRigidBody& rbB)
+:btTypedConstraint(CONTACT_CONSTRAINT_TYPE, rbA, rbB),
 	m_contactManifold(*contactManifold)
 {
 
@@ -98,8 +98,8 @@ btScalar resolveSingleCollision(
 
 	btScalar positionalError = solverInfo.m_erp *-distance /solverInfo.m_timeStep ;
 	btScalar velocityError = -(1.0f + restitution) * rel_vel;// * damping;
-	btScalar denom0 = body1->computeImpulseDenominator(contactPositionWorld,normal);
-	btScalar denom1 = body2? body2->computeImpulseDenominator(contactPositionWorld,normal) : 0.f;
+	btScalar denom0 = body1->computeImpulseDenominator(contactPositionWorld, normal);
+	btScalar denom1 = body2? body2->computeImpulseDenominator(contactPositionWorld, normal) : 0.f;
 	btScalar relaxation = 1.f;
 	btScalar jacDiagABInv = relaxation/(denom0+denom1);
 
@@ -120,7 +120,7 @@ btScalar resolveSingleCollision(
 //bilateral constraint between two dynamic objects
 void resolveSingleBilateral(btRigidBody& body1, const btVector3& pos1,
 					  btRigidBody& body2, const btVector3& pos2,
-					  btScalar distance, const btVector3& normal,btScalar& impulse ,btScalar timeStep)
+					  btScalar distance, const btVector3& normal, btScalar& impulse, btScalar timeStep)
 {
 	(void)timeStep;
 	(void)distance;
@@ -144,8 +144,8 @@ void resolveSingleBilateral(btRigidBody& body1, const btVector3& pos1,
 
 	   btJacobianEntry jac(body1.getCenterOfMassTransform().getBasis().transpose(),
 		body2.getCenterOfMassTransform().getBasis().transpose(),
-		rel_pos1,rel_pos2,normal,body1.getInvInertiaDiagLocal(),body1.getInvMass(),
-		body2.getInvInertiaDiagLocal(),body2.getInvMass());
+		rel_pos1, rel_pos2, normal, body1.getInvInertiaDiagLocal(), body1.getInvMass(),
+		body2.getInvInertiaDiagLocal(), body2.getInvMass());
 
 	btScalar jacDiagAB = jac.getDiagonal();
 	btScalar jacDiagABInv = btScalar(1.) / jacDiagAB;

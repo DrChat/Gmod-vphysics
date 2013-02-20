@@ -29,7 +29,7 @@ m_numVertices(0)
 	addVertex(pt0);
 }
 
-btBU_Simplex1to4::btBU_Simplex1to4(const btVector3& pt0,const btVector3& pt1) : btPolyhedralConvexAabbCachingShape (),
+btBU_Simplex1to4::btBU_Simplex1to4(const btVector3& pt0, const btVector3& pt1) : btPolyhedralConvexAabbCachingShape (),
 m_numVertices(0)
 {
 	m_shapeType = TETRAHEDRAL_SHAPE_PROXYTYPE;
@@ -37,7 +37,7 @@ m_numVertices(0)
 	addVertex(pt1);
 }
 
-btBU_Simplex1to4::btBU_Simplex1to4(const btVector3& pt0,const btVector3& pt1,const btVector3& pt2) : btPolyhedralConvexAabbCachingShape (),
+btBU_Simplex1to4::btBU_Simplex1to4(const btVector3& pt0, const btVector3& pt1, const btVector3& pt2) : btPolyhedralConvexAabbCachingShape (),
 m_numVertices(0)
 {
 	m_shapeType = TETRAHEDRAL_SHAPE_PROXYTYPE;
@@ -46,7 +46,7 @@ m_numVertices(0)
 	addVertex(pt2);
 }
 
-btBU_Simplex1to4::btBU_Simplex1to4(const btVector3& pt0,const btVector3& pt1,const btVector3& pt2,const btVector3& pt3) : btPolyhedralConvexAabbCachingShape (),
+btBU_Simplex1to4::btBU_Simplex1to4(const btVector3& pt0, const btVector3& pt1, const btVector3& pt2, const btVector3& pt3) : btPolyhedralConvexAabbCachingShape (),
 m_numVertices(0)
 {
 	m_shapeType = TETRAHEDRAL_SHAPE_PROXYTYPE;
@@ -57,12 +57,12 @@ m_numVertices(0)
 }
 
 
-void btBU_Simplex1to4::getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+void btBU_Simplex1to4::getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 {
 #if 1
-	btPolyhedralConvexAabbCachingShape::getAabb(t,aabbMin,aabbMax);
+	btPolyhedralConvexAabbCachingShape::getAabb(t, aabbMin, aabbMax);
 #else
-	aabbMin.setValue(BT_LARGE_FLOAT,BT_LARGE_FLOAT,BT_LARGE_FLOAT);
+	aabbMin.setValue(BT_LARGE_FLOAT, BT_LARGE_FLOAT, BT_LARGE_FLOAT);
 	aabbMax.setValue(-BT_LARGE_FLOAT,-BT_LARGE_FLOAT,-BT_LARGE_FLOAT);
 
 	//just transform the vertices in worldspace, and take their AABB
@@ -110,7 +110,7 @@ int btBU_Simplex1to4::getNumEdges() const
 	return 0;
 }
 
-void btBU_Simplex1to4::getEdge(int i,btVector3& pa,btVector3& pb) const
+void btBU_Simplex1to4::getEdge(int i, btVector3& pa, btVector3& pb) const
 {
 	
     switch (m_numVertices)
@@ -174,7 +174,7 @@ void btBU_Simplex1to4::getEdge(int i,btVector3& pa,btVector3& pb) const
 
 }
 
-void btBU_Simplex1to4::getVertex(int i,btVector3& vtx) const
+void btBU_Simplex1to4::getVertex(int i, btVector3& vtx) const
 {
 	vtx = m_vertices[i];
 }
@@ -201,7 +201,7 @@ int	btBU_Simplex1to4::getNumPlanes() const
 }
 
 
-void btBU_Simplex1to4::getPlane(btVector3&, btVector3& ,int ) const
+void btBU_Simplex1to4::getPlane(btVector3&, btVector3&, int ) const
 {
 	
 }
@@ -211,7 +211,7 @@ int btBU_Simplex1to4::getIndex(int ) const
 	return 0;
 }
 
-bool btBU_Simplex1to4::isInside(const btVector3& ,btScalar ) const
+bool btBU_Simplex1to4::isInside(const btVector3&, btScalar ) const
 {
 	return false;
 }

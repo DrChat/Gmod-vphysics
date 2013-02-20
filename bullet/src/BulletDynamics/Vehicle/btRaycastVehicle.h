@@ -76,7 +76,7 @@ private:
 public:
 
 	//constructor to create a car from an existing rigidbody
-	btRaycastVehicle(const btVehicleTuning& tuning,btRigidBody* chassis,	btVehicleRaycaster* raycaster );
+	btRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis,	btVehicleRaycaster* raycaster );
 
 	virtual ~btRaycastVehicle() ;
 
@@ -103,7 +103,7 @@ public:
 
 	btScalar	getSteeringValue(int wheel) const;
 
-	void	setSteeringValue(btScalar steering,int wheel);
+	void	setSteeringValue(btScalar steering, int wheel);
 
 
 	void	applyEngineForce(btScalar force, int wheel);
@@ -112,9 +112,9 @@ public:
 
 	void	updateWheelTransform( int wheelIndex, bool interpolatedTransform = true );
 	
-//	void	setRaycastWheelInfo( int wheelIndex , bool isInContact, const btVector3& hitPoint, const btVector3& hitNormal,btScalar depth);
+//	void	setRaycastWheelInfo( int wheelIndex, bool isInContact, const btVector3& hitPoint, const btVector3& hitNormal, btScalar depth);
 
-	btWheelInfo&	addWheel( const btVector3& connectionPointCS0, const btVector3& wheelDirectionCS0,const btVector3& wheelAxleCS,btScalar suspensionRestLength,btScalar wheelRadius,const btVehicleTuning& tuning, bool isFrontWheel);
+	btWheelInfo&	addWheel( const btVector3& connectionPointCS0, const btVector3& wheelDirectionCS0, const btVector3& wheelAxleCS, btScalar suspensionRestLength, btScalar wheelRadius, const btVehicleTuning& tuning, bool isFrontWheel);
 
 	inline int		getNumWheels() const {
 		return int (m_wheelInfo.size());
@@ -127,10 +127,10 @@ public:
 
 	btWheelInfo&	getWheelInfo(int index);
 
-	void	updateWheelTransformsWS(btWheelInfo& wheel , bool interpolatedTransform = true);
+	void	updateWheelTransformsWS(btWheelInfo& wheel, bool interpolatedTransform = true);
 
 	
-	void setBrake(btScalar brake,int wheelIndex);
+	void setBrake(btScalar brake, int wheelIndex);
 
 	void	setPitchControl(btScalar pitch)
 	{
@@ -187,7 +187,7 @@ public:
 		return m_currentVehicleSpeedKmHour;
 	}
 
-	virtual void	setCoordinateSystem(int rightIndex,int upIndex,int forwardIndex)
+	virtual void	setCoordinateSystem(int rightIndex, int upIndex, int forwardIndex)
 	{
 		m_indexRightAxis = rightIndex;
 		m_indexUpAxis = upIndex;
@@ -227,7 +227,7 @@ public:
 	{
 	}
 
-	virtual void* castRay(const btVector3& from,const btVector3& to, btVehicleRaycasterResult& result);
+	virtual void* castRay(const btVector3& from, const btVector3& to, btVehicleRaycasterResult& result);
 
 };
 

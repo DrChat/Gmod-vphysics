@@ -148,19 +148,19 @@ static inline float bt3dGrid_dot(float3& a, float3& b)
 {
 	return a.x*b.x+a.y*b.y+a.z*b.z;
 }
-#define BT_GPU_dot(a,b) bt3dGrid_dot(a,b)
+#define BT_GPU_dot(a, b) bt3dGrid_dot(a, b)
 
 static inline float bt3dGrid_dot4(float4& a, float4& b)
 {
 	return a.x*b.x+a.y*b.y+a.z*b.z+a.w*b.w;
 }
-#define BT_GPU_dot4(a,b) bt3dGrid_dot4(a,b)
+#define BT_GPU_dot4(a, b) bt3dGrid_dot4(a, b)
 
 static inline float3 bt3dGrid_cross(const float3& a, const float3& b)
 {
 	float3 r; r.x = a.y*b.z-a.z*b.y; r.y = -a.x*b.z+a.z*b.x; r.z = a.x*b.y-a.y*b.x;	return r;
 }
-#define BT_GPU_cross(a,b) bt3dGrid_cross(a,b)
+#define BT_GPU_cross(a, b) bt3dGrid_cross(a, b)
 
 
 inline float3 operator*(const float3& a, float fact)

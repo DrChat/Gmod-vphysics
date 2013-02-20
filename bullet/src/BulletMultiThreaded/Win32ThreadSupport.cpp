@@ -55,21 +55,21 @@ DWORD WINAPI Thread_no_1( LPVOID lpParam )
 	
 	while (1)
 	{
-		WaitForSingleObject(status->m_eventStartHandle,INFINITE);
+		WaitForSingleObject(status->m_eventStartHandle, INFINITE);
 		
 		void* userPtr = status->m_userPtr;
 
 		if (userPtr)
 		{
 			btAssert(status->m_status);
-			status->m_userThreadFunc(userPtr,status->m_lsMemory);
+			status->m_userThreadFunc(userPtr, status->m_lsMemory);
 			status->m_status = 2;
 			SetEvent(status->m_eventCompletetHandle);
 		} else
 		{
 			//exit Thread
 			status->m_status = 3;
-			printf("Thread with taskId %i with handle %p exiting\n",status->m_taskId, status->m_threadHandle);
+			printf("Thread with taskId %i with handle %p exiting\n", status->m_taskId, status->m_threadHandle);
 			SetEvent(status->m_eventCompletetHandle);
 			break;
 		}
@@ -101,7 +101,7 @@ void Win32ThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiArgumen
 
 			btSpuStatus&	spuStatus = m_activeSpuStatus[0];
 			spuStatus.m_userPtr=(void*)uiArgument0;
-			spuStatus.m_userThreadFunc(spuStatus.m_userPtr,spuStatus.m_lsMemory);
+			spuStatus.m_userThreadFunc(spuStatus.m_userPtr, spuStatus.m_lsMemory);
 			HANDLE handle =0;
 #else
 
@@ -234,7 +234,7 @@ void Win32ThreadSupport::startThreads(const Win32ThreadConstructionInfo& threadC
 
 	for (int i=0;i<threadConstructionInfo.m_numThreads;i++)
 	{
-		printf("starting thread %d\n",i);
+		printf("starting thread %d\n", i);
 
 		btSpuStatus&	spuStatus = m_activeSpuStatus[i];
 
@@ -247,17 +247,17 @@ void Win32ThreadSupport::startThreads(const Win32ThreadConstructionInfo& threadC
 
 		spuStatus.m_userPtr=0;
 
-		sprintf(spuStatus.m_eventStartHandleName,"eventStart%s%d",threadConstructionInfo.m_uniqueName,i);
-		spuStatus.m_eventStartHandle = CreateEventA (0,false,false,spuStatus.m_eventStartHandleName);
+		sprintf(spuStatus.m_eventStartHandleName, "eventStart%s%d", threadConstructionInfo.m_uniqueName, i);
+		spuStatus.m_eventStartHandle = CreateEventA (0, false, false, spuStatus.m_eventStartHandleName);
 
-		sprintf(spuStatus.m_eventCompletetHandleName,"eventComplete%s%d",threadConstructionInfo.m_uniqueName,i);
-		spuStatus.m_eventCompletetHandle = CreateEventA (0,false,false,spuStatus.m_eventCompletetHandleName);
+		sprintf(spuStatus.m_eventCompletetHandleName, "eventComplete%s%d", threadConstructionInfo.m_uniqueName, i);
+		spuStatus.m_eventCompletetHandle = CreateEventA (0, false, false, spuStatus.m_eventCompletetHandleName);
 
 		m_completeHandles[i] = spuStatus.m_eventCompletetHandle;
 
-		HANDLE handle = CreateThread(lpThreadAttributes,dwStackSize,lpStartAddress,lpParameter,	dwCreationFlags,lpThreadId);
-		SetThreadPriority(handle,THREAD_PRIORITY_HIGHEST);
-		//SetThreadPriority(handle,THREAD_PRIORITY_TIME_CRITICAL);
+		HANDLE handle = CreateThread(lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,	dwCreationFlags, lpThreadId);
+		SetThreadPriority(handle, THREAD_PRIORITY_HIGHEST);
+		//SetThreadPriority(handle, THREAD_PRIORITY_TIME_CRITICAL);
 
 		SetThreadAffinityMask(handle, 1<<i);
 
@@ -268,7 +268,7 @@ void Win32ThreadSupport::startThreads(const Win32ThreadConstructionInfo& threadC
 		spuStatus.m_lsMemory = threadConstructionInfo.m_lsMemoryFunc();
 		spuStatus.m_userThreadFunc = threadConstructionInfo.m_userThreadFunc;
 
-		printf("started thread %d with threadHandle %p\n",i,handle);
+		printf("started thread %d with threadHandle %p\n", i,handle);
 		
 	}
 
@@ -314,8 +314,8 @@ class btWin32Barrier : public btBarrier
 private:
 	CRITICAL_SECTION mExternalCriticalSection;
 	CRITICAL_SECTION mLocalCriticalSection;
-	HANDLE mRunEvent,mNotifyEvent;
-	int mCounter,mEnableCounter;
+	HANDLE mRunEvent, mNotifyEvent;
+	int mCounter, mEnableCounter;
 	int mMaxCount;
 
 public:
@@ -326,8 +326,8 @@ public:
 		mEnableCounter = 0;
 		InitializeCriticalSection(&mExternalCriticalSection);
 		InitializeCriticalSection(&mLocalCriticalSection);
-		mRunEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
-		mNotifyEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
+		mRunEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+		mNotifyEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	}
 
 	virtual ~btWin32Barrier()
@@ -344,12 +344,12 @@ public:
 
 		EnterCriticalSection(&mExternalCriticalSection);
 
-		//PFX_PRINTF("enter taskId %d count %d stage %d phase %d mEnableCounter %d\n",taskId,mCounter,debug&0xff,debug>>16,mEnableCounter);
+		//PFX_PRINTF("enter taskId %d count %d stage %d phase %d mEnableCounter %d\n", taskId, mCounter, debug&0xff, debug>>16, mEnableCounter);
 
 		if(mEnableCounter > 0) {
 			ResetEvent(mNotifyEvent);
 			LeaveCriticalSection(&mExternalCriticalSection);
-			WaitForSingleObject(mNotifyEvent,INFINITE); 
+			WaitForSingleObject(mNotifyEvent, INFINITE); 
 			EnterCriticalSection(&mExternalCriticalSection);
 		}
 
@@ -365,7 +365,7 @@ public:
 		else {
 			ResetEvent(mRunEvent);
 			LeaveCriticalSection(&mExternalCriticalSection);
-			WaitForSingleObject(mRunEvent,INFINITE); 
+			WaitForSingleObject(mRunEvent, INFINITE); 
 			EnterCriticalSection(&mExternalCriticalSection);
 			mEnableCounter--;
 		}
@@ -374,7 +374,7 @@ public:
 			SetEvent(mNotifyEvent);
 		}
 
-		//PFX_PRINTF("leave taskId %d count %d stage %d phase %d mEnableCounter %d\n",taskId,mCounter,debug&0xff,debug>>16,mEnableCounter);
+		//PFX_PRINTF("leave taskId %d count %d stage %d phase %d mEnableCounter %d\n", taskId, mCounter, debug&0xff, debug>>16, mEnableCounter);
 
 		LeaveCriticalSection(&mExternalCriticalSection);
 	}
@@ -405,7 +405,7 @@ public:
 		return mCommonBuff[i+1];
 	}
 
-	void setSharedParam(int i,unsigned int p)
+	void setSharedParam(int i, unsigned int p)
 	{
 		btAssert(i>=0&&i<31);
 		mCommonBuff[i+1] = p;

@@ -103,10 +103,10 @@ public:
 
 	virtual ~btTypedConstraint() {};
 	btTypedConstraint(btTypedConstraintType type, btRigidBody& rbA);
-	btTypedConstraint(btTypedConstraintType type, btRigidBody& rbA,btRigidBody& rbB);
+	btTypedConstraint(btTypedConstraintType type, btRigidBody& rbA, btRigidBody& rbB);
 
 	struct btConstraintInfo1 {
-		int m_numConstraintRows,nub;
+		int m_numConstraintRows, nub;
 	};
 
 	static btRigidBody& getFixedBody();
@@ -114,7 +114,7 @@ public:
 	struct btConstraintInfo2 {
 		// integrator parameters: frames per second (1/stepsize), default error
 		// reduction parameter (0..1).
-		btScalar fps,erp;
+		btScalar fps, erp;
 
 		// for the first and second body, pointers to two (linear and angular)
 		// n*3 jacobian sub matrices, stored by rows. these matrices will have
@@ -161,7 +161,7 @@ public:
 	virtual void	buildJacobian() {};
 
 	///internal method used by the constraint solver, don't use them directly
-	virtual	void	setupSolverConstraint(btConstraintArray& ca, int solverBodyA,int solverBodyB, btScalar timeStep)
+	virtual	void	setupSolverConstraint(btConstraintArray& ca, int solverBodyA, int solverBodyB, btScalar timeStep)
 	{
         (void)ca;
         (void)solverBodyA;
@@ -209,7 +209,7 @@ public:
 
 
 	///internal method used by the constraint solver, don't use them directly
-	virtual	void	solveConstraintObsolete(btSolverBody& /*bodyA*/,btSolverBody& /*bodyB*/,btScalar	/*timeStep*/) {};
+	virtual	void	solveConstraintObsolete(btSolverBody& /*bodyA*/, btSolverBody& /*bodyB*/, btScalar	/*timeStep*/) {};
 
 	
 	const btRigidBody& getRigidBodyA() const

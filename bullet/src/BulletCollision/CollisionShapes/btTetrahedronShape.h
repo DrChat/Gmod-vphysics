@@ -35,9 +35,9 @@ public:
 	btBU_Simplex1to4();
 
 	btBU_Simplex1to4(const btVector3& pt0);
-	btBU_Simplex1to4(const btVector3& pt0,const btVector3& pt1);
-	btBU_Simplex1to4(const btVector3& pt0,const btVector3& pt1,const btVector3& pt2);
-	btBU_Simplex1to4(const btVector3& pt0,const btVector3& pt1,const btVector3& pt2,const btVector3& pt3);
+	btBU_Simplex1to4(const btVector3& pt0, const btVector3& pt1);
+	btBU_Simplex1to4(const btVector3& pt0, const btVector3& pt1, const btVector3& pt2);
+	btBU_Simplex1to4(const btVector3& pt0, const btVector3& pt1, const btVector3& pt2, const btVector3& pt3);
 
     
 	void	reset()
@@ -45,7 +45,7 @@ public:
 		m_numVertices = 0;
 	}
 	
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
 
 	void addVertex(const btVector3& pt);
 
@@ -55,17 +55,17 @@ public:
 
 	virtual int getNumEdges() const;
 
-	virtual void getEdge(int i,btVector3& pa,btVector3& pb) const;
+	virtual void getEdge(int i, btVector3& pa, btVector3& pb) const;
 	
-	virtual void getVertex(int i,btVector3& vtx) const;
+	virtual void getVertex(int i, btVector3& vtx) const;
 
 	virtual int	getNumPlanes() const;
 
-	virtual void getPlane(btVector3& planeNormal,btVector3& planeSupport,int i) const;
+	virtual void getPlane(btVector3& planeNormal, btVector3& planeSupport, int i) const;
 
 	virtual int getIndex(int i) const;
 
-	virtual	bool isInside(const btVector3& pt,btScalar tolerance) const;
+	virtual	bool isInside(const btVector3& pt, btScalar tolerance) const;
 
 
 	///getName is for debugging

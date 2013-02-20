@@ -39,7 +39,7 @@ subject to the following restrictions:
 #endif
 
 
-#define BT_SHUFFLE(x,y,z,w) ((w)<<6 | (z)<<4 | (y)<<2 | (x))
+#define BT_SHUFFLE(x, y,z, w) ((w)<<6 | (z)<<4 | (y)<<2 | (x))
 //#define bt_pshufd_ps( _a, _mask ) (__m128) _mm_shuffle_epi32((__m128i)(_a), (_mask) )
 #define bt_pshufd_ps( _a, _mask ) _mm_shuffle_ps((_a), (_a), (_mask) )
 #define bt_splat3_ps( _a, _i ) bt_pshufd_ps((_a), BT_SHUFFLE(_i,_i,_i, 3) )
@@ -484,7 +484,7 @@ public:
 		__m128 r0 = _mm_mul_ps(v0.mVec128, vs);
 		vrt = bt_pshufd_ps(vrt, 0x80);	//	(rt rt rt 0.0)
 		__m128 r1 = _mm_mul_ps(v1.mVec128, vrt);
-		__m128 tmp3 = _mm_add_ps(r0,r1);
+		__m128 tmp3 = _mm_add_ps(r0, r1);
 		mVec128 = tmp3;
 #elif defined(BT_USE_NEON)
 		mVec128 = vsubq_f32(v1.mVec128, v0.mVec128);
@@ -631,7 +631,7 @@ public:
 		m_floats[3] = btScalar(0.f);
 	}
 
-	void	getSkewSymmetricMatrix(btVector3* v0,btVector3* v1,btVector3* v2) const
+	void	getSkewSymmetricMatrix(btVector3* v0, btVector3* v1, btVector3* v2) const
 	{
 #if defined BT_USE_SIMD_VECTOR3 && defined (BT_USE_SSE_IN_API) && defined (BT_USE_SSE)
  
@@ -648,9 +648,9 @@ public:
 		v1->mVec128 = V1;
 		v2->mVec128 = V2;
 #else
-		v0->setValue(0.		,-z()		,y());
+		v0->setValue(0.		,-z()		, y());
 		v1->setValue(z()	,0.			,-x());
-		v2->setValue(-y()	,x()	,0.);
+		v2->setValue(-y()	, x()	,0.);
 #endif
 	}
 
@@ -662,7 +662,7 @@ public:
 		int32x4_t vi = vdupq_n_s32(0); 
 		mVec128 = vreinterpretq_f32_s32(vi);
 #else	
-		setValue(btScalar(0.),btScalar(0.),btScalar(0.));
+		setValue(btScalar(0.), btScalar(0.), btScalar(0.));
 #endif
 	}
 
@@ -1070,7 +1070,7 @@ public:
 	SIMD_FORCE_INLINE btVector4() {}
 
 
-	SIMD_FORCE_INLINE btVector4(const btScalar& _x, const btScalar& _y, const btScalar& _z,const btScalar& _w) 
+	SIMD_FORCE_INLINE btVector4(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w) 
 		: btVector3(_x,_y,_z)
 	{
 		m_floats[3] = _w;
@@ -1180,7 +1180,7 @@ public:
 	
  
 
-  /**@brief Set x,y,z and zero w 
+  /**@brief Set x, y,z and zero w 
    * @param x Value of x
    * @param y Value of y
    * @param z Value of z
@@ -1200,7 +1200,7 @@ public:
    * @param z Value of z
    * @param w Value of w
    */
-		SIMD_FORCE_INLINE void	setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z,const btScalar& _w)
+		SIMD_FORCE_INLINE void	setValue(const btScalar& _x, const btScalar& _y, const btScalar& _z, const btScalar& _w)
 		{
 			m_floats[0]=_x;
 			m_floats[1]=_y;
@@ -1240,7 +1240,7 @@ SIMD_FORCE_INLINE void	btSwapVector3Endian(const btVector3& sourceVec, btVector3
 {
 	for (int i=0;i<4;i++)
 	{
-		btSwapScalarEndian(sourceVec[i],destVec[i]);
+		btSwapScalarEndian(sourceVec[i], destVec[i]);
 	}
 
 }
@@ -1252,7 +1252,7 @@ SIMD_FORCE_INLINE void	btUnSwapVector3Endian(btVector3& vector)
 	btVector3	swappedVec;
 	for (int i=0;i<4;i++)
 	{
-		btSwapScalarEndian(vector[i],swappedVec[i]);
+		btSwapScalarEndian(vector[i], swappedVec[i]);
 	}
 	vector = swappedVec;
 }

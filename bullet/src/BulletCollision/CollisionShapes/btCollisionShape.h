@@ -43,9 +43,9 @@ public:
 	}
 
 	///getAabb returns the axis aligned bounding box in the coordinate frame of the given transform t.
-	virtual void getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const =0;
+	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const =0;
 
-	virtual void	getBoundingSphere(btVector3& center,btScalar& radius) const;
+	virtual void	getBoundingSphere(btVector3& center, btScalar& radius) const;
 
 	///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.
 	virtual btScalar	getAngularMotionDisc() const;
@@ -55,7 +55,7 @@ public:
 
 	///calculateTemporalAabb calculates the enclosing aabb for the moving object over interval [0..timeStep)
 	///result is conservative
-	void calculateTemporalAabb(const btTransform& curTrans,const btVector3& linvel,const btVector3& angvel,btScalar timeStep, btVector3& temporalAabbMin,btVector3& temporalAabbMax) const;
+	void calculateTemporalAabb(const btTransform& curTrans, const btVector3& linvel, const btVector3& angvel, btScalar timeStep, btVector3& temporalAabbMin, btVector3& temporalAabbMax) const;
 
 
 
@@ -100,7 +100,7 @@ public:
 #ifndef __SPU__
 	virtual void	setLocalScaling(const btVector3& scaling) =0;
 	virtual const btVector3& getLocalScaling() const =0;
-	virtual void	calculateLocalInertia(btScalar mass,btVector3& inertia) const = 0;
+	virtual void	calculateLocalInertia(btScalar mass, btVector3& inertia) const = 0;
 
 
 //debugging support

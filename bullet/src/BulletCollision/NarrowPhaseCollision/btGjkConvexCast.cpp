@@ -27,7 +27,7 @@ subject to the following restrictions:
 #define MAX_ITERATIONS 32
 #endif
 
-btGjkConvexCast::btGjkConvexCast(const btConvexShape* convexA,const btConvexShape* convexB,btSimplexSolverInterface* simplexSolver)
+btGjkConvexCast::btGjkConvexCast(const btConvexShape* convexA, const btConvexShape* convexB, btSimplexSolverInterface* simplexSolver)
 :m_simplexSolver(simplexSolver),
 m_convexA(convexA),
 m_convexB(convexB)
@@ -47,7 +47,7 @@ bool	btGjkConvexCast::calcTimeOfImpact(
 
 	/// compute linear velocity for this interval, to interpolate
 	//assume no rotation/angular velocity, assert here?
-	btVector3 linVelA,linVelB;
+	btVector3 linVelA, linVelB;
 	linVelA = toA.getOrigin()-fromA.getOrigin();
 	linVelB = toB.getOrigin()-fromB.getOrigin();
 
@@ -58,7 +58,7 @@ bool	btGjkConvexCast::calcTimeOfImpact(
 	int maxIter = MAX_ITERATIONS;
 
 	btVector3 n;
-	n.setValue(btScalar(0.),btScalar(0.),btScalar(0.));
+	n.setValue(btScalar(0.), btScalar(0.), btScalar(0.));
 	bool hasResult = false;
 	btVector3 c;
 	btVector3 r = (linVelA-linVelB);
@@ -79,7 +79,7 @@ bool	btGjkConvexCast::calcTimeOfImpact(
 	btPointCollector	pointCollector;
 
 		
-	btGjkPairDetector gjk(m_convexA,m_convexB,m_simplexSolver,0);//m_penetrationDepthSolver);		
+	btGjkPairDetector gjk(m_convexA, m_convexB, m_simplexSolver,0);//m_penetrationDepthSolver);		
 	btGjkPairDetector::ClosestPointInput input;
 
 	//we don't use margins during CCD
@@ -87,7 +87,7 @@ bool	btGjkConvexCast::calcTimeOfImpact(
 
 	input.m_transformA = fromA;
 	input.m_transformB = fromB;
-	gjk.getClosestPoints(input,pointCollector,0);
+	gjk.getClosestPoints(input, pointCollector,0);
 
 	hasResult = pointCollector.m_hasResult;
 	c = pointCollector.m_pointInWorld;
@@ -133,10 +133,10 @@ bool	btGjkConvexCast::calcTimeOfImpact(
 
 			//interpolate to next lambda
 			result.DebugDraw( lambda );
-			input.m_transformA.getOrigin().setInterpolate3(fromA.getOrigin(),toA.getOrigin(),lambda);
-			input.m_transformB.getOrigin().setInterpolate3(fromB.getOrigin(),toB.getOrigin(),lambda);
+			input.m_transformA.getOrigin().setInterpolate3(fromA.getOrigin(), toA.getOrigin(), lambda);
+			input.m_transformB.getOrigin().setInterpolate3(fromB.getOrigin(), toB.getOrigin(), lambda);
 			
-			gjk.getClosestPoints(input,pointCollector,0);
+			gjk.getClosestPoints(input, pointCollector,0);
 			if (pointCollector.m_hasResult)
 			{
 				if (pointCollector.m_distance < btScalar(0.))

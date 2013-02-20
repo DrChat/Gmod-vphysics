@@ -18,7 +18,7 @@ subject to the following restrictions:
 
 
 
-btTriangleMesh::btTriangleMesh (bool use32bitIndices,bool use4componentVertices)
+btTriangleMesh::btTriangleMesh (bool use32bitIndices, bool use4componentVertices)
 :m_use32bitIndices(use32bitIndices),
 m_use4componentVertices(use4componentVertices),
 m_weldingThreshold(0.0)
@@ -105,7 +105,7 @@ int	btTriangleMesh::findOrAddVertex(const btVector3& vertex, bool removeDuplicat
 		{
 			for (int i=0;i< m_3componentVertices.size();i+=3)
 			{
-				btVector3 vtx(m_3componentVertices[i],m_3componentVertices[i+1],m_3componentVertices[i+2]);
+				btVector3 vtx(m_3componentVertices[i], m_3componentVertices[i+1], m_3componentVertices[i+2]);
 				if ((vtx-vertex).length2() <= m_weldingThreshold)
 				{
 					return i/3;
@@ -122,12 +122,12 @@ int	btTriangleMesh::findOrAddVertex(const btVector3& vertex, bool removeDuplicat
 
 }
 		
-void	btTriangleMesh::addTriangle(const btVector3& vertex0,const btVector3& vertex1,const btVector3& vertex2,bool removeDuplicateVertices)
+void	btTriangleMesh::addTriangle(const btVector3& vertex0, const btVector3& vertex1, const btVector3& vertex2, bool removeDuplicateVertices)
 {
 	m_indexedMeshes[0].m_numTriangles++;
-	addIndex(findOrAddVertex(vertex0,removeDuplicateVertices));
-	addIndex(findOrAddVertex(vertex1,removeDuplicateVertices));
-	addIndex(findOrAddVertex(vertex2,removeDuplicateVertices));
+	addIndex(findOrAddVertex(vertex0, removeDuplicateVertices));
+	addIndex(findOrAddVertex(vertex1, removeDuplicateVertices));
+	addIndex(findOrAddVertex(vertex2, removeDuplicateVertices));
 }
 
 int btTriangleMesh::getNumTriangles() const

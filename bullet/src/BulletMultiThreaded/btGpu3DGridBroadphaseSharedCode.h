@@ -378,7 +378,7 @@ void BT_GPU_PREF(findOverlappingPairs(bt3DGrid3F1U* pAABB, unsigned int* pHash,	
 #endif
     int numThreads, numBlocks;
     BT_GPU_PREF(computeGridSize)(numBodies, 64, numBlocks, numThreads);
-    BT_GPU_EXECKERNEL(numBlocks, numThreads, findOverlappingPairsD, (pAABB,(uint2*)pHash,(uint*)pCellStart,(uint*)pPairBuff,(uint2*)pPairBuffStartCurr,numBodies));
+    BT_GPU_EXECKERNEL(numBlocks, numThreads, findOverlappingPairsD, (pAABB, (uint2*)pHash, (uint*)pCellStart, (uint*)pPairBuff, (uint2*)pPairBuffStartCurr, numBodies));
     BT_GPU_CHECK_ERROR("Kernel execution failed: bt_CudaFindOverlappingPairsD");
 #if B_CUDA_USE_TEX
     BT_GPU_SAFE_CALL(cudaUnbindTexture(pAABBTex));
@@ -394,7 +394,7 @@ void BT_GPU_PREF(findPairsLarge(bt3DGrid3F1U* pAABB, unsigned int* pHash, unsign
 #endif
     int numThreads, numBlocks;
     BT_GPU_PREF(computeGridSize)(numBodies, 64, numBlocks, numThreads);
-    BT_GPU_EXECKERNEL(numBlocks, numThreads, findPairsLargeD, (pAABB,(uint2*)pHash,(uint*)pCellStart,(uint*)pPairBuff,(uint2*)pPairBuffStartCurr,numBodies,numLarge));
+    BT_GPU_EXECKERNEL(numBlocks, numThreads, findPairsLargeD, (pAABB, (uint2*)pHash, (uint*)pCellStart, (uint*)pPairBuff, (uint2*)pPairBuffStartCurr, numBodies, numLarge));
     BT_GPU_CHECK_ERROR("Kernel execution failed: btCuda_findPairsLargeD");
 #if B_CUDA_USE_TEX
     BT_GPU_SAFE_CALL(cudaUnbindTexture(pAABBTex));
@@ -407,7 +407,7 @@ void BT_GPU_PREF(computePairCacheChanges(unsigned int* pPairBuff, unsigned int* 
 {
     int numThreads, numBlocks;
     BT_GPU_PREF(computeGridSize)(numBodies, 256, numBlocks, numThreads);
-    BT_GPU_EXECKERNEL(numBlocks, numThreads, computePairCacheChangesD, ((uint*)pPairBuff,(uint2*)pPairBuffStartCurr,(uint*)pPairScan,pAABB,numBodies));
+    BT_GPU_EXECKERNEL(numBlocks, numThreads, computePairCacheChangesD, ((uint*)pPairBuff, (uint2*)pPairBuffStartCurr, (uint*)pPairScan, pAABB, numBodies));
     BT_GPU_CHECK_ERROR("Kernel execution failed: btCudaComputePairCacheChangesD");
 } // computePairCacheChanges()
 
@@ -417,7 +417,7 @@ void BT_GPU_PREF(squeezeOverlappingPairBuff(unsigned int* pPairBuff, unsigned in
 {
     int numThreads, numBlocks;
     BT_GPU_PREF(computeGridSize)(numBodies, 256, numBlocks, numThreads);
-    BT_GPU_EXECKERNEL(numBlocks, numThreads, squeezeOverlappingPairBuffD, ((uint*)pPairBuff,(uint2*)pPairBuffStartCurr,(uint*)pPairScan,(uint*)pPairOut,pAABB,numBodies));
+    BT_GPU_EXECKERNEL(numBlocks, numThreads, squeezeOverlappingPairBuffD, ((uint*)pPairBuff, (uint2*)pPairBuffStartCurr, (uint*)pPairScan, (uint*)pPairOut, pAABB, numBodies));
     BT_GPU_CHECK_ERROR("Kernel execution failed: btCudaSqueezeOverlappingPairBuffD");
 } // btCuda_squeezeOverlappingPairBuff()
 

@@ -22,8 +22,8 @@ subject to the following restrictions:
 
 
 
-btPoint2PointConstraint::btPoint2PointConstraint(btRigidBody& rbA,btRigidBody& rbB, const btVector3& pivotInA,const btVector3& pivotInB)
-:btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE,rbA,rbB),m_pivotInA(pivotInA),m_pivotInB(pivotInB),
+btPoint2PointConstraint::btPoint2PointConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB)
+:btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE, rbA, rbB), m_pivotInA(pivotInA), m_pivotInB(pivotInB),
 m_flags(0),
 m_useSolveConstraintObsolete(false)
 {
@@ -31,8 +31,8 @@ m_useSolveConstraintObsolete(false)
 }
 
 
-btPoint2PointConstraint::btPoint2PointConstraint(btRigidBody& rbA,const btVector3& pivotInA)
-:btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE,rbA),m_pivotInA(pivotInA),m_pivotInB(rbA.getCenterOfMassTransform()(pivotInA)),
+btPoint2PointConstraint::btPoint2PointConstraint(btRigidBody& rbA, const btVector3& pivotInA)
+:btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE, rbA), m_pivotInA(pivotInA), m_pivotInB(rbA.getCenterOfMassTransform()(pivotInA)),
 m_flags(0),
 m_useSolveConstraintObsolete(false)
 {
@@ -91,7 +91,7 @@ void btPoint2PointConstraint::getInfo1NonVirtual (btConstraintInfo1* info)
 
 void btPoint2PointConstraint::getInfo2 (btConstraintInfo2* info)
 {
-	getInfo2NonVirtual(info, m_rbA.getCenterOfMassTransform(),m_rbB.getCenterOfMassTransform());
+	getInfo2NonVirtual(info, m_rbA.getCenterOfMassTransform(), m_rbB.getCenterOfMassTransform());
 }
 
 void btPoint2PointConstraint::getInfo2NonVirtual (btConstraintInfo2* info, const btTransform& body0_trans, const btTransform& body1_trans)
@@ -113,7 +113,7 @@ void btPoint2PointConstraint::getInfo2NonVirtual (btConstraintInfo2* info, const
 		btVector3* angular1 = (btVector3*)(info->m_J1angularAxis+info->rowskip);
 		btVector3* angular2 = (btVector3*)(info->m_J1angularAxis+2*info->rowskip);
 		btVector3 a1neg = -a1;
-		a1neg.getSkewSymmetricMatrix(angular0,angular1,angular2);
+		a1neg.getSkewSymmetricMatrix(angular0, angular1, angular2);
 	}
     
 	info->m_J2linearAxis[0] = -1;
@@ -127,7 +127,7 @@ void btPoint2PointConstraint::getInfo2NonVirtual (btConstraintInfo2* info, const
 		btVector3* angular0 = (btVector3*)(info->m_J2angularAxis);
 		btVector3* angular1 = (btVector3*)(info->m_J2angularAxis+info->rowskip);
 		btVector3* angular2 = (btVector3*)(info->m_J2angularAxis+2*info->rowskip);
-		a2.getSkewSymmetricMatrix(angular0,angular1,angular2);
+		a2.getSkewSymmetricMatrix(angular0, angular1, angular2);
 	}
     
 
@@ -139,7 +139,7 @@ void btPoint2PointConstraint::getInfo2NonVirtual (btConstraintInfo2* info, const
 	for (j=0; j<3; j++)
     {
         info->m_constraintError[j*info->rowskip] = k * (a2[j] + body1_trans.getOrigin()[j] - a1[j] - body0_trans.getOrigin()[j]);
-		//printf("info->m_constraintError[%d]=%f\n",j,info->m_constraintError[j]);
+		//printf("info->m_constraintError[%d]=%f\n", j,info->m_constraintError[j]);
     }
 	if(m_flags & BT_P2P_FLAGS_CFM)
 	{

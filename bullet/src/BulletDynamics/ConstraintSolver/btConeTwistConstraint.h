@@ -128,9 +128,9 @@ public:
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btConeTwistConstraint(btRigidBody& rbA,btRigidBody& rbB,const btTransform& rbAFrame, const btTransform& rbBFrame);
+	btConeTwistConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& rbAFrame, const btTransform& rbBFrame);
 	
-	btConeTwistConstraint(btRigidBody& rbA,const btTransform& rbAFrame);
+	btConeTwistConstraint(btRigidBody& rbA, const btTransform& rbAFrame);
 
 	virtual void	buildJacobian();
 
@@ -140,9 +140,9 @@ public:
 	
 	virtual void getInfo2 (btConstraintInfo2* info);
 	
-	void	getInfo2NonVirtual(btConstraintInfo2* info,const btTransform& transA,const btTransform& transB,const btMatrix3x3& invInertiaWorldA,const btMatrix3x3& invInertiaWorldB);
+	void	getInfo2NonVirtual(btConstraintInfo2* info, const btTransform& transA, const btTransform& transB, const btMatrix3x3& invInertiaWorldA, const btMatrix3x3& invInertiaWorldB);
 
-	virtual	void	solveConstraintObsolete(btSolverBody& bodyA,btSolverBody& bodyB,btScalar	timeStep);
+	virtual	void	solveConstraintObsolete(btSolverBody& bodyA, btSolverBody& bodyB, btScalar	timeStep);
 
     
 	void	updateRHS(btScalar	timeStep);
@@ -162,7 +162,7 @@ public:
 		m_angularOnly = angularOnly;
 	}
 
-	void	setLimit(int limitIndex,btScalar limitValue)
+	void	setLimit(int limitIndex, btScalar limitValue)
 	{
 		switch (limitIndex)
 		{
@@ -198,7 +198,7 @@ public:
 	// __relaxationFactor:
 	//		0->1, recommend to stay near 1.
 	//		the lower the value, the less the constraint will fight velocities which violate the angular limits.
-	void	setLimit(btScalar _swingSpan1,btScalar _swingSpan2,btScalar _twistSpan, btScalar _softness = 1.f, btScalar _biasFactor = 0.3f, btScalar _relaxationFactor = 1.0f)
+	void	setLimit(btScalar _swingSpan1, btScalar _swingSpan2, btScalar _twistSpan, btScalar _softness = 1.f, btScalar _biasFactor = 0.3f, btScalar _relaxationFactor = 1.0f)
 	{
 		m_swingSpan1 = _swingSpan1;
 		m_swingSpan2 = _swingSpan2;
@@ -228,7 +228,7 @@ public:
 	}
 
 	void calcAngleInfo();
-	void calcAngleInfo2(const btTransform& transA, const btTransform& transB,const btMatrix3x3& invInertiaWorldA,const btMatrix3x3& invInertiaWorldB);
+	void calcAngleInfo2(const btTransform& transA, const btTransform& transB, const btMatrix3x3& invInertiaWorldA, const btMatrix3x3& invInertiaWorldB);
 
 	inline btScalar getSwingSpan1()
 	{
@@ -329,7 +329,7 @@ SIMD_FORCE_INLINE int	btConeTwistConstraint::calculateSerializeBufferSize() cons
 SIMD_FORCE_INLINE const char*	btConeTwistConstraint::serialize(void* dataBuffer, btSerializer* serializer) const
 {
 	btConeTwistConstraintData* cone = (btConeTwistConstraintData*) dataBuffer;
-	btTypedConstraint::serialize(&cone->m_typeConstraintData,serializer);
+	btTypedConstraint::serialize(&cone->m_typeConstraintData, serializer);
 
 	m_rbAFrame.serializeFloat(cone->m_rbAFrame);
 	m_rbBFrame.serializeFloat(cone->m_rbBFrame);

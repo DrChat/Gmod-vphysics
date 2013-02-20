@@ -26,7 +26,7 @@ subject to the following restrictions:
 
 
 
-void	SampleThreadFunc(void* userPtr,void* lsMemory)
+void	SampleThreadFunc(void* userPtr, void* lsMemory)
 {
 	//do nothing
 	printf("hello world\n");
@@ -105,7 +105,7 @@ void	SpuSampleTaskProcess::initialize()
 }
 
 
-void SpuSampleTaskProcess::issueTask(void* sampleMainMemPtr,int sampleValue,int sampleCommand)
+void SpuSampleTaskProcess::issueTask(void* sampleMainMemPtr, int sampleValue, int sampleCommand)
 {
 
 #ifdef DEBUG_SPU_TASK_SCHEDULING

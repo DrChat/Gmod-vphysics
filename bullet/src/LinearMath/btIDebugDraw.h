@@ -24,7 +24,7 @@ subject to the following restrictions:
 ///The btIDebugDraw interface class allows hooking up a debug renderer to visually debug simulations.
 ///Typical use case: create a debug drawer object, and assign it to a btCollisionWorld or btDynamicsWorld using setDebugDrawer and call debugDrawWorld.
 ///A class that implements the btIDebugDraw interface has to implement the drawLine method at a minimum.
-///For color arguments the X,Y,Z components refer to Red, Green and Blue each in the range [0..1]
+///For color arguments the X, Y,Z components refer to Red, Green and Blue each in the range [0..1]
 class	btIDebugDraw
 {
 	public:
@@ -52,9 +52,9 @@ class	btIDebugDraw
 
 	virtual ~btIDebugDraw() {};
 
-	virtual void	drawLine(const btVector3& from,const btVector3& to,const btVector3& color)=0;
+	virtual void	drawLine(const btVector3& from, const btVector3& to, const btVector3& color)=0;
 		
-	virtual void    drawLine(const btVector3& from,const btVector3& to, const btVector3& fromColor, const btVector3& toColor)
+	virtual void    drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor)
 	{
         (void) toColor;
 		drawLine (from, to, fromColor);
@@ -65,8 +65,8 @@ class	btIDebugDraw
 		btVector3 start = transform.getOrigin();
 
 		const btVector3 xoffs = transform.getBasis() * btVector3(radius,0,0);
-		const btVector3 yoffs = transform.getBasis() * btVector3(0,radius,0);
-		const btVector3 zoffs = transform.getBasis() * btVector3(0,0,radius);
+		const btVector3 yoffs = transform.getBasis() * btVector3(0, radius,0);
+		const btVector3 zoffs = transform.getBasis() * btVector3(0,0, radius);
 
 		// XY 
 		drawLine(start-xoffs, start+yoffs, color);
@@ -92,38 +92,38 @@ class	btIDebugDraw
 		btTransform tr;
 		tr.setIdentity();
 		tr.setOrigin(p);
-		drawSphere(radius,tr,color);
+		drawSphere(radius, tr, color);
 	}
 	
-	virtual	void	drawTriangle(const btVector3& v0,const btVector3& v1,const btVector3& v2,const btVector3& /*n0*/,const btVector3& /*n1*/,const btVector3& /*n2*/,const btVector3& color, btScalar alpha)
+	virtual	void	drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& /*n0*/, const btVector3& /*n1*/, const btVector3& /*n2*/, const btVector3& color, btScalar alpha)
 	{
-		drawTriangle(v0,v1,v2,color,alpha);
+		drawTriangle(v0, v1, v2, color, alpha);
 	}
-	virtual	void	drawTriangle(const btVector3& v0,const btVector3& v1,const btVector3& v2,const btVector3& color, btScalar /*alpha*/)
+	virtual	void	drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar /*alpha*/)
 	{
-		drawLine(v0,v1,color);
-		drawLine(v1,v2,color);
-		drawLine(v2,v0,color);
+		drawLine(v0, v1, color);
+		drawLine(v1, v2, color);
+		drawLine(v2, v0, color);
 	}
 
-	virtual void	drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color)=0;
+	virtual void	drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)=0;
 
 	virtual void	reportErrorWarning(const char* warningString) = 0;
 
-	virtual void	draw3dText(const btVector3& location,const char* textString) = 0;
+	virtual void	draw3dText(const btVector3& location, const char* textString) = 0;
 	
 	virtual void	setDebugMode(int debugMode) =0;
 	
 	virtual int		getDebugMode() const = 0;
 
-	virtual void drawAabb(const btVector3& from,const btVector3& to,const btVector3& color)
+	virtual void drawAabb(const btVector3& from, const btVector3& to, const btVector3& color)
 	{
 
 		btVector3 halfExtents = (to-from)* 0.5f;
 		btVector3 center = (to+from) *0.5f;
-		int i,j;
+		int i, j;
 
-		btVector3 edgecoord(1.f,1.f,1.f),pa,pb;
+		btVector3 edgecoord(1.f,1.f,1.f), pa, pb;
 		for (i=0;i<4;i++)
 		{
 			for (j=0;j<3;j++)
@@ -138,7 +138,7 @@ class	btIDebugDraw
 					edgecoord[2]*halfExtents[2]);
 				pb+=center;
 
-				drawLine(pa,pb,color);
+				drawLine(pa, pb, color);
 			}
 			edgecoord = btVector3(-1.f,-1.f,-1.f);
 			if (i<3)
@@ -339,20 +339,20 @@ class	btIDebugDraw
 
 		capStart[(upAxis+1)%3] = radius;
 		capEnd[(upAxis+1)%3] = radius;
-		drawLine(start+transform.getBasis() * capStart,start+transform.getBasis() * capEnd, color);
+		drawLine(start+transform.getBasis() * capStart, start+transform.getBasis() * capEnd, color);
 		capStart[(upAxis+1)%3] = -radius;
 		capEnd[(upAxis+1)%3] = -radius;
-		drawLine(start+transform.getBasis() * capStart,start+transform.getBasis() * capEnd, color);
+		drawLine(start+transform.getBasis() * capStart, start+transform.getBasis() * capEnd, color);
 
 		capStart[(upAxis+1)%3] = 0.f;
 		capEnd[(upAxis+1)%3] = 0.f;
 
 		capStart[(upAxis+2)%3] = radius;
 		capEnd[(upAxis+2)%3] = radius;
-		drawLine(start+transform.getBasis() * capStart,start+transform.getBasis() * capEnd, color);
+		drawLine(start+transform.getBasis() * capStart, start+transform.getBasis() * capEnd, color);
 		capStart[(upAxis+2)%3] = -radius;
 		capEnd[(upAxis+2)%3] = -radius;
-		drawLine(start+transform.getBasis() * capStart,start+transform.getBasis() * capEnd, color);
+		drawLine(start+transform.getBasis() * capStart, start+transform.getBasis() * capEnd, color);
 	}
 
 	virtual void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform& transform, const btVector3& color)
@@ -362,16 +362,16 @@ class	btIDebugDraw
 		offsetHeight[upAxis] = halfHeight;
 		btVector3	offsetRadius(0,0,0);
 		offsetRadius[(upAxis+1)%3] = radius;
-		drawLine(start+transform.getBasis() * (offsetHeight+offsetRadius),start+transform.getBasis() * (-offsetHeight+offsetRadius),color);
-		drawLine(start+transform.getBasis() * (offsetHeight-offsetRadius),start+transform.getBasis() * (-offsetHeight-offsetRadius),color);
+		drawLine(start+transform.getBasis() * (offsetHeight+offsetRadius), start+transform.getBasis() * (-offsetHeight+offsetRadius), color);
+		drawLine(start+transform.getBasis() * (offsetHeight-offsetRadius), start+transform.getBasis() * (-offsetHeight-offsetRadius), color);
 
 		// Drawing top and bottom caps of the cylinder
 		btVector3 yaxis(0,0,0);
 		yaxis[upAxis] = btScalar(1.0);
 		btVector3 xaxis(0,0,0);
 		xaxis[(upAxis+1)%3] = btScalar(1.0);
-		drawArc(start-transform.getBasis()*(offsetHeight),transform.getBasis()*yaxis,transform.getBasis()*xaxis,radius,radius,0,SIMD_2_PI,color,false,btScalar(10.0));
-		drawArc(start+transform.getBasis()*(offsetHeight),transform.getBasis()*yaxis,transform.getBasis()*xaxis,radius,radius,0,SIMD_2_PI,color,false,btScalar(10.0));
+		drawArc(start-transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius,0, SIMD_2_PI, color, false, btScalar(10.0));
+		drawArc(start+transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius,0, SIMD_2_PI, color, false, btScalar(10.0));
 	}
 
 	virtual void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform& transform, const btVector3& color)
@@ -386,31 +386,31 @@ class	btIDebugDraw
 		btVector3	offset2Radius(0,0,0);
 		offset2Radius[(upAxis+2)%3] = radius;
 
-		drawLine(start+transform.getBasis() * (offsetHeight),start+transform.getBasis() * (-offsetHeight+offsetRadius),color);
-		drawLine(start+transform.getBasis() * (offsetHeight),start+transform.getBasis() * (-offsetHeight-offsetRadius),color);
-		drawLine(start+transform.getBasis() * (offsetHeight),start+transform.getBasis() * (-offsetHeight+offset2Radius),color);
-		drawLine(start+transform.getBasis() * (offsetHeight),start+transform.getBasis() * (-offsetHeight-offset2Radius),color);
+		drawLine(start+transform.getBasis() * (offsetHeight), start+transform.getBasis() * (-offsetHeight+offsetRadius), color);
+		drawLine(start+transform.getBasis() * (offsetHeight), start+transform.getBasis() * (-offsetHeight-offsetRadius), color);
+		drawLine(start+transform.getBasis() * (offsetHeight), start+transform.getBasis() * (-offsetHeight+offset2Radius), color);
+		drawLine(start+transform.getBasis() * (offsetHeight), start+transform.getBasis() * (-offsetHeight-offset2Radius), color);
 
 		// Drawing the base of the cone
 		btVector3 yaxis(0,0,0);
 		yaxis[upAxis] = btScalar(1.0);
 		btVector3 xaxis(0,0,0);
 		xaxis[(upAxis+1)%3] = btScalar(1.0);
-		drawArc(start-transform.getBasis()*(offsetHeight),transform.getBasis()*yaxis,transform.getBasis()*xaxis,radius,radius,0,SIMD_2_PI,color,false,10.0);
+		drawArc(start-transform.getBasis()*(offsetHeight), transform.getBasis()*yaxis, transform.getBasis()*xaxis, radius, radius,0, SIMD_2_PI, color, false,10.0);
 	}
 
 	virtual void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform& transform, const btVector3& color)
 	{
 		btVector3 planeOrigin = planeNormal * planeConst;
-		btVector3 vec0,vec1;
-		btPlaneSpace1(planeNormal,vec0,vec1);
+		btVector3 vec0, vec1;
+		btPlaneSpace1(planeNormal, vec0, vec1);
 		btScalar vecLen = 100.f;
 		btVector3 pt0 = planeOrigin + vec0*vecLen;
 		btVector3 pt1 = planeOrigin - vec0*vecLen;
 		btVector3 pt2 = planeOrigin + vec1*vecLen;
 		btVector3 pt3 = planeOrigin - vec1*vecLen;
-		drawLine(transform*pt0,transform*pt1,color);
-		drawLine(transform*pt2,transform*pt3,color);
+		drawLine(transform*pt0, transform*pt1, color);
+		drawLine(transform*pt2, transform*pt3, color);
 	}
 };
 

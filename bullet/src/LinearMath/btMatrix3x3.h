@@ -128,7 +128,7 @@ public:
 	*  @param i Column number 0 indexed */
 	SIMD_FORCE_INLINE btVector3 getColumn(int i) const
 	{
-		return btVector3(m_el[0][i],m_el[1][i],m_el[2][i]);
+		return btVector3(m_el[0][i], m_el[1][i], m_el[2][i]);
 	}
 
 
@@ -175,9 +175,9 @@ public:
 	*  @param m A pointer to the beginning of the array of scalars*/
 	void setFromOpenGLSubMatrix(const btScalar *m)
 	{
-		m_el[0].setValue(m[0],m[4],m[8]);
-		m_el[1].setValue(m[1],m[5],m[9]);
-		m_el[2].setValue(m[2],m[6],m[10]);
+		m_el[0].setValue(m[0], m[4], m[8]);
+		m_el[1].setValue(m[1], m[5], m[9]);
+		m_el[2].setValue(m[2], m[6], m[10]);
 
 	}
 	/** @brief Set the values of the matrix explicitly (row major)
@@ -194,9 +194,9 @@ public:
 		const btScalar& yx, const btScalar& yy, const btScalar& yz, 
 		const btScalar& zx, const btScalar& zy, const btScalar& zz)
 	{
-		m_el[0].setValue(xx,xy,xz);
-		m_el[1].setValue(yx,yy,yz);
-		m_el[2].setValue(zx,zy,zz);
+		m_el[0].setValue(xx, xy, xz);
+		m_el[1].setValue(yx, yy, yz);
+		m_el[2].setValue(zx, zy, zz);
 	}
 
 	/** @brief Set the matrix from a quaternion
@@ -290,7 +290,7 @@ public:
 	* angles are applied in ZYX order. I.e a vector is first rotated 
 	* about X then Y and then Z
 	**/
-	void setEulerZYX(btScalar eulerX,btScalar eulerY,btScalar eulerZ) { 
+	void setEulerZYX(btScalar eulerX, btScalar eulerY, btScalar eulerZ) { 
 		///@todo proposed to reverse this since it's labeled zyx but takes arguments xyz and it will match all other parts of the code
 		btScalar ci ( btCos(eulerX)); 
 		btScalar cj ( btCos(eulerY)); 
@@ -476,7 +476,7 @@ public:
 			temp[j] = (m_el[j][i] + m_el[i][j]) * s;
 			temp[k] = (m_el[k][i] + m_el[i][k]) * s;
 		}
-		q.setValue(temp[0],temp[1],temp[2],temp[3]);
+		q.setValue(temp[0], temp[1], temp[2], temp[3]);
 #endif
 	}
 
@@ -533,7 +533,7 @@ public:
 			euler_out2.yaw = 0;
 
 			// From difference of angles formula
-			btScalar delta = btAtan2(m_el[0].x(),m_el[0].z());
+			btScalar delta = btAtan2(m_el[0].x(), m_el[0].z());
 			if (m_el[2].x() > 0)  //gimbal locked up
 			{
 				euler_out.pitch = SIMD_PI / btScalar(2.0);
@@ -865,9 +865,9 @@ operator*(const btMatrix3x3& m, const btScalar & k)
                 vmulq_n_f32(m[2].mVec128, k)); 
 #else
 	return btMatrix3x3(
-		m[0].x()*k,m[0].y()*k,m[0].z()*k,
-		m[1].x()*k,m[1].y()*k,m[1].z()*k,
-		m[2].x()*k,m[2].y()*k,m[2].z()*k);
+		m[0].x()*k, m[0].y()*k, m[0].z()*k,
+		m[1].x()*k, m[1].y()*k, m[1].z()*k,
+		m[2].x()*k, m[2].y()*k, m[2].z()*k);
 #endif
 }
 

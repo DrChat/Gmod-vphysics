@@ -36,7 +36,7 @@ struct btCollisionAlgorithmConstructionInfo
 		m_manifold(0)
 	{
 	}
-	btCollisionAlgorithmConstructionInfo(btDispatcher* dispatcher,int temp)
+	btCollisionAlgorithmConstructionInfo(btDispatcher* dispatcher, int temp)
 		:m_dispatcher1(dispatcher)
 	{
 		(void)temp;
@@ -70,9 +70,9 @@ public:
 
 	virtual ~btCollisionAlgorithm() {};
 
-	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut) = 0;
+	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut) = 0;
 
-	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0,btCollisionObject* body1,const btDispatcherInfo& dispatchInfo,btManifoldResult* resultOut) = 0;
+	virtual btScalar calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut) = 0;
 
 	virtual	void	getAllContactManifolds(btManifoldArray&	manifoldArray) = 0;
 };

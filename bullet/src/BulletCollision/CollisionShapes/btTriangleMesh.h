@@ -38,7 +38,7 @@ class btTriangleMesh : public btTriangleIndexVertexArray
 	public:
 		btScalar	m_weldingThreshold;
 
-		btTriangleMesh (bool use32bitIndices=true,bool use4componentVertices=true);
+		btTriangleMesh (bool use32bitIndices=true, bool use4componentVertices=true);
 
 		bool	getUse32bitIndices() const
 		{
@@ -51,7 +51,7 @@ class btTriangleMesh : public btTriangleIndexVertexArray
 		}
 		///By default addTriangle won't search for duplicate vertices, because the search is very slow for large triangle meshes.
 		///In general it is better to directly use btTriangleIndexVertexArray instead.
-		void	addTriangle(const btVector3& vertex0,const btVector3& vertex1,const btVector3& vertex2, bool removeDuplicateVertices=false);
+		void	addTriangle(const btVector3& vertex0, const btVector3& vertex1, const btVector3& vertex2, bool removeDuplicateVertices=false);
 		
 		int getNumTriangles() const;
 

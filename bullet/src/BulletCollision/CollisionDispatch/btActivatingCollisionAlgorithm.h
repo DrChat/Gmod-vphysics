@@ -28,7 +28,7 @@ public:
 
 	btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci);
 
-	btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap,const btCollisionObjectWrapper* body1Wrap);
+	btActivatingCollisionAlgorithm (const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap);
 
 	virtual ~btActivatingCollisionAlgorithm();
 

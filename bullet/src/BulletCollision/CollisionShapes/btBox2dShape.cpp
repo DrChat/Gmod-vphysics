@@ -19,13 +19,13 @@ subject to the following restrictions:
 //{ 
 
 
-void btBox2dShape::getAabb(const btTransform& t,btVector3& aabbMin,btVector3& aabbMax) const
+void btBox2dShape::getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const
 {
-	btTransformAabb(getHalfExtentsWithoutMargin(),getMargin(),t,aabbMin,aabbMax);
+	btTransformAabb(getHalfExtentsWithoutMargin(), getMargin(), t,aabbMin, aabbMax);
 }
 
 
-void	btBox2dShape::calculateLocalInertia(btScalar mass,btVector3& inertia) const
+void	btBox2dShape::calculateLocalInertia(btScalar mass, btVector3& inertia) const
 {
 	//btScalar margin = btScalar(0.);
 	btVector3 halfExtents = getHalfExtentsWithMargin();

@@ -95,12 +95,12 @@ public:
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btKinematicCharacterController (btPairCachingGhostObject* ghostObject,btConvexShape* convexShape,btScalar stepHeight, int upAxis = 1);
+	btKinematicCharacterController (btPairCachingGhostObject* ghostObject, btConvexShape* convexShape, btScalar stepHeight, int upAxis = 1);
 	~btKinematicCharacterController ();
 	
 
 	///btActionInterface interface
-	virtual void updateAction( btCollisionWorld* collisionWorld,btScalar deltaTime)
+	virtual void updateAction( btCollisionWorld* collisionWorld, btScalar deltaTime)
 	{
 		preStep ( collisionWorld);
 		playerStep (collisionWorld, deltaTime);

@@ -64,7 +64,7 @@ inline int	btGetVersion()
 
 			#include <ppcintrinsics.h>
  			#define BT_HAVE_NATIVE_FSEL
- 			#define btFsel(a,b,c) __fsel((a),(b),(c))
+ 			#define btFsel(a, b,c) __fsel((a), (b), (c))
 		#else
 
 #if (defined (_WIN32) && (_MSC_VER) && _MSC_VER >= 1400) && (!defined (BT_USE_DOUBLE_PRECISION))
@@ -207,7 +207,7 @@ inline int	btGetVersion()
 	{\
 	if(!(x))\
 	{\
-		printf("Assert %s in line %d, file %s\n",#x, __LINE__, __FILE__);\
+		printf("Assert %s in line %d, file %s\n", #x, __LINE__, __FILE__);\
 		asm volatile ("int3");\
 	}\
 	}
@@ -304,7 +304,7 @@ inline __m128 operator * (const __m128 A, const __m128 B)
 #define btCastiTo128f(a) (_mm_castsi128_ps(a))
 #define btCastdTo128f(a) (_mm_castpd_ps(a))
 #define btCastdTo128i(a) (_mm_castpd_si128(a))
-#define btAssign128(r0,r1,r2,r3) _mm_setr_ps(r0,r1,r2,r3)
+#define btAssign128(r0, r1, r2, r3) _mm_setr_ps(r0, r1, r2, r3)
 
 #else//_WIN32
 
@@ -313,7 +313,7 @@ inline __m128 operator * (const __m128 A, const __m128 B)
 #define btCastiTo128f(a)  ((__m128) (a))
 #define btCastdTo128f(a) ((__m128) (a))
 #define btCastdTo128i(a) ((__m128i)(a))
-#define btAssign128(r0,r1,r2,r3) (__m128){r0,r1,r2,r3}
+#define btAssign128(r0, r1, r2, r3) (__m128){r0, r1, r2, r3}
 #define BT_INFINITY INFINITY
 #define BT_NAN NAN
 #endif//_WIN32
@@ -325,7 +325,7 @@ inline __m128 operator * (const __m128 A, const __m128 B)
 typedef float32x4_t btSimdFloat4;
 #define BT_INFINITY INFINITY
 #define BT_NAN NAN
-#define btAssign128(r0,r1,r2,r3) (float32x4_t){r0,r1,r2,r3}
+#define btAssign128(r0, r1, r2, r3) (float32x4_t){r0, r1, r2, r3}
 #endif
 
 
@@ -357,8 +357,8 @@ SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atan(x); }
 SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2(x, y); }
 SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return exp(x); }
 SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return log(x); }
-SIMD_FORCE_INLINE btScalar btPow(btScalar x,btScalar y) { return pow(x,y); }
-SIMD_FORCE_INLINE btScalar btFmod(btScalar x,btScalar y) { return fmod(x,y); }
+SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { return pow(x, y); }
+SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmod(x, y); }
 
 #else
 		
@@ -404,8 +404,8 @@ SIMD_FORCE_INLINE btScalar btAtan(btScalar x) { return atanf(x); }
 SIMD_FORCE_INLINE btScalar btAtan2(btScalar x, btScalar y) { return atan2f(x, y); }
 SIMD_FORCE_INLINE btScalar btExp(btScalar x) { return expf(x); }
 SIMD_FORCE_INLINE btScalar btLog(btScalar x) { return logf(x); }
-SIMD_FORCE_INLINE btScalar btPow(btScalar x,btScalar y) { return powf(x,y); }
-SIMD_FORCE_INLINE btScalar btFmod(btScalar x,btScalar y) { return fmodf(x,y); }
+SIMD_FORCE_INLINE btScalar btPow(btScalar x, btScalar y) { return powf(x, y); }
+SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmodf(x, y); }
 	
 #endif
 
@@ -468,7 +468,7 @@ SIMD_FORCE_INLINE btScalar btFsel(btScalar a, btScalar b, btScalar c)
 	return a >= 0 ? b : c;
 }
 #endif
-#define btFsels(a,b,c) (btScalar)btFsel(a,b,c)
+#define btFsels(a, b,c) (btScalar)btFsel(a, b,c)
 
 
 SIMD_FORCE_INLINE bool btMachineIsLittleEndian()
