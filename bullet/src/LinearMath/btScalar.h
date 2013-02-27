@@ -63,8 +63,8 @@ inline int	btGetVersion()
 			#define BT_USE_VMX128
 
 			#include <ppcintrinsics.h>
- 			#define BT_HAVE_NATIVE_FSEL
- 			#define btFsel(a, b,c) __fsel((a), (b), (c))
+			#define BT_HAVE_NATIVE_FSEL
+			#define btFsel(a, b,c) __fsel((a), (b), (c))
 		#else
 
 #if (defined (_WIN32) && (_MSC_VER) && _MSC_VER >= 1400) && (!defined (BT_USE_DOUBLE_PRECISION))
@@ -92,7 +92,7 @@ inline int	btGetVersion()
 #ifdef BT_DEBUG
 	#ifdef _MSC_VER
 		#include <stdio.h>
-		#define btAssert(x) { if(!(x)){printf("Assert "__FILE__ ":%u ("#x")\n", __LINE__);__debugbreak();	}}
+		#define btAssert(x) { if (!(x)) { printf("Assert "__FILE__ ":%u ("#x")\n", __LINE__); __debugbreak(); } }
 	#else//_MSC_VER
 		#include <assert.h>
 		#define btAssert assert
@@ -162,34 +162,34 @@ inline int	btGetVersion()
 	//non-windows systems
 
 #if (defined (__APPLE__) && (!defined (BT_USE_DOUBLE_PRECISION)))
-    #if defined (__i386__) || defined (__x86_64__)
+	#if defined (__i386__) || defined (__x86_64__)
 		#define BT_USE_SIMD_VECTOR3
 		#define BT_USE_SSE
 		//BT_USE_SSE_IN_API is enabled on Mac OSX by default, because memory is automatically aligned on 16-byte boundaries
 		//if apps run into issues, we will disable the next line
 		#define BT_USE_SSE_IN_API
-        #ifdef BT_USE_SSE
-            // include appropriate SSE level
-            #if defined (__SSE4_1__)
-                #include <smmintrin.h>
-            #elif defined (__SSSE3__)
-                #include <tmmintrin.h>
-            #elif defined (__SSE3__)
-                #include <pmmintrin.h>
-            #else
-                #include <emmintrin.h>
-            #endif
-        #endif //BT_USE_SSE
-    #elif defined( __armv7__ )
-        #ifdef __clang__
-            #define BT_USE_NEON 1
+		#ifdef BT_USE_SSE
+			// include appropriate SSE level
+			#if defined (__SSE4_1__)
+				#include <smmintrin.h>
+			#elif defined (__SSSE3__)
+				#include <tmmintrin.h>
+			#elif defined (__SSE3__)
+				#include <pmmintrin.h>
+			#else
+				#include <emmintrin.h>
+			#endif
+		#endif //BT_USE_SSE
+	#elif defined( __armv7__ )
+		#ifdef __clang__
+			#define BT_USE_NEON 1
 			#define BT_USE_SIMD_VECTOR3
 		
-            #if defined BT_USE_NEON && defined (__clang__)
-                #include <arm_neon.h>
-            #endif//BT_USE_NEON
-       #endif //__clang__
-    #endif//__arm__
+			#if defined BT_USE_NEON && defined (__clang__)
+				#include <arm_neon.h>
+			#endif//BT_USE_NEON
+	   #endif //__clang__
+	#endif//__arm__
 
 	#define SIMD_FORCE_INLINE inline __attribute__ ((always_inline))
 ///@todo: check out alignment methods for other platforms/compilers
@@ -286,17 +286,17 @@ static  int btInfinityMask = 0x7F800000;
 
 inline __m128 operator + (const __m128 A, const __m128 B)
 {
-    return _mm_add_ps(A, B);
+	return _mm_add_ps(A, B);
 }
 
 inline __m128 operator - (const __m128 A, const __m128 B)
 {
-    return _mm_sub_ps(A, B);
+	return _mm_sub_ps(A, B);
 }
 
 inline __m128 operator * (const __m128 A, const __m128 B)
 {
-    return _mm_mul_ps(A, B);
+	return _mm_mul_ps(A, B);
 }
 
 #define btCastfTo128i(a) (_mm_castps_si128(a))
@@ -328,21 +328,15 @@ typedef float32x4_t btSimdFloat4;
 #define btAssign128(r0, r1, r2, r3) (float32x4_t){r0, r1, r2, r3}
 #endif
 
-
-
-
-
 #define BT_DECLARE_ALIGNED_ALLOCATOR() \
-   SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes)   { return btAlignedAlloc(sizeInBytes,16); }   \
-   SIMD_FORCE_INLINE void  operator delete(void* ptr)         { btAlignedFree(ptr); }   \
-   SIMD_FORCE_INLINE void* operator new(size_t, void* ptr)   { return ptr; }   \
-   SIMD_FORCE_INLINE void  operator delete(void*, void*)      { }   \
-   SIMD_FORCE_INLINE void* operator new[](size_t sizeInBytes)   { return btAlignedAlloc(sizeInBytes,16); }   \
-   SIMD_FORCE_INLINE void  operator delete[](void* ptr)         { btAlignedFree(ptr); }   \
-   SIMD_FORCE_INLINE void* operator new[](size_t, void* ptr)   { return ptr; }   \
-   SIMD_FORCE_INLINE void  operator delete[](void*, void*)      { }   \
-
-
+   SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes)		{ return btAlignedAlloc(sizeInBytes, 16); }		\
+   SIMD_FORCE_INLINE void  operator delete(void* ptr)			{ btAlignedFree(ptr); }							\
+   SIMD_FORCE_INLINE void* operator new(size_t, void* ptr)		{ return ptr; }									\
+   SIMD_FORCE_INLINE void  operator delete(void*, void*)		{ }												\
+   SIMD_FORCE_INLINE void* operator new[](size_t sizeInBytes)	{ return btAlignedAlloc(sizeInBytes, 16); }		\
+   SIMD_FORCE_INLINE void  operator delete[](void* ptr)			{ btAlignedFree(ptr); }							\
+   SIMD_FORCE_INLINE void* operator new[](size_t, void* ptr)	{ return ptr; }									\
+   SIMD_FORCE_INLINE void  operator delete[](void*, void*)		{ }
 
 #if defined(BT_USE_DOUBLE_PRECISION) || defined(BT_FORCE_DOUBLE_FUNCTIONS)
 		
@@ -365,8 +359,8 @@ SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmod(x, y); }
 SIMD_FORCE_INLINE btScalar btSqrt(btScalar y) 
 { 
 #ifdef USE_APPROXIMATION
-    double x, z, tempf;
-    unsigned long *tfptr = ((unsigned long *)&tempf) + 1;
+	double x, z, tempf;
+	unsigned long *tfptr = ((unsigned long *)&tempf) + 1;
 
 	tempf = y;
 	*tfptr = (0xbfcdd90a - *tfptr)>>1; /* estimate of 1/sqrt(y) */
@@ -409,12 +403,12 @@ SIMD_FORCE_INLINE btScalar btFmod(btScalar x, btScalar y) { return fmodf(x, y); 
 	
 #endif
 
-#define SIMD_2_PI         btScalar(6.283185307179586232)
-#define SIMD_PI           (SIMD_2_PI * btScalar(0.5))
-#define SIMD_HALF_PI      (SIMD_2_PI * btScalar(0.25))
-#define SIMD_RADS_PER_DEG (SIMD_2_PI / btScalar(360.0))
-#define SIMD_DEGS_PER_RAD  (btScalar(360.0) / SIMD_2_PI)
-#define SIMDSQRT12 btScalar(0.7071067811865475244008443621048490)
+#define SIMD_2_PI			btScalar(6.283185307179586232)
+#define SIMD_PI				(SIMD_2_PI * btScalar(0.5))
+#define SIMD_HALF_PI		(SIMD_2_PI * btScalar(0.25))
+#define SIMD_RADS_PER_DEG	(SIMD_2_PI / btScalar(360.0))
+#define SIMD_DEGS_PER_RAD	(btScalar(360.0) / SIMD_2_PI)
+#define SIMDSQRT12			btScalar(0.7071067811865475244008443621048490)
 
 #define btRecipSqrt(x) ((btScalar)(btScalar(1.0)/btSqrt(btScalar(x))))		/* reciprocal square root */
 
@@ -454,7 +448,7 @@ SIMD_FORCE_INLINE bool	btGreaterEqual (btScalar a, btScalar eps) {
 
 
 SIMD_FORCE_INLINE int       btIsNegative(btScalar x) {
-    return x < btScalar(0.0) ? 1 : 0;
+	return x < btScalar(0.0) ? 1 : 0;
 }
 
 SIMD_FORCE_INLINE btScalar btRadians(btScalar x) { return x * SIMD_RADS_PER_DEG; }
@@ -487,26 +481,28 @@ SIMD_FORCE_INLINE bool btMachineIsLittleEndian()
 ///Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
 SIMD_FORCE_INLINE unsigned btSelect(unsigned condition, unsigned valueIfConditionNonZero, unsigned valueIfConditionZero) 
 {
-    // Set testNz to 0xFFFFFFFF if condition is nonzero, 0x00000000 if condition is zero
-    // Rely on positive value or'ed with its negative having sign bit on
-    // and zero value or'ed with its negative (which is still zero) having sign bit off 
-    // Use arithmetic shift right, shifting the sign bit through all 32 bits
-    unsigned testNz = (unsigned)(((int)condition | -(int)condition) >> 31);
-    unsigned testEqz = ~testNz;
-    return ((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz)); 
+	// Set testNz to 0xFFFFFFFF if condition is nonzero, 0x00000000 if condition is zero
+	// Rely on positive value or'ed with its negative having sign bit on
+	// and zero value or'ed with its negative (which is still zero) having sign bit off 
+	// Use arithmetic shift right, shifting the sign bit through all 32 bits
+	unsigned testNz = (unsigned)(((int)condition | -(int)condition) >> 31);
+	unsigned testEqz = ~testNz;
+	return ((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz)); 
 }
+
 SIMD_FORCE_INLINE int btSelect(unsigned condition, int valueIfConditionNonZero, int valueIfConditionZero)
 {
-    unsigned testNz = (unsigned)(((int)condition | -(int)condition) >> 31);
-    unsigned testEqz = ~testNz; 
-    return static_cast<int>((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz));
+	unsigned testNz = (unsigned)(((int)condition | -(int)condition) >> 31);
+	unsigned testEqz = ~testNz; 
+	return static_cast<int>((valueIfConditionNonZero & testNz) | (valueIfConditionZero & testEqz));
 }
+
 SIMD_FORCE_INLINE float btSelect(unsigned condition, float valueIfConditionNonZero, float valueIfConditionZero)
 {
 #ifdef BT_HAVE_NATIVE_FSEL
-    return (float)btFsel((btScalar)condition - btScalar(1.0f), valueIfConditionNonZero, valueIfConditionZero);
+	return (float)btFsel((btScalar)condition - btScalar(1.0f), valueIfConditionNonZero, valueIfConditionZero);
 #else
-    return (condition != 0) ? valueIfConditionNonZero : valueIfConditionZero; 
+	return (condition != 0) ? valueIfConditionNonZero : valueIfConditionZero; 
 #endif
 }
 
@@ -547,63 +543,63 @@ SIMD_FORCE_INLINE unsigned short btSwapEndian(short val)
 ///so instead of returning a float/double, we return integer/long long integer
 SIMD_FORCE_INLINE unsigned int  btSwapEndianFloat(float d)
 {
-    unsigned int a = 0;
-    unsigned char *dst = (unsigned char *)&a;
-    unsigned char *src = (unsigned char *)&d;
+	unsigned int a = 0;
+	unsigned char *dst = (unsigned char *)&a;
+	unsigned char *src = (unsigned char *)&d;
 
-    dst[0] = src[3];
-    dst[1] = src[2];
-    dst[2] = src[1];
-    dst[3] = src[0];
-    return a;
+	dst[0] = src[3];
+	dst[1] = src[2];
+	dst[2] = src[1];
+	dst[3] = src[0];
+	return a;
 }
 
 // unswap using char pointers
 SIMD_FORCE_INLINE float btUnswapEndianFloat(unsigned int a) 
 {
-    float d = 0.0f;
-    unsigned char *src = (unsigned char *)&a;
-    unsigned char *dst = (unsigned char *)&d;
+	float d = 0.0f;
+	unsigned char *src = (unsigned char *)&a;
+	unsigned char *dst = (unsigned char *)&d;
 
-    dst[0] = src[3];
-    dst[1] = src[2];
-    dst[2] = src[1];
-    dst[3] = src[0];
+	dst[0] = src[3];
+	dst[1] = src[2];
+	dst[2] = src[1];
+	dst[3] = src[0];
 
-    return d;
+	return d;
 }
 
 
 // swap using char pointers
 SIMD_FORCE_INLINE void  btSwapEndianDouble(double d, unsigned char* dst)
 {
-    unsigned char *src = (unsigned char *)&d;
+	unsigned char *src = (unsigned char *)&d;
 
-    dst[0] = src[7];
-    dst[1] = src[6];
-    dst[2] = src[5];
-    dst[3] = src[4];
-    dst[4] = src[3];
-    dst[5] = src[2];
-    dst[6] = src[1];
-    dst[7] = src[0];
+	dst[0] = src[7];
+	dst[1] = src[6];
+	dst[2] = src[5];
+	dst[3] = src[4];
+	dst[4] = src[3];
+	dst[5] = src[2];
+	dst[6] = src[1];
+	dst[7] = src[0];
 
 }
 
 // unswap using char pointers
 SIMD_FORCE_INLINE double btUnswapEndianDouble(const unsigned char *src) 
 {
-    double d = 0.0;
-    unsigned char *dst = (unsigned char *)&d;
+	double d = 0.0;
+	unsigned char *dst = (unsigned char *)&d;
 
-    dst[0] = src[7];
-    dst[1] = src[6];
-    dst[2] = src[5];
-    dst[3] = src[4];
-    dst[4] = src[3];
-    dst[5] = src[2];
-    dst[6] = src[1];
-    dst[7] = src[0];
+	dst[0] = src[7];
+	dst[1] = src[6];
+	dst[2] = src[5];
+	dst[3] = src[4];
+	dst[4] = src[3];
+	dst[5] = src[2];
+	dst[6] = src[1];
+	dst[7] = src[0];
 
 	return d;
 }
@@ -654,11 +650,11 @@ template <typename T>T* btAlignPointer(T* unalignedPtr, size_t alignment)
 				size_t integer;
 		};
 	};
-    btConvertPointerSizeT converter;
-    
-    
+	btConvertPointerSizeT converter;
+	
+	
 	const size_t bit_mask = ~(alignment - 1);
-    converter.ptr = unalignedPtr;
+	converter.ptr = unalignedPtr;
 	converter.integer += alignment-1;
 	converter.integer &= bit_mask;
 	return converter.ptr;

@@ -114,7 +114,7 @@ void btCompoundShape::removeChildShapeByIndex(int childShapeIndex)
 		m_dynamicAabbTree->remove(m_children[childShapeIndex].m_node);
 	}
 	m_children.swap(childShapeIndex, m_children.size()-1);
-    if (m_dynamicAabbTree) 
+	if (m_dynamicAabbTree) 
 		m_children[childShapeIndex].m_node->dataAsInt = childShapeIndex;
 	m_children.pop_back();
 
@@ -182,7 +182,7 @@ void btCompoundShape::getAabb(const btTransform& trans, btVector3& aabbMin, btVe
 
 	btVector3 center = trans(localCenter);
 
-    btVector3 extent = localHalfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
+	btVector3 extent = localHalfExtents.dot3(abs_b[0], abs_b[1], abs_b[2]);
 	aabbMin = center-extent;
 	aabbMax = center+extent;
 	
@@ -295,24 +295,24 @@ void btCompoundShape::setLocalScaling(const btVector3& scaling)
 
 void btCompoundShape::createAabbTreeFromChildren()
 {
-    if ( !m_dynamicAabbTree )
-    {
-        void* mem = btAlignedAlloc(sizeof(btDbvt),16);
-        m_dynamicAabbTree = new(mem) btDbvt();
-        btAssert(mem==m_dynamicAabbTree);
+	if ( !m_dynamicAabbTree )
+	{
+		void* mem = btAlignedAlloc(sizeof(btDbvt),16);
+		m_dynamicAabbTree = new(mem) btDbvt();
+		btAssert(mem==m_dynamicAabbTree);
 
-        for ( int index = 0; index < m_children.size(); index++ )
-        {
-            btCompoundShapeChild &child = m_children[index];
+		for ( int index = 0; index < m_children.size(); index++ )
+		{
+			btCompoundShapeChild &child = m_children[index];
 
-            //extend the local aabbMin/aabbMax
-            btVector3 localAabbMin, localAabbMax;
-            child.m_childShape->getAabb(child.m_transform, localAabbMin, localAabbMax);
+			//extend the local aabbMin/aabbMax
+			btVector3 localAabbMin, localAabbMax;
+			child.m_childShape->getAabb(child.m_transform, localAabbMin, localAabbMax);
 
-            const btDbvtVolume  bounds=btDbvtVolume::FromMM(localAabbMin, localAabbMax);
-            child.m_node = m_dynamicAabbTree->insert(bounds, (void*)index);
-        }
-    }
+			const btDbvtVolume  bounds=btDbvtVolume::FromMM(localAabbMin, localAabbMax);
+			child.m_node = m_dynamicAabbTree->insert(bounds, (void*)index);
+		}
+	}
 }
 
 

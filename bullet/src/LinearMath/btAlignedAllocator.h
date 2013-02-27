@@ -50,6 +50,7 @@ typedef void *(btAllocFunc)(size_t size);
 typedef void (btFreeFunc)(void *memblock);
 
 ///The developer can let all Bullet memory allocations go through a custom memory allocator, using btAlignedAllocSetCustom
+// NULL to revert to the defaults.
 void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc);
 ///If the developer has already an custom aligned allocator, then btAlignedAllocSetCustomAligned can be used. The default aligned allocator pre-allocates extra memory using the non-aligned allocator, and instruments it.
 void btAlignedAllocSetCustomAligned(btAlignedAllocFunc *allocFunc, btAlignedFreeFunc *freeFunc);
@@ -79,22 +80,35 @@ public:
 	typedef T&               reference;
 	typedef T                value_type;
 
-	pointer       address   ( reference        ref ) const                           { return &ref; }
-	const_pointer address   ( const_reference  ref ) const                           { return &ref; }
-	pointer       allocate  ( size_type        n  , const_pointer *      hint = 0 ) {
+	pointer       address   ( reference        ref ) const		{ return &ref; }
+	const_pointer address   ( const_reference  ref ) const		{ return &ref; }
+
+	pointer allocate  ( size_type n  , const_pointer *hint = 0 )
+	{
 		(void)hint;
 		return reinterpret_cast< pointer >(btAlignedAlloc( sizeof(value_type) * n, Alignment ));
 	}
-	void          construct ( pointer          ptr, const value_type &   value    ) { new (ptr) value_type( value ); }
-	void          deallocate( pointer          ptr ) {
+
+	void construct ( pointer ptr, const value_type &value )
+	{
+		new (ptr) value_type( value );
+	}
+
+	void deallocate( pointer ptr )
+	{
 		btAlignedFree( reinterpret_cast< void * >( ptr ) );
 	}
-	void          destroy   ( pointer          ptr )                                 { ptr->~value_type(); }
+
+	void destroy   ( pointer ptr )
+	{
+		ptr->~value_type();
+	}
 	
 
 	template < typename O > struct rebind {
 		typedef btAlignedAllocator< O, Alignment > other;
 	};
+
 	template < typename O >
 	self_type & operator=( const btAlignedAllocator< O, Alignment > & ) { return *this; }
 

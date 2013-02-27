@@ -140,6 +140,7 @@ void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, con
 }
 
 // TODO: Support this, lua Entity:PhysicsInitMultiConvex uses this!
+// IVP internally used QHull to generate the convexes.
 CPhysPolysoup *CPhysicsCollision::PolysoupCreate() {
 	NOT_IMPLEMENTED
 	return NULL;
@@ -579,7 +580,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				|| surfaceheader->version != 0x100
 				|| surfaceheader->modelType != 0x0
 				|| ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) {
-			DevWarning("VPhysics: Could not load mesh!");
+			Warning("VPhysics: Could not load mesh! (bad/unsupported file format)");
 			pOutput->solids[i] = NULL;
 			continue;
 		}

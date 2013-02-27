@@ -138,9 +138,9 @@ public:
 	{
 		return m_collisionMargin;
 	}
-	virtual const char*	getName()const
+	virtual const char*	getName() const
 	{
-		return "Compound";
+		return "compound";
 	}
 
 	const btDbvt*	getDynamicAabbTree() const

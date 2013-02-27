@@ -132,10 +132,8 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 	if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 
-	// FIXME: This is completely broken
-	// Has to do with the object's contents != MASK_SOLID
 	if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
-	
+
 	// And then the default bullet stuff...
 	bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
 	collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
@@ -147,7 +145,7 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 * CLASS CPhysicsCollisionData
 *******************************/
 
-class CPhysicsCollisionData: public IPhysicsCollisionData {
+class CPhysicsCollisionData : public IPhysicsCollisionData {
 	public:
 		void GetSurfaceNormal(Vector &out);		// normal points toward second object (object index 1)
 		void GetContactPoint(Vector &out);		// contact point of collision (in world space)

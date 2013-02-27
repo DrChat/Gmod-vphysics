@@ -147,7 +147,7 @@ void CPhysicsObject::EnableMotion(bool enable) {
 	if (IsMotionEnabled() == enable || IsStatic()) return;
 	m_bMotionEnabled = enable;
 
-	// TODO: Does this cause any issues with player controllers?
+	// FIXME: Does this cause any issues with player controllers?
 	if (enable) {
 		m_pObject->setLinearFactor(btVector3(1, 1, 1));
 		m_pObject->setAngularFactor(1);
@@ -215,20 +215,20 @@ void CPhysicsObject::RecheckCollisionFilter() {
 }
 
 void CPhysicsObject::RecheckContactPoints() {
-	
+	// FIXME: Should we be doing anything here?
 }
 
 void CPhysicsObject::SetMass(float mass) {
 	if (IsStatic()) return;
 
-	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
+	btVector3 inertia = m_pObject->getInvInertiaDiagLocal();
 
-	// Invert the inverse intertia to get inertia
-	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
-	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
-	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+	// Inverse the inverse to get the not inverse (unless in the case that the not inverse is inverse, therefore you must inverse the universe)
+	inertia.setX(SAFE_DIVIDE(1.0, inertia.x()));
+	inertia.setY(SAFE_DIVIDE(1.0, inertia.y()));
+	inertia.setZ(SAFE_DIVIDE(1.0, inertia.z()));
 
-	m_pObject->setMassProps(mass, btvec);
+	m_pObject->setMassProps(mass, inertia);
 }
 
 float CPhysicsObject::GetMass() const {

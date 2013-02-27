@@ -8,7 +8,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
-static void ReadVector(const char *pString, Vector& out) {
+static void ReadVector(const char *pString, Vector &out) {
 	float x, y, z;
 	sscanf(pString, "%f %f %f", &x, &y, &z);
 	out.x = x;
@@ -16,7 +16,7 @@ static void ReadVector(const char *pString, Vector& out) {
 	out.z = z;
 }
 
-static void ReadVector4D(const char *pString, Vector4D& out) {
+static void ReadVector4D(const char *pString, Vector4D &out) {
 	float x, y, z, w;
 	sscanf(pString, "%f %f %f %f", &x, &y, &z, &w);
 	out.x = x;
@@ -36,12 +36,12 @@ CPhysicsKeyParser::~CPhysicsKeyParser() {
 		m_pKeyValues->deleteThis();
 }
 
-void CPhysicsKeyParser::NextBlock(void) {
+void CPhysicsKeyParser::NextBlock() {
 	if (m_pCurrentBlock)
 		m_pCurrentBlock = m_pCurrentBlock->GetNextKey();
 }
 
-const char *CPhysicsKeyParser::GetCurrentBlockName(void) {
+const char *CPhysicsKeyParser::GetCurrentBlockName() {
 	if (m_pCurrentBlock) {
 		return m_pCurrentBlock->GetName();
 	}

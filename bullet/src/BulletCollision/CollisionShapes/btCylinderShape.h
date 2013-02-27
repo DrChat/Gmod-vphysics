@@ -124,7 +124,7 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 	//debugging
 	virtual const char*	getName()const
 	{
-		return "CylinderY";
+		return "cylinderY";
 	}
 
 	virtual	int	calculateSerializeBufferSize() const;
@@ -147,7 +147,7 @@ public:
 		//debugging
 	virtual const char*	getName()const
 	{
-		return "CylinderX";
+		return "cylinderX";
 	}
 
 	virtual btScalar getRadius() const
@@ -170,7 +170,7 @@ public:
 		//debugging
 	virtual const char*	getName()const
 	{
-		return "CylinderZ";
+		return "cylinderZ";
 	}
 
 	virtual btScalar getRadius() const

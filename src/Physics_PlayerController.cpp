@@ -67,6 +67,8 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 		MaxSpeed(velocity);
 	}
 
+	m_secondsToArrival = secondsToArrival;
+
 	// AKA ensure_core_in_simulation
 	m_pObject->GetObject()->activate(true);
 
@@ -112,6 +114,7 @@ bool CPlayerController::IsInContact() {
 
 void CPlayerController::MaxSpeed(const Vector &maxVelocity) {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
+
 	btVector3 bullVel;
 	ConvertPosToBull(maxVelocity, bullVel);
 	btVector3 available = bullVel;
@@ -223,7 +226,7 @@ void CPlayerController::Tick(float deltaTime) {
 	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 	btVector3 delta_position = m_targetPosition - transform.getOrigin();
 
-	//FIXME: figure out what shift_core_f_object is
+	// FIXME: figure out what shift_core_f_object is
 	// shift_core_f_object is a floating point vector3
 	// shift core from object (displacement of core from object)?
 	// IVP docs appear to confirm _f_ means from
@@ -246,7 +249,7 @@ void CPlayerController::Tick(float deltaTime) {
 	ComputeController(speed, delta_position, m_maxSpeed, psiScale / deltaTime, m_dampFactor);
 	body->setLinearVelocity(speed);
 
-	m_lastImpulse = speed;
+	m_lastImpulse = speed; // FIXME: This is wrong.
 }
 
 void CPlayerController::AttachObject() {

@@ -33,5 +33,6 @@
 
 #define SAFE_DIVIDE(a, b) ((b) != 0 ? (a)/(b) : 0)
 
-#define NOT_IMPLEMENTED DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
-#define NOT_IMPLEMENTED_CRITICAL Error("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED				DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED_BREAK		{DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__); __asm int 3;}
+#define NOT_IMPLEMENTED_CRITICAL	Error("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);

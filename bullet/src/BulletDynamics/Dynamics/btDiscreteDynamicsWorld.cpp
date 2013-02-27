@@ -201,17 +201,16 @@ struct InplaceSolverIslandCallback : public btSimulationIslandManager::IslandCal
 
 
 
-btDiscreteDynamicsWorld::btDiscreteDynamicsWorld(btDispatcher* dispatcher, btBroadphaseInterface* pairCache, btConstraintSolver* constraintSolver, btCollisionConfiguration* collisionConfiguration)
-:btDynamicsWorld(dispatcher, pairCache, collisionConfiguration),
-m_sortedConstraints	(),
-m_solverIslandCallback ( NULL ),
-m_constraintSolver(constraintSolver),
-m_gravity(0,-10,0),
-m_localTime(0),
-m_synchronizeAllMotionStates(false),
-m_applySpeculativeContactRestitution(false),
-m_profileTimings(0)
-
+btDiscreteDynamicsWorld::btDiscreteDynamicsWorld(btDispatcher* dispatcher, btBroadphaseInterface* pairCache, btConstraintSolver* constraintSolver, btCollisionConfiguration* collisionConfiguration) :
+	btDynamicsWorld(dispatcher, pairCache, collisionConfiguration),
+	m_sortedConstraints	(),
+	m_solverIslandCallback ( NULL ),
+	m_constraintSolver(constraintSolver),
+	m_gravity(0,-10,0),
+	m_localTime(0),
+	m_synchronizeAllMotionStates(false),
+	m_applySpeculativeContactRestitution(false),
+	m_profileTimings(0)
 {
 	if (!m_constraintSolver)
 	{

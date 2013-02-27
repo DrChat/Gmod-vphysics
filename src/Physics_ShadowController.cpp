@@ -11,9 +11,10 @@
 //#include "tier0/memdbgon.h"
 
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
+	// Compute the fraction of time we'll be operating on.
 	float fraction = 1.0;
 	if (secondsToArrival > 0) {
-		fraction *= dt / secondsToArrival;
+		fraction = dt / secondsToArrival;
 		if (fraction > 1) fraction = 1;
 	}
 
@@ -94,8 +95,12 @@ float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_p
 	return ComputeShadowControllerBull(pObject->GetObject(), bullParams, secondsToArrival, dt);
 }
 
-static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1) {
-	float delta = fabs(pt0.x() - pt1.x());
+// FIXME: Broken.
+static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1a) {
+	btQuaternion pt1 = pt0.nearest(pt1a);
+
+	float delta = 0.0f;
+	delta += fabs(pt0.x() - pt1.x());
 	delta += fabs(pt0.y() - pt1.y());
 	delta += fabs(pt0.z() - pt1.z());
 	delta += fabs(pt0.w() - pt1.w());
@@ -115,7 +120,7 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_shadow.dampFactor = 1.0f;
 	m_shadow.teleportDistance = 0;
 	m_shadow.targetPosition.setZero();
-	memset(&m_shadow.targetRotation, 0, sizeof(btQuaternion)); // Shit fucking access violation randomly caused by below line in release builds
+	memset(&m_shadow.targetRotation, 0, sizeof(btQuaternion)); // HACK: Shit fucking access violation randomly caused by below line in release builds
 	//m_shadow.targetRotation = btQuaternion(0, 0, 0, 1);
 	m_bPhysicallyControlled = false;
 
@@ -165,6 +170,10 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 
+	//----------------
+	// Linear
+	//----------------
+
 	btVector3 bullSpeed;
 	ConvertPosToBull(maxSpeed, bullSpeed);
 	btVector3 available = bullSpeed;
@@ -180,6 +189,10 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 		available -= bullSpeed;
 	}
 	m_shadow.maxSpeed = available.absolute();
+
+	//----------------
+	// Angular
+	//----------------
 
 	btVector3 bullAngular;
 	ConvertAngularImpulseToBull(maxAngularSpeed, bullAngular);
@@ -197,7 +210,14 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 }
 
 void CShadowController::StepUp(float height) {
-	NOT_IMPLEMENTED
+	btVector3 step;
+	ConvertPosToBull(Vector(0, 0, height), step);
+
+	btRigidBody *pObject = m_pObject->GetObject();
+	btTransform transform = pObject->getWorldTransform();
+	transform.setOrigin(transform.getOrigin() + step);
+
+	pObject->setWorldTransform(transform);
 }
 
 void CShadowController::SetTeleportDistance(float teleportDistance) {

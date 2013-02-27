@@ -140,11 +140,11 @@ CPhysicsConstraint::~CPhysicsConstraint() {
 	delete m_pConstraint;
 }
 
-void CPhysicsConstraint::Activate(void) {
+void CPhysicsConstraint::Activate() {
 	m_pConstraint->setEnabled(true);
 }
 
-void CPhysicsConstraint::Deactivate(void) {
+void CPhysicsConstraint::Deactivate() {
 	m_pConstraint->setEnabled(false);
 }
 
@@ -183,7 +183,7 @@ void CPhysicsConstraint::OutputDebugInfo() {
 // REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE CPhysicsEnvironment::DestroySpring!!!
 
 CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint)
-				: CPhysicsConstraint(pEnv, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
+	: CPhysicsConstraint(pEnv, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
 	
 }
 

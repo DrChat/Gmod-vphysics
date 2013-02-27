@@ -125,8 +125,8 @@ class CCarRaycaster : public btVehicleRaycaster {
 			return NULL;
 		}
 	private:
-		btDynamicsWorld *	m_pWorld;
-		CPhysicsVehicleController *		m_pController;
+		btDynamicsWorld *			m_pWorld;
+		CPhysicsVehicleController *	m_pController;
 };
 
 /*********************************

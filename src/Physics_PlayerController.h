@@ -31,7 +31,8 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		float							GetPushSpeedLimit();
 		bool							WasFrozen();
 	
-		// UNEXPOSED
+		// Unexposed functions
+	public:
 		void							Tick(float deltaTime);
 	private:
 		void							AttachObject();
@@ -46,6 +47,7 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		IPhysicsPlayerControllerEvent *	m_handler;
 		float							m_maxDeltaPosition;
 		float							m_dampFactor;
+		float							m_secondsToArrival;
 		btVector3						m_targetPosition;
 		btVector3						m_maxSpeed;
 		btVector3						m_currentSpeed;

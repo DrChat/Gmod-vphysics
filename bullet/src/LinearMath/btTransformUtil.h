@@ -25,8 +25,8 @@ subject to the following restrictions:
 SIMD_FORCE_INLINE btVector3 btAabbSupport(const btVector3& halfExtents, const btVector3& supportDir)
 {
 	return btVector3(supportDir.x() < btScalar(0.0) ? -halfExtents.x() : halfExtents.x(),
-      supportDir.y() < btScalar(0.0) ? -halfExtents.y() : halfExtents.y(),
-      supportDir.z() < btScalar(0.0) ? -halfExtents.z() : halfExtents.z()); 
+	  supportDir.y() < btScalar(0.0) ? -halfExtents.y() : halfExtents.y(),
+	  supportDir.z() < btScalar(0.0) ? -halfExtents.z() : halfExtents.z()); 
 }
 
 

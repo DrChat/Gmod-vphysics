@@ -38,7 +38,7 @@ ATTRIBUTE_ALIGNED16(class) btDiscreteDynamicsWorld : public btDynamicsWorld
 {
 protected:
 	
-    btAlignedObjectArray<btTypedConstraint*>	m_sortedConstraints;
+	btAlignedObjectArray<btTypedConstraint*>	m_sortedConstraints;
 	InplaceSolverIslandCallback* 	m_solverIslandCallback;
 
 	btConstraintSolver*	m_constraintSolver;
@@ -158,7 +158,7 @@ public:
 	
 	virtual	int		getNumConstraints() const;
 
-	virtual btTypedConstraint* getConstraint(int index)	;
+	virtual btTypedConstraint* getConstraint(int index);
 
 	virtual const btTypedConstraint* getConstraint(int index) const;
 
@@ -176,7 +176,7 @@ public:
 
 	virtual void	setNumTasks(int numTasks)
 	{
-        (void) numTasks;
+		(void) numTasks;
 	}
 
 	///obsolete, use updateActions instead

@@ -45,6 +45,8 @@ enum	btRigidBodyFlags
 	///So generally it is best to not enable it. 
 	///If really needed, run at a high frequency like 1000 Hertz:	///See Demos/GyroscopicDemo for an example use
 	BT_ENABLE_GYROPSCOPIC_FORCE = 2
+
+	// DrChat - TODO: We need a disable motion flag.
 };
 
 
@@ -58,8 +60,7 @@ enum	btRigidBodyFlags
 ///Deactivated (sleeping) rigid bodies don't take any processing time, except a minor broadphase collision detection impact (to allow active objects to activate/wake up sleeping objects)
 class btRigidBody  : public btCollisionObject
 {
-
-	btMatrix3x3	m_invInertiaTensorWorld;
+	btMatrix3x3		m_invInertiaTensorWorld;
 	btVector3		m_linearVelocity;
 	btVector3		m_angularVelocity;
 	btScalar		m_inverseMass;
@@ -177,11 +178,11 @@ public:
 
 
 	virtual ~btRigidBody()
-        { 
-                //No constraints should point to this rigidbody
+		{ 
+				//No constraints should point to this rigidbody
 		//Remove constraints from the dynamics world before you delete the related rigidbodies. 
-                btAssert(m_constraintRefs.size()==0); 
-        }
+				btAssert(m_constraintRefs.size()==0); 
+		}
 
 protected:
 
@@ -287,7 +288,7 @@ public:
 	{
 		return m_totalTorque;
 	};
-    
+	
 	const btVector3& getInvInertiaDiagLocal() const
 	{
 		return m_invInertiaLocal;
@@ -320,7 +321,7 @@ public:
 		m_linearVelocity += impulse *m_linearFactor * m_inverseMass;
 	}
 	
-  	void applyTorqueImpulse(const btVector3& torque)
+	void applyTorqueImpulse(const btVector3& torque)
 	{
 			m_angularVelocity += m_invInertiaTensorWorld * torque * m_angularFactor;
 	}

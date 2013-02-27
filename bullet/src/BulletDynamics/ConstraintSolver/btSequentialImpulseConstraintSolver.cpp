@@ -703,7 +703,7 @@ void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstra
 
 void btSequentialImpulseConstraintSolver::setFrictionConstraintImpulse( btSolverConstraint& solverConstraint, 
 																		int solverBodyIdA, int solverBodyIdB,
-																 btManifoldPoint& cp, const btContactSolverInfo& infoGlobal)
+																		btManifoldPoint& cp, const btContactSolverInfo& infoGlobal )
 {
 
 	btSolverBody* bodyA = &m_tmpSolverBodyPool[solverBodyIdA];

@@ -50,9 +50,9 @@ btGpu3DGridBroadphase::btGpu3DGridBroadphase(	const btVector3& worldAabbMin, con
 										btScalar cellFactorAABB) :
 	btSimpleBroadphase(maxSmallProxies,
 //				     new (btAlignedAlloc(sizeof(btSortedOverlappingPairCache),16)) btSortedOverlappingPairCache),
-				     new (btAlignedAlloc(sizeof(btHashedOverlappingPairCache),16)) btHashedOverlappingPairCache),
+					 new (btAlignedAlloc(sizeof(btHashedOverlappingPairCache),16)) btHashedOverlappingPairCache),
 	m_bInitialized(false),
-    m_numBodies(0)
+	m_numBodies(0)
 {
 	_initialize(worldAabbMin, worldAabbMax, gridSizeX, gridSizeY, gridSizeZ, 
 				maxSmallProxies, maxLargeProxies, maxPairsPerBody,
@@ -69,7 +69,7 @@ btGpu3DGridBroadphase::btGpu3DGridBroadphase(	btOverlappingPairCache* overlappin
 										btScalar cellFactorAABB) :
 	btSimpleBroadphase(maxSmallProxies, overlappingPairCache),
 	m_bInitialized(false),
-    m_numBodies(0)
+	m_numBodies(0)
 {
 	_initialize(worldAabbMin, worldAabbMax, gridSizeX, gridSizeY, gridSizeZ, 
 				maxSmallProxies, maxLargeProxies, maxPairsPerBody,
@@ -121,13 +121,13 @@ void btGpu3DGridBroadphase::_initialize(	const btVector3& worldAabbMin, const bt
 
 	m_LastLargeHandleIndex = -1;
 
-    btAssert(!m_bInitialized);
-    // allocate host storage
-    m_hBodiesHash = new unsigned int[m_maxHandles * 2];
-    memset(m_hBodiesHash, 0x00, m_maxHandles*2*sizeof(unsigned int));
+	btAssert(!m_bInitialized);
+	// allocate host storage
+	m_hBodiesHash = new unsigned int[m_maxHandles * 2];
+	memset(m_hBodiesHash, 0x00, m_maxHandles*2*sizeof(unsigned int));
 
-    m_hCellStart = new unsigned int[m_params.m_numCells];
-    memset(m_hCellStart, 0x00, m_params.m_numCells * sizeof(unsigned int));
+	m_hCellStart = new unsigned int[m_params.m_numCells];
+	memset(m_hCellStart, 0x00, m_params.m_numCells * sizeof(unsigned int));
 
 	m_hPairBuffStartCurr = new unsigned int[m_maxHandles * 2 + 2];
 	// --------------- for now, init with m_maxPairsPerBody for each body
@@ -168,18 +168,18 @@ void btGpu3DGridBroadphase::_initialize(	const btVector3& worldAabbMin, const bt
 	m_numPairsAdded = 0;
 	m_numOverflows = 0;
 
-    m_bInitialized = true;
+	m_bInitialized = true;
 }
 
 
 
 void btGpu3DGridBroadphase::_finalize()
 {
-    btAssert(m_bInitialized);
-    delete [] m_hBodiesHash;
-    delete [] m_hCellStart;
-    delete [] m_hPairBuffStartCurr;
-    delete [] m_hAABB;
+	btAssert(m_bInitialized);
+	delete [] m_hBodiesHash;
+	delete [] m_hCellStart;
+	delete [] m_hPairBuffStartCurr;
+	delete [] m_hAABB;
 	delete [] m_hPairBuff;
 	delete [] m_hPairScan;
 	delete [] m_hPairOut;

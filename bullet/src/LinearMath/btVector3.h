@@ -90,22 +90,22 @@ public:
 	}
 public:
 #else //__CELLOS_LV2__ __SPU__
-    #if defined (BT_USE_SSE) || defined(BT_USE_NEON) // _WIN32 || ARM
-        union {
-            btSimdFloat4      mVec128;
-            btScalar	m_floats[4];
-        };
-        SIMD_FORCE_INLINE	btSimdFloat4	get128() const
-        {
-            return mVec128;
-        }
-        SIMD_FORCE_INLINE	void	set128(btSimdFloat4 v128)
-        {
-            mVec128 = v128;
-        }
-    #else
-        btScalar	m_floats[4];
-    #endif
+	#if defined (BT_USE_SSE) || defined(BT_USE_NEON) // _WIN32 || ARM
+		union {
+			btSimdFloat4      mVec128;
+			btScalar	m_floats[4];
+		};
+		SIMD_FORCE_INLINE	btSimdFloat4	get128() const
+		{
+			return mVec128;
+		}
+		SIMD_FORCE_INLINE	void	set128(btSimdFloat4 v128)
+		{
+			mVec128 = v128;
+		}
+	#else
+		btScalar	m_floats[4];
+	#endif
 #endif //__CELLOS_LV2__ __SPU__
 
 	public:
@@ -153,7 +153,7 @@ public:
 		return *this;
 	}
 #endif // #if defined (BT_USE_SSE_IN_API) || defined (BT_USE_NEON) 
-    
+	
 /**@brief Add a vector to this one 
  * @param The vector to add to this one */
 	SIMD_FORCE_INLINE btVector3& operator+=(const btVector3& v)
@@ -286,37 +286,37 @@ public:
 	SIMD_FORCE_INLINE btVector3& normalize() 
 	{
 #if defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE)		
-        // dot product first
+		// dot product first
 		__m128 vd = _mm_mul_ps(mVec128, mVec128);
 		__m128 z = _mm_movehl_ps(vd, vd);
 		__m128 y = _mm_shuffle_ps(vd, vd, 0x55);
 		vd = _mm_add_ss(vd, y);
 		vd = _mm_add_ss(vd, z);
 		
-        #if 0
-        vd = _mm_sqrt_ss(vd);
+		#if 0
+		vd = _mm_sqrt_ss(vd);
 		vd = _mm_div_ss(v1110, vd);
 		vd = bt_splat_ps(vd, 0x80);
 		mVec128 = _mm_mul_ps(mVec128, vd);
-        #else
-        
-        // NR step 1/sqrt(x) - vd is x, y is output 
-        y = _mm_rsqrt_ss(vd); // estimate 
-        
-        //  one step NR 
-        z = v1_5;
-        vd = _mm_mul_ss(vd, vHalf); // vd * 0.5	
-        //x2 = vd;
-        vd = _mm_mul_ss(vd, y); // vd * 0.5 * y0
-        vd = _mm_mul_ss(vd, y); // vd * 0.5 * y0 * y0
-        z = _mm_sub_ss(z, vd);  // 1.5 - vd * 0.5 * y0 * y0 
+		#else
+		
+		// NR step 1/sqrt(x) - vd is x, y is output 
+		y = _mm_rsqrt_ss(vd); // estimate 
+		
+		//  one step NR 
+		z = v1_5;
+		vd = _mm_mul_ss(vd, vHalf); // vd * 0.5	
+		//x2 = vd;
+		vd = _mm_mul_ss(vd, y); // vd * 0.5 * y0
+		vd = _mm_mul_ss(vd, y); // vd * 0.5 * y0 * y0
+		z = _mm_sub_ss(z, vd);  // 1.5 - vd * 0.5 * y0 * y0 
 
-        y = _mm_mul_ss(y, z);   // y0 * (1.5 - vd * 0.5 * y0 * y0)
+		y = _mm_mul_ss(y, z);   // y0 * (1.5 - vd * 0.5 * y0 * y0)
 
 		y = bt_splat_ps(y, 0x80);
 		mVec128 = _mm_mul_ps(mVec128, y);
 
-        #endif
+		#endif
 
 		
 		return *this;
@@ -575,12 +575,12 @@ public:
 	SIMD_FORCE_INLINE	bool	operator==(const btVector3& other) const
 	{
 #if defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE)
-        return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
+		return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
 #else 
 		return ((m_floats[3]==other.m_floats[3]) && 
-                (m_floats[2]==other.m_floats[2]) && 
-                (m_floats[1]==other.m_floats[1]) && 
-                (m_floats[0]==other.m_floats[0]));
+				(m_floats[2]==other.m_floats[2]) && 
+				(m_floats[1]==other.m_floats[1]) && 
+				(m_floats[0]==other.m_floats[0]));
 #endif
 	}
 
@@ -641,7 +641,7 @@ public:
 		
 		__m128 V1 = _mm_shuffle_ps(V, V0, 0xCE);
 		
-        V0 = _mm_shuffle_ps(V0, V, 0xDB);
+		V0 = _mm_shuffle_ps(V0, V, 0xDB);
 		V2 = _mm_shuffle_ps(V2, V, 0xF9);
 		
 		v0->mVec128 = V0;
@@ -687,50 +687,50 @@ public:
 	SIMD_FORCE_INLINE	void	serializeDouble(struct	btVector3DoubleData& dataOut) const;
 
 	SIMD_FORCE_INLINE	void	deSerializeDouble(const struct	btVector3DoubleData& dataIn);
-    
-        /**@brief returns index of maximum dot product between this and vectors in array[]
-         * @param array The other vectors 
-         * @param array_count The number of other vectors 
-         * @param dotOut The maximum dot product */
-        SIMD_FORCE_INLINE   long    maxDot( const btVector3 *array, long array_count, btScalar &dotOut ) const; 
+	
+		/**@brief returns index of maximum dot product between this and vectors in array[]
+		 * @param array The other vectors 
+		 * @param array_count The number of other vectors 
+		 * @param dotOut The maximum dot product */
+		SIMD_FORCE_INLINE   long    maxDot( const btVector3 *array, long array_count, btScalar &dotOut ) const; 
 
-        /**@brief returns index of minimum dot product between this and vectors in array[]
-         * @param array The other vectors 
-         * @param array_count The number of other vectors 
-         * @param dotOut The minimum dot product */    
-        SIMD_FORCE_INLINE   long    minDot( const btVector3 *array, long array_count, btScalar &dotOut ) const; 
+		/**@brief returns index of minimum dot product between this and vectors in array[]
+		 * @param array The other vectors 
+		 * @param array_count The number of other vectors 
+		 * @param dotOut The minimum dot product */    
+		SIMD_FORCE_INLINE   long    minDot( const btVector3 *array, long array_count, btScalar &dotOut ) const; 
 
-    /* create a vector as  btVector3( this->dot( btVector3 v0 ), this->dot( btVector3 v1), this->dot( btVector3 v2 ))  */
-    SIMD_FORCE_INLINE btVector3  dot3( const btVector3 &v0, const btVector3 &v1, const btVector3 &v2 ) const
-    {
+	/* create a vector as  btVector3( this->dot( btVector3 v0 ), this->dot( btVector3 v1), this->dot( btVector3 v2 ))  */
+	SIMD_FORCE_INLINE btVector3  dot3( const btVector3 &v0, const btVector3 &v1, const btVector3 &v2 ) const
+	{
 #if defined BT_USE_SIMD_VECTOR3 && defined (BT_USE_SSE_IN_API) && defined (BT_USE_SSE)
 
-        __m128 a0 = _mm_mul_ps( v0.mVec128, this->mVec128 );
-        __m128 a1 = _mm_mul_ps( v1.mVec128, this->mVec128 );
-        __m128 a2 = _mm_mul_ps( v2.mVec128, this->mVec128 );
-        __m128 b0 = _mm_unpacklo_ps( a0, a1 );
-        __m128 b1 = _mm_unpackhi_ps( a0, a1 );
-        __m128 b2 = _mm_unpacklo_ps( a2, _mm_setzero_ps() );
-        __m128 r = _mm_movelh_ps( b0, b2 );
-        r = _mm_add_ps( r, _mm_movehl_ps( b2, b0 ));
-        a2 = _mm_and_ps( a2, btvxyzMaskf);
-        r = _mm_add_ps( r, btCastdTo128f (_mm_move_sd( btCastfTo128d(a2), btCastfTo128d(b1) )));
-        return btVector3(r);
-        
+		__m128 a0 = _mm_mul_ps( v0.mVec128, this->mVec128 );
+		__m128 a1 = _mm_mul_ps( v1.mVec128, this->mVec128 );
+		__m128 a2 = _mm_mul_ps( v2.mVec128, this->mVec128 );
+		__m128 b0 = _mm_unpacklo_ps( a0, a1 );
+		__m128 b1 = _mm_unpackhi_ps( a0, a1 );
+		__m128 b2 = _mm_unpacklo_ps( a2, _mm_setzero_ps() );
+		__m128 r = _mm_movelh_ps( b0, b2 );
+		r = _mm_add_ps( r, _mm_movehl_ps( b2, b0 ));
+		a2 = _mm_and_ps( a2, btvxyzMaskf);
+		r = _mm_add_ps( r, btCastdTo128f (_mm_move_sd( btCastfTo128d(a2), btCastfTo128d(b1) )));
+		return btVector3(r);
+		
 #elif defined(BT_USE_NEON)
-        static const uint32x4_t xyzMask = (const uint32x4_t){ -1, -1, -1, 0 };
-        float32x4_t a0 = vmulq_f32( v0.mVec128, this->mVec128);
-        float32x4_t a1 = vmulq_f32( v1.mVec128, this->mVec128);
-        float32x4_t a2 = vmulq_f32( v2.mVec128, this->mVec128);
-        float32x2x2_t zLo = vtrn_f32( vget_high_f32(a0), vget_high_f32(a1));
-        a2 = (float32x4_t) vandq_u32((uint32x4_t) a2, xyzMask );
-        float32x2_t b0 = vadd_f32( vpadd_f32( vget_low_f32(a0), vget_low_f32(a1)), zLo.val[0] );
-        float32x2_t b1 = vpadd_f32( vpadd_f32( vget_low_f32(a2), vget_high_f32(a2)), vdup_n_f32(0.0f));
-        return btVector3( vcombine_f32(b0, b1) );
+		static const uint32x4_t xyzMask = (const uint32x4_t){ -1, -1, -1, 0 };
+		float32x4_t a0 = vmulq_f32( v0.mVec128, this->mVec128);
+		float32x4_t a1 = vmulq_f32( v1.mVec128, this->mVec128);
+		float32x4_t a2 = vmulq_f32( v2.mVec128, this->mVec128);
+		float32x2x2_t zLo = vtrn_f32( vget_high_f32(a0), vget_high_f32(a1));
+		a2 = (float32x4_t) vandq_u32((uint32x4_t) a2, xyzMask );
+		float32x2_t b0 = vadd_f32( vpadd_f32( vget_low_f32(a0), vget_low_f32(a1)), zLo.val[0] );
+		float32x2_t b1 = vpadd_f32( vpadd_f32( vget_low_f32(a2), vget_high_f32(a2)), vdup_n_f32(0.0f));
+		return btVector3( vcombine_f32(b0, b1) );
 #else	
 		return btVector3( dot(v0), dot(v1), dot(v2));
 #endif
-    }
+	}
 };
 
 /**@brief Return the sum of two vectors (Point symantics)*/
@@ -830,7 +830,7 @@ operator/(const btVector3& v, const btScalar& s)
 #if 0 //defined(BT_USE_SSE_IN_API)
 // this code is not faster !
 	__m128 vs = _mm_load_ss(&s);
-    vs = _mm_div_ss(v1110, vs);
+	vs = _mm_div_ss(v1110, vs);
 	vs = bt_pshufd_ps(vs, 0x00);	//	(S S S S)
 
 	return btVector3(_mm_mul_ps(v.mVec128, vs));
@@ -951,27 +951,27 @@ SIMD_FORCE_INLINE btVector3 btVector3::rotate( const btVector3& wAxis, const btS
 
 #if defined BT_USE_SIMD_VECTOR3 && defined (BT_USE_SSE_IN_API) && defined (BT_USE_SSE)
 
-    __m128 O = _mm_mul_ps(wAxis.mVec128, mVec128);
+	__m128 O = _mm_mul_ps(wAxis.mVec128, mVec128);
 	btScalar ssin = btSin( _angle );
-    __m128 C = wAxis.cross( mVec128 ).mVec128;
+	__m128 C = wAxis.cross( mVec128 ).mVec128;
 	O = _mm_and_ps(O, btvFFF0fMask);
-    btScalar scos = btCos( _angle );
+	btScalar scos = btCos( _angle );
 	
 	__m128 vsin = _mm_load_ss(&ssin);	//	(S 0 0 0)
-    __m128 vcos = _mm_load_ss(&scos);	//	(S 0 0 0)
+	__m128 vcos = _mm_load_ss(&scos);	//	(S 0 0 0)
 	
 	__m128 Y = bt_pshufd_ps(O, 0xC9);	//	(Y Z X 0)
 	__m128 Z = bt_pshufd_ps(O, 0xD2);	//	(Z X Y 0)
 	O = _mm_add_ps(O, Y);
 	vsin = bt_pshufd_ps(vsin, 0x80);	//	(S S S 0)
 	O = _mm_add_ps(O, Z);
-    vcos = bt_pshufd_ps(vcos, 0x80);	//	(S S S 0)
+	vcos = bt_pshufd_ps(vcos, 0x80);	//	(S S S 0)
 	
-    vsin = vsin * C; 
+	vsin = vsin * C; 
 	O = O * wAxis.mVec128; 
 	__m128 X = mVec128 - O; 
 	
-    O = O + vsin;
+	O = O + vsin;
 	vcos = vcos * X;
 	O = O + vcos;	
 	
@@ -990,75 +990,75 @@ SIMD_FORCE_INLINE btVector3 btVector3::rotate( const btVector3& wAxis, const btS
 SIMD_FORCE_INLINE   long    btVector3::maxDot( const btVector3 *array, long array_count, btScalar &dotOut ) const
 {
 #if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined (BT_USE_NEON)
-    #if defined _WIN32 || defined (BT_USE_SSE)
-        const long scalar_cutoff = 10;
-        long _maxdot_large( const float *array, const float *vec, unsigned long array_count, float *dotOut );
-    #elif defined BT_USE_NEON
-        const long scalar_cutoff = 4;
-        extern long (*_maxdot_large)( const float *array, const float *vec, unsigned long array_count, float *dotOut );
-    #endif
-    if( array_count < scalar_cutoff )	
+	#if defined _WIN32 || defined (BT_USE_SSE)
+		const long scalar_cutoff = 10;
+		long _maxdot_large( const float *array, const float *vec, unsigned long array_count, float *dotOut );
+	#elif defined BT_USE_NEON
+		const long scalar_cutoff = 4;
+		extern long (*_maxdot_large)( const float *array, const float *vec, unsigned long array_count, float *dotOut );
+	#endif
+	if( array_count < scalar_cutoff )	
 #endif
-    {
-        btScalar maxDot = -SIMD_INFINITY;
-        int i = 0;
-        int ptIndex = -1;
-        for( i = 0; i < array_count; i++ )
-        {
-            btScalar dot = array[i].dot(*this);
-            
-            if( dot > maxDot )
-            {
-                maxDot = dot;
-                ptIndex = i;
-            }
-        }
-        
-        dotOut = maxDot;
-        return ptIndex;
-    }
+	{
+		btScalar maxDot = -SIMD_INFINITY;
+		int i = 0;
+		int ptIndex = -1;
+		for( i = 0; i < array_count; i++ )
+		{
+			btScalar dot = array[i].dot(*this);
+			
+			if( dot > maxDot )
+			{
+				maxDot = dot;
+				ptIndex = i;
+			}
+		}
+		
+		dotOut = maxDot;
+		return ptIndex;
+	}
 #if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined (BT_USE_NEON)
-    return _maxdot_large( (float*) array, (float*) &m_floats[0], array_count, &dotOut );
+	return _maxdot_large( (float*) array, (float*) &m_floats[0], array_count, &dotOut );
 #endif
 }
 
 SIMD_FORCE_INLINE   long    btVector3::minDot( const btVector3 *array, long array_count, btScalar &dotOut ) const
 {
 #if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined (BT_USE_NEON)
-    #if defined BT_USE_SSE
-        const long scalar_cutoff = 10;
-        long _mindot_large( const float *array, const float *vec, unsigned long array_count, float *dotOut );
-    #elif defined BT_USE_NEON
-        const long scalar_cutoff = 4;
-        extern long (*_mindot_large)( const float *array, const float *vec, unsigned long array_count, float *dotOut );
-    #else
-        #error unhandled arch!
-    #endif
-    
-    if( array_count < scalar_cutoff )
+	#if defined BT_USE_SSE
+		const long scalar_cutoff = 10;
+		long _mindot_large( const float *array, const float *vec, unsigned long array_count, float *dotOut );
+	#elif defined BT_USE_NEON
+		const long scalar_cutoff = 4;
+		extern long (*_mindot_large)( const float *array, const float *vec, unsigned long array_count, float *dotOut );
+	#else
+		#error unhandled arch!
+	#endif
+	
+	if( array_count < scalar_cutoff )
 #endif
-    {
-        btScalar  minDot = SIMD_INFINITY;
-        int i = 0;
-        int ptIndex = -1;
-        
-        for( i = 0; i < array_count; i++ )
-        {
-            btScalar dot = array[i].dot(*this);
-            
-            if( dot < minDot )
-            {
-                minDot = dot;
-                ptIndex = i;
-            }
-        }
-        
-        dotOut = minDot;
-        
-        return ptIndex;
-    }
+	{
+		btScalar  minDot = SIMD_INFINITY;
+		int i = 0;
+		int ptIndex = -1;
+		
+		for( i = 0; i < array_count; i++ )
+		{
+			btScalar dot = array[i].dot(*this);
+			
+			if( dot < minDot )
+			{
+				minDot = dot;
+				ptIndex = i;
+			}
+		}
+		
+		dotOut = minDot;
+		
+		return ptIndex;
+	}
 #if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined (BT_USE_NEON)
-    return _mindot_large( (float*) array, (float*) &m_floats[0], array_count, &dotOut );
+	return _mindot_large( (float*) array, (float*) &m_floats[0], array_count, &dotOut );
 #endif//BT_USE_SIMD_VECTOR3
 }
 
@@ -1219,20 +1219,20 @@ SIMD_FORCE_INLINE void	btSwapScalarEndian(const btScalar& sourceVal, btScalar& d
 	unsigned char* dest = (unsigned char*) &destVal;
 	unsigned char* src  = (unsigned char*) &sourceVal;
 	dest[0] = src[7];
-    dest[1] = src[6];
-    dest[2] = src[5];
-    dest[3] = src[4];
-    dest[4] = src[3];
-    dest[5] = src[2];
-    dest[6] = src[1];
-    dest[7] = src[0];
+	dest[1] = src[6];
+	dest[2] = src[5];
+	dest[3] = src[4];
+	dest[4] = src[3];
+	dest[5] = src[2];
+	dest[6] = src[1];
+	dest[7] = src[0];
 #else
 	unsigned char* dest = (unsigned char*) &destVal;
 	unsigned char* src  = (unsigned char*) &sourceVal;
 	dest[0] = src[3];
-    dest[1] = src[2];
-    dest[2] = src[1];
-    dest[3] = src[0];
+	dest[1] = src[2];
+	dest[2] = src[1];
+	dest[3] = src[0];
 #endif //BT_USE_DOUBLE_PRECISION
 }
 ///btSwapVector3Endian swaps vector endianness, useful for network and cross-platform serialization
@@ -1261,26 +1261,26 @@ template <class T>
 SIMD_FORCE_INLINE void btPlaneSpace1 (const T& n, T& p, T& q)
 {
   if (btFabs(n[2]) > SIMDSQRT12) {
-    // choose p in y-z plane
-    btScalar a = n[1]*n[1] + n[2]*n[2];
-    btScalar k = btRecipSqrt (a);
-    p[0] = 0;
+	// choose p in y-z plane
+	btScalar a = n[1]*n[1] + n[2]*n[2];
+	btScalar k = btRecipSqrt (a);
+	p[0] = 0;
 	p[1] = -n[2]*k;
 	p[2] = n[1]*k;
-    // set q = n x p
-    q[0] = a*k;
+	// set q = n x p
+	q[0] = a*k;
 	q[1] = -n[0]*p[2];
 	q[2] = n[0]*p[1];
   }
   else {
-    // choose p in x-y plane
-    btScalar a = n[0]*n[0] + n[1]*n[1];
-    btScalar k = btRecipSqrt (a);
-    p[0] = -n[1]*k;
+	// choose p in x-y plane
+	btScalar a = n[0]*n[0] + n[1]*n[1];
+	btScalar k = btRecipSqrt (a);
+	p[0] = -n[1]*k;
 	p[1] = n[0]*k;
 	p[2] = 0;
-    // set q = n x p
-    q[0] = -n[2]*p[1];
+	// set q = n x p
+	q[0] = -n[2]*p[1];
 	q[1] = n[2]*p[0];
 	q[2] = a*k;
   }
