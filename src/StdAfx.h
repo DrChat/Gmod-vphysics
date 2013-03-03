@@ -3,8 +3,7 @@
 #include <tier1/utlsymbol.h>
 
 #include <vphysics_interface.h>
-#include "vphysics_interfaceV32.h"
-#include <vphysics/collision_set.h>
+#include <vphysics/collision_set.h> // THIS FILE HAS NO INCLUDE GUARDS!
 #include <vphysics/constraints.h>
 #include <vphysics/friction.h>
 #include <vphysics/object_hash.h>
@@ -14,6 +13,10 @@
 #include <vphysics/vehicles.h>
 #include <vphysics/virtualmesh.h>
 #include <vcollide_parse.h>
+
+// NEW INTERFACE HEADERS
+#include "vphysics_interfaceV32.h"
+#include "vphysics/vehiclesV32.h"
 
 #include <cmodel.h>
 

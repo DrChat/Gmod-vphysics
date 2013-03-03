@@ -405,22 +405,23 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 	// TODO: These were apparently scrapped when vphysics was shipped. Figure out new speed governors by disassembly.
 
 	// Apply our forces!
+	// FIXME: Forces are in NEWTONS!
 	if (fabs(controls.throttle) > 1e-4) {
 		for (int i = 0; i < m_iWheelCount; i++) {
 			m_pRaycastVehicle->setBrake(0, i);
 		}
 
+		const static float watt_per_hp = 745.0f;
+		const static float seconds_per_minute = 60.0f;
+
+		float brakeForce = controls.throttle * 
+			m_vehicleParams.engine.horsepower * (watt_per_hp * seconds_per_minute) * 
+			m_vehicleParams.engine.gearRatio[m_vehicleState.gear]  * m_vehicleParams.engine.axleRatio / 
+			(m_vehicleParams.engine.maxRPM * (2 * M_PI));
+
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-			const static float watt_per_hp = 745.0f;
-			const static float seconds_per_minute = 60.0f;
-
-			float wheelForce = controls.throttle * 
-				m_vehicleParams.engine.horsepower * (watt_per_hp * seconds_per_minute) * 
-				m_vehicleParams.engine.gearRatio[m_vehicleState.gear]  * m_vehicleParams.engine.axleRatio / 
-				(m_vehicleParams.engine.maxRPM * (2 * M_PI));
-
-			wheelForce *= m_vehicleParams.axles[i].torqueFactor * m_vehicleParams.axles[i].wheels.radius;
+			float wheelForce = brakeForce * m_vehicleParams.axles[i].torqueFactor * m_vehicleParams.axles[i].wheels.radius;
 
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 				m_pRaycastVehicle->applyEngineForce(wheelForce, wheelIndex);
@@ -442,7 +443,6 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 			}
 		}
 	} else {
-		// Stopped!
 		for (int i = 0; i < m_iWheelCount; i++) {
 			m_pRaycastVehicle->applyEngineForce(0, i);
 		}
@@ -458,6 +458,8 @@ int CPhysicsVehicleController::GetWheelCount() {
 }
 
 IPhysicsObject *CPhysicsVehicleController::GetWheel(int index) {
+	if (index >= m_iWheelCount || index < 0) return NULL;
+
 	if (m_iVehicleType = VEHICLE_TYPE_CAR_WHEELS) {
 		return m_pWheels[index];
 	}
@@ -487,12 +489,20 @@ bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContact
 }
 
 void CPhysicsVehicleController::SetSpringLength(int wheelIndex, float length) {
-	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) return;
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+
 	NOT_IMPLEMENTED
 }
 
 void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction) {
-	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) return;
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+
 	NOT_IMPLEMENTED
 }
 
@@ -503,6 +513,34 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 
 void CPhysicsVehicleController::VehicleDataReload() {
 	NOT_IMPLEMENTED
+}
+
+/******
+* NEW HANDLING FUNCTIONS
+******/
+
+// force appears to be in newtons. Correct this if it's wrong.
+void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+}
+
+void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+}
+
+void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+
+	m_pRaycastVehicle->setSteeringValue(DEG2RAD(steerVal), wheelIndex);
 }
 
 /****************************

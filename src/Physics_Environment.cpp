@@ -276,8 +276,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pPhysicsDragController = new CPhysicsDragController;
 
-	m_perfparams = new physics_performanceparams_t;
-	m_perfparams->Defaults();
+	m_perfparams.Defaults();
+	memset(&m_stats, 0, sizeof(m_stats));
 
 #if MULTITHREAD
 	m_pBulletEnvironment->getSolverInfo().m_numIterations = maxTasks;
@@ -338,8 +338,6 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 		delete m_pThreadSupportSolver;
 #	endif
 #endif
-
-	delete m_perfparams;
 }
 
 // UNEXPOSED
@@ -741,38 +739,74 @@ bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 	return false;
 }
 
-// Is this function ever called?
 void CPhysicsEnvironment::TraceRay(const Ray_t &ray, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
-	if (!ray.m_IsRay) return;
+	if (!ray.m_IsRay || !pTrace) return;
 
 	btVector3 vecStart, vecEnd;
 	ConvertPosToBull(ray.m_Start + ray.m_StartOffset, vecStart);
 	ConvertPosToBull(ray.m_Start + ray.m_StartOffset + ray.m_Delta, vecEnd);
-	NOT_IMPLEMENTED
+
+	btCollisionWorld::ClosestRayResultCallback cb(vecStart, vecEnd);
+	m_pBulletEnvironment->rayTest(vecStart, vecEnd, cb);
+
+	pTrace->fraction = cb.m_closestHitFraction;
+	ConvertPosToHL(cb.m_hitPointWorld, pTrace->endpos);
+	ConvertDirectionToHL(cb.m_hitNormalWorld, pTrace->plane.normal);
 }
 
 // Is this function ever called?
+// TODO: This is a bit more complex, bullet doesn't support compound sweep tests.
 void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
 	NOT_IMPLEMENTED
 }
 
+void CPhysicsEnvironment::SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
+	if (!pConvex || !pTrace) return;
+	
+	btVector3 vecStart, vecEnd;
+	ConvertPosToBull(vecAbsStart, vecStart);
+	ConvertPosToBull(vecAbsEnd, vecEnd);
+
+	btMatrix3x3 matAng;
+	ConvertRotationToBull(vecAngles, matAng);
+
+	btTransform transStart, transEnd;
+	transStart.setOrigin(vecStart);
+	transStart.setBasis(matAng);
+
+	transEnd.setOrigin(vecEnd);
+	transEnd.setBasis(matAng);
+
+	btConvexShape *pShape = (btConvexShape *)pConvex;
+
+	btCollisionWorld::ClosestConvexResultCallback cb(vecStart, vecEnd);
+	m_pBulletEnvironment->convexSweepTest(pShape, transStart, transEnd, cb, 0.0001f);
+
+	pTrace->fraction = cb.m_closestHitFraction;
+	ConvertPosToHL(cb.m_hitPointWorld, pTrace->endpos);
+	ConvertDirectionToHL(cb.m_hitNormalWorld, pTrace->plane.normal);
+}
+
 void CPhysicsEnvironment::GetPerformanceSettings(physics_performanceparams_t *pOutput) const {
 	if (!pOutput) return;
-	memcpy(pOutput, m_perfparams, sizeof(physics_performanceparams_t));
+
+	*pOutput = m_perfparams;
 }
 
 void CPhysicsEnvironment::SetPerformanceSettings(const physics_performanceparams_t *pSettings) {
 	if (!pSettings) return;
-	memcpy((void *)m_perfparams, pSettings, sizeof(physics_performanceparams_t));
+
+	m_perfparams = *pSettings;
 }
 
 void CPhysicsEnvironment::ReadStats(physics_stats_t *pOutput) {
 	if (!pOutput) return;
-	NOT_IMPLEMENTED
+
+	*pOutput = m_stats;
 }
 
 void CPhysicsEnvironment::ClearStats() {
-	NOT_IMPLEMENTED
+	memset(&m_stats, 0, sizeof(m_stats));
 }
 
 unsigned int CPhysicsEnvironment::GetObjectSerializeSize(IPhysicsObject *pObject) const {
@@ -793,7 +827,7 @@ void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
 	m_bConstraintNotify = bEnable;
 }
 
-// FIXME: What do?
+// FIXME: What do? Source SDK mods call this every frame in debug builds.
 void CPhysicsEnvironment::DebugCheckContacts() {
 	
 }

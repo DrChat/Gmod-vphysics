@@ -61,9 +61,9 @@ private:
 	btScalar	m_tau;
 	btScalar	m_damping;
 	btVehicleRaycaster*	m_vehicleRaycaster;
-	btScalar		m_pitchControl;
+	btScalar	m_pitchControl;
 	btScalar	m_steeringValue; 
-	btScalar m_currentVehicleSpeedKmHour;
+	btScalar	m_currentVehicleSpeedKmHour;
 
 	btRigidBody* m_chassisBody;
 
@@ -76,15 +76,15 @@ private:
 public:
 
 	//constructor to create a car from an existing rigidbody
-	btRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis,	btVehicleRaycaster* raycaster );
+	btRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis, btVehicleRaycaster* raycaster);
 
 	virtual ~btRaycastVehicle() ;
 
 
 	///btActionInterface interface
-	virtual void updateAction( btCollisionWorld* collisionWorld, btScalar step)
+	virtual void updateAction(btCollisionWorld* collisionWorld, btScalar step)
 	{
-        (void) collisionWorld;
+		(void) collisionWorld;
 		updateVehicle(step);
 	}
 	
@@ -101,7 +101,7 @@ public:
 	
 	void resetSuspension();
 
-	btScalar	getSteeringValue(int wheel) const;
+	btScalar getSteeringValue(int wheel) const;
 
 	void	setSteeringValue(btScalar steering, int wheel);
 

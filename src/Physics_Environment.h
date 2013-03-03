@@ -1,6 +1,8 @@
 #ifndef CPHYSICSENVIRONMENT_H
 #define CPHYSICSENVIRONMENT_H
 
+#include <vphysics/stats.h>
+
 class btThreadSupportInterface;
 class btCollisionConfiguration;
 class btDispatcher;
@@ -120,7 +122,7 @@ public:
 	IPhysicsObject *						UnserializeObjectFromBuffer(void *pGameData, unsigned char *pBuffer, unsigned int bufferSize, bool enableCollisions);
 
 	void									EnableConstraintNotify(bool bEnable);
-	void									DebugCheckContacts(void);
+	void									DebugCheckContacts();
 public:
 	// Unexposed functions
 	btDynamicsWorld *						GetBulletEnvironment();
@@ -131,6 +133,9 @@ public:
 	void									DoCollisionEvents(float dt);
 
 	void									HandleConstraintBroken(CPhysicsConstraint *pConstraint); // Call this if you're a constraint that was just broken.
+
+	// To be exposed functions
+	void									SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace);
 
 	// Soft body functions we'll expose at a later time...
 private:
@@ -155,12 +160,14 @@ private:
 	IPhysicsCollisionEvent *				m_pCollisionEvent;
 	IPhysicsConstraintEvent *				m_pConstraintEvent;
 	CDeleteQueue *							m_pDeleteQueue;
-	physics_performanceparams_t *			m_perfparams;
 	CUtlVector<CPhysicsFluidController *>	m_fluids;
 	CPhysicsDragController *				m_pPhysicsDragController;
 	CUtlVector<IController*>				m_controllers;
 	IVPhysicsDebugOverlay *					m_pDebugOverlay;
 	IPhysicsObjectEvent *					m_pObjectEvent;
+
+	physics_performanceparams_t				m_perfparams;
+	physics_stats_t							m_stats;
 
 	CDebugDrawer *							m_debugdraw;
 };

@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+#include <vphysics/virtualmesh.h>
+
 #include "Physics_Collision.h"
 #include "convert.h"
 #include "Physics_KeyParser.h"
@@ -549,6 +551,17 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	return false;
 }
 
+void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
+	if (node->IsTerminal()) {
+		vecOut->AddToTail(node->GetCompactLedge());
+	} else {
+		const ivpcompactledgenode_t *rs = node->GetRightSon();
+		const ivpcompactledgenode_t *ls = node->GetLeftSon();
+		GetAllLedges(rs, vecOut);
+		GetAllLedges(ls, vecOut);
+	}
+}
+
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
 	memset(pOutput, 0, sizeof(*pOutput));
@@ -585,52 +598,32 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			continue;
 		}
 
-		// derp test
-		const ivpcompactledgenode_t *ledgetree = (ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root);
-		do {
-			if (ledgetree->offset_compact_ledge)
-				ivpcompactledge_t *ledge = (ivpcompactledge_t *)((char *)ledgetree + ledgetree->offset_compact_ledge);
-
-			ledgetree = (ivpcompactledgenode_t *)((char *)ledgetree + ledgetree->offset_right_node);
-		} while (ledgetree->offset_right_node);
-
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
 		btVector3 massCenter;
 		ConvertIVPPosToBull(ivpsurface->mass_center, massCenter);
 		info->massCenter = massCenter;
 
-		const char *convexes = solid + 76; // Right after ivpsurface
-
 		btCompoundShape *pCompound = new btCompoundShape;
 		pCompound->setMargin(COLLISION_MARGIN);
 		pCompound->setUserPointer(info);
-		int position = 0;
 
-		// Add all of the convex solids to our compound shape.
-		while (true) {
-			// Structure:
-			// ivp_compact_ledge, ivp_compact_triangle[ledge.n_trianges], repeat until vertices
-			// Later on are actual edge(vertices) points of each triangle
-			const ivpcompactledge_t ivpledge = *(ivpcompactledge_t *)(convexes + position);
-			const char *vertices = convexes + position + ivpledge.c_point_offset;
+		// Add all of the ledges up
+		CUtlVector<const ivpcompactledge_t *> ledges;
+		GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
 
-			// Triangles start after the ivp_compact_ledge
-			position += sizeof(ivpcompactledge_t);
+		for (int j = 0; j < ledges.Count(); j++) {
+			const char *vertices = (const char *)ledges[j] + ledges[j]->c_point_offset;
+
 			btConvexHullShape *pConvex = new btConvexHullShape;
 			pConvex->setMargin(COLLISION_MARGIN);
 
-			// Add all of the triangles to our mesh.
-			for (int j = 0; j < ivpledge.n_triangles; j++) {
-				const ivpcompacttriangle_t ivptri = *(ivpcompacttriangle_t *)(convexes + position);
-				Assert(j == ivptri.tri_index); // If these are not equal, some data corruption may have occurred.
+			const char *tris = (const char *)ledges[j] + sizeof(ivpcompactledge_t);
+			for (int k = 0; k < ledges[j]->n_triangles; k++) {
+				const ivpcompacttriangle_t *ivptri = (ivpcompacttriangle_t *)(tris + (k * sizeof(ivpcompacttriangle_t)));
+				Assert(k == ivptri->tri_index);
 
-				position += sizeof(ivpcompacttriangle_t);
-
-				if (ivptri.is_virtual)
-					continue;
-
-				for (int k = 0; k < 3; k++) {
-					short index = ivptri.c_three_edges[k].start_point_index;
+				for (int l = 0; l < 3; l++) {
+					short index = ivptri->c_three_edges[l].start_point_index;
 					float *verts = (float *)(vertices + index * 16);
 
 					btVector3 vertex;
@@ -639,14 +632,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				}
 			}
 
-			if (pConvex->getNumPoints() > 0) {
-				pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), pConvex); // Move by opposite of center of mass since bullet takes our origin as the center of mass.
-			} else {
-				delete pConvex;
-			}
-
-			if (convexes + position >= vertices)
-				break;
+			pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), pConvex);
 		}
 
 		pOutput->solids[i] = (CPhysCollide *)pCompound;
@@ -656,8 +642,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	for (int i = 0; i < pVCollide->solidCount; i++) {
 		DestroyCollide(pVCollide->solids[i]);
-		pVCollide->solids[i] = NULL;
 	}
+
+	delete [] pVCollide->solids;
+	pVCollide->solids = NULL;
 
 	delete pVCollide->pKeyValues;
 	pVCollide->pKeyValues = NULL;
@@ -672,6 +660,8 @@ void CPhysicsCollision::VPhysicsKeyParserDestroy(IVPhysicsKeyParser *pParser) {
 }
 
 int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vector **outVerts) {
+	if (!pCollisionModel || !outVerts) return 0;
+
 	int count = 0;
 	btCompoundShape *compound = (btCompoundShape *)pCollisionModel;
 	for (int i = 0; i < compound->getNumChildShapes(); i++)

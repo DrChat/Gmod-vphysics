@@ -145,6 +145,9 @@
     <ClInclude Include="src\phydata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\vphysics\vehiclesV32.h">
+      <Filter>Header Files\public</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />

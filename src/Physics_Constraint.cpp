@@ -284,7 +284,8 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
 
 	// Set axis limits
-
+	// swing span 1, swing span 2, twist limit
+	
 
 	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }

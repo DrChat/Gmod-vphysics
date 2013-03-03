@@ -297,7 +297,7 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 	for (i=0;i<m_wheelInfo.size();i++)
 	{
 		btScalar depth; 
-		depth = rayCast( m_wheelInfo[i]);
+		depth = rayCast(m_wheelInfo[i]);
 	}
 
 	updateSuspension(step);

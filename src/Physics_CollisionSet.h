@@ -1,8 +1,7 @@
 #ifndef CPHYSICSCOLLISIONSET_H
 #define CPHYSICSCOLLISIONSET_H
 
-class CPhysicsCollisionSet : public IPhysicsCollisionSet
-{
+class CPhysicsCollisionSet : public IPhysicsCollisionSet {
 	public:
 						CPhysicsCollisionSet(int iMaxEntries);
 						~CPhysicsCollisionSet();

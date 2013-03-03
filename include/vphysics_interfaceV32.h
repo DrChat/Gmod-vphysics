@@ -28,7 +28,7 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 		
 		// Purpose: Set/Get the speeds at which any object is travelling slower than will fall asleep.
 		// linear velocity is in in/s and angular velocity is in degrees/s
-		// Parameters are optional in SetSleepThresholds.
+		// Parameters are optional in both functions.
 		virtual void	SetSleepThresholds(const float *linVel, const float *angVel) = 0;
 		virtual void	GetSleepThresholds(float *linVel, float *angVel) const = 0;
 };

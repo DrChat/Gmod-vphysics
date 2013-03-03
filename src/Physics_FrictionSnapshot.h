@@ -1,6 +1,8 @@
 #ifndef CPHYSICSFRICTIONSNAPSHOT_H
 #define CPHYSICSFRICTIONSNAPSHOT_H
 
+#include <vphysics/friction.h>
+
 class CPhysicsObject;
 class btPersistentManifold;
 

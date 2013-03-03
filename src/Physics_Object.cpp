@@ -523,6 +523,10 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 
 // These two functions apply an insanely low force!
 void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
+	// forceVector is in kg*in/s
+	// bullet takes forces in newtons
+
+
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
 	m_pObject->applyCentralForce(force);

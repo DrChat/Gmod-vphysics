@@ -2,6 +2,7 @@ BULLET_SRC_DIR = ../src
 
 BULLET_PROJS = BulletCollision BulletDynamics BulletMultiThreaded BulletSoftBody LinearMath
 BULLET_OUT_DIR = ../../build/lib/linux/Release
+BULLET_OBJ_DIR = ../../build/obj/linux/Release
 
 # ------------------------ System Commands ------------------------
 CC = /usr/bin/g++
@@ -28,7 +29,7 @@ BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/CollisionShapes/*.cpp)
 BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/Gimpact/*.cpp)
 BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/NarrowPhaseCollision/*.cpp)
 
-BULLETCOLLISION_OBJS = $(addprefix $(BULLET_OUT_DIR)/BulletCollision, $(BULLETCOLLISION_SRCS:.cpp=.o))
+BULLETCOLLISION_OBJS = $(patsubst %/%.cpp, %/%.o, $(BULLETCOLLISION_SRCS))
 
 BulletCollision:
 	@for obj in $(BULLETCOLLISION_OBJS); do	\

@@ -61,7 +61,7 @@ CONCAVE_SHAPES_START_HERE,
 ///Used for GIMPACT Trimesh integration
 	GIMPACT_SHAPE_PROXYTYPE,
 ///Multimaterial mesh
-    MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE,
+	MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE,
 	
 	EMPTY_SHAPE_PROXYTYPE,
 	STATIC_PLANE_PROXYTYPE,
@@ -90,13 +90,13 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 	///optional filtering to cull potential collisions
 	enum CollisionFilterGroups
 	{
-	        DefaultFilter = 1,
-	        StaticFilter = 2,
-	        KinematicFilter = 4,
-	        DebrisFilter = 8,
+			DefaultFilter = 1,
+			StaticFilter = 2,
+			KinematicFilter = 4,
+			DebrisFilter = 8,
 			SensorTrigger = 16,
 			CharacterFilter = 32,
-	        AllFilter = -1 //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
+			AllFilter = -1 //all bits sets: DefaultFilter | StaticFilter | KinematicFilter | DebrisFilter | SensorTrigger
 	};
 
 	//Usually the client btCollisionObject or Rigidbody class
@@ -208,15 +208,15 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 
 		//keep them sorted, so the std::set operations work
 		if (proxy0.m_uniqueId < proxy1.m_uniqueId)
-        { 
-            m_pProxy0 = &proxy0; 
-            m_pProxy1 = &proxy1; 
-        }
-        else 
-        { 
+		{ 
+			m_pProxy0 = &proxy0; 
+			m_pProxy1 = &proxy1; 
+		}
+		else 
+		{ 
 			m_pProxy0 = &proxy1; 
-            m_pProxy1 = &proxy0; 
-        }
+			m_pProxy1 = &proxy0; 
+		}
 
 		m_algorithm = 0;
 		m_internalInfo1 = 0;
@@ -235,8 +235,8 @@ BT_DECLARE_ALIGNED_ALLOCATOR();
 //comparison for set operation, see Solid DT_Encounter
 SIMD_FORCE_INLINE bool operator<(const btBroadphasePair& a, const btBroadphasePair& b) 
 { 
-    return a.m_pProxy0 < b.m_pProxy0 || 
-        (a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 < b.m_pProxy1); 
+	return a.m_pProxy0 < b.m_pProxy0 || 
+		(a.m_pProxy0 == b.m_pProxy0 && a.m_pProxy1 < b.m_pProxy1); 
 }
 */
 

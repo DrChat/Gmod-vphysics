@@ -1,16 +1,24 @@
 #ifndef CPHYSICSVEHICLECONTROLLER_H
 #define CPHYSICSVEHICLECONTROLLER_H
 
-class IPhysicsVehicleController;
-class IPhysicsObject;
-class CPhysicsEnvironment;
-struct vehicleparams_t;
-class Vector;
-struct vehicle_operatingparams_t;
-struct vehicle_controlparams_t;
-struct vehicle_debugcarsystem_t;
+#include <vphysics/vehicles.h>
 
-class CPhysicsVehicleController : public IPhysicsVehicleController {
+class IPhysicsObject;
+class CPhysicsObject;
+class CPhysicsEnvironment;
+
+class btVehicleRaycaster;
+class btRaycastVehicle;
+
+// TODO: Implement this class and move it to the public interface.
+// The game can implement this class to override wheel ray traces.
+class IPhysicsVehicleWheelTrace {
+	public:
+		// Return the object if the ray hits, otherwise NULL
+		IPhysicsObject *					CastRay(int wheelIndex, const Vector &start, const Vector &end);
+};
+
+class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 	public:
 		CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
 		~CPhysicsVehicleController();
@@ -55,6 +63,14 @@ class CPhysicsVehicleController : public IPhysicsVehicleController {
 
 		void								ShutdownBullVehicle();
 
+		// To be exposed functions
+		CPhysicsObject *					AddWheel();
+
+		// New handling code
+		void								SetWheelForce(int wheelIndex, float force);
+		void								SetWheelBrake(int wheelIndex, float brakeVal);
+		// steerVal is in degrees!
+		void								SetWheelSteering(int wheelIndex, float steerVal);
 	private:
 		vehicleparams_t						m_vehicleParams;
 		vehicle_operatingparams_t			m_vehicleState;

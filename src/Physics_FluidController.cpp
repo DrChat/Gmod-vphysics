@@ -148,9 +148,6 @@ void CPhysicsFluidController::Tick(float dt) {
 		// FIXME: Damping would be way too much for an object barely touching our surface.
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
-
-		if (body->getLinearVelocity().length2() > 0.01f)
-			body->activate(true); // Stop it from freezing while mini-bouncing, it looks dumb
 	}
 }
 
