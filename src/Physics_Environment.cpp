@@ -696,8 +696,7 @@ bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnviro
 	}
 }
 
-void CPhysicsEnvironment::CleanupDeleteList(void) {
-	DevMsg(2, "VPhysics CleanupDeleteList: Deleting %d objects", m_deadObjects.Count());
+void CPhysicsEnvironment::CleanupDeleteList() {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject *)m_deadObjects.Element(i);
 		delete pObject;

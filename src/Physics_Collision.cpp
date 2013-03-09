@@ -551,6 +551,7 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	return false;
 }
 
+// Purpose: Recursive function that goes through the entire ledge tree and adds ledges
 void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
 	if (node->IsTerminal()) {
 		vecOut->AddToTail(node->GetCompactLedge());
@@ -583,9 +584,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	DevMsg("VPhysics: VCollideLoad with %d solids, swap is %s\n", solidCount, swap ? "true" : "false");
 
 	// Now for the fun part:
-	// We must convert all of the ivp shapes into something we can read.
+	// We must convert all of the ivp shapes into something we can use.
 	for (int i = 0; i < solidCount; i++) {
-		const char *solid = (const char *)pOutput->solids[i];
 		const compactsurfaceheader_t *surfaceheader = (compactsurfaceheader_t *)pOutput->solids[i];
 		const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
@@ -612,27 +612,31 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
 
 		for (int j = 0; j < ledges.Count(); j++) {
-			const char *vertices = (const char *)ledges[j] + ledges[j]->c_point_offset;
+			const ivpcompactledge_t *ledge = ledges[j];
+			const char *vertices = (const char *)ledge + ledge->c_point_offset;
 
-			btConvexHullShape *pConvex = new btConvexHullShape;
-			pConvex->setMargin(COLLISION_MARGIN);
+			if (ledge->n_triangles > 0) {
+				// TODO: We may have to switch this to use a btTriangleMesh due to surface properities and the collision query interface.
+				btConvexHullShape *pConvex = new btConvexHullShape;
+				pConvex->setMargin(COLLISION_MARGIN);
 
-			const char *tris = (const char *)ledges[j] + sizeof(ivpcompactledge_t);
-			for (int k = 0; k < ledges[j]->n_triangles; k++) {
-				const ivpcompacttriangle_t *ivptri = (ivpcompacttriangle_t *)(tris + (k * sizeof(ivpcompacttriangle_t)));
-				Assert(k == ivptri->tri_index);
+				const char *tris = (const char *)ledge + sizeof(ivpcompactledge_t);
+				for (int k = 0; k < ledge->n_triangles; k++) {
+					const ivpcompacttriangle_t *ivptri = (ivpcompacttriangle_t *)(tris + (k * sizeof(ivpcompacttriangle_t)));
+					Assert(k == ivptri->tri_index);
 
-				for (int l = 0; l < 3; l++) {
-					short index = ivptri->c_three_edges[l].start_point_index;
-					float *verts = (float *)(vertices + index * 16);
+					for (int l = 0; l < 3; l++) {
+						short index = ivptri->c_three_edges[l].start_point_index;
+						float *verts = (float *)(vertices + index * 16);
 
-					btVector3 vertex;
-					ConvertIVPPosToBull(verts, vertex);
-					pConvex->addPoint(vertex);
+						btVector3 vertex;
+						ConvertIVPPosToBull(verts, vertex);
+						pConvex->addPoint(vertex);
+					}
 				}
-			}
 
-			pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), pConvex);
+				pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), pConvex);
+			}
 		}
 
 		pOutput->solids[i] = (CPhysCollide *)pCompound;
@@ -670,7 +674,6 @@ int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vect
 	*outVerts = new Vector[count];
 	int k = 0;
 
-	// BUG: This doesn't work on concave meshes! (Lots of lines connecting far apart vertices)
 	for (int i = 0; i < compound->getNumChildShapes(); i++) {
 		btConvexHullShape *hull = (btConvexHullShape *)compound->getChildShape(i);
 		for (int j = hull->getNumVertices()-1; j >= 0; j--) { // ugh, source wants the vertices in this order or shit begins to draw improperly

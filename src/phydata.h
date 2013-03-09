@@ -23,8 +23,6 @@ struct ivpcompactsurface_t {
 	int		byte_size : 24;
 	int		offset_ledgetree_root;
 	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
-
-
 };
 
 // 16 bytes
@@ -71,6 +69,7 @@ struct ivpcompactledgenode_t {
 	unsigned char free_0;
 
 	// Functions
+
 	const ivpcompactledge_t *GetCompactLedge() const {
 		Assert(this->offset_right_node == 0);
 		return (ivpcompactledge_t *)((char *)this + this->offset_compact_ledge);

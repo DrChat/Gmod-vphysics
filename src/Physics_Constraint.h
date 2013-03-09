@@ -79,6 +79,14 @@ class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 		void	GetErrorParams(constraint_groupparams_t *pParams);
 		void	SetErrorParams(const constraint_groupparams_t &params);
 		void	SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1);
+
+	public:
+		// Unexposed functions
+		void	AddConstraint(CPhysicsConstraint *pConstraint);
+		void	RemoveConstraint(CPhysicsConstraint *pConstraint);
+
+	private:
+		CUtlVector<CPhysicsConstraint *>	m_constraints;
 };
 
 // CONSTRAINT CREATION FUNCTIONS

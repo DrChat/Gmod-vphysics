@@ -30,7 +30,7 @@
 		- Scaling of collision models
 			- Vector(1, 1, 1) would be normal scale.
 		- ...
-	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this!
+	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this properly!
 	- CONSTRAINTS
 		- Implement constraint_breakableparams_t
 		- Ragdolls, etc.

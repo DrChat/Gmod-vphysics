@@ -103,7 +103,7 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 		if (!stricmp(key, "index"))
 			pFluid->index = data->GetInt();
 		else if (!stricmp(key, "surfaceprop"))
-			strncpy(pFluid->surfaceprop, data->GetString(), sizeof pFluid->surfaceprop);
+			strncpy(pFluid->surfaceprop, data->GetString(), sizeof(pFluid->surfaceprop));
 		else if (!stricmp(key, "damping"))
 			pFluid->params.damping = data->GetFloat();
 		else if (!stricmp(key, "contents"))
@@ -248,7 +248,7 @@ void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValue
 		else if (!stricmp(key, "rotdamping"))
 			wheel.rotdamping = data->GetFloat();
 		else if (!stricmp(key, "frictionscale"))
-			wheel.frictionScale = data->GetFloat(); // APPARENTLY UNUSED!
+			wheel.frictionScale = data->GetFloat(); // UNUSED!
 		else if (!stricmp(key, "material"))
 			wheel.materialIndex = data->GetInt();
 		else if (!stricmp(key, "skidmaterial"))

@@ -252,6 +252,16 @@ void CPhysicsConstraintGroup::SolvePenetration(IPhysicsObject *pObj0, IPhysicsOb
 	NOT_IMPLEMENTED
 }
 
+// UNEXPOSED
+void CPhysicsConstraintGroup::AddConstraint(CPhysicsConstraint *pConstraint) {
+	m_constraints.AddToTail(pConstraint);
+}
+
+// UNEXPOSED
+void CPhysicsConstraintGroup::RemoveConstraint(CPhysicsConstraint *pConstraint) {
+	m_constraints.FindAndRemove(pConstraint);
+}
+
 /************************
 * CREATION FUNCTIONS
 ************************/
@@ -383,6 +393,6 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	obj1Pos -= ((btMassCenterMotionState *)pObjRef->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
-	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, HL2BULL(length.totalLength));
+	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, ConvertDistanceToBull(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
 }

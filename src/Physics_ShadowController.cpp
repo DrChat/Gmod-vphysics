@@ -178,7 +178,7 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 	ConvertPosToBull(maxSpeed, bullSpeed);
 	btVector3 available = bullSpeed;
 
-	m_currentSpeed = bullSpeed;
+	// m_currentSpeed = bullSpeed;
 
 	float length = bullSpeed.length();
 	bullSpeed.normalize();

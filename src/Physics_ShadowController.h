@@ -57,8 +57,8 @@ class CShadowController : public IController, public IPhysicsShadowController
 		bool					m_enable;
 		bool					m_allowPhysicsMovement;
 		bool					m_allowPhysicsRotation;
-		shadowcontrol_params_t	m_shadow;
 		bool					m_bPhysicallyControlled;
+		shadowcontrol_params_t	m_shadow;
 };
 
 float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);

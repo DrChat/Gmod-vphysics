@@ -83,9 +83,9 @@
     </Link>
     <CustomBuildStep>
       <Command>echo RUNNING COMMAND
-if exist "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll"
+if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\source sdk base 2007\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\source sdk base 2007\bin\vphysics.dll"
 if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\"
+copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\source sdk base 2007\bin\"
 copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
@@ -107,6 +107,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <Optimization>MaxSpeed</Optimization>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
