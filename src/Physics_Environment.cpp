@@ -904,6 +904,7 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 			// obA is the object which is colliding with obB
 			const btCollisionObject *obA = contactManifold->getBody0();
 			const btCollisionObject *obB = contactManifold->getBody1();
+			if (!obA || !obB) continue;
 
 			// These are our own internal objects, don't do callbacks on them.
 			if (obA->getInternalType() == btCollisionObject::CO_GHOST_OBJECT || obB->getInternalType() == btCollisionObject::CO_GHOST_OBJECT)

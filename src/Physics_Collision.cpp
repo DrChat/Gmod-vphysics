@@ -600,9 +600,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		}
 
 		PhysicsShapeInfo *info = new PhysicsShapeInfo;
-		btVector3 massCenter;
-		ConvertIVPPosToBull(ivpsurface->mass_center, massCenter);
-		info->massCenter = massCenter;
+		ConvertIVPPosToBull(ivpsurface->mass_center, info->massCenter);
 
 		btCompoundShape *pCompound = new btCompoundShape;
 		pCompound->setMargin(COLLISION_MARGIN);
