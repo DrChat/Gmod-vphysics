@@ -24,6 +24,8 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		void *					m_pGameData;
 		int						m_iContents;
 		float					m_fDensity;
+
+		// surface plane is a Vector surface normal and float distance
 		Vector4D				m_vSurfacePlane;
 		CPhysicsEnvironment *	m_pEnv;
 		btGhostObject *			m_pGhostObject;

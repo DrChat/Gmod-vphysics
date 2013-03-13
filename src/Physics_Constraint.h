@@ -1,6 +1,8 @@
 #ifndef CCONSTRAINT_H
 #define CCONSTRAINT_H
 
+#include <vphysics/constraints.h>
+
 class CPhysicsEnvironment;
 
 enum EConstraintType {

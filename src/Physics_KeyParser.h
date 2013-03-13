@@ -1,6 +1,8 @@
 #ifndef CPHYSICSKEYPARSER_H
 #define CPHYSICSKEYPARSER_H
 
+#include <vcollide_parse.h>
+
 class KeyValues;
 
 class CPhysicsKeyParser : public IVPhysicsKeyParser

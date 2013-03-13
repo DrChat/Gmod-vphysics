@@ -4,15 +4,6 @@
 
 #include <vphysics_interface.h>
 #include <vphysics/collision_set.h> // THIS FILE HAS NO INCLUDE GUARDS!
-#include <vphysics/constraints.h>
-#include <vphysics/friction.h>
-#include <vphysics/object_hash.h>
-#include <vphysics/performance.h>
-#include <vphysics/player_controller.h>
-#include <vphysics/stats.h>
-#include <vphysics/vehicles.h>
-#include <vphysics/virtualmesh.h>
-#include <vcollide_parse.h>
 
 // NEW INTERFACE HEADERS
 #include "vphysics_interfaceV32.h"

@@ -1,6 +1,7 @@
 #ifndef CPHYSICSENVIRONMENT_H
 #define CPHYSICSENVIRONMENT_H
 
+#include <vphysics/performance.h>
 #include <vphysics/stats.h>
 
 class btThreadSupportInterface;

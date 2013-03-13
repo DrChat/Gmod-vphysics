@@ -1,6 +1,7 @@
 #ifndef CPLAYERCONTROLLER
 #define CPLAYERCONTROLLER
 
+#include <vphysics/player_controller.h>
 #include "IController.h"
 
 class CPhysicsObject;

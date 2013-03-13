@@ -308,8 +308,8 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	btTransform bullAFrame;
-	btTransform bullBFrame;
+	btTransform bullAFrame = btTransform::getIdentity();
+	btTransform bullBFrame = btTransform::getIdentity();
 
 	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
 	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);

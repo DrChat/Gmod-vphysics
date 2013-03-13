@@ -7,17 +7,25 @@
 
 /************************************************
 * COORDINATE SYSTEMS:
-* Bullet vector
+* Bullet vector: Forward, Up, Right
 *	+x: forward (east)
 *	+y: up
 *	+z: right (south)
+*
+*
+*
 * HL Vector: Forward, Left, Up
 *	+x: forward (east)
 *	+y: left (north)
 *	+z: up
 *
-*    left (y)
-*   -------> forward (x)
+*   (top down)
+*
+*   left (y)
+*    ^
+*    |
+*   (*)------> forward (x)
+*   up (z)
 *
 ************************************************/
 

@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
 #include <vphysics/virtualmesh.h>
+#include <cmodel.h>
 
 #include "Physics_Collision.h"
 #include "convert.h"

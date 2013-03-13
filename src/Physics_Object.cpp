@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+#include <cmodel.h>
+
 #include "math.h"
 #include "Physics_Object.h"
 #include "Physics_Environment.h"
@@ -53,7 +55,7 @@ bool CPhysicsObject::IsStatic() const {
 // Returning true will cause most traces to fail, making the object almost impossible to interact with.
 // Also note the lag doesn't stop when the game is paused, indicating that it isn't caused
 // by physics simulations.
-// Call stack comes from CPhysicsHook:FrameUpdatePostEntityThink to IVEngineServer::SolidMoved
+// Lag caused by IVEngineServer::SolidMoved
 // Perhaps the game is receiving flawed data somewhere, as the engine makes almost no calls to vphysics
 bool CPhysicsObject::IsAsleep() const {
 	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
@@ -328,12 +330,12 @@ void CPhysicsObject::SetMaterialIndex(int materialIndex) {
 		m_materialIndex = materialIndex;
 		m_pObject->setFriction(pSurface->physics.friction);
 		//m_pObject->setRollingFriction(pSurface->physics.friction);
-		m_pObject->setRestitution(pSurface->physics.elasticity > 1 ? 1 : pSurface->physics.elasticity);
+		m_pObject->setRestitution(min(pSurface->physics.elasticity, 1));
 
 		// FIXME: Figure out how to convert damping values.
 
-		// ratio = (mass / (volume * CUBIC_METERS_PER_CUBIC_INCH)) / density
-		m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, m_fVolume * CUBIC_METERS_PER_CUBIC_INCH), pSurface->physics.density);
+		// ratio = (mass / volume) / density
+		m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, m_fVolume), pSurface->physics.density);
 	}
 }
 
@@ -548,12 +550,13 @@ void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 	m_pObject->applyTorque(bullTorque);
 }
 
+// Output passed to ApplyForceCenter/ApplyTorqueCenter
 void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const {
 	if (!centerForce && !centerTorque) return;
 	NOT_IMPLEMENTED
 }
 
-// Thrusters call this
+// Thrusters call this and pass output to AddVelocity
 void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	if (!centerVelocity && !centerAngularVelocity) return;
 
@@ -563,6 +566,12 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 
 	pos = pos - m_pObject->getWorldTransform().getOrigin();
 	btVector3 cross = pos.cross(force);
+
+	if (centerVelocity)
+		centerVelocity->Zero();
+
+	if (centerAngularVelocity)
+		centerAngularVelocity->Zero();
 
 	NOT_IMPLEMENTED
 }
@@ -591,7 +600,7 @@ bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **cont
 		if (contactManifold->getNumContacts() <= 0)
 			continue;
 
-		// Does it matter what the index is, or should we just return the first point of contact?
+		// Interface specifies this function as a hack - return any point of contact.
 		btManifoldPoint bullContactPoint = contactManifold->getContactPoint(0);
 
 		if (obA == m_pObject) {
@@ -647,7 +656,7 @@ void CPhysicsObject::UpdateShadow(const Vector &targetPosition, const QAngle &ta
 }
 
 int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
-	if (!position && !angles) return 1;
+	if (!m_pShadow || (!position && !angles)) return 1;
 
 	btTransform transform;
 	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
@@ -658,6 +667,7 @@ int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 	if (angles)
 		ConvertRotationToHL(transform.getBasis(), *angles);
 
+	// Ticks simulated since last UpdateShadow()
 	return 0; // return pVEnv->GetSimulatedPSIs();
 }
 
@@ -792,7 +802,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	if (pParams) {
 		m_pGameData		= pParams->pGameData;
 		m_pName			= pParams->pName;
-		m_fVolume		= pParams->volume;
+		m_fVolume		= pParams->volume * CUBIC_METERS_PER_CUBIC_INCH;
 		EnableCollisions(pParams->enableCollisions);
 	}
 
@@ -837,10 +847,10 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	}
 
 	if (isStatic) {
-		pObject->setCollisionFlags(pObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
-		pEnv->GetBulletEnvironment()->addRigidBody(pObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+		m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
 	} else {
-		pEnv->GetBulletEnvironment()->addRigidBody(pObject);
+		m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject);
 	}
 }
 

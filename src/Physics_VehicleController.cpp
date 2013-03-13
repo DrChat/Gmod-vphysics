@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+#include <cmodel.h>
+
 #include "Physics_Object.h"
 #include "Physics_VehicleController.h"
 #include "Physics_Environment.h"
@@ -16,6 +18,17 @@
 /*********************************
 * MISC CLASSES
 *********************************/
+
+class CDefaultCarWheelTracer : public IPhysicsVehicleWheelTrace {
+	public:
+		CDefaultCarWheelTracer(btRaycastVehicle *pVehicle);
+
+		IPhysicsObject *CastRay(int wheelIndex, const Vector &start, const Vector &end, trace_t &result) {
+
+		}
+	private:
+		btRaycastVehicle *m_pVehicle;
+};
 
 // Purpose: This ray will ignore a body AND detect water for use in airboats.
 struct CDetectWaterRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
@@ -362,22 +375,12 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 	if (m_vehicleParams.engine.isAutoTransmission) {
 		// Estimate the engine RPM
 		float avgRotSpeed = 0;
-
-		bool skid = false;
 		for (int i = 0; i < m_iWheelCount; i++) {
 			btWheelInfo wheelInfo = m_pRaycastVehicle->getWheelInfo(i);
 
-			float rotSpeed = fabs(wheelInfo.m_deltaRotation * wheelInfo.m_wheelsRadius);
+			float rotSpeed = fabs(wheelInfo.m_deltaRotation / dt);
 			avgRotSpeed += rotSpeed;
-
-			if (rotSpeed > absSpeed + 0.1)
-				skid = true;
 		}
-
-		// Locked wheels?
-		if (controls.handbrake && absSpeed > 0.762)
-			skid = true;
-		skid = skid && m_vehicleParams.steering.isSkidAllowed;
 
 		avgRotSpeed *= 0.5f / M_PI / m_iWheelCount;
 
@@ -398,7 +401,8 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 			m_vehicleState.gear--;
 			estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * 60;
 		}
-		m_vehicleState.engineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * 60;
+
+		m_vehicleState.engineRPM = estEngineRPM;
 	}
 
 	// Speed governor
@@ -520,20 +524,32 @@ void CPhysicsVehicleController::VehicleDataReload() {
 ******/
 
 // force appears to be in newtons. Correct this if it's wrong.
+// UNEXPOSED
 void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
 		Assert(0);
 		return;
 	}
+
+	// convert from kg*in/s to kg*m/s
+	force *= METERS_PER_INCH;
+	m_pRaycastVehicle->applyEngineForce(force, wheelIndex);
 }
 
+// UNEXPOSED
 void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
 		Assert(0);
 		return;
 	}
+
+	// convert from kg*in/s to kg*m/s
+	brakeVal *= METERS_PER_INCH;
+	m_pRaycastVehicle->setBrake(brakeVal, wheelIndex);
 }
 
+
+// UNEXPOSED
 void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
 		Assert(0);

@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+#include <cmodel.h>
+
 #include "Physics_Environment.h"
 #include "Physics.h"
 #include "Physics_Object.h"
@@ -575,11 +577,13 @@ void SerializeWorld_f(const CCommand &args) {
 		if (pFile) {
 			fwrite(pSerializer->getBufferPointer(), pSerializer->getCurrentBufferSize(), 1, pFile);
 			fclose(pFile);
+		} else {
+			Warning("Couldn't open testfile.bullet for writing!\n");
 		}
 	}
 }
 
-static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (0=server, 1=client), Dumps \"testfile.bullet\" out to the exe directory.");
+static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client), Dumps \"testfile.bullet\" out to the exe directory.");
 
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", 0, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
 void CPhysicsEnvironment::Simulate(float deltaTime) {

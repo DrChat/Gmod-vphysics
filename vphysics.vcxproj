@@ -62,7 +62,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>_WINDLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
@@ -80,19 +80,28 @@
       <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
       <LargeAddressAware>true</LargeAddressAware>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <CustomBuildStep>
-      <Command>echo RUNNING COMMAND
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\source sdk base 2007\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\source sdk base 2007\bin\vphysics.dll"
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\source sdk base 2007\bin\"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\"</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Message>Copying dll</Message>
-      <Outputs>C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll;%(Outputs)</Outputs>
-      <Inputs>$(TargetPath)</Inputs>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>if defined VPHYSICS_GAME_PATH (
+ attrib -r "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ del "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ copy "$(TargetPath)" "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+)</Command>
+      <Message>Copy vphysics. Make sure VPHYSICS_GAME_PATH points to the exe dir</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -101,7 +110,7 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PreprocessorDefinitions>_WINDLL;_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;_RELEASE;BT_USE_SSE_IN_API;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <Optimization>MaxSpeed</Optimization>
@@ -122,17 +131,25 @@ copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presi
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <CustomBuildStep>
-      <Command>echo RUNNING COMMAND
-if exist "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll"
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\vphysics.dll"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Valve\HLServer\orangebox\bin\"
-copy "$(TargetDir)"vphysics.dll "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\bin\"</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Message>Copying dll</Message>
-      <Outputs>C:\Program Files (x86)\Valve\HLServer\orangebox\bin\vphysics.dll;%(Outputs)</Outputs>
-      <Inputs>$(TargetPath)</Inputs>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>if defined VPHYSICS_GAME_PATH (
+ attrib -r "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ del "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ copy "$(TargetPath)" "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+)</Command>
+      <Message>Copy vphysics. Make sure VPHYSICS_GAME_PATH points to the exe dir</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\DebugDrawer.cpp" />

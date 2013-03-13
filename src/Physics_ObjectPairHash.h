@@ -1,6 +1,8 @@
 #ifndef CPHYSICSOBJECTPAIRHASH_H
 #define CPHYSICSOBJECTPAIRHASH_H
 
+#include <vphysics/object_hash.h>
+
 struct pair_hash_list {
 	void *object0;
 	void *object1;

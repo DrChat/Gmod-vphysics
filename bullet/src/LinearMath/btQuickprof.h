@@ -154,21 +154,21 @@ public:
 	static	float						Get_Time_Since_Reset( void );
 
 	static	CProfileIterator *			Get_Iterator( void )	
-	{ 
-		
+	{
 		return new CProfileIterator( &Root ); 
 	}
+
 	static	void						Release_Iterator( CProfileIterator * iterator ) { delete ( iterator); }
 
-	static void	dumpRecursive(CProfileIterator* profileIterator, int spacing);
+	static void	Dump_Recursive(CProfileIterator* profileIterator, int spacing);
 
-	static void	dumpAll();
+	static void	Dump_All();
 
 private:
 	static	CProfileNode			Root;
 	static	CProfileNode *			CurrentNode;
 	static	int						FrameCounter;
-	static	unsigned long int					ResetTime;
+	static	unsigned long int		ResetTime;
 };
 
 

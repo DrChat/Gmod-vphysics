@@ -21,6 +21,7 @@ CPhysicsSurfaceProps::~CPhysicsSurfaceProps() {
 
 int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pTextfile) {
 	if (!AddFileToDatabase(pFilename)) return 0;
+	DevMsg("VPhysics: Parsing surface data (file: %s)\n", pFilename);
 
 	KeyValues *surfprops = new KeyValues("CPhysicsSurfaceProps");
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
@@ -136,13 +137,13 @@ int CPhysicsSurfaceProps::GetSurfaceIndex(const char *pSurfacePropName) const {
 	return -1;
 }
 
-void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float *density, float *thickness, float *friction, float *elasticity) const  {
+void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float *density, float *thickness, float *friction, float *elasticity) const {
 	const CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
 	if (pSurface) {
-		if (friction) *friction = (float)pSurface->data.physics.friction;
-		if (elasticity) *elasticity = (float)pSurface->data.physics.elasticity;
-		if (density) *density = pSurface->data.physics.density;
-		if (thickness) *thickness = pSurface->data.physics.thickness;
+		if (friction) *friction		= pSurface->data.physics.friction;
+		if (elasticity) *elasticity = pSurface->data.physics.elasticity;
+		if (density) *density		= pSurface->data.physics.density;
+		if (thickness) *thickness	= pSurface->data.physics.thickness;
 	}
 }
 
@@ -150,6 +151,7 @@ surfacedata_t *CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
 	CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
 	if (!pSurface) pSurface = GetInternalSurface(GetSurfaceIndex("default"));
 	assert(pSurface);
+
 	return &pSurface->data;
 }
 

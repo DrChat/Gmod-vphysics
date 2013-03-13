@@ -63,12 +63,14 @@
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <CustomBuildStep>
-      <Command>echo RUNNING COMMAND
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\$(TargetName)$(TargetExt)" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\$(TargetName)$(TargetExt)"
-copy "$(TargetDir)"$(TargetName)$(TargetExt) "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\$(TargetName)$(TargetExt)"</Command>
-      <Message>Copying dll</Message>
-      <Outputs>C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\gmsv_vphysics.dll</Outputs>
-      <Inputs>$(TargetPath)</Inputs>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -89,12 +91,14 @@ copy "$(TargetDir)"$(TargetName)$(TargetExt) "C:\Program Files (x86)\Steam\steam
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;vstdlib.lib;mathlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
-      <Command>echo RUNNING COMMAND
-if exist "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\$(TargetName)$(TargetExt)" attrib -r "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\$(TargetName)$(TargetExt)"
-copy "$(TargetDir)"$(TargetName)$(TargetExt) "C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\$(TargetName)$(TargetExt)"</Command>
-      <Message>Copying dll</Message>
-      <Outputs>C:\Program Files (x86)\Steam\steamapps\da_presidents_assistant\garrysmod\garrysmod\lua\bin\gmsv_vphysics.dll</Outputs>
-      <Inputs>$(TargetPath)</Inputs>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
+      <Inputs>
+      </Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>

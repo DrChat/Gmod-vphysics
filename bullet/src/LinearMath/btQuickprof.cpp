@@ -22,47 +22,41 @@ static btClock gProfileClock;
 
 
 #ifdef __CELLOS_LV2__
-#include <sys/sys_time.h>
-#include <sys/time_util.h>
-#include <stdio.h>
+	#include <sys/sys_time.h>
+	#include <sys/time_util.h>
+	#include <stdio.h>
 #endif
 
 #if defined (SUNOS) || defined (__SUNOS__) 
-#include <stdio.h> 
+	#include <stdio.h> 
 #endif
 
 #if defined(WIN32) || defined(_WIN32)
-
-#define BT_USE_WINDOWS_TIMERS
-#define WIN32_LEAN_AND_MEAN
-#define NOWINRES
-#define NOMCX
-#define NOIME 
-
-#ifdef _XBOX
-	#include <Xtl.h>
-#else //_XBOX
-	#include <windows.h>
-#endif //_XBOX
-
-#include <time.h>
-#include <stdio.h>
-
-
+	#define BT_USE_WINDOWS_TIMERS
+	#define WIN32_LEAN_AND_MEAN
+	#define NOWINRES
+	#define NOMCX
+	#define NOIME 
+	
+	#ifdef _XBOX
+		#include <Xtl.h>
+	#else //_XBOX
+		#include <windows.h>
+	#endif //_XBOX
+	
+	#include <time.h>
+	#include <stdio.h>
 #else //_WIN32
-#include <sys/time.h>
+	#include <sys/time.h>
 #endif //_WIN32
-
-#define mymin(a, b) ((a) > (b) ? (a) : (b))
 
 struct btClockData
 {
-
 #ifdef BT_USE_WINDOWS_TIMERS
-	LARGE_INTEGER mClockFrequency;
-	DWORD mStartTick;
-	LONGLONG mPrevElapsedTime;
-	LARGE_INTEGER mStartTime;
+	LARGE_INTEGER	mClockFrequency;
+	DWORD			mStartTick;
+	LONGLONG		mPrevElapsedTime;
+	LARGE_INTEGER	mStartTime;
 #else
 #ifdef __CELLOS_LV2__
 	uint64_t	mStartTime;
@@ -70,7 +64,6 @@ struct btClockData
 	struct timeval mStartTime;
 #endif
 #endif //__CELLOS_LV2__
-
 };
 
 ///The btClock is a portable basic clock that measures accurate time in seconds, use for profiling.
@@ -101,7 +94,7 @@ btClock& btClock::operator=(const btClock& other)
 }
 
 
-	/// Resets the initial reference time.
+// Resets the initial reference time.
 void btClock::reset()
 {
 #ifdef BT_USE_WINDOWS_TIMERS
@@ -122,8 +115,8 @@ void btClock::reset()
 #endif
 }
 
-/// Returns the time in ms since the last call to reset or since 
-/// the btClock was created.
+// Returns the time in ms since the last call to reset or since 
+// the btClock was created.
 unsigned long int btClock::getTimeMilliseconds()
 {
 #ifdef BT_USE_WINDOWS_TIMERS
@@ -131,55 +124,55 @@ unsigned long int btClock::getTimeMilliseconds()
 	QueryPerformanceCounter(&currentTime);
 	LONGLONG elapsedTime = currentTime.QuadPart - 
 		m_data->mStartTime.QuadPart;
-		// Compute the number of millisecond ticks elapsed.
+
+	// Compute the number of millisecond ticks elapsed.
 	unsigned long msecTicks = (unsigned long)(1000 * elapsedTime / 
 		m_data->mClockFrequency.QuadPart);
-		// Check for unexpected leaps in the Win32 performance counter.  
+
+	// Check for unexpected leaps in the Win32 performance counter.  
 	// (This is caused by unexpected data across the PCI to ISA 
-		// bridge, aka south bridge.  See Microsoft KB274323.)
-		unsigned long elapsedTicks = GetTickCount() - m_data->mStartTick;
-		signed long msecOff = (signed long)(msecTicks - elapsedTicks);
-		if (msecOff < -100 || msecOff > 100)
-		{
-			// Adjust the starting time forwards.
-			LONGLONG msecAdjustment = min(msecOff * 
-				m_data->mClockFrequency.QuadPart / 1000, elapsedTime - 
-				m_data->mPrevElapsedTime);
-			m_data->mStartTime.QuadPart += msecAdjustment;
-			elapsedTime -= msecAdjustment;
+	// bridge, aka south bridge.  See Microsoft KB274323.)
+	unsigned long elapsedTicks = GetTickCount() - m_data->mStartTick;
+	signed long msecOff = (signed long)(msecTicks - elapsedTicks);
+	if (msecOff < -100 || msecOff > 100)
+	{
+		// Adjust the starting time forwards.
+		LONGLONG msecAdjustment = min(msecOff * 
+			m_data->mClockFrequency.QuadPart / 1000, elapsedTime - 
+			m_data->mPrevElapsedTime);
+		m_data->mStartTime.QuadPart += msecAdjustment;
+		elapsedTime -= msecAdjustment;
 
-			// Recompute the number of millisecond ticks elapsed.
-			msecTicks = (unsigned long)(1000 * elapsedTime / 
-				m_data->mClockFrequency.QuadPart);
-		}
+		// Recompute the number of millisecond ticks elapsed.
+		msecTicks = (unsigned long)(1000 * elapsedTime / 
+			m_data->mClockFrequency.QuadPart);
+	}
 
-		// Store the current elapsed time for adjustments next time.
-		m_data->mPrevElapsedTime = elapsedTime;
+	// Store the current elapsed time for adjustments next time.
+	m_data->mPrevElapsedTime = elapsedTime;
 
-		return msecTicks;
+	return msecTicks;
 #else
-
 #ifdef __CELLOS_LV2__
-		uint64_t freq=sys_time_get_timebase_frequency();
-		double dFreq=((double) freq) / 1000.0;
-		typedef uint64_t  ClockSize;
-		ClockSize newTime;
-		SYS_TIMEBASE_GET( newTime );
-		//__asm __volatile__( "mftb %0" : "=r" (newTime) : : "memory");
+	uint64_t freq=sys_time_get_timebase_frequency();
+	double dFreq=((double) freq) / 1000.0;
+	typedef uint64_t  ClockSize;
+	ClockSize newTime;
+	SYS_TIMEBASE_GET( newTime );
+	//__asm __volatile__( "mftb %0" : "=r" (newTime) : : "memory");
 
-		return (unsigned long int)((double(newTime-m_data->mStartTime)) / dFreq);
+	return (unsigned long int)((double(newTime-m_data->mStartTime)) / dFreq);
 #else
-
-		struct timeval currentTime;
-		gettimeofday(&currentTime, 0);
-		return (currentTime.tv_sec - m_data->mStartTime.tv_sec) * 1000 + 
-			(currentTime.tv_usec - m_data->mStartTime.tv_usec) / 1000;
+	struct timeval currentTime;
+	gettimeofday(&currentTime, 0);
+	return (currentTime.tv_sec - m_data->mStartTime.tv_sec) * 1000 + 
+		(currentTime.tv_usec - m_data->mStartTime.tv_usec) / 1000;
 #endif //__CELLOS_LV2__
 #endif
 }
 
-	/// Returns the time in us since the last call to reset or since 
-	/// the Clock was created.
+// Returns the time in us since the last call to reset or since 
+// the Clock was created.
 unsigned long int btClock::getTimeMicroseconds()
 {
 #ifdef BT_USE_WINDOWS_TIMERS
@@ -240,9 +233,9 @@ unsigned long int btClock::getTimeMicroseconds()
 
 
 
-inline void Profile_Get_Ticks(unsigned long int * ticks)
+inline void Profile_Get_Ticks(unsigned long int & ticks)
 {
-	*ticks = gProfileClock.getTimeMicroseconds();
+	ticks = gProfileClock.getTimeMicroseconds();
 }
 
 inline float Profile_Get_Tick_Rate(void)
@@ -284,7 +277,7 @@ CProfileNode::CProfileNode( const char * name, CProfileNode * parent ) :
 }
 
 
-void	CProfileNode::CleanupMemory()
+void CProfileNode::CleanupMemory()
 {
 	delete ( Child);
 	Child = NULL;
@@ -327,7 +320,7 @@ CProfileNode * CProfileNode::Get_Sub_Node( const char * name )
 }
 
 
-void	CProfileNode::Reset( void )
+void CProfileNode::Reset( void )
 {
 	TotalCalls = 0;
 	TotalTime = 0.0f;
@@ -342,20 +335,20 @@ void	CProfileNode::Reset( void )
 }
 
 
-void	CProfileNode::Call( void )
+void CProfileNode::Call( void )
 {
 	TotalCalls++;
 	if (RecursionCounter++ == 0) {
-		Profile_Get_Ticks(&StartTime);
+		Profile_Get_Ticks(StartTime);
 	}
 }
 
 
-bool	CProfileNode::Return( void )
+bool CProfileNode::Return( void )
 {
 	if ( --RecursionCounter == 0 && TotalCalls != 0 ) { 
 		unsigned long int time;
-		Profile_Get_Ticks(&time);
+		Profile_Get_Ticks(time);
 		time-=StartTime;
 		TotalTime += (float)time / Profile_Get_Tick_Rate();
 	}
@@ -375,25 +368,25 @@ CProfileIterator::CProfileIterator( CProfileNode * start )
 }
 
 
-void	CProfileIterator::First(void)
+void CProfileIterator::First(void)
 {
 	CurrentChild = CurrentParent->Get_Child();
 }
 
 
-void	CProfileIterator::Next(void)
+void CProfileIterator::Next(void)
 {
 	CurrentChild = CurrentChild->Get_Sibling();
 }
 
 
-bool	CProfileIterator::Is_Done(void)
+bool CProfileIterator::Is_Done(void)
 {
 	return CurrentChild == NULL;
 }
 
 
-void	CProfileIterator::Enter_Child( int index )
+void CProfileIterator::Enter_Child( int index )
 {
 	CurrentChild = CurrentParent->Get_Child();
 	while ( (CurrentChild != NULL) && (index != 0) ) {
@@ -408,7 +401,7 @@ void	CProfileIterator::Enter_Child( int index )
 }
 
 
-void	CProfileIterator::Enter_Parent( void )
+void CProfileIterator::Enter_Parent( void )
 {
 	if ( CurrentParent->Get_Parent() != NULL ) {
 		CurrentParent = CurrentParent->Get_Parent();
@@ -426,7 +419,7 @@ void	CProfileIterator::Enter_Parent( void )
 CProfileNode	CProfileManager::Root( "Root", NULL );
 CProfileNode *	CProfileManager::CurrentNode = &CProfileManager::Root;
 int				CProfileManager::FrameCounter = 0;
-unsigned long int			CProfileManager::ResetTime = 0;
+unsigned long int CProfileManager::ResetTime = 0;
 
 
 /***********************************************************************************************
@@ -442,7 +435,7 @@ unsigned long int			CProfileManager::ResetTime = 0;
  * The string used is assumed to be a static string; pointer compares are used throughout      *
  * the profiling code for efficiency.                                                          *
  *=============================================================================================*/
-void	CProfileManager::Start_Profile( const char * name )
+void CProfileManager::Start_Profile( const char * name )
 {
 	if (name != CurrentNode->Get_Name()) {
 		CurrentNode = CurrentNode->Get_Sub_Node( name );
@@ -455,7 +448,7 @@ void	CProfileManager::Start_Profile( const char * name )
 /***********************************************************************************************
  * CProfileManager::Stop_Profile -- Stop timing and record the results.                       *
  *=============================================================================================*/
-void	CProfileManager::Stop_Profile( void )
+void CProfileManager::Stop_Profile( void )
 {
 	// Return will indicate whether we should back up to our parent (we may
 	// be profiling a recursive function)
@@ -470,13 +463,13 @@ void	CProfileManager::Stop_Profile( void )
  *                                                                                             *
  *    This resets everything except for the tree structure.  All of the timing data is reset.  *
  *=============================================================================================*/
-void	CProfileManager::Reset( void )
+void CProfileManager::Reset( void )
 { 
 	gProfileClock.reset();
 	Root.Reset();
 	Root.Call();
 	FrameCounter = 0;
-	Profile_Get_Ticks(&ResetTime);
+	Profile_Get_Ticks(ResetTime);
 }
 
 
@@ -495,12 +488,15 @@ void CProfileManager::Increment_Frame_Counter( void )
 float CProfileManager::Get_Time_Since_Reset( void )
 {
 	unsigned long int time;
-	Profile_Get_Ticks(&time);
+	Profile_Get_Ticks(time);
 	time -= ResetTime;
 	return (float)time / Profile_Get_Tick_Rate();
 }
 
-void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spacing)
+/***********************************************************************************************
+ * CProfileManager::Dump_Recursive -- dumps all the profiled timings to printf					*
+ *=============================================================================================*/
+void CProfileManager::Dump_Recursive(CProfileIterator* profileIterator, int spacing)
 {
 	profileIterator->First();
 	if (profileIterator->Is_Done())
@@ -534,7 +530,7 @@ void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spaci
 
 	if (parent_time < accumulated_time)
 	{
-		printf("what's wrong\n");
+		printf("what's wrong (parent_time[%f] < accumulated_time[%f])\n", parent_time, accumulated_time);
 	}
 	for (i=0;i<spacing;i++)	printf(".");
 	printf("%s (%.3f %%) :: %.3f ms\n", "Unaccounted:", parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f, parent_time - accumulated_time);
@@ -542,19 +538,20 @@ void	CProfileManager::dumpRecursive(CProfileIterator* profileIterator, int spaci
 	for (i=0;i<numChildren;i++)
 	{
 		profileIterator->Enter_Child(i);
-		dumpRecursive(profileIterator, spacing+3);
+		Dump_Recursive(profileIterator, spacing+3);
 		profileIterator->Enter_Parent();
 	}
 }
 
-
-
-void	CProfileManager::dumpAll()
+/***********************************************************************************************
+ * CProfileManager::Dump_All -- dumps all the profiled timings to printf						*
+ *=============================================================================================*/
+void CProfileManager::Dump_All()
 {
 	CProfileIterator* profileIterator = 0;
 	profileIterator = CProfileManager::Get_Iterator();
 
-	dumpRecursive(profileIterator,0);
+	Dump_Recursive(profileIterator,0);
 
 	CProfileManager::Release_Iterator(profileIterator);
 }

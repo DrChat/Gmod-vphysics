@@ -2,6 +2,7 @@
 #define CPHYSICSVEHICLECONTROLLER_H
 
 #include <vphysics/vehicles.h>
+#include "vphysics/vehiclesV32.h"
 
 class IPhysicsObject;
 class CPhysicsObject;
@@ -15,7 +16,8 @@ class btRaycastVehicle;
 class IPhysicsVehicleWheelTrace {
 	public:
 		// Return the object if the ray hits, otherwise NULL
-		IPhysicsObject *					CastRay(int wheelIndex, const Vector &start, const Vector &end);
+		// Also, be sure to fill the result trace.
+		virtual IPhysicsObject *					CastRay(int wheelIndex, const Vector &start, const Vector &end, trace_t &result) = 0;
 };
 
 class CPhysicsVehicleController : public IPhysicsVehicleController1 {
@@ -67,6 +69,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 		CPhysicsObject *					AddWheel();
 
 		// New handling code
+		// force in kg*in/s
 		void								SetWheelForce(int wheelIndex, float force);
 		void								SetWheelBrake(int wheelIndex, float brakeVal);
 		// steerVal is in degrees!

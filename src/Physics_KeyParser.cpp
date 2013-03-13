@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 
 #include <tier1/KeyValues.h>
+#include <vphysics/constraints.h>
 
 #include "Physics_KeyParser.h"
 #include "Physics_SurfaceProps.h"

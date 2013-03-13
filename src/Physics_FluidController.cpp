@@ -121,31 +121,8 @@ void CPhysicsFluidController::Tick(float dt) {
 		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();
 		body->applyCentralForce(force);
 
-		/*
-		int numManifolds = m_pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
-		for (int j = 0; j < numManifolds; j++) {
-			btPersistentManifold *pManifold = m_pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(j);
-			const btCollisionObject *obA = pManifold->getBody0();
-			const btCollisionObject *obB = pManifold->getBody1();
-
-			int numContacts = pManifold->getNumContacts();
-			if (numContacts <= 0)
-				continue;
-
-			// obA collides with obB. Because we're static, we cannot collide with anything.
-			if (obB == m_pGhostObject && obA == body) {
-				for (int k = 0; k < numContacts; k++) {
-					btManifoldPoint manPoint = pManifold->getContactPoint(k);
-					btVector3 pos = manPoint.getPositionWorldOnA();
-
-					body->applyForce(force, pos);
-				}
-			}
-		}
-		*/
-
 		// Damping
-		// FIXME: Damping would be way too much for an object barely touching our surface.
+		// FIXME: Damping would be way too much for an object only partially touching our surface.
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
 	}

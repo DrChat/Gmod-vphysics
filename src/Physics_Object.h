@@ -162,7 +162,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								ComputeDragBasis(bool isStatic);
 
 		float								GetVolume() const { return m_fVolume; }
-		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; }
+		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; } // [0..1] value
 
 		int									GetLastActivationState() { return m_iLastActivationState; }
 		void								SetLastActivationState(int iState) { m_iLastActivationState = iState; }
