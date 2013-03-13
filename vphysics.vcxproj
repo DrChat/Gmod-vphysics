@@ -96,8 +96,11 @@
     </CustomBuildStep>
     <PostBuildEvent>
       <Command>if defined VPHYSICS_GAME_PATH (
- attrib -r "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
- del "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ if exist "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)" (
+  attrib -r "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+  del "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ )
+ 
  copy "$(TargetPath)" "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
 )</Command>
       <Message>Copy vphysics. Make sure VPHYSICS_GAME_PATH points to the exe dir</Message>
@@ -144,8 +147,11 @@
     </CustomBuildStep>
     <PostBuildEvent>
       <Command>if defined VPHYSICS_GAME_PATH (
- attrib -r "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
- del "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ if exist "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)" (
+  attrib -r "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+  del "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
+ )
+ 
  copy "$(TargetPath)" "%VPHYSICS_GAME_PATH%\bin\$(TargetFileName)"
 )</Command>
       <Message>Copy vphysics. Make sure VPHYSICS_GAME_PATH points to the exe dir</Message>

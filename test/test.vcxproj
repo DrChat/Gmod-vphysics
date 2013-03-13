@@ -88,12 +88,6 @@
   <ItemGroup>
     <ClCompile Include="test.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\vphysics.vcxproj">
-      <Project>{d14b5456-0069-453d-a86a-d5b4cb35c6dd}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
