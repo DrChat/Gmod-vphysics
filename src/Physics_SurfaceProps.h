@@ -29,6 +29,7 @@ class CPhysicsSurfaceProps : public IPhysicsSurfaceProps {
 		void					SetWorldMaterialIndexTable(int *pMapArray, int mapSize);
 
 		void					GetPhysicsParameters(int surfaceDataIndex, surfacephysicsparams_t *pParamsOut) const;
+
 	private:
 		int						GetReservedSurfaceIndex(const char *pSurfacePropName) const;
 
@@ -37,6 +38,7 @@ class CPhysicsSurfaceProps : public IPhysicsSurfaceProps {
 
 		void					CopyPhysicsProperties(CSurface *pOut, int baseIndex);
 		bool					AddFileToDatabase(const char *pFilename);
+
 	private:
 		CUtlSymbolTable *		m_strings;
 		CUtlVector<CUtlSymbol>	m_soundList;

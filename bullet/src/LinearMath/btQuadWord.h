@@ -73,7 +73,8 @@ public:
 
 	public:
   
-#if defined(BT_USE_SSE) || defined(BT_USE_NEON)
+// Dr. Chat: Applied fix @ http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?t=8915
+#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
 
 	// Set Vector 
 	SIMD_FORCE_INLINE btQuadWord(const btSimdFloat4 vec)
@@ -130,12 +131,12 @@ public:
 	SIMD_FORCE_INLINE	bool	operator==(const btQuadWord& other) const
 	{
 #ifdef BT_USE_SSE
-        return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
+		return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
 #else 
 		return ((m_floats[3]==other.m_floats[3]) && 
-                (m_floats[2]==other.m_floats[2]) && 
-                (m_floats[1]==other.m_floats[1]) && 
-                (m_floats[0]==other.m_floats[0]));
+				(m_floats[2]==other.m_floats[2]) && 
+				(m_floats[1]==other.m_floats[1]) && 
+				(m_floats[0]==other.m_floats[0]));
 #endif
 	}
 
@@ -209,33 +210,33 @@ public:
    */
 		SIMD_FORCE_INLINE void	setMax(const btQuadWord& other)
 		{
-        #ifdef BT_USE_SSE
-            mVec128 = _mm_max_ps(mVec128, other.mVec128);
-        #elif defined(BT_USE_NEON)
-            mVec128 = vmaxq_f32(mVec128, other.mVec128);
-        #else
-        	btSetMax(m_floats[0], other.m_floats[0]);
+		#ifdef BT_USE_SSE
+			mVec128 = _mm_max_ps(mVec128, other.mVec128);
+		#elif defined(BT_USE_NEON)
+			mVec128 = vmaxq_f32(mVec128, other.mVec128);
+		#else
+			btSetMax(m_floats[0], other.m_floats[0]);
 			btSetMax(m_floats[1], other.m_floats[1]);
 			btSetMax(m_floats[2], other.m_floats[2]);
 			btSetMax(m_floats[3], other.m_floats[3]);
 		#endif
-        }
+		}
   /**@brief Set each element to the min of the current values and the values of another btQuadWord
    * @param other The other btQuadWord to compare with 
    */
 		SIMD_FORCE_INLINE void	setMin(const btQuadWord& other)
 		{
-        #ifdef BT_USE_SSE
-            mVec128 = _mm_min_ps(mVec128, other.mVec128);
-        #elif defined(BT_USE_NEON)
-            mVec128 = vminq_f32(mVec128, other.mVec128);
-        #else
-        	btSetMin(m_floats[0], other.m_floats[0]);
+		#ifdef BT_USE_SSE
+			mVec128 = _mm_min_ps(mVec128, other.mVec128);
+		#elif defined(BT_USE_NEON)
+			mVec128 = vminq_f32(mVec128, other.mVec128);
+		#else
+			btSetMin(m_floats[0], other.m_floats[0]);
 			btSetMin(m_floats[1], other.m_floats[1]);
 			btSetMin(m_floats[2], other.m_floats[2]);
 			btSetMin(m_floats[3], other.m_floats[3]);
 		#endif
-        }
+		}
 
 
 

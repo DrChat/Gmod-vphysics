@@ -217,7 +217,6 @@ void CPlayerController::Tick(float deltaTime) {
 
 	btRigidBody *body = m_pObject->GetObject();
 	CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
-	btDynamicsWorld *world = pEnv->GetBulletEnvironment();
 
 	float psiScale = pEnv->GetInvPSIScale();
 	if (!psiScale) return;
@@ -239,7 +238,7 @@ void CPlayerController::Tick(float deltaTime) {
 
 	/*
 	if (!m_onground) {
-		btVector3 pgrav = world->getGravity();
+		btVector3 pgrav = pEnv->GetBulletEnvironment()->getGravity();
 		btVector3 gravSpeed = pgrav * deltaTime;
 		body->setLinearVelocity(body->getLinearVelocity() - gravSpeed);
 	}

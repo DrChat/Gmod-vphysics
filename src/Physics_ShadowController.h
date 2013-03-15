@@ -20,8 +20,9 @@ struct shadowcontrol_params_t {
 class CShadowController : public IController, public IPhysicsShadowController
 {
 	public:
-								CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation);
-								~CShadowController();
+		CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation);
+		~CShadowController();
+
 		void					Update(const Vector &position, const QAngle &angles, float timeOffset);
 		void					MaxSpeed(float maxSpeed, float maxAngularSpeed);
 		void					StepUp(float height);
@@ -49,15 +50,21 @@ class CShadowController : public IController, public IPhysicsShadowController
 		void					AttachObject();
 		void					DetachObject();
 
+		// NOTE: If you add more than 8 flags, change the m_flags variable type to a short.
+		enum EShadowFlags {
+			FLAG_ALLOWPHYSICSMOVEMENT	= 1<<0,
+			FLAG_ALLOWPHYSICSROTATION	= 1<<1,
+			FLAG_PHYSICALLYCONTROLLED	= 1<<2,
+			FLAG_USESHADOWMATERIAL		= 1<<3,
+		};
+
 		CPhysicsObject *		m_pObject;
 		float					m_secondsToArrival;
 		btVector3				m_currentSpeed;
 		float					m_savedMass;
 		int						m_savedMaterialIndex;
 		bool					m_enable;
-		bool					m_allowPhysicsMovement;
-		bool					m_allowPhysicsRotation;
-		bool					m_bPhysicallyControlled;
+		char					m_flags;
 		shadowcontrol_params_t	m_shadow;
 };
 

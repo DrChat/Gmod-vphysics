@@ -120,12 +120,10 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_shadow.dampFactor = 1.0f;
 	m_shadow.teleportDistance = 0;
 	m_shadow.targetPosition.setZero();
-	memset(&m_shadow.targetRotation, 0, sizeof(btQuaternion)); // HACK: Shit fucking access violation randomly caused by below line in release builds
-	//m_shadow.targetRotation = btQuaternion(0, 0, 0, 1);
-	m_bPhysicallyControlled = false;
+	m_shadow.targetRotation = btQuaternion::getIdentity();
 
-	m_allowPhysicsMovement = allowTranslation;
-	m_allowPhysicsRotation = allowRotation;
+	SetAllowsTranslation(allowTranslation);
+	SetAllowsRotation(allowRotation);
 	AttachObject();
 }
 
@@ -139,7 +137,7 @@ void CShadowController::Tick(float deltaTime) {
 		// TODO: Figure out the intended behavior and set accordingly. We may just want to smoothly move the object
 		// to point B without applying velocities to achieve this. IVP shadows don't respond to collisions, and
 		// neither should we.
-		if (m_bPhysicallyControlled) {
+		if (IsPhysicallyControlled()) {
 			ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
 			m_secondsToArrival -= deltaTime;
 			if (m_secondsToArrival < 0) m_secondsToArrival = 0;
@@ -225,27 +223,27 @@ void CShadowController::SetTeleportDistance(float teleportDistance) {
 }
 
 bool CShadowController::AllowsTranslation() {
-	return m_allowPhysicsMovement;
+	return (m_flags & FLAG_ALLOWPHYSICSMOVEMENT) > 0;
 }
 
 bool CShadowController::AllowsRotation() {
-	return m_allowPhysicsRotation;
-}
-
-void CShadowController::SetAllowsTranslation(bool enable) {
-	m_allowPhysicsMovement = enable;
-}
-
-void CShadowController::SetAllowsRotation(bool enable) {
-	m_allowPhysicsRotation = enable;
-}
-
-void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {
-	m_bPhysicallyControlled = isPhysicallyControlled;
+	return (m_flags & FLAG_ALLOWPHYSICSROTATION) > 0;
 }
 
 bool CShadowController::IsPhysicallyControlled() {
-	return m_bPhysicallyControlled;
+	return (m_flags & FLAG_PHYSICALLYCONTROLLED) > 0;
+}
+
+void CShadowController::SetAllowsTranslation(bool enable) {
+	enable ? m_flags |= FLAG_ALLOWPHYSICSMOVEMENT : m_flags &= ~(FLAG_ALLOWPHYSICSMOVEMENT);
+}
+
+void CShadowController::SetAllowsRotation(bool enable) {
+	enable ? m_flags |= FLAG_ALLOWPHYSICSROTATION : m_flags &= ~(FLAG_ALLOWPHYSICSROTATION);
+}
+
+void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {
+	isPhysicallyControlled ? m_flags |= FLAG_PHYSICALLYCONTROLLED : m_flags &= ~(FLAG_PHYSICALLYCONTROLLED);
 }
 
 // NPCs call this
@@ -298,7 +296,7 @@ void CShadowController::AttachObject() {
 
 	m_pObject->SetMaterialIndex(MATERIAL_INDEX_SHADOW);
 
-	if (!m_allowPhysicsMovement) {
+	if (!AllowsTranslation()) {
 		m_pObject->SetMass(0);
 		m_pObject->EnableGravity(false);
 	}

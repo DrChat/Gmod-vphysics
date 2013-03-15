@@ -72,6 +72,18 @@
       <Inputs>
       </Inputs>
     </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>if defined VPHYSICS_GAME_PATH (
+ if exist "%VPHYSICS_GAME_PATH%\garrysmod" (
+  if exist "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)" (
+   attrib -r "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)"
+   del "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)"
+  )
+
+  copy "$(TargetPath)" "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)"
+ )
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -100,6 +112,18 @@
       <Inputs>
       </Inputs>
     </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>if defined VPHYSICS_GAME_PATH (
+ if exist "%VPHYSICS_GAME_PATH%\garrysmod" (
+  if exist "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)" (
+   attrib -r "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)"
+   del "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)"
+  )
+
+  copy "$(TargetPath)" "%VPHYSICS_GAME_PATH%\garrysmod\lua\bin\$(TargetFileName)"
+ )
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

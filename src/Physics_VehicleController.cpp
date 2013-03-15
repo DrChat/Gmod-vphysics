@@ -464,7 +464,7 @@ int CPhysicsVehicleController::GetWheelCount() {
 IPhysicsObject *CPhysicsVehicleController::GetWheel(int index) {
 	if (index >= m_iWheelCount || index < 0) return NULL;
 
-	if (m_iVehicleType = VEHICLE_TYPE_CAR_WHEELS) {
+	if (m_iVehicleType == VEHICLE_TYPE_CAR_WHEELS) {
 		return m_pWheels[index];
 	}
 
