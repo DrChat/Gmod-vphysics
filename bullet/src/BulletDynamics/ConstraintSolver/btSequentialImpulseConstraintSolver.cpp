@@ -640,7 +640,8 @@ void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstra
 						bodyA->internalApplyImpulse(solverConstraint.m_contactNormal1*bodyA->internalGetInvMass()*rb0->getLinearFactor(), solverConstraint.m_angularComponentA, solverConstraint.m_appliedImpulse);
 					if (rb1)
 						bodyB->internalApplyImpulse(-solverConstraint.m_contactNormal2*bodyB->internalGetInvMass()*rb1->getLinearFactor(),-solverConstraint.m_angularComponentB,-(btScalar)solverConstraint.m_appliedImpulse);
-				} else
+				}
+				else
 				{
 					solverConstraint.m_appliedImpulse = 0.f;
 				}
@@ -669,7 +670,8 @@ void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstra
 						positionalError = 0;
 
 						velocityError -= penetration / infoGlobal.m_timeStep;
-					} else
+					}
+					else
 					{
 						positionalError = -penetration * erp/infoGlobal.m_timeStep;
 					}
@@ -683,7 +685,8 @@ void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstra
 						solverConstraint.m_rhs = penetrationImpulse+velocityImpulse;
 						solverConstraint.m_rhsPenetration = 0.f;
 
-					} else
+					}
+					else
 					{
 						//split position and velocity into rhs and m_rhsPenetration
 						solverConstraint.m_rhs = velocityImpulse;

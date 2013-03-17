@@ -5,7 +5,9 @@
 #include "Physics_PlayerController.h"
 #include "Physics_Object.h"
 #include "Physics_SurfaceProps.h"
+
 #include "convert.h"
+#include "math.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
@@ -134,9 +136,6 @@ CShadowController::~CShadowController() {
 // UNEXPOSED
 void CShadowController::Tick(float deltaTime) {
 	if (m_enable) {
-		// TODO: Figure out the intended behavior and set accordingly. We may just want to smoothly move the object
-		// to point B without applying velocities to achieve this. IVP shadows don't respond to collisions, and
-		// neither should we.
 		if (IsPhysicallyControlled()) {
 			ComputeShadowControllerBull(m_pObject->GetObject(), m_shadow, m_secondsToArrival, deltaTime);
 			m_secondsToArrival -= deltaTime;
@@ -159,6 +158,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 	m_secondsToArrival = timeOffset < 0 ? 0 : timeOffset;
 
 	m_enable = true;
+	m_timeOffset = timeOffset;
 
 	if (IsEqual(targetPosition, m_shadow.targetPosition) && IsEqual(targetRotation, m_shadow.targetRotation)) return;
 
@@ -230,6 +230,9 @@ bool CShadowController::AllowsRotation() {
 	return (m_flags & FLAG_ALLOWPHYSICSROTATION) > 0;
 }
 
+// There are two classes of shadow objects:
+// 1) Game physics controlled, shadow follows game physics (this is the default)
+// 2) Physically controlled - shadow position is a target, but the game hasn't guaranteed that the space can be occupied by this object
 bool CShadowController::IsPhysicallyControlled() {
 	return (m_flags & FLAG_PHYSICALLYCONTROLLED) > 0;
 }
@@ -267,7 +270,7 @@ void CShadowController::ObjectMaterialChanged(int materialIndex) {
 	NOT_IMPLEMENTED
 }
 
-// FIXME: What do we return? Ticks since last update?
+// Basically get the last inputs to IPhysicsShadowController::Update(), returns last input to timeOffset in Update()
 float CShadowController::GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut) {
 	if (!pPositionOut && !pAnglesOut) return 0;
 
@@ -277,7 +280,7 @@ float CShadowController::GetTargetPosition(Vector *pPositionOut, QAngle *pAngles
 	if (pAnglesOut)
 		ConvertRotationToHL(m_shadow.targetRotation, *pAnglesOut);
 
-	return 0;
+	return m_timeOffset;
 }
 
 float CShadowController::GetTeleportDistance() {

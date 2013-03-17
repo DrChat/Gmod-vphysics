@@ -9,8 +9,9 @@ class btPersistentManifold;
 class CPhysicsFrictionSnapshot : public IPhysicsFrictionSnapshot
 {
 	public:
-											CPhysicsFrictionSnapshot(CPhysicsObject *pObject);
-											~CPhysicsFrictionSnapshot();
+		CPhysicsFrictionSnapshot(CPhysicsObject *pObject);
+		~CPhysicsFrictionSnapshot();
+
 		bool								IsValid();
 
 		IPhysicsObject *					GetObject(int index);

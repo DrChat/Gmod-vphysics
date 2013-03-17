@@ -52,15 +52,8 @@ bool CPhysicsObject::IsStatic() const {
 	return (m_pObject->getCollisionFlags() & btCollisionObject::CF_STATIC_OBJECT);
 }
 
-// Returning true will cause most traces to fail, making the object almost impossible to interact with.
-// Also note the lag doesn't stop when the game is paused, indicating that it isn't caused
-// by physics simulations.
-// Lag caused by IVEngineServer::SolidMoved
-// Perhaps the game is receiving flawed data somewhere, as the engine makes almost no calls to vphysics
 bool CPhysicsObject::IsAsleep() const {
-	//return m_pObject->getActivationState() == ISLAND_SLEEPING;
-	// FIXME: Returning true ensues an extreme lag storm, figure out why since this fix is counter-effective
-	return false;
+	return m_pObject->getActivationState() == ISLAND_SLEEPING;
 }
 
 bool CPhysicsObject::IsTrigger() const {
@@ -156,7 +149,7 @@ void CPhysicsObject::EnableMotion(bool enable) {
 	} else {
 		m_pObject->setLinearVelocity(btVector3(0, 0, 0));
 		m_pObject->setAngularVelocity(btVector3(0, 0, 0));
-
+		
 		m_pObject->setLinearFactor(btVector3(0, 0, 0));
 		m_pObject->setAngularFactor(0);
 	}
@@ -220,8 +213,20 @@ void CPhysicsObject::RecheckContactPoints() {
 	// FIXME: Should we be doing anything here?
 }
 
+void CPhysicsObject::UpdateCollide() {
+	btVector3 inertia;
+
+	btCollisionShape *pShape = m_pObject->getCollisionShape();
+	pShape->calculateLocalInertia(m_fMass, inertia);
+
+	m_pObject->setMassProps(m_fMass, inertia);
+	m_pObject->updateInertiaTensor();
+}
+
 void CPhysicsObject::SetMass(float mass) {
 	if (IsStatic()) return;
+
+	m_fMass = mass;
 
 	btVector3 inertia = m_pObject->getInvInertiaDiagLocal();
 
@@ -234,18 +239,17 @@ void CPhysicsObject::SetMass(float mass) {
 }
 
 float CPhysicsObject::GetMass() const {
-	btScalar invmass = m_pObject->getInvMass();
-	return SAFE_DIVIDE(1.0, invmass);
+	return m_fMass;
 }
 
 float CPhysicsObject::GetInvMass() const {
-	return m_pObject->getInvMass();
+	return SAFE_DIVIDE(1, m_fMass);
 }
 
 Vector CPhysicsObject::GetInertia() const {
 	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
 
-	// Invert the inverse intertia to get inertia
+	// Invert the inverse inertia to get inertia
 	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
 	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
 	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
@@ -789,7 +793,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_bIsSphere			= isSphere;
 	m_gameFlags			= 0;
 	m_bMotionEnabled	= !isStatic;
-	m_fMass				= GetMass();
+	m_fMass				= (pParams && !isStatic) ? pParams->mass : 0;
 	m_pGameData			= NULL;
 	m_pName				= NULL;
 	m_fVolume			= 0;

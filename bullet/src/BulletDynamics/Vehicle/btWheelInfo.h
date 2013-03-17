@@ -39,6 +39,19 @@ struct btWheelInfo
 {
 	struct RaycastInfo
 	{
+		// Dr. Chat: Applied fix @ http://code.google.com/p/bullet/issues/detail?id=701
+		RaycastInfo() :
+			m_contactNormalWS(0.0f, 0.0f, 0.0f),
+			m_contactPointWS(0.0f, 0.0f, 0.0f),
+			m_hardPointWS(0.0f, 0.0f, 0.0f),
+			m_wheelDirectionWS(0.0f, 0.0f, 0.0f),
+			m_wheelAxleWS(0.0f, 0.0f, 0.0f),
+			m_suspensionLength(0.0f),
+			m_isInContact(false),
+			m_groundObject(NULL)
+		{
+		}
+
 		//set by raycaster
 		btVector3	m_contactNormalWS;//contactnormal
 		btVector3	m_contactPointWS;//raycast hitpoint
@@ -59,7 +72,7 @@ struct btWheelInfo
 	btVector3	m_wheelAxleCS; // const or modified by steering
 	btScalar	m_suspensionRestLength1;//const
 	btScalar	m_maxSuspensionTravelCm;
-	btScalar getSuspensionRestLength() const;
+	btScalar	getSuspensionRestLength() const;
 	btScalar	m_wheelsRadius;//const
 	btScalar	m_suspensionStiffness;//const
 	btScalar	m_wheelsDampingCompression;//const

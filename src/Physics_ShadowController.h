@@ -62,6 +62,7 @@ class CShadowController : public IController, public IPhysicsShadowController
 		float					m_secondsToArrival;
 		btVector3				m_currentSpeed;
 		float					m_savedMass;
+		float					m_timeOffset;
 		int						m_savedMaterialIndex;
 		bool					m_enable;
 		char					m_flags;

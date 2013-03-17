@@ -29,6 +29,10 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		CPhysCollide *			ConvertPolysoupToCollide(CPhysPolysoup *pSoup, bool useMOPP);
 		CPhysCollide *			ConvertConvexToCollide(CPhysConvex **pConvex, int convexCount);
 		CPhysCollide *			ConvertConvexToCollideParams(CPhysConvex **pConvex, int convexCount, const convertconvexparams_t &convertParams);
+
+		void					AddConvexToCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex, const matrix3x4_t *xform = NULL);
+		void					RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex);
+
 		void					DestroyCollide(CPhysCollide *pCollide);
 		int						CollideSize(CPhysCollide *pCollide);
 		int						CollideWrite(char *pDest, CPhysCollide *pCollide, bool bSwap = false);
@@ -41,6 +45,8 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		void					CollideSetMassCenter(CPhysCollide *pCollide, const Vector &massCenter);
 		Vector					CollideGetOrthographicAreas(const CPhysCollide *pCollide);
 		void					CollideSetOrthographicAreas(CPhysCollide *pCollide, const Vector &areas);
+		void					CollideSetScale(CPhysCollide *pCollide, const Vector &scale);
+		void					CollideGetScale(const CPhysCollide *pCollide, Vector &scale);
 		int						CollideIndex(const CPhysCollide *pCollide);
 		int						GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit);
 
@@ -60,6 +66,7 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		void					TraceBox(const Ray_t &ray, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 		void					TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 		void					TraceCollide(const Vector &start, const Vector &end, const CPhysCollide *pSweepCollide, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
+		void					TraceConvex(const Vector &start, const Vector &end, const CPhysConvex *pSweepConvex, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *pTrace);
 
 		bool					IsBoxIntersectingCone(const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &cone);
 

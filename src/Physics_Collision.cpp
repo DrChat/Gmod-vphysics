@@ -13,6 +13,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+#define COLLISION_MARGIN 0.004 // 4 mm
+
 /****************************
 * CLASS CCollisionQuery
 ****************************/
@@ -179,6 +181,53 @@ CPhysCollide *CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pCon
 	return ConvertConvexToCollide(pConvex, convexCount);
 }
 
+void CPhysicsCollision::AddConvexToCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex, const matrix3x4_t *xform) {
+	if (!pCollide || !pConvex) return;
+
+	if (((btCollisionShape *)pCollide)->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+		btCollisionShape *pShape = (btCollisionShape *)pConvex;
+
+		btTransform trans = btTransform::getIdentity();
+		if (xform) {
+			ConvertMatrixToBull(*xform, trans);
+		}
+
+		pCompound->addChildShape(trans, pShape);
+	}
+}
+
+void CPhysicsCollision::RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex) {
+	if (!pCollide || !pConvex) return;
+
+	if (((btCollisionShape *)pCollide)->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+		btCollisionShape *pShape = (btCollisionShape *)pConvex;
+
+		pCompound->removeChildShape(pShape);
+	}
+}
+
+// Purpose: Recursive function that will go through all compounds and delete their children (recurses if a child is a compound shape)
+void DestroyCompoundShape(btCompoundShape *pCompound) {
+	if (!pCompound) return;
+	int numChildShapes = pCompound->getNumChildShapes();
+
+	// We're looping in reverse because we're removing objects from the compound shape.
+	for (int i = numChildShapes - 1; i >= 0; i--) {
+		btCollisionShape *pShape = pCompound->getChildShape(i);
+		if (pShape->isCompound()) {
+			DestroyCompoundShape((btCompoundShape *)pShape);
+		} else {
+			pCompound->removeChildShape(pShape);
+			delete pShape;
+		}
+	}
+
+	delete (PhysicsShapeInfo *)pCompound->getUserPointer();
+	delete pCompound;
+}
+
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 	if (!pCollide) return;
 
@@ -186,17 +235,10 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 
 	// Compound shape? Delete all of it's children.
 	if (pShape->isCompound()) {
-		btCompoundShape *pCompound = (btCompoundShape *)pShape;
-		int numChildShapes = pCompound->getNumChildShapes();
-		for (int i = 0; i < numChildShapes; i++) {
-			delete (btCollisionShape *)pCompound->getChildShape(i);
-		}
-
-		// Also delete our PhysicsShapeInfo thing.
-		delete (PhysicsShapeInfo *)pCompound->getUserPointer();
+		DestroyCompoundShape((btCompoundShape *)pShape);
+	} else {
+		delete pShape;
 	}
-
-	delete pShape;
 }
 
 int CPhysicsCollision::CollideSize(CPhysCollide *pCollide) {
@@ -225,7 +267,7 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 }
 
 // This'll return the farthest possible vector that's still within our collision mesh.
-// direction argument is a normalized Vector, literally a direction.
+// direction argument is a normalized Vector, literally a direction. (to the center?)
 // TODO: Methods on doing this?
 // Does bullet provide any APIs for doing this?
 // Should we do a raytrace that starts outside of our mesh and goes inwards?
@@ -260,7 +302,6 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 	return collideOrigin;
 }
 
-// Called every frame when an object is reported to be asleep in CPhysicsObject::IsAsleep!
 void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles) {
 	VPROF_BUDGET("CPhysicsCollision::CollideGetAABB", VPROF_BUDGETGROUP_PHYSICS);
 	if (!pCollide || (!pMins && !pMaxs)) return;
@@ -277,15 +318,28 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
 	if (shapeInfo)
-		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
+		transform.setOrigin(transform.getOrigin() + shapeInfo->massCenter);
 
 	shape->getAabb(transform, mins, maxs);
+
+	Assert(mins.x() <= maxs.x());
+	Assert(mins.y() <= maxs.y());
+	Assert(mins.z() <= maxs.z());
 
 	if (pMins)
 		ConvertPosToHL(mins, *pMins);
 
 	if (pMaxs)
 		ConvertPosToHL(maxs, *pMaxs);
+
+	if (pMins && pMaxs) {
+		// FYI: This is the cause of the CPhysicsObject::IsAsleep() engine lag:
+		// We're returning bad AABBs
+
+		Assert(pMins->x <= pMaxs->x);
+		Assert(pMins->y <= pMaxs->y);
+		Assert(pMins->z <= pMaxs->z);
+	}
 }
 
 void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOutMassCenter) {
@@ -323,6 +377,29 @@ Vector CPhysicsCollision::CollideGetOrthographicAreas(const CPhysCollide *pColli
 
 void CPhysicsCollision::CollideSetOrthographicAreas(CPhysCollide *pCollide, const Vector &areas) {
 	NOT_IMPLEMENTED
+}
+
+void CPhysicsCollision::CollideSetScale(CPhysCollide *pCollide, const Vector &scale) {
+	if (!pCollide) return;
+
+	if (((btCollisionShape *)pCollide)->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+
+		btVector3 bullScale;
+		ConvertPosToBull(scale, bullScale);
+
+		pCompound->setLocalScaling(bullScale);
+	}
+}
+
+void CPhysicsCollision::CollideGetScale(const CPhysCollide *pCollide, Vector &out) {
+	if (!pCollide) return;
+
+	if (((btCollisionShape *)pCollide)->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+
+		ConvertPosToHL(pCompound->getLocalScaling(), out);
+	}
 }
 
 int CPhysicsCollision::CollideIndex(const CPhysCollide *pCollide) {

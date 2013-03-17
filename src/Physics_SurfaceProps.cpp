@@ -202,14 +202,11 @@ const CSurface *CPhysicsSurfaceProps::GetInternalSurface(int materialIndex) cons
 }
 
 void CPhysicsSurfaceProps::CopyPhysicsProperties(CSurface *pOut, int baseIndex) {
+	if (!pOut) return;
+
 	const CSurface *pSurface = GetInternalSurface(baseIndex);
 	if (pSurface) {
-		pOut->data.physics.density = pSurface->data.physics.density;
-		pOut->data.physics.thickness = pSurface->data.physics.thickness;
-		pOut->data.physics.friction = pSurface->data.physics.friction;
-		pOut->data.physics.elasticity = pSurface->data.physics.elasticity;
-
-		pOut->data.game.material = pSurface->data.game.material;
+		pOut->data.physics = pSurface->data.physics;
 	}
 }
 

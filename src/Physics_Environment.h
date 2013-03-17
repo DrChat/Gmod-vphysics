@@ -111,6 +111,7 @@ public:
 	
 	void									TraceRay(const Ray_t &ray, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace);
 	void									SweepCollideable(const CPhysCollide *pCollide, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace);
+	void									SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace);
 
 	void									GetPerformanceSettings(physics_performanceparams_t *pOutput) const;
 	void									SetPerformanceSettings(const physics_performanceparams_t *pSettings);
@@ -134,9 +135,6 @@ public:
 	void									DoCollisionEvents(float dt);
 
 	void									HandleConstraintBroken(CPhysicsConstraint *pConstraint); // Call this if you're a constraint that was just broken.
-
-	// To be exposed functions
-	void									SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace);
 
 	// Soft body functions we'll expose at a later time...
 private:

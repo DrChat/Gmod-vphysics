@@ -6,6 +6,7 @@ class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
 
+// Bullet uses this so we can sync the graphics representation of the object.
 struct btMassCenterMotionState : public btMotionState {
 	btTransform	m_centerOfMassOffset;
 	btTransform m_worldTrans;
@@ -64,13 +65,16 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								RecheckCollisionFilter();
 		void								RecheckContactPoints();
 
+		// Call this if you have recently changed the collision shape we're using.
+		void								UpdateCollide();
+
 		void								SetMass(float mass);
 		float								GetMass() const;
 		float								GetInvMass() const;
 
 		Vector								GetInertia() const;
 		Vector								GetInvInertia() const;
-		void								SetInertia(const Vector& inertia);
+		void								SetInertia(const Vector &inertia);
 
 		void								SetGravity(const Vector &gravityVector);
 		Vector								GetGravity() const;
