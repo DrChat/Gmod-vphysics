@@ -322,20 +322,21 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	shape->getAabb(transform, mins, maxs);
 
-	Assert(mins.x() <= maxs.x());
-	Assert(mins.y() <= maxs.y());
-	Assert(mins.z() <= maxs.z());
+	btVector3 delta = maxs - mins;
+	btVector3 halfextents = delta / 2;
+
+	Vector hlHalfExtents;
+	ConvertPosToHL(halfextents, hlHalfExtents);
+	// Half life's AABBs use different corners.
+	hlHalfExtents.y = -hlHalfExtents.y;
 
 	if (pMins)
-		ConvertPosToHL(mins, *pMins);
+		*pMins = collideOrigin - hlHalfExtents;
 
 	if (pMaxs)
-		ConvertPosToHL(maxs, *pMaxs);
+		*pMaxs = collideOrigin + hlHalfExtents;
 
 	if (pMins && pMaxs) {
-		// FYI: This is the cause of the CPhysicsObject::IsAsleep() engine lag:
-		// We're returning bad AABBs
-
 		Assert(pMins->x <= pMaxs->x);
 		Assert(pMins->y <= pMaxs->y);
 		Assert(pMins->z <= pMaxs->z);
@@ -361,6 +362,8 @@ void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vecto
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
 	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
+
+	// TODO: Compound shape? Move all children to -massCenter
 
 	if (pInfo) {
 		btVector3 bullMassCenter;
