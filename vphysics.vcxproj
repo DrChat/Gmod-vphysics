@@ -186,7 +186,6 @@
   <ItemGroup>
     <ClInclude Include="include\vphysics\vehiclesV32.h" />
     <ClInclude Include="include\vphysics_interfaceV32.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="src\DebugDrawer.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\phydata.h" />
@@ -208,13 +207,14 @@
     <ClInclude Include="src\Physics_ShadowController.h" />
     <ClInclude Include="src\IController.h" />
     <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="todo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="vphysics.rc" />
+    <ResourceCompile Include="src\vphysics.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
