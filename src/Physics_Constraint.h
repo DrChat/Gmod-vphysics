@@ -4,6 +4,7 @@
 #include <vphysics/constraints.h>
 
 class CPhysicsEnvironment;
+class CPhysicsConstraintGroup;
 
 enum EConstraintType {
 	CONSTRAINT_UNKNOWN,
