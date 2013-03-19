@@ -389,7 +389,9 @@ void CPhysicsCollision::CollideSetScale(CPhysCollide *pCollide, const Vector &sc
 		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
 
 		btVector3 bullScale;
-		ConvertPosToBull(scale, bullScale);
+		bullScale.setX(scale.x);
+		bullScale.setY(scale.y);
+		bullScale.setZ(scale.z);
 
 		pCompound->setLocalScaling(bullScale);
 	}
@@ -401,7 +403,10 @@ void CPhysicsCollision::CollideGetScale(const CPhysCollide *pCollide, Vector &ou
 	if (((btCollisionShape *)pCollide)->isCompound()) {
 		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
 
-		ConvertPosToHL(pCompound->getLocalScaling(), out);
+		btVector3 scale = pCompound->getLocalScaling();
+		out.x = scale.x();
+		out.y = scale.y();
+		out.z = scale.z();
 	}
 }
 
@@ -431,6 +436,9 @@ CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &m
 	ConvertPosToBull(mins, btmins);
 	ConvertPosToBull(maxs, btmaxs);
 	btVector3 halfSize = (btmaxs - btmins) / 2;
+	// HL AABBs use different corners.
+	halfSize.setZ(-halfSize.z());
+
 	btBoxShape *box = new btBoxShape(halfSize.absolute());
 
 	return (CPhysConvex *)box;
@@ -446,9 +454,11 @@ CPhysCollide *CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 	btVector3 btmins, btmaxs;
 	ConvertPosToBull(mins, btmins);
 	ConvertPosToBull(maxs, btmaxs);
-	btVector3 halfsize = (btmaxs - btmins) / 2;
+	btVector3 halfSize = (btmaxs - btmins) / 2;
+	// HL AABBs use different corners.
+	halfSize.setZ(-halfSize.z());
 
-	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfsize), (btCollisionShape *)pConvex);
+	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfSize), (btCollisionShape *)pConvex);
 	return (CPhysCollide *)pCompound;
 }
 
@@ -459,6 +469,8 @@ CPhysConvex *CPhysicsCollision::CylinderToConvex(const Vector &mins, const Vecto
 	ConvertPosToBull(mins, btmins);
 	ConvertPosToBull(maxs, btmaxs);
 	btVector3 halfSize = (btmaxs - btmins) / 2;
+	// HL AABBs use different corners.
+	halfSize.setZ(-halfSize.z());
 
 	btCylinderShape *pShape = new btCylinderShape(halfSize.absolute());
 
@@ -671,9 +683,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
 		if (surfaceheader->vphysicsID != MAKEID('V', 'P', 'H', 'Y')
-				|| surfaceheader->version != 0x100
-				|| surfaceheader->modelType != 0x0
-				|| ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) {
+		 || surfaceheader->version != 0x100
+		 || surfaceheader->modelType != 0x0
+		 || ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) {
 			Warning("VPhysics: Could not load mesh! (bad/unsupported file format)");
 			pOutput->solids[i] = NULL;
 			continue;

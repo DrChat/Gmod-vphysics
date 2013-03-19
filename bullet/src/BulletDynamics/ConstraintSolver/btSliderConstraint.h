@@ -67,7 +67,7 @@ protected:
 	bool		m_useSolveConstraintObsolete;
 	bool		m_useOffsetForConstraintFrame;
 	btTransform	m_frameInA;
-    btTransform	m_frameInB;
+	btTransform	m_frameInB;
 	// use frameA fo define limits, if true
 	bool m_useLinearReferenceFrameA;
 	// linear limits
@@ -121,11 +121,11 @@ protected:
 	btJacobianEntry	m_jacLin[3];
 	btScalar		m_jacLinDiagABInv[3];
 
-    btJacobianEntry	m_jacAng[3];
+	btJacobianEntry	m_jacAng[3];
 
 	btScalar m_timeStep;
-    btTransform m_calculatedTransformA;
-    btTransform m_calculatedTransformB;
+	btTransform m_calculatedTransformA;
+	btTransform m_calculatedTransformB;
 
 	btVector3 m_sliderAxis;
 	btVector3 m_realPivotAInW;
@@ -143,14 +143,14 @@ protected:
 	btScalar m_kAngle;
 
 	bool	 m_poweredLinMotor;
-    btScalar m_targetLinMotorVelocity;
-    btScalar m_maxLinMotorForce;
-    btScalar m_accumulatedLinMotorImpulse;
+	btScalar m_targetLinMotorVelocity;
+	btScalar m_maxLinMotorForce;
+	btScalar m_accumulatedLinMotorImpulse;
 	
 	bool	 m_poweredAngMotor;
-    btScalar m_targetAngMotorVelocity;
-    btScalar m_maxAngMotorForce;
-    btScalar m_accumulatedAngMotorImpulse;
+	btScalar m_targetAngMotorVelocity;
+	btScalar m_maxAngMotorForce;
+	btScalar m_accumulatedAngMotorImpulse;
 
 	//------------------------    
 	void initParams();
@@ -158,12 +158,12 @@ public:
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 	
 	// constructors
-    btSliderConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB, bool useLinearReferenceFrameA);
-    btSliderConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameA);
+	btSliderConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB, bool useLinearReferenceFrameA);
+	btSliderConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameA);
 
 	// overrides
 
-    virtual void getInfo1 (btConstraintInfo1* info);
+	virtual void getInfo1 (btConstraintInfo1* info);
 
 	void getInfo1NonVirtual(btConstraintInfo1* info);
 	
@@ -173,22 +173,22 @@ public:
 
 
 	// access
-    const btRigidBody& getRigidBodyA() const { return m_rbA; }
-    const btRigidBody& getRigidBodyB() const { return m_rbB; }
-    const btTransform & getCalculatedTransformA() const { return m_calculatedTransformA; }
-    const btTransform & getCalculatedTransformB() const { return m_calculatedTransformB; }
-    const btTransform & getFrameOffsetA() const { return m_frameInA; }
-    const btTransform & getFrameOffsetB() const { return m_frameInB; }
-    btTransform & getFrameOffsetA() { return m_frameInA; }
-    btTransform & getFrameOffsetB() { return m_frameInB; }
-    btScalar getLowerLinLimit() { return m_lowerLinLimit; }
-    void setLowerLinLimit(btScalar lowerLimit) { m_lowerLinLimit = lowerLimit; }
-    btScalar getUpperLinLimit() { return m_upperLinLimit; }
-    void setUpperLinLimit(btScalar upperLimit) { m_upperLinLimit = upperLimit; }
-    btScalar getLowerAngLimit() { return m_lowerAngLimit; }
-    void setLowerAngLimit(btScalar lowerLimit) { m_lowerAngLimit = btNormalizeAngle(lowerLimit); }
-    btScalar getUpperAngLimit() { return m_upperAngLimit; }
-    void setUpperAngLimit(btScalar upperLimit) { m_upperAngLimit = btNormalizeAngle(upperLimit); }
+	const btRigidBody& getRigidBodyA() const { return m_rbA; }
+	const btRigidBody& getRigidBodyB() const { return m_rbB; }
+	const btTransform & getCalculatedTransformA() const { return m_calculatedTransformA; }
+	const btTransform & getCalculatedTransformB() const { return m_calculatedTransformB; }
+	const btTransform & getFrameOffsetA() const { return m_frameInA; }
+	const btTransform & getFrameOffsetB() const { return m_frameInB; }
+	btTransform & getFrameOffsetA() { return m_frameInA; }
+	btTransform & getFrameOffsetB() { return m_frameInB; }
+	btScalar getLowerLinLimit() { return m_lowerLinLimit; }
+	void setLowerLinLimit(btScalar lowerLimit) { m_lowerLinLimit = lowerLimit; }
+	btScalar getUpperLinLimit() { return m_upperLinLimit; }
+	void setUpperLinLimit(btScalar upperLimit) { m_upperLinLimit = upperLimit; }
+	btScalar getLowerAngLimit() { return m_lowerAngLimit; }
+	void setLowerAngLimit(btScalar lowerLimit) { m_lowerAngLimit = btNormalizeAngle(lowerLimit); }
+	btScalar getUpperAngLimit() { return m_upperAngLimit; }
+	void setUpperAngLimit(btScalar upperLimit) { m_upperAngLimit = btNormalizeAngle(upperLimit); }
 	bool getUseLinearReferenceFrameA() { return m_useLinearReferenceFrameA; }
 	btScalar getSoftnessDirLin() { return m_softnessDirLin; }
 	btScalar getRestitutionDirLin() { return m_restitutionDirLin; }

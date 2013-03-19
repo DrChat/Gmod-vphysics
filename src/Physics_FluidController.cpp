@@ -29,16 +29,14 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 		m_vSurfacePlane = pParams->surfacePlane;
 	}
 
-	m_fDensity = 1.0f;
+	//m_fDensity = 1.0f;
 
 	// FIXME: The below density is correct (kg/m^3, close to 1000). Adjust our calculations in Tick
-	/*
 	int matIndex = pFluidObject->GetMaterialIndex();
 	surfacedata_t *pSurface = g_SurfaceDatabase.GetSurfaceData(matIndex);
 	if (pSurface) {
 		m_fDensity = pSurface->physics.density;
 	}
-	*/
 
 	pFluidObject->EnableCollisions(false);
 	pFluidObject->SetContents(m_iContents);

@@ -95,7 +95,7 @@ public:
 	void									SetQuickDelete(bool bQuick);
 
 	int										GetActiveObjectCount() const;
-	void									GetActiveObjects(IPhysicsObject **pOutputObjectList ) const;
+	void									GetActiveObjects(IPhysicsObject **pOutputObjectList) const;
 	const IPhysicsObject **					GetObjectList(int *pOutputObjectCount) const;
 	bool									TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment);
 

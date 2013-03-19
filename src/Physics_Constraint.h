@@ -19,7 +19,7 @@ enum EConstraintType {
 
 class CPhysicsConstraint : public IPhysicsConstraint {
 	public:
-		CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
+		CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstraintGroup *pGroup, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
 		~CPhysicsConstraint();
 
 		void					Activate();
@@ -42,8 +42,9 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 
 		// UNEXPOSED FUNCTIONS
 	protected:
-		CPhysicsObject *		m_pReferenceObject;	// Reference object
-		CPhysicsObject *		m_pAttachedObject;	// Attached object
+		CPhysicsObject *		m_pReferenceObject;
+		CPhysicsObject *		m_pAttachedObject;
+		CPhysicsConstraintGroup *m_pGroup;
 		btTypedConstraint *		m_pConstraint;
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;

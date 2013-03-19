@@ -125,14 +125,19 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 * CLASS CPhysicsConstraint
 *********************************/
 
-CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint, EConstraintType type) {
+CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstraintGroup *pGroup, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint, EConstraintType type) {
 	m_pReferenceObject = pReferenceObject;
 	m_pAttachedObject = pAttachedObject;
 	m_pConstraint = pConstraint;
+	m_pGroup = (CPhysicsConstraintGroup *)pGroup; // May be NULL in the case of spring constraints.
 	m_pEnv = pEnv;
 	m_type = type;
 
 	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
+
+	if (m_pGroup) {
+		m_pGroup->AddConstraint(this);
+	}
 }
 
 CPhysicsConstraint::~CPhysicsConstraint() {
@@ -175,45 +180,6 @@ bool CPhysicsConstraint::GetConstraintParams(constraint_breakableparams_t *pPara
 void CPhysicsConstraint::OutputDebugInfo() {
 	Msg("-------------------\n");
 	Msg("%s constraint\n", GetConstraintName(m_type));
-}
-
-/************************
-* CLASS CPhysicsSpring
-************************/
-// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE CPhysicsEnvironment::DestroySpring!!!
-
-CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint)
-	: CPhysicsConstraint(pEnv, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
-	
-}
-
-CPhysicsSpring::~CPhysicsSpring() {
-
-}
-
-void CPhysicsSpring::GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd) {
-	if (!worldPositionStart && !worldPositionEnd) return;
-	NOT_IMPLEMENTED
-}
-
-void CPhysicsSpring::SetSpringConstant(float flSpringContant) {
-	NOT_IMPLEMENTED
-}
-
-void CPhysicsSpring::SetSpringDamping(float flSpringDamping) {
-	NOT_IMPLEMENTED
-}
-
-void CPhysicsSpring::SetSpringLength(float flSpringLength) {
-	NOT_IMPLEMENTED
-}
-
-IPhysicsObject *CPhysicsSpring::GetStartObject() {
-	return m_pReferenceObject;
-}
-
-IPhysicsObject *CPhysicsSpring::GetEndObject() {
-	return m_pAttachedObject;
 }
 
 /*********************************
@@ -263,6 +229,45 @@ void CPhysicsConstraintGroup::RemoveConstraint(CPhysicsConstraint *pConstraint) 
 }
 
 /************************
+* CLASS CPhysicsSpring
+************************/
+// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE CPhysicsEnvironment::DestroySpring!!!
+
+CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint)
+	: CPhysicsConstraint(pEnv, NULL, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
+	
+}
+
+CPhysicsSpring::~CPhysicsSpring() {
+
+}
+
+void CPhysicsSpring::GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd) {
+	if (!worldPositionStart && !worldPositionEnd) return;
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsSpring::SetSpringConstant(float flSpringContant) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsSpring::SetSpringDamping(float flSpringDamping) {
+	NOT_IMPLEMENTED
+}
+
+void CPhysicsSpring::SetSpringLength(float flSpringLength) {
+	NOT_IMPLEMENTED
+}
+
+IPhysicsObject *CPhysicsSpring::GetStartObject() {
+	return m_pReferenceObject;
+}
+
+IPhysicsObject *CPhysicsSpring::GetEndObject() {
+	return m_pAttachedObject;
+}
+
+/************************
 * CREATION FUNCTIONS
 ************************/
 
@@ -297,7 +302,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	// swing span 1, swing span 2, twist limit
 	
 
-	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
 
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
@@ -312,7 +317,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	btTransform bullBFrame = btTransform::getIdentity();
 
 	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
-	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }
 
 CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed) {
@@ -326,7 +331,7 @@ CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	pWeld->setAngularLowerLimit(btVector3(0,0,0));
 	pWeld->setAngularUpperLimit(btVector3(0,0,0));
 
-	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
 }
 
 CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
@@ -357,7 +362,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	pSlider->setLowerAngLimit(0);
 	pSlider->setUpperAngLimit(0);
 
-	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pSlider, CONSTRAINT_SLIDING);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pSlider, CONSTRAINT_SLIDING);
 }
 
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
@@ -373,7 +378,7 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 
 	// TODO: Not the correct constraint.
 	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos);
-	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pBallsock, CONSTRAINT_BALLSOCKET);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pBallsock, CONSTRAINT_BALLSOCKET);
 }
 
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
@@ -394,5 +399,5 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
 	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, ConvertDistanceToBull(length.totalLength));
-	return new CPhysicsConstraint(pEnv, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
 }

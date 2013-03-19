@@ -21,7 +21,7 @@
 	- In the future, expose unexposed functions to the lua states under table physenv (or get garry to support them). Expose features such as:
 		- Soft bodies
 			- Would require alot of work on garry's part, such as networking, prediction, etc...
-		- Scaling of collision models
+		- Scaling of collision models (EXPOSED!)
 			- Vector(1, 1, 1) would be normal scale.
 		- ...
 	- IPhysicsCollisionEvent::Friction controls sound and effects! Implement this properly!
