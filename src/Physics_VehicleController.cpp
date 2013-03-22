@@ -418,14 +418,15 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 		const static float watt_per_hp = 745.0f;
 		const static float seconds_per_minute = 60.0f;
 
-		float brakeForce = controls.throttle * 
+		// TODO: Convert to NEWTONS!
+		float force = controls.throttle * 
 			m_vehicleParams.engine.horsepower * (watt_per_hp * seconds_per_minute) * 
 			m_vehicleParams.engine.gearRatio[m_vehicleState.gear]  * m_vehicleParams.engine.axleRatio / 
 			(m_vehicleParams.engine.maxRPM * (2 * M_PI));
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-			float wheelForce = brakeForce * m_vehicleParams.axles[i].torqueFactor * m_vehicleParams.axles[i].wheels.radius;
+			float wheelForce = force * m_vehicleParams.axles[i].torqueFactor * m_vehicleParams.axles[i].wheels.radius;
 
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 				m_pRaycastVehicle->applyEngineForce(wheelForce, wheelIndex);

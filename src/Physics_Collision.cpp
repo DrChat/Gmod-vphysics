@@ -322,6 +322,16 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	shape->getAabb(transform, mins, maxs);
 
+	Vector tMins, tMaxs;
+	ConvertAABBToHL(mins, maxs, tMins, tMaxs);
+
+	if (pMins)
+		*pMins = tMins;
+
+	if (pMaxs)
+		*pMaxs = tMaxs;
+
+	/*
 	btVector3 delta = maxs - mins;
 	btVector3 halfextents = delta / 2;
 
@@ -341,6 +351,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 		Assert(pMins->y <= pMaxs->y);
 		Assert(pMins->z <= pMaxs->z);
 	}
+	*/
 }
 
 void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOutMassCenter) {
@@ -433,13 +444,10 @@ CPhysConvex *CPhysicsCollision::BBoxToConvex(const Vector &mins, const Vector &m
 	if (mins == maxs) return NULL;
 
 	btVector3 btmins, btmaxs;
-	ConvertPosToBull(mins, btmins);
-	ConvertPosToBull(maxs, btmaxs);
-	btVector3 halfSize = (btmaxs - btmins) / 2;
-	// HL AABBs use different corners.
-	halfSize.setZ(-halfSize.z());
+	ConvertAABBToBull(mins, maxs, btmins, btmaxs);
+	btVector3 halfExtents = (btmaxs - btmins) / 2;
 
-	btBoxShape *box = new btBoxShape(halfSize.absolute());
+	btBoxShape *box = new btBoxShape(halfExtents);
 
 	return (CPhysConvex *)box;
 }
@@ -452,13 +460,11 @@ CPhysCollide *CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 	pCompound->setMargin(COLLISION_MARGIN);
 
 	btVector3 btmins, btmaxs;
-	ConvertPosToBull(mins, btmins);
-	ConvertPosToBull(maxs, btmaxs);
-	btVector3 halfSize = (btmaxs - btmins) / 2;
-	// HL AABBs use different corners.
-	halfSize.setZ(-halfSize.z());
+	ConvertAABBToBull(mins, maxs, btmins, btmaxs);
 
-	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfSize), (btCollisionShape *)pConvex);
+	btVector3 halfExtents = (btmaxs - btmins) / 2;
+
+	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfExtents), (btCollisionShape *)pConvex);
 	return (CPhysCollide *)pCompound;
 }
 
@@ -466,13 +472,10 @@ CPhysConvex *CPhysicsCollision::CylinderToConvex(const Vector &mins, const Vecto
 	if (mins == maxs) return NULL;
 
 	btVector3 btmins, btmaxs;
-	ConvertPosToBull(mins, btmins);
-	ConvertPosToBull(maxs, btmaxs);
+	ConvertAABBToBull(mins, maxs, btmins, btmaxs);
 	btVector3 halfSize = (btmaxs - btmins) / 2;
-	// HL AABBs use different corners.
-	halfSize.setZ(-halfSize.z());
 
-	btCylinderShape *pShape = new btCylinderShape(halfSize.absolute());
+	btCylinderShape *pShape = new btCylinderShape(halfSize);
 
 	return (CPhysConvex *)pShape;
 }
@@ -485,8 +488,7 @@ CPhysCollide *CPhysicsCollision::CylinderToCollide(const Vector &mins, const Vec
 	pCompound->setMargin(COLLISION_MARGIN);
 
 	btVector3 btmins, btmaxs;
-	ConvertPosToBull(mins, btmins);
-	ConvertPosToBull(maxs, btmaxs);
+	ConvertAABBToBull(mins, maxs, btmins, btmaxs);
 	btVector3 halfsize = (btmaxs - btmins) / 2;
 
 	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfsize), (btCollisionShape *)pConvex);

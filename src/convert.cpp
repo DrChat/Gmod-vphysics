@@ -50,6 +50,46 @@ void ConvertPosToHL(const btVector3 &pos, Vector &hl) {
 	hl.z = BULL2HL(pos.y());
 }
 
+void ConvertAABBToBull(const Vector &hlMins, const Vector &hlMaxs, btVector3 &bullMins, btVector3 &bullMaxs) {
+	Assert(hlMins.x <= hlMaxs.x);
+	Assert(hlMins.y <= hlMaxs.y);
+	Assert(hlMins.z <= hlMaxs.z);
+
+	Vector halfExtents = (hlMaxs - hlMins) / 2;
+	btVector3 bullHalfExtents;
+	ConvertPosToBull(halfExtents, bullHalfExtents);
+
+	Vector center = hlMins + halfExtents;
+	btVector3 bullCenter;
+	ConvertPosToBull(center, bullCenter);
+
+	// Half Life AABBs use different corners.
+	bullHalfExtents.setZ(-bullHalfExtents.z());
+
+	bullMins = bullCenter - bullHalfExtents;
+	bullMaxs = bullCenter + bullHalfExtents;
+}
+
+void ConvertAABBToHL(const btVector3 &bullMins, const btVector3 &bullMaxs, Vector &hlMins, Vector &hlMaxs) {
+	Assert(bullMins.x() <= bullMaxs.x());
+	Assert(bullMins.y() <= bullMaxs.y());
+	Assert(bullMins.z() <= bullMaxs.z());
+
+	btVector3 halfExtents = (bullMaxs - bullMins) / 2;
+	Vector hlHalfExtents;
+	ConvertPosToHL(halfExtents, hlHalfExtents);
+
+	btVector3 center = bullMins + halfExtents;
+	Vector hlCenter;
+	ConvertPosToHL(center, hlCenter);
+
+	// Half Life AABBs use different corners.
+	hlHalfExtents.y = -hlHalfExtents.y;
+
+	hlMins = hlCenter - hlHalfExtents;
+	hlMaxs = hlCenter + hlHalfExtents;
+}
+
 void ConvertDirectionToBull(const Vector &dir, btVector3 &bull) {
 	bull.setX(dir.x);
 	bull.setY(dir.z);

@@ -298,13 +298,8 @@ Vector CPhysicsObject::GetGravity() const {
 void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
 	if (!speed && !rot) return;
 
-	if (speed && rot) {
-		m_pObject->setDamping(*speed, *rot);
-		return;
-	}
-
-	if (speed) m_pObject->setDamping(*speed, m_pObject->getAngularDamping());
-	if (rot) m_pObject->setDamping(m_pObject->getLinearDamping(), *rot);
+	m_pObject->setDamping(speed ? *speed : m_pObject->getLinearDamping(),
+						  rot ? *rot : m_pObject->getAngularDamping());
 }
 
 void CPhysicsObject::GetDamping(float *speed, float *rot) const {
@@ -339,6 +334,7 @@ void CPhysicsObject::SetMaterialIndex(int materialIndex) {
 		// FIXME: Figure out how to convert damping values.
 
 		// ratio = (mass / volume) / density
+		// or (actual density) / (prop density)
 		m_fBuoyancyRatio = SAFE_DIVIDE(SAFE_DIVIDE(m_fMass, m_fVolume), pSurface->physics.density);
 	}
 }
@@ -352,17 +348,8 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 }
 
 void CPhysicsObject::SetSleepThresholds(const float *linVel, const float *angVel) {
-	if (linVel && angVel) {
-		m_pObject->setSleepingThresholds(ConvertDistanceToBull(*linVel), DEG2RAD(*angVel));
-	}
-
-	if (linVel) {
-		m_pObject->setSleepingThresholds(ConvertDistanceToBull(*linVel), m_pObject->getAngularSleepingThreshold());
-	}
-
-	if (angVel) {
-		m_pObject->setSleepingThresholds(m_pObject->getLinearSleepingThreshold(), DEG2RAD(*angVel));
-	}
+	m_pObject->setSleepingThresholds(linVel ? ConvertDistanceToBull(*linVel) : m_pObject->getLinearSleepingThreshold(),
+									 angVel ? DEG2RAD(*angVel) : m_pObject->getAngularSleepingThreshold());
 }
 
 void CPhysicsObject::GetSleepThresholds(float *linVel, float *angVel) const {
