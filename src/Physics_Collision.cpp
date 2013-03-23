@@ -84,10 +84,12 @@ void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleInde
 ****************************/
 
 // NOTE:
-// CPhysCollide is a btCompoundShape
-// CPhysConvex is a btConvexHullShape
+// CPhysCollide is usually a btCompoundShape
+// CPhysConvex is usually a btConvexHullShape
 
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
+	if (!pVerts) return NULL;
+
 	btConvexHullShape *pConvex = new btConvexHullShape;
 
 	for (int i = 0; i < vertCount; i++) {
@@ -823,8 +825,11 @@ void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
 		}
 		Msg("---\n");
 	} else if (pShape->isConvex()) {
-		btConvexShape *pConvex = (btConvexShape *)pShape;
-		Msg("Margin: %f\n", pConvex->getMargin());
+		if (pShape->getShapeType() == CONVEX_HULL_SHAPE_PROXYTYPE) {
+			btConvexHullShape *pConvex = (btConvexHullShape *)pShape;
+			Msg("Margin: %f\n", pConvex->getMargin());
+			Msg("Num points: %d\n", pConvex->getNumPoints());
+		}
 	}
 }
 

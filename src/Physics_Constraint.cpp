@@ -196,7 +196,11 @@ void CPhysicsConstraint::OutputDebugInfo() {
 }
 
 void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
-	pObject == m_pAttachedObject ? m_pAttachedObject = NULL : m_pReferenceObject = NULL;
+	if (pObject == m_pAttachedObject)
+		m_pAttachedObject = NULL;
+
+	if (pObject == m_pReferenceObject)
+		m_pReferenceObject = NULL;
 }
 
 /*********************************

@@ -10,6 +10,30 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+class CPhysicsFluidCallback : public btGhostObjectCallback {
+	public:
+		CPhysicsFluidCallback(CPhysicsFluidController *pController) {
+			m_pController = pController;
+		}
+
+		void addedOverlappingObject(btCollisionObject *pObject) {
+			CPhysicsObject *pPhys = (CPhysicsObject *)pObject->getUserPointer();
+			if (!pPhys) return;
+
+			m_pController->ObjectAdded(pPhys);
+		}
+
+		void removedOverlappingObject(btCollisionObject *pObject) {
+			CPhysicsObject *pPhys = (CPhysicsObject *)pObject->getUserPointer();
+			if (!pPhys) return;
+
+			m_pController->ObjectRemoved(pPhys);
+		}
+
+	private:
+		CPhysicsFluidController *m_pController;
+};
+
 /********************************
 * CLASS CPhysicsFluidController
 ********************************/
@@ -42,8 +66,11 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 	pFluidObject->SetContents(m_iContents);
 	pFluidObject->SetFluidController(this);
 
+	m_pCallback = new CPhysicsFluidCallback(this);
+
 	m_pGhostObject = new btGhostObject;
 	m_pGhostObject->setUserPointer(pFluidObject);
+	m_pGhostObject->setCallback(m_pCallback);
 	m_pGhostObject->setCollisionShape(pFluidObject->GetObject()->getCollisionShape());
 	m_pGhostObject->setWorldTransform(pFluidObject->GetObject()->getWorldTransform());
 	m_pGhostObject->setCollisionFlags(m_pGhostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_STATIC_OBJECT);
@@ -53,6 +80,7 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 CPhysicsFluidController::~CPhysicsFluidController() {
 	m_pEnv->GetBulletEnvironment()->removeCollisionObject(m_pGhostObject);
 	delete m_pGhostObject;
+	delete m_pCallback;
 }
 
 void CPhysicsFluidController::WakeAllSleepingObjects() {
@@ -124,6 +152,16 @@ void CPhysicsFluidController::Tick(float dt) {
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
 	}
+}
+
+// UNEXPOSED
+void CPhysicsFluidController::ObjectAdded(CPhysicsObject *pObject) {
+	
+}
+
+// UNEXPOSED
+void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
+	
 }
 
 /************************

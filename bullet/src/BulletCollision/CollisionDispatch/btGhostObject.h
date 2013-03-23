@@ -27,6 +27,8 @@ class btConvexShape;
 
 class btDispatcher;
 
+class btGhostObjectCallback;
+
 ///The btGhostObject can keep track of all objects that are overlapping
 ///By default, this overlap is based on the AABB
 ///This is useful for creating a character controller, collision sensors/triggers, explosions etc.
@@ -36,6 +38,7 @@ ATTRIBUTE_ALIGNED16(class) btGhostObject : public btCollisionObject
 protected:
 
 	btAlignedObjectArray<btCollisionObject*> m_overlappingObjects;
+	btGhostObjectCallback*		m_callback;
 
 public:
 
@@ -75,6 +78,16 @@ public:
 	const btAlignedObjectArray<btCollisionObject*>	getOverlappingPairs() const
 	{
 		return m_overlappingObjects;
+	}
+
+	void	setCallback(btGhostObjectCallback* callback)
+	{
+		m_callback = callback;
+	}
+
+	btGhostObjectCallback*	getCallback() const
+	{
+		return m_callback;
 	}
 
 	//
@@ -118,6 +131,13 @@ public:
 
 };
 
+
+// Implement this class to handle callbacks in your code.
+class btGhostObjectCallback {
+	public:
+		virtual void	addedOverlappingObject(btCollisionObject* object) {};
+		virtual void	removedOverlappingObject(btCollisionObject* object) {};
+};
 
 
 ///The btGhostPairCallback interfaces and forwards adding and removal of overlapping pairs from the btBroadphaseInterface to btGhostObject.

@@ -37,7 +37,7 @@ public:
 	void									GetGravity(Vector* pGravityVector) const;
 
 	void									SetAirDensity(float density);
-	float									GetAirDensity(void) const;
+	float									GetAirDensity() const;
 	
 	IPhysicsObject *						CreatePolyObject(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
 	IPhysicsObject *						CreatePolyObjectStatic(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
@@ -156,13 +156,14 @@ private:
 	CUtlVector<IPhysicsObject *>			m_objects;
 	CUtlVector<IPhysicsObject *>			m_deadObjects;
 	CCollisionSolver *						m_pCollisionSolver;
-	IPhysicsCollisionEvent *				m_pCollisionEvent;
-	IPhysicsConstraintEvent *				m_pConstraintEvent;
 	CDeleteQueue *							m_pDeleteQueue;
 	CUtlVector<CPhysicsFluidController *>	m_fluids;
 	CPhysicsDragController *				m_pPhysicsDragController;
 	CUtlVector<IController*>				m_controllers;
 	IVPhysicsDebugOverlay *					m_pDebugOverlay;
+
+	IPhysicsCollisionEvent *				m_pCollisionEvent;
+	IPhysicsConstraintEvent *				m_pConstraintEvent;
 	IPhysicsObjectEvent *					m_pObjectEvent;
 
 	physics_performanceparams_t				m_perfparams;

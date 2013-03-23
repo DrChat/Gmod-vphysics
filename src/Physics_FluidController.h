@@ -4,6 +4,8 @@
 class CPhysicsObject;
 class CPhysicsEnvironment;
 
+class CPhysicsFluidCallback;
+
 #include "IController.h"
 
 class CPhysicsFluidController : public IPhysicsFluidController, public IController
@@ -19,7 +21,13 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		float					GetDensity() const;
 		void					WakeAllSleepingObjects();
 		int						GetContents() const;
+
+		// UNEXPOSED FUNCTIONS
+	public:
 		void					Tick(float deltaTime);
+
+		void					ObjectAdded(CPhysicsObject *pObject);
+		void					ObjectRemoved(CPhysicsObject *pObject);
 	private:
 		void *					m_pGameData;
 		int						m_iContents;
@@ -29,6 +37,7 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		Vector4D				m_vSurfacePlane;
 		CPhysicsEnvironment *	m_pEnv;
 		btGhostObject *			m_pGhostObject;
+		CPhysicsFluidCallback *	m_pCallback;
 };
 
 CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams);

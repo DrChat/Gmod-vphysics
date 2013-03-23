@@ -704,6 +704,7 @@ const char *CPhysicsObject::GetName() const {
 }
 
 void CPhysicsObject::BecomeTrigger() {
+	// TODO: We need to use a ghost object to keep track of any objects entering/exiting us!
 	NOT_IMPLEMENTED
 }
 
