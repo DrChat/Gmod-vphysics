@@ -158,6 +158,9 @@ class CPhysicsObject : public IPhysicsObject1 {
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
 		btRigidBody *						GetObject();
 
+		void								AttachedToConstraint(CPhysicsConstraint *pConstraint);
+		void								DetachedFromConstraint(CPhysicsConstraint *pConstraint);
+
 		void								AddCallbackFlags(unsigned short flag);
 		void								RemoveCallbackFlags(unsigned short flag);
 
@@ -194,6 +197,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 		Vector								m_massCenterOverride;
 		CShadowController *					m_pShadow;
 		CPhysicsFluidController *			m_pFluidController;
+		CUtlVector<CPhysicsConstraint *>	m_pConstraintVec;
 
 		int									m_iLastActivationState;
 };

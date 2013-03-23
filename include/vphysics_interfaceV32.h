@@ -44,14 +44,16 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 // Typically we use a CPhysCollide to represent a collection of CPhysConvexes
 // You can create a physics object using a CPhysConvex if you REALLY want to.
 
+// Note: If you change anything about a collision shape that an IPhysicsObject is using, call UpdateCollide on that object.
+
 abstract_class IPhysicsCollision1 : public IPhysicsCollision {
 	public:
-		// Note: If any IPhysicsObjects are using this collide, you'll have to call UpdateCollide!
+		// Adds a convex to a collide, with an optional transform to offset the convex.
 		virtual void			AddConvexToCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex, const matrix3x4_t *xform = NULL) = 0;
 		virtual void			RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex) = 0;
 
-		// Note: If any IPhysicsObjects are using this collide, you'll have to call UpdateCollide!
-		// This will rescale a collide
+		// This will scale a collide
+		// Untested as of now, but I believe Vecor(1,1,1) is normal scale.
 		virtual void			CollideSetScale(CPhysCollide *pCollide, const Vector &scale) = 0;
 		virtual void			CollideGetScale(const CPhysCollide *pCollide, Vector &scale) = 0;
 

@@ -6,11 +6,12 @@
 #include "Physics_Object.h"
 #include "Physics_Environment.h"
 #include "Physics_Collision.h"
+#include "Physics_Constraint.h"
 #include "Physics_FrictionSnapshot.h"
 #include "Physics_ShadowController.h"
-#include "convert.h"
 #include "Physics_DragController.h"
 #include "Physics_SurfaceProps.h"
+#include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
@@ -34,6 +35,10 @@ CPhysicsObject::~CPhysicsObject() {
 	if (m_pEnv) {
 		RemoveShadowController();
 		m_pEnv->GetDragController()->RemovePhysicsObject(this);
+	}
+
+	for (int i = 0; i < m_pConstraintVec.Count(); i++) {
+		m_pConstraintVec[i]->ObjectDestroyed(this);
 	}
 	
 	if (m_pEnv && m_pObject) {
@@ -76,9 +81,8 @@ bool CPhysicsObject::IsMoveable() const {
 }
 
 bool CPhysicsObject::IsAttachedToConstraint(bool bExternalOnly) const {
-	// What is bExternalOnly?
-	NOT_IMPLEMENTED
-	return false;
+	// FIXME: What is bExternalOnly?
+	return m_pConstraintVec.Count() > 0;
 }
 
 bool CPhysicsObject::IsCollisionEnabled() const {
@@ -195,6 +199,17 @@ void CPhysicsObject::AddCallbackFlags(unsigned short flags) {
 // UNEXPOSED
 void CPhysicsObject::RemoveCallbackFlags(unsigned short flags) {
 	m_callbacks &= ~(flags);
+}
+
+const CPhysCollide *CPhysicsObject::GetCollisionModel() const {
+	return (CPhysCollide *)m_pObject->getCollisionShape();
+}
+
+void CPhysicsObject::SetCollisionModel(CPhysCollide *pCollisionModel) {
+	if (!pCollisionModel) return;
+
+	btCollisionShape *pShape = (btCollisionShape *)pCollisionModel;
+	m_pObject->setCollisionShape(pShape);
 }
 
 void CPhysicsObject::Wake() {
@@ -348,6 +363,8 @@ void CPhysicsObject::SetContents(unsigned int contents) {
 }
 
 void CPhysicsObject::SetSleepThresholds(const float *linVel, const float *angVel) {
+	if (!linVel && !angVel) return;
+
 	m_pObject->setSleepingThresholds(linVel ? ConvertDistanceToBull(*linVel) : m_pObject->getLinearSleepingThreshold(),
 									 angVel ? DEG2RAD(*angVel) : m_pObject->getAngularSleepingThreshold());
 }
@@ -372,12 +389,12 @@ float CPhysicsObject::GetSphereRadius() const {
 }
 
 float CPhysicsObject::GetEnergy() const {
-	float e = 0.5 * GetMass() * m_pObject->getLinearVelocity().dot(m_pObject->getLinearVelocity());
-	e += 0.5 * GetMass() * m_pObject->getAngularVelocity().dot(m_pObject->getAngularVelocity());
+	// (1/2) * mass * velocity^2
+	float e = 0.5f * GetMass() * m_pObject->getLinearVelocity().dot(m_pObject->getLinearVelocity());
+	e += 0.5f * GetMass() * m_pObject->getAngularVelocity().dot(m_pObject->getAngularVelocity());
 	return ConvertEnergyToHL(e);
 }
 
-// Local space means from the origin of the model
 Vector CPhysicsObject::GetMassCenterLocalSpace() const {
 	btTransform bullTransform = ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset;
 	Vector HLMassCenter;
@@ -517,8 +534,7 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 // These two functions apply an insanely low force!
 void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 	// forceVector is in kg*in/s
-	// bullet takes forces in newtons
-
+	// bullet takes forces in newtons, aka kg*m/s
 
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
@@ -853,6 +869,16 @@ CPhysicsEnvironment *CPhysicsObject::GetVPhysicsEnvironment() {
 // UNEXPOSED
 btRigidBody *CPhysicsObject::GetObject() {
 	return m_pObject;
+}
+
+// UNEXPOSED
+void CPhysicsObject::AttachedToConstraint(CPhysicsConstraint *pConstraint) {
+	m_pConstraintVec.AddToTail(pConstraint);
+}
+
+// UNEXPOSED
+void CPhysicsObject::DetachedFromConstraint(CPhysicsConstraint *pConstraint) {
+	m_pConstraintVec.FindAndRemove(pConstraint);
 }
 
 // UNEXPOSED

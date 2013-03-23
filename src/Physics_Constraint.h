@@ -42,6 +42,10 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		void					OutputDebugInfo();
 
 		// UNEXPOSED FUNCTIONS
+	public:
+		// Call this if you're an object currently being destroyed.
+		void					ObjectDestroyed(CPhysicsObject *pObject);
+
 	protected:
 		CPhysicsObject *		m_pReferenceObject;
 		CPhysicsObject *		m_pAttachedObject;

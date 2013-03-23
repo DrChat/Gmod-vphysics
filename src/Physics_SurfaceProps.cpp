@@ -150,7 +150,7 @@ void CPhysicsSurfaceProps::GetPhysicsProperties(int surfaceDataIndex, float *den
 surfacedata_t *CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
 	CSurface *pSurface = GetInternalSurface(surfaceDataIndex);
 	if (!pSurface) pSurface = GetInternalSurface(GetSurfaceIndex("default"));
-	assert(pSurface);
+	Assert(pSurface);
 
 	return &pSurface->data;
 }

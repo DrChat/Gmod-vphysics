@@ -330,28 +330,6 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 
 	if (pMaxs)
 		*pMaxs = tMaxs;
-
-	/*
-	btVector3 delta = maxs - mins;
-	btVector3 halfextents = delta / 2;
-
-	Vector hlHalfExtents;
-	ConvertPosToHL(halfextents, hlHalfExtents);
-	// Half life's AABBs use different corners.
-	hlHalfExtents.y = -hlHalfExtents.y;
-
-	if (pMins)
-		*pMins = collideOrigin - hlHalfExtents;
-
-	if (pMaxs)
-		*pMaxs = collideOrigin + hlHalfExtents;
-
-	if (pMins && pMaxs) {
-		Assert(pMins->x <= pMaxs->x);
-		Assert(pMins->y <= pMaxs->y);
-		Assert(pMins->z <= pMaxs->z);
-	}
-	*/
 }
 
 void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOutMassCenter) {
@@ -845,9 +823,8 @@ void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
 		}
 		Msg("---\n");
 	} else if (pShape->isConvex()) {
-		// FIXME: Spheres don't work with this!
-		//btConvexHullShape *pConvex = (btConvexHullShape *)pShape;
-		//Msg("Num vertices: %d\n", pConvex->getNumVertices());
+		btConvexShape *pConvex = (btConvexShape *)pShape;
+		Msg("Margin: %f\n", pConvex->getMargin());
 	}
 }
 

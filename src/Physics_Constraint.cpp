@@ -135,6 +135,12 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 
 	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 
+	if (pReferenceObject)
+		pReferenceObject->AttachedToConstraint(this);
+
+	if (pAttachedObject)
+		pAttachedObject->AttachedToConstraint(this);
+
 	if (m_pGroup) {
 		m_pGroup->AddConstraint(this);
 	}
@@ -142,6 +148,13 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 
 CPhysicsConstraint::~CPhysicsConstraint() {
 	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+
+	if (m_pReferenceObject)
+		m_pReferenceObject->DetachedFromConstraint(this);
+
+	if (m_pAttachedObject)
+		m_pAttachedObject->DetachedFromConstraint(this);
+
 	delete m_pConstraint;
 }
 
@@ -180,6 +193,10 @@ bool CPhysicsConstraint::GetConstraintParams(constraint_breakableparams_t *pPara
 void CPhysicsConstraint::OutputDebugInfo() {
 	Msg("-------------------\n");
 	Msg("%s constraint\n", GetConstraintName(m_type));
+}
+
+void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
+	pObject == m_pAttachedObject ? m_pAttachedObject = NULL : m_pReferenceObject = NULL;
 }
 
 /*********************************
