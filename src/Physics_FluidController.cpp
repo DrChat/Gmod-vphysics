@@ -156,12 +156,12 @@ void CPhysicsFluidController::Tick(float dt) {
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectAdded(CPhysicsObject *pObject) {
-	
+	m_pEnv->HandleFluidStartTouch(this, pObject);
 }
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
-	
+	m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 
 /************************

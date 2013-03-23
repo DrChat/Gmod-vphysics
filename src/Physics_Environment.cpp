@@ -962,3 +962,15 @@ void CPhysicsEnvironment::HandleConstraintBroken(CPhysicsConstraint *pConstraint
 	if (m_bConstraintNotify && m_pConstraintEvent)
 		m_pConstraintEvent->ConstraintBroken(pConstraint);
 }
+
+// UNEXPOSED
+void CPhysicsEnvironment::HandleFluidStartTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject) {
+	if (m_pCollisionEvent)
+		m_pCollisionEvent->FluidStartTouch(pObject, pController);
+}
+
+// UNEXPOSED
+void CPhysicsEnvironment::HandleFluidEndTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject) {
+	if (m_pCollisionEvent)
+		m_pCollisionEvent->FluidEndTouch(pObject, pController);
+}
