@@ -269,10 +269,11 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 }
 
 // This'll return the farthest possible vector that's still within our collision mesh.
-// direction argument is a normalized Vector, literally a direction. (to the center?)
+// direction argument is a normalized Vector, literally a direction. (to/from the center?)
 // TODO: Methods on doing this?
 // Does bullet provide any APIs for doing this?
 // Should we do a raytrace that starts outside of our mesh and goes inwards?
+// From what I gather, valve does this by going through the vertices and returning the one with the nearest dot product to the direction.
 Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction) {
 	VPROF_BUDGET("CPhysicsCollision::CollideGetExtent", VPROF_BUDGETGROUP_PHYSICS);
 	if (!pCollide) return collideOrigin;

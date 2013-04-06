@@ -17,12 +17,12 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 #if defined(_WIN32)
-#	define DEBUG_DRAW 1
+	#define DEBUG_DRAW 1
 #endif
 
 #define SLEEP_LINEAR_THRESHOLD 0.1 // m/s
 #define SLEEP_ANGULAR_THRESHOLD 0.4 // rad/s
 
-#define NOT_IMPLEMENTED				DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
-#define NOT_IMPLEMENTED_BREAK		{DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__); __asm int 3;}
-#define NOT_IMPLEMENTED_CRITICAL	Error("VPhysics UNIMPLEMENTED: %s (%s:%d)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED				DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%u)\n", __FUNCTION__, __FILE__, __LINE__);
+#define NOT_IMPLEMENTED_BREAK		{DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%u)\n", __FUNCTION__, __FILE__, __LINE__); __asm int 3;}
+#define NOT_IMPLEMENTED_CRITICAL	Error("VPhysics UNIMPLEMENTED: %s (%s:%u)\n", __FUNCTION__, __FILE__, __LINE__);

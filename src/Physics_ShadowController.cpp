@@ -65,8 +65,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	btVector3 axis;
 	btScalar angle;
 	btTransformUtil::calculateDiffAxisAngleQuaternion(transform.getRotation(), params.targetRotation, axis, angle);
-	axis.normalize();
 
+	// So we don't end up having a huge delta angle.
 	if (angle > M_PI) {
 		angle -= 2 * M_PI;
 	}

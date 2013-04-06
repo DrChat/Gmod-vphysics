@@ -16,6 +16,38 @@
 // memdbgon must be the last include file in a .cpp file!!!
 //#include "tier0/memdbgon.h"
 
+/*****************************
+* CLASS CGhostTriggerCallback
+* Purpose: For BecomeTrigger, etc.
+* Tracks objects that enter/exit us.
+*****************************/
+class CGhostTriggerCallback : public btGhostObjectCallback {
+	public:
+		CGhostTriggerCallback(CPhysicsObject *pObject): m_pObject(pObject) {
+
+		}
+
+		void addedOverlappingObject(btCollisionObject *pObj) {
+			if (!pObj) return;
+
+			CPhysicsObject *pPhys = (CPhysicsObject *)pObj->getUserPointer();
+			if (!pPhys) return;
+
+			m_pObject->TriggerObjectEntered(pPhys);
+		}
+
+		void removedOverlappingObject(btCollisionObject *pObj) {
+			if (!pObj) return;
+
+			CPhysicsObject *pPhys = (CPhysicsObject *)pObj->getUserPointer();
+			if (!pPhys) return;
+
+			m_pObject->TriggerObjectExited(pPhys);
+		}
+	private:
+		CPhysicsObject *m_pObject;
+};
+
 /***************************
 * CLASS CPhysicsObject
 ***************************/
@@ -28,6 +60,7 @@ CPhysicsObject::CPhysicsObject() {
 	m_pEnv = NULL;
 	m_pGameData = NULL;
 	m_pObject = NULL;
+	m_pGhostObject = NULL;
 	m_pName = NULL;
 }
 
@@ -59,11 +92,6 @@ bool CPhysicsObject::IsStatic() const {
 
 bool CPhysicsObject::IsAsleep() const {
 	return m_pObject->getActivationState() == ISLAND_SLEEPING;
-}
-
-bool CPhysicsObject::IsTrigger() const {
-	NOT_IMPLEMENTED
-	return false;
 }
 
 bool CPhysicsObject::IsFluid() const {
@@ -225,7 +253,7 @@ void CPhysicsObject::RecheckCollisionFilter() {
 }
 
 void CPhysicsObject::RecheckContactPoints() {
-	// FIXME: Should we be doing anything here?
+	// TODO: May need to use this to remove all our contact points (such as when we're no collided, we'll still collide with the object for a while)
 }
 
 void CPhysicsObject::UpdateCollide() {
@@ -560,6 +588,17 @@ void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 // Output passed to ApplyForceCenter/ApplyTorqueCenter
 void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const {
 	if (!centerForce && !centerTorque) return;
+
+	btVector3 pos, force;
+	ConvertPosToBull(worldPosition, pos);
+	ConvertPosToBull(forceVector, force);
+
+	pos = pos - m_pObject->getWorldTransform().getOrigin();
+
+	if (centerForce) {
+		ConvertForceImpulseToHL(force, *centerForce);
+	}
+
 	NOT_IMPLEMENTED
 }
 
@@ -572,13 +611,16 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 	ConvertPosToBull(worldPosition, pos);
 
 	pos = pos - m_pObject->getWorldTransform().getOrigin();
+
+	// Cross product for dummies: Returns a vector perpendicular to the 2 vectors being crossed.
+	// See: http://en.wikipedia.org/wiki/Cross_product
 	btVector3 cross = pos.cross(force);
 
-	if (centerVelocity)
-		centerVelocity->Zero();
-
-	if (centerAngularVelocity)
-		centerAngularVelocity->Zero();
+	// Linear velocity
+	if (centerVelocity) {
+		force *= m_pObject->getInvMass();
+		ConvertForceImpulseToHL(force, *centerVelocity);
+	}
 
 	NOT_IMPLEMENTED
 }
@@ -703,16 +745,64 @@ const char *CPhysicsObject::GetName() const {
 	return m_pName;
 }
 
+bool CPhysicsObject::IsTrigger() const {
+	return m_pGhostObject != NULL;
+}
+
 void CPhysicsObject::BecomeTrigger() {
 	// TODO: We need to use a ghost object to keep track of any objects entering/exiting us!
-	NOT_IMPLEMENTED
+	if (IsTrigger())
+		return;
+
+	EnableDrag(false);
+	EnableGravity(false);
+
+	m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
+
+	m_pGhostObject = new btGhostObject;
+	m_pGhostObject->setCollisionShape(m_pObject->getCollisionShape());
+	m_pGhostObject->setUserPointer(this);
+	m_pGhostObject->setCollisionFlags(m_pGhostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_STATIC_OBJECT);
+	m_pGhostObject->setWorldTransform(m_pObject->getWorldTransform());
+	
+	m_pGhostCallback = new CGhostTriggerCallback(this);
+	if (m_pGhostCallback)
+		m_pGhostObject->setCallback(m_pGhostCallback);
+
+	m_pEnv->GetBulletEnvironment()->addCollisionObject(m_pGhostObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
 }
 
 void CPhysicsObject::RemoveTrigger() {
-	NOT_IMPLEMENTED
+	if (!IsTrigger())
+		return;
+
+	EnableDrag(true);
+	EnableGravity(true);
+
+	if (IsStatic())
+		m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
+	else
+		m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject);
+
+	m_pGhostObject->setCallback(NULL);
+	delete m_pGhostCallback;
+	m_pGhostCallback = NULL;
+
+	m_pEnv->GetBulletEnvironment()->removeCollisionObject(m_pGhostObject);
+	delete m_pGhostObject;
+	m_pGhostObject = NULL;
+}
+
+void CPhysicsObject::TriggerObjectEntered(CPhysicsObject *pObject) {
+	m_pEnv->HandleObjectEnteredTrigger(this, pObject);
+}
+
+void CPhysicsObject::TriggerObjectExited(CPhysicsObject *pObject) {
+	m_pEnv->HandleObjectExitedTrigger(this, pObject);
 }
 
 void CPhysicsObject::BecomeHinged(int localAxis) {
+	// localAxis is the axis we're hinged to.
 	NOT_IMPLEMENTED
 }
 
@@ -873,11 +963,13 @@ btRigidBody *CPhysicsObject::GetObject() {
 }
 
 // UNEXPOSED
+// Purpose: Constraints will call this when we're one of the constrained objects.
 void CPhysicsObject::AttachedToConstraint(CPhysicsConstraint *pConstraint) {
 	m_pConstraintVec.AddToTail(pConstraint);
 }
 
 // UNEXPOSED
+// Purpose: Constraints will call this when we're one of the constrained objects.
 void CPhysicsObject::DetachedFromConstraint(CPhysicsConstraint *pConstraint) {
 	m_pConstraintVec.FindAndRemove(pConstraint);
 }

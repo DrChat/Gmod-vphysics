@@ -89,6 +89,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
 	}
+
 	NextBlock();
 }
 
@@ -116,6 +117,7 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pFluid, key, data->GetString());
 	}
+
 	NextBlock();
 }
 
@@ -162,6 +164,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pConstraint, key, data->GetString());
 	}
+
 	NextBlock();
 }
 
@@ -170,6 +173,7 @@ void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unkno
 		if (data->GetInt() < 128)
 			table[data->GetInt()] = g_SurfaceDatabase.GetSurfaceIndex(data->GetName());
 	}
+
 	NextBlock();
 }
 
@@ -215,6 +219,7 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pVehicle, key, data->GetString());
 	}
+
 	NextBlock();
 }
 

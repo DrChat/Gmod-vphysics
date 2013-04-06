@@ -4,6 +4,7 @@
 #include "Physics_Object.h"
 #include "Physics_Environment.h"
 #include "Physics_SurfaceProps.h"
+#include "Physics_Collision.h"
 
 #include "tier0/vprof.h"
 
@@ -74,7 +75,7 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 	m_pGhostObject->setCollisionShape(pFluidObject->GetObject()->getCollisionShape());
 	m_pGhostObject->setWorldTransform(pFluidObject->GetObject()->getWorldTransform());
 	m_pGhostObject->setCollisionFlags(m_pGhostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_STATIC_OBJECT);
-	m_pEnv->GetBulletEnvironment()->addCollisionObject(m_pGhostObject, 2, ~2);
+	m_pEnv->GetBulletEnvironment()->addCollisionObject(m_pGhostObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
 }
 
 CPhysicsFluidController::~CPhysicsFluidController() {
@@ -161,6 +162,7 @@ void CPhysicsFluidController::ObjectAdded(CPhysicsObject *pObject) {
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
+	// FIXME: Crash when killing jeeps inside of water.
 	m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 

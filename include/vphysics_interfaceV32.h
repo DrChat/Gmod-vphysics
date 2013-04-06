@@ -26,6 +26,8 @@ abstract_class IPhysicsEnvironment1 : public IPhysicsEnvironment {
 abstract_class IPhysicsObject1 : public IPhysicsObject {
 	public:
 		// You need to call EnableGravity(false) first so we stop using the world's gravity.
+		// To use the world's gravity again, call EnableGravity(true)
+		// (Yes I know it's confusing, nothing I can do about it)
 		virtual void	SetGravity(const Vector &gravityVector) = 0;
 		virtual Vector	GetGravity() const = 0;
 		
@@ -53,7 +55,7 @@ abstract_class IPhysicsCollision1 : public IPhysicsCollision {
 		virtual void			RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex) = 0;
 
 		// This will scale a collide
-		// Untested as of now, but I believe Vecor(1,1,1) is normal scale.
+		// Untested as of now, but I believe Vector(1,1,1) is normal scale.
 		virtual void			CollideSetScale(CPhysCollide *pCollide, const Vector &scale) = 0;
 		virtual void			CollideGetScale(const CPhysCollide *pCollide, Vector &scale) = 0;
 

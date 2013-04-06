@@ -3,7 +3,7 @@
 #include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-////#include "tier0/memdbgon.h"
+//#include "tier0/memdbgon.h"
 
 /************************************************
 * COORDINATE SYSTEMS:
@@ -30,6 +30,7 @@
 ************************************************/
 
 // IVP: Forward down left
+// IVP Units in meters
 void ConvertIVPPosToBull(const float *pos, btVector3 &bull) {
 	if (!pos) return;
 
@@ -171,13 +172,13 @@ void ConvertMatrixToBull(const matrix3x4_t &hl, btTransform &transform) {
 	pos.y = hl[1][3];
 	pos.z = hl[2][3];
 
-	btVector3 bullForward, bullLeft, bullUp, origin;
+	btVector3 bullForward, bullRight, bullUp, origin;
 	ConvertDirectionToBull(forward, bullForward);
-	ConvertDirectionToBull(-left, bullLeft);
+	ConvertDirectionToBull(-left, bullRight);
 	ConvertDirectionToBull(up, bullUp);
 	ConvertPosToBull(pos, origin);
 
-	transform.setBasis(btMatrix3x3(bullForward.x(), bullUp.x(), bullLeft.x(), bullForward.y(), bullUp.y(), bullLeft.y(), bullForward.z(), bullUp.z(), bullLeft.z()));
+	transform.setBasis(btMatrix3x3(bullForward.x(), bullUp.x(), bullRight.x(), bullForward.y(), bullUp.y(), bullRight.y(), bullForward.z(), bullUp.z(), bullRight.z()));
 	transform.setOrigin(origin);
 }
 

@@ -28,6 +28,10 @@ class btDispatcher;
 class btDispatcher;
 class btCollisionObject;
 
+class btCollisionShape;
+typedef bool (*btShapePairCallback)(const btCollisionShape* pShape0, const btCollisionShape* pShape1);
+extern btShapePairCallback gCompoundChildShapePairCallback;
+
 /// btCompoundCollisionAlgorithm  supports collision between CompoundCollisionShapes and other collision shapes
 class btCompoundCollisionAlgorithm  : public btActivatingCollisionAlgorithm
 {
@@ -48,6 +52,11 @@ public:
 	btCompoundCollisionAlgorithm( const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, bool isSwapped);
 
 	virtual ~btCompoundCollisionAlgorithm();
+
+	btCollisionAlgorithm* getChildAlgorithm (int n) const
+	{
+		return m_childCollisionAlgorithms[n];
+	}
 
 	virtual void processCollision (const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut);
 

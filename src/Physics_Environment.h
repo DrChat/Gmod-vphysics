@@ -138,6 +138,8 @@ public:
 	void									HandleConstraintBroken(CPhysicsConstraint *pConstraint); // Call this if you're a constraint that was just broken.
 	void									HandleFluidStartTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject);
 	void									HandleFluidEndTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject);
+	void									HandleObjectEnteredTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject);
+	void									HandleObjectExitedTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject);
 
 	// Soft body functions we'll expose at a later time...
 private:

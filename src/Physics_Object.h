@@ -5,6 +5,7 @@ class CPhysicsEnvironment;
 class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
+class CGhostTriggerCallback;
 
 // Bullet uses this so we can sync the graphics representation of the object.
 struct btMassCenterMotionState : public btMotionState {
@@ -31,7 +32,6 @@ class CPhysicsObject : public IPhysicsObject1 {
 
 		bool								IsStatic() const;
 		bool								IsAsleep() const;
-		bool								IsTrigger() const;
 		bool								IsFluid() const;
 		bool								IsHinged() const;
 		bool								IsMoveable() const;
@@ -138,8 +138,13 @@ class CPhysicsObject : public IPhysicsObject1 {
 		const CPhysCollide *				GetCollide() const;
 		const char *						GetName() const;
 
+		bool								IsTrigger() const;
 		void								BecomeTrigger();
 		void								RemoveTrigger();
+
+		// UNEXPOSED
+		void								TriggerObjectEntered(CPhysicsObject *pObject);
+		void								TriggerObjectExited(CPhysicsObject *pObject);
 
 		void								BecomeHinged(int localAxis);
 		void								RemoveHinged();
@@ -178,6 +183,9 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void *								m_pGameData;
 		btRigidBody *						m_pObject;
 		const char *						m_pName;
+
+		btGhostObject *						m_pGhostObject; // For triggers
+		CGhostTriggerCallback *				m_pGhostCallback;
 
 		unsigned short						m_materialIndex;
 		unsigned short						m_callbacks;

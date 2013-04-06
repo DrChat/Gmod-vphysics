@@ -321,7 +321,7 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 	m_pRaycastVehicle->updateVehicle(dt);
 }
 
-void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &controls, float dt) {
+void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls, float dt) {
 	float steeringVal = controls.steering;
 
 	// TODO: Calculate for degreesSlow, degreesFast, and degreesBoost
@@ -334,15 +334,16 @@ void CPhysicsVehicleController::UpdateSteering(const vehicle_controlparams_t &co
 	}
 }
 
-void CPhysicsVehicleController::UpdateEngine(const vehicle_controlparams_t &controls, float dt) {
+void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, float dt) {
 	// Update the operating params
 	float fSpeed = m_pRaycastVehicle->getCurrentSpeedKmHour();
 	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(-fSpeed));
 
+	CalcEngineTransmission(controls, dt);
 	CalcEngine(controls, dt);
 }
 
-void CPhysicsVehicleController::UpdateWheels(const vehicle_controlparams_t &controls, float dt) {
+void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, float dt) {
 	for (int i = 0; i < m_iWheelCount; i++) {
 		btTransform bullTransform = m_pRaycastVehicle->getWheelTransformWS(i);
 		btVector3 bullPos = bullTransform.getOrigin();
@@ -366,11 +367,13 @@ float CPhysicsVehicleController::UpdateBooster(float dt) {
 	return 0.0f; // Return boost delay.
 }
 
-void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &controls, float dt) {
+void CPhysicsVehicleController::CalcEngineTransmission(vehicle_controlparams_t &controls, float dt) {
 	// throttle goes forward and backward, [-1, 1]
 	// brake_val [0..1]
 
 	float absSpeed = fabs(KMH2MS(m_pRaycastVehicle->getCurrentSpeedKmHour()));
+
+	const static int secondsPerMinute = 60;
 
 	if (m_vehicleParams.engine.isAutoTransmission) {
 		// Estimate the engine RPM
@@ -382,29 +385,31 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 			avgRotSpeed += rotSpeed;
 		}
 
-		avgRotSpeed *= 0.5f / M_PI / m_iWheelCount;
+		//avgRotSpeed *= 0.5f / M_PI / m_iWheelCount;
+		avgRotSpeed /= m_iWheelCount;
 
-		// Note: 60 = seconds per minute
-		float estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * 60;
+		float estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * secondsPerMinute;
 
 		// only shift up when going forward
 		if (controls.throttle > 0) {
 			// check for higher gear, top gear is gearcount-1 (0 based)
 			while (estEngineRPM > m_vehicleParams.engine.shiftUpRPM && m_vehicleState.gear < m_vehicleParams.engine.gearCount-1) {
 				m_vehicleState.gear++;
-				estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * 60;
+				estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * secondsPerMinute;
 			}
 		}
 
 		// check for lower gear
 		while (estEngineRPM < m_vehicleParams.engine.shiftDownRPM && m_vehicleState.gear > 0) {
 			m_vehicleState.gear--;
-			estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * 60;
+			estEngineRPM = avgRotSpeed * m_vehicleParams.engine.axleRatio * m_vehicleParams.engine.gearRatio[m_vehicleState.gear] * secondsPerMinute;
 		}
 
 		m_vehicleState.engineRPM = estEngineRPM;
 	}
+}
 
+void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, float dt) {
 	// Speed governor
 	// TODO: These were apparently scrapped when vphysics was shipped. Figure out new speed governors by disassembly.
 
@@ -415,8 +420,8 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 			m_pRaycastVehicle->setBrake(0, i);
 		}
 
-		const static float watt_per_hp = 745.0f;
-		const static float seconds_per_minute = 60.0f;
+		const static int watt_per_hp = 745;
+		const static int seconds_per_minute = 60;
 
 		// TODO: Convert to NEWTONS!
 		float force = controls.throttle * 
@@ -442,7 +447,7 @@ void CPhysicsVehicleController::CalcEngine(const vehicle_controlparams_t &contro
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-			float wheelForce = 0.5f * brakeForce * m_vehicleParams.axles[i].brakeFactor;
+			float wheelForce = 0.5f * brakeForce * m_vehicleParams.axles[i].brakeFactor * m_vehicleParams.axles[i].wheels.radius;
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 				m_pRaycastVehicle->setBrake(wheelForce, wheelIndex);
 			}
@@ -465,11 +470,7 @@ int CPhysicsVehicleController::GetWheelCount() {
 IPhysicsObject *CPhysicsVehicleController::GetWheel(int index) {
 	if (index >= m_iWheelCount || index < 0) return NULL;
 
-	if (m_iVehicleType == VEHICLE_TYPE_CAR_WHEELS) {
-		return m_pWheels[index];
-	}
-
-	return NULL;
+	return m_pWheels[index];
 }
 
 bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps) {
@@ -513,10 +514,31 @@ void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction)
 
 void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem) {
 	memset(&debugCarSystem, 0, sizeof(debugCarSystem));
-	NOT_IMPLEMENTED
+
+	// NOTE: Durr valve are silly and expect us to return data in ivp coordinates. (See: line 619 of fourwheelvehiclephysics.cpp)
+	// This means we have to convert all of our positions we return to IVP positions.
+	// Luckily this is easy (us: Forward Up Right) (IVP: Forward Down Left)
+
+	// wheel stuff
+	for (int i = 0; i < m_iWheelCount; i++) {
+		btWheelInfo &wheelInfo = m_pRaycastVehicle->getWheelInfo(i);
+
+		btVector3 wheelPos = wheelInfo.m_worldTransform.getOrigin();
+		debugCarSystem.vecWheelPos[i].x = wheelPos.x();
+		debugCarSystem.vecWheelPos[i].y = -wheelPos.y();
+		debugCarSystem.vecWheelPos[i].z = -wheelPos.z();
+
+		// raycast hitpos
+		btVector3 rayContact = wheelInfo.m_raycastInfo.m_contactPointWS;
+		debugCarSystem.vecWheelRaycastImpacts[i].x = rayContact.x();
+		debugCarSystem.vecWheelRaycastImpacts[i].y = -rayContact.y();
+		debugCarSystem.vecWheelRaycastImpacts[i].z = -rayContact.z();
+	}
+
 }
 
 void CPhysicsVehicleController::VehicleDataReload() {
+	// What do?
 	NOT_IMPLEMENTED
 }
 
@@ -525,7 +547,6 @@ void CPhysicsVehicleController::VehicleDataReload() {
 ******/
 
 // force appears to be in newtons. Correct this if it's wrong.
-// UNEXPOSED
 void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
 		Assert(0);
@@ -537,7 +558,6 @@ void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
 	m_pRaycastVehicle->applyEngineForce(force, wheelIndex);
 }
 
-// UNEXPOSED
 void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
 		Assert(0);
@@ -549,8 +569,6 @@ void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
 	m_pRaycastVehicle->setBrake(brakeVal, wheelIndex);
 }
 
-
-// UNEXPOSED
 void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
 		Assert(0);

@@ -50,7 +50,8 @@ m_marginA(objectA->getMargin()),
 m_marginB(objectB->getMargin()),
 m_ignoreMargin(false),
 m_lastUsedMethod(-1),
-m_catchDegeneracies(1)
+m_catchDegeneracies(1),
+m_fixContactNormalDirection(1)
 {
 }
 btGjkPairDetector::btGjkPairDetector(const btConvexShape* objectA, const btConvexShape* objectB, int shapeTypeA, int shapeTypeB, btScalar marginA, btScalar marginB, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver*	penetrationDepthSolver)
@@ -234,12 +235,12 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			}
 
 			if(newCachedSeparatingAxis.length2()<REL_ERROR2)
-            {
+			{
 				m_cachedSeparatingAxis = newCachedSeparatingAxis;
-                m_degenerateSimplex = 6;
-                checkSimplex = true;
-                break;
-            }
+				m_degenerateSimplex = 6;
+				checkSimplex = true;
+				break;
+			}
 
 			btScalar previousSquaredDistance = squaredDistance;
 			squaredDistance = newCachedSeparatingAxis.length2();
@@ -249,8 +250,8 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			{
 				m_degenerateSimplex = 7;
 				squaredDistance = previousSquaredDistance;
-                checkSimplex = false;
-                break;
+				checkSimplex = false;
+				break;
 			}
 #endif //
 			
@@ -270,23 +271,23 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			m_cachedSeparatingAxis = newCachedSeparatingAxis;
 
 			  //degeneracy, this is typically due to invalid/uninitialized worldtransforms for a btCollisionObject   
-              if (m_curIter++ > gGjkMaxIter)   
-              {   
-                      #if defined(DEBUG) || defined (_DEBUG) || defined (DEBUG_SPU_COLLISION_DETECTION)
+			  if (m_curIter++ > gGjkMaxIter)   
+			  {   
+					  #if defined(DEBUG) || defined (_DEBUG) || defined (DEBUG_SPU_COLLISION_DETECTION)
 
-                              printf("btGjkPairDetector maxIter exceeded:%i\n", m_curIter);   
-                              printf("sepAxis=(%f, %f, %f), squaredDistance = %f, shapeTypeA=%i, shapeTypeB=%i\n",   
-                              m_cachedSeparatingAxis.getX(),   
-                              m_cachedSeparatingAxis.getY(),   
-                              m_cachedSeparatingAxis.getZ(),   
-                              squaredDistance,   
-                              m_minkowskiA->getShapeType(),   
-                              m_minkowskiB->getShapeType());   
+							  printf("btGjkPairDetector maxIter exceeded:%i\n", m_curIter);   
+							  printf("sepAxis=(%f, %f, %f), squaredDistance = %f, shapeTypeA=%i, shapeTypeB=%i\n",   
+							  m_cachedSeparatingAxis.getX(),   
+							  m_cachedSeparatingAxis.getY(),   
+							  m_cachedSeparatingAxis.getZ(),   
+							  squaredDistance,   
+							  m_minkowskiA->getShapeType(),   
+							  m_minkowskiB->getShapeType());   
 
-                      #endif   
-                      break;   
+					  #endif   
+					  break;   
 
-              } 
+			  } 
 
 
 			bool check = (!m_simplexSolver->fullSimplex());
@@ -438,6 +439,27 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 		}
 #endif 
 
+		if (m_fixContactNormalDirection)
+		{
+			///@workaround for sticky convex collisions
+			//in some degenerate cases (usually when the use uses very small margins) 
+			//the contact normal is pointing the wrong direction
+			//so fix it now (until we can deal with all degenerate cases in GJK and EPA)
+			//contact normals need to point from B to A in all cases, so we can simply check if the contact normal really points from B to A
+			//We like to use a dot product of the normal against the difference of the centroids, 
+			//once the centroid is available in the API
+			//until then we use the center of the aabb to approximate the centroid
+			btVector3 aabbMin,aabbMax;
+			m_minkowskiA->getAabb(localTransA,aabbMin,aabbMax);
+			btVector3 posA  = (aabbMax+aabbMin)*btScalar(0.5);
+		
+			m_minkowskiB->getAabb(localTransB,aabbMin,aabbMax);
+			btVector3 posB = (aabbMin+aabbMax)*btScalar(0.5);
+
+			btVector3 diff = posA-posB;
+			if (diff.dot(normalInB) < 0.f)
+				normalInB *= -1.f;
+		}
 		m_cachedSeparatingAxis = normalInB;
 		m_cachedSeparatingDistance = distance;
 

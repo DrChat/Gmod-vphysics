@@ -57,11 +57,12 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 
 		CPhysicsObject *					GetBody();
 
-		void								UpdateSteering(const vehicle_controlparams_t &controls, float dt);
-		void								UpdateEngine(const vehicle_controlparams_t &controls, float dt);
-		void								UpdateWheels(const vehicle_controlparams_t &controls, float dt);
+		void								UpdateSteering(vehicle_controlparams_t &controls, float dt);
+		void								UpdateEngine(vehicle_controlparams_t &controls, float dt);
+		void								UpdateWheels(vehicle_controlparams_t &controls, float dt);
 
-		void								CalcEngine(const vehicle_controlparams_t &controls, float dt);
+		void								CalcEngineTransmission(vehicle_controlparams_t &controls, float dt);
+		void								CalcEngine(vehicle_controlparams_t &controls, float dt);
 
 		void								ShutdownBullVehicle();
 

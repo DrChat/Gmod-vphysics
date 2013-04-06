@@ -60,6 +60,9 @@ const char *GetConstraintName(EConstraintType type) {
 // TODO: Somebody fill this out!
 class btPulleyConstraint: public btTypedConstraint {
 	protected:
+		// The 2 points the pulley should run through (such as being attached to a roof)
+		btVector3	m_attachPointWS1;
+		btVector3	m_attachPointWS2;
 	public:
 };
 
@@ -133,7 +136,11 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_pEnv = pEnv;
 	m_type = type;
 
-	m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
+	if (m_type == CONSTRAINT_RAGDOLL) {
+		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
+	} else {
+		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
+	}
 
 	if (pReferenceObject)
 		pReferenceObject->AttachedToConstraint(this);
@@ -201,6 +208,13 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 
 	if (pObject == m_pReferenceObject)
 		m_pReferenceObject = NULL;
+
+	// HACK: We'll have to remove ourselves from the environment. Hopefully the game is about to destroy us anyways, otherwise prepare for explosions.
+	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+}
+
+EConstraintType CPhysicsConstraint::GetType() {
+	return m_type;
 }
 
 /*********************************
@@ -309,7 +323,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
 	btTransform constraintToReference, constraintToAttached;
-	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // It appears that constraintToReference is always the identity matrix.
+	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // constraintToReference is ALwAYS the identity matrix.
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
 	btTransform bullAFrame = constraintToReference;

@@ -46,6 +46,8 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		// Call this if you're an object currently being destroyed.
 		void					ObjectDestroyed(CPhysicsObject *pObject);
 
+		EConstraintType			GetType();
+
 	protected:
 		CPhysicsObject *		m_pReferenceObject;
 		CPhysicsObject *		m_pAttachedObject;
