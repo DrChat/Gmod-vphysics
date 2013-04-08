@@ -20,27 +20,33 @@
 	#include "DebugDrawer.h"
 #endif
 
+// Multithreading stuff
 // Multithreading is so buggy as of now. Leave this disabled.
-#define MULTITHREAD 0 // TODO: Mac and Linux support (Possibly done, needs testing)
+#define USE_PARALLEL_DISPATCHER 0 // TODO: Test this on mac and linux
 #define USE_PARALLEL_SOLVER 0
 
-#if MULTITHREAD
-	#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
-	#include "BulletMultiThreaded/PlatformDefinitions.h"
-	#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
-	#include "BulletMultiThreaded/btParallelConstraintSolver.h"
-	
+#if USE_PARALLEL_DISPATCHER || USE_PARALLEL_SOLVER
+	#define MULTITHREADED 1
+#endif
+
+#if MULTITHREADED
 	#ifdef _WIN32
 		#include "BulletMultiThreaded/Win32ThreadSupport.h"
-		
-		#ifdef _DEBUG
-			#pragma comment(lib, "BulletMultiThreaded_Debug.lib")
-		#elif _RELEASE
-			#pragma comment(lib, "BulletMultiThreaded_RelWithDebugInfo.lib")
-		#endif
+		#pragma comment(lib, "BulletMultiThreaded.lib")
 	#else
 		#include "BulletMultiThreaded/PosixThreadSupport.h"
 	#endif
+
+	#include "BulletMultiThreaded/PlatformDefinitions.h"
+#endif
+
+#if USE_PARALLEL_DISPATCHER
+	#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
+	#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+#endif
+
+#if USE_PARALLEL_SOLVER
+	#include "BulletMultiThreaded/btParallelConstraintSolver.h"
 #endif
 
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
@@ -195,7 +201,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pObjectEvent = NULL;
 	m_pCollisionEvent = NULL;
 
-	m_pThreadSupportCollision = NULL;
+	m_pThreadSupportDispatcher = NULL;
 	m_pThreadSupportSolver = NULL;
 	m_pBulletBroadphase = NULL;
 	m_pBulletConfiguration = NULL;
@@ -205,74 +211,67 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletSolver = NULL;
 
 	btDefaultCollisionConstructionInfo cci;
-#if MULTITHREAD
+#if MULTITHREADED
 	// Multithreaded versions cannot dynamically expand this pool. Having a small pool causes props to bounce around.
 	cci.m_defaultMaxPersistentManifoldPoolSize = 65536;
+
+	// HACK: Fix to prevent crashing on games with more than 1 environment.
+	static unsigned int uniqueNum = 0;
+	static const int maxTasks = 4;
 #endif
 
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
-#if !MULTITHREAD
-	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
-	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
-#else
-	// TODO: In the future, try and get this value from the game somewhere.
-	int maxTasks = 8;
-
-	// HACK: Crash fix on the client (2 environments with same thread unique name = uh ohs)
-	static unsigned int iUniqueNum = 0;	// Fixes a crash with multiple environments.
-	char uniquenamecollision[128];
-	char uniquenamesolver[128];
-	sprintf(uniquenamecollision, "collision%d", iUniqueNum);
-	sprintf(uniquenamesolver, "solver%d", iUniqueNum);
-	iUniqueNum++;
+#if USE_PARALLEL_DISPATCHER
+	char dispatcherThreadName[128];
+	sprintf(dispatcherThreadName, "dispatcher%d", uniqueNum);
 
 	#ifdef _WIN32
-		btThreadSupportInterface *threadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																			uniquenamecollision,
-																			processCollisionTask,
-																			createCollisionLocalStoreMemory,
-																			maxTasks));
-
-		#if USE_PARALLEL_SOLVER
-			btThreadSupportInterface *solverThreadInterface = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																				uniquenamesolver,
-																				SolverThreadFunc,
-																				SolverlsMemoryFunc,
-																				maxTasks));
-			solverThreadInterface->startSPU();
-		#endif
+		m_pThreadSupportDispatcher = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																		dispatcherThreadName,
+																		processCollisionTask,
+																		createCollisionLocalStoreMemory,
+																		maxTasks));
 	#else
-		btThreadSupportInterface *threadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																			uniquenamecollision,
-																			processCollisionTask,
-																			createCollisionLocalStoreMemory,
-																			maxTasks));
-
-		#if USE_PARALLEL_SOLVER
-			btThreadSupportInterface *solverThreadInterface = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																				uniquenamesolver,
-																				SolverThreadFunc,
-																				SolverlsMemoryFunc,
-																				maxTasks));
-		#endif
+		m_pThreadSupportDispatcher = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+																		dispatcherThreadName,
+																		processCollisionTask,
+																		createCollisionLocalStoreMemory,
+																		maxTasks));
 	#endif
 
-	#if USE_PARALLEL_SOLVER
-		m_pThreadSupportSolver = solverThreadInterface;
+	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(m_pThreadSupportDispatcher, maxTasks, m_pBulletConfiguration);
+#else
+	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
+#endif
+
+#if USE_PARALLEL_SOLVER
+	char solverThreadName[128];
+	sprintf(solverThreadName, "solver%d", uniqueNum);
+
+	#ifdef _WIN32
+		m_pThreadSupportSolver = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
+																			solverThreadName,
+																			SolverThreadFunc,
+																			SolverlsMemoryFunc,
+																			maxTasks));
+	#else
+		m_pThreadSupportSolver = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
+									 										solverThreadName,
+									 										SolverThreadFunc,
+									 										SolverlsMemoryFunc,
+									 										maxTasks));
 	#endif
 
-	m_pThreadSupportCollision = threadInterface;
-	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(threadInterface, maxTasks, m_pBulletConfiguration);
+	m_pBulletSolver = new btParallelConstraintSolver(m_pThreadSupportSolver);
 
-	#if USE_PARALLEL_SOLVER
-		m_pBulletSolver = new btParallelConstraintSolver(solverThreadInterface);
-		//this solver requires the contacts to be in a contiguous pool, so avoid dynamic allocation
-		m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
-	#else
-		m_pBulletSolver = new btSequentialImpulseConstraintSolver();
-	#endif // USE_PARARLLEL_SOLVER
-#endif // MULTITHREAD
+#else
+	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
+#endif
+
+#if MULTITHREADED
+	uniqueNum++;
+#endif
 
 	m_pBulletBroadphase = new btDbvtBroadphase;
 
@@ -291,12 +290,15 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_perfparams.Defaults();
 	memset(&m_stats, 0, sizeof(m_stats));
 
-#if MULTITHREAD
+#if MULTITHREADED
 	m_pBulletEnvironment->getSolverInfo().m_numIterations = maxTasks;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
 	#if USE_PARALLEL_SOLVER
 		// Required for parallel solver (undocumented lolololo)
 		m_pBulletEnvironment->getSimulationIslandManager()->setSplitIslands(false);
+
+		// Solver also requires this.
+		m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
 	#endif
 #endif
 

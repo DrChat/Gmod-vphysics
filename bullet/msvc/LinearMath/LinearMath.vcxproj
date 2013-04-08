@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\src\LinearMath\btConvexHull.h" />
     <ClInclude Include="..\..\src\LinearMath\btConvexHullComputer.h" />
     <ClInclude Include="..\..\src\LinearMath\btDefaultMotionState.h" />
+    <ClInclude Include="..\..\src\LinearMath\btDefines.h" />
     <ClInclude Include="..\..\src\LinearMath\btGeometryUtil.h" />
     <ClInclude Include="..\..\src\LinearMath\btGrahamScan2dConvexHull.h" />
     <ClInclude Include="..\..\src\LinearMath\btHashMap.h" />

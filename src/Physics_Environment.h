@@ -149,7 +149,7 @@ private:
 	bool									m_deleteQuick;
 	float									m_timestep;
 
-	btThreadSupportInterface *				m_pThreadSupportCollision;
+	btThreadSupportInterface *				m_pThreadSupportDispatcher;
 	btThreadSupportInterface *				m_pThreadSupportSolver;
 	btCollisionConfiguration *				m_pBulletConfiguration;
 	btCollisionDispatcher *					m_pBulletDispatcher;

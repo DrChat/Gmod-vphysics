@@ -1029,7 +1029,7 @@ void			btSoftBody::clusterDCImpulse(Cluster* cluster, const btVector3& impulse)
 
 struct NodeLinks
 {
-    btAlignedObjectArray<int> m_links;
+	btAlignedObjectArray<int> m_links;
 };
 
 

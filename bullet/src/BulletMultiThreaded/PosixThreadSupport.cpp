@@ -188,8 +188,11 @@ void PosixThreadSupport::waitForResponse(unsigned int *puiArgument0, unsigned in
 	// need to find an active spu
 	btAssert(last >= 0);
 
-	*puiArgument0 = spuStatus.m_taskId;
-	*puiArgument1 = spuStatus.m_status;
+	if (puiArgument0)
+		*puiArgument0 = spuStatus.m_taskId;
+
+	if (puiArgument1)
+		*puiArgument1 = spuStatus.m_status;
 }
 
 

@@ -220,12 +220,12 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 				}
 	
 				BT_PROFILE("addWorkToTask");
-				for (i=0;i<numTotalPairs;)
+				for (i=0; i<numTotalPairs; )
 				{
 					//Performance Hint: tweak this number during benchmarking
 					
 					int endIndex = (i+pairRange) < numTotalPairs ? i+pairRange : numTotalPairs;
-					m_spuCollisionTaskProcess->addWorkToTask(pairPtr, i,endIndex);
+					m_spuCollisionTaskProcess->addWorkToTask(pairPtr, i, endIndex);
 					i = endIndex;
 				}
 			}

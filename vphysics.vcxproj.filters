@@ -74,6 +74,9 @@
     <ClCompile Include="src\Physics_ShadowController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Physics_SoftBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\convert.h">
@@ -149,6 +152,9 @@
       <Filter>Header Files\public</Filter>
     </ClInclude>
     <ClInclude Include="src\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics_SoftBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

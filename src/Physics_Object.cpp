@@ -591,7 +591,7 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 
 	btVector3 pos, force;
 	ConvertPosToBull(worldPosition, pos);
-	ConvertPosToBull(forceVector, force);
+	ConvertForceImpulseToBull(forceVector, force);
 
 	pos = pos - m_pObject->getWorldTransform().getOrigin();
 
@@ -637,6 +637,7 @@ float CPhysicsObject::CalculateAngularDrag(const Vector &objectSpaceRotationAxis
 	return DEG2RAD(GetAngularDragInDirection(bull_unitDirection));
 }
 
+// This function is a silly hack, games should be using the friction snapshot instead.
 bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
 	if (!contactPoint && !contactObject) return true;
 

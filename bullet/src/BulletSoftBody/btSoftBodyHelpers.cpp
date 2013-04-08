@@ -37,14 +37,17 @@ static void				drawBox(	btIDebugDraw* idraw,
 								const btVector3& maxs,
 								const btVector3& color)
 {
-	const btVector3	c[]={	btVector3(mins.x(), mins.y(), mins.z()),
+	const btVector3	c[]={
+		btVector3(mins.x(), mins.y(), mins.z()),
 		btVector3(maxs.x(), mins.y(), mins.z()),
 		btVector3(maxs.x(), maxs.y(), mins.z()),
 		btVector3(mins.x(), maxs.y(), mins.z()),
 		btVector3(mins.x(), mins.y(), maxs.z()),
 		btVector3(maxs.x(), mins.y(), maxs.z()),
 		btVector3(maxs.x(), maxs.y(), maxs.z()),
-		btVector3(mins.x(), maxs.y(), maxs.z())};
+		btVector3(mins.x(), maxs.y(), maxs.z())
+	};
+
 	idraw->drawLine(c[0], c[1], color);idraw->drawLine(c[1], c[2], color);
 	idraw->drawLine(c[2], c[3], color);idraw->drawLine(c[3], c[0], color);
 	idraw->drawLine(c[4], c[5], color);idraw->drawLine(c[5], c[6], color);
@@ -958,98 +961,100 @@ btSoftBody*	btSoftBodyHelpers::CreateFromTetGenData(btSoftBodyWorldInfo& worldIn
 													bool btetralinks,
 													bool bfacesfromtetras)
 {
-btAlignedObjectArray<btVector3>	pos;
-int								nnode=0;
-int								ndims=0;
-int								nattrb=0;
-int								hasbounds=0;
-int result = sscanf(node, "%d %d %d %d", &nnode, &ndims, &nattrb, &hasbounds);
-result = sscanf(node, "%d %d %d %d", &nnode, &ndims, &nattrb, &hasbounds);
-node += nextLine(node);
+	btAlignedObjectArray<btVector3>	pos;
+	int			nnode=0;
+	int			ndims=0;
+	int			nattrb=0;
+	int			hasbounds=0;
 
-pos.resize(nnode);
-for(int i=0;i<pos.size();++i)
-	{
-	int			index=0;
-	//int			bound=0;
-	float	x, y,z;
-	sscanf(node, "%d %f %f %f", &index, &x, &y, &z);
-
-//	sn>>index;
-//	sn>>x;sn>>y;sn>>z;
+	int result = sscanf(node, "%d %d %d %d", &nnode, &ndims, &nattrb, &hasbounds);
+	result = sscanf(node, "%d %d %d %d", &nnode, &ndims, &nattrb, &hasbounds);
 	node += nextLine(node);
-
-	//for(int j=0;j<nattrb;++j) 
-	//	sn>>a;
-
-	//if(hasbounds) 
-	//	sn>>bound;
-
-	pos[index].setX(btScalar(x));
-	pos[index].setY(btScalar(y));
-	pos[index].setZ(btScalar(z));
-	}
-btSoftBody*						psb=new btSoftBody(&worldInfo, nnode, &pos[0],0);
-#if 0
-if(face&&face[0])
+	
+	pos.resize(nnode);
+	for(int i=0;i<pos.size();++i)
 	{
-	int								nface=0;
-	sf>>nface;sf>>hasbounds;
-	for(int i=0;i<nface;++i)
-		{
 		int			index=0;
-		int			bound=0;
-		int			ni[3];
-		sf>>index;
-		sf>>ni[0];sf>>ni[1];sf>>ni[2];
-		sf>>bound;
-		psb->appendFace(ni[0], ni[1], ni[2]);	
-		if(btetralinks)
+		//int			bound=0;
+		float	x, y,z;
+		sscanf(node, "%d %f %f %f", &index, &x, &y, &z);
+	
+	//	sn>>index;
+	//	sn>>x;sn>>y;sn>>z;
+		node += nextLine(node);
+	
+		//for(int j=0;j<nattrb;++j) 
+		//	sn>>a;
+	
+		//if(hasbounds) 
+		//	sn>>bound;
+	
+		pos[index].setX(btScalar(x));
+		pos[index].setY(btScalar(y));
+		pos[index].setZ(btScalar(z));
+	}
+
+	btSoftBody*						psb=new btSoftBody(&worldInfo, nnode, &pos[0],0);
+#if 0
+	if(face && face[0])
+	{
+		int								nface=0;
+		sf>>nface;sf>>hasbounds;
+		for(int i=0;i<nface;++i)
+		{
+			int			index=0;
+			int			bound=0;
+			int			ni[3];
+			sf>>index;
+			sf>>ni[0];sf>>ni[1];sf>>ni[2];
+			sf>>bound;
+			psb->appendFace(ni[0], ni[1], ni[2]);	
+			if(btetralinks)
 			{
-			psb->appendLink(ni[0], ni[1],0, true);
-			psb->appendLink(ni[1], ni[2],0, true);
-			psb->appendLink(ni[2], ni[0],0, true);
+				psb->appendLink(ni[0], ni[1],0, true);
+				psb->appendLink(ni[1], ni[2],0, true);
+				psb->appendLink(ni[2], ni[0],0, true);
 			}
 		}
 	}
 #endif
-
-if(ele&&ele[0])
-	{
-	int								ntetra=0;
-	int								ncorner=0;
-	int								neattrb=0;
-	sscanf(ele, "%d %d %d", &ntetra, &ncorner, &neattrb);
-	ele += nextLine(ele);
 	
-	//se>>ntetra;se>>ncorner;se>>neattrb;
-	for(int i=0;i<ntetra;++i)
+	if(ele && ele[0])
+	{
+		int								ntetra=0;
+		int								ncorner=0;
+		int								neattrb=0;
+		sscanf(ele, "%d %d %d", &ntetra, &ncorner, &neattrb);
+		ele += nextLine(ele);
+		
+		//se>>ntetra;se>>ncorner;se>>neattrb;
+		for(int i=0;i<ntetra;++i)
 		{
-		int			index=0;
-		int			ni[4];
-
-		//se>>index;
-		//se>>ni[0];se>>ni[1];se>>ni[2];se>>ni[3];
-		sscanf(ele, "%d %d %d %d %d", &index, &ni[0], &ni[1], &ni[2], &ni[3]);
-		ele+=nextLine(ele);
-		//for(int j=0;j<neattrb;++j) 
-		//	se>>a;
-		psb->appendTetra(ni[0], ni[1], ni[2], ni[3]);
-		if(btetralinks)
+			int			index=0;
+			int			ni[4];
+	
+			//se>>index;
+			//se>>ni[0];se>>ni[1];se>>ni[2];se>>ni[3];
+			sscanf(ele, "%d %d %d %d %d", &index, &ni[0], &ni[1], &ni[2], &ni[3]);
+			ele+=nextLine(ele);
+			//for(int j=0;j<neattrb;++j) 
+			//	se>>a;
+			psb->appendTetra(ni[0], ni[1], ni[2], ni[3]);
+			if(btetralinks)
 			{
-			psb->appendLink(ni[0], ni[1],0, true);
-			psb->appendLink(ni[1], ni[2],0, true);
-			psb->appendLink(ni[2], ni[0],0, true);
-			psb->appendLink(ni[0], ni[3],0, true);
-			psb->appendLink(ni[1], ni[3],0, true);
-			psb->appendLink(ni[2], ni[3],0, true);
+				psb->appendLink(ni[0], ni[1],0, true);
+				psb->appendLink(ni[1], ni[2],0, true);
+				psb->appendLink(ni[2], ni[0],0, true);
+				psb->appendLink(ni[0], ni[3],0, true);
+				psb->appendLink(ni[1], ni[3],0, true);
+				psb->appendLink(ni[2], ni[3],0, true);
 			}
 		}
 	}
-printf("Nodes:  %u\r\n", psb->m_nodes.size());
-printf("Links:  %u\r\n", psb->m_links.size());
-printf("Faces:  %u\r\n", psb->m_faces.size());
-printf("Tetras: %u\r\n", psb->m_tetras.size());
-return(psb);
+	printf("Nodes:  %u\r\n", psb->m_nodes.size());
+	printf("Links:  %u\r\n", psb->m_links.size());
+	printf("Faces:  %u\r\n", psb->m_faces.size());
+	printf("Tetras: %u\r\n", psb->m_tetras.size());
+	return(psb);
 }
 

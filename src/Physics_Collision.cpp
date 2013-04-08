@@ -15,6 +15,8 @@
 
 #define COLLISION_MARGIN 0.004 // 4 mm
 
+static ConVar vcollide_opimize_meshes("vcollide_optimize_meshes", "1", FCVAR_ARCHIVE, "Optimize physics meshes when they're loaded (increases loading times)");
+
 /****************************
 * CLASS CCollisionQuery
 ****************************/
@@ -144,6 +146,25 @@ CPhysConvex *CPhysicsCollision::ConvexFromConvexPolyhedron(const CPolyhedron &Co
 
 void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, const Vector *pPoints, int iPointCount, CPhysConvex **ppOutput) {
 	NOT_IMPLEMENTED
+}
+
+CPhysConvex *CPhysicsCollision::OptimizeConvex(CPhysConvex *pConvex) {
+	if (!pConvex) return NULL;
+
+	btCollisionShape *pShape = (btCollisionShape *)pConvex;
+	if (pShape->getShapeType() == CONVEX_HULL_SHAPE_PROXYTYPE) {
+		btConvexHullShape *pConvexHull = (btConvexHullShape *)pConvex;
+
+		btShapeHull *pHull = new btShapeHull(pConvexHull);
+		pHull->buildHull(pConvexHull->getMargin());
+		btConvexHullShape *pOptimizedConvex = new btConvexHullShape((btScalar *)pHull->getVertexPointer(), pHull->numVertices());
+		pOptimizedConvex->setMargin(pConvexHull->getMargin());
+		delete pHull;
+
+		return (CPhysConvex *)pOptimizedConvex;
+	}
+
+	return NULL;
 }
 
 // TODO: Support this, lua Entity:PhysicsInitMultiConvex uses this!
@@ -709,7 +730,20 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 					}
 				}
 
-				pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), -info->massCenter), pConvex);
+				btTransform offsetTrans(btMatrix3x3::getIdentity(), -info->massCenter);
+				if (vcollide_opimize_meshes.GetBool()) {
+					btConvexHullShape *pOptimizedConvex = (btConvexHullShape *)OptimizeConvex((CPhysConvex *)pConvex);
+					if (pOptimizedConvex) {
+						DevMsg("VCollideLoad: Optimized mesh from %d vertices to %d vertices\n", pConvex->getNumVertices(), pOptimizedConvex->getNumVertices());
+
+						pCompound->addChildShape(offsetTrans, pOptimizedConvex);
+						ConvexFree((CPhysConvex *)pConvex);
+					} else {
+						pCompound->addChildShape(offsetTrans, pConvex);
+					}
+				} else {
+					pCompound->addChildShape(offsetTrans, pConvex);
+				}
 			}
 		}
 

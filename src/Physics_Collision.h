@@ -21,6 +21,8 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		void					ConvexFree(CPhysConvex *pConvex);
 		CPhysConvex *			ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron);
 		void					ConvexesFromConvexPolygon(const Vector &vPolyNormal, const Vector *pPoints, int iPointCount, CPhysConvex **pOutput);
+		// Returns an optimized convex from the input convex. May return NULL if failed.
+		CPhysConvex *			OptimizeConvex(CPhysConvex *pConvex);
 
 		CPhysPolysoup *			PolysoupCreate();
 		void					PolysoupDestroy(CPhysPolysoup *pSoup);

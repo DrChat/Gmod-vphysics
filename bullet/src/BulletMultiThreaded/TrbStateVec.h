@@ -102,7 +102,7 @@ public:
 	uint16_t	mSleepCount;
 	uint8_t		mMotionType;
 	uint8_t		deleted            : 1;
-	uint8_t		mSleeping           : 1;
+	uint8_t		mSleeping          : 1;
 	uint8_t		useSleep           : 1;
 	uint8_t		useCcd		       : 1;
 	uint8_t		useContactCallback : 1;

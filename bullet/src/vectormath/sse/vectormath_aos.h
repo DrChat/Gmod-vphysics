@@ -5,14 +5,14 @@
    Redistribution and use in source and binary forms,
    with or without modification, are permitted provided that the
    following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the Sony Computer Entertainment Inc nor the names
-      of its contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+	* Redistributions of source code must retain the above copyright
+	  notice, this list of conditions and the following disclaimer.
+	* Redistributions in binary form must reproduce the above copyright
+	  notice, this list of conditions and the following disclaimer in the
+	  documentation and/or other materials provided with the distribution.
+	* Neither the name of the Sony Computer Entertainment Inc nor the names
+	  of its contributors may be used to endorse or promote products derived
+	  from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -91,7 +91,7 @@ union SSEFloat
 	unsigned short s[8];
 	float f[4];
 	SSEFloat(__m128 v) : m128(v) {}
-    SSEFloat(__m128i v) : vi(v) {}
+	SSEFloat(__m128i v) : vi(v) {}
 	SSEFloat() {}//uninitialized
 };
 
@@ -110,12 +110,12 @@ static VECTORMATH_FORCE_INLINE __m128 vec_sel(__m128 a, __m128 b, unsigned int _
 
 static VECTORMATH_FORCE_INLINE __m128 toM128(unsigned int x)
 {
-    return _mm_set1_ps( *(float *)&x );
+	return _mm_set1_ps( *(float *)&x );
 }
 
 static VECTORMATH_FORCE_INLINE __m128 fabsf4(__m128 x)
 {
-    return _mm_and_ps( x, toM128( 0x7fffffff ) );
+	return _mm_and_ps( x, toM128( 0x7fffffff ) );
 }
 /*
 union SSE64
@@ -136,7 +136,7 @@ static VECTORMATH_FORCE_INLINE __m128 vec_cts(__m128 x, int a)
 	sse64.m64.m01 = _mm_cvttps_pi32(x);
 	sse64.m64.m23 = _mm_cvttps_pi32(_mm_ror_ps(x,2));
 	_mm_empty();
-    return sse64.m128;
+	return sse64.m128;
 }
 
 static VECTORMATH_FORCE_INLINE __m128 vec_ctf(__m128 x, int a)
@@ -157,7 +157,7 @@ static VECTORMATH_FORCE_INLINE __m128 vec_cts(__m128 x, int a)
 	assert(a == 0); // Only 2^0 supported
 	(void)a;
 	__m128i result = _mm_cvtps_epi32(x);
-    return (__m128 &)result;
+	return (__m128 &)result;
 }
 
 static VECTORMATH_FORCE_INLINE __m128 vec_ctf(__m128 x, int a)
@@ -197,30 +197,30 @@ return _mm_mul_ps(_mm_mul_ps(_half4, approx), _mm_sub_ps(_three, muls) );
 
 static VECTORMATH_FORCE_INLINE __m128 acosf4(__m128 x)
 {
-    __m128 xabs = fabsf4(x);
+	__m128 xabs = fabsf4(x);
 	__m128 select = _mm_cmplt_ps( x, _mm_setzero_ps() );
-    __m128 t1 = sqrtf4(vec_sub(_mm_set1_ps(1.0f), xabs));
-    
-    /* Instruction counts can be reduced if the polynomial was
-     * computed entirely from nested (dependent) fma's. However, 
-     * to reduce the number of pipeline stalls, the polygon is evaluated 
-     * in two halves (hi amd lo). 
-     */
-    __m128 xabs2 = _mm_mul_ps(xabs,  xabs);
-    __m128 xabs4 = _mm_mul_ps(xabs2, xabs2);
-    __m128 hi = vec_madd(vec_madd(vec_madd(_mm_set1_ps(-0.0012624911f),
+	__m128 t1 = sqrtf4(vec_sub(_mm_set1_ps(1.0f), xabs));
+	
+	/* Instruction counts can be reduced if the polynomial was
+	 * computed entirely from nested (dependent) fma's. However, 
+	 * to reduce the number of pipeline stalls, the polygon is evaluated 
+	 * in two halves (hi amd lo). 
+	 */
+	__m128 xabs2 = _mm_mul_ps(xabs,  xabs);
+	__m128 xabs4 = _mm_mul_ps(xabs2, xabs2);
+	__m128 hi = vec_madd(vec_madd(vec_madd(_mm_set1_ps(-0.0012624911f),
 		xabs, _mm_set1_ps(0.0066700901f)),
 			xabs, _mm_set1_ps(-0.0170881256f)),
 				xabs, _mm_set1_ps( 0.0308918810f));
-    __m128 lo = vec_madd(vec_madd(vec_madd(_mm_set1_ps(-0.0501743046f),
+	__m128 lo = vec_madd(vec_madd(vec_madd(_mm_set1_ps(-0.0501743046f),
 		xabs, _mm_set1_ps(0.0889789874f)),
 			xabs, _mm_set1_ps(-0.2145988016f)),
 				xabs, _mm_set1_ps( 1.5707963050f));
-    
-    __m128 result = vec_madd(hi, xabs4, lo);
-    
-    // Adjust the result if x is negactive.
-    return vec_sel(
+	
+	__m128 result = vec_madd(hi, xabs4, lo);
+	
+	// Adjust the result if x is negactive.
+	return vec_sel(
 		vec_mul(t1, result),									// Positive
 		vec_nmsub(t1, result, _mm_set1_ps(3.1415926535898f)),	// Negative
 		select);
@@ -242,56 +242,56 @@ static VECTORMATH_FORCE_INLINE __m128 sinf4(vec_float4 x)
 #define _SINCOS_KC1  1.57079625129f
 #define _SINCOS_KC2  7.54978995489e-8f
 
-    vec_float4 xl,xl2,xl3,res;
+	vec_float4 xl,xl2,xl3,res;
 
-    // Range reduction using : xl = angle * TwoOverPi;
-    //  
-    xl = vec_mul(x, _mm_set1_ps(0.63661977236f));
+	// Range reduction using : xl = angle * TwoOverPi;
+	//  
+	xl = vec_mul(x, _mm_set1_ps(0.63661977236f));
 
-    // Find the quadrant the angle falls in
-    // using:  q = (int) (ceil(abs(xl))*sign(xl))
-    //
-    vec_int4 q = vec_cts(xl,0);
+	// Find the quadrant the angle falls in
+	// using:  q = (int) (ceil(abs(xl))*sign(xl))
+	//
+	vec_int4 q = vec_cts(xl,0);
 
-    // Compute an offset based on the quadrant that the angle falls in
-    // 
-    vec_int4 offset = _mm_and_ps(q,toM128(0x3));
+	// Compute an offset based on the quadrant that the angle falls in
+	// 
+	vec_int4 offset = _mm_and_ps(q,toM128(0x3));
 
-    // Remainder in range [-pi/4..pi/4]
-    //
-    vec_float4 qf = vec_ctf(q,0);
-    xl  = vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC2),vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC1),x));
-    
-    // Compute x^2 and x^3
-    //
-    xl2 = vec_mul(xl,xl);
-    xl3 = vec_mul(xl2,xl);
-    
-    // Compute both the sin and cos of the angles
-    // using a polynomial expression:
-    //   cx = 1.0f + xl2 * ((C0 * xl2 + C1) * xl2 + C2), and
-    //   sx = xl + xl3 * ((S0 * xl2 + S1) * xl2 + S2)
-    //
-    
-    vec_float4 cx =
+	// Remainder in range [-pi/4..pi/4]
+	//
+	vec_float4 qf = vec_ctf(q,0);
+	xl  = vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC2),vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC1),x));
+	
+	// Compute x^2 and x^3
+	//
+	xl2 = vec_mul(xl,xl);
+	xl3 = vec_mul(xl2,xl);
+	
+	// Compute both the sin and cos of the angles
+	// using a polynomial expression:
+	//   cx = 1.0f + xl2 * ((C0 * xl2 + C1) * xl2 + C2), and
+	//   sx = xl + xl3 * ((S0 * xl2 + S1) * xl2 + S2)
+	//
+	
+	vec_float4 cx =
 		vec_madd(
 			vec_madd(
 				vec_madd(_mm_set1_ps(_SINCOS_CC0),xl2,_mm_set1_ps(_SINCOS_CC1)),xl2,_mm_set1_ps(_SINCOS_CC2)),xl2,_mm_set1_ps(1.0f));
-    vec_float4 sx =
+	vec_float4 sx =
 		vec_madd(
 			vec_madd(
 				vec_madd(_mm_set1_ps(_SINCOS_SC0),xl2,_mm_set1_ps(_SINCOS_SC1)),xl2,_mm_set1_ps(_SINCOS_SC2)),xl3,xl);
 
-    // Use the cosine when the offset is odd and the sin
-    // when the offset is even
-    //
-    res = vec_sel(cx,sx,vec_cmpeq(vec_and(offset,
-                                          toM128(0x1)),
+	// Use the cosine when the offset is odd and the sin
+	// when the offset is even
+	//
+	res = vec_sel(cx,sx,vec_cmpeq(vec_and(offset,
+										  toM128(0x1)),
 										  _mm_setzero_ps()));
 
-    // Flip the sign of the result when (offset mod 4) = 1 or 2
-    //
-    return vec_sel(
+	// Flip the sign of the result when (offset mod 4) = 1 or 2
+	//
+	return vec_sel(
 		vec_xor(toM128(0x80000000U), res),	// Negative
 		res,								// Positive
 		vec_cmpeq(vec_and(offset,toM128(0x2)),_mm_setzero_ps()));
@@ -299,65 +299,65 @@ static VECTORMATH_FORCE_INLINE __m128 sinf4(vec_float4 x)
 
 static VECTORMATH_FORCE_INLINE void sincosf4(vec_float4 x, vec_float4* s, vec_float4* c)
 {
-    vec_float4 xl,xl2,xl3;
-    vec_int4   offsetSin, offsetCos;
+	vec_float4 xl,xl2,xl3;
+	vec_int4   offsetSin, offsetCos;
 
-    // Range reduction using : xl = angle * TwoOverPi;
-    //  
-    xl = vec_mul(x, _mm_set1_ps(0.63661977236f));
+	// Range reduction using : xl = angle * TwoOverPi;
+	//  
+	xl = vec_mul(x, _mm_set1_ps(0.63661977236f));
 
-    // Find the quadrant the angle falls in
-    // using:  q = (int) (ceil(abs(xl))*sign(xl))
-    //
-    //vec_int4 q = vec_cts(vec_add(xl,vec_sel(_mm_set1_ps(0.5f),xl,(0x80000000))),0);
-    vec_int4 q = vec_cts(xl,0);
-     
-    // Compute the offset based on the quadrant that the angle falls in.
-    // Add 1 to the offset for the cosine. 
-    //
-    offsetSin = vec_and(q,toM128((int)0x3));
+	// Find the quadrant the angle falls in
+	// using:  q = (int) (ceil(abs(xl))*sign(xl))
+	//
+	//vec_int4 q = vec_cts(vec_add(xl,vec_sel(_mm_set1_ps(0.5f),xl,(0x80000000))),0);
+	vec_int4 q = vec_cts(xl,0);
+	 
+	// Compute the offset based on the quadrant that the angle falls in.
+	// Add 1 to the offset for the cosine. 
+	//
+	offsetSin = vec_and(q,toM128((int)0x3));
 	__m128i temp = _mm_add_epi32(_mm_set1_epi32(1),(__m128i &)offsetSin);
 	offsetCos = (__m128 &)temp;
 
-    // Remainder in range [-pi/4..pi/4]
-    //
-    vec_float4 qf = vec_ctf(q,0);
-    xl  = vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC2),vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC1),x));
-    
-    // Compute x^2 and x^3
-    //
-    xl2 = vec_mul(xl,xl);
-    xl3 = vec_mul(xl2,xl);
-    
-    // Compute both the sin and cos of the angles
-    // using a polynomial expression:
-    //   cx = 1.0f + xl2 * ((C0 * xl2 + C1) * xl2 + C2), and
-    //   sx = xl + xl3 * ((S0 * xl2 + S1) * xl2 + S2)
-    //
-    vec_float4 cx =
+	// Remainder in range [-pi/4..pi/4]
+	//
+	vec_float4 qf = vec_ctf(q,0);
+	xl  = vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC2),vec_nmsub(qf,_mm_set1_ps(_SINCOS_KC1),x));
+	
+	// Compute x^2 and x^3
+	//
+	xl2 = vec_mul(xl,xl);
+	xl3 = vec_mul(xl2,xl);
+	
+	// Compute both the sin and cos of the angles
+	// using a polynomial expression:
+	//   cx = 1.0f + xl2 * ((C0 * xl2 + C1) * xl2 + C2), and
+	//   sx = xl + xl3 * ((S0 * xl2 + S1) * xl2 + S2)
+	//
+	vec_float4 cx =
 		vec_madd(
 			vec_madd(
 				vec_madd(_mm_set1_ps(_SINCOS_CC0),xl2,_mm_set1_ps(_SINCOS_CC1)),xl2,_mm_set1_ps(_SINCOS_CC2)),xl2,_mm_set1_ps(1.0f));
-    vec_float4 sx =
+	vec_float4 sx =
 		vec_madd(
 			vec_madd(
 				vec_madd(_mm_set1_ps(_SINCOS_SC0),xl2,_mm_set1_ps(_SINCOS_SC1)),xl2,_mm_set1_ps(_SINCOS_SC2)),xl3,xl);
 
-    // Use the cosine when the offset is odd and the sin
-    // when the offset is even
-    //
-    vec_uint4 sinMask = (vec_uint4)vec_cmpeq(vec_and(offsetSin,toM128(0x1)),_mm_setzero_ps());
-    vec_uint4 cosMask = (vec_uint4)vec_cmpeq(vec_and(offsetCos,toM128(0x1)),_mm_setzero_ps());    
-    *s = vec_sel(cx,sx,sinMask);
-    *c = vec_sel(cx,sx,cosMask);
+	// Use the cosine when the offset is odd and the sin
+	// when the offset is even
+	//
+	vec_uint4 sinMask = (vec_uint4)vec_cmpeq(vec_and(offsetSin,toM128(0x1)),_mm_setzero_ps());
+	vec_uint4 cosMask = (vec_uint4)vec_cmpeq(vec_and(offsetCos,toM128(0x1)),_mm_setzero_ps());    
+	*s = vec_sel(cx,sx,sinMask);
+	*c = vec_sel(cx,sx,cosMask);
 
-    // Flip the sign of the result when (offset mod 4) = 1 or 2
-    //
-    sinMask = vec_cmpeq(vec_and(offsetSin,toM128(0x2)),_mm_setzero_ps());
-    cosMask = vec_cmpeq(vec_and(offsetCos,toM128(0x2)),_mm_setzero_ps());
-    
-    *s = vec_sel((vec_float4)vec_xor(toM128(0x80000000),(vec_uint4)*s),*s,sinMask);
-    *c = vec_sel((vec_float4)vec_xor(toM128(0x80000000),(vec_uint4)*c),*c,cosMask);    
+	// Flip the sign of the result when (offset mod 4) = 1 or 2
+	//
+	sinMask = vec_cmpeq(vec_and(offsetSin,toM128(0x2)),_mm_setzero_ps());
+	cosMask = vec_cmpeq(vec_and(offsetCos,toM128(0x2)),_mm_setzero_ps());
+	
+	*s = vec_sel((vec_float4)vec_xor(toM128(0x80000000),(vec_uint4)*s),*s,sinMask);
+	*c = vec_sel((vec_float4)vec_xor(toM128(0x80000000),(vec_uint4)*c),*c,cosMask);    
 }
 
 #include "vecidx_aos.h"
@@ -387,176 +387,176 @@ class Transform3;
 //
 class Vector3
 {
-    __m128 mVec128;
+	__m128 mVec128;
 
 	VECTORMATH_FORCE_INLINE void set128(vec_float4 vec);
 	 
 	 VECTORMATH_FORCE_INLINE  vec_float4& get128Ref();
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Vector3( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Vector3( ) { };
 
 	// Default copy constructor
-    // 
+	// 
 	VECTORMATH_FORCE_INLINE Vector3(const Vector3& vec);
 
-    // Construct a 3-D vector from x, y, and z elements
-    // 
-    VECTORMATH_FORCE_INLINE Vector3( float x, float y, float z );
+	// Construct a 3-D vector from x, y, and z elements
+	// 
+	VECTORMATH_FORCE_INLINE Vector3( float x, float y, float z );
 
-    // Construct a 3-D vector from x, y, and z elements (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3( const floatInVec &x, const floatInVec &y, const floatInVec &z );
+	// Construct a 3-D vector from x, y, and z elements (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3( const floatInVec &x, const floatInVec &y, const floatInVec &z );
 
-    // Copy elements from a 3-D point into a 3-D vector
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector3( const Point3 &pnt );
+	// Copy elements from a 3-D point into a 3-D vector
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector3( const Point3 &pnt );
 
-    // Set all elements of a 3-D vector to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector3( float scalar );
+	// Set all elements of a 3-D vector to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector3( float scalar );
 
-    // Set all elements of a 3-D vector to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector3( const floatInVec &scalar );
+	// Set all elements of a 3-D vector to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector3( const floatInVec &scalar );
 
-    // Set vector float data in a 3-D vector
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector3( __m128 vf4 );
+	// Set vector float data in a 3-D vector
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector3( __m128 vf4 );
 
-    // Get vector float data from a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE __m128 get128( ) const;
+	// Get vector float data from a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE __m128 get128( ) const;
 
-    // Assign one 3-D vector to another
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator =( const Vector3 &vec );
+	// Assign one 3-D vector to another
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator =( const Vector3 &vec );
 
-    // Set the x element of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setX( float x );
+	// Set the x element of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setX( float x );
 
-    // Set the y element of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setY( float y );
+	// Set the y element of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setY( float y );
 
-    // Set the z element of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setZ( float z );
+	// Set the z element of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setZ( float z );
 
-    // Set the x element of a 3-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setX( const floatInVec &x );
+	// Set the x element of a 3-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setX( const floatInVec &x );
 
-    // Set the y element of a 3-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setY( const floatInVec &y );
+	// Set the y element of a 3-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setY( const floatInVec &y );
 
-    // Set the z element of a 3-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setZ( const floatInVec &z );
+	// Set the z element of a 3-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setZ( const floatInVec &z );
 
-    // Get the x element of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
+	// Get the x element of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
 
-    // Get the y element of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
+	// Get the y element of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
 
-    // Get the z element of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
+	// Get the z element of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
 
-    // Set an x, y, or z element of a 3-D vector by index
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setElem( int idx, float value );
+	// Set an x, y, or z element of a 3-D vector by index
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setElem( int idx, float value );
 
-    // Set an x, y, or z element of a 3-D vector by index (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & setElem( int idx, const floatInVec &value );
+	// Set an x, y, or z element of a 3-D vector by index (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & setElem( int idx, const floatInVec &value );
 
-    // Get an x, y, or z element of a 3-D vector by index
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
+	// Get an x, y, or z element of a 3-D vector by index
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
 
-    // Subscripting operator to set or get an element
-    // 
-    VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
+	// Subscripting operator to set or get an element
+	// 
+	VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
 
-    // Subscripting operator to get an element
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
+	// Subscripting operator to get an element
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
 
-    // Add two 3-D vectors
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator +( const Vector3 &vec ) const;
+	// Add two 3-D vectors
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator +( const Vector3 &vec ) const;
 
-    // Subtract a 3-D vector from another 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator -( const Vector3 &vec ) const;
+	// Subtract a 3-D vector from another 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator -( const Vector3 &vec ) const;
 
-    // Add a 3-D vector to a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const Point3 operator +( const Point3 &pnt ) const;
+	// Add a 3-D vector to a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const Point3 operator +( const Point3 &pnt ) const;
 
-    // Multiply a 3-D vector by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator *( float scalar ) const;
+	// Multiply a 3-D vector by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator *( float scalar ) const;
 
-    // Divide a 3-D vector by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator /( float scalar ) const;
+	// Divide a 3-D vector by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator /( float scalar ) const;
 
-    // Multiply a 3-D vector by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator *( const floatInVec &scalar ) const;
+	// Multiply a 3-D vector by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator *( const floatInVec &scalar ) const;
 
-    // Divide a 3-D vector by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator /( const floatInVec &scalar ) const;
+	// Divide a 3-D vector by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator /( const floatInVec &scalar ) const;
 
-    // Perform compound assignment and addition with a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator +=( const Vector3 &vec );
+	// Perform compound assignment and addition with a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator +=( const Vector3 &vec );
 
-    // Perform compound assignment and subtraction by a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator -=( const Vector3 &vec );
+	// Perform compound assignment and subtraction by a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator -=( const Vector3 &vec );
 
-    // Perform compound assignment and multiplication by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator *=( float scalar );
+	// Perform compound assignment and multiplication by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator *=( float scalar );
 
-    // Perform compound assignment and division by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator /=( float scalar );
+	// Perform compound assignment and division by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator /=( float scalar );
 
-    // Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator *=( const floatInVec &scalar );
+	// Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator *=( const floatInVec &scalar );
 
-    // Perform compound assignment and division by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator /=( const floatInVec &scalar );
+	// Perform compound assignment and division by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator /=( const floatInVec &scalar );
 
-    // Negate all elements of a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator -( ) const;
+	// Negate all elements of a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator -( ) const;
 
-    // Construct x axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector3 xAxis( );
+	// Construct x axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector3 xAxis( );
 
-    // Construct y axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector3 yAxis( );
+	// Construct y axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector3 yAxis( );
 
-    // Construct z axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector3 zAxis( );
+	// Construct z axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector3 zAxis( );
 
 };
 
@@ -730,206 +730,206 @@ VECTORMATH_FORCE_INLINE void print( const Vector3 &vec, const char * name );
 //
 class Vector4
 {
-    __m128 mVec128;
+	__m128 mVec128;
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Vector4( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Vector4( ) { };
 
-    // Construct a 4-D vector from x, y, z, and w elements
-    // 
-    VECTORMATH_FORCE_INLINE Vector4( float x, float y, float z, float w );
+	// Construct a 4-D vector from x, y, z, and w elements
+	// 
+	VECTORMATH_FORCE_INLINE Vector4( float x, float y, float z, float w );
 
-    // Construct a 4-D vector from x, y, z, and w elements (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4( const floatInVec &x, const floatInVec &y, const floatInVec &z, const floatInVec &w );
+	// Construct a 4-D vector from x, y, z, and w elements (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4( const floatInVec &x, const floatInVec &y, const floatInVec &z, const floatInVec &w );
 
-    // Construct a 4-D vector from a 3-D vector and a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Vector4( const Vector3 &xyz, float w );
+	// Construct a 4-D vector from a 3-D vector and a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Vector4( const Vector3 &xyz, float w );
 
-    // Construct a 4-D vector from a 3-D vector and a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4( const Vector3 &xyz, const floatInVec &w );
+	// Construct a 4-D vector from a 3-D vector and a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4( const Vector3 &xyz, const floatInVec &w );
 
-    // Copy x, y, and z from a 3-D vector into a 4-D vector, and set w to 0
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector4( const Vector3 &vec );
+	// Copy x, y, and z from a 3-D vector into a 4-D vector, and set w to 0
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector4( const Vector3 &vec );
 
-    // Copy x, y, and z from a 3-D point into a 4-D vector, and set w to 1
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector4( const Point3 &pnt );
+	// Copy x, y, and z from a 3-D point into a 4-D vector, and set w to 1
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector4( const Point3 &pnt );
 
-    // Copy elements from a quaternion into a 4-D vector
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector4( const Quat &quat );
+	// Copy elements from a quaternion into a 4-D vector
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector4( const Quat &quat );
 
-    // Set all elements of a 4-D vector to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector4( float scalar );
+	// Set all elements of a 4-D vector to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector4( float scalar );
 
-    // Set all elements of a 4-D vector to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector4( const floatInVec &scalar );
+	// Set all elements of a 4-D vector to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector4( const floatInVec &scalar );
 
-    // Set vector float data in a 4-D vector
-    // 
-    explicit VECTORMATH_FORCE_INLINE Vector4( __m128 vf4 );
+	// Set vector float data in a 4-D vector
+	// 
+	explicit VECTORMATH_FORCE_INLINE Vector4( __m128 vf4 );
 
-    // Get vector float data from a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE __m128 get128( ) const;
+	// Get vector float data from a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE __m128 get128( ) const;
 
-    // Assign one 4-D vector to another
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator =( const Vector4 &vec );
+	// Assign one 4-D vector to another
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator =( const Vector4 &vec );
 
-    // Set the x, y, and z elements of a 4-D vector
-    // NOTE: 
-    // This function does not change the w element.
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setXYZ( const Vector3 &vec );
+	// Set the x, y, and z elements of a 4-D vector
+	// NOTE: 
+	// This function does not change the w element.
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setXYZ( const Vector3 &vec );
 
-    // Get the x, y, and z elements of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getXYZ( ) const;
+	// Get the x, y, and z elements of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getXYZ( ) const;
 
-    // Set the x element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setX( float x );
+	// Set the x element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setX( float x );
 
-    // Set the y element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setY( float y );
+	// Set the y element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setY( float y );
 
-    // Set the z element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setZ( float z );
+	// Set the z element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setZ( float z );
 
-    // Set the w element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setW( float w );
+	// Set the w element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setW( float w );
 
-    // Set the x element of a 4-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setX( const floatInVec &x );
+	// Set the x element of a 4-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setX( const floatInVec &x );
 
-    // Set the y element of a 4-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setY( const floatInVec &y );
+	// Set the y element of a 4-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setY( const floatInVec &y );
 
-    // Set the z element of a 4-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setZ( const floatInVec &z );
+	// Set the z element of a 4-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setZ( const floatInVec &z );
 
-    // Set the w element of a 4-D vector (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setW( const floatInVec &w );
+	// Set the w element of a 4-D vector (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setW( const floatInVec &w );
 
-    // Get the x element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
+	// Get the x element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
 
-    // Get the y element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
+	// Get the y element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
 
-    // Get the z element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
+	// Get the z element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
 
-    // Get the w element of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getW( ) const;
+	// Get the w element of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getW( ) const;
 
-    // Set an x, y, z, or w element of a 4-D vector by index
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setElem( int idx, float value );
+	// Set an x, y, z, or w element of a 4-D vector by index
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setElem( int idx, float value );
 
-    // Set an x, y, z, or w element of a 4-D vector by index (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & setElem( int idx, const floatInVec &value );
+	// Set an x, y, z, or w element of a 4-D vector by index (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & setElem( int idx, const floatInVec &value );
 
-    // Get an x, y, z, or w element of a 4-D vector by index
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
+	// Get an x, y, z, or w element of a 4-D vector by index
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
 
-    // Subscripting operator to set or get an element
-    // 
-    VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
+	// Subscripting operator to set or get an element
+	// 
+	VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
 
-    // Subscripting operator to get an element
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
+	// Subscripting operator to get an element
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
 
-    // Add two 4-D vectors
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator +( const Vector4 &vec ) const;
+	// Add two 4-D vectors
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator +( const Vector4 &vec ) const;
 
-    // Subtract a 4-D vector from another 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator -( const Vector4 &vec ) const;
+	// Subtract a 4-D vector from another 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator -( const Vector4 &vec ) const;
 
-    // Multiply a 4-D vector by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator *( float scalar ) const;
+	// Multiply a 4-D vector by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator *( float scalar ) const;
 
-    // Divide a 4-D vector by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator /( float scalar ) const;
+	// Divide a 4-D vector by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator /( float scalar ) const;
 
-    // Multiply a 4-D vector by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator *( const floatInVec &scalar ) const;
+	// Multiply a 4-D vector by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator *( const floatInVec &scalar ) const;
 
-    // Divide a 4-D vector by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator /( const floatInVec &scalar ) const;
+	// Divide a 4-D vector by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator /( const floatInVec &scalar ) const;
 
-    // Perform compound assignment and addition with a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator +=( const Vector4 &vec );
+	// Perform compound assignment and addition with a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator +=( const Vector4 &vec );
 
-    // Perform compound assignment and subtraction by a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator -=( const Vector4 &vec );
+	// Perform compound assignment and subtraction by a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator -=( const Vector4 &vec );
 
-    // Perform compound assignment and multiplication by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator *=( float scalar );
+	// Perform compound assignment and multiplication by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator *=( float scalar );
 
-    // Perform compound assignment and division by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator /=( float scalar );
+	// Perform compound assignment and division by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator /=( float scalar );
 
-    // Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator *=( const floatInVec &scalar );
+	// Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator *=( const floatInVec &scalar );
 
-    // Perform compound assignment and division by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator /=( const floatInVec &scalar );
+	// Perform compound assignment and division by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator /=( const floatInVec &scalar );
 
-    // Negate all elements of a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator -( ) const;
+	// Negate all elements of a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator -( ) const;
 
-    // Construct x axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector4 xAxis( );
+	// Construct x axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector4 xAxis( );
 
-    // Construct y axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector4 yAxis( );
+	// Construct y axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector4 yAxis( );
 
-    // Construct z axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector4 zAxis( );
+	// Construct z axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector4 zAxis( );
 
-    // Construct w axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Vector4 wAxis( );
+	// Construct w axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Vector4 wAxis( );
 
 };
 
@@ -1071,120 +1071,120 @@ VECTORMATH_FORCE_INLINE void print( const Vector4 &vec, const char * name );
 //
 class Point3
 {
-    __m128 mVec128;
+	__m128 mVec128;
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Point3( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Point3( ) { };
 
-    // Construct a 3-D point from x, y, and z elements
-    // 
-    VECTORMATH_FORCE_INLINE Point3( float x, float y, float z );
+	// Construct a 3-D point from x, y, and z elements
+	// 
+	VECTORMATH_FORCE_INLINE Point3( float x, float y, float z );
 
-    // Construct a 3-D point from x, y, and z elements (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Point3( const floatInVec &x, const floatInVec &y, const floatInVec &z );
+	// Construct a 3-D point from x, y, and z elements (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Point3( const floatInVec &x, const floatInVec &y, const floatInVec &z );
 
-    // Copy elements from a 3-D vector into a 3-D point
-    // 
-    explicit VECTORMATH_FORCE_INLINE Point3( const Vector3 &vec );
+	// Copy elements from a 3-D vector into a 3-D point
+	// 
+	explicit VECTORMATH_FORCE_INLINE Point3( const Vector3 &vec );
 
-    // Set all elements of a 3-D point to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Point3( float scalar );
+	// Set all elements of a 3-D point to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Point3( float scalar );
 
-    // Set all elements of a 3-D point to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Point3( const floatInVec &scalar );
+	// Set all elements of a 3-D point to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Point3( const floatInVec &scalar );
 
-    // Set vector float data in a 3-D point
-    // 
-    explicit VECTORMATH_FORCE_INLINE Point3( __m128 vf4 );
+	// Set vector float data in a 3-D point
+	// 
+	explicit VECTORMATH_FORCE_INLINE Point3( __m128 vf4 );
 
-    // Get vector float data from a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE __m128 get128( ) const;
+	// Get vector float data from a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE __m128 get128( ) const;
 
-    // Assign one 3-D point to another
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & operator =( const Point3 &pnt );
+	// Assign one 3-D point to another
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & operator =( const Point3 &pnt );
 
-    // Set the x element of a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setX( float x );
+	// Set the x element of a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setX( float x );
 
-    // Set the y element of a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setY( float y );
+	// Set the y element of a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setY( float y );
 
-    // Set the z element of a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setZ( float z );
+	// Set the z element of a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setZ( float z );
 
-    // Set the x element of a 3-D point (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setX( const floatInVec &x );
+	// Set the x element of a 3-D point (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setX( const floatInVec &x );
 
-    // Set the y element of a 3-D point (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setY( const floatInVec &y );
+	// Set the y element of a 3-D point (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setY( const floatInVec &y );
 
-    // Set the z element of a 3-D point (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setZ( const floatInVec &z );
+	// Set the z element of a 3-D point (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setZ( const floatInVec &z );
 
-    // Get the x element of a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
+	// Get the x element of a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
 
-    // Get the y element of a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
+	// Get the y element of a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
 
-    // Get the z element of a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
+	// Get the z element of a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
 
-    // Set an x, y, or z element of a 3-D point by index
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setElem( int idx, float value );
+	// Set an x, y, or z element of a 3-D point by index
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setElem( int idx, float value );
 
-    // Set an x, y, or z element of a 3-D point by index (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & setElem( int idx, const floatInVec &value );
+	// Set an x, y, or z element of a 3-D point by index (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & setElem( int idx, const floatInVec &value );
 
-    // Get an x, y, or z element of a 3-D point by index
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
+	// Get an x, y, or z element of a 3-D point by index
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
 
-    // Subscripting operator to set or get an element
-    // 
-    VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
+	// Subscripting operator to set or get an element
+	// 
+	VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
 
-    // Subscripting operator to get an element
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
+	// Subscripting operator to get an element
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
 
-    // Subtract a 3-D point from another 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator -( const Point3 &pnt ) const;
+	// Subtract a 3-D point from another 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator -( const Point3 &pnt ) const;
 
-    // Add a 3-D point to a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Point3 operator +( const Vector3 &vec ) const;
+	// Add a 3-D point to a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Point3 operator +( const Vector3 &vec ) const;
 
-    // Subtract a 3-D vector from a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const Point3 operator -( const Vector3 &vec ) const;
+	// Subtract a 3-D vector from a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const Point3 operator -( const Vector3 &vec ) const;
 
-    // Perform compound assignment and addition with a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & operator +=( const Vector3 &vec );
+	// Perform compound assignment and addition with a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & operator +=( const Vector3 &vec );
 
-    // Perform compound assignment and subtraction by a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Point3 & operator -=( const Vector3 &vec );
+	// Perform compound assignment and subtraction by a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Point3 & operator -=( const Vector3 &vec );
 
 };
 
@@ -1326,242 +1326,242 @@ VECTORMATH_FORCE_INLINE void print( const Point3 &pnt, const char * name );
 //
 class Quat
 {
-    __m128 mVec128;
+	__m128 mVec128;
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Quat( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Quat( ) { };
 
 	VECTORMATH_FORCE_INLINE  Quat(const Quat& quat);
 
-    // Construct a quaternion from x, y, z, and w elements
-    // 
-    VECTORMATH_FORCE_INLINE Quat( float x, float y, float z, float w );
+	// Construct a quaternion from x, y, z, and w elements
+	// 
+	VECTORMATH_FORCE_INLINE Quat( float x, float y, float z, float w );
 
-    // Construct a quaternion from x, y, z, and w elements (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat( const floatInVec &x, const floatInVec &y, const floatInVec &z, const floatInVec &w );
+	// Construct a quaternion from x, y, z, and w elements (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat( const floatInVec &x, const floatInVec &y, const floatInVec &z, const floatInVec &w );
 
-    // Construct a quaternion from a 3-D vector and a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Quat( const Vector3 &xyz, float w );
+	// Construct a quaternion from a 3-D vector and a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Quat( const Vector3 &xyz, float w );
 
-    // Construct a quaternion from a 3-D vector and a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat( const Vector3 &xyz, const floatInVec &w );
+	// Construct a quaternion from a 3-D vector and a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat( const Vector3 &xyz, const floatInVec &w );
 
-    // Copy elements from a 4-D vector into a quaternion
-    // 
-    explicit VECTORMATH_FORCE_INLINE Quat( const Vector4 &vec );
+	// Copy elements from a 4-D vector into a quaternion
+	// 
+	explicit VECTORMATH_FORCE_INLINE Quat( const Vector4 &vec );
 
-    // Convert a rotation matrix to a unit-length quaternion
-    // 
-    explicit VECTORMATH_FORCE_INLINE Quat( const Matrix3 & rotMat );
+	// Convert a rotation matrix to a unit-length quaternion
+	// 
+	explicit VECTORMATH_FORCE_INLINE Quat( const Matrix3 & rotMat );
 
-    // Set all elements of a quaternion to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Quat( float scalar );
+	// Set all elements of a quaternion to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Quat( float scalar );
 
-    // Set all elements of a quaternion to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Quat( const floatInVec &scalar );
+	// Set all elements of a quaternion to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Quat( const floatInVec &scalar );
 
-    // Set vector float data in a quaternion
-    // 
-    explicit VECTORMATH_FORCE_INLINE Quat( __m128 vf4 );
+	// Set vector float data in a quaternion
+	// 
+	explicit VECTORMATH_FORCE_INLINE Quat( __m128 vf4 );
 
-    // Get vector float data from a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE __m128 get128( ) const;
+	// Get vector float data from a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE __m128 get128( ) const;
 
 	// Set a quaterion from vector float data
-    //
+	//
 	VECTORMATH_FORCE_INLINE void set128(vec_float4 vec);
 
-    // Assign one quaternion to another
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator =( const Quat &quat );
+	// Assign one quaternion to another
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator =( const Quat &quat );
 
-    // Set the x, y, and z elements of a quaternion
-    // NOTE: 
-    // This function does not change the w element.
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setXYZ( const Vector3 &vec );
+	// Set the x, y, and z elements of a quaternion
+	// NOTE: 
+	// This function does not change the w element.
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setXYZ( const Vector3 &vec );
 
-    // Get the x, y, and z elements of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getXYZ( ) const;
+	// Get the x, y, and z elements of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getXYZ( ) const;
 
-    // Set the x element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setX( float x );
+	// Set the x element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setX( float x );
 
-    // Set the y element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setY( float y );
+	// Set the y element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setY( float y );
 
-    // Set the z element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setZ( float z );
+	// Set the z element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setZ( float z );
 
-    // Set the w element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setW( float w );
+	// Set the w element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setW( float w );
 
-    // Set the x element of a quaternion (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setX( const floatInVec &x );
+	// Set the x element of a quaternion (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setX( const floatInVec &x );
 
-    // Set the y element of a quaternion (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setY( const floatInVec &y );
+	// Set the y element of a quaternion (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setY( const floatInVec &y );
 
-    // Set the z element of a quaternion (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setZ( const floatInVec &z );
+	// Set the z element of a quaternion (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setZ( const floatInVec &z );
 
-    // Set the w element of a quaternion (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setW( const floatInVec &w );
+	// Set the w element of a quaternion (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setW( const floatInVec &w );
 
-    // Get the x element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
+	// Get the x element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getX( ) const;
 
-    // Get the y element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
+	// Get the y element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getY( ) const;
 
-    // Get the z element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
+	// Get the z element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getZ( ) const;
 
-    // Get the w element of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getW( ) const;
+	// Get the w element of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getW( ) const;
 
-    // Set an x, y, z, or w element of a quaternion by index
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setElem( int idx, float value );
+	// Set an x, y, z, or w element of a quaternion by index
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setElem( int idx, float value );
 
-    // Set an x, y, z, or w element of a quaternion by index (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & setElem( int idx, const floatInVec &value );
+	// Set an x, y, z, or w element of a quaternion by index (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & setElem( int idx, const floatInVec &value );
 
-    // Get an x, y, z, or w element of a quaternion by index
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
+	// Get an x, y, z, or w element of a quaternion by index
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int idx ) const;
 
-    // Subscripting operator to set or get an element
-    // 
-    VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
+	// Subscripting operator to set or get an element
+	// 
+	VECTORMATH_FORCE_INLINE VecIdx operator []( int idx );
 
-    // Subscripting operator to get an element
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
+	// Subscripting operator to get an element
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec operator []( int idx ) const;
 
-    // Add two quaternions
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator +( const Quat &quat ) const;
+	// Add two quaternions
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator +( const Quat &quat ) const;
 
-    // Subtract a quaternion from another quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator -( const Quat &quat ) const;
+	// Subtract a quaternion from another quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator -( const Quat &quat ) const;
 
-    // Multiply two quaternions
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator *( const Quat &quat ) const;
+	// Multiply two quaternions
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator *( const Quat &quat ) const;
 
-    // Multiply a quaternion by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator *( float scalar ) const;
+	// Multiply a quaternion by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator *( float scalar ) const;
 
-    // Divide a quaternion by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator /( float scalar ) const;
+	// Divide a quaternion by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator /( float scalar ) const;
 
-    // Multiply a quaternion by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator *( const floatInVec &scalar ) const;
+	// Multiply a quaternion by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator *( const floatInVec &scalar ) const;
 
-    // Divide a quaternion by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator /( const floatInVec &scalar ) const;
+	// Divide a quaternion by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator /( const floatInVec &scalar ) const;
 
-    // Perform compound assignment and addition with a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator +=( const Quat &quat );
+	// Perform compound assignment and addition with a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator +=( const Quat &quat );
 
-    // Perform compound assignment and subtraction by a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator -=( const Quat &quat );
+	// Perform compound assignment and subtraction by a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator -=( const Quat &quat );
 
-    // Perform compound assignment and multiplication by a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator *=( const Quat &quat );
+	// Perform compound assignment and multiplication by a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator *=( const Quat &quat );
 
-    // Perform compound assignment and multiplication by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator *=( float scalar );
+	// Perform compound assignment and multiplication by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator *=( float scalar );
 
-    // Perform compound assignment and division by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator /=( float scalar );
+	// Perform compound assignment and division by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator /=( float scalar );
 
-    // Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator *=( const floatInVec &scalar );
+	// Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator *=( const floatInVec &scalar );
 
-    // Perform compound assignment and division by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Quat & operator /=( const floatInVec &scalar );
+	// Perform compound assignment and division by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Quat & operator /=( const floatInVec &scalar );
 
-    // Negate all elements of a quaternion
-    // 
-    VECTORMATH_FORCE_INLINE const Quat operator -( ) const;
+	// Negate all elements of a quaternion
+	// 
+	VECTORMATH_FORCE_INLINE const Quat operator -( ) const;
 
-    // Construct an identity quaternion
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat identity( );
+	// Construct an identity quaternion
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat identity( );
 
-    // Construct a quaternion to rotate between two unit-length 3-D vectors
-    // NOTE: 
-    // The result is unpredictable if unitVec0 and unitVec1 point in opposite directions.
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotation( const Vector3 &unitVec0, const Vector3 &unitVec1 );
+	// Construct a quaternion to rotate between two unit-length 3-D vectors
+	// NOTE: 
+	// The result is unpredictable if unitVec0 and unitVec1 point in opposite directions.
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotation( const Vector3 &unitVec0, const Vector3 &unitVec1 );
 
-    // Construct a quaternion to rotate around a unit-length 3-D vector
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotation( float radians, const Vector3 &unitVec );
+	// Construct a quaternion to rotate around a unit-length 3-D vector
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotation( float radians, const Vector3 &unitVec );
 
-    // Construct a quaternion to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotation( const floatInVec &radians, const Vector3 &unitVec );
+	// Construct a quaternion to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotation( const floatInVec &radians, const Vector3 &unitVec );
 
-    // Construct a quaternion to rotate around the x axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotationX( float radians );
+	// Construct a quaternion to rotate around the x axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotationX( float radians );
 
-    // Construct a quaternion to rotate around the y axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotationY( float radians );
+	// Construct a quaternion to rotate around the y axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotationY( float radians );
 
-    // Construct a quaternion to rotate around the z axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotationZ( float radians );
+	// Construct a quaternion to rotate around the z axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotationZ( float radians );
 
-    // Construct a quaternion to rotate around the x axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotationX( const floatInVec &radians );
+	// Construct a quaternion to rotate around the x axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotationX( const floatInVec &radians );
 
-    // Construct a quaternion to rotate around the y axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotationY( const floatInVec &radians );
+	// Construct a quaternion to rotate around the y axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotationY( const floatInVec &radians );
 
-    // Construct a quaternion to rotate around the z axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Quat rotationZ( const floatInVec &radians );
+	// Construct a quaternion to rotate around the z axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Quat rotationZ( const floatInVec &radians );
 
 };
 
@@ -1667,194 +1667,194 @@ VECTORMATH_FORCE_INLINE void print( const Quat &quat, const char * name );
 //
 class Matrix3
 {
-    Vector3 mCol0;
-    Vector3 mCol1;
-    Vector3 mCol2;
+	Vector3 mCol0;
+	Vector3 mCol1;
+	Vector3 mCol2;
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3( ) { };
 
-    // Copy a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3( const Matrix3 & mat );
+	// Copy a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3( const Matrix3 & mat );
 
-    // Construct a 3x3 matrix containing the specified columns
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3( const Vector3 &col0, const Vector3 &col1, const Vector3 &col2 );
+	// Construct a 3x3 matrix containing the specified columns
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3( const Vector3 &col0, const Vector3 &col1, const Vector3 &col2 );
 
-    // Construct a 3x3 rotation matrix from a unit-length quaternion
-    // 
-    explicit VECTORMATH_FORCE_INLINE Matrix3( const Quat &unitQuat );
+	// Construct a 3x3 rotation matrix from a unit-length quaternion
+	// 
+	explicit VECTORMATH_FORCE_INLINE Matrix3( const Quat &unitQuat );
 
-    // Set all elements of a 3x3 matrix to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Matrix3( float scalar );
+	// Set all elements of a 3x3 matrix to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Matrix3( float scalar );
 
-    // Set all elements of a 3x3 matrix to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Matrix3( const floatInVec &scalar );
+	// Set all elements of a 3x3 matrix to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Matrix3( const floatInVec &scalar );
 
-    // Assign one 3x3 matrix to another
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & operator =( const Matrix3 & mat );
+	// Assign one 3x3 matrix to another
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & operator =( const Matrix3 & mat );
 
-    // Set column 0 of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setCol0( const Vector3 &col0 );
+	// Set column 0 of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setCol0( const Vector3 &col0 );
 
-    // Set column 1 of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setCol1( const Vector3 &col1 );
+	// Set column 1 of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setCol1( const Vector3 &col1 );
 
-    // Set column 2 of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setCol2( const Vector3 &col2 );
+	// Set column 2 of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setCol2( const Vector3 &col2 );
 
-    // Get column 0 of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol0( ) const;
+	// Get column 0 of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol0( ) const;
 
-    // Get column 1 of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol1( ) const;
+	// Get column 1 of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol1( ) const;
 
-    // Get column 2 of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol2( ) const;
+	// Get column 2 of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol2( ) const;
 
-    // Set the column of a 3x3 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setCol( int col, const Vector3 &vec );
+	// Set the column of a 3x3 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setCol( int col, const Vector3 &vec );
 
-    // Set the row of a 3x3 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setRow( int row, const Vector3 &vec );
+	// Set the row of a 3x3 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setRow( int row, const Vector3 &vec );
 
-    // Get the column of a 3x3 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol( int col ) const;
+	// Get the column of a 3x3 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol( int col ) const;
 
-    // Get the row of a 3x3 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getRow( int row ) const;
+	// Get the row of a 3x3 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getRow( int row ) const;
 
-    // Subscripting operator to set or get a column
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator []( int col );
+	// Subscripting operator to set or get a column
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator []( int col );
 
-    // Subscripting operator to get a column
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator []( int col ) const;
+	// Subscripting operator to get a column
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator []( int col ) const;
 
-    // Set the element of a 3x3 matrix referred to by column and row indices
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setElem( int col, int row, float val );
+	// Set the element of a 3x3 matrix referred to by column and row indices
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setElem( int col, int row, float val );
 
-    // Set the element of a 3x3 matrix referred to by column and row indices (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & setElem( int col, int row, const floatInVec &val );
+	// Set the element of a 3x3 matrix referred to by column and row indices (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & setElem( int col, int row, const floatInVec &val );
 
-    // Get the element of a 3x3 matrix referred to by column and row indices
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int col, int row ) const;
+	// Get the element of a 3x3 matrix referred to by column and row indices
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int col, int row ) const;
 
-    // Add two 3x3 matrices
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 operator +( const Matrix3 & mat ) const;
+	// Add two 3x3 matrices
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 operator +( const Matrix3 & mat ) const;
 
-    // Subtract a 3x3 matrix from another 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 operator -( const Matrix3 & mat ) const;
+	// Subtract a 3x3 matrix from another 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 operator -( const Matrix3 & mat ) const;
 
-    // Negate all elements of a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 operator -( ) const;
+	// Negate all elements of a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 operator -( ) const;
 
-    // Multiply a 3x3 matrix by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 operator *( float scalar ) const;
+	// Multiply a 3x3 matrix by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 operator *( float scalar ) const;
 
-    // Multiply a 3x3 matrix by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 operator *( const floatInVec &scalar ) const;
+	// Multiply a 3x3 matrix by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 operator *( const floatInVec &scalar ) const;
 
-    // Multiply a 3x3 matrix by a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator *( const Vector3 &vec ) const;
+	// Multiply a 3x3 matrix by a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator *( const Vector3 &vec ) const;
 
-    // Multiply two 3x3 matrices
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 operator *( const Matrix3 & mat ) const;
+	// Multiply two 3x3 matrices
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 operator *( const Matrix3 & mat ) const;
 
-    // Perform compound assignment and addition with a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & operator +=( const Matrix3 & mat );
+	// Perform compound assignment and addition with a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & operator +=( const Matrix3 & mat );
 
-    // Perform compound assignment and subtraction by a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & operator -=( const Matrix3 & mat );
+	// Perform compound assignment and subtraction by a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & operator -=( const Matrix3 & mat );
 
-    // Perform compound assignment and multiplication by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & operator *=( float scalar );
+	// Perform compound assignment and multiplication by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & operator *=( float scalar );
 
-    // Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & operator *=( const floatInVec &scalar );
+	// Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & operator *=( const floatInVec &scalar );
 
-    // Perform compound assignment and multiplication by a 3x3 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix3 & operator *=( const Matrix3 & mat );
+	// Perform compound assignment and multiplication by a 3x3 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix3 & operator *=( const Matrix3 & mat );
 
-    // Construct an identity 3x3 matrix
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 identity( );
+	// Construct an identity 3x3 matrix
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 identity( );
 
-    // Construct a 3x3 matrix to rotate around the x axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationX( float radians );
+	// Construct a 3x3 matrix to rotate around the x axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationX( float radians );
 
-    // Construct a 3x3 matrix to rotate around the y axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationY( float radians );
+	// Construct a 3x3 matrix to rotate around the y axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationY( float radians );
 
-    // Construct a 3x3 matrix to rotate around the z axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationZ( float radians );
+	// Construct a 3x3 matrix to rotate around the z axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationZ( float radians );
 
-    // Construct a 3x3 matrix to rotate around the x axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationX( const floatInVec &radians );
+	// Construct a 3x3 matrix to rotate around the x axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationX( const floatInVec &radians );
 
-    // Construct a 3x3 matrix to rotate around the y axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationY( const floatInVec &radians );
+	// Construct a 3x3 matrix to rotate around the y axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationY( const floatInVec &radians );
 
-    // Construct a 3x3 matrix to rotate around the z axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationZ( const floatInVec &radians );
+	// Construct a 3x3 matrix to rotate around the z axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationZ( const floatInVec &radians );
 
-    // Construct a 3x3 matrix to rotate around the x, y, and z axes
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotationZYX( const Vector3 &radiansXYZ );
+	// Construct a 3x3 matrix to rotate around the x, y, and z axes
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotationZYX( const Vector3 &radiansXYZ );
 
-    // Construct a 3x3 matrix to rotate around a unit-length 3-D vector
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotation( float radians, const Vector3 &unitVec );
+	// Construct a 3x3 matrix to rotate around a unit-length 3-D vector
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotation( float radians, const Vector3 &unitVec );
 
-    // Construct a 3x3 matrix to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotation( const floatInVec &radians, const Vector3 &unitVec );
+	// Construct a 3x3 matrix to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotation( const floatInVec &radians, const Vector3 &unitVec );
 
-    // Construct a rotation matrix from a unit-length quaternion
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 rotation( const Quat &unitQuat );
+	// Construct a rotation matrix from a unit-length quaternion
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 rotation( const Quat &unitQuat );
 
-    // Construct a 3x3 matrix to perform scaling
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix3 scale( const Vector3 &scaleVec );
+	// Construct a 3x3 matrix to perform scaling
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix3 scale( const Vector3 &scaleVec );
 
 };
 // Multiply a 3x3 matrix by a scalar
@@ -1933,267 +1933,267 @@ VECTORMATH_FORCE_INLINE void print( const Matrix3 & mat, const char * name );
 //
 class Matrix4
 {
-    Vector4 mCol0;
-    Vector4 mCol1;
-    Vector4 mCol2;
-    Vector4 mCol3;
+	Vector4 mCol0;
+	Vector4 mCol1;
+	Vector4 mCol2;
+	Vector4 mCol3;
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4( ) { };
 
-    // Copy a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4( const Matrix4 & mat );
+	// Copy a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4( const Matrix4 & mat );
 
-    // Construct a 4x4 matrix containing the specified columns
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4( const Vector4 &col0, const Vector4 &col1, const Vector4 &col2, const Vector4 &col3 );
+	// Construct a 4x4 matrix containing the specified columns
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4( const Vector4 &col0, const Vector4 &col1, const Vector4 &col2, const Vector4 &col3 );
 
-    // Construct a 4x4 matrix from a 3x4 transformation matrix
-    // 
-    explicit VECTORMATH_FORCE_INLINE Matrix4( const Transform3 & mat );
+	// Construct a 4x4 matrix from a 3x4 transformation matrix
+	// 
+	explicit VECTORMATH_FORCE_INLINE Matrix4( const Transform3 & mat );
 
-    // Construct a 4x4 matrix from a 3x3 matrix and a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4( const Matrix3 & mat, const Vector3 &translateVec );
+	// Construct a 4x4 matrix from a 3x3 matrix and a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4( const Matrix3 & mat, const Vector3 &translateVec );
 
-    // Construct a 4x4 matrix from a unit-length quaternion and a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4( const Quat &unitQuat, const Vector3 &translateVec );
+	// Construct a 4x4 matrix from a unit-length quaternion and a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4( const Quat &unitQuat, const Vector3 &translateVec );
 
-    // Set all elements of a 4x4 matrix to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Matrix4( float scalar );
+	// Set all elements of a 4x4 matrix to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Matrix4( float scalar );
 
-    // Set all elements of a 4x4 matrix to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Matrix4( const floatInVec &scalar );
+	// Set all elements of a 4x4 matrix to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Matrix4( const floatInVec &scalar );
 
-    // Assign one 4x4 matrix to another
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator =( const Matrix4 & mat );
+	// Assign one 4x4 matrix to another
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator =( const Matrix4 & mat );
 
-    // Set the upper-left 3x3 submatrix
-    // NOTE: 
-    // This function does not change the bottom row elements.
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setUpper3x3( const Matrix3 & mat3 );
+	// Set the upper-left 3x3 submatrix
+	// NOTE: 
+	// This function does not change the bottom row elements.
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setUpper3x3( const Matrix3 & mat3 );
 
-    // Get the upper-left 3x3 submatrix of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 getUpper3x3( ) const;
+	// Get the upper-left 3x3 submatrix of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 getUpper3x3( ) const;
 
-    // Set translation component
-    // NOTE: 
-    // This function does not change the bottom row elements.
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setTranslation( const Vector3 &translateVec );
+	// Set translation component
+	// NOTE: 
+	// This function does not change the bottom row elements.
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setTranslation( const Vector3 &translateVec );
 
-    // Get the translation component of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getTranslation( ) const;
+	// Get the translation component of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getTranslation( ) const;
 
-    // Set column 0 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setCol0( const Vector4 &col0 );
+	// Set column 0 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setCol0( const Vector4 &col0 );
 
-    // Set column 1 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setCol1( const Vector4 &col1 );
+	// Set column 1 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setCol1( const Vector4 &col1 );
 
-    // Set column 2 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setCol2( const Vector4 &col2 );
+	// Set column 2 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setCol2( const Vector4 &col2 );
 
-    // Set column 3 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setCol3( const Vector4 &col3 );
+	// Set column 3 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setCol3( const Vector4 &col3 );
 
-    // Get column 0 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getCol0( ) const;
+	// Get column 0 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getCol0( ) const;
 
-    // Get column 1 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getCol1( ) const;
+	// Get column 1 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getCol1( ) const;
 
-    // Get column 2 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getCol2( ) const;
+	// Get column 2 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getCol2( ) const;
 
-    // Get column 3 of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getCol3( ) const;
+	// Get column 3 of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getCol3( ) const;
 
-    // Set the column of a 4x4 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setCol( int col, const Vector4 &vec );
+	// Set the column of a 4x4 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setCol( int col, const Vector4 &vec );
 
-    // Set the row of a 4x4 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setRow( int row, const Vector4 &vec );
+	// Set the row of a 4x4 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setRow( int row, const Vector4 &vec );
 
-    // Get the column of a 4x4 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getCol( int col ) const;
+	// Get the column of a 4x4 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getCol( int col ) const;
 
-    // Get the row of a 4x4 matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getRow( int row ) const;
+	// Get the row of a 4x4 matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getRow( int row ) const;
 
-    // Subscripting operator to set or get a column
-    // 
-    VECTORMATH_FORCE_INLINE Vector4 & operator []( int col );
+	// Subscripting operator to set or get a column
+	// 
+	VECTORMATH_FORCE_INLINE Vector4 & operator []( int col );
 
-    // Subscripting operator to get a column
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator []( int col ) const;
+	// Subscripting operator to get a column
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator []( int col ) const;
 
-    // Set the element of a 4x4 matrix referred to by column and row indices
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setElem( int col, int row, float val );
+	// Set the element of a 4x4 matrix referred to by column and row indices
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setElem( int col, int row, float val );
 
-    // Set the element of a 4x4 matrix referred to by column and row indices (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & setElem( int col, int row, const floatInVec &val );
+	// Set the element of a 4x4 matrix referred to by column and row indices (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & setElem( int col, int row, const floatInVec &val );
 
-    // Get the element of a 4x4 matrix referred to by column and row indices
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int col, int row ) const;
+	// Get the element of a 4x4 matrix referred to by column and row indices
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int col, int row ) const;
 
-    // Add two 4x4 matrices
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator +( const Matrix4 & mat ) const;
+	// Add two 4x4 matrices
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator +( const Matrix4 & mat ) const;
 
-    // Subtract a 4x4 matrix from another 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator -( const Matrix4 & mat ) const;
+	// Subtract a 4x4 matrix from another 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator -( const Matrix4 & mat ) const;
 
-    // Negate all elements of a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator -( ) const;
+	// Negate all elements of a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator -( ) const;
 
-    // Multiply a 4x4 matrix by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator *( float scalar ) const;
+	// Multiply a 4x4 matrix by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator *( float scalar ) const;
 
-    // Multiply a 4x4 matrix by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator *( const floatInVec &scalar ) const;
+	// Multiply a 4x4 matrix by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator *( const floatInVec &scalar ) const;
 
-    // Multiply a 4x4 matrix by a 4-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator *( const Vector4 &vec ) const;
+	// Multiply a 4x4 matrix by a 4-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator *( const Vector4 &vec ) const;
 
-    // Multiply a 4x4 matrix by a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator *( const Vector3 &vec ) const;
+	// Multiply a 4x4 matrix by a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator *( const Vector3 &vec ) const;
 
-    // Multiply a 4x4 matrix by a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 operator *( const Point3 &pnt ) const;
+	// Multiply a 4x4 matrix by a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 operator *( const Point3 &pnt ) const;
 
-    // Multiply two 4x4 matrices
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator *( const Matrix4 & mat ) const;
+	// Multiply two 4x4 matrices
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator *( const Matrix4 & mat ) const;
 
-    // Multiply a 4x4 matrix by a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix4 operator *( const Transform3 & tfrm ) const;
+	// Multiply a 4x4 matrix by a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix4 operator *( const Transform3 & tfrm ) const;
 
-    // Perform compound assignment and addition with a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator +=( const Matrix4 & mat );
+	// Perform compound assignment and addition with a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator +=( const Matrix4 & mat );
 
-    // Perform compound assignment and subtraction by a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator -=( const Matrix4 & mat );
+	// Perform compound assignment and subtraction by a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator -=( const Matrix4 & mat );
 
-    // Perform compound assignment and multiplication by a scalar
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator *=( float scalar );
+	// Perform compound assignment and multiplication by a scalar
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator *=( float scalar );
 
-    // Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator *=( const floatInVec &scalar );
+	// Perform compound assignment and multiplication by a scalar (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator *=( const floatInVec &scalar );
 
-    // Perform compound assignment and multiplication by a 4x4 matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator *=( const Matrix4 & mat );
+	// Perform compound assignment and multiplication by a 4x4 matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator *=( const Matrix4 & mat );
 
-    // Perform compound assignment and multiplication by a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Matrix4 & operator *=( const Transform3 & tfrm );
+	// Perform compound assignment and multiplication by a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Matrix4 & operator *=( const Transform3 & tfrm );
 
-    // Construct an identity 4x4 matrix
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 identity( );
+	// Construct an identity 4x4 matrix
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 identity( );
 
-    // Construct a 4x4 matrix to rotate around the x axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationX( float radians );
+	// Construct a 4x4 matrix to rotate around the x axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationX( float radians );
 
-    // Construct a 4x4 matrix to rotate around the y axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationY( float radians );
+	// Construct a 4x4 matrix to rotate around the y axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationY( float radians );
 
-    // Construct a 4x4 matrix to rotate around the z axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationZ( float radians );
+	// Construct a 4x4 matrix to rotate around the z axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationZ( float radians );
 
-    // Construct a 4x4 matrix to rotate around the x axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationX( const floatInVec &radians );
+	// Construct a 4x4 matrix to rotate around the x axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationX( const floatInVec &radians );
 
-    // Construct a 4x4 matrix to rotate around the y axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationY( const floatInVec &radians );
+	// Construct a 4x4 matrix to rotate around the y axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationY( const floatInVec &radians );
 
-    // Construct a 4x4 matrix to rotate around the z axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationZ( const floatInVec &radians );
+	// Construct a 4x4 matrix to rotate around the z axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationZ( const floatInVec &radians );
 
-    // Construct a 4x4 matrix to rotate around the x, y, and z axes
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotationZYX( const Vector3 &radiansXYZ );
+	// Construct a 4x4 matrix to rotate around the x, y, and z axes
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotationZYX( const Vector3 &radiansXYZ );
 
-    // Construct a 4x4 matrix to rotate around a unit-length 3-D vector
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotation( float radians, const Vector3 &unitVec );
+	// Construct a 4x4 matrix to rotate around a unit-length 3-D vector
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotation( float radians, const Vector3 &unitVec );
 
-    // Construct a 4x4 matrix to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotation( const floatInVec &radians, const Vector3 &unitVec );
+	// Construct a 4x4 matrix to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotation( const floatInVec &radians, const Vector3 &unitVec );
 
-    // Construct a rotation matrix from a unit-length quaternion
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 rotation( const Quat &unitQuat );
+	// Construct a rotation matrix from a unit-length quaternion
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 rotation( const Quat &unitQuat );
 
-    // Construct a 4x4 matrix to perform scaling
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 scale( const Vector3 &scaleVec );
+	// Construct a 4x4 matrix to perform scaling
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 scale( const Vector3 &scaleVec );
 
-    // Construct a 4x4 matrix to perform translation
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 translation( const Vector3 &translateVec );
+	// Construct a 4x4 matrix to perform translation
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 translation( const Vector3 &translateVec );
 
-    // Construct viewing matrix based on eye, position looked at, and up direction
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 lookAt( const Point3 &eyePos, const Point3 &lookAtPos, const Vector3 &upVec );
+	// Construct viewing matrix based on eye, position looked at, and up direction
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 lookAt( const Point3 &eyePos, const Point3 &lookAtPos, const Vector3 &upVec );
 
-    // Construct a perspective projection matrix
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 perspective( float fovyRadians, float aspect, float zNear, float zFar );
+	// Construct a perspective projection matrix
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 perspective( float fovyRadians, float aspect, float zNear, float zFar );
 
-    // Construct a perspective projection matrix based on frustum
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 frustum( float left, float right, float bottom, float top, float zNear, float zFar );
+	// Construct a perspective projection matrix based on frustum
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 frustum( float left, float right, float bottom, float top, float zNear, float zFar );
 
-    // Construct an orthographic projection matrix
-    // 
-    static VECTORMATH_FORCE_INLINE const Matrix4 orthographic( float left, float right, float bottom, float top, float zNear, float zFar );
+	// Construct an orthographic projection matrix
+	// 
+	static VECTORMATH_FORCE_INLINE const Matrix4 orthographic( float left, float right, float bottom, float top, float zNear, float zFar );
 
 };
 // Multiply a 4x4 matrix by a scalar
@@ -2284,195 +2284,195 @@ VECTORMATH_FORCE_INLINE void print( const Matrix4 & mat, const char * name );
 //
 class Transform3
 {
-    Vector3 mCol0;
-    Vector3 mCol1;
-    Vector3 mCol2;
-    Vector3 mCol3;
+	Vector3 mCol0;
+	Vector3 mCol1;
+	Vector3 mCol2;
+	Vector3 mCol3;
 
 public:
-    // Default constructor; does no initialization
-    // 
-    VECTORMATH_FORCE_INLINE Transform3( ) { };
+	// Default constructor; does no initialization
+	// 
+	VECTORMATH_FORCE_INLINE Transform3( ) { };
 
-    // Copy a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3( const Transform3 & tfrm );
+	// Copy a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3( const Transform3 & tfrm );
 
-    // Construct a 3x4 transformation matrix containing the specified columns
-    // 
-    VECTORMATH_FORCE_INLINE Transform3( const Vector3 &col0, const Vector3 &col1, const Vector3 &col2, const Vector3 &col3 );
+	// Construct a 3x4 transformation matrix containing the specified columns
+	// 
+	VECTORMATH_FORCE_INLINE Transform3( const Vector3 &col0, const Vector3 &col1, const Vector3 &col2, const Vector3 &col3 );
 
-    // Construct a 3x4 transformation matrix from a 3x3 matrix and a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Transform3( const Matrix3 & tfrm, const Vector3 &translateVec );
+	// Construct a 3x4 transformation matrix from a 3x3 matrix and a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Transform3( const Matrix3 & tfrm, const Vector3 &translateVec );
 
-    // Construct a 3x4 transformation matrix from a unit-length quaternion and a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE Transform3( const Quat &unitQuat, const Vector3 &translateVec );
+	// Construct a 3x4 transformation matrix from a unit-length quaternion and a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE Transform3( const Quat &unitQuat, const Vector3 &translateVec );
 
-    // Set all elements of a 3x4 transformation matrix to the same scalar value
-    // 
-    explicit VECTORMATH_FORCE_INLINE Transform3( float scalar );
+	// Set all elements of a 3x4 transformation matrix to the same scalar value
+	// 
+	explicit VECTORMATH_FORCE_INLINE Transform3( float scalar );
 
-    // Set all elements of a 3x4 transformation matrix to the same scalar value (scalar data contained in vector data type)
-    // 
-    explicit VECTORMATH_FORCE_INLINE Transform3( const floatInVec &scalar );
+	// Set all elements of a 3x4 transformation matrix to the same scalar value (scalar data contained in vector data type)
+	// 
+	explicit VECTORMATH_FORCE_INLINE Transform3( const floatInVec &scalar );
 
-    // Assign one 3x4 transformation matrix to another
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & operator =( const Transform3 & tfrm );
+	// Assign one 3x4 transformation matrix to another
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & operator =( const Transform3 & tfrm );
 
-    // Set the upper-left 3x3 submatrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setUpper3x3( const Matrix3 & mat3 );
+	// Set the upper-left 3x3 submatrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setUpper3x3( const Matrix3 & mat3 );
 
-    // Get the upper-left 3x3 submatrix of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Matrix3 getUpper3x3( ) const;
+	// Get the upper-left 3x3 submatrix of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Matrix3 getUpper3x3( ) const;
 
-    // Set translation component
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setTranslation( const Vector3 &translateVec );
+	// Set translation component
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setTranslation( const Vector3 &translateVec );
 
-    // Get the translation component of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getTranslation( ) const;
+	// Get the translation component of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getTranslation( ) const;
 
-    // Set column 0 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setCol0( const Vector3 &col0 );
+	// Set column 0 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setCol0( const Vector3 &col0 );
 
-    // Set column 1 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setCol1( const Vector3 &col1 );
+	// Set column 1 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setCol1( const Vector3 &col1 );
 
-    // Set column 2 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setCol2( const Vector3 &col2 );
+	// Set column 2 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setCol2( const Vector3 &col2 );
 
-    // Set column 3 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setCol3( const Vector3 &col3 );
+	// Set column 3 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setCol3( const Vector3 &col3 );
 
-    // Get column 0 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol0( ) const;
+	// Get column 0 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol0( ) const;
 
-    // Get column 1 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol1( ) const;
+	// Get column 1 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol1( ) const;
 
-    // Get column 2 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol2( ) const;
+	// Get column 2 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol2( ) const;
 
-    // Get column 3 of a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol3( ) const;
+	// Get column 3 of a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol3( ) const;
 
-    // Set the column of a 3x4 transformation matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setCol( int col, const Vector3 &vec );
+	// Set the column of a 3x4 transformation matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setCol( int col, const Vector3 &vec );
 
-    // Set the row of a 3x4 transformation matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setRow( int row, const Vector4 &vec );
+	// Set the row of a 3x4 transformation matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setRow( int row, const Vector4 &vec );
 
-    // Get the column of a 3x4 transformation matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 getCol( int col ) const;
+	// Get the column of a 3x4 transformation matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 getCol( int col ) const;
 
-    // Get the row of a 3x4 transformation matrix referred to by the specified index
-    // 
-    VECTORMATH_FORCE_INLINE const Vector4 getRow( int row ) const;
+	// Get the row of a 3x4 transformation matrix referred to by the specified index
+	// 
+	VECTORMATH_FORCE_INLINE const Vector4 getRow( int row ) const;
 
-    // Subscripting operator to set or get a column
-    // 
-    VECTORMATH_FORCE_INLINE Vector3 & operator []( int col );
+	// Subscripting operator to set or get a column
+	// 
+	VECTORMATH_FORCE_INLINE Vector3 & operator []( int col );
 
-    // Subscripting operator to get a column
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator []( int col ) const;
+	// Subscripting operator to get a column
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator []( int col ) const;
 
-    // Set the element of a 3x4 transformation matrix referred to by column and row indices
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setElem( int col, int row, float val );
+	// Set the element of a 3x4 transformation matrix referred to by column and row indices
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setElem( int col, int row, float val );
 
-    // Set the element of a 3x4 transformation matrix referred to by column and row indices (scalar data contained in vector data type)
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & setElem( int col, int row, const floatInVec &val );
+	// Set the element of a 3x4 transformation matrix referred to by column and row indices (scalar data contained in vector data type)
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & setElem( int col, int row, const floatInVec &val );
 
-    // Get the element of a 3x4 transformation matrix referred to by column and row indices
-    // 
-    VECTORMATH_FORCE_INLINE const floatInVec getElem( int col, int row ) const;
+	// Get the element of a 3x4 transformation matrix referred to by column and row indices
+	// 
+	VECTORMATH_FORCE_INLINE const floatInVec getElem( int col, int row ) const;
 
-    // Multiply a 3x4 transformation matrix by a 3-D vector
-    // 
-    VECTORMATH_FORCE_INLINE const Vector3 operator *( const Vector3 &vec ) const;
+	// Multiply a 3x4 transformation matrix by a 3-D vector
+	// 
+	VECTORMATH_FORCE_INLINE const Vector3 operator *( const Vector3 &vec ) const;
 
-    // Multiply a 3x4 transformation matrix by a 3-D point
-    // 
-    VECTORMATH_FORCE_INLINE const Point3 operator *( const Point3 &pnt ) const;
+	// Multiply a 3x4 transformation matrix by a 3-D point
+	// 
+	VECTORMATH_FORCE_INLINE const Point3 operator *( const Point3 &pnt ) const;
 
-    // Multiply two 3x4 transformation matrices
-    // 
-    VECTORMATH_FORCE_INLINE const Transform3 operator *( const Transform3 & tfrm ) const;
+	// Multiply two 3x4 transformation matrices
+	// 
+	VECTORMATH_FORCE_INLINE const Transform3 operator *( const Transform3 & tfrm ) const;
 
-    // Perform compound assignment and multiplication by a 3x4 transformation matrix
-    // 
-    VECTORMATH_FORCE_INLINE Transform3 & operator *=( const Transform3 & tfrm );
+	// Perform compound assignment and multiplication by a 3x4 transformation matrix
+	// 
+	VECTORMATH_FORCE_INLINE Transform3 & operator *=( const Transform3 & tfrm );
 
-    // Construct an identity 3x4 transformation matrix
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 identity( );
+	// Construct an identity 3x4 transformation matrix
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 identity( );
 
-    // Construct a 3x4 transformation matrix to rotate around the x axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationX( float radians );
+	// Construct a 3x4 transformation matrix to rotate around the x axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationX( float radians );
 
-    // Construct a 3x4 transformation matrix to rotate around the y axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationY( float radians );
+	// Construct a 3x4 transformation matrix to rotate around the y axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationY( float radians );
 
-    // Construct a 3x4 transformation matrix to rotate around the z axis
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationZ( float radians );
+	// Construct a 3x4 transformation matrix to rotate around the z axis
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationZ( float radians );
 
-    // Construct a 3x4 transformation matrix to rotate around the x axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationX( const floatInVec &radians );
+	// Construct a 3x4 transformation matrix to rotate around the x axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationX( const floatInVec &radians );
 
-    // Construct a 3x4 transformation matrix to rotate around the y axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationY( const floatInVec &radians );
+	// Construct a 3x4 transformation matrix to rotate around the y axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationY( const floatInVec &radians );
 
-    // Construct a 3x4 transformation matrix to rotate around the z axis (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationZ( const floatInVec &radians );
+	// Construct a 3x4 transformation matrix to rotate around the z axis (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationZ( const floatInVec &radians );
 
-    // Construct a 3x4 transformation matrix to rotate around the x, y, and z axes
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotationZYX( const Vector3 &radiansXYZ );
+	// Construct a 3x4 transformation matrix to rotate around the x, y, and z axes
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotationZYX( const Vector3 &radiansXYZ );
 
-    // Construct a 3x4 transformation matrix to rotate around a unit-length 3-D vector
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotation( float radians, const Vector3 &unitVec );
+	// Construct a 3x4 transformation matrix to rotate around a unit-length 3-D vector
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotation( float radians, const Vector3 &unitVec );
 
-    // Construct a 3x4 transformation matrix to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotation( const floatInVec &radians, const Vector3 &unitVec );
+	// Construct a 3x4 transformation matrix to rotate around a unit-length 3-D vector (scalar data contained in vector data type)
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotation( const floatInVec &radians, const Vector3 &unitVec );
 
-    // Construct a rotation matrix from a unit-length quaternion
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 rotation( const Quat &unitQuat );
+	// Construct a rotation matrix from a unit-length quaternion
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 rotation( const Quat &unitQuat );
 
-    // Construct a 3x4 transformation matrix to perform scaling
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 scale( const Vector3 &scaleVec );
+	// Construct a 3x4 transformation matrix to perform scaling
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 scale( const Vector3 &scaleVec );
 
-    // Construct a 3x4 transformation matrix to perform translation
-    // 
-    static VECTORMATH_FORCE_INLINE const Transform3 translation( const Vector3 &translateVec );
+	// Construct a 3x4 transformation matrix to perform translation
+	// 
+	static VECTORMATH_FORCE_INLINE const Transform3 translation( const Vector3 &translateVec );
 
 };
 // Append (post-multiply) a scale transformation to a 3x4 transformation matrix

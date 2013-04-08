@@ -468,6 +468,7 @@ void CustomSetupContactConstraintsTask(
 			btVector3 linVelA, linVelB;
 			btVector3 angVelA, angVelB;
 			
+			// Zero-mass objects are static.
 			if (rbA && (rbA->getInvMass()>0.f))
 			{
 				linVelA = rbA->getLinearVelocity();
@@ -478,6 +479,7 @@ void CustomSetupContactConstraintsTask(
 				angVelA.setValue(0,0,0);
 			}
 
+			// Zero-mass objects are static.
 			if (rbB && (rbB->getInvMass()>0.f))
 			{
 				linVelB = rbB->getLinearVelocity();
@@ -508,7 +510,7 @@ void CustomSetupContactConstraintsTask(
 				(const vmVector3&)linVelB, (const vmVector3&)angVelB,
 				separateBias,
 				timeStep
-				);
+			);
 		}
 
 		//contact.setCompositeFriction(friction);
@@ -859,7 +861,6 @@ void CustomSplitConstraints(
 
 void CustomSolveConstraintsParallel(
 	PfxConstraintPair *contactPairs, uint32_t numContactPairs,
-	
 	PfxConstraintPair *jointPairs, uint32_t numJointPairs,
 	btPersistentManifold* offsetContactManifolds,
 	btConstraintRow* offsetContactConstraintRows,
@@ -873,7 +874,7 @@ void CustomSolveConstraintsParallel(
 	void* poolBuf,
 	int poolBytes,
 	class btBarrier* barrier)
-	{
+{
 
 	int maxTasks = threadSupport->getNumTasks();
 //	config.taskManager->setTaskEntry(PFX_SOLVER_ENTRY);
@@ -899,66 +900,66 @@ void CustomSolveConstraintsParallel(
 			BT_PROFILE("PFX_CONSTRAINT_SOLVER_CMD_SOLVE_CONSTRAINTS");
 //#define SOLVE_SEQUENTIAL
 #ifdef SOLVE_SEQUENTIAL
-		CustomSolveConstraintsTask(
-			io->solveConstraints.contactParallelGroup,
-			io->solveConstraints.contactParallelBatches,
-			io->solveConstraints.contactPairs,
-			io->solveConstraints.numContactPairs,
-			io->solveConstraints.offsetContactManifolds,
+			CustomSolveConstraintsTask(
+				io->solveConstraints.contactParallelGroup,
+				io->solveConstraints.contactParallelBatches,
+				io->solveConstraints.contactPairs,
+				io->solveConstraints.numContactPairs,
+				io->solveConstraints.offsetContactManifolds,
 
-			io->solveConstraints.jointParallelGroup,
-			io->solveConstraints.jointParallelBatches,
-			io->solveConstraints.jointPairs,
-			io->solveConstraints.numJointPairs,
-			io->solveConstraints.offsetSolverConstraints,
+				io->solveConstraints.jointParallelGroup,
+				io->solveConstraints.jointParallelBatches,
+				io->solveConstraints.jointPairs,
+				io->solveConstraints.numJointPairs,
+				io->solveConstraints.offsetSolverConstraints,
 
-			io->solveConstraints.offsetRigStates1,
-			io->solveConstraints.offsetSolverBodies,
-			io->solveConstraints.numRigidBodies,
-			io->solveConstraints.iteration,0,1,0);//arg->taskId,1,0);//, arg->maxTasks, arg->barrier);
+				io->solveConstraints.offsetRigStates1,
+				io->solveConstraints.offsetSolverBodies,
+				io->solveConstraints.numRigidBodies,
+				io->solveConstraints.iteration,0,1,0);//arg->taskId,1,0);//, arg->maxTasks, arg->barrier);
 #else
-		for(int t=0;t<maxTasks;t++) {
-			io[t].cmd = PFX_CONSTRAINT_SOLVER_CMD_SOLVE_CONSTRAINTS;
-			io[t].solveConstraints.contactParallelGroup = cgroup;
-			io[t].solveConstraints.contactParallelBatches = cbatches;
-			io[t].solveConstraints.contactPairs = contactPairs;
-			io[t].solveConstraints.numContactPairs = numContactPairs;
-			io[t].solveConstraints.offsetContactManifolds = offsetContactManifolds;
-			io[t].solveConstraints.offsetContactConstraintRows = offsetContactConstraintRows;
-			io[t].solveConstraints.jointParallelGroup = jgroup;
-			io[t].solveConstraints.jointParallelBatches = jbatches;
-			io[t].solveConstraints.jointPairs = jointPairs;
-			io[t].solveConstraints.numJointPairs = numJointPairs;
-			io[t].solveConstraints.offsetSolverConstraints = offsetSolverConstraints;
-			io[t].solveConstraints.offsetRigStates1 = offsetRigStates;
-			io[t].solveConstraints.offsetSolverBodies = offsetSolverBodies;
-			io[t].solveConstraints.numRigidBodies = numRigidBodies;
-			io[t].solveConstraints.iteration = iteration;
-			io[t].solveConstraints.taskId = t;
-			io[t].solveConstraints.barrier = barrier;
+			for(int t=0;t<maxTasks;t++) {
+				io[t].cmd = PFX_CONSTRAINT_SOLVER_CMD_SOLVE_CONSTRAINTS;
+				io[t].solveConstraints.contactParallelGroup = cgroup;
+				io[t].solveConstraints.contactParallelBatches = cbatches;
+				io[t].solveConstraints.contactPairs = contactPairs;
+				io[t].solveConstraints.numContactPairs = numContactPairs;
+				io[t].solveConstraints.offsetContactManifolds = offsetContactManifolds;
+				io[t].solveConstraints.offsetContactConstraintRows = offsetContactConstraintRows;
+				io[t].solveConstraints.jointParallelGroup = jgroup;
+				io[t].solveConstraints.jointParallelBatches = jbatches;
+				io[t].solveConstraints.jointPairs = jointPairs;
+				io[t].solveConstraints.numJointPairs = numJointPairs;
+				io[t].solveConstraints.offsetSolverConstraints = offsetSolverConstraints;
+				io[t].solveConstraints.offsetRigStates1 = offsetRigStates;
+				io[t].solveConstraints.offsetSolverBodies = offsetSolverBodies;
+				io[t].solveConstraints.numRigidBodies = numRigidBodies;
+				io[t].solveConstraints.iteration = iteration;
+				io[t].solveConstraints.taskId = t;
+				io[t].solveConstraints.barrier = barrier;
 
-		io[t].maxTasks1 = maxTasks;
+				io[t].maxTasks1 = maxTasks;
 #ifdef __PPU__
-		BulletPE2ConstraintSolverSpursSupport* spursThread = (BulletPE2ConstraintSolverSpursSupport*) threadSupport;
-		io[t].barrierAddr2 = (unsigned int) spursThread->getBarrierAddress();
-		io[t].criticalsectionAddr2 = (unsigned int)spursThread->getCriticalSectionAddress();
+				BulletPE2ConstraintSolverSpursSupport* spursThread = (BulletPE2ConstraintSolverSpursSupport*) threadSupport;
+				io[t].barrierAddr2 = (unsigned int) spursThread->getBarrierAddress();
+				io[t].criticalsectionAddr2 = (unsigned int)spursThread->getCriticalSectionAddress();
 #endif
 
-			threadSupport->sendRequest(1, (ppu_address_t)&io[t], t);
-		}
+				threadSupport->sendRequest(1, (ppu_address_t)&io[t], t);
+			}
 
-		unsigned int arg0, arg1;
-		for(int t=0;t<maxTasks;t++) {
-			arg0 = t;
-			threadSupport->waitForResponse(&arg0, &arg1);
-		}
+			unsigned int arg0, arg1;
+			for(int t=0;t<maxTasks;t++) {
+				arg0 = t;
+				threadSupport->waitForResponse(&arg0, &arg1);
+			}
 #endif
 		}
 		pool.clear();
 	}
 
 	{
-			BT_PROFILE("PFX_CONSTRAINT_SOLVER_CMD_POST_SOLVER");
+		BT_PROFILE("PFX_CONSTRAINT_SOLVER_CMD_POST_SOLVER");
 		int batch = ((int)numRigidBodies + maxTasks - 1) / maxTasks;
 		int rest = (int)numRigidBodies;
 		int start = 0;
@@ -1163,7 +1164,7 @@ btParallelConstraintSolver::~btParallelConstraintSolver()
 
 
 
-btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies1, int numRigidBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher)
+btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies, int numRigidBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher)
 {
 	
 /*	int sz = sizeof(PfxSolverBody);
@@ -1182,64 +1183,64 @@ btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies1, int
 	m_memoryCache->m_mystates.resize(numRigidBodies);
 
 	{
-			BT_PROFILE("create states and solver bodies");
-	for (int i=0;i<numRigidBodies;i++)
-	{
-		btCollisionObject* obj = bodies1[i];
-		obj->setCompanionId(i);
-
-		PfxSolverBody& solverBody = m_memoryCache->m_mysolverbodies[i];
-		btRigidBody* rb = btRigidBody::upcast(obj);
-		TrbState& state = m_memoryCache->m_mystates[i];
-	
-		state.reset();
-		const btQuaternion& orgOri = obj->getWorldTransform().getRotation();
-		vmQuat orn(orgOri.getX(), orgOri.getY(), orgOri.getZ(), orgOri.getW());
-		state.setPosition(getVmVector3(obj->getWorldTransform().getOrigin()));
-		state.setOrientation(orn);
-		state.setPosition(state.getPosition());
-		state.setRigidBodyId(i);
-		state.setAngularDamping(0);
-		state.setLinearDamping(0);
-		
-		
-		solverBody.mOrientation = state.getOrientation();
-		solverBody.mDeltaLinearVelocity = vmVector3(0.0f);
-		solverBody.mDeltaAngularVelocity = vmVector3(0.0f);
-		solverBody.friction = obj->getFriction();
-		solverBody.restitution = obj->getRestitution();
-		
-		state.resetSleepCount();
-		
-		//if(state.getMotionMask()&PFX_MOTION_MASK_DYNAMIC) {
-		if (rb && (rb->getInvMass()>0.f))
+		BT_PROFILE("create states and solver bodies");
+		for (int i = 0; i < numRigidBodies; i++)
 		{
-			btVector3 angVelPlusForces = rb->getAngularVelocity()+rb->getTotalTorque()*rb->getInvInertiaTensorWorld()*infoGlobal.m_timeStep;
-			btVector3 linVelPlusForces = rb->getLinearVelocity()+rb->getTotalForce()*rb->getInvMass()*infoGlobal.m_timeStep;
+			btCollisionObject* obj = bodies[i];
+			obj->setCompanionId(i);
 
-			state.setAngularVelocity((const vmVector3&)angVelPlusForces);
-			state.setLinearVelocity((const vmVector3&) linVelPlusForces);
-
-			state.setMotionType(PfxMotionTypeActive);
-			vmMatrix3 ori(solverBody.mOrientation);
-			vmMatrix3 localInvInertia = vmMatrix3::identity();
-			localInvInertia.setCol(0, vmVector3(rb->getInvInertiaDiagLocal().getX(),0,0));
-			localInvInertia.setCol(1, vmVector3(0, rb->getInvInertiaDiagLocal().getY(),0));
-			localInvInertia.setCol(2, vmVector3(0,0, rb->getInvInertiaDiagLocal().getZ()));
-
-			solverBody.mMassInv = rb->getInvMass();
-			solverBody.mInertiaInv = ori * localInvInertia * transpose(ori);
-		} else
-		{
-			state.setAngularVelocity(vmVector3(0));
-			state.setLinearVelocity(vmVector3(0));
+			PfxSolverBody& solverBody = m_memoryCache->m_mysolverbodies[i];
+			btRigidBody* rb = btRigidBody::upcast(obj);
+			TrbState& state = m_memoryCache->m_mystates[i];
 		
-			state.setMotionType(PfxMotionTypeFixed);
-			m_memoryCache->m_mysolverbodies[i].mMassInv = 0.f;
-			m_memoryCache->m_mysolverbodies[i].mInertiaInv = vmMatrix3(0.0f);
+			state.reset();
+			const btQuaternion& orgOri = obj->getWorldTransform().getRotation();
+			vmQuat orn(orgOri.getX(), orgOri.getY(), orgOri.getZ(), orgOri.getW());
+			state.setPosition(getVmVector3(obj->getWorldTransform().getOrigin()));
+			state.setOrientation(orn);
+			state.setPosition(state.getPosition());
+			state.setRigidBodyId(i);
+			state.setAngularDamping(0);
+			state.setLinearDamping(0);
+			
+			
+			solverBody.mOrientation = state.getOrientation();
+			solverBody.mDeltaLinearVelocity = vmVector3(0.0f);
+			solverBody.mDeltaAngularVelocity = vmVector3(0.0f);
+			solverBody.friction = obj->getFriction();
+			solverBody.restitution = obj->getRestitution();
+			
+			state.resetSleepCount();
+			
+			//if(state.getMotionMask()&PFX_MOTION_MASK_DYNAMIC) {
+			if (rb && (rb->getInvMass()>0.f))
+			{
+				btVector3 angVelPlusForces = rb->getAngularVelocity()+rb->getTotalTorque()*rb->getInvInertiaTensorWorld()*infoGlobal.m_timeStep;
+				btVector3 linVelPlusForces = rb->getLinearVelocity()+rb->getTotalForce()*rb->getInvMass()*infoGlobal.m_timeStep;
+
+				state.setAngularVelocity((const vmVector3&)angVelPlusForces);
+				state.setLinearVelocity((const vmVector3&) linVelPlusForces);
+
+				state.setMotionType(PfxMotionTypeActive);
+				vmMatrix3 ori(solverBody.mOrientation);
+				vmMatrix3 localInvInertia = vmMatrix3::identity();
+				localInvInertia.setCol(0, vmVector3(rb->getInvInertiaDiagLocal().getX(),0,0));
+				localInvInertia.setCol(1, vmVector3(0, rb->getInvInertiaDiagLocal().getY(),0));
+				localInvInertia.setCol(2, vmVector3(0,0, rb->getInvInertiaDiagLocal().getZ()));
+
+				solverBody.mMassInv = rb->getInvMass();
+				solverBody.mInertiaInv = ori * localInvInertia * transpose(ori);
+			} else
+			{
+				state.setAngularVelocity(vmVector3(0));
+				state.setLinearVelocity(vmVector3(0));
+			
+				state.setMotionType(PfxMotionTypeFixed);
+				m_memoryCache->m_mysolverbodies[i].mMassInv = 0.f;
+				m_memoryCache->m_mysolverbodies[i].mInertiaInv = vmMatrix3(0.0f);
+			}
+
 		}
-
-	}
 	}
 
 
@@ -1536,7 +1537,7 @@ btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies1, int
 		BT_PROFILE("copy back");
 		for (int i=0;i<numRigidBodies;i++)
 		{
-			btCollisionObject* obj = bodies1[i];
+			btCollisionObject* obj = bodies[i];
 			btRigidBody* rb = btRigidBody::upcast(obj);
 			TrbState& state = m_memoryCache->m_mystates[i];
 			if (rb && (rb->getInvMass()>0.f))

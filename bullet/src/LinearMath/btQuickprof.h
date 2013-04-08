@@ -190,6 +190,9 @@ public:
 
 #define	BT_PROFILE( name )			CProfileSample __profile( name )
 
+#define BT_PROFILE_ENTER( name )	CProfileManager::Start_Profile( name );
+#define BT_PROFILE_EXIT( name )		CProfileManager::Stop_Profile();
+
 #else
 
 #define	BT_PROFILE( name )

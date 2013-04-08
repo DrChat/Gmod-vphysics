@@ -42,11 +42,11 @@ typedef void* (*PosixlsMemorySetupFunc)();
 class PosixThreadSupport : public btThreadSupportInterface 
 {
 public:
-    typedef enum sStatus {
-        STATUS_BUSY,
-        STATUS_READY,
-        STATUS_FINISHED
-    } Status;
+	typedef enum sStatus {
+		STATUS_BUSY,
+		STATUS_READY,
+		STATUS_FINISHED
+	} Status;
 
 	// placeholder, until libspe2 support is there
 	struct	btSpuStatus
@@ -59,10 +59,10 @@ public:
 		void*	m_userPtr; //for taskDesc etc
 		void*	m_lsMemory; //initialized using PosixLocalStoreMemorySetupFunc
 
-                pthread_t thread;
-                sem_t* startSemaphore;
+				pthread_t thread;
+				sem_t* startSemaphore;
 
-        unsigned long threadUsed;
+		unsigned long threadUsed;
 	};
 private:
 

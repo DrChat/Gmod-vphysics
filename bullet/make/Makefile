@@ -29,12 +29,16 @@ BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/CollisionShapes/*.cpp)
 BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/Gimpact/*.cpp)
 BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/NarrowPhaseCollision/*.cpp)
 
-BULLETCOLLISION_OBJS = $(patsubst %/%.cpp, %/%.o, $(BULLETCOLLISION_SRCS))
+BULLETCOLLISION_OBJS := $(BULLETCOLLISION_SRCS:.cpp=.o)
+BULLETCOLLISION_OBJS := $(subst $(BULLET_SRC_DIR), $(BULLET_OUT_DIR), $(BULLETCOLLISION_OBJS))
 
 BulletCollision:
+	@echo " + Linking BulletCollision..."
 	@for obj in $(BULLETCOLLISION_OBJS); do	\
 		echo $$obj;							\
 	done
+	
+$(BULLETCOLLISION_OBJS):
 
 # ------------------------ BulletDynamics ------------------------
 BULLETDYNAMICS_DIR = $(BULLET_SRC_DIR)/BulletDynamics
@@ -43,6 +47,9 @@ BULLETDYNAMICS_SRCS =	$(wildcard $(BULLETDYNAMICS_DIR)/Character/*.cpp)
 BULLETDYNAMICS_SRCS +=	$(wildcard $(BULLETDYNAMICS_DIR)/ConstraintSolver/*.cpp)
 BULLETDYNAMICS_SRCS +=	$(wildcard $(BULLETDYNAMICS_DIR)/Dynamics/*.cpp)
 BULLETDYNAMICS_SRCS +=	$(wildcard $(BULLETDYNAMICS_DIR)/Vehicle/*.cpp)
+
+BULLETDYNAMICS_OBJS := $(BULLETDYNAMICS_SRCS:.cpp=.0)
+BULLETDYNAMICS_OBJS := $(subst $(BULLET_SRC_DIR), $(BULLET_OUT_DIR), $(BULLETDYNAMICS_OBJS))
 
 BulletDynamics:
 	@echo "BulletDynamics"
@@ -53,6 +60,9 @@ BULLETMULTITHREADED_DIR = $(BULLET_SRC_DIR)/BulletMultiThreaded
 BULLETMULTITHREADED_SRCS =	$(wildcard $(BULLETMULTITHREADED_DIR)/*.cpp)
 BULLETMULTITHREADED_SRCS +=	$(wildcard $(BULLETMULTITHREADED_DIR)/SpuNarrowPhaseCollisionTask/*.cpp)
 
+BULLETMULTITHREADED_OBJS := $(BULLETMULTITHREADED_SRCS:.cpp=.0)
+BULLETMULTITHREADED_OBJS := $(subst $(BULLET_SRC_DIR), $(BULLET_OUT_DIR), $(BULLETMULTITHREADED_OBJS))
+
 BulletMultiThreaded:
 	@echo "BulletMultiThreaded"
 
@@ -61,6 +71,9 @@ BULLETSOFTBODY_DIR = $(BULLET_SRC_DIR)/BulletSoftBody
 
 BULLETSOFTBODY_SRCS =	$(wildcard $(BULLETSOFTBODY_DIR)/*.cpp)
 
+BULLETSOFTBODY_OBJS := $(BULLETSOFTBODY_SRCS:.cpp=.o)
+BULLETSOFTBODY_OBJS := $(subst $(BULLET_SRC_DIR), $(BULLET_OUT_DIR), $(BULLETSOFTBODY_OBJS))
+
 BulletSoftBody:
 	@echo "BulletSoftBody"
 
@@ -68,6 +81,9 @@ BulletSoftBody:
 LINEARMATH_DIR = $(BULLET_SRC_DIR)/LinearMath
 
 LINEARMATH_SRCS =	$(wildcard $(LINEARMATH_DIR)/*.cpp)
+
+LINEARMATH_OBJS := $(LINEARMATH_SRCS:.cpp=.o)
+LINEARMATH_OBJS := $(subst $(BULLET_SRC_DIR), $(BULLET_OUT_DIR), $(LINEARMATH_OBJS))
 
 LinearMath:
 	@echo "LinearMath"

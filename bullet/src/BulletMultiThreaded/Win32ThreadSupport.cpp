@@ -19,10 +19,42 @@ subject to the following restrictions:
 
 #include <windows.h>
 
+#include <stdio.h>
+
 #include "SpuCollisionTaskProcess.h"
 
 #include "SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 
+#ifdef _MSC_VER
+const DWORD MS_VC_EXCEPTION=0x406D1388;
+
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
+{
+   DWORD dwType; // Must be 0x1000.
+   LPCSTR szName; // Pointer to name (in user addr space).
+   DWORD dwThreadID; // Thread ID (-1=caller thread).
+   DWORD dwFlags; // Reserved for future use, must be zero.
+} THREADNAME_INFO;
+#pragma pack(pop)
+
+void SetThreadName(DWORD dwThreadID, const char* threadName)
+{
+	THREADNAME_INFO info;
+	info.dwType = 0x1000;
+	info.szName = threadName;
+	info.dwThreadID = dwThreadID;
+	info.dwFlags = 0;
+
+	__try
+	{
+		RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+	}
+}
+#endif // _MSC_VER
 
 
 ///The number of threads should be equal to the number of available cores
@@ -42,18 +74,13 @@ Win32ThreadSupport::~Win32ThreadSupport()
 	stopSPU();
 }
 
-
-
-
-#include <stdio.h>
-
-DWORD WINAPI Thread_no_1( LPVOID lpParam ) 
+DWORD WINAPI ThreadFunc(LPVOID lpParam) 
 {
 
 	Win32ThreadSupport::btSpuStatus* status = (Win32ThreadSupport::btSpuStatus*)lpParam;
 
 	
-	while (1)
+	while (true)
 	{
 		WaitForSingleObject(status->m_eventStartHandle, INFINITE);
 		
@@ -92,7 +119,7 @@ void Win32ThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiArgumen
 
 	switch (uiCommand)
 	{
-	case 	CMD_GATHER_AND_PROCESS_PAIRLIST:
+		case 	CMD_GATHER_AND_PROCESS_PAIRLIST:
 		{
 
 
@@ -105,10 +132,10 @@ void Win32ThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiArgumen
 			HANDLE handle =0;
 #else
 
+			btAssert(taskId>=0);
+			btAssert(int(taskId) < m_activeSpuStatus.size());
 
 			btSpuStatus&	spuStatus = m_activeSpuStatus[taskId];
-			btAssert(taskId>=0);
-			btAssert(int(taskId)<m_activeSpuStatus.size());
 
 			spuStatus.m_commandId = uiCommand;
 			spuStatus.m_status = 1;
@@ -117,13 +144,13 @@ void Win32ThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiArgumen
 			///fire event to start new task
 			SetEvent(spuStatus.m_eventStartHandle);
 
-#endif //CollisionTask_LocalStoreMemory
+#endif // SINGLE_THREADED
 
 			
 
 			break;
 		}
-	default:
+		default:
 		{
 			///not implemented
 			btAssert(0);
@@ -168,13 +195,12 @@ void Win32ThreadSupport::waitForResponse(unsigned int *puiArgument0, unsigned in
 #endif //SINGLE_THREADED
 
 	
+	if (puiArgument0)
+		*puiArgument0 = spuStatus.m_taskId;
 
-	*puiArgument0 = spuStatus.m_taskId;
-	*puiArgument1 = spuStatus.m_status;
-
-
+	if (puiArgument1)
+		*puiArgument1 = spuStatus.m_status;
 }
-
 
 ///check for messages from SPUs
 bool Win32ThreadSupport::isTaskCompleted(unsigned int *puiArgument0, unsigned int *puiArgument1, int timeOutInMilliseconds)
@@ -192,7 +218,6 @@ bool Win32ThreadSupport::isTaskCompleted(unsigned int *puiArgument0, unsigned in
 	
 	if ((res != STATUS_TIMEOUT) && (res != WAIT_FAILED))
 	{
-		
 		btAssert(res != WAIT_FAILED);
 		last = res - WAIT_OBJECT_0;
 
@@ -207,20 +232,28 @@ bool Win32ThreadSupport::isTaskCompleted(unsigned int *puiArgument0, unsigned in
 		///need to find an active spu
 		btAssert(last>=0);
 
-	#else
-		last=0;
-		btSpuStatus& spuStatus = m_activeSpuStatus[last];
-	#endif //SINGLE_THREADED
+		if (puiArgument0)
+			*puiArgument0 = spuStatus.m_taskId;
 
-		
-
-		*puiArgument0 = spuStatus.m_taskId;
-		*puiArgument1 = spuStatus.m_status;
+		if (puiArgument1)
+			*puiArgument1 = spuStatus.m_status;
 
 		return true;
-	} 
+	}
 
 	return false;
+#else
+	last=0;
+	btSpuStatus& spuStatus = m_activeSpuStatus[last];
+
+	if (puiArgument0)
+		*puiArgument0 = spuStatus.m_taskId;
+
+	if (puiArgument1)
+		*puiArgument1 = spuStatus.m_status;
+
+	return true;
+#endif //SINGLE_THREADED
 }
 
 
@@ -232,7 +265,7 @@ void Win32ThreadSupport::startThreads(const Win32ThreadConstructionInfo& threadC
 
 	m_maxNumTasks = threadConstructionInfo.m_numThreads;
 
-	for (int i=0;i<threadConstructionInfo.m_numThreads;i++)
+	for (int i=0; i < threadConstructionInfo.m_numThreads; i++)
 	{
 		printf("starting thread %d\n", i);
 
@@ -240,38 +273,44 @@ void Win32ThreadSupport::startThreads(const Win32ThreadConstructionInfo& threadC
 
 		LPSECURITY_ATTRIBUTES lpThreadAttributes=NULL;
 		SIZE_T dwStackSize=threadConstructionInfo.m_threadStackSize;
-		LPTHREAD_START_ROUTINE lpStartAddress=&Thread_no_1;
-		LPVOID lpParameter=&spuStatus;
-		DWORD dwCreationFlags=0;
-		LPDWORD lpThreadId=0;
+		LPTHREAD_START_ROUTINE lpStartAddress = &ThreadFunc;
+		LPVOID lpParameter = &spuStatus;
+		DWORD dwCreationFlags = 0;
+		LPDWORD lpThreadId = 0;
 
 		spuStatus.m_userPtr=0;
 
-		sprintf(spuStatus.m_eventStartHandleName, "eventStart%s%d", threadConstructionInfo.m_uniqueName, i);
-		spuStatus.m_eventStartHandle = CreateEventA (0, false, false, spuStatus.m_eventStartHandleName);
+		sprintf_s(spuStatus.m_eventStartHandleName, "eventStart%s%d", threadConstructionInfo.m_uniqueName, i);
+		spuStatus.m_eventStartHandle = CreateEventA(0, false, false, spuStatus.m_eventStartHandleName);
 
-		sprintf(spuStatus.m_eventCompletetHandleName, "eventComplete%s%d", threadConstructionInfo.m_uniqueName, i);
-		spuStatus.m_eventCompletetHandle = CreateEventA (0, false, false, spuStatus.m_eventCompletetHandleName);
+		sprintf_s(spuStatus.m_eventCompletetHandleName, "eventComplete%s%d", threadConstructionInfo.m_uniqueName, i);
+		spuStatus.m_eventCompletetHandle = CreateEventA(0, false, false, spuStatus.m_eventCompletetHandleName);
 
 		m_completeHandles[i] = spuStatus.m_eventCompletetHandle;
 
-		HANDLE handle = CreateThread(lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,	dwCreationFlags, lpThreadId);
-		SetThreadPriority(handle, THREAD_PRIORITY_HIGHEST);
+		HANDLE hThread = CreateThread(lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,	dwCreationFlags, lpThreadId);
+		SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
 		//SetThreadPriority(handle, THREAD_PRIORITY_TIME_CRITICAL);
 
-		SetThreadAffinityMask(handle, 1<<i);
+#ifdef _MSC_VER
+		// For easier debugging.
+		char threadName[32];
+		sprintf_s(threadName, "%s-%d", threadConstructionInfo.m_uniqueName, i);
+		SetThreadName(GetThreadId(hThread), threadName);
+#endif
+
+		SetThreadAffinityMask(hThread, 1<<i);
+		
 
 		spuStatus.m_taskId = i;
 		spuStatus.m_commandId = 0;
 		spuStatus.m_status = 0;
-		spuStatus.m_threadHandle = handle;
+		spuStatus.m_threadHandle = hThread;
 		spuStatus.m_lsMemory = threadConstructionInfo.m_lsMemoryFunc();
 		spuStatus.m_userThreadFunc = threadConstructionInfo.m_userThreadFunc;
 
-		printf("started thread %d with threadHandle %p\n", i,handle);
-		
+		printf("started thread %d with threadHandle %p\n", i, hThread);
 	}
-
 }
 
 void Win32ThreadSupport::startSPU()
