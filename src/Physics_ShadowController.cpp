@@ -10,7 +10,7 @@
 #include "math.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+#include "tier0/memdbgon.h"
 
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// Compute the fraction of time we'll be operating on.

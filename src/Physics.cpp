@@ -6,18 +6,17 @@
 #include "Physics_CollisionSet.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+#include "tier0/memdbgon.h"
 
 /******************
 * CLASS CPhysics
 ******************/
 
-void *CPhysics::QueryInterface(const char *pInterfaceName) {
-	CreateInterfaceFn func = Sys_GetFactoryThis();
-	if (!func)
-		return NULL;
-
-	return func(pInterfaceName, NULL);
+CPhysics::~CPhysics() {
+#if defined(_DEBUG) && defined(_MSC_VER)
+	// Probably not the place we should be doing this, but who cares.
+	_CrtDumpMemoryLeaks();
+#endif
 }
 
 InitReturnVal_t CPhysics::Init() {
@@ -29,6 +28,14 @@ InitReturnVal_t CPhysics::Init() {
 
 void CPhysics::Shutdown() {
 	BaseClass::Shutdown();
+}
+
+void *CPhysics::QueryInterface(const char *pInterfaceName) {
+	CreateInterfaceFn func = Sys_GetFactoryThis();
+	if (!func)
+		return NULL;
+
+	return func(pInterfaceName, NULL);
 }
 
 IPhysicsEnvironment *CPhysics::CreateEnvironment() {

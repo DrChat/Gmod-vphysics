@@ -7,6 +7,8 @@ class IPhysicsCollisionSet;
 class CPhysics : public CTier1AppSystem<IPhysics1> {
 	typedef CTier1AppSystem<IPhysics1> BaseClass;
 	public:
+		~CPhysics();
+
 		void *						QueryInterface(const char *pInterfaceName);
 		InitReturnVal_t				Init();
 		void						Shutdown();

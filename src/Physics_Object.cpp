@@ -14,7 +14,7 @@
 #include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+#include "tier0/memdbgon.h"
 
 /*****************************
 * CLASS CGhostTriggerCallback
@@ -68,6 +68,9 @@ CPhysicsObject::~CPhysicsObject() {
 	if (m_pEnv) {
 		RemoveShadowController();
 		m_pEnv->GetDragController()->RemovePhysicsObject(this);
+
+		if (m_pFluidController)
+			m_pEnv->DestroyFluidController((IPhysicsFluidController *)m_pFluidController);
 	}
 
 	for (int i = 0; i < m_pConstraintVec.Count(); i++) {

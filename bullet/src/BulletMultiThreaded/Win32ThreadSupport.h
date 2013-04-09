@@ -33,107 +33,107 @@ typedef void* (*Win32lsMemorySetupFunc)();
 ///Win32ThreadSupport helps to initialize/shutdown libspe2, start/stop SPU tasks and communication
 class Win32ThreadSupport : public btThreadSupportInterface 
 {
-public:
-	///placeholder, until libspe2 support is there
-	struct	btSpuStatus
-	{
-		uint32_t	m_taskId;
-		uint32_t	m_commandId;
-		uint32_t	m_status;
-
-		Win32ThreadFunc	m_userThreadFunc;
-		void*	m_userPtr; //for taskDesc etc
-		void*	m_lsMemory; //initialized using Win32LocalStoreMemorySetupFunc
-
-		void*	m_threadHandle; //this one is calling 'Win32ThreadFunc'
-
-		void*	m_eventStartHandle;
-		char	m_eventStartHandleName[32];
-
-		void*	m_eventCompletetHandle;
-		char	m_eventCompletetHandleName[32];
-		
-
-	};
-private:
-
-	btAlignedObjectArray<btSpuStatus>	m_activeSpuStatus;
-	btAlignedObjectArray<void*>			m_completeHandles;
-	
-	int m_maxNumTasks;
-public:
-	///Setup and initialize SPU/CELL/Libspe2
-
-	struct	Win32ThreadConstructionInfo
-	{
-		Win32ThreadConstructionInfo(const char* uniqueName,
-									Win32ThreadFunc userThreadFunc,
-									Win32lsMemorySetupFunc	lsMemoryFunc,
-									int numThreads=1,
-									int threadStackSize=65535
-									)
-									:m_uniqueName(uniqueName),
-									m_userThreadFunc(userThreadFunc),
-									m_lsMemoryFunc(lsMemoryFunc),
-									m_numThreads(numThreads),
-									m_threadStackSize(threadStackSize)
+	public:
+		// placeholder, until libspe2 support is there
+		struct	btSpuStatus
 		{
-
+			uint32_t	m_taskId;
+			uint32_t	m_commandId;
+			uint32_t	m_status;
+	
+			Win32ThreadFunc	m_userThreadFunc;
+			void*	m_userPtr; //for taskDesc etc
+			void*	m_lsMemory; //initialized using Win32LocalStoreMemorySetupFunc
+	
+			void*	m_threadHandle; //this one is calling 'Win32ThreadFunc'
+	
+			void*	m_eventStartHandle;
+			char	m_eventStartHandleName[32];
+	
+			void*	m_eventCompletedHandle;
+			char	m_eventCompletedHandleName[32];
+			
+	
+		};
+	private:
+	
+		btAlignedObjectArray<btSpuStatus>	m_activeSpuStatus;
+		btAlignedObjectArray<void*>			m_completeHandles;
+		
+		int m_maxNumTasks;
+	public:
+		///Setup and initialize SPU/CELL/Libspe2
+	
+		struct	Win32ThreadConstructionInfo
+		{
+			Win32ThreadConstructionInfo(const char *uniqueName,
+										Win32ThreadFunc userThreadFunc,
+										Win32lsMemorySetupFunc	lsMemoryFunc,
+										int numThreads=1,
+										int threadStackSize=65535
+										)
+										:m_uniqueName(uniqueName),
+										m_userThreadFunc(userThreadFunc),
+										m_lsMemoryFunc(lsMemoryFunc),
+										m_numThreads(numThreads),
+										m_threadStackSize(threadStackSize)
+			{
+	
+			}
+	
+			const char *			m_uniqueName;
+			Win32ThreadFunc			m_userThreadFunc;
+			Win32lsMemorySetupFunc	m_lsMemoryFunc;
+			int						m_numThreads;
+			int						m_threadStackSize;
+	
+		};
+	
+	
+	
+		Win32ThreadSupport(const Win32ThreadConstructionInfo &threadConstructionInfo);
+	
+	///cleanup/shutdown Libspe2
+		virtual	~Win32ThreadSupport();
+	
+		void	startThreads(const Win32ThreadConstructionInfo &threadInfo);
+	
+	
+	///send messages to SPUs
+		virtual	void sendRequest(uint32_t uiCommand, ppu_address_t uiArgument0, uint32_t uiArgument1);
+	
+	///check for messages from SPUs
+		virtual	void waitForResponse(unsigned int *puiArgument0, unsigned int *puiArgument1);
+	
+		virtual bool isTaskCompleted(unsigned int *puiArgument0, unsigned int *puiArgument1, int timeOutInMilliseconds);
+	
+	///start the spus (can be called at the beginning of each frame, to make sure that the right SPU program is loaded)
+		virtual	void startSPU();
+	
+	///tell the task scheduler we are done with the SPU tasks
+		virtual	void stopSPU();
+	
+		virtual	void setNumTasks(int numTasks)
+		{
+			m_maxNumTasks = numTasks;
 		}
+	
+		virtual int getNumTasks() const
+		{
+			return m_maxNumTasks;
+		}
+	
+		virtual void *getThreadLocalMemory(int taskId)
+		{
+			return m_activeSpuStatus[taskId].m_lsMemory;
+		}
+		virtual btBarrier *createBarrier();
+	
+		virtual btCriticalSection *createCriticalSection();
+	
+		virtual void deleteBarrier(btBarrier *barrier);
 
-		const char*				m_uniqueName;
-		Win32ThreadFunc			m_userThreadFunc;
-		Win32lsMemorySetupFunc	m_lsMemoryFunc;
-		int						m_numThreads;
-		int						m_threadStackSize;
-
-	};
-
-
-
-	Win32ThreadSupport(const Win32ThreadConstructionInfo& threadConstructionInfo);
-
-///cleanup/shutdown Libspe2
-	virtual	~Win32ThreadSupport();
-
-	void	startThreads(const Win32ThreadConstructionInfo&	threadInfo);
-
-
-///send messages to SPUs
-	virtual	void sendRequest(uint32_t uiCommand, ppu_address_t uiArgument0, uint32_t uiArgument1);
-
-///check for messages from SPUs
-	virtual	void waitForResponse(unsigned int *puiArgument0, unsigned int *puiArgument1);
-
-	virtual bool isTaskCompleted(unsigned int *puiArgument0, unsigned int *puiArgument1, int timeOutInMilliseconds);
-
-///start the spus (can be called at the beginning of each frame, to make sure that the right SPU program is loaded)
-	virtual	void startSPU();
-
-///tell the task scheduler we are done with the SPU tasks
-	virtual	void stopSPU();
-
-	virtual	void	setNumTasks(int numTasks)
-	{
-		m_maxNumTasks = numTasks;
-	}
-
-	virtual int getNumTasks() const
-	{
-		return m_maxNumTasks;
-	}
-
-	virtual void*	getThreadLocalMemory(int taskId)
-	{
-		return m_activeSpuStatus[taskId].m_lsMemory;
-	}
-	virtual btBarrier*	createBarrier();
-
-	virtual btCriticalSection* createCriticalSection();
-
-	virtual void deleteBarrier(btBarrier* barrier);
-
-		virtual void deleteCriticalSection(btCriticalSection* criticalSection);
+		virtual void deleteCriticalSection(btCriticalSection *criticalSection);
 };
 
 #endif //BT_WIN32_THREAD_SUPPORT_H

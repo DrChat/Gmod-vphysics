@@ -8,7 +8,7 @@
 #include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+#include "tier0/memdbgon.h"
 
 // MPH2INS: 1(miles/hr) = 0.44704(meters/sec)
 #define MPH2MS(x) ((x) * 0.44704)

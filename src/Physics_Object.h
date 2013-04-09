@@ -153,9 +153,6 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot);
 
 		void								OutputDebugInfo() const;
-
-		CPhysicsFluidController *			GetFluidController(void) { return m_pFluidController; }
-		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	public:
 		// UNEXPOSED FUNCTIONS
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isStatic, bool isSphere = false);
@@ -178,6 +175,9 @@ class CPhysicsObject : public IPhysicsObject1 {
 
 		int									GetLastActivationState() { return m_iLastActivationState; }
 		void								SetLastActivationState(int iState) { m_iLastActivationState = iState; }
+
+		CPhysicsFluidController *			GetFluidController(void) { return m_pFluidController; }
+		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 	private:
 		CPhysicsEnvironment *				m_pEnv;
 		void *								m_pGameData;

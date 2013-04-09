@@ -27,7 +27,7 @@ subject to the following restrictions:
 ///http://www.continuousphysics.com/Bullet/phpBB2/viewtopic.php?t=1240
 
 #define BT_USE_PLACEMENT_NEW 1
-//#define BT_USE_MEMCPY 1 //disable, because it is cumbersome to find out for each platform where memcpy is defined. It can be in <memory.h> or <string.h> or otherwise...
+//#define BT_USE_MEMCPY 1 // disable, because it is cumbersome to find out for each platform where memcpy is defined. It can be in <memory.h> or <string.h> or otherwise...
 #define BT_ALLOW_ARRAY_COPY_OPERATOR // enabling this can accidently perform deep copies of data if you are not careful
 
 #ifdef BT_USE_MEMCPY
@@ -36,14 +36,13 @@ subject to the following restrictions:
 #endif //BT_USE_MEMCPY
 
 #ifdef BT_USE_PLACEMENT_NEW
-#include <new> //for placement new
-#endif //BT_USE_PLACEMENT_NEW
+#include <new>
+#endif // BT_USE_PLACEMENT_NEW
 
 
 ///The btAlignedObjectArray template class uses a subset of the stl::vector interface for its methods
 ///It is developed to replace stl::vector to avoid portability issues, including STL alignment issues to add SIMD/SSE data
 template <typename T> 
-//template <class T> 
 class btAlignedObjectArray
 {
 	btAlignedAllocator<T, 16>	m_allocator;
@@ -51,22 +50,21 @@ class btAlignedObjectArray
 	int					m_size;
 	int					m_capacity;
 	T*					m_data;
-	//PCK: added this line
 	bool				m_ownsMemory;
 
 #ifdef BT_ALLOW_ARRAY_COPY_OPERATOR
-public:
-	SIMD_FORCE_INLINE btAlignedObjectArray<T>& operator=(const btAlignedObjectArray<T> &other)
-	{
-		copyFromArray(other);
-		return *this;
-	}
-#else//BT_ALLOW_ARRAY_COPY_OPERATOR
-private:
-		SIMD_FORCE_INLINE btAlignedObjectArray<T>& operator=(const btAlignedObjectArray<T> &other);
-#endif//BT_ALLOW_ARRAY_COPY_OPERATOR
+	public:
+		SIMD_FORCE_INLINE btAlignedObjectArray<T>& operator=(const btAlignedObjectArray<T> &other)
+		{
+			copyFromArray(other);
+			return *this;
+		}
+#else // BT_ALLOW_ARRAY_COPY_OPERATOR
+	private:
+			SIMD_FORCE_INLINE btAlignedObjectArray<T>& operator=(const btAlignedObjectArray<T> &other);
+#endif // BT_ALLOW_ARRAY_COPY_OPERATOR
 
-protected:
+	protected:
 		SIMD_FORCE_INLINE	int	allocSize(int size)
 		{
 			return (size ? size*2 : 1);
@@ -118,9 +116,6 @@ protected:
 			}
 		}
 
-	
-
-
 	public:
 		
 		btAlignedObjectArray()
@@ -146,7 +141,7 @@ protected:
 		
 		
 		/// return the number of elements in the array
-		SIMD_FORCE_INLINE	int size() const
+		SIMD_FORCE_INLINE int size() const
 		{	
 			return m_size;
 		}
@@ -181,7 +176,7 @@ protected:
 		
 
 		///clear the array, deallocated memory. Generally it is better to use array.resize(0), to reduce performance overhead of run-time memory (de)allocations.
-		SIMD_FORCE_INLINE	void	clear()
+		SIMD_FORCE_INLINE void clear()
 		{
 			destroy(0, size());
 			
@@ -190,7 +185,7 @@ protected:
 			init();
 		}
 
-		SIMD_FORCE_INLINE	void	pop_back()
+		SIMD_FORCE_INLINE void pop_back()
 		{
 			btAssert(m_size>0);
 			m_size--;
@@ -200,7 +195,7 @@ protected:
 
 		///resize changes the number of elements in the array. If the new size is larger, the new elements will be constructed using the optional second argument.
 		///when the new number of elements is smaller, the destructor will be called, but memory will not be freed, to reduce performance overhead of run-time memory (de)allocations.
-		SIMD_FORCE_INLINE	void	resizeNoInitialize(int newsize)
+		SIMD_FORCE_INLINE void resizeNoInitialize(int newsize)
 		{
 			int curSize = size();
 
@@ -217,7 +212,7 @@ protected:
 			m_size = newsize;
 		}
 	
-		SIMD_FORCE_INLINE	void	resize(int newsize, const T& fillData=T())
+		SIMD_FORCE_INLINE void resize(int newsize, const T& fillData=T())
 		{
 			int curSize = size();
 
@@ -244,7 +239,8 @@ protected:
 
 			m_size = newsize;
 		}
-		SIMD_FORCE_INLINE	T&  expandNonInitializing( )
+
+		SIMD_FORCE_INLINE T& expandNonInitializing()
 		{	
 			int sz = size();
 			if( sz == capacity() )
@@ -257,7 +253,7 @@ protected:
 		}
 
 
-		SIMD_FORCE_INLINE	T&  expand( const T& fillValue=T())
+		SIMD_FORCE_INLINE T& expand(const T& fillValue=T())
 		{	
 			int sz = size();
 			if( sz == capacity() )
@@ -273,7 +269,7 @@ protected:
 		}
 
 
-		SIMD_FORCE_INLINE	void push_back(const T& _Val)
+		SIMD_FORCE_INLINE void push_back(const T& _Val)
 		{	
 			int sz = size();
 			if( sz == capacity() )
@@ -292,13 +288,14 @@ protected:
 
 	
 		/// return the pre-allocated (reserved) elements, this is at least as large as the total number of elements, see size() and reserve()
-		SIMD_FORCE_INLINE	int capacity() const
+		SIMD_FORCE_INLINE int capacity() const
 		{	
 			return m_capacity;
 		}
 		
-		SIMD_FORCE_INLINE	void reserve(int _Count)
-		{	// determine new minimum length of allocated storage
+		SIMD_FORCE_INLINE void reserve(int _Count)
+		{
+			// determine new minimum length of allocated storage
 			if (capacity() < _Count)
 			{	// not enough room, reallocate
 				T*	s = (T*)allocate(_Count);
@@ -319,68 +316,56 @@ protected:
 			}
 		}
 
-
-		class less
-		{
-			public:
-
-				bool operator() ( const T& a, const T& b )
-				{
-					return ( a < b );
-				}
-		};
-	
-
 		template <typename L>
 		void quickSortInternal(const L& CompareFunc, int lo, int hi)
 		{
-		//  lo is the lower index, hi is the upper index
-		//  of the region of array a that is to be sorted
+			// lo is the lower index, hi is the upper index
+			// of the region of array a that is to be sorted
 			int i=lo, j=hi;
 			T x=m_data[(lo+hi)/2];
 
-			//  partition
+			// partition
 			do
 			{    
-				while (CompareFunc(m_data[i], x)) 
-					i++; 
-				while (CompareFunc(x, m_data[j])) 
+				while (CompareFunc(m_data[i], x))
+					i++;
+
+				while (CompareFunc(x, m_data[j]))
 					j--;
+
 				if (i<=j)
 				{
 					swap(i, j);
 					i++; j--;
 				}
-			} while (i<=j);
+			} while (i <= j);
 
 			//  recursion
-			if (lo<j) 
-				quickSortInternal( CompareFunc, lo, j);
-			if (i<hi) 
-				quickSortInternal( CompareFunc, i, hi);
+			if (lo < j) 
+				quickSortInternal(CompareFunc, lo, j);
+			if (i < hi) 
+				quickSortInternal(CompareFunc, i, hi);
 		}
-
 
 		template <typename L>
 		void quickSort(const L& CompareFunc)
 		{
-			//don't sort 0 or 1 elements
+			// don't sort 0 or 1 elements
 			if (size()>1)
 			{
 				quickSortInternal(CompareFunc,0, size()-1);
 			}
 		}
 
-
-		///heap sort from http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Sort/Heap/
+		// heap sort from http://www.csse.monash.edu.au/~lloyd/tildeAlgDS/Sort/Heap/
 		template <typename L>
 		void downHeap(T *pArr, int k, int n, const L& CompareFunc)
 		{
-			/*  PRE: a[k+1..N] is a heap */
-			/* POST:  a[k..N]  is a heap */
+			//  PRE: a[k+1..N] is a heap
+			// POST:  a[k..N]  is a heap
 			
 			T temp = pArr[k - 1];
-			/* k has child(s) */
+			// k has child(s)
 			while (k <= n/2) 
 			{
 				int child = 2*k;
@@ -389,10 +374,11 @@ protected:
 				{
 					child++;
 				}
-				/* pick larger child */
+
+				// pick larger child 
 				if (CompareFunc(temp, pArr[child - 1]))
 				{
-					/* move child up */
+					// move child up
 					pArr[k - 1] = pArr[child - 1];
 					k = child;
 				}
@@ -402,9 +388,9 @@ protected:
 				}
 			}
 			pArr[k - 1] = temp;
-		} /*downHeap*/
+		}
 
-		void	swap(int index0, int index1)
+		void swap(int index0, int index1)
 		{
 #ifdef BT_USE_MEMCPY
 			char	temp[sizeof(T)];
@@ -415,97 +401,96 @@ protected:
 			T temp = m_data[index0];
 			m_data[index0] = m_data[index1];
 			m_data[index1] = temp;
-#endif //BT_USE_PLACEMENT_NEW
+#endif // BT_USE_MEMCPY
 
 		}
 
-	template <typename L>
-	void heapSort(const L& CompareFunc)
-	{
-		/* sort a[0..N-1],  N.B. 0 to N-1 */
-		int k;
-		int n = m_size;
-		for (k = n/2; k > 0; k--) 
+		template <typename L>
+		void heapSort(const L& CompareFunc)
 		{
-			downHeap(m_data, k, n, CompareFunc);
-		}
-
-		/* a[1..N] is now a heap */
-		while ( n>=1 ) 
-		{
-			swap(0, n-1); /* largest of a[0..n-1] */
-
-
-			n = n - 1;
-			/* restore a[1..i-1] heap */
-			downHeap(m_data, 1, n, CompareFunc);
-		} 
-	}
-
-	///non-recursive binary search, assumes sorted array
-	int	findBinarySearch(const T& key) const
-	{
-		int first = 0;
-		int last = size()-1;
-
-		//assume sorted array
-		while (first <= last) {
-			int mid = (first + last) / 2;  // compute mid point.
-			if (key > m_data[mid]) 
-				first = mid + 1;  // repeat search in top half.
-			else if (key < m_data[mid]) 
-				last = mid - 1; // repeat search in bottom half.
-			else
-				return mid;     // found it. return position /////
-		}
-		return size();    // failed to find key
-	}
-
-
-	int	findLinearSearch(const T& key) const
-	{
-		int index=size();
-		int i;
-
-		for (i=0;i<size();i++)
-		{
-			if (m_data[i] == key)
+			/* sort a[0..N-1],  N.B. 0 to N-1 */
+			int k;
+			int n = m_size;
+			for (k = n/2; k > 0; k--) 
 			{
-				index = i;
-				break;
+				downHeap(m_data, k, n, CompareFunc);
+			}
+
+			/* a[1..N] is now a heap */
+			while ( n>=1 ) 
+			{
+				swap(0, n-1); /* largest of a[0..n-1] */
+
+
+				n = n - 1;
+				/* restore a[1..i-1] heap */
+				downHeap(m_data, 1, n, CompareFunc);
+			} 
+		}
+
+		// non-recursive binary search, assumes sorted array
+		int	findBinarySearch(const T& key) const
+		{
+			int first = 0;
+			int last = size()-1;
+
+			//assume sorted array
+			while (first <= last) {
+				int mid = (first + last) / 2;  // compute mid point.
+				if (key > m_data[mid]) 
+					first = mid + 1;  // repeat search in top half.
+				else if (key < m_data[mid]) 
+					last = mid - 1; // repeat search in bottom half.
+				else
+					return mid;     // found it. return position /////
+			}
+			return size();    // failed to find key
+		}
+
+
+		int	findLinearSearch(const T& key) const
+		{
+			int index=size();
+			int i;
+
+			for (i=0;i<size();i++)
+			{
+				if (m_data[i] == key)
+				{
+					index = i;
+					break;
+				}
+			}
+			return index;
+		}
+
+		void	remove(const T& key)
+		{
+
+			int findIndex = findLinearSearch(key);
+			if (findIndex<size())
+			{
+				swap( findIndex, size()-1);
+				pop_back();
 			}
 		}
-		return index;
-	}
 
-	void	remove(const T& key)
-	{
-
-		int findIndex = findLinearSearch(key);
-		if (findIndex<size())
+		//PCK: whole function
+		void initializeFromBuffer(void *buffer, int size, int capacity)
 		{
-			swap( findIndex, size()-1);
-			pop_back();
+			clear();
+			m_ownsMemory = false;
+			m_data = (T*)buffer;
+			m_size = size;
+			m_capacity = capacity;
 		}
-	}
 
-	//PCK: whole function
-	void initializeFromBuffer(void *buffer, int size, int capacity)
-	{
-		clear();
-		m_ownsMemory = false;
-		m_data = (T*)buffer;
-		m_size = size;
-		m_capacity = capacity;
-	}
-
-	void copyFromArray(const btAlignedObjectArray& otherArray)
-	{
-		int otherSize = otherArray.size();
-		resize (otherSize);
-		otherArray.copy(0, otherSize, m_data);
-	}
-
+		void copyFromArray(const btAlignedObjectArray& otherArray)
+		{
+			int otherSize = otherArray.size();
+			resize (otherSize);
+			otherArray.copy(0, otherSize, m_data);
+		}
 };
 
 #endif //BT_OBJECT_ARRAY__

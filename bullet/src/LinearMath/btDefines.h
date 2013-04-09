@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2009 Erwin Coumans  http://bullet.googlecode.com
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -253,15 +253,45 @@ inline int btGetVersion()
 	#endif	//__CELLOS_LV2__
 #endif
 
-#define BT_DECLARE_ALIGNED_ALLOCATOR() \
-   SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes)		{ return btAlignedAlloc(sizeInBytes, 16); }		\
-   SIMD_FORCE_INLINE void  operator delete(void* ptr)			{ btAlignedFree(ptr); }							\
-   SIMD_FORCE_INLINE void* operator new(size_t, void* ptr)		{ return ptr; }									\
-   SIMD_FORCE_INLINE void  operator delete(void*, void*)		{ }												\
-   SIMD_FORCE_INLINE void* operator new[](size_t sizeInBytes)	{ return btAlignedAlloc(sizeInBytes, 16); }		\
-   SIMD_FORCE_INLINE void  operator delete[](void* ptr)			{ btAlignedFree(ptr); }							\
-   SIMD_FORCE_INLINE void* operator new[](size_t, void* ptr)	{ return ptr; }									\
-   SIMD_FORCE_INLINE void  operator delete[](void*, void*)		{ }
+#ifdef BT_DEBUG
+
+	// Declared twice for debugging information that may be passed through.
+	#define BT_DECLARE_ALIGNED_ALLOCATOR() \
+	   SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes, int blockType, const char* pFileName, int nLine)	{ return btDbgAlignedAlloc(sizeInBytes, 16, blockType, pFileName, nLine); }	\
+	   SIMD_FORCE_INLINE void  operator delete(void* ptr, int blockType)											{ btDbgAlignedFree(ptr, blockType); }										\
+	   SIMD_FORCE_INLINE void  operator delete(void* ptr, int blockType, const char* pFileName, int nLine)			{ btDbgAlignedFree(ptr, blockType); }										\
+	   SIMD_FORCE_INLINE void* operator new(size_t, void* ptr, int blockType, const char* pFileName, int nLine)		{ return ptr; }																\
+	   SIMD_FORCE_INLINE void  operator delete(void*, void*, int blockType)											{ }																			\
+	   SIMD_FORCE_INLINE void  operator delete(void*, void*, int blockType, const char* pFileName, int nLine)		{ }																			\
+	   SIMD_FORCE_INLINE void* operator new[](size_t sizeInBytes, int blockType, const char* pFileName, int nLine)	{ return btDbgAlignedAlloc(sizeInBytes, 16, blockType, pFileName, nLine); }	\
+	   SIMD_FORCE_INLINE void  operator delete[](void* ptr, int blockType)											{ return btDbgAlignedFree(ptr, blockType); }								\
+	   SIMD_FORCE_INLINE void  operator delete[](void* ptr, int blockType, const char* pFileName, int nLine)		{ return btDbgAlignedFree(ptr, blockType); }								\
+	   SIMD_FORCE_INLINE void* operator new[](size_t, void* ptr, int blockType, const char* pFileName, int nLine)	{ return ptr; }																\
+	   SIMD_FORCE_INLINE void  operator delete[](void*, void*, int blockType)										{ }																			\
+	   SIMD_FORCE_INLINE void  operator delete[](void*, void*, int blockType, const char* pFileName, int nLine)		{ }																			\
+																																																\
+	   SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes)														{ return btAlignedAlloc(sizeInBytes, 16); }									\
+	   SIMD_FORCE_INLINE void  operator delete(void* ptr)															{ btAlignedFree(ptr); }														\
+	   SIMD_FORCE_INLINE void* operator new(size_t, void* ptr)														{ return ptr; }																\
+	   SIMD_FORCE_INLINE void  operator delete(void*, void*)														{ }																			\
+	   SIMD_FORCE_INLINE void* operator new[](size_t sizeInBytes)													{ return btAlignedAlloc(sizeInBytes, 16); }									\
+	   SIMD_FORCE_INLINE void  operator delete[](void* ptr)															{ btAlignedFree(ptr); }														\
+	   SIMD_FORCE_INLINE void* operator new[](size_t, void* ptr)													{ return ptr; }																\
+	   SIMD_FORCE_INLINE void  operator delete[](void*, void*)														{ }
+
+#else
+
+	#define BT_DECLARE_ALIGNED_ALLOCATOR() \
+	   SIMD_FORCE_INLINE void* operator new(size_t sizeInBytes)		{ return btAlignedAlloc(sizeInBytes, 16); }		\
+	   SIMD_FORCE_INLINE void  operator delete(void* ptr)			{ btAlignedFree(ptr); }							\
+	   SIMD_FORCE_INLINE void* operator new(size_t, void* ptr)		{ return ptr; }									\
+	   SIMD_FORCE_INLINE void  operator delete(void*, void*)		{ }												\
+	   SIMD_FORCE_INLINE void* operator new[](size_t sizeInBytes)	{ return btAlignedAlloc(sizeInBytes, 16); }		\
+	   SIMD_FORCE_INLINE void  operator delete[](void* ptr)			{ btAlignedFree(ptr); }							\
+	   SIMD_FORCE_INLINE void* operator new[](size_t, void* ptr)	{ return ptr; }									\
+	   SIMD_FORCE_INLINE void  operator delete[](void*, void*)		{ }
+
+#endif
 
 ///align a pointer to the provided alignment, upwards
 template <typename T> T* btAlignPointer(T* unalignedPtr, size_t alignment)

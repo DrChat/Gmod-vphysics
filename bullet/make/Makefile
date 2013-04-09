@@ -10,7 +10,7 @@ LINK = /usr/bin/g++
 
 # ------------------------ Compiler Settings ------------------------
 INCLUDES = 
-DEFINES = -DLINUX -D_LINUX -D__linux__ -d__LINUX__ -DNDEBUG
+DEFINES = -DLINUX -D_LINUX -D__linux__ -D__LINUX__ -DNDEBUG -DRELEASE -D_RELEASE
 
 LIBS = -lm
 

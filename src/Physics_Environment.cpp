@@ -56,7 +56,7 @@
 #include "BulletCollision/CollisionDispatch/btSimulationIslandManager.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+#include "tier0/memdbgon.h"
 
 /*****************************
 * MISC. CLASSES
@@ -344,6 +344,8 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pBulletConfiguration;
 	delete m_pBulletGhostCallback;
 
+	delete m_pCollisionSolver;
+
 #if MULTITHREAD
 	deleteCollisionLocalStoreMemory();
 	delete m_pThreadSupportCollision;
@@ -442,8 +444,9 @@ IPhysicsFluidController *CPhysicsEnvironment::CreateFluidController(IPhysicsObje
 	return pFluid;
 }
 
-void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController *tbr) {
-	m_fluids.FindAndRemove((CPhysicsFluidController  *)tbr);
+void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController *pController) {
+	m_fluids.FindAndRemove((CPhysicsFluidController  *)pController);
+	delete (CPhysicsFluidController *)pController;
 }
 
 IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, IPhysicsObject *pObjectEnd, springparams_t *pParams) {

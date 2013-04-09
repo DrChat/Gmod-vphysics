@@ -332,7 +332,7 @@ void   btBvhTriangleMeshShape::setLocalScaling(const btVector3& scaling)
 {
    if ((getLocalScaling() -scaling).length2() > SIMD_EPSILON)
    {
-      btTriangleMeshShape::setLocalScaling(scaling);
+	  btTriangleMeshShape::setLocalScaling(scaling);
 	  buildOptimizedBvh();
    }
 }
@@ -362,7 +362,7 @@ void   btBvhTriangleMeshShape::setOptimizedBvh(btOptimizedBvh* bvh, const btVect
    // update the scaling without rebuilding the bvh
    if ((getLocalScaling() -scaling).length2() > SIMD_EPSILON)
    {
-      btTriangleMeshShape::setLocalScaling(scaling);
+	  btTriangleMeshShape::setLocalScaling(scaling);
    }
 }
 

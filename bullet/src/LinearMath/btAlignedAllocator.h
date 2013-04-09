@@ -21,27 +21,34 @@ subject to the following restrictions:
 ///that is better portable and more predictable
 
 #include "btScalar.h"
-//#define BT_DEBUG_MEMORY_ALLOCATIONS 1
-#ifdef BT_DEBUG_MEMORY_ALLOCATIONS
 
-#define btAlignedAlloc(a, b) \
-		btAlignedAllocInternal(a, b,__LINE__,__FILE__)
-
-#define btAlignedFree(ptr) \
-		btAlignedFreeInternal(ptr,__LINE__,__FILE__)
-
-void*	btAlignedAllocInternal	(size_t size, int alignment, int line, char* filename);
-
-void	btAlignedFreeInternal	(void* ptr, int line, char* filename);
-
-#else
-	void*	btAlignedAllocInternal	(size_t size, int alignment);
-	void	btAlignedFreeInternal	(void* ptr);
-
-	#define btAlignedAlloc(size, alignment) btAlignedAllocInternal(size, alignment)
-	#define btAlignedFree(ptr) btAlignedFreeInternal(ptr)
-
+#if defined(BT_DEBUG) && defined(_MSC_VER)
+	#define BT_DEBUG_MEMORY_ALLOCATIONS
 #endif
+
+#ifdef BT_DEBUG_MEMORY_ALLOCATIONS
+	// Debug versions of the aligned allocator, for CRT debugging, etc.
+	void *	btDbgAlignedAllocInternal(size_t size, int alignment, int blockType, const char *fileName, int line);
+	void	btDbgAlignedFreeInternal(void *ptr, int blockType);
+	
+	#define btDbgAlignedAlloc(size, alignment, blocktype, filename, line) \
+			btDbgAlignedAllocInternal(size, alignment, blocktype, filename, line)
+	
+	#define btDbgAlignedFree(ptr, blocktype) \
+			btDbgAlignedFreeInternal(ptr, blocktype)
+
+	typedef void *(btDbgAlignedAllocFunc)(size_t size, int alignment, int blockType, const char *fileName, int line);
+	typedef void  (btDbgAlignedFreeFunc)(void *memblock, int blockType);
+	typedef void *(btDbgAllocFunc)(size_t size, int blockType, const char *fileName, int line);
+	typedef void  (btDbgFreeFunc)(void *memblock, int blockType);
+#endif
+
+void*	btAlignedAllocInternal(size_t size, int alignment);
+void	btAlignedFreeInternal(void* ptr);
+
+#define btAlignedAlloc(size, alignment) btAlignedAllocInternal(size, alignment)
+#define btAlignedFree(ptr) btAlignedFreeInternal(ptr)
+
 typedef int	size_type;
 
 typedef void *(btAlignedAllocFunc)(size_t size, int alignment);

@@ -92,9 +92,9 @@ static void *threadFunction(void *argument)
 	PosixThreadSupport::btSpuStatus* status = (PosixThreadSupport::btSpuStatus*)argument;
 
 	
-	while (1)
+	while (true)
 	{
-			checkPThreadFunction(sem_wait(status->startSemaphore));
+		checkPThreadFunction(sem_wait(status->startSemaphore));
 		
 		void* userPtr = status->m_userPtr;
 
@@ -123,37 +123,17 @@ static void *threadFunction(void *argument)
 ///send messages to SPUs
 void PosixThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiArgument0, uint32_t taskId)
 {
-	///	gMidphaseSPU.sendRequest(CMD_GATHER_AND_PROCESS_PAIRLIST, (uint32_t) &taskDesc);
-	
 	///we should spawn an SPU task here, and in 'waitForResponse' it should wait for response of the (one of) the first tasks that finished
-	
+	btSpuStatus&	spuStatus = m_activeSpuStatus[taskId];
+	btAssert(taskId >= 0);
+	btAssert(taskId < m_activeSpuStatus.size());
 
+	spuStatus.m_commandId = uiCommand;
+	spuStatus.m_status = 1;
+	spuStatus.m_userPtr = (void*)uiArgument0;
 
-	switch (uiCommand)
-	{
-	case 	CMD_GATHER_AND_PROCESS_PAIRLIST:
-		{
-			btSpuStatus&	spuStatus = m_activeSpuStatus[taskId];
-			btAssert(taskId >= 0);
-			btAssert(taskId < m_activeSpuStatus.size());
-
-			spuStatus.m_commandId = uiCommand;
-			spuStatus.m_status = 1;
-			spuStatus.m_userPtr = (void*)uiArgument0;
-
-			// fire event to start new task
-			checkPThreadFunction(sem_post(spuStatus.startSemaphore));
-			break;
-		}
-	default:
-		{
-			///not implemented
-			btAssert(0);
-		}
-
-	};
-
-
+	// fire event to start new task
+	checkPThreadFunction(sem_post(spuStatus.startSemaphore));
 }
 
 

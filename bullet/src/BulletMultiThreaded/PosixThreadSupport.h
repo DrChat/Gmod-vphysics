@@ -23,15 +23,13 @@ subject to the following restrictions:
 #ifdef USE_PTHREADS //platform specifc defines are defined in PlatformDefinitions.h
 
 #ifndef _XOPEN_SOURCE
-#define _XOPEN_SOURCE 600 //for definition of pthread_barrier_t, see http://pages.cs.wisc.edu/~travitch/pthreads_primer.html
+	#define _XOPEN_SOURCE 600 //for definition of pthread_barrier_t, see http://pages.cs.wisc.edu/~travitch/pthreads_primer.html
 #endif //_XOPEN_SOURCE
+
 #include <pthread.h>
 #include <semaphore.h>
 
-
-
 #include "LinearMath/btAlignedObjectArray.h"
-
 #include "btThreadSupportInterface.h"
 
 
@@ -59,8 +57,8 @@ public:
 		void*	m_userPtr; //for taskDesc etc
 		void*	m_lsMemory; //initialized using PosixLocalStoreMemorySetupFunc
 
-				pthread_t thread;
-				sem_t* startSemaphore;
+		pthread_t thread;
+		sem_t* startSemaphore;
 
 		unsigned long threadUsed;
 	};

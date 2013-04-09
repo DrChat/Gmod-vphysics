@@ -11,7 +11,7 @@
 #include "tier0/vprof.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
-//#include "tier0/memdbgon.h"
+#include "tier0/memdbgon.h"
 
 #define COLLISION_MARGIN 0.004 // 4 mm
 
@@ -157,6 +157,12 @@ CPhysConvex *CPhysicsCollision::OptimizeConvex(CPhysConvex *pConvex) {
 
 		btShapeHull *pHull = new btShapeHull(pConvexHull);
 		pHull->buildHull(pConvexHull->getMargin());
+		// AKA Failed.
+		if (pHull->numVertices() <= 0) {
+			delete pHull;
+			return NULL;
+		}
+
 		btConvexHullShape *pOptimizedConvex = new btConvexHullShape((btScalar *)pHull->getVertexPointer(), pHull->numVertices());
 		pOptimizedConvex->setMargin(pConvexHull->getMargin());
 		delete pHull;
@@ -255,6 +261,8 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 	if (!pCollide) return;
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
+
+	// TODO: Detect and delete triangle mesh shapes in a special way.
 
 	// Compound shape? Delete all of it's children.
 	if (pShape->isCompound()) {
@@ -686,10 +694,10 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		const compactsurfaceheader_t *surfaceheader = (compactsurfaceheader_t *)pOutput->solids[i];
 		const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
-		if (surfaceheader->vphysicsID != MAKEID('V', 'P', 'H', 'Y')
-		 || surfaceheader->version != 0x100
-		 || surfaceheader->modelType != 0x0
-		 || ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) {
+		if (surfaceheader->vphysicsID	!= MAKEID('V', 'P', 'H', 'Y')
+		 || surfaceheader->version		!= 0x100
+		 || surfaceheader->modelType	!= 0x0
+		 || ivpsurface->dummy[2]		!= MAKEID('I', 'V', 'P', 'S')) {
 			Warning("VPhysics: Could not load mesh! (bad/unsupported file format)");
 			pOutput->solids[i] = NULL;
 			continue;
@@ -759,7 +767,7 @@ void CPhysicsCollision::VCollideUnload(vcollide_t *pVCollide) {
 	delete [] pVCollide->solids;
 	pVCollide->solids = NULL;
 
-	delete pVCollide->pKeyValues;
+	delete [] pVCollide->pKeyValues;
 	pVCollide->pKeyValues = NULL;
 }
 
@@ -830,7 +838,6 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
 	}
 
-	// FIXME: MEMORY LEAK - Find out where to delete this.
 	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(btmesh, true);
 	bull->setMargin(COLLISION_MARGIN);
 	return (CPhysCollide *)bull;
