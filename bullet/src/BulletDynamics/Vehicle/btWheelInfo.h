@@ -88,7 +88,7 @@ struct btWheelInfo
 
 	btScalar	m_brake;
 	
-	bool m_bIsFrontWheel;
+	bool		m_bIsFrontWheel;
 	
 	void*		m_clientInfo;//can be used to store pointer to sync transforms...
 

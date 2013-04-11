@@ -16,25 +16,25 @@ BULLET_MAKEFILE_DIR = ../bullet/make
 
 # Compilation Configuration
 INCLUDES = \
-	-I../include \
-	-I$(SOURCE_SDK)/public \
-	-I$(SOURCE_SDK)/public/tier0 \
-	-I$(SOURCE_SDK)/public/tier1 \
+	-I../include 					\
+	-I$(SOURCE_SDK)/public 			\
+	-I$(SOURCE_SDK)/public/tier0 	\
+	-I$(SOURCE_SDK)/public/tier1 	\
 	-I$(BULLET_SDK)/src
 	
 STATICLIBDIRS = \
 	-L../build/lib/linux/Release
 	
 STATICLIBS = \
-	-lBulletSoftBody \
-	-lBulletDynamics \
-	-lBulletCollision \
+	-lBulletSoftBody 	\
+	-lBulletDynamics 	\
+	-lBulletCollision 	\
 	-lLinearMath
 	
 DYNAMICLIBS = \
-	$(SOURCE_SDK)/lib/linux/tier1_i486.a \
-	$(SOURCE_SDK)/lib/linux/mathlib_i486.a \
-	$(SRCDS_BIN_DIR)/libvstdlib_srv.so \
+	$(SOURCE_SDK)/lib/linux/tier1_i486.a 	\
+	$(SOURCE_SDK)/lib/linux/mathlib_i486.a 	\
+	$(SRCDS_BIN_DIR)/libvstdlib_srv.so 		\
 	$(SRCDS_BIN_DIR)/libtier0_srv.so
 		
 CC = /usr/bin/g++-3.4

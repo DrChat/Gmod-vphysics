@@ -42,7 +42,7 @@ static void btDbgFreeDefault(void *ptr, int blockType)
 static btDbgAllocFunc *sDbgAllocFunc = btDbgAllocDefault;
 static btDbgFreeFunc *sDbgFreeFunc = btDbgFreeDefault;
 
-#endif
+#else
 
 static void *btAllocDefault(size_t size)
 {
@@ -57,36 +57,11 @@ static void btFreeDefault(void *ptr)
 static btAllocFunc *sAllocFunc = btAllocDefault;
 static btFreeFunc *sFreeFunc = btFreeDefault;
 
+#endif
+
 /*****************************
 * ALIGNED ALLOCATOR FUNCTIONS
 *****************************/
-
-#if defined (BT_HAS_ALIGNED_ALLOCATOR)
-
-#include <malloc.h>
-static void *btAlignedAllocDefault(size_t size, int alignment)
-{
-	return _aligned_malloc(size, (size_t)alignment);
-}
-
-static void btAlignedFreeDefault(void *ptr)
-{
-	_aligned_free(ptr);
-}
-#elif defined(__CELLOS_LV2__)
-#include <stdlib.h>
-
-static inline void *btAlignedAllocDefault(size_t size, int alignment)
-{
-	return memalign(alignment, size);
-}
-
-static inline void btAlignedFreeDefault(void *ptr)
-{
-	free(ptr);
-}
-
-#else // !BT_HAS_ALIGNED_ALLOCATOR && !__CELLOS_LV2__
 
 #if defined(BT_DEBUG_MEMORY_ALLOCATIONS)
 
@@ -122,7 +97,34 @@ static inline void btDbgAlignedFreeDefault(void *ptr, int blockType)
 static btDbgAlignedAllocFunc *sDbgAlignedAllocFunc = btDbgAlignedAllocDefault;
 static btDbgAlignedFreeFunc *sDbgAlignedFreeFunc = btDbgAlignedFreeDefault;
 
-#endif // BT_DEBUG_MEMORY_ALLOCATIONS
+#else // !BT_DEBUG_MEMORY_ALLOCATIONS
+
+#if defined (BT_HAS_ALIGNED_ALLOCATOR)
+
+#include <malloc.h>
+static void *btAlignedAllocDefault(size_t size, int alignment)
+{
+	return _aligned_malloc(size, (size_t)alignment);
+}
+
+static void btAlignedFreeDefault(void *ptr)
+{
+	_aligned_free(ptr);
+}
+#elif defined(__CELLOS_LV2__)
+#include <stdlib.h>
+
+static inline void *btAlignedAllocDefault(size_t size, int alignment)
+{
+	return memalign(alignment, size);
+}
+
+static inline void btAlignedFreeDefault(void *ptr)
+{
+	free(ptr);
+}
+
+#else // !BT_HAS_ALIGNED_ALLOCATOR && !__CELLOS_LV2__
 
 static inline void *btAlignedAllocDefault(size_t size, int alignment)
 {
@@ -155,20 +157,7 @@ static inline void btAlignedFreeDefault(void *ptr)
 
 #endif // !BT_HAS_ALIGNED_ALLOCATOR && !__CELLOS_LV2__
 
-static btAlignedAllocFunc *sAlignedAllocFunc = btAlignedAllocDefault;
-static btAlignedFreeFunc *sAlignedFreeFunc = btAlignedFreeDefault;
-
-void btAlignedAllocSetCustomAligned(btAlignedAllocFunc *allocFunc, btAlignedFreeFunc *freeFunc)
-{
-	sAlignedAllocFunc = allocFunc ? allocFunc : btAlignedAllocDefault;
-	sAlignedFreeFunc = freeFunc ? freeFunc : btAlignedFreeDefault;
-}
-
-void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc)
-{
-	sAllocFunc = allocFunc ? allocFunc : btAllocDefault;
-	sFreeFunc = freeFunc ? freeFunc : btFreeDefault;
-}
+#endif // !BT_DEBUG_MEMORY_ALLOCATIONS
 
 // this generic allocator provides the total allocated number of bytes
 
@@ -192,7 +181,22 @@ void btDbgAlignedFreeInternal(void *ptr, int blockType)
 	sDbgAlignedFreeFunc(ptr, blockType);
 }
 
-#endif // BT_DEBUG_MEMORY_ALLOCATIONS
+#else // BT_DEBUG_MEMORY_ALLOCATIONS
+
+static btAlignedAllocFunc *sAlignedAllocFunc = btAlignedAllocDefault;
+static btAlignedFreeFunc *sAlignedFreeFunc = btAlignedFreeDefault;
+
+void btAlignedAllocSetCustomAligned(btAlignedAllocFunc *allocFunc, btAlignedFreeFunc *freeFunc)
+{
+	sAlignedAllocFunc = allocFunc ? allocFunc : btAlignedAllocDefault;
+	sAlignedFreeFunc = freeFunc ? freeFunc : btAlignedFreeDefault;
+}
+
+void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc)
+{
+	sAllocFunc = allocFunc ? allocFunc : btAllocDefault;
+	sFreeFunc = freeFunc ? freeFunc : btFreeDefault;
+}
 
 void *btAlignedAllocInternal(size_t size, int alignment)
 {
@@ -214,3 +218,5 @@ void btAlignedFreeInternal(void* ptr)
 //	printf("btAlignedFreeInternal %x\n", ptr);
 	sAlignedFreeFunc(ptr);
 }
+
+#endif

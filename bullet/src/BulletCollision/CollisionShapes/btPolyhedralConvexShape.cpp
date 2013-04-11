@@ -318,7 +318,7 @@ bool	btPolyhedralConvexShape::initializePolyhedralFeatures(int shiftVerticesByMa
 }
 
 #ifndef MIN
-    #define MIN(_a, _b)     ((_a) < (_b) ? (_a) : (_b))
+	#define MIN(_a, _b)     ((_a) < (_b) ? (_a) : (_b))
 #endif
 
 btVector3	btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const btVector3& vec0)const
@@ -344,19 +344,19 @@ btVector3	btPolyhedralConvexShape::localGetSupportingVertexWithoutMargin(const b
 	btVector3 vtx;
 	btScalar newDot;
 
-    for( int k = 0; k < getNumVertices(); k += 128 )
-    {
-        btVector3 temp[128];
-        int inner_count = MIN(getNumVertices() - k, 128);
-        for( i = 0; i < inner_count; i++ )
-            getVertex(i, temp[i]); 
-        i = (int) vec.maxDot( temp, inner_count, newDot);
+	for( int k = 0; k < getNumVertices(); k += 128 )
+	{
+		btVector3 temp[128];
+		int inner_count = MIN(getNumVertices() - k, 128);
+		for( i = 0; i < inner_count; i++ )
+			getVertex(i, temp[i]); 
+		i = (int) vec.maxDot( temp, inner_count, newDot);
 		if (newDot > maxDot)
 		{
 			maxDot = newDot;
 			supVec = temp[i];
 		}        
-    }
+	}
 	
 #endif //__SPU__
 	return supVec;
@@ -379,22 +379,22 @@ void	btPolyhedralConvexShape::batchedUnitVectorGetSupportingVertexWithoutMargin(
 
 	for (int j=0;j<numVectors;j++)
 	{
-        const btVector3& vec = vectors[j];
-        
-        for( int k = 0; k < getNumVertices(); k += 128 )
-        {
-            btVector3 temp[128];
-            int inner_count = MIN(getNumVertices() - k, 128);
-            for( i = 0; i < inner_count; i++ )
-                getVertex(i, temp[i]); 
-            i = (int) vec.maxDot( temp, inner_count, newDot);
-            if (newDot > supportVerticesOut[j][3])
-            {
+		const btVector3& vec = vectors[j];
+		
+		for( int k = 0; k < getNumVertices(); k += 128 )
+		{
+			btVector3 temp[128];
+			int inner_count = MIN(getNumVertices() - k, 128);
+			for( i = 0; i < inner_count; i++ )
+				getVertex(i, temp[i]); 
+			i = (int) vec.maxDot( temp, inner_count, newDot);
+			if (newDot > supportVerticesOut[j][3])
+			{
 				supportVerticesOut[j] = temp[i];
 				supportVerticesOut[j][3] = newDot;
-            }        
-        }
-    }
+			}        
+		}
+	}
 
 #endif //__SPU__
 }

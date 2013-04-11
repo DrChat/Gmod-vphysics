@@ -20,7 +20,7 @@
 	#define DEBUG_DRAW 1
 #endif
 
-#define SLEEP_LINEAR_THRESHOLD 0.3 // m/s
+#define SLEEP_LINEAR_THRESHOLD 0.1 // m/s
 #define SLEEP_ANGULAR_THRESHOLD 0.4 // rad/s
 
 #define NOT_IMPLEMENTED				DevWarning("VPhysics UNIMPLEMENTED: %s (%s:%u)\n", __FUNCTION__, __FILE__, __LINE__);

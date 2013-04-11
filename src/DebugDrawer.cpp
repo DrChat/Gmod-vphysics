@@ -13,17 +13,17 @@
 #if RENDER_SDL
 #	include <SDL.h>
 #	include <SDL_opengl.h>
-#endif
+#endif // RENDER_SDL
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #if DEBUG_DRAW
-#	if RENDER_SDL
-#		pragma comment(lib, "SDL")
-#		pragma comment(lib, "OpenGL32")
-#		pragma comment(lib, "Glu32")
-#	endif
+#if RENDER_SDL
+#	pragma comment(lib, "SDL")
+#	pragma comment(lib, "OpenGL32")
+#	pragma comment(lib, "Glu32")
+#endif // RENDER_SDL
 
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
 static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)");
@@ -59,12 +59,16 @@ CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) :
 	m_world = world;
 	m_world->setDebugDrawer(this);
 
+#ifndef BT_NO_PROFILE
 	m_pProfIterator = CProfileManager::Get_Iterator();
+#endif
 }
 
 CDebugDrawer::~CDebugDrawer() {
 	m_world->setDebugDrawer(NULL);
+#ifndef BT_NO_PROFILE
 	CProfileManager::Release_Iterator(m_pProfIterator);
+#endif
 
 #if RENDER_SDL
 	SDL_FreeSurface(m_pDisplay);

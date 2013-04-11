@@ -29,6 +29,17 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 		const vehicleparams_t &				GetVehicleParams() { return m_vehicleParams; }
 		vehicleparams_t &					GetVehicleParamsForChange() { return m_vehicleParams; }
 
+		// Updates the internal vehicle without calculating anything related to controls.
+		// Use this instead of Update if your car has manual handling.
+		void								UpdateVehicle(float dt);
+
+		// force in kg*in/s
+		void								SetWheelForce(int wheelIndex, float force);
+		void								SetWheelBrake(int wheelIndex, float brakeVal);
+		// steerVal is in degrees!
+		void								SetWheelSteering(int wheelIndex, float steerVal);
+
+		// Default vehicle handling...
 		void								Update(float dt, vehicle_controlparams_t &controls);
 		float								UpdateBooster(float dt);
 		int									GetWheelCount();
@@ -68,13 +79,6 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 
 		// To be exposed functions
 		CPhysicsObject *					AddWheel();
-
-		// New handling code
-		// force in kg*in/s
-		void								SetWheelForce(int wheelIndex, float force);
-		void								SetWheelBrake(int wheelIndex, float brakeVal);
-		// steerVal is in degrees!
-		void								SetWheelSteering(int wheelIndex, float steerVal);
 	private:
 		vehicleparams_t						m_vehicleParams;
 		vehicle_operatingparams_t			m_vehicleState;
@@ -89,7 +93,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 		bool								m_bSlipperyWheels;
 
 		btVehicleRaycaster *				m_pRaycaster;
-		btRaycastVehicle *					m_pRaycastVehicle;
+		btRaycastVehicle *					m_pVehicle;
 		btRaycastVehicle::btVehicleTuning	m_tuning;
 };
 

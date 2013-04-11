@@ -197,15 +197,15 @@ void CPhysicsVehicleController::InitBullVehicle() {
 	else
 		Assert(0);
 
-	m_pRaycastVehicle = new btRaycastVehicle(m_tuning, m_pBody->GetObject(), m_pRaycaster);
-	m_pRaycastVehicle->setCoordinateSystem(0, 1, 2);
-	m_pEnv->GetBulletEnvironment()->addAction(m_pRaycastVehicle);
+	m_pVehicle = new btRaycastVehicle(m_tuning, m_pBody->GetObject(), m_pRaycaster);
+	m_pVehicle->setCoordinateSystem(0, 1, 2);
+	m_pEnv->GetBulletEnvironment()->addAction(m_pVehicle);
 
 	InitCarWheels();
 }
 
 void CPhysicsVehicleController::ShutdownBullVehicle() {
-	m_pEnv->GetBulletEnvironment()->removeAction(m_pRaycastVehicle);
+	m_pEnv->GetBulletEnvironment()->removeAction(m_pVehicle);
 
 	for (int i = 0; i < m_iWheelCount; i++) {
 		m_pEnv->DestroyObject(m_pWheels[i]);
@@ -213,7 +213,7 @@ void CPhysicsVehicleController::ShutdownBullVehicle() {
 	}
 
 	delete m_pRaycaster;
-	delete m_pRaycastVehicle;
+	delete m_pVehicle;
 }
 
 void CPhysicsVehicleController::InitCarWheels() {
@@ -294,7 +294,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	bullSuspensionRestLength = axle.wheels.springAdditionalLength;
 	bullWheelRadius = axle.wheels.radius;
 
-	btWheelInfo &wheelInfo = m_pRaycastVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
+	btWheelInfo &wheelInfo = m_pVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
 	// FIXME: frictionScale is UNUSED (or we're not parsing something correctly)!
 	//wheelInfo.m_frictionSlip = axle.wheels.frictionScale;
@@ -302,7 +302,45 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();
 	wheelInfo.m_suspensionStiffness = axle.suspension.springConstant;
 
+	wheelInfo.m_clientInfo = pWheel;
+
 	return pWheel;
+}
+
+void CPhysicsVehicleController::UpdateVehicle(float dt) {
+	m_pVehicle->updateVehicle(dt);
+}
+
+// Bullet appears to take force in newtons. Correct this if it's wrong.
+void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+
+	// convert from kg*in/s to kg*m/s
+	force *= METERS_PER_INCH;
+	m_pVehicle->applyEngineForce(force, wheelIndex);
+}
+
+void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+
+	// convert from kg*in/s to kg*m/s
+	brakeVal *= METERS_PER_INCH;
+	m_pVehicle->setBrake(brakeVal, wheelIndex);
+}
+
+void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal) {
+	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
+		Assert(0);
+		return;
+	}
+
+	m_pVehicle->setSteeringValue(DEG2RAD(steerVal), wheelIndex);
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls) {
@@ -318,7 +356,7 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 	UpdateEngine(controls, dt);
 	UpdateWheels(controls, dt);
 
-	m_pRaycastVehicle->updateVehicle(dt);
+	m_pVehicle->updateVehicle(dt);
 }
 
 void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls, float dt) {
@@ -329,14 +367,14 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 	m_vehicleState.steeringAngle = steeringVal;
 
 	for (int i = 0; i < m_iWheelCount; i++) {
-		if (m_pRaycastVehicle->getWheelInfo(i).m_bIsFrontWheel)
-			m_pRaycastVehicle->setSteeringValue(DEG2RAD(-steeringVal), i);
+		if (m_pVehicle->getWheelInfo(i).m_bIsFrontWheel)
+			m_pVehicle->setSteeringValue(DEG2RAD(-steeringVal), i);
 	}
 }
 
 void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, float dt) {
 	// Update the operating params
-	float fSpeed = m_pRaycastVehicle->getCurrentSpeedKmHour();
+	float fSpeed = m_pVehicle->getCurrentSpeedKmHour();
 	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(-fSpeed));
 
 	CalcEngineTransmission(controls, dt);
@@ -345,7 +383,7 @@ void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, 
 
 void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, float dt) {
 	for (int i = 0; i < m_iWheelCount; i++) {
-		btTransform bullTransform = m_pRaycastVehicle->getWheelTransformWS(i);
+		btTransform bullTransform = m_pVehicle->getWheelTransformWS(i);
 		btVector3 bullPos = bullTransform.getOrigin();
 		btQuaternion bullRot = bullTransform.getRotation();
 
@@ -371,7 +409,7 @@ void CPhysicsVehicleController::CalcEngineTransmission(vehicle_controlparams_t &
 	// throttle goes forward and backward, [-1, 1]
 	// brake_val [0..1]
 
-	float absSpeed = fabs(KMH2MS(m_pRaycastVehicle->getCurrentSpeedKmHour()));
+	float absSpeed = fabs(KMH2MS(m_pVehicle->getCurrentSpeedKmHour()));
 
 	const static int secondsPerMinute = 60;
 
@@ -379,7 +417,7 @@ void CPhysicsVehicleController::CalcEngineTransmission(vehicle_controlparams_t &
 		// Estimate the engine RPM
 		float avgRotSpeed = 0;
 		for (int i = 0; i < m_iWheelCount; i++) {
-			btWheelInfo wheelInfo = m_pRaycastVehicle->getWheelInfo(i);
+			btWheelInfo wheelInfo = m_pVehicle->getWheelInfo(i);
 
 			float rotSpeed = fabs(wheelInfo.m_deltaRotation / dt);
 			avgRotSpeed += rotSpeed;
@@ -417,7 +455,7 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 	// FIXME: Forces are in NEWTONS!
 	if (fabs(controls.throttle) > 1e-4) {
 		for (int i = 0; i < m_iWheelCount; i++) {
-			m_pRaycastVehicle->setBrake(0, i);
+			m_pVehicle->setBrake(0, i);
 		}
 
 		const static int watt_per_hp = 745;
@@ -434,12 +472,12 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 			float wheelForce = force * m_vehicleParams.axles[i].torqueFactor * m_vehicleParams.axles[i].wheels.radius;
 
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
-				m_pRaycastVehicle->applyEngineForce(wheelForce, wheelIndex);
+				m_pVehicle->applyEngineForce(wheelForce, wheelIndex);
 			}
 		}
 	} else if (fabs(controls.brake) > 1e-4) {
 		for (int i = 0; i < m_iWheelCount; i++) {
-			m_pRaycastVehicle->applyEngineForce(0, i);
+			m_pVehicle->applyEngineForce(0, i);
 		}
 
 		// float wheel_force_by_brake = brake_val * m_gravityLength * ( m_bodyMass + m_totalWheelMass );
@@ -449,12 +487,12 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
 			float wheelForce = 0.5f * brakeForce * m_vehicleParams.axles[i].brakeFactor * m_vehicleParams.axles[i].wheels.radius;
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
-				m_pRaycastVehicle->setBrake(wheelForce, wheelIndex);
+				m_pVehicle->setBrake(wheelForce, wheelIndex);
 			}
 		}
 	} else {
 		for (int i = 0; i < m_iWheelCount; i++) {
-			m_pRaycastVehicle->applyEngineForce(0, i);
+			m_pVehicle->applyEngineForce(0, i);
 		}
 	}
 }
@@ -476,7 +514,7 @@ IPhysicsObject *CPhysicsVehicleController::GetWheel(int index) {
 bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps) {
 	if ((index >= m_iWheelCount || index < 0) || (!pContactPoint && !pSurfaceProps)) return false;
 
-	btWheelInfo wheelInfo = m_pRaycastVehicle->getWheelInfo(index);
+	btWheelInfo wheelInfo = m_pVehicle->getWheelInfo(index);
 	if (wheelInfo.m_raycastInfo.m_isInContact) {
 		btVector3 bullContactVec = wheelInfo.m_raycastInfo.m_contactPointWS;
 		btCollisionObject *body = (btCollisionObject *)wheelInfo.m_raycastInfo.m_groundObject;
@@ -500,7 +538,8 @@ void CPhysicsVehicleController::SetSpringLength(int wheelIndex, float length) {
 		return;
 	}
 
-	NOT_IMPLEMENTED
+	btScalar bullDist = ConvertDistanceToBull(length);
+	m_pVehicle->getWheelInfo(wheelIndex).m_suspensionRestLength1 = bullDist;
 }
 
 void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction) {
@@ -509,7 +548,7 @@ void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction)
 		return;
 	}
 
-	NOT_IMPLEMENTED
+	m_pVehicle->getWheelInfo(wheelIndex).m_frictionSlip = friction;
 }
 
 void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem) {
@@ -521,7 +560,7 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 
 	// wheel stuff
 	for (int i = 0; i < m_iWheelCount; i++) {
-		btWheelInfo &wheelInfo = m_pRaycastVehicle->getWheelInfo(i);
+		btWheelInfo &wheelInfo = m_pVehicle->getWheelInfo(i);
 
 		btVector3 wheelPos = wheelInfo.m_worldTransform.getOrigin();
 		debugCarSystem.vecWheelPos[i].x = wheelPos.x();
@@ -540,42 +579,6 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 void CPhysicsVehicleController::VehicleDataReload() {
 	// What do?
 	NOT_IMPLEMENTED
-}
-
-/******
-* NEW HANDLING FUNCTIONS
-******/
-
-// force appears to be in newtons. Correct this if it's wrong.
-void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
-	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
-		Assert(0);
-		return;
-	}
-
-	// convert from kg*in/s to kg*m/s
-	force *= METERS_PER_INCH;
-	m_pRaycastVehicle->applyEngineForce(force, wheelIndex);
-}
-
-void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
-	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
-		Assert(0);
-		return;
-	}
-
-	// convert from kg*in/s to kg*m/s
-	brakeVal *= METERS_PER_INCH;
-	m_pRaycastVehicle->setBrake(brakeVal, wheelIndex);
-}
-
-void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal) {
-	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
-		Assert(0);
-		return;
-	}
-
-	m_pRaycastVehicle->setSteeringValue(DEG2RAD(steerVal), wheelIndex);
 }
 
 /****************************

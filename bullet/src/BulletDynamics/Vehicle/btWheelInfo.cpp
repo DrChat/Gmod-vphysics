@@ -14,9 +14,7 @@
 
 btScalar btWheelInfo::getSuspensionRestLength() const
 {
-
 	return m_suspensionRestLength1;
-
 }
 
 void	btWheelInfo::updateWheel(const btRigidBody& chassis, RaycastInfo& raycastInfo)
@@ -25,7 +23,6 @@ void	btWheelInfo::updateWheel(const btRigidBody& chassis, RaycastInfo& raycastIn
 
 	
 	if (m_raycastInfo.m_isInContact)
-
 	{
 		btScalar	project= m_raycastInfo.m_contactNormalWS.dot( m_raycastInfo.m_wheelDirectionWS );
 		btVector3	 chassis_velocity_at_contactPoint;
@@ -43,9 +40,7 @@ void	btWheelInfo::updateWheel(const btRigidBody& chassis, RaycastInfo& raycastIn
 			m_suspensionRelativeVelocity = projVel * inv;
 			m_clippedInvContactDotSuspension = inv;
 		}
-		
 	}
-
 	else	// Not in contact : position wheel in a nice (rest length) position
 	{
 		m_raycastInfo.m_suspensionLength = this->getSuspensionRestLength();

@@ -1012,7 +1012,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 		{
 			btSolverBody& solverBody = m_tmpSolverBodyPool[bodyId];
 			btVector3 gyroForce (0, 0, 0);
-			if (body->getFlags()&BT_ENABLE_GYROPSCOPIC_FORCE)
+			if (body->getFlags() & BT_ENABLE_GYROPSCOPIC_FORCE)
 			{
 				gyroForce = body->computeGyroscopicForce(infoGlobal.m_maxGyroscopicForce);
 			}
@@ -1092,9 +1092,6 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 
 					btSolverBody* bodyAPtr = &m_tmpSolverBodyPool[solverBodyIdA];
 					btSolverBody* bodyBPtr = &m_tmpSolverBodyPool[solverBodyIdB];
-
-
-
 
 					int overrideNumSolverIterations = constraint->getOverrideNumSolverIterations() > 0 ? constraint->getOverrideNumSolverIterations() : infoGlobal.m_numIterations;
 					if (overrideNumSolverIterations>m_maxOverrideNumSolverIterations)
@@ -1425,7 +1422,8 @@ btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration
 
 			}			
 		}
-	} else
+	}
+	else
 	{
 		//non-SIMD version
 		///solve all joint constraints
@@ -1436,7 +1434,7 @@ btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration
 				resolveSingleConstraintRowGeneric(m_tmpSolverBodyPool[constraint.m_solverBodyIdA], m_tmpSolverBodyPool[constraint.m_solverBodyIdB], constraint);
 		}
 
-		if (iteration< infoGlobal.m_numIterations)
+		if (iteration < infoGlobal.m_numIterations)
 		{
 			for (int j=0;j<numConstraints;j++)
 			{

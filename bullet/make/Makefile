@@ -30,15 +30,13 @@ BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/Gimpact/*.cpp)
 BULLETCOLLISION_SRCS += $(wildcard $(BULLETCOLLISION_DIR)/NarrowPhaseCollision/*.cpp)
 
 BULLETCOLLISION_OBJS := $(BULLETCOLLISION_SRCS:.cpp=.o)
-BULLETCOLLISION_OBJS := $(subst $(BULLET_SRC_DIR), $(BULLET_OUT_DIR), $(BULLETCOLLISION_OBJS))
+BULLETCOLLISION_OBJS := $(addprefix $(BULLET_OBJ_DIR)/BulletCollision/, $(notdir $(BULLETCOLLISION_OBJS)))
 
-BulletCollision:
+BulletCollision: $(BULLETCOLLISION_OBJS)
 	@echo " + Linking BulletCollision..."
-	@for obj in $(BULLETCOLLISION_OBJS); do	\
-		echo $$obj;							\
-	done
 	
-$(BULLETCOLLISION_OBJS):
+$(dir $(BULLETCOLLISION_OBJS))/%.o: $(dir $(BULLETCOLLISION_SRCS))/%.cpp
+	@echo " + Compiling '$<'"
 
 # ------------------------ BulletDynamics ------------------------
 BULLETDYNAMICS_DIR = $(BULLET_SRC_DIR)/BulletDynamics

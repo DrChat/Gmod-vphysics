@@ -114,18 +114,14 @@ ATTRIBUTE_ALIGNED128(struct) PfxSolverBody {
 #else
 ATTRIBUTE_ALIGNED16(struct) PfxSolverBody {
 #endif
-	vmVector3 mDeltaLinearVelocity;
-	vmVector3 mDeltaAngularVelocity;
-	vmMatrix3 mInertiaInv;
-	vmQuat    mOrientation;
-	float   mMassInv;
-	float   friction;
-	float   restitution;
-	float   unused;
-	float   unused2;
-	float   unused3;
-	float   unused4;
-	float   unused5;
+	vmVector3	mDeltaLinearVelocity;
+	vmVector3	mDeltaAngularVelocity;
+	vmMatrix3	mInertiaInv;
+	vmQuat		mOrientation;
+	float		mMassInv;
+	float		friction;
+	float		restitution;
+	float		unused;
 };
 
 
@@ -263,23 +259,23 @@ void*	SolverlsMemoryFunc();
 class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver
 {
 	
-protected:
-	struct btParallelSolverMemoryCache*	m_memoryCache;
-
-	class btThreadSupportInterface*	m_solverThreadSupport;
-
-	struct btConstraintSolverIO* m_solverIO;
-	class btBarrier*			m_barrier;
-	class btCriticalSection*	m_criticalSection;
-
-
-public:
-
-	btParallelConstraintSolver(class btThreadSupportInterface* solverThreadSupport);
+	protected:
+		struct btParallelSolverMemoryCache*	m_memoryCache;
 	
-	virtual ~btParallelConstraintSolver();
-
-	virtual btScalar solveGroup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifold, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& info, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher);
+		class btThreadSupportInterface*	m_solverThreadSupport;
+	
+		struct btConstraintSolverIO* m_solverIO;
+		class btBarrier*			m_barrier;
+		class btCriticalSection*	m_criticalSection;
+	
+	
+	public:
+	
+		btParallelConstraintSolver(class btThreadSupportInterface* solverThreadSupport);
+		
+		virtual ~btParallelConstraintSolver();
+	
+		virtual btScalar solveGroup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifold, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& info, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher);
 
 };
 

@@ -294,14 +294,15 @@ inline int btGetVersion()
 #endif
 
 ///align a pointer to the provided alignment, upwards
-template <typename T> T* btAlignPointer(T* unalignedPtr, size_t alignment)
+template <typename T>
+T *btAlignPointer(T *unalignedPtr, size_t alignment)
 {
 		
 	struct btConvertPointerSizeT
 	{
 		union 
 		{
-				T* ptr;
+				T *ptr;
 				size_t integer;
 		};
 	};

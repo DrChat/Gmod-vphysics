@@ -16,9 +16,10 @@
 /// btVehicleRaycaster is provides interface for between vehicle simulation and raycasting
 struct btVehicleRaycaster
 {
-virtual ~btVehicleRaycaster()
-{
-}
+	virtual ~btVehicleRaycaster()
+	{
+	}
+
 	struct btVehicleRaycasterResult
 	{
 		btVehicleRaycasterResult() :m_distFraction(btScalar(-1.)){};

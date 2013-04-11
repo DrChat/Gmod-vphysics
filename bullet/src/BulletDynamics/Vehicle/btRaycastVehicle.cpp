@@ -166,7 +166,7 @@ void	btRaycastVehicle::updateWheelTransformsWS(btWheelInfo& wheel, bool interpol
 
 btScalar btRaycastVehicle::rayCast(btWheelInfo& wheel)
 {
-	updateWheelTransformsWS( wheel, false);
+	updateWheelTransformsWS(wheel, false);
 
 	
 	btScalar depth = -1;

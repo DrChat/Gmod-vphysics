@@ -50,9 +50,8 @@ unsigned char ATTRIBUTE_ALIGNED128(tmp_buff[TMP_BUFF_BYTES]);
 
 
 // Project Gauss Seidel or the equivalent Sequential Impulse
- inline void resolveSingleConstraintRowGeneric(PfxSolverBody& body1, PfxSolverBody& body2, const btSolverConstraint& c)
+SIMD_FORCE_INLINE void resolveSingleConstraintRowGeneric(PfxSolverBody& body1, PfxSolverBody& body2, const btSolverConstraint& c)
 {
-
 	btScalar deltaImpulse = c.m_rhs-btScalar(c.m_appliedImpulse)*c.m_cfm;
 	const btScalar deltaVel1Dotn	=	c.m_contactNormal1.dot(getBtVector3(body1.mDeltaLinearVelocity)) 	+ c.m_relpos1CrossNormal.dot(getBtVector3(body1.mDeltaAngularVelocity));
 	const btScalar deltaVel2Dotn	=	c.m_contactNormal2.dot(getBtVector3(body2.mDeltaLinearVelocity))	+ c.m_relpos2CrossNormal.dot(getBtVector3(body2.mDeltaAngularVelocity));
@@ -76,6 +75,7 @@ unsigned char ATTRIBUTE_ALIGNED128(tmp_buff[TMP_BUFF_BYTES]);
 		c.m_appliedImpulse = sum;
 	}
 	
+	// TODO: Modify PfxSolverBody to include lin/ang factors
 
 	if (body1.mMassInv)
 	{
@@ -95,7 +95,6 @@ unsigned char ATTRIBUTE_ALIGNED128(tmp_buff[TMP_BUFF_BYTES]);
 
 	//body1.internalApplyImpulse(c.m_contactNormal1*body1.internalGetInvMass(), c.m_angularComponentA, deltaImpulse);
 	//body2.internalApplyImpulse(c.m_contactNormal2*body2.internalGetInvMass(), c.m_angularComponentB, deltaImpulse);
-
 }
 
  
@@ -557,28 +556,28 @@ void	SolverThreadFunc(void* userPtr, void* lsMemory)
 	switch(io->cmd) {
 
 		case PFX_CONSTRAINT_SOLVER_CMD_SOLVE_CONSTRAINTS:
-		CustomSolveConstraintsTaskParallel(
-			io->solveConstraints.contactParallelGroup,
-			io->solveConstraints.contactParallelBatches,
-			io->solveConstraints.contactPairs,
-			io->solveConstraints.numContactPairs,
-			io->solveConstraints.offsetContactManifolds,
-			io->solveConstraints.offsetContactConstraintRows,
+			CustomSolveConstraintsTaskParallel(
+				io->solveConstraints.contactParallelGroup,
+				io->solveConstraints.contactParallelBatches,
+				io->solveConstraints.contactPairs,
+				io->solveConstraints.numContactPairs,
+				io->solveConstraints.offsetContactManifolds,
+				io->solveConstraints.offsetContactConstraintRows,
 
-			io->solveConstraints.jointParallelGroup,
-			io->solveConstraints.jointParallelBatches,
-			io->solveConstraints.jointPairs,
-			io->solveConstraints.numJointPairs,
-			io->solveConstraints.offsetSolverConstraints,
-			io->solveConstraints.offsetRigStates1,
-			io->solveConstraints.offsetSolverBodies,
-			io->solveConstraints.numRigidBodies,
-			io->solveConstraints.iteration,
+				io->solveConstraints.jointParallelGroup,
+				io->solveConstraints.jointParallelBatches,
+				io->solveConstraints.jointPairs,
+				io->solveConstraints.numJointPairs,
+				io->solveConstraints.offsetSolverConstraints,
+				io->solveConstraints.offsetRigStates1,
+				io->solveConstraints.offsetSolverBodies,
+				io->solveConstraints.numRigidBodies,
+				io->solveConstraints.iteration,
 
-			io->solveConstraints.taskId,
-			io->maxTasks1,
-			io->solveConstraints.barrier
-			);
+				io->solveConstraints.taskId,
+				io->maxTasks1,
+				io->solveConstraints.barrier
+				);
 		break;
 
 		case PFX_CONSTRAINT_SOLVER_CMD_POST_SOLVER:
@@ -762,18 +761,15 @@ void CustomSplitConstraints(
 {
 	HeapManager pool((unsigned char*)poolBuff, poolBytes);
 
-	// ステートチェック用ビットフラグテーブル
 	int bufSize = sizeof(uint8_t)*numRigidBodies;
 	bufSize = ((bufSize+127)>>7)<<7; // 128 bytes alignment
 	uint8_t *bodyTable = (uint8_t*)pool.allocate(bufSize, HeapManager::ALIGN128);
 
-	// ペアチェック用ビットフラグテーブル
 	uint32_t *pairTable;
 	size_t allocSize = sizeof(uint32_t)*((numPairs+31)/32);
 	pairTable = (uint32_t*)pool.allocate(allocSize);
 	memset(pairTable,0, allocSize);
 
-	// 目標とする分割数
 	uint32_t targetCount = btMax(uint32_t(PFX_MIN_SOLVER_PAIRS), btMin(numPairs / (numTasks*2), uint32_t(PFX_MAX_SOLVER_PAIRS)));
 	uint32_t startIndex = 0;
 	
@@ -790,7 +786,6 @@ void CustomSplitConstraints(
 		
 		uint32_t i = startIndex;
 		
-		// チェック用ビットフラグテーブルをクリア
 		memset(bodyTable,0xff, bufSize);
 		
 		for(batchId=0;i<numPairs&&totalCount<numPairs&&batchId<maxBatches;batchId++) {
@@ -811,7 +806,6 @@ void CustomSplitConstraints(
 				uint32_t idxA = pfxGetRigidBodyIdA(pairs[i]);
 				uint32_t idxB = pfxGetRigidBodyIdB(pairs[i]);
 
-				// 両方ともアクティブでない、または衝突点が０のペアは登録対象からはずす
 				if(!pfxGetActive(pairs[i]) || pfxGetNumConstraints(pairs[i]) == 0 ||
 					((pfxGetMotionMaskA(pairs[i])&PFX_MOTION_MASK_STATIC) && (pfxGetMotionMaskB(pairs[i])&PFX_MOTION_MASK_STATIC)) ) {
 					if(startIndexCheck) 
@@ -822,7 +816,6 @@ void CustomSplitConstraints(
 					continue;
 				}
 				
-				// 依存性のチェック
 				if( (bodyTable[idxA] != batchId && bodyTable[idxA] != 0xff) || 
 					(bodyTable[idxB] != batchId && bodyTable[idxB] != 0xff) ) {
 					startIndexCheck = false;
@@ -830,7 +823,6 @@ void CustomSplitConstraints(
 					continue;
 				}
 				
-				// 依存性判定テーブルに登録
 				if(pfxGetMotionMaskA(pairs[i])&PFX_MOTION_MASK_DYNAMIC) 
 						bodyTable[idxA] = batchId;
 				if(pfxGetMotionMaskB(pairs[i])&PFX_MOTION_MASK_DYNAMIC) 
@@ -1020,7 +1012,6 @@ void BPE_customConstraintSolverSequentialNew(unsigned int new_num, PfxBroadphase
 		BT_PROFILE("pfxSetupConstraints");
 
 		for(uint32_t i=0;i<numJoints;i++) {
-			// 情報の更新
 			PfxConstraintPair &pair = jointPairs[i];
 			int idA = pfxGetRigidBodyIdA(pair);
 
@@ -1128,12 +1119,11 @@ void BPE_customConstraintSolverSequentialNew(unsigned int new_num, PfxBroadphase
 
 struct	btParallelSolverMemoryCache
 {
-	btAlignedObjectArray<TrbState>	m_mystates;
-	btAlignedObjectArray<PfxSolverBody>  m_mysolverbodies;
+	btAlignedObjectArray<TrbState>			m_mystates;
+	btAlignedObjectArray<PfxSolverBody>		m_mysolverbodies;
 	btAlignedObjectArray<PfxBroadphasePair> m_mypairs;
 	btAlignedObjectArray<PfxConstraintPair> m_jointPairs;
-	btAlignedObjectArray<PfxConstraintRow> m_constraintRows;
-	
+	btAlignedObjectArray<PfxConstraintRow>	m_constraintRows;
 };
 
 
@@ -1142,10 +1132,14 @@ btConstraintSolverIO* createSolverIO(int numThreads)
 	return new btConstraintSolverIO[numThreads];
 }
 
+void destroySolverIO(btConstraintSolverIO *io)
+{
+	delete [] io;
+}
+
 btParallelConstraintSolver::btParallelConstraintSolver(btThreadSupportInterface* solverThreadSupport)
 {
-	
-	m_solverThreadSupport = solverThreadSupport;//createSolverThreadSupport(maxNumThreads);
+	m_solverThreadSupport = solverThreadSupport;
 	m_solverIO = createSolverIO(m_solverThreadSupport->getNumTasks());
 
 	m_barrier = m_solverThreadSupport->createBarrier();
@@ -1157,7 +1151,7 @@ btParallelConstraintSolver::btParallelConstraintSolver(btThreadSupportInterface*
 btParallelConstraintSolver::~btParallelConstraintSolver()
 {
 	delete m_memoryCache;
-	delete m_solverIO;
+	destroySolverIO(m_solverIO);
 	m_solverThreadSupport->deleteBarrier(m_barrier);
 	m_solverThreadSupport->deleteCriticalSection(m_criticalSection);
 }
@@ -1166,7 +1160,6 @@ btParallelConstraintSolver::~btParallelConstraintSolver()
 
 btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies, int numRigidBodies, btPersistentManifold** manifoldPtr, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& infoGlobal, btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher)
 {
-	
 /*	int sz = sizeof(PfxSolverBody);
 	int sz2 = sizeof(vmVector3);
 	int sz3 = sizeof(vmMatrix3);
@@ -1230,7 +1223,8 @@ btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies, int 
 
 				solverBody.mMassInv = rb->getInvMass();
 				solverBody.mInertiaInv = ori * localInvInertia * transpose(ori);
-			} else
+			}
+			else
 			{
 				state.setAngularVelocity(vmVector3(0));
 				state.setLinearVelocity(vmVector3(0));
@@ -1517,7 +1511,7 @@ btScalar btParallelConstraintSolver::solveGroup(btCollisionObject** bodies, int 
 			
 			
 			PfxConstraintRow* contactRows = actualNumManifolds? &m_memoryCache->m_constraintRows[0] : 0;
-			 PfxBroadphasePair* actualPairs = m_memoryCache->m_mypairs.size() ? &m_memoryCache->m_mypairs[0] : 0;
+			PfxBroadphasePair* actualPairs = m_memoryCache->m_mypairs.size() ? &m_memoryCache->m_mypairs[0] : 0;
 			BPE_customConstraintSolverSequentialNew(
 				actualNumManifolds,
 				actualPairs,
