@@ -47,7 +47,7 @@ void SequentialThreadSupport::sendRequest(uint32_t uiCommand, ppu_address_t uiAr
 	default:
 		{
 			///not implemented
-			btAssert(0 && "Not implemented");
+			btAssertMsg(0, "Not implemented");
 		}
 
 	};
@@ -167,12 +167,12 @@ btCriticalSection* SequentialThreadSupport::createCriticalSection()
 
 void SequentialThreadSupport::deleteBarrier(btBarrier* barrier)
 {
-    delete barrier;
+	delete barrier;
 }
 
 void SequentialThreadSupport::deleteCriticalSection(btCriticalSection* criticalSection)
 {
-    delete criticalSection;
+	delete criticalSection;
 }
 
 

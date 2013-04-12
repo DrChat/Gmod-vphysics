@@ -61,6 +61,7 @@ CPhysicsObject::CPhysicsObject() {
 	m_pGameData = NULL;
 	m_pObject = NULL;
 	m_pGhostObject = NULL;
+	m_pGhostCallback = NULL;
 	m_pName = NULL;
 }
 

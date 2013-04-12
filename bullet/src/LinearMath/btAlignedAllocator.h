@@ -31,8 +31,10 @@ subject to the following restrictions:
 	void *	btDbgAlignedAllocInternal(size_t size, int alignment, int blockType, const char *fileName, int line);
 	void	btDbgAlignedFreeInternal(void *ptr, int blockType);
 
-	#define btAlignedAlloc(size, alignment) btDbgAlignedAllocInternal(size, alignment, 1, __FILE__, __LINE__)
-	#define btAlignedFree(ptr) btDbgAlignedFreeInternal(ptr, 1)
+	#define _NORMAL_BLOCK 1
+
+	#define btAlignedAlloc(size, alignment) btDbgAlignedAllocInternal(size, alignment, _NORMAL_BLOCK, __FILE__, __LINE__)
+	#define btAlignedFree(ptr) btDbgAlignedFreeInternal(ptr, _NORMAL_BLOCK)
 	
 	#define btDbgAlignedAlloc(size, alignment, blocktype, filename, line) \
 			btDbgAlignedAllocInternal(size, alignment, blocktype, filename, line)
@@ -70,8 +72,8 @@ subject to the following restrictions:
 	void btAlignedAllocSetCustomAligned(btAlignedAllocFunc *allocFunc, btAlignedFreeFunc *freeFunc);
 #endif
 
-///The btAlignedAllocator is a portable class for aligned memory allocations.
-///Default implementations for unaligned and aligned allocations can be overridden by a custom allocator using btAlignedAllocSetCustom and btAlignedAllocSetCustomAligned.
+// The btAlignedAllocator is a portable class for aligned memory allocations.
+// Default implementations for unaligned and aligned allocations can be overridden by a custom allocator using btAlignedAllocSetCustom and btAlignedAllocSetCustomAligned.
 template < typename T, unsigned Alignment >
 class btAlignedAllocator {
 	typedef btAlignedAllocator< T, Alignment > self_type;

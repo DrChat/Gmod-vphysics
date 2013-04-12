@@ -12,6 +12,8 @@
 // To use this new interface, typecast the old interfaces to the newer ones
 // ex. IPhysics1 *newPhysics = (IPhysics1 *)oldPhysics;
 
+// THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
+
 abstract_class IPhysics1 : public IPhysics {
 	public:
 		virtual int		GetNumActiveEnvironments() = 0;

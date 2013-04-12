@@ -6,6 +6,8 @@
 
 #include "vphysics/vehicles.h"
 
+// THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
+
 class IPhysicsVehicleController1 : public IPhysicsVehicleController {
 	public:
 		// Updates the internal vehicle without calculating anything related to controls.

@@ -21,10 +21,10 @@ subject to the following restrictions:
 #include <spu_intrinsics.h>
 static inline vec_float4 vec_dot3( vec_float4 vec0, vec_float4 vec1 )
 {
-    vec_float4 result;
-    result = spu_mul( vec0, vec1 );
-    result = spu_madd( spu_rlqwbyte( vec0, 4 ), spu_rlqwbyte( vec1, 4 ), result );
-    return spu_madd( spu_rlqwbyte( vec0, 8 ), spu_rlqwbyte( vec1, 8 ), result );
+	vec_float4 result;
+	result = spu_mul( vec0, vec1 );
+	result = spu_madd( spu_rlqwbyte( vec0, 4 ), spu_rlqwbyte( vec1, 4 ), result );
+	return spu_madd( spu_rlqwbyte( vec0, 8 ), spu_rlqwbyte( vec1, 8 ), result );
 }
 #endif //__SPU__
 
@@ -44,7 +44,7 @@ void computeAabb (btVector3& aabbMin, btVector3& aabbMax, btConvexInternalShape*
 		const btTransform& t = xform;
 		btMatrix3x3 abs_b = t.getBasis().absolute();  
 		btVector3 center = t.getOrigin();
-        btVector3 extent = halfExtents.dot3( abs_b[0], abs_b[1], abs_b[2] );
+		btVector3 extent = halfExtents.dot3( abs_b[0], abs_b[1], abs_b[2] );
 		
 		aabbMin = center - extent;
 		aabbMax = center + extent;
@@ -67,7 +67,7 @@ void computeAabb (btVector3& aabbMin, btVector3& aabbMax, btConvexInternalShape*
 		const btTransform& t = xform;
 		btMatrix3x3 abs_b = t.getBasis().absolute();  
 		btVector3 center = t.getOrigin();
-        btVector3 extent = halfExtents.dot3( abs_b[0], abs_b[1], abs_b[2] );
+		btVector3 extent = halfExtents.dot3( abs_b[0], abs_b[1], abs_b[2] );
 		
 		aabbMin = center - extent;
 		aabbMax = center + extent;

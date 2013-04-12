@@ -3,37 +3,39 @@
 #include <vphysics_interface.h>
 #include "../include/vphysics_interfaceV32.h"
 
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
 // A note about this module:
 // The structures we're using here are internal to Garry's Mod, and they may change!
 // Do not release this module.
 
+using namespace GarrysMod::Lua;
+
 IPhysics1 *g_pPhysics = NULL;
 
 IPhysicsObject1 *Get_PhysObj(lua_State *state, int stackPos) {
-	int type = LUA->GetType(stackPos);
-	if (type == GarrysMod::Lua::Type::PHYSOBJ) {
-		// GetUserData for PhysObj returns a pointer to a pointer of the physics object. (Really returns an unknown struct)
-		return *(IPhysicsObject1 **)LUA->GetUserdata(stackPos);
-	} else {
-		char str[1024];
-		sprintf_s(str, "User data at stack position %d is not a PhysObj!\n", stackPos);
-		LUA->ThrowError(str);
-	}
+	LUA->CheckType(stackPos, Type::PHYSOBJ);
 
-	return NULL;
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (IPhysicsObject1 *)ud->data;
 }
 
 Vector *Get_Vector(lua_State *state, int stackPos) {
-	int type = LUA->GetType(stackPos);
-	if (type == GarrysMod::Lua::Type::VECTOR) {
-		return *(Vector **)LUA->GetUserdata(stackPos);
-	} else {
-		char str[1024];
-		sprintf_s(str, "User data at stack position %d is not a Vector!\n", stackPos);
-		LUA->ThrowError(str);
-	}
+	LUA->CheckType(stackPos, Type::VECTOR);
 
-	return NULL;
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (Vector *)ud->data;
+}
+
+void Push_Vector(lua_State *state, const Vector &vec) {
+	LUA->PushSpecial(SPECIAL_GLOB);
+		LUA->GetField(-1, "Vector");
+		LUA->PushNumber(vec.x);
+		LUA->PushNumber(vec.y);
+		LUA->PushNumber(vec.z);
+		LUA->Call(3, 1);
+	LUA->Remove(-2);
 }
 
 int lPhysStats(lua_State *state) {
@@ -65,6 +67,21 @@ int lPhysObjSetGravity(lua_State *state) {
 	return 0;
 }
 
+//
+// Name: PhysObj:GetGravity
+// Desc: Gets the object's current gravity. Will return the same gravity as the environment if you didn't set it previously.
+// Arg1:
+// Ret1: Vector|gravityVec|The gravity vector
+//
+int lPhysObjGetGravity(lua_State *state) {
+	IPhysicsObject1 *pObject = Get_PhysObj(state, 1);
+	Vector grav = pObject->GetGravity();
+
+	Push_Vector(state, grav);
+
+	return 1;
+}
+
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory) {
@@ -85,6 +102,7 @@ GMOD_MODULE_OPEN() {
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_REG);
 		LUA->GetField(-1, "PhysObj");
 			LUA->PushCFunction(lPhysObjSetGravity); LUA->SetField(-2, "SetGravity");
+			LUA->PushCFunction(lPhysObjGetGravity); LUA->SetField(-2, "GetGravity");
 		LUA->Pop();
 	LUA->Pop();
 

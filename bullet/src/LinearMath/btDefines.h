@@ -94,12 +94,15 @@ inline int btGetVersion()
 		#ifdef _MSC_VER
 			#include <stdio.h>
 			#define btAssert(x) { if (!(x)) { printf("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); __debugbreak(); } }
+			#define btAssertMsg(x, str) { if (!(x)) { printf("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); __debugbreak(); } }
 		#else//_MSC_VER
 			#include <assert.h>
 			#define btAssert assert
+			#define btAssertMsg(x, str) assert(x)
 		#endif//_MSC_VER
 	#else
 		#define btAssert(x)
+		#define btAssertMsg(x, str)
 	#endif
 
 	//btFullAssert is optional, slows down a lot
@@ -123,13 +126,15 @@ inline int btGetVersion()
 			#ifdef __SPU__
 				#include <spu_printf.h>
 				#define printf spu_printf
-				#define btAssert(x) {if(!(x)){printf("Assert "__FILE__ ":%u ("#x")\n", __LINE__);spu_hcmpeq(0,0);}}
+				#define btAssert(x) { if(!(x)) { printf("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); spu_hcmpeq(0,0); } }
+				#define btAssertMsg(x, str) { if(!(x)) { printf("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); spu_hcmpeq(0,0); } }
 			#else
 				#define btAssert assert
+				#define btAssertMsg(x, str) assert(x)
 			#endif
-			
 		#else
 			#define btAssert(x)
+			#define btAssertMsg(x, str)
 		#endif
 
 		//btFullAssert is optional, slows down a lot
@@ -209,12 +214,15 @@ inline int btGetVersion()
 				#if defined(DEBUG) || defined (_DEBUG)
 					#if defined (__i386__) || defined (__x86_64__)
 						#include <stdio.h>
-						#define btAssert(x) { if (!(x)) { printf("Assert %s in file %s:%d\n", #x, __LINE__, __FILE__); asm volatile ("int3"); } }
+						#define btAssert(x) { if (!(x)) { printf("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); asm volatile ("int3"); } }
+						#define btAssertMsg(x, str) { if (!(x)) { printf("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); asm volatile ("int3"); } }
 					#else//defined (__i386__) || defined (__x86_64__)
 						#define btAssert assert
+						#define btAssertMsg(x, str) assert(x)
 					#endif//defined (__i386__) || defined (__x86_64__)
 				#else//defined(DEBUG) || defined (_DEBUG)
 					#define btAssert(x)
+					#define btAssertMsg(x, str)
 				#endif//defined(DEBUG) || defined (_DEBUG)
 			
 				//btFullAssert is optional, slows down a lot
@@ -238,8 +246,10 @@ inline int btGetVersion()
 			
 				#if defined(DEBUG) || defined (_DEBUG)
 					#define btAssert assert
+					#define btAssertMsg(x, str) assert(x)
 				#else
 					#define btAssert(x)
+					#define btAssertMsg(x, str)
 				#endif
 			
 				//btFullAssert is optional, slows down a lot
