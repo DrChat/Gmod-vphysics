@@ -232,8 +232,8 @@ SIMD_FORCE_INLINE bool btMachineIsLittleEndian()
 
 
 
-///btSelect avoids branches, which makes performance much better for consoles like Playstation 3 and XBox 360
-///Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
+// btSelect avoids branches, which makes performance much better for consoles like Playstation 3 and XBox 360
+// Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
 SIMD_FORCE_INLINE unsigned btSelect(unsigned condition, unsigned valueIfConditionNonZero, unsigned valueIfConditionZero) 
 {
 	// Set testNz to 0xFFFFFFFF if condition is nonzero, 0x00000000 if condition is zero
@@ -290,12 +290,12 @@ SIMD_FORCE_INLINE unsigned short btSwapEndian(short val)
 	return btSwapEndian((unsigned short) val);
 }
 
-///btSwapFloat uses using char pointers to swap the endianness
-////btSwapFloat/btSwapDouble will NOT return a float, because the machine might 'correct' invalid floating point values
-///Not all values of sign/exponent/mantissa are valid floating point numbers according to IEEE 754. 
-///When a floating point unit is faced with an invalid value, it may actually change the value, or worse, throw an exception. 
-///In most systems, running user mode code, you wouldn't get an exception, but instead the hardware/os/runtime will 'fix' the number for you. 
-///so instead of returning a float/double, we return integer/long long integer
+// btSwapFloat uses using char pointers to swap the endianness
+// btSwapFloat/btSwapDouble will NOT return a float, because the machine might 'correct' invalid floating point values
+// Not all values of sign/exponent/mantissa are valid floating point numbers according to IEEE 754. 
+// When a floating point unit is faced with an invalid value, it may actually change the value, or worse, throw an exception. 
+// In most systems, running user mode code, you wouldn't get an exception, but instead the hardware/os/runtime will 'fix' the number for you. 
+// so instead of returning a float/double, we return integer/long long integer
 SIMD_FORCE_INLINE unsigned int  btSwapEndianFloat(float d)
 {
 	unsigned int a = 0;
@@ -384,11 +384,13 @@ struct btTypedObject
 		:m_objectType(objectType)
 	{
 	}
-	int	m_objectType;
+	
 	inline int getObjectType() const
 	{
 		return m_objectType;
 	}
+
+	int	m_objectType;
 };
 
 #endif //BT_SCALAR_H

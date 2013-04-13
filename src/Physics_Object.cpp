@@ -233,17 +233,6 @@ void CPhysicsObject::RemoveCallbackFlags(unsigned short flags) {
 	m_callbacks &= ~(flags);
 }
 
-const CPhysCollide *CPhysicsObject::GetCollisionModel() const {
-	return (CPhysCollide *)m_pObject->getCollisionShape();
-}
-
-void CPhysicsObject::SetCollisionModel(CPhysCollide *pCollisionModel) {
-	if (!pCollisionModel) return;
-
-	btCollisionShape *pShape = (btCollisionShape *)pCollisionModel;
-	m_pObject->setCollisionShape(pShape);
-}
-
 void CPhysicsObject::Wake() {
 	m_pObject->setActivationState(ACTIVE_TAG);
 }
@@ -330,13 +319,13 @@ void CPhysicsObject::SetInertia(const Vector &inertia) {
 
 // FIXME: The API is confusing because we need to add the BT_DISABLE_WORLD_GRAVITY flag to the object
 // by calling EnableGravity(false)
-void CPhysicsObject::SetGravity(const Vector &gravityVector) {
+void CPhysicsObject::SetLocalGravity(const Vector &gravityVector) {
 	btVector3 tmp;
 	ConvertPosToBull(gravityVector, tmp);
 	m_pObject->setGravity(tmp);
 }
 
-Vector CPhysicsObject::GetGravity() const {
+Vector CPhysicsObject::GetLocalGravity() const {
 	Vector tmp;
 	ConvertPosToHL(m_pObject->getGravity(), tmp);
 	return tmp;

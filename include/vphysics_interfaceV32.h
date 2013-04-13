@@ -30,8 +30,8 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 		// You need to call EnableGravity(false) first so we stop using the world's gravity.
 		// To use the world's gravity again, call EnableGravity(true)
 		// (Yes I know it's confusing, nothing I can do about it)
-		virtual void	SetGravity(const Vector &gravityVector) = 0;
-		virtual Vector	GetGravity() const = 0;
+		virtual void	SetLocalGravity(const Vector &gravityVector) = 0;
+		virtual Vector	GetLocalGravity() const = 0;
 		
 		// Purpose: Set/Get the speeds at which any object is travelling slower than will fall asleep.
 		// linear velocity is in in/s and angular velocity is in degrees/s

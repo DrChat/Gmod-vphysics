@@ -12,6 +12,7 @@
 #include <cmodel.h>
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 #include <BulletCollision/CollisionShapes/btMaterial.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>

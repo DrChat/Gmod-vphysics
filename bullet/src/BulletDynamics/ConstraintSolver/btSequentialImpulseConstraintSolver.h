@@ -75,12 +75,12 @@ protected:
 
 
 	void	resolveSplitPenetrationSIMD(
-     btSolverBody& bodyA, btSolverBody& bodyB,
-        const btSolverConstraint& contactConstraint);
+	 btSolverBody& bodyA, btSolverBody& bodyB,
+		const btSolverConstraint& contactConstraint);
 
 	void	resolveSplitPenetrationImpulseCacheFriendly(
-       btSolverBody& bodyA, btSolverBody& bodyB,
-        const btSolverConstraint& contactConstraint);
+	   btSolverBody& bodyA, btSolverBody& bodyB,
+		const btSolverConstraint& contactConstraint);
 
 	//internal method
 	int		getOrInitSolverBody(btCollisionObject& body);

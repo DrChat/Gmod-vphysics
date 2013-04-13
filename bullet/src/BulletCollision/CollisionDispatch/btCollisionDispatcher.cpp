@@ -30,9 +30,8 @@ subject to the following restrictions:
 int gNumManifold = 0;
 
 #ifdef BT_DEBUG
-#include <stdio.h>
+	#include <stdio.h>
 #endif
-
 
 btCollisionDispatcher::btCollisionDispatcher (btCollisionConfiguration* collisionConfiguration): 
 m_dispatcherFlags(btCollisionDispatcher::CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD),
@@ -54,10 +53,7 @@ m_dispatcherFlags(btCollisionDispatcher::CD_USE_RELATIVE_CONTACT_BREAKING_THRESH
 			btAssert(m_doubleDispatch[i][j]);
 		}
 	}
-	
-	
 }
-
 
 void btCollisionDispatcher::registerCollisionCreateFunc(int proxyType0, int proxyType1, btCollisionAlgorithmCreateFunc *createFunc)
 {
@@ -71,10 +67,6 @@ btCollisionDispatcher::~btCollisionDispatcher()
 btPersistentManifold*	btCollisionDispatcher::getNewManifold(const btCollisionObject* body0, const btCollisionObject* body1) 
 { 
 	gNumManifold++;
-	
-	//btAssert(gNumManifold < 65535);
-	
-
 
 	//optional relative contact breaking threshold, turned on by default (use setDispatcherFlags to switch off feature for improved performance)
 	
@@ -89,19 +81,22 @@ btPersistentManifold*	btCollisionDispatcher::getNewManifold(const btCollisionObj
 	if (m_persistentManifoldPoolAllocator->getFreeCount())
 	{
 		mem = m_persistentManifoldPoolAllocator->allocate(sizeof(btPersistentManifold));
-	} else
+	}
+	else
 	{
 		//we got a pool memory overflow, by default we fallback to dynamically allocate memory. If we require a contiguous contact pool then assert.
-		if ((m_dispatcherFlags&CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION)==0)
+		if ((m_dispatcherFlags & CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION) == 0)
 		{
 			mem = btAlignedAlloc(sizeof(btPersistentManifold),16);
-		} else
+		}
+		else
 		{
 			btAssert(0);
 			//make sure to increase the m_defaultMaxPersistentManifoldPoolSize in the btDefaultCollisionConstructionInfo/btDefaultCollisionConfiguration
 			return 0;
 		}
 	}
+
 	btPersistentManifold* manifold = new(mem) btPersistentManifold (body0, body1,0, contactBreakingThreshold, contactProcessingThreshold);
 	manifold->m_index1a = m_manifoldsPtr.size();
 	m_manifoldsPtr.push_back(manifold);
@@ -117,7 +112,6 @@ void btCollisionDispatcher::clearManifold(btPersistentManifold* manifold)
 	
 void btCollisionDispatcher::releaseManifold(btPersistentManifold* manifold)
 {
-	
 	gNumManifold--;
 
 	//printf("releaseManifold: gNumManifold %d\n", gNumManifold);
@@ -133,18 +127,15 @@ void btCollisionDispatcher::releaseManifold(btPersistentManifold* manifold)
 	if (m_persistentManifoldPoolAllocator->validPtr(manifold))
 	{
 		m_persistentManifoldPoolAllocator->freeMemory(manifold);
-	} else
+	}
+	else
 	{
 		btAlignedFree(manifold);
 	}
-	
 }
-
-	
 
 btCollisionAlgorithm* btCollisionDispatcher::findAlgorithm(const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btPersistentManifold* sharedManifold)
 {
-	
 	btCollisionAlgorithmConstructionInfo ci;
 
 	ci.m_dispatcher1 = this;
@@ -153,9 +144,6 @@ btCollisionAlgorithm* btCollisionDispatcher::findAlgorithm(const btCollisionObje
 
 	return algo;
 }
-
-
-
 
 bool	btCollisionDispatcher::needsResponse(const btCollisionObject* body0, const btCollisionObject* body1)
 {
@@ -196,10 +184,8 @@ bool	btCollisionDispatcher::needsCollision(const btCollisionObject* body0, const
 
 }
 
-
-
-///interface for iterating all overlapping collision pairs, no matter how those pairs are stored (array, set, map etc)
-///this is useful for the collision dispatcher.
+// interface for iterating all overlapping collision pairs, no matter how those pairs are stored (array, set, map etc)
+// this is useful for the collision dispatcher.
 class btCollisionPairCallback : public btOverlapCallback
 {
 	const btDispatcherInfo& m_dispatchInfo;
@@ -233,8 +219,6 @@ public:
 	}
 };
 
-
-
 void	btCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher) 
 {
 	//m_blockedForChanges = true;
@@ -247,10 +231,7 @@ void	btCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairCache* pa
 
 }
 
-
-
-
-//by default, Bullet will use this near callback
+// by default, Bullet will use this near callback
 void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo)
 {
 		btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
@@ -262,7 +243,7 @@ void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair,
 			btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(),-1,-1);
 
 
-			//dispatcher will keep algorithms persistent in the collision pair
+			// dispatcher will keep algorithms persistent in the collision pair
 			if (!collisionPair.m_algorithm)
 			{
 				collisionPair.m_algorithm = dispatcher.findAlgorithm(&obj0Wrap, &obj1Wrap);
@@ -277,7 +258,8 @@ void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair,
 					//discrete collision detection query
 					
 					collisionPair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, dispatchInfo, &contactPointResult);
-				} else
+				}
+				else
 				{
 					//continuous collision detection query, time of impact (toi)
 					btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
@@ -290,7 +272,6 @@ void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair,
 
 }
 
-
 void* btCollisionDispatcher::allocateCollisionAlgorithm(int size)
 {
 	if (m_collisionAlgorithmPoolAllocator->getFreeCount())
@@ -298,8 +279,8 @@ void* btCollisionDispatcher::allocateCollisionAlgorithm(int size)
 		return m_collisionAlgorithmPoolAllocator->allocate(size);
 	}
 	
-	//warn user for overflow?
-	return	btAlignedAlloc(static_cast<size_t>(size), 16);
+	// warn user for overflow?
+	return btAlignedAlloc(static_cast<size_t>(size), 16);
 }
 
 void btCollisionDispatcher::freeCollisionAlgorithm(void* ptr)
@@ -307,7 +288,8 @@ void btCollisionDispatcher::freeCollisionAlgorithm(void* ptr)
 	if (m_collisionAlgorithmPoolAllocator->validPtr(ptr))
 	{
 		m_collisionAlgorithmPoolAllocator->freeMemory(ptr);
-	} else
+	}
+	else
 	{
 		btAlignedFree(ptr);
 	}

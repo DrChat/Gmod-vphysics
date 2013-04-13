@@ -21,10 +21,13 @@ class CPhysicsObject;
 
 class CDebugDrawer;
 
+// Temporary; remove later
+class IPhysicsSoftBody;
+
 class CPhysicsEnvironment : public IPhysicsEnvironment {
 public:
-											CPhysicsEnvironment();
-											~CPhysicsEnvironment();
+	CPhysicsEnvironment();
+	~CPhysicsEnvironment();
 
 	// UNEXPOSED
 	// Don't call this directly!
@@ -43,7 +46,10 @@ public:
 	IPhysicsObject *						CreatePolyObject(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
 	IPhysicsObject *						CreatePolyObjectStatic(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
 	IPhysicsObject *						CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic = false);
-	void									DestroyObject(IPhysicsObject*);
+	void									DestroyObject(IPhysicsObject *pObject);
+
+	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
+	void									DestroySoftBody(IPhysicsSoftBody *pSoftBody);
 
 	IPhysicsFluidController	*				CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams);
 	void									DestroyFluidController(IPhysicsFluidController*);
@@ -128,7 +134,7 @@ public:
 	void									DebugCheckContacts();
 public:
 	// Unexposed functions
-	btDynamicsWorld *						GetBulletEnvironment();
+	btSoftRigidDynamicsWorld *				GetBulletEnvironment();
 	float									GetInvPSIScale();
 	void									BulletTick(btScalar timeStep);
 	CPhysicsDragController *				GetDragController();
@@ -160,11 +166,13 @@ private:
 
 	CUtlVector<IPhysicsObject *>			m_objects;
 	CUtlVector<IPhysicsObject *>			m_deadObjects;
+	CUtlVector<IPhysicsSoftBody *>			m_softBodies;
+	CUtlVector<CPhysicsFluidController *>	m_fluids;
+	CUtlVector<IController*>				m_controllers;
+
 	CCollisionSolver *						m_pCollisionSolver;
 	CDeleteQueue *							m_pDeleteQueue;
-	CUtlVector<CPhysicsFluidController *>	m_fluids;
 	CPhysicsDragController *				m_pPhysicsDragController;
-	CUtlVector<IController*>				m_controllers;
 	IVPhysicsDebugOverlay *					m_pDebugOverlay;
 
 	IPhysicsCollisionEvent *				m_pCollisionEvent;

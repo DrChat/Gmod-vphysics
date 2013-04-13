@@ -7,8 +7,6 @@
 class IPhysicsSoftBody {
 	public:
 		virtual ~IPhysicsSoftBody() {}
-
-
 };
 
 // Class declarations
@@ -21,7 +19,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		CPhysicsSoftBody();
 		~CPhysicsSoftBody();
 
-		// Unexposed functions
+		// UNEXPOSED FUNCTIONS
 	public:
 		void	Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody);
 
@@ -31,5 +29,6 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 };
 
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv);
+CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
 
 #endif // CPHYSICSSOFTBODY_H

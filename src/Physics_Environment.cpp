@@ -12,6 +12,7 @@
 #include "Physics_MotionController.h"
 #include "Physics_Constraint.h"
 #include "Physics_VehicleController.h"
+#include "Physics_SoftBody.h"
 #include "convert.h"
 
 #include "tier0/vprof.h"
@@ -438,6 +439,26 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	}
 }
 
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, position, angles);
+	m_softBodies.AddToTail(pSoftBody);
+	return pSoftBody;
+}
+
+void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
+	if (!pSoftBody) return;
+
+	m_softBodies.FindAndRemove(pSoftBody);
+	NOT_IMPLEMENTED
+	
+	if (m_inSimulation || m_bUseDeleteQueue) {
+
+	} else {
+		delete pSoftBody;
+		pSoftBody = NULL;
+	}
+}
+
 IPhysicsFluidController *CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
 	CPhysicsFluidController *pFluid = ::CreateFluidController(this, (CPhysicsObject *)pFluidObject, pParams);
 	m_fluids.AddToTail(pFluid);
@@ -851,7 +872,7 @@ void CPhysicsEnvironment::DebugCheckContacts() {
 }
 
 // UNEXPOSED
-btDynamicsWorld *CPhysicsEnvironment::GetBulletEnvironment() {
+btSoftRigidDynamicsWorld *CPhysicsEnvironment::GetBulletEnvironment() {
 	return m_pBulletEnvironment;
 }
 

@@ -47,7 +47,7 @@ struct	btSoftBodyWorldInfo
 	btScalar				water_offset;
 	btVector3				water_normal;
 	btBroadphaseInterface*	m_broadphase;
-	btDispatcher*	m_dispatcher;
+	btDispatcher*			m_dispatcher;
 	btVector3				m_gravity;
 	btSparseSdf<3>			m_sparsesdf;
 

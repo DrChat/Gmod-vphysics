@@ -56,9 +56,6 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								SetCallbackFlags(unsigned short callbackflags);
 		unsigned short						GetCallbackFlags() const;
 
-		const CPhysCollide *				GetCollisionModel() const;
-		void								SetCollisionModel(CPhysCollide *pCollide);
-
 		void								Wake();
 		void								Sleep();
 
@@ -76,8 +73,8 @@ class CPhysicsObject : public IPhysicsObject1 {
 		Vector								GetInvInertia() const;
 		void								SetInertia(const Vector &inertia);
 
-		void								SetGravity(const Vector &gravityVector);
-		Vector								GetGravity() const;
+		void								SetLocalGravity(const Vector &gravityVector);
+		Vector								GetLocalGravity() const;
 
 		void								SetDamping(const float *speed, const float *rot);
 		void								GetDamping(float *speed, float *rot) const;
@@ -98,7 +95,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 		float								GetEnergy() const;
 		Vector								GetMassCenterLocalSpace() const;
 
-		void								SetPosition(const Vector& worldPosition, const QAngle& angles, bool isTeleport);
+		void								SetPosition(const Vector &worldPosition, const QAngle &angles, bool isTeleport);
 		void								SetPositionMatrix(const matrix3x4_t&matrix, bool isTeleport);
 		void								GetPosition(Vector *worldPosition, QAngle *angles) const;
 		void								GetPositionMatrix(matrix3x4_t *positionMatrix) const;
@@ -107,33 +104,33 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity);
 		void								GetVelocity(Vector *velocity, AngularImpulse *angularVelocity) const;
 		void								AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity);
-		void								GetVelocityAtPoint(const Vector& worldPosition, Vector *pVelocity) const;
+		void								GetVelocityAtPoint(const Vector &worldPosition, Vector *pVelocity) const;
 		void								GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const;
 
-		void								LocalToWorld(Vector *worldPosition, const Vector& localPosition) const;
-		void								WorldToLocal(Vector *localPosition, const Vector& worldPosition) const;
-		void								LocalToWorldVector(Vector *worldVector, const Vector& localVector) const;
-		void								WorldToLocalVector(Vector *localVector, const Vector& worldVector) const;
+		void								LocalToWorld(Vector *worldPosition, const Vector &localPosition) const;
+		void								WorldToLocal(Vector *localPosition, const Vector &worldPosition) const;
+		void								LocalToWorldVector(Vector *worldVector, const Vector &localVector) const;
+		void								WorldToLocalVector(Vector *localVector, const Vector &worldVector) const;
 	
-		void								ApplyForceCenter(const Vector& forceVector);
-		void								ApplyForceOffset(const Vector& forceVector, const Vector& worldPosition);
-		void								ApplyTorqueCenter(const AngularImpulse& torque);
+		void								ApplyForceCenter(const Vector &forceVector);
+		void								ApplyForceOffset(const Vector &forceVector, const Vector &worldPosition);
+		void								ApplyTorqueCenter(const AngularImpulse &torque);
 
-		void								CalculateForceOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const;
-		void								CalculateVelocityOffset(const Vector& forceVector, const Vector& worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const;
+		void								CalculateForceOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerForce, AngularImpulse *centerTorque) const;
+		void								CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const;
 
-		float								CalculateLinearDrag(const Vector& unitDirection) const;
-		float								CalculateAngularDrag(const Vector& objectSpaceRotationAxis) const;
+		float								CalculateLinearDrag(const Vector &unitDirection) const;
+		float								CalculateAngularDrag(const Vector &objectSpaceRotationAxis) const;
 
 		bool								GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const;
 
 		void								SetShadow(float maxSpeed, float maxAngularSpeed, bool allowPhysicsMovement, bool allowPhysicsRotation);
-		void								UpdateShadow(const Vector& targetPosition, const QAngle& targetAngles, bool tempDisableGravity, float timeOffset);
+		void								UpdateShadow(const Vector &targetPosition, const QAngle &targetAngles, bool tempDisableGravity, float timeOffset);
 	
 		int									GetShadowPosition(Vector *position, QAngle *angles) const;
 		IPhysicsShadowController *			GetShadowController() const;
 		void								RemoveShadowController();
-		float								ComputeShadowControl(const hlshadowcontrol_params_t& params, float secondsToArrival, float dt);
+		float								ComputeShadowControl(const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
 
 		const CPhysCollide *				GetCollide() const;
 		const char *						GetName() const;
@@ -153,8 +150,9 @@ class CPhysicsObject : public IPhysicsObject1 {
 		void								DestroyFrictionSnapshot(IPhysicsFrictionSnapshot *pSnapshot);
 
 		void								OutputDebugInfo() const;
-	public:
+
 		// UNEXPOSED FUNCTIONS
+	public:
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isStatic, bool isSphere = false);
 
 		CPhysicsEnvironment *				GetVPhysicsEnvironment();
@@ -178,6 +176,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 
 		CPhysicsFluidController *			GetFluidController(void) { return m_pFluidController; }
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
+
 	private:
 		CPhysicsEnvironment *				m_pEnv;
 		void *								m_pGameData;
@@ -210,7 +209,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 		int									m_iLastActivationState;
 };
 
-CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector& position, const QAngle& angles, objectparams_t *pParams, bool isStatic);
+CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic);
 CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic);
 
 #endif
