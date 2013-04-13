@@ -1,0 +1,53 @@
+#include "PhysObj.h"
+
+#include <GarrysMod/Lua/Interface.h>
+#include <vphysics_interface.h>
+#include "../include/vphysics_interfaceV32.h"
+
+#include "MiscFuncs.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
+using namespace GarrysMod::Lua;
+
+//
+// Name: PhysObj:SetLocalGravity
+// Desc: Sets an object's gravity. You must disable the environment's gravity with EnableGravity(false) first!
+// Arg1: Vector|gravityVec|The gravity vector
+// Ret1:
+//
+int lPhysObjSetLocalGravity(lua_State *state) {
+	IPhysicsObject1 *	pObject = Get_PhysObj(state, 1);
+	Vector *			pVec = Get_Vector(state, 2);
+
+	if (pVec)
+		pObject->SetLocalGravity(*pVec);
+
+	return 0;
+}
+
+//
+// Name: PhysObj:GetLocalGravity
+// Desc: Gets the object's current gravity. Will return the same gravity as the environment if you didn't set it previously.
+// Arg1:
+// Ret1: Vector|gravityVec|The gravity vector
+//
+int lPhysObjGetLocalGravity(lua_State *state) {
+	IPhysicsObject1 *pObject = Get_PhysObj(state, 1);
+
+	Vector grav = pObject->GetLocalGravity();
+	Push_Vector(state, grav);
+
+	return 1;
+}
+
+int Init_PhysObj(lua_State *state) {
+	LUA->PushSpecial(SPECIAL_REG);
+		LUA->GetField(-1, "PhysObj");
+			LUA->PushCFunction(lPhysObjSetLocalGravity); LUA->SetField(-2, "SetLocalGravity");
+			LUA->PushCFunction(lPhysObjGetLocalGravity); LUA->SetField(-2, "GetLocalGravity");
+	LUA->Pop(2);
+
+	return 0;
+}
