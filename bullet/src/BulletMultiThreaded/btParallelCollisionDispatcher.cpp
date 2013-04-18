@@ -96,6 +96,8 @@ int DispatchThreadFunc(int taskId, void *pArg)
 			ProcessCollision((btProcessCollisionInfo *)pArg);
 			break;
 	}
+
+	return 0;
 }
 
 btParallelCollisionDispatcher::btParallelCollisionDispatcher(btCollisionConfiguration *collisionConfiguration, btIThreadPool *threadPool, uint32_t numThreads) :
