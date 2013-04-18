@@ -8,7 +8,7 @@ class IPhysicsObject;
 class CPhysicsObject;
 class CPhysicsEnvironment;
 
-class btVehicleRaycaster;
+struct btVehicleRaycaster;
 class btRaycastVehicle;
 
 // TODO: Implement this class and move it to the public interface.

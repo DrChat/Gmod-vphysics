@@ -16,4 +16,6 @@ int Init_PhysEnv(lua_State *state) {
 		LUA->GetField(-1, "physenv");
 			
 	LUA->Pop(2);
+
+	return 0;
 }

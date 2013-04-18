@@ -16,10 +16,6 @@
 	#include "vectormath/vmInclude.h"
 #endif//PFX_USE_FREE_VECTORMATH
 
-
-
-
-
 #ifdef _WIN32
 
 	typedef union

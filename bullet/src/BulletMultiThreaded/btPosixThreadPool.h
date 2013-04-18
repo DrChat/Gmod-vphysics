@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2003-2006 Gino van den Bergen / Erwin Coumans  http://continuousphysics.com/Bullet/
+Bullet Continuous Collision Detection and Physics Library
+Copyright (c) 2003-2013 Dr. Chat / Erwin Coumans  http://bulletphysics.com
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,33 +13,15 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+#ifndef BT_POSIX_THREAD_POOL_H
+#define BT_POSIX_THREAD_POOL_H
 
+#include "btIThreadPool.h"
 
-#ifndef BT_GEN_RANDOM_H
-#define BT_GEN_RANDOM_H
+#ifdef USE_PTHREADS
 
-#include "btScalar.h"
-
-#ifdef MT19937
-
-#include <limits.h>
-#include <mt19937.h>
-
-#define GEN_RAND_MAX UINT_MAX
-
-SIMD_FORCE_INLINE void         GEN_srand(unsigned int seed) { init_genrand(seed); }
-SIMD_FORCE_INLINE unsigned int GEN_rand()                   { return genrand_int32(); }
-
-#else
-
-#include <stdlib.h>
-
-#define GEN_RAND_MAX RAND_MAX
-
-SIMD_FORCE_INLINE void         GEN_srand(unsigned int seed) { srand(seed); } 
-SIMD_FORCE_INLINE unsigned int GEN_rand()                   { return rand(); }
+// TODO!
 
 #endif
 
-#endif //BT_GEN_RANDOM_H
-
+#endif // BT_POSIX_THREAD_POOL_H

@@ -116,6 +116,7 @@ public:
 			{
 				collisionPair.m_internalTmpValue = 1;
 			}
+
 			if (!collisionPair.m_algorithm)
 			{
 				btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
@@ -164,7 +165,8 @@ public:
 #endif
 						collisionPair.m_algorithm = new(mem) SpuContactManifoldCollisionAlgorithm(ci, colObj0, colObj1);
 						collisionPair.m_internalTmpValue =  2;
-					} else
+					}
+					else
 					{
 						btCollisionObjectWrapper ob0(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(),-1,-1);
 						btCollisionObjectWrapper ob1(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(),-1,-1);
@@ -175,6 +177,7 @@ public:
 				} 
 			}
 		}
+
 		return false;
 	}
 };
@@ -220,7 +223,7 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 				}
 	
 				BT_PROFILE("addWorkToTask");
-				for (i=0; i<numTotalPairs; )
+				for (i = 0; i < numTotalPairs; )
 				{
 					//Performance Hint: tweak this number during benchmarking
 					
@@ -232,7 +235,7 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 			{
 				BT_PROFILE("PPU fallback");
 				//handle PPU fallback pairs
-				for (i=0;i<numTotalPairs;i++)
+				for (i = 0; i < numTotalPairs; i++)
 				{
 					btBroadphasePair& collisionPair = pairPtr[i];
 					if (collisionPair.m_internalTmpValue == 3)
@@ -244,19 +247,19 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 	
 							if (dispatcher->needsCollision(colObj0, colObj1))
 							{
-							//discrete collision detection query
 								btCollisionObjectWrapper ob0(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(),-1,-1);
 								btCollisionObjectWrapper ob1(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(),-1,-1);
 
 								btManifoldResult contactPointResult(&ob0, &ob1);
 								
-								if (dispatchInfo.m_dispatchFunc == 		btDispatcherInfo::DISPATCH_DISCRETE)
+								if (dispatchInfo.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE)
 								{
-									
+									// discrete collision detection query
 									collisionPair.m_algorithm->processCollision(&ob0, &ob1, dispatchInfo, &contactPointResult);
-								} else
+								}
+								else
 								{
-									//continuous collision detection query, time of impact (toi)
+									// continuous collision detection query, time of impact (toi)
 									btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
 									if (dispatchInfo.m_timeOfImpact > toi)
 										dispatchInfo.m_timeOfImpact = toi;
@@ -274,7 +277,8 @@ void	SpuGatheringCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPai
 			m_spuCollisionTaskProcess->flush2();
 		}
 
-	} else
+	}
+	else
 	{
 		///PPU fallback
 		///!Need to make sure to clear all 'algorithms' when switching between SPU and PPU

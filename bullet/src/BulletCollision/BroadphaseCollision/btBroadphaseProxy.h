@@ -194,7 +194,7 @@ ATTRIBUTE_ALIGNED16(struct) btBroadphasePair
 	{
 	}
 
-BT_DECLARE_ALIGNED_ALLOCATOR();
+	BT_DECLARE_ALIGNED_ALLOCATOR();
 
 	btBroadphasePair(const btBroadphasePair& other)
 		:		m_pProxy0(other.m_pProxy0),

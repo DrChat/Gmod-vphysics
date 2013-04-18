@@ -181,6 +181,19 @@ void btDbgAlignedFreeInternal(void *ptr, int blockType)
 	sDbgAlignedFreeFunc(ptr, blockType);
 }
 
+void *btDbgAllocInternal(size_t size, int blockType, const char *fileName, int line)
+{
+	return sDbgAllocFunc(size, blockType, fileName, line);
+}
+
+void btDbgFreeInternal(void *ptr, int blockType)
+{
+	if (!ptr)
+		return;
+
+	sDbgFreeFunc(ptr, blockType);
+}
+
 #else // BT_DEBUG_MEMORY_ALLOCATIONS
 
 static btAlignedAllocFunc *sAlignedAllocFunc = btAlignedAllocDefault;
@@ -217,6 +230,16 @@ void btAlignedFreeInternal(void* ptr)
 	gNumAlignedFree++;
 //	printf("btAlignedFreeInternal %x\n", ptr);
 	sAlignedFreeFunc(ptr);
+}
+
+void *btAllocInternal(size_t size)
+{
+	return sAllocFunc(size);
+}
+
+void btFreeInternal(void *ptr)
+{
+	sFreeFunc(ptr);
 }
 
 #endif

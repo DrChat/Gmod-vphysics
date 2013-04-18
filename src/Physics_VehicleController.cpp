@@ -409,7 +409,7 @@ void CPhysicsVehicleController::CalcEngineTransmission(vehicle_controlparams_t &
 	// throttle goes forward and backward, [-1, 1]
 	// brake_val [0..1]
 
-	float absSpeed = fabs(KMH2MS(m_pVehicle->getCurrentSpeedKmHour()));
+	//float absSpeed = fabs(KMH2MS(m_pVehicle->getCurrentSpeedKmHour()));
 
 	const static int secondsPerMinute = 60;
 

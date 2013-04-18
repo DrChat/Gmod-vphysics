@@ -84,22 +84,22 @@ int g_CacheHits=0;
 #else
 #define spe_cache_read(ea)		\
 ({								\
-    int set, idx, line, byte;					\
-    _spe_cache_nway_lookup_(ea, set, idx);			\
+	int set, idx, line, byte;					\
+	_spe_cache_nway_lookup_(ea, set, idx);			\
 								\
-    if (btUnlikely(idx < 0)) {					\
-        ++g_CacheMisses;                        \
-	    idx = _spe_cache_miss_(ea, set, -1);			\
-        spu_writech(22, SPE_CACHE_SET_TAGMASK(set));		\
-        spu_mfcstat(MFC_TAG_UPDATE_ALL);			\
-    } 								\
-    else                            \
-    {                               \
-        ++g_CacheHits;              \
-    }                               \
-    line = _spe_cacheline_num_(set, idx);			\
-    byte = _spe_cacheline_byte_offset_(ea);			\
-    (void *) &spe_cache_mem[line + byte];			\
+	if (btUnlikely(idx < 0)) {					\
+		++g_CacheMisses;                        \
+		idx = _spe_cache_miss_(ea, set, -1);			\
+		spu_writech(22, SPE_CACHE_SET_TAGMASK(set));		\
+		spu_mfcstat(MFC_TAG_UPDATE_ALL);			\
+	} 								\
+	else                            \
+	{                               \
+		++g_CacheHits;              \
+	}                               \
+	line = _spe_cacheline_num_(set, idx);			\
+	byte = _spe_cacheline_byte_offset_(ea);			\
+	(void *) &spe_cache_mem[line + byte];			\
 })
 
 #endif
@@ -199,18 +199,18 @@ btAlignedObjectArray<CollisionTask_LocalStoreMemory*> sLocalStorePointers;
 
 void* createCollisionLocalStoreMemory()
 {
-    CollisionTask_LocalStoreMemory* localStore = (CollisionTask_LocalStoreMemory*)btAlignedAlloc( sizeof(CollisionTask_LocalStoreMemory),16);
-    sLocalStorePointers.push_back(localStore);
-    return localStore;
+	CollisionTask_LocalStoreMemory* localStore = (CollisionTask_LocalStoreMemory*)btAlignedAlloc( sizeof(CollisionTask_LocalStoreMemory),16);
+	sLocalStorePointers.push_back(localStore);
+	return localStore;
 }
 
 void deleteCollisionLocalStoreMemory()
 {
-    for (int i=0;i<sLocalStorePointers.size();i++)
-    {
-        btAlignedFree(sLocalStorePointers[i]);
-    }
-    sLocalStorePointers.clear();
+	for (int i=0;i<sLocalStorePointers.size();i++)
+	{
+		btAlignedFree(sLocalStorePointers[i]);
+	}
+	sLocalStorePointers.clear();
 }
 
 #endif
@@ -396,7 +396,7 @@ void btConvexPlaneCollideSingleContact (SpuCollisionPairInput* wuInput, Collisio
 	btConvexShape* convexShape = (btConvexShape*) wuInput->m_spuCollisionShapes[0];
 	btStaticPlaneShape* planeShape = (btStaticPlaneShape*) wuInput->m_spuCollisionShapes[1];
 
-    bool hasCollision = false;
+	bool hasCollision = false;
 	const btVector3& planeNormal = planeShape->getPlaneNormal();
 	const btScalar& planeConstant = planeShape->getPlaneConstant();
 	

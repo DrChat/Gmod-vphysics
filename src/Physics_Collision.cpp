@@ -15,7 +15,7 @@
 
 #define COLLISION_MARGIN 0.004 // 4 mm
 
-static ConVar vcollide_opimize_meshes("vcollide_optimize_meshes", "1", FCVAR_ARCHIVE, "Optimize physics meshes when they're loaded (increases loading times)");
+static ConVar vcollide_opimize_meshes("vcollide_optimize_meshes", "0", FCVAR_ARCHIVE, "Optimize physics meshes when they're loaded (increases loading times)");
 
 /****************************
 * CLASS CCollisionQuery
@@ -642,7 +642,7 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 	btTransform bullEndT(btMatrix3x3::getIdentity(), bullEndVec);
 
 	btCollisionWorld::ClosestConvexResultCallback cb(bullStartVec, bullEndVec);
-	// btCollisionWorld::objectQuerySingle(pSweepObject, bullStartT, bullEndT, object, shape, transform, cb, 0);
+	//btCollisionWorld::objectQuerySingle(pSweepObject, bullStartT, bullEndT, object, shape, transform, cb, 0);
 
 	// Cleanup
 	delete object;

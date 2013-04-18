@@ -92,8 +92,12 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuDefines.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedCode.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedDefs.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\btIThreadPool.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\btPosixThreadPool.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\btWin32ThreadPool.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PpuAddressSpace.h" />
@@ -118,8 +122,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphase.cpp" />
+    <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.cpp" />
+    <ClCompile Include="..\..\src\BulletMultiThreaded\btWin32ThreadPool.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\SequentialThreadSupport.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuCollisionObjectWrapper.cpp" />

@@ -4,6 +4,7 @@
 #include "Physics_Object.h"
 #include "Physics_Environment.h"
 #include "convert.h"
+#include "math.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -50,7 +51,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	ConvertPosToBull(velocity, targetSpeedBull);
 
 	// If the object hasn't moved, abort.
-	if (targetSpeedBull.distance2(m_currentSpeed) < 1e-6 && targetPositionBull.distance2(m_targetPosition) < 1e-6) {
+	if (targetSpeedBull.distance2(m_currentSpeed) < FLT_EPSILON && targetPositionBull.distance2(m_targetPosition) < FLT_EPSILON) {
 		return;
 	}
 
@@ -171,8 +172,7 @@ void CPlayerController::GetShadowVelocity(Vector *velocity) {
 	if (!velocity) return;
 
 	btRigidBody *body = m_pObject->GetObject();
-	//ConvertPosToHL(body->getLinearVelocity(), *velocity);
-	*velocity = Vector(0, 0, 0);
+	ConvertPosToHL(body->getLinearVelocity(), *velocity);
 }
 
 IPhysicsObject *CPlayerController::GetObject() {
@@ -218,9 +218,6 @@ void CPlayerController::Tick(float deltaTime) {
 	btRigidBody *body = m_pObject->GetObject();
 	CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
 
-	float psiScale = pEnv->GetInvPSIScale();
-	if (!psiScale) return;
-
 	btTransform transform;
 	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 	btVector3 delta_position = m_targetPosition - transform.getOrigin();
@@ -244,8 +241,19 @@ void CPlayerController::Tick(float deltaTime) {
 	}
 	*/
 
+	float frac = 1;
+	if (m_secondsToArrival > 0) {
+		frac = deltaTime / m_secondsToArrival;
+		if (frac > 1) frac = 1;
+	}
+
+	m_secondsToArrival -= deltaTime;
+	if (m_secondsToArrival < 0) m_secondsToArrival = 0;
+
+	if (frac <= 0) return;
+
 	btVector3 speed = body->getLinearVelocity();
-	ComputeController(speed, delta_position, m_maxSpeed, psiScale / deltaTime, m_dampFactor);
+	ComputeController(speed, delta_position, m_maxSpeed, SAFE_DIVIDE(frac, deltaTime), m_dampFactor);
 	body->setLinearVelocity(speed);
 
 	m_lastImpulse = speed; // FIXME: This is wrong.

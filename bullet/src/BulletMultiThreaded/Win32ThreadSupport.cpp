@@ -37,7 +37,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-void SetThreadName(DWORD dwThreadID, const char* threadName)
+static void SetThreadName(DWORD dwThreadID, const char* threadName)
 {
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
@@ -73,7 +73,7 @@ Win32ThreadSupport::~Win32ThreadSupport()
 	stopSPU();
 }
 
-DWORD WINAPI ThreadFunc(LPVOID lpParam) 
+static DWORD WINAPI ThreadFunc(LPVOID lpParam) 
 {
 	Win32ThreadSupport::btSpuStatus *status = (Win32ThreadSupport::btSpuStatus *)lpParam;
 
@@ -187,7 +187,6 @@ bool Win32ThreadSupport::isTaskCompleted(unsigned int *puiArgument0, unsigned in
 	
 	if ((res != STATUS_TIMEOUT) && (res != WAIT_FAILED))
 	{
-		btAssert(res != WAIT_FAILED);
 		last = res - WAIT_OBJECT_0;
 
 		btSpuStatus& spuStatus = m_activeSpuStatus[last];
@@ -234,14 +233,14 @@ void Win32ThreadSupport::startThreads(const Win32ThreadConstructionInfo& threadC
 
 	m_maxNumTasks = threadConstructionInfo.m_numThreads;
 
-	for (int i=0; i < threadConstructionInfo.m_numThreads; i++)
+	for (int i = 0; i < threadConstructionInfo.m_numThreads; i++)
 	{
 		printf("starting thread %d\n", i);
 
 		btSpuStatus&	spuStatus = m_activeSpuStatus[i];
 
-		LPSECURITY_ATTRIBUTES lpThreadAttributes=NULL;
-		SIZE_T dwStackSize=threadConstructionInfo.m_threadStackSize;
+		LPSECURITY_ATTRIBUTES lpThreadAttributes = NULL;
+		SIZE_T dwStackSize = threadConstructionInfo.m_threadStackSize;
 		LPTHREAD_START_ROUTINE lpStartAddress = &ThreadFunc;
 		LPVOID lpParameter = &spuStatus;
 		DWORD dwCreationFlags = 0;

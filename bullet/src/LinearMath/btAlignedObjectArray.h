@@ -14,34 +14,34 @@ subject to the following restrictions:
 */
 
 
-#ifndef BT_OBJECT_ARRAY__
-#define BT_OBJECT_ARRAY__
+#ifndef BT_ALIGNED_OBJECT_ARRAY_H
+#define BT_ALIGNED_OBJECT_ARRAY_H
 
 #include "btScalar.h" // has definitions like SIMD_FORCE_INLINE
 #include "btAlignedAllocator.h"
 
-///If the platform doesn't support placement new, you can disable BT_USE_PLACEMENT_NEW
-///then the btAlignedObjectArray doesn't support objects with virtual methods, and non-trivial constructors/destructors
-///You can enable BT_USE_MEMCPY, then swapping elements in the array will use memcpy instead of operator=
-///see discussion here: http://continuousphysics.com/Bullet/phpBB2/viewtopic.php?t=1231 and
-///http://www.continuousphysics.com/Bullet/phpBB2/viewtopic.php?t=1240
+// If the platform doesn't support placement new, you can disable BT_USE_PLACEMENT_NEW
+// then the btAlignedObjectArray doesn't support objects with virtual methods, and non-trivial constructors/destructors
+// You can enable BT_USE_MEMCPY, then swapping elements in the array will use memcpy instead of operator=
+// see discussion here: http://continuousphysics.com/Bullet/phpBB2/viewtopic.php?t=1231 and
+// http://www.continuousphysics.com/Bullet/phpBB2/viewtopic.php?t=1240
 
 #define BT_USE_PLACEMENT_NEW 1
 //#define BT_USE_MEMCPY 1 // disable, because it is cumbersome to find out for each platform where memcpy is defined. It can be in <memory.h> or <string.h> or otherwise...
 #define BT_ALLOW_ARRAY_COPY_OPERATOR // enabling this can accidently perform deep copies of data if you are not careful
 
 #ifdef BT_USE_MEMCPY
-#include <memory.h>
-#include <string.h>
+	#include <memory.h>
+	#include <string.h>
 #endif //BT_USE_MEMCPY
 
 #ifdef BT_USE_PLACEMENT_NEW
-#include <new>
+	#include <new>
 #endif // BT_USE_PLACEMENT_NEW
 
 
-///The btAlignedObjectArray template class uses a subset of the stl::vector interface for its methods
-///It is developed to replace stl::vector to avoid portability issues, including STL alignment issues to add SIMD/SSE data
+// The btAlignedObjectArray template class uses a subset of the stl::vector interface for its methods
+// It is developed to replace stl::vector to avoid portability issues, including STL alignment issues to add SIMD/SSE data
 template <typename T> 
 class btAlignedObjectArray
 {
@@ -69,6 +69,7 @@ class btAlignedObjectArray
 		{
 			return (size ? size*2 : 1);
 		}
+
 		SIMD_FORCE_INLINE	void	copy(int start, int end, T* dest) const
 		{
 			int i;
@@ -77,17 +78,18 @@ class btAlignedObjectArray
 				new (&dest[i]) T(m_data[i]);
 #else
 				dest[i] = m_data[i];
-#endif //BT_USE_PLACEMENT_NEW
+#endif // BT_USE_PLACEMENT_NEW
 		}
 
 		SIMD_FORCE_INLINE	void	init()
 		{
-			//PCK: added this line
+			// PCK: added this line
 			m_ownsMemory = true;
 			m_data = 0;
 			m_size = 0;
 			m_capacity = 0;
 		}
+
 		SIMD_FORCE_INLINE	void	destroy(int first, int last)
 		{
 			int i;
@@ -107,7 +109,7 @@ class btAlignedObjectArray
 		SIMD_FORCE_INLINE	void	deallocate()
 		{
 			if(m_data)	{
-				//PCK: enclosed the deallocation in this block
+				// PCK: enclosed the deallocation in this block
 				if (m_ownsMemory)
 				{
 					m_allocator.deallocate(m_data);
@@ -128,7 +130,7 @@ class btAlignedObjectArray
 			clear();
 		}
 
-		///Generally it is best to avoid using the copy constructor of an btAlignedObjectArray, and use a (const) reference to the array instead.
+		// Generally it is best to avoid using the copy constructor of an btAlignedObjectArray, and use a (const) reference to the array instead.
 		btAlignedObjectArray(const btAlignedObjectArray& otherArray)
 		{
 			init();
@@ -150,6 +152,7 @@ class btAlignedObjectArray
 		{
 			btAssert(n>=0);
 			btAssert(n<size());
+
 			return m_data[n];
 		}
 
@@ -157,6 +160,7 @@ class btAlignedObjectArray
 		{
 			btAssert(n>=0);
 			btAssert(n<size());
+
 			return m_data[n];
 		}
 
@@ -171,11 +175,12 @@ class btAlignedObjectArray
 		{
 			btAssert(n>=0);
 			btAssert(n<size());
+
 			return m_data[n];
 		}
 		
 
-		///clear the array, deallocated memory. Generally it is better to use array.resize(0), to reduce performance overhead of run-time memory (de)allocations.
+		// clear the array, deallocated memory. Generally it is better to use array.resize(0), to reduce performance overhead of run-time memory (de)allocations.
 		SIMD_FORCE_INLINE void clear()
 		{
 			destroy(0, size());
@@ -193,25 +198,26 @@ class btAlignedObjectArray
 		}
 
 
-		///resize changes the number of elements in the array. If the new size is larger, the new elements will be constructed using the optional second argument.
-		///when the new number of elements is smaller, the destructor will be called, but memory will not be freed, to reduce performance overhead of run-time memory (de)allocations.
+		// resize changes the number of elements in the array. If the new size is larger, the new elements will be constructed using the optional second argument.
+		// when the new number of elements is smaller, memory will not be freed to reduce performance overhead of run-time memory (de)allocations.
 		SIMD_FORCE_INLINE void resizeNoInitialize(int newsize)
 		{
 			int curSize = size();
 
-			if (newsize < curSize)
-			{
-			} else
+			if (newsize >= curSize)
 			{
 				if (newsize > size())
 				{
 					reserve(newsize);
 				}
-				//leave this uninitialized
+				// leave this uninitialized
 			}
+
 			m_size = newsize;
 		}
 	
+		// resize changes the number of elements in the array. If the new size is larger, the new elements will be constructed using the optional second argument.
+		// when the new number of elements is smaller, the destructor will be called, but memory will not be freed to reduce performance overhead of run-time memory (de)allocations.
 		SIMD_FORCE_INLINE void resize(int newsize, const T& fillData=T())
 		{
 			int curSize = size();
@@ -222,19 +228,17 @@ class btAlignedObjectArray
 				{
 					m_data[i].~T();
 				}
-			} else
+			}
+			else if (newsize > curSize)
 			{
-				if (newsize > size())
-				{
-					reserve(newsize);
-				}
+				reserve(newsize);
+
 #ifdef BT_USE_PLACEMENT_NEW
 				for (int i=curSize;i<newsize;i++)
 				{
-					new ( &m_data[i]) T(fillData);
+					new (&m_data[i]) T(fillData);
 				}
-#endif //BT_USE_PLACEMENT_NEW
-
+#endif // BT_USE_PLACEMENT_NEW
 			}
 
 			m_size = newsize;
@@ -245,8 +249,9 @@ class btAlignedObjectArray
 			int sz = size();
 			if( sz == capacity() )
 			{
-				reserve( allocSize(size()) );
+				reserve( allocSize(sz) );
 			}
+
 			m_size++;
 
 			return m_data[sz];		
@@ -258,8 +263,9 @@ class btAlignedObjectArray
 			int sz = size();
 			if( sz == capacity() )
 			{
-				reserve( allocSize(size()) );
+				reserve( allocSize(sz) );
 			}
+
 			m_size++;
 #ifdef BT_USE_PLACEMENT_NEW
 			new (&m_data[sz]) T(fillValue); //use the in-place new (not really allocating heap memory)
@@ -274,7 +280,7 @@ class btAlignedObjectArray
 			int sz = size();
 			if( sz == capacity() )
 			{
-				reserve( allocSize(size()) );
+				reserve( allocSize(sz) );
 			}
 			
 #ifdef BT_USE_PLACEMENT_NEW
@@ -475,7 +481,7 @@ class btAlignedObjectArray
 			}
 		}
 
-		//PCK: whole function
+		// PCK: whole function
 		void initializeFromBuffer(void *buffer, int size, int capacity)
 		{
 			clear();
@@ -493,4 +499,4 @@ class btAlignedObjectArray
 		}
 };
 
-#endif //BT_OBJECT_ARRAY__
+#endif // BT_ALIGNED_OBJECT_ARRAY_H

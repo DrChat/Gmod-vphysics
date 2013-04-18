@@ -31,16 +31,21 @@ subject to the following restrictions:
 	void *	btDbgAlignedAllocInternal(size_t size, int alignment, int blockType, const char *fileName, int line);
 	void	btDbgAlignedFreeInternal(void *ptr, int blockType);
 
+	// Non-aligned allocations
+	void *	btDbgAllocInternal(size_t size, int blockType, const char *fileName, int line);
+	void	btDbgFreeInternal(void *ptr, int blockType);
+
 	#define _NORMAL_BLOCK 1
 
 	#define btAlignedAlloc(size, alignment) btDbgAlignedAllocInternal(size, alignment, _NORMAL_BLOCK, __FILE__, __LINE__)
 	#define btAlignedFree(ptr) btDbgAlignedFreeInternal(ptr, _NORMAL_BLOCK)
+
+	#define btAlloc(size) btDbgAllocInternal(size, _NORMAL_BLOCK, __FILE__, __LINE__)
+	#define btFree(ptr) btDbgFreeInternal(ptr, _NORMAL_BLOCK)
 	
-	#define btDbgAlignedAlloc(size, alignment, blocktype, filename, line) \
-			btDbgAlignedAllocInternal(size, alignment, blocktype, filename, line)
-	
-	#define btDbgAlignedFree(ptr, blocktype) \
-			btDbgAlignedFreeInternal(ptr, blocktype)
+	// Don't use these macros unless you have a good reason to!
+	#define btDbgAlignedAlloc(size, alignment, blocktype, filename, line) btDbgAlignedAllocInternal(size, alignment, blocktype, filename, line)
+	#define btDbgAlignedFree(ptr, blocktype) btDbgAlignedFreeInternal(ptr, blocktype)
 
 	typedef int size_type;
 
@@ -53,10 +58,21 @@ subject to the following restrictions:
 	void btDbgAlignedAllocSetCustom(btDbgAlignedAllocFunc *allocFunc, btDbgAlignedFreeFunc *freeFunc);
 #else
 	void *	btAlignedAllocInternal(size_t size, int alignment);
-	void	btAlignedFreeInternal(void* ptr);
+	void	btAlignedFreeInternal(void *ptr);
+
+	// Non-aligned allocations
+	void *	btAllocInternal(size_t size);
+	void	btFreeInternal(void *ptr);
 	 
 	#define btAlignedAlloc(size, alignment) btAlignedAllocInternal(size, alignment)
 	#define btAlignedFree(ptr) btAlignedFreeInternal(ptr)
+
+	#define btAlloc(size) btAllocInternal(size)
+	#define btFree(ptr) btFreeInternal(ptr)
+
+	// Don't use these macros unless you have a good reason to!
+	#define btDbgAlignedAlloc(size, alignment, blocktype, filename, line) btAlignedAlloc(size, alignment)
+	#define btDbgAlignedFree(ptr, blocktype) btAlignedFree(ptr)
 	
 	typedef int	size_type;
 	

@@ -14,7 +14,7 @@
 
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// Compute the fraction of time we'll be operating on.
-	float fraction = 1.0;
+	float fraction = 1;
 	if (secondsToArrival > 0) {
 		fraction = dt / secondsToArrival;
 		if (fraction > 1) fraction = 1;
@@ -51,9 +51,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 		}
 	}
 
-	float invDt = SAFE_DIVIDE(1.0f, dt);
 	btVector3 speed = object->getLinearVelocity();
-	ComputeController(speed, delta_position, params.maxSpeed, fraction * invDt, params.dampFactor);
+	ComputeController(speed, delta_position, params.maxSpeed, SAFE_DIVIDE(fraction, dt), params.dampFactor);
 	object->setLinearVelocity(speed);
 
 	params.lastPosition = posbull + (speed * dt);
@@ -73,7 +72,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	btVector3 deltaAngles = axis * angle;
 	btVector3 rot_speed = object->getAngularVelocity();
-	ComputeController(rot_speed, deltaAngles, params.maxAngular, fraction * invDt, params.dampFactor);
+	ComputeController(rot_speed, deltaAngles, params.maxAngular, SAFE_DIVIDE(fraction, dt), params.dampFactor);
 	object->setAngularVelocity(rot_speed);
 
 	return secondsToArrival;
@@ -141,6 +140,8 @@ void CShadowController::Tick(float deltaTime) {
 			m_secondsToArrival -= deltaTime;
 			if (m_secondsToArrival < 0) m_secondsToArrival = 0;
 		} else {
+			// TODO: Need to use secondsToArrival
+
 			btTransform target(m_shadow.targetRotation, m_shadow.targetPosition);
 			m_pObject->GetObject()->setWorldTransform(target);
 		}
@@ -223,11 +224,11 @@ void CShadowController::SetTeleportDistance(float teleportDistance) {
 }
 
 bool CShadowController::AllowsTranslation() {
-	return (m_flags & FLAG_ALLOWPHYSICSMOVEMENT) > 0;
+	return (m_flags & FLAG_ALLOWPHYSICSMOVEMENT) != 0;
 }
 
 bool CShadowController::AllowsRotation() {
-	return (m_flags & FLAG_ALLOWPHYSICSROTATION) > 0;
+	return (m_flags & FLAG_ALLOWPHYSICSROTATION) != 0;
 }
 
 // There are two classes of shadow objects:
@@ -246,7 +247,17 @@ void CShadowController::SetAllowsRotation(bool enable) {
 }
 
 void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {
-	isPhysicallyControlled ? m_flags |= FLAG_PHYSICALLYCONTROLLED : m_flags &= ~(FLAG_PHYSICALLYCONTROLLED);
+	if (isPhysicallyControlled) {
+		m_flags |= FLAG_PHYSICALLYCONTROLLED;
+
+		btRigidBody *body = m_pObject->GetObject();
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	} else {
+		m_flags &= ~(FLAG_PHYSICALLYCONTROLLED);
+
+		btRigidBody *body = m_pObject->GetObject();
+		body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
+	}
 }
 
 // NPCs call this
@@ -304,7 +315,6 @@ void CShadowController::AttachObject() {
 		m_pObject->EnableGravity(false);
 	}
 
-	//body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
 
@@ -317,7 +327,6 @@ void CShadowController::DetachObject() {
 	body->setMassProps(m_savedMass, btvec);
 	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
 
-	//body->setCollisionFlags(body->getCollisionFlags() & ~(btCollisionObject::CF_KINEMATIC_OBJECT));
 	body->setActivationState(ACTIVE_TAG);
 }
 

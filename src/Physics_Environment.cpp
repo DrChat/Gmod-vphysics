@@ -22,8 +22,14 @@
 #endif
 
 // Multithreading stuff
-// Multithreading is so buggy as of now. Leave this disabled.
-#define USE_PARALLEL_DISPATCHER 0 // TODO: Test this on mac and linux
+// NOTE: As of now, the parallel constraint solver has the same performance as the
+// sequential constraint solver, and even in some cases is slower. The parallel dispatcher
+// allows for some speed gain, however.
+// We should try to create a parallel dynamics world that'll support multithreading, and
+// use the sequential dispatcher and constraint solver, as that is where most of the effort
+// in bullet went.
+
+#define USE_PARALLEL_DISPATCHER 0
 #define USE_PARALLEL_SOLVER 0
 
 #if USE_PARALLEL_DISPATCHER || USE_PARALLEL_SOLVER
@@ -214,10 +220,13 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	btDefaultCollisionConstructionInfo cci;
 #if MULTITHREADED
 	// Multithreaded versions cannot dynamically expand this pool. Having a small pool causes props to bounce around.
-	cci.m_defaultMaxPersistentManifoldPoolSize = 65536;
+	cci.m_defaultMaxPersistentManifoldPoolSize = 16384;
 
 	// HACK: Fix to prevent crashing on games with more than 1 environment.
 	static unsigned int uniqueNum = 0;
+
+	// Maximum number of parallel tasks (number of threads in the thread support)
+	// Good to set it to the same amount of CPU cores on the system.
 	static const int maxTasks = 4;
 #endif
 
@@ -265,7 +274,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	#endif
 
 	m_pBulletSolver = new btParallelConstraintSolver(m_pThreadSupportSolver);
-
 #else
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
 #endif

@@ -33,7 +33,7 @@ int gNumManifold = 0;
 	#include <stdio.h>
 #endif
 
-btCollisionDispatcher::btCollisionDispatcher (btCollisionConfiguration* collisionConfiguration): 
+btCollisionDispatcher::btCollisionDispatcher(btCollisionConfiguration* collisionConfiguration): 
 m_dispatcherFlags(btCollisionDispatcher::CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD),
 	m_collisionConfiguration(collisionConfiguration)
 {
@@ -78,26 +78,26 @@ btPersistentManifold*	btCollisionDispatcher::getNewManifold(const btCollisionObj
 		
 	void* mem = 0;
 	
-	if (m_persistentManifoldPoolAllocator->getFreeCount())
+	if (m_persistentManifoldPoolAllocator->getFreeCount() > 0)
 	{
 		mem = m_persistentManifoldPoolAllocator->allocate(sizeof(btPersistentManifold));
 	}
 	else
 	{
-		//we got a pool memory overflow, by default we fallback to dynamically allocate memory. If we require a contiguous contact pool then assert.
+		// we got a pool memory overflow, by default we fallback to dynamically allocate memory. If we require a contiguous contact pool then assert.
 		if ((m_dispatcherFlags & CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION) == 0)
 		{
-			mem = btAlignedAlloc(sizeof(btPersistentManifold),16);
+			mem = btAlignedAlloc(sizeof(btPersistentManifold), 16);
 		}
 		else
 		{
 			btAssert(0);
-			//make sure to increase the m_defaultMaxPersistentManifoldPoolSize in the btDefaultCollisionConstructionInfo/btDefaultCollisionConfiguration
+			// make sure to increase the m_defaultMaxPersistentManifoldPoolSize in the btDefaultCollisionConstructionInfo/btDefaultCollisionConfiguration
 			return 0;
 		}
 	}
 
-	btPersistentManifold* manifold = new(mem) btPersistentManifold (body0, body1,0, contactBreakingThreshold, contactProcessingThreshold);
+	btPersistentManifold* manifold = new(mem) btPersistentManifold(body0, body1, 0, contactBreakingThreshold, contactProcessingThreshold);
 	manifold->m_index1a = m_manifoldsPtr.size();
 	m_manifoldsPtr.push_back(manifold);
 
@@ -147,12 +147,12 @@ btCollisionAlgorithm* btCollisionDispatcher::findAlgorithm(const btCollisionObje
 
 bool	btCollisionDispatcher::needsResponse(const btCollisionObject* body0, const btCollisionObject* body1)
 {
-	//here you can do filtering
-	bool hasResponse = 
-		(body0->hasContactResponse() && body1->hasContactResponse());
-	//no response between two static/kinematic bodies:
-	hasResponse = hasResponse &&
-		((!body0->isStaticOrKinematicObject()) ||(! body1->isStaticOrKinematicObject()));
+	// here you can do filtering
+	bool hasResponse = (body0->hasContactResponse() && body1->hasContactResponse());
+
+	// no response between two static/kinematic bodies:
+	hasResponse = hasResponse && ((!body0->isStaticOrKinematicObject()) || (!body1->isStaticOrKinematicObject()));
+
 	return hasResponse;
 }
 
@@ -180,7 +180,7 @@ bool	btCollisionDispatcher::needsCollision(const btCollisionObject* body0, const
 	else if (!body0->checkCollideWith(body1))
 		needsCollision = false;
 	
-	return needsCollision ;
+	return needsCollision;
 
 }
 
@@ -213,7 +213,7 @@ public:
 
 	virtual bool	processOverlap(btBroadphasePair& pair)
 	{
-		(*m_dispatcher->getNearCallback())(pair,*m_dispatcher, m_dispatchInfo);
+		(*m_dispatcher->getNearCallback())(pair, *m_dispatcher, m_dispatchInfo);
 
 		return false;
 	}
@@ -234,42 +234,40 @@ void	btCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairCache* pa
 // by default, Bullet will use this near callback
 void btCollisionDispatcher::defaultNearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& dispatcher, const btDispatcherInfo& dispatchInfo)
 {
-		btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
-		btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
+	btCollisionObject* colObj0 = (btCollisionObject*)collisionPair.m_pProxy0->m_clientObject;
+	btCollisionObject* colObj1 = (btCollisionObject*)collisionPair.m_pProxy1->m_clientObject;
 
-		if (dispatcher.needsCollision(colObj0, colObj1))
+	if (dispatcher.needsCollision(colObj0, colObj1))
+	{
+		btCollisionObjectWrapper obj0Wrap(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(), -1, -1);
+		btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(), -1, -1);
+
+		// dispatcher will keep algorithms persistent in the collision pair
+		if (!collisionPair.m_algorithm)
 		{
-			btCollisionObjectWrapper obj0Wrap(0, colObj0->getCollisionShape(), colObj0, colObj0->getWorldTransform(),-1,-1);
-			btCollisionObjectWrapper obj1Wrap(0, colObj1->getCollisionShape(), colObj1, colObj1->getWorldTransform(),-1,-1);
-
-
-			// dispatcher will keep algorithms persistent in the collision pair
-			if (!collisionPair.m_algorithm)
-			{
-				collisionPair.m_algorithm = dispatcher.findAlgorithm(&obj0Wrap, &obj1Wrap);
-			}
-
-			if (collisionPair.m_algorithm)
-			{
-				btManifoldResult contactPointResult(&obj0Wrap, &obj1Wrap);
-				
-				if (dispatchInfo.m_dispatchFunc == 		btDispatcherInfo::DISPATCH_DISCRETE)
-				{
-					//discrete collision detection query
-					
-					collisionPair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, dispatchInfo, &contactPointResult);
-				}
-				else
-				{
-					//continuous collision detection query, time of impact (toi)
-					btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
-					if (dispatchInfo.m_timeOfImpact > toi)
-						dispatchInfo.m_timeOfImpact = toi;
-
-				}
-			}
+			collisionPair.m_algorithm = dispatcher.findAlgorithm(&obj0Wrap, &obj1Wrap);
 		}
 
+		if (collisionPair.m_algorithm)
+		{
+			btManifoldResult contactPointResult(&obj0Wrap, &obj1Wrap);
+			
+			if (dispatchInfo.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE)
+			{
+				//discrete collision detection query
+				
+				collisionPair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, dispatchInfo, &contactPointResult);
+			}
+			else
+			{
+				//continuous collision detection query, time of impact (toi)
+				btScalar toi = collisionPair.m_algorithm->calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, &contactPointResult);
+				if (dispatchInfo.m_timeOfImpact > toi)
+					dispatchInfo.m_timeOfImpact = toi;
+
+			}
+		}
+	}
 }
 
 void* btCollisionDispatcher::allocateCollisionAlgorithm(int size)

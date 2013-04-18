@@ -109,8 +109,8 @@ public:
 
 	struct CreateFunc :public 	btCollisionAlgorithmCreateFunc
 	{
-        virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
- 		{
+		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
+		{
 			void* mem = ci.m_dispatcher1->allocateCollisionAlgorithm(sizeof(SpuContactManifoldCollisionAlgorithm));
 			return new(mem) SpuContactManifoldCollisionAlgorithm(ci, body0Wrap->getCollisionObject(), body1Wrap->getCollisionObject());
 		}

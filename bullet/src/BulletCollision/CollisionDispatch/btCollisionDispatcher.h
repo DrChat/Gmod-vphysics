@@ -121,7 +121,7 @@ public:
 	
 	virtual bool	needsResponse(const btCollisionObject* body0, const btCollisionObject* body1);
 	
-	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher) ;
+	virtual void	dispatchAllCollisionPairs(btOverlappingPairCache* pairCache, const btDispatcherInfo& dispatchInfo, btDispatcher* dispatcher);
 
 	void	setNearCallback(btNearCallback	nearCallback)
 	{

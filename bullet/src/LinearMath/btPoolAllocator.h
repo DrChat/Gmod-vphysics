@@ -19,14 +19,14 @@ subject to the following restrictions:
 #include "btScalar.h"
 #include "btAlignedAllocator.h"
 
-///The btPoolAllocator class allows to efficiently allocate a large pool of objects, instead of dynamically allocating them separately.
+// The btPoolAllocator class allows to efficiently allocate a large pool of objects, instead of dynamically allocating them separately.
 class btPoolAllocator
 {
 	int				m_elemSize;
 	int				m_maxElements;
 	int				m_freeCount;
-	void*			m_firstFree;
-	unsigned char*	m_pool;
+	void *			m_firstFree;
+	unsigned char *	m_pool;
 
 public:
 
@@ -34,22 +34,22 @@ public:
 		:m_elemSize(elemSize),
 		m_maxElements(maxElements)
 	{
-		m_pool = (unsigned char*) btAlignedAlloc( static_cast<unsigned int>(m_elemSize*m_maxElements),16);
+		m_pool = (unsigned char *)btAlignedAlloc(static_cast<unsigned int>(m_elemSize * m_maxElements), 16);
 
-		unsigned char* p = m_pool;
-        m_firstFree = p;
-        m_freeCount = m_maxElements;
-        int count = m_maxElements;
-        while (--count) {
-            *(void**)p = (p + m_elemSize);
-            p += m_elemSize;
-        }
-        *(void**)p = 0;
-    }
+		unsigned char *p = m_pool;
+		m_firstFree = p;
+		m_freeCount = m_maxElements;
+		int count = m_maxElements;
+		while (--count) {
+			*(void **)p = (p + m_elemSize);
+			p += m_elemSize;
+		}
+		*(void **)p = 0;
+	}
 
 	~btPoolAllocator()
 	{
-		btAlignedFree( m_pool);
+		btAlignedFree(m_pool);
 	}
 
 	int	getFreeCount() const
@@ -67,38 +67,40 @@ public:
 		return m_maxElements;
 	}
 
-	void*	allocate(int size)
+	void *	allocate(int size)
 	{
-		// release mode fix
 		(void)size;
+
 		btAssert(!size || size<=m_elemSize);
 		btAssert(m_freeCount>0);
-        void* result = m_firstFree;
-        m_firstFree = *(void**)m_firstFree;
-        --m_freeCount;
-        return result;
+		void *result = m_firstFree;
+		m_firstFree = *(void **)m_firstFree;
+		--m_freeCount;
+		return result;
 	}
 
-	bool validPtr(void* ptr)
+	bool validPtr(void *ptr)
 	{
-		if (ptr) {
-			if (((unsigned char*)ptr >= m_pool && (unsigned char*)ptr < m_pool + m_maxElements * m_elemSize))
+		if (ptr)
+		{
+			if (((unsigned char *)ptr >= m_pool && (unsigned char *)ptr < m_pool + m_maxElements * m_elemSize))
 			{
 				return true;
 			}
 		}
+
 		return false;
 	}
 
-	void	freeMemory(void* ptr)
+	void	freeMemory(void *ptr)
 	{
 		 if (ptr) {
-            btAssert((unsigned char*)ptr >= m_pool && (unsigned char*)ptr < m_pool + m_maxElements * m_elemSize);
+			btAssert((unsigned char *)ptr >= m_pool && (unsigned char *)ptr < m_pool + m_maxElements * m_elemSize);
 
-            *(void**)ptr = m_firstFree;
-            m_firstFree = ptr;
-            ++m_freeCount;
-        }
+			*(void **)ptr = m_firstFree;
+			m_firstFree = ptr;
+			++m_freeCount;
+		}
 	}
 
 	int	getElementSize() const
@@ -106,12 +108,12 @@ public:
 		return m_elemSize;
 	}
 
-	unsigned char*	getPoolAddress()
+	unsigned char *	getPoolAddress()
 	{
 		return m_pool;
 	}
 
-	const unsigned char*	getPoolAddress() const
+	const unsigned char *	getPoolAddress() const
 	{
 		return m_pool;
 	}

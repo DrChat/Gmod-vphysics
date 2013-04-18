@@ -19,10 +19,6 @@ subject to the following restrictions:
 #include "btScalar.h"
 #include "btMinMax.h"
 
-
-
-
-
 #if defined (__CELLOS_LV2) && defined (__SPU__)
 #include <altivec.h>
 #endif
@@ -75,7 +71,6 @@ public:
   
 // Dr. Chat: Applied fix @ http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?t=8915
 #if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON)
-
 	// Set Vector 
 	SIMD_FORCE_INLINE btQuadWord(const btSimdFloat4 vec)
 	{
@@ -96,7 +91,6 @@ public:
 		
 		return *this;
 	}
-	
 #endif
 
   /**@brief Return the x value */
@@ -124,13 +118,13 @@ public:
 
 	//SIMD_FORCE_INLINE btScalar&       operator[](int i)       { return (&m_floats[0])[i];	}      
 	//SIMD_FORCE_INLINE const btScalar& operator[](int i) const { return (&m_floats[0])[i]; }
-	///operator btScalar*() replaces operator[], using implicit conversion. We added operator != and operator == to avoid pointer comparisons.
+	// operator btScalar*() replaces operator[], using implicit conversion. We added operator != and operator == to avoid pointer comparisons.
 	SIMD_FORCE_INLINE	operator       btScalar *()       { return &m_floats[0]; }
 	SIMD_FORCE_INLINE	operator const btScalar *() const { return &m_floats[0]; }
 
 	SIMD_FORCE_INLINE	bool	operator==(const btQuadWord& other) const
 	{
-#ifdef BT_USE_SSE
+#if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
 		return (0xf == _mm_movemask_ps((__m128)_mm_cmpeq_ps(mVec128, other.mVec128)));
 #else 
 		return ((m_floats[3]==other.m_floats[3]) && 

@@ -14,10 +14,12 @@ using namespace GarrysMod::Lua;
 IPhysicsCollision1 *	g_pPhysCollision = NULL;
 
 int lPhysCollisionCollideSetScale(lua_State *state) {
+	// TODO
 	return 0;
 }
 
 int lPhysCollisionCollideGetScale(lua_State *state) {
+	// TODO
 	return 0;
 }
 

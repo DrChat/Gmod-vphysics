@@ -380,16 +380,16 @@ void	btHashedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback*
 	int i;
 
 //	printf("m_overlappingPairArray.size()=%d\n", m_overlappingPairArray.size());
-	for (i=0;i<m_overlappingPairArray.size();)
+	for (i = 0; i < m_overlappingPairArray.size();)
 	{
-	
 		btBroadphasePair* pair = &m_overlappingPairArray[i];
 		if (callback->processOverlap(*pair))
 		{
 			removeOverlappingPair(pair->m_pProxy0, pair->m_pProxy1, dispatcher);
 
 			gOverlappingPairs--;
-		} else
+		}
+		else
 		{
 			i++;
 		}
@@ -528,7 +528,8 @@ void	btSortedOverlappingPairCache::processAllOverlappingPairs(btOverlapCallback*
 			m_overlappingPairArray.swap(i, m_overlappingPairArray.size()-1);
 			m_overlappingPairArray.pop_back();
 			gOverlappingPairs--;
-		} else
+		}
+		else
 		{
 			i++;
 		}
