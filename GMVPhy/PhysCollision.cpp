@@ -13,13 +13,40 @@ using namespace GarrysMod::Lua;
 
 IPhysicsCollision1 *	g_pPhysCollision = NULL;
 
+//
+// Name: physcollision.CollideSetScale
+// Desc: Sets the scale of the specified collision mesh
+// Arg1: CPhysCollide|collide|The collision mesh
+// Arg2: Vector|scale|The scale to scale by. Vector(1,1,1) is normal scale.
+// Ret1: 
+//
 int lPhysCollisionCollideSetScale(lua_State *state) {
-	// TODO
+	CPhysCollide *pCollide = Get_PhysCollide(state, 1);
+	Vector *scale = Get_Vector(state, 2);
+	if (pCollide && scale) {
+		g_pPhysCollision->CollideSetScale(pCollide, *scale);
+	}
+
 	return 0;
 }
 
+//
+// Name: physcollision.CollideGetScale
+// Desc: Gets the scale of the specified collision mesh
+// Arg1: CPhysCollide|collide|The collision mesh
+// Ret1: Vector|scale|The scale. Vector(1,1,1) is normal scale.
+//
 int lPhysCollisionCollideGetScale(lua_State *state) {
-	// TODO
+	CPhysCollide *pCollide = Get_PhysCollide(state, 1);
+	
+	if (pCollide) {
+		Vector scale;
+		g_pPhysCollision->CollideGetScale(pCollide, scale);
+		Push_Vector(state, scale);
+
+		return 1;
+	}
+	
 	return 0;
 }
 
@@ -35,8 +62,8 @@ int Init_PhysCollision(lua_State *state) {
 
 	LUA->PushSpecial(SPECIAL_GLOB);
 		LUA->CreateTable();
-			LUA->PushCFunction(lPhysCollisionCollideSetScale); LUA->SetField(-2, "CollideSetScale");
-			LUA->PushCFunction(lPhysCollisionCollideGetScale); LUA->SetField(-2, "CollideGetScale");
+			LUA->PushCFunction(lPhysCollisionCollideSetScale);	LUA->SetField(-2, "CollideSetScale");
+			LUA->PushCFunction(lPhysCollisionCollideGetScale);	LUA->SetField(-2, "CollideGetScale");
 		LUA->SetField(-2, "physcollision");
 	LUA->Pop();
 

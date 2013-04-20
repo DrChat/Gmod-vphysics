@@ -735,6 +735,10 @@ const CPhysCollide *CPhysicsObject::GetCollide() const {
 	return (CPhysCollide *)m_pObject->getCollisionShape();
 }
 
+CPhysCollide *CPhysicsObject::GetCollide() {
+	return (CPhysCollide *)m_pObject->getCollisionShape();
+}
+
 const char *CPhysicsObject::GetName() const {
 	return m_pName;
 }

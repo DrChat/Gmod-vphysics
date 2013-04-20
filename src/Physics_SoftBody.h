@@ -21,7 +21,9 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 		// UNEXPOSED FUNCTIONS
 	public:
-		void	Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody);
+		void			Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody);
+
+		btSoftBody *	GetSoftBody();
 
 	private:
 		CPhysicsEnvironment *	m_pEnv;

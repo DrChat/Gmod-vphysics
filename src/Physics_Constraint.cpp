@@ -323,7 +323,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
 	btTransform constraintToReference, constraintToAttached;
-	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // constraintToReference is ALwAYS the identity matrix.
+	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // constraintToReference is ALWAYS the identity matrix.
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
 	btTransform bullAFrame = constraintToReference;
@@ -335,6 +335,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 
 	// Set axis limits
 	// swing span 1, swing span 2, twist limit
+	// Bullet only supports setting the maximum limits, not minimums!
 	
 
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
@@ -361,10 +362,10 @@ CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	btGeneric6DofConstraint *pWeld = new btGeneric6DofConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(),
 																pObjRef->GetObject()->getWorldTransform().inverse() * pObjAtt->GetObject()->getWorldTransform(),
 																btTransform::getIdentity(), true);
-	pWeld->setLinearLowerLimit(btVector3(0,0,0));
-	pWeld->setLinearUpperLimit(btVector3(0,0,0));
-	pWeld->setAngularLowerLimit(btVector3(0,0,0));
-	pWeld->setAngularUpperLimit(btVector3(0,0,0));
+	pWeld->setLinearLowerLimit(btVector3(0, 0, 0));
+	pWeld->setLinearUpperLimit(btVector3(0, 0, 0));
+	pWeld->setAngularLowerLimit(btVector3(0, 0, 0));
+	pWeld->setAngularUpperLimit(btVector3(0, 0, 0));
 
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
 }
@@ -384,7 +385,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform bullFrameInA = btTransform::getIdentity();
 	btTransform bullFrameInB = btTransform::getIdentity();
 	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef, 0));
-	bullFrameInB.setRotation(pObjAtt->GetObject()->getWorldTransform().getRotation());
+	bullFrameInB.setRotation(pObjAtt->GetObject()->getWorldTransform().getRotation()); // This is wrong. Should find rot from attached object to ref object.
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullFrameInA, bullFrameInB, true);
 

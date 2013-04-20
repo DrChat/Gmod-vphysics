@@ -30,17 +30,20 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 		// You need to call EnableGravity(false) first so we stop using the world's gravity.
 		// To use the world's gravity again, call EnableGravity(true)
 		// (Yes I know it's confusing, nothing I can do about it)
-		virtual void	SetLocalGravity(const Vector &gravityVector) = 0;
-		virtual Vector	GetLocalGravity() const = 0;
+		virtual void		SetLocalGravity(const Vector &gravityVector) = 0;
+		virtual Vector		GetLocalGravity() const = 0;
 		
 		// Purpose: Set/Get the speeds at which any object is travelling slower than will fall asleep.
 		// linear velocity is in in/s and angular velocity is in degrees/s
 		// Parameters are optional in both functions.
-		virtual void	SetSleepThresholds(const float *linVel, const float *angVel) = 0;
-		virtual void	GetSleepThresholds(float *linVel, float *angVel) const = 0;
+		virtual void		SetSleepThresholds(const float *linVel, const float *angVel) = 0;
+		virtual void		GetSleepThresholds(float *linVel, float *angVel) const = 0;
+
+		// Get a modifiable version of the collision mesh we're using.
+		virtual CPhysCollide *	GetCollide() = 0;
 
 		// Call this if you have recently changed the collision shape we're using.
-		virtual void	UpdateCollide() = 0;
+		virtual void		UpdateCollide() = 0;
 };
 
 // A note about CPhysConvex / CPhysCollide:

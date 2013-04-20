@@ -410,9 +410,7 @@ void CPhysicsCollision::CollideSetScale(CPhysCollide *pCollide, const Vector &sc
 		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
 
 		btVector3 bullScale;
-		bullScale.setX(scale.x);
-		bullScale.setY(scale.y);
-		bullScale.setZ(scale.z);
+		ConvertDirectionToBull(scale, bullScale);
 
 		pCompound->setLocalScaling(bullScale);
 	}
@@ -657,7 +655,7 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 }
 
 // Purpose: Recursive function that goes through the entire ledge tree and adds ledges
-void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
+static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
 	if (node->IsTerminal()) {
 		vecOut->AddToTail(node->GetCompactLedge());
 	} else {

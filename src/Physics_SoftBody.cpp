@@ -19,6 +19,7 @@ CPhysicsSoftBody::CPhysicsSoftBody() {
 }
 
 CPhysicsSoftBody::~CPhysicsSoftBody() {
+	m_pEnv->GetBulletEnvironment()->removeSoftBody(m_pSoftBody);
 	delete m_pSoftBody;
 }
 
@@ -27,6 +28,10 @@ void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody) {
 	m_pSoftBody		= pSoftBody;
 
 	pEnv->GetBulletEnvironment()->addSoftBody(m_pSoftBody);
+}
+
+btSoftBody *CPhysicsSoftBody::GetSoftBody() {
+	return m_pSoftBody;
 }
 
 /*************************

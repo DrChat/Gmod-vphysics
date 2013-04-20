@@ -133,6 +133,8 @@ class CPhysicsObject : public IPhysicsObject1 {
 		float								ComputeShadowControl(const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
 
 		const CPhysCollide *				GetCollide() const;
+		CPhysCollide *						GetCollide();
+
 		const char *						GetName() const;
 
 		bool								IsTrigger() const;

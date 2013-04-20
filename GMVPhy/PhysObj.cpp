@@ -42,11 +42,27 @@ int lPhysObjGetLocalGravity(lua_State *state) {
 	return 1;
 }
 
+//
+// Name: PhysObj:GetCollide
+// Desc: Gets the object's current collision mesh.
+// Arg1:
+// Ret1: CPhysCollide|collide|The collision mesh
+//
+int lPhysObjGetCollide(lua_State *state) {
+	IPhysicsObject1 *pObject = Get_PhysObj(state, 1);
+
+	CPhysCollide *pCollide = pObject->GetCollide();
+	Push_PhysCollide(state, pCollide);
+	
+	return 1;
+}
+
 int Init_PhysObj(lua_State *state) {
 	LUA->PushSpecial(SPECIAL_REG);
 		LUA->GetField(-1, "PhysObj");
-			LUA->PushCFunction(lPhysObjSetLocalGravity); LUA->SetField(-2, "SetLocalGravity");
-			LUA->PushCFunction(lPhysObjGetLocalGravity); LUA->SetField(-2, "GetLocalGravity");
+			LUA->PushCFunction(lPhysObjSetLocalGravity);	LUA->SetField(-2, "SetLocalGravity");
+			LUA->PushCFunction(lPhysObjGetLocalGravity);	LUA->SetField(-2, "GetLocalGravity");
+			LUA->PushCFunction(lPhysObjGetCollide);			LUA->SetField(-2, "GetCollide");
 	LUA->Pop(2);
 
 	return 0;

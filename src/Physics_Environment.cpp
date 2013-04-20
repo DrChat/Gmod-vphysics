@@ -324,7 +324,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment, this);
 #endif
 
-	// Durr hack to get ourselves a debug overlay on the client
+	// HACK: Durr hack to get ourselves a debug overlay on the client
 	CreateInterfaceFn engine = Sys_GetFactory("engine");
 	SetDebugOverlay(engine);
 }
@@ -793,6 +793,7 @@ void CPhysicsEnvironment::TraceRay(const Ray_t &ray, unsigned int fMask, IPhysic
 	ConvertPosToBull(ray.m_Start + ray.m_StartOffset, vecStart);
 	ConvertPosToBull(ray.m_Start + ray.m_StartOffset + ray.m_Delta, vecEnd);
 
+	// TODO: Override this class to use the mask and trace filter.
 	btCollisionWorld::ClosestRayResultCallback cb(vecStart, vecEnd);
 	m_pBulletEnvironment->rayTest(vecStart, vecEnd, cb);
 
