@@ -30,6 +30,7 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 		// You need to call EnableGravity(false) first so we stop using the world's gravity.
 		// To use the world's gravity again, call EnableGravity(true)
 		// (Yes I know it's confusing, nothing I can do about it)
+		// This will allow you to override the gravity force acted upon the object.
 		virtual void		SetLocalGravity(const Vector &gravityVector) = 0;
 		virtual Vector		GetLocalGravity() const = 0;
 		
@@ -39,7 +40,7 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 		virtual void		SetSleepThresholds(const float *linVel, const float *angVel) = 0;
 		virtual void		GetSleepThresholds(float *linVel, float *angVel) const = 0;
 
-		// Get a modifiable version of the collision mesh we're using.
+		// Get a modifiable version of the collision mesh we're using. If you change it at all, remember to call UpdateCollide()
 		virtual CPhysCollide *	GetCollide() = 0;
 
 		// Call this if you have recently changed the collision shape we're using.
@@ -63,6 +64,9 @@ abstract_class IPhysicsCollision1 : public IPhysicsCollision {
 		// Untested as of now, but I believe Vector(1,1,1) is normal scale.
 		virtual void			CollideSetScale(CPhysCollide *pCollide, const Vector &scale) = 0;
 		virtual void			CollideGetScale(const CPhysCollide *pCollide, Vector &scale) = 0;
+
+		// New collision shapes
+		// NOTE: VPhysics DOES NOT keep track of these, unlike BBoxes! You must destroy them with DestroyCollide!
 
 		virtual CPhysConvex *	CylinderToConvex(const Vector &mins, const Vector &maxs) = 0;
 		virtual CPhysCollide *	CylinderToCollide(const Vector &mins, const Vector &maxs) = 0;

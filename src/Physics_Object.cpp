@@ -431,6 +431,7 @@ void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angl
 	ConvertRotationToBull(angles, bullAngles);
 	m_pObject->setWorldTransform(btTransform(bullAngles, bullPos) * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
+	// Assumed this is the behavior of IVP. If you teleport an object, you don't want it to be stupidly frozen in the air.
 	if (isTeleport)
 		m_pObject->activate();
 }
@@ -499,6 +500,7 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 		ConvertPosToBull(*velocity, bullvelocity);
 		m_pObject->setLinearVelocity(m_pObject->getLinearVelocity() + bullvelocity);
 	}
+
 	if (angularVelocity) {
 		ConvertAngularImpulseToBull(*angularVelocity, bullangular);
 		m_pObject->setAngularVelocity(m_pObject->getAngularVelocity() + bullangular);
@@ -508,9 +510,11 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 void CPhysicsObject::GetVelocityAtPoint(const Vector &worldPosition, Vector *pVelocity) const {
 	if (!pVelocity) return;
 
-	// FIXME: Doesn't getVelocityInLocalPoint take a vector in local space?
+	Vector localPos;
+	WorldToLocal(&localPos, worldPosition);
+
 	btVector3 vec;
-	ConvertPosToBull(worldPosition, vec);
+	ConvertPosToBull(localPos, vec);
 	ConvertPosToHL(m_pObject->getVelocityInLocalPoint(vec), *pVelocity);
 }
 
@@ -533,7 +537,7 @@ void CPhysicsObject::WorldToLocal(Vector *localPosition, const Vector &worldPosi
 
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
-	VectorITransform(Vector(worldPosition), matrix, *localPosition);
+	VectorITransform(worldPosition, matrix, *localPosition);
 }
 
 void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector &localVector) const {
@@ -541,7 +545,7 @@ void CPhysicsObject::LocalToWorldVector(Vector *worldVector, const Vector &local
 
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
-	VectorRotate(Vector(localVector), matrix, *worldVector);
+	VectorRotate(localVector, matrix, *worldVector);
 }
 
 void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &worldVector) const {
@@ -549,7 +553,7 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 
 	matrix3x4_t matrix;
 	GetPositionMatrix(&matrix);
-	VectorIRotate(Vector(worldVector), matrix, *localVector);
+	VectorIRotate(worldVector, matrix, *localVector);
 }
 
 // These two functions apply an insanely low force!
@@ -748,7 +752,6 @@ bool CPhysicsObject::IsTrigger() const {
 }
 
 void CPhysicsObject::BecomeTrigger() {
-	// TODO: We need to use a ghost object to keep track of any objects entering/exiting us!
 	if (IsTrigger())
 		return;
 
@@ -792,11 +795,12 @@ void CPhysicsObject::RemoveTrigger() {
 }
 
 void CPhysicsObject::TriggerObjectEntered(CPhysicsObject *pObject) {
-	m_pEnv->HandleObjectEnteredTrigger(this, pObject);
+	// Doesn't work.
+	//m_pEnv->HandleObjectEnteredTrigger(this, pObject);
 }
 
 void CPhysicsObject::TriggerObjectExited(CPhysicsObject *pObject) {
-	m_pEnv->HandleObjectExitedTrigger(this, pObject);
+	//m_pEnv->HandleObjectExitedTrigger(this, pObject);
 }
 
 void CPhysicsObject::BecomeHinged(int localAxis) {
@@ -1020,6 +1024,10 @@ void CPhysicsObject::ComputeDragBasis(bool isStatic) {
 	}
 }
 
+btVector3 CPhysicsObject::GetBullMassCenterOffset() const {
+	return ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset.getOrigin();
+}
+
 /************************
 * CREATION FUNCTIONS
 ************************/
@@ -1060,8 +1068,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape, inertia);
 
 	if (pParams) {
-		info.m_linearDamping = pParams->damping;
-		info.m_angularDamping = pParams->rotdamping;
+		//info.m_linearDamping = pParams->damping;
+		//info.m_angularDamping = pParams->rotdamping;
 
 		// FIXME: We should be using inertia values from source. Figure out a proper conversion.
 		// Inertia with props is 1 (always?) and 25 with ragdolls (always?)

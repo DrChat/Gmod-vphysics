@@ -11,8 +11,17 @@ enum ECollisionGroups {
 	COLGROUP_WORLD	= 1<<1,
 };
 
+// Because the old vphysics had to do this.
+struct bboxcache_t {
+	CPhysCollide *	pCollide;
+	Vector			mins, maxs;
+};
+
 class CPhysicsCollision : public IPhysicsCollision1 {
 	public:
+		CPhysicsCollision();
+		~CPhysicsCollision();
+
 		CPhysConvex *			ConvexFromVerts(Vector **pVerts, int vertCount);
 		CPhysConvex *			ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance);
 		float					ConvexVolume(CPhysConvex *pConvex);
@@ -21,8 +30,6 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		void					ConvexFree(CPhysConvex *pConvex);
 		CPhysConvex *			ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron);
 		void					ConvexesFromConvexPolygon(const Vector &vPolyNormal, const Vector *pPoints, int iPointCount, CPhysConvex **pOutput);
-		// Returns an optimized convex from the input convex. May return NULL if failed.
-		CPhysConvex *			OptimizeConvex(CPhysConvex *pConvex);
 
 		CPhysPolysoup *			PolysoupCreate();
 		void					PolysoupDestroy(CPhysPolysoup *pSoup);
@@ -51,6 +58,17 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		void					CollideGetScale(const CPhysCollide *pCollide, Vector &scale);
 		int						CollideIndex(const CPhysCollide *pCollide);
 		int						GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit);
+
+		// Some functions for old vphysics behavior. Do not use anything like these for newer collision shapes.
+
+		CPhysCollide *			GetCachedBBox(const Vector &mins, const Vector &maxs);
+		void					AddCachedBBox(CPhysCollide *pModel, const Vector &mins, const Vector &maxs);
+		bool					IsCachedBBox(CPhysCollide *pModel);
+		void					ClearBBoxCache();
+
+		// API for disabling old vphysics behavior.
+		void					EnableBBoxCache(bool enable);
+		bool					IsBBoxCacheEnabled();
 
 		CPhysConvex *			BBoxToConvex(const Vector &mins, const Vector &maxs);
 		CPhysCollide *			BBoxToCollide(const Vector &mins, const Vector &maxs);
@@ -96,6 +114,10 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 
 		void					OutputDebugInfo(const CPhysCollide *pCollide);
 		unsigned int			ReadStat(int statID);
+
+	private:
+		CUtlVector<bboxcache_t> m_bboxCache;
+		bool					m_enableBBoxCache;
 };
 
 extern CPhysicsCollision g_PhysicsCollision;

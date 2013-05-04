@@ -173,6 +173,8 @@ class CPhysicsObject : public IPhysicsObject1 {
 		float								GetVolume() const { return m_fVolume; }
 		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; } // [0..1] value
 
+		btVector3							GetBullMassCenterOffset() const;
+
 		int									GetLastActivationState() { return m_iLastActivationState; }
 		void								SetLastActivationState(int iState) { m_iLastActivationState = iState; }
 

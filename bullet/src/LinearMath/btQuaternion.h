@@ -494,25 +494,25 @@ public:
    * Slerp interpolates assuming constant velocity.  */
 	btQuaternion slerp(const btQuaternion& q, const btScalar& t) const
 	{
-	  btScalar magnitude = btSqrt(length2() * q.length2()); 
-	  btAssert(magnitude > btScalar(0));
+		btScalar magnitude = btSqrt(length2() * q.length2()); 
+		btAssert(magnitude > btScalar(0));
 
-	btScalar product = dot(q) / magnitude;
-	if (btFabs(product) < btScalar(1))
+		btScalar product = dot(q) / magnitude;
+		if (btFabs(product) < btScalar(1))
 		{
-	  // Take care of long angle case see http://en.wikipedia.org/wiki/Slerp
-	  const btScalar sign = (product < 0) ? btScalar(-1) : btScalar(1);
+			// Take care of long angle case see http://en.wikipedia.org/wiki/Slerp
+			const btScalar sign = (product < 0) ? btScalar(-1) : btScalar(1);
 
-	  const btScalar theta = btAcos(sign * product);
-	  const btScalar s1 = btSin(sign * t * theta);   
-	  const btScalar d = btScalar(1.0) / btSin(theta);
-	  const btScalar s0 = btSin((btScalar(1.0) - t) * theta);
+			const btScalar theta = btAcos(sign * product);
+			const btScalar s1 = btSin(sign * t * theta);   
+			const btScalar d = btScalar(1.0) / btSin(theta);
+			const btScalar s0 = btSin((btScalar(1.0) - t) * theta);
 
-	  return btQuaternion(
-		  (m_floats[0] * s0 + q.x() * s1) * d,
-		  (m_floats[1] * s0 + q.y() * s1) * d,
-		  (m_floats[2] * s0 + q.z() * s1) * d,
-		  (m_floats[3] * s0 + q.m_floats[3] * s1) * d);
+			return btQuaternion(
+				  (m_floats[0] * s0 + q.x() * s1) * d,
+				  (m_floats[1] * s0 + q.y() * s1) * d,
+				  (m_floats[2] * s0 + q.z() * s1) * d,
+				  (m_floats[3] * s0 + q.m_floats[3] * s1) * d);
 		}
 		else
 		{

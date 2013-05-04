@@ -24,6 +24,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	if (secondsToArrival < 0) secondsToArrival = 0;
 
 	if (fraction <= 0) return secondsToArrival;
+	float scale = SAFE_DIVIDE(fraction, dt);
 
 	btTransform transform;
 	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
@@ -35,6 +36,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	btVector3 posbull = transform.getOrigin();
 	btVector3 delta_position = params.targetPosition - posbull;
 
+	// Teleportation
+	// If our distance is greater than teleport distance, teleport instead.
 	if (params.teleportDistance > 0) {
 		btScalar qdist;
 		if (!params.lastPosition.isZero()) {
@@ -52,27 +55,27 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	}
 
 	btVector3 speed = object->getLinearVelocity();
-	ComputeController(speed, delta_position, params.maxSpeed, SAFE_DIVIDE(fraction, dt), params.dampFactor);
+	ComputeController(speed, delta_position, params.maxSpeed, scale, params.dampFactor);
 	object->setLinearVelocity(speed);
 
 	params.lastPosition = posbull + (speed * dt);
 
-	//----------------
+	//-------------------
 	// Rotation
-	//----------------
+	//-------------------
 
 	btVector3 axis;
 	btScalar angle;
 	btTransformUtil::calculateDiffAxisAngleQuaternion(transform.getRotation(), params.targetRotation, axis, angle);
 
-	// So we don't end up having a huge delta angle.
+	// So we don't end up having a huge delta angle (such as instead of doing 379 deg turn, do a -1 deg turn)
 	if (angle > M_PI) {
 		angle -= 2 * M_PI;
 	}
 
 	btVector3 deltaAngles = axis * angle;
 	btVector3 rot_speed = object->getAngularVelocity();
-	ComputeController(rot_speed, deltaAngles, params.maxAngular, SAFE_DIVIDE(fraction, dt), params.dampFactor);
+	ComputeController(rot_speed, deltaAngles, params.maxAngular, scale, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
 
 	return secondsToArrival;
@@ -268,8 +271,8 @@ void CShadowController::GetLastImpulse(Vector *pOut) {
 	*pOut = Vector(0,0,0);
 }
 
-void CShadowController::UseShadowMaterial(bool bUseShadowMaterial) {
-	NOT_IMPLEMENTED
+void CShadowController::UseShadowMaterial(bool enable) {
+	enable ? m_flags |= FLAG_USESHADOWMATERIAL : m_flags &= ~(FLAG_USESHADOWMATERIAL);
 }
 
 void CShadowController::ObjectMaterialChanged(int materialIndex) {

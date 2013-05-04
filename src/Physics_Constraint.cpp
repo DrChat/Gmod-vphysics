@@ -349,8 +349,9 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	btTransform bullAFrame = btTransform::getIdentity();
-	btTransform bullBFrame = btTransform::getIdentity();
+	// FIXME: Position is correct, but rotation isn't
+	btTransform bullAFrame(btQuaternion(bullWorldAxis, 0), bullWorldPosition - pObjRef->GetObject()->getWorldTransform().getOrigin());
+	btTransform bullBFrame(btQuaternion(bullWorldAxis, 0), bullWorldPosition - pObjAtt->GetObject()->getWorldTransform().getOrigin());
 
 	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);

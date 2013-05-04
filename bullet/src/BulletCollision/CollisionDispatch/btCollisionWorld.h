@@ -385,7 +385,7 @@ public:
 		
 		virtual	btScalar	addSingleResult(LocalConvexResult& convexResult, bool normalInWorldSpace)
 		{
-//caller already does the filter on the m_closestHitFraction
+			// caller already does the filter on the m_closestHitFraction
 			btAssert(convexResult.m_hitFraction <= m_closestHitFraction);
 						
 			m_closestHitFraction = convexResult.m_hitFraction;

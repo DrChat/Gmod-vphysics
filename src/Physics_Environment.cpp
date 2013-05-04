@@ -460,7 +460,7 @@ void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
 	NOT_IMPLEMENTED
 	
 	if (m_inSimulation || m_bUseDeleteQueue) {
-
+		// TODO
 	} else {
 		delete pSoftBody;
 		pSoftBody = NULL;

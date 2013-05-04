@@ -141,7 +141,7 @@ m_flags(0)
 
 
 btHingeConstraint::btHingeConstraint(btRigidBody& rbA, btRigidBody& rbB, 
-								     const btTransform& rbAFrame, const btTransform& rbBFrame, bool useReferenceFrameA)
+									 const btTransform& rbAFrame, const btTransform& rbBFrame, bool useReferenceFrameA)
 :btTypedConstraint(HINGE_CONSTRAINT_TYPE, rbA, rbB), m_rbAFrame(rbAFrame), m_rbBFrame(rbBFrame),
 #ifdef _BT_USE_CENTER_LIMIT_
 m_limit(),
@@ -413,7 +413,7 @@ void btHingeConstraint::getInfo2Internal(btConstraintInfo2* info, const btTransf
 		a2.getSkewSymmetricMatrix(angular0, angular1, angular2);
 	}
 	// linear RHS
-    btScalar k = info->fps * info->erp;
+	btScalar k = info->fps * info->erp;
 	if (!m_angularOnly)
 	{
 		for(i = 0; i < 3; i++)
@@ -435,8 +435,8 @@ void btHingeConstraint::getInfo2Internal(btConstraintInfo2* info, const btTransf
 	btVector3 p = trA.getBasis().getColumn(0);
 	btVector3 q = trA.getBasis().getColumn(1);
 	// set the two hinge angular rows 
-    int s3 = 3 * info->rowskip;
-    int s4 = 4 * info->rowskip;
+	int s3 = 3 * info->rowskip;
+	int s4 = 4 * info->rowskip;
 
 	info->m_J1angularAxis[s3 + 0] = p[0];
 	info->m_J1angularAxis[s3 + 1] = p[1];
@@ -451,22 +451,22 @@ void btHingeConstraint::getInfo2Internal(btConstraintInfo2* info, const btTransf
 	info->m_J2angularAxis[s4 + 0] = -q[0];
 	info->m_J2angularAxis[s4 + 1] = -q[1];
 	info->m_J2angularAxis[s4 + 2] = -q[2];
-    // compute the right hand side of the constraint equation. set relative
-    // body velocities along p and q to bring the hinge back into alignment.
-    // if ax1, ax2 are the unit length hinge axes as computed from body1 and
-    // body2, we need to rotate both bodies along the axis u = (ax1 x ax2).
-    // if `theta' is the angle between ax1 and ax2, we need an angular velocity
-    // along u to cover angle erp*theta in one step :
-    //   |angular_velocity| = angle/time = erp*theta / stepsize
-    //                      = (erp*fps) * theta
-    //    angular_velocity  = |angular_velocity| * (ax1 x ax2) / |ax1 x ax2|
-    //                      = (erp*fps) * theta * (ax1 x ax2) / sin(theta)
-    // ...as ax1 and ax2 are unit length. if theta is smallish,
-    // theta ~= sin(theta), so
-    //    angular_velocity  = (erp*fps) * (ax1 x ax2)
-    // ax1 x ax2 is in the plane space of ax1, so we project the angular
-    // velocity to p and q to find the right hand side.
-    btVector3 ax2 = trB.getBasis().getColumn(2);
+	// compute the right hand side of the constraint equation. set relative
+	// body velocities along p and q to bring the hinge back into alignment.
+	// if ax1, ax2 are the unit length hinge axes as computed from body1 and
+	// body2, we need to rotate both bodies along the axis u = (ax1 x ax2).
+	// if `theta' is the angle between ax1 and ax2, we need an angular velocity
+	// along u to cover angle erp*theta in one step :
+	//   |angular_velocity| = angle/time = erp*theta / stepsize
+	//                      = (erp*fps) * theta
+	//    angular_velocity  = |angular_velocity| * (ax1 x ax2) / |ax1 x ax2|
+	//                      = (erp*fps) * theta * (ax1 x ax2) / sin(theta)
+	// ...as ax1 and ax2 are unit length. if theta is smallish,
+	// theta ~= sin(theta), so
+	//    angular_velocity  = (erp*fps) * (ax1 x ax2)
+	// ax1 x ax2 is in the plane space of ax1, so we project the angular
+	// velocity to p and q to find the right hand side.
+	btVector3 ax2 = trB.getBasis().getColumn(2);
 	btVector3 u = ax1.cross(ax2);
 	info->m_constraintError[s3] = k * u.dot(p);
 	info->m_constraintError[s4] = k * u.dot(q);
@@ -775,8 +775,8 @@ void btHingeConstraint::getInfo2InternalUsingFrameOffset(btConstraintInfo2* info
 	// fill three rows
 	tmpA = relA.cross(p);
 	tmpB = relB.cross(p);
-    for (i=0; i<3; i++) info->m_J1angularAxis[s0+i] = tmpA[i];
-    for (i=0; i<3; i++) info->m_J2angularAxis[s0+i] = -tmpB[i];
+	for (i=0; i<3; i++) info->m_J1angularAxis[s0+i] = tmpA[i];
+	for (i=0; i<3; i++) info->m_J2angularAxis[s0+i] = -tmpB[i];
 	tmpA = relA.cross(q);
 	tmpB = relB.cross(q);
 	if(hasStaticBody && getSolveLimit())
@@ -786,7 +786,7 @@ void btHingeConstraint::getInfo2InternalUsingFrameOffset(btConstraintInfo2* info
 		tmpA *= factA;
 	}
 	for (i=0; i<3; i++) info->m_J1angularAxis[s1+i] = tmpA[i];
-    for (i=0; i<3; i++) info->m_J2angularAxis[s1+i] = -tmpB[i];
+	for (i=0; i<3; i++) info->m_J2angularAxis[s1+i] = -tmpB[i];
 	tmpA = relA.cross(ax1);
 	tmpB = relB.cross(ax1);
 	if(hasStaticBody)
@@ -796,7 +796,7 @@ void btHingeConstraint::getInfo2InternalUsingFrameOffset(btConstraintInfo2* info
 		tmpA *= factA;
 	}
 	for (i=0; i<3; i++) info->m_J1angularAxis[s2+i] = tmpA[i];
-    for (i=0; i<3; i++) info->m_J2angularAxis[s2+i] = -tmpB[i];
+	for (i=0; i<3; i++) info->m_J2angularAxis[s2+i] = -tmpB[i];
 
 	btScalar k = info->fps * info->erp;
 

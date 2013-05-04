@@ -14,6 +14,13 @@ namespace CustomTypes {
 	};
 }
 
+// Prints argument error (type expected, type received)
+inline void PrintArgError(lua_State *state, int stackPos, const char *argType) {
+	static char str[1024];
+	sprintf_s(str, "expected %s, got %s", argType, LUA->GetTypeName(LUA->GetType(stackPos)));
+	LUA->ArgError(stackPos, str);
+}
+
 IPhysicsObject1 *Get_PhysObj(lua_State *state, int stackPos) {
 	LUA->CheckType(stackPos, Type::PHYSOBJ);
 
@@ -29,11 +36,9 @@ Vector *Get_Vector(lua_State *state, int stackPos) {
 }
 
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
-	//LUA->CheckType(stackPos, Type::USERDATA);
-
 	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
 	if (ud->type != CustomTypes::TYPE_PHYSCOLLIDE) {
-		LUA->ArgError(stackPos, "expected a PhysCollide");
+		PrintArgError(state, stackPos, "PhysCollide");
 		return NULL;
 	}
 

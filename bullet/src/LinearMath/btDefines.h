@@ -75,12 +75,12 @@ inline int btGetVersion()
 
 				#define BT_USE_SSE
 				#ifdef BT_USE_SSE
-				//BT_USE_SSE_IN_API is disabled under Windows by default, because 
-				//it makes it harder to integrate Bullet into your application under Windows 
-				//(structured embedding Bullet structs/classes need to be 16-byte aligned)
-				//with relatively little performance gain
-				//If you are not embedded Bullet data in your classes, or make sure that you align those classes on 16-byte boundaries
-				//you can manually enable this line or set it in the build system for a bit of performance gain (a few percent, dependent on usage)
+				// BT_USE_SSE_IN_API is disabled under Windows by default, because 
+				// it makes it harder to integrate Bullet into your application under Windows 
+				// (structures embedding Bullet structs/classes need to be 16-byte aligned)
+				// with relatively little performance gain
+				// If you are not embedding Bullet data in your classes, or you make sure that you align those classes on 16-byte boundaries
+				// you can manually enable this line or set it in the build system for a bit of performance gain (a few percent, dependent on usage)
 				//#define BT_USE_SSE_IN_API
 				#endif //BT_USE_SSE
 				#include <emmintrin.h>

@@ -93,7 +93,7 @@ public:
 /**@brief Return the transform of the vector */
 	SIMD_FORCE_INLINE btVector3 operator()(const btVector3& x) const
 	{
-        return x.dot3(m_basis[0], m_basis[1], m_basis[2]) + m_origin;
+		return x.dot3(m_basis[0], m_basis[1], m_basis[2]) + m_origin;
 	}
 
   /**@brief Return the transform of the vector */
@@ -245,7 +245,7 @@ btTransform::operator*(const btTransform& t) const
 SIMD_FORCE_INLINE bool operator==(const btTransform& t1, const btTransform& t2)
 {
    return ( t1.getBasis()  == t2.getBasis() &&
-            t1.getOrigin() == t2.getOrigin() );
+			t1.getOrigin() == t2.getOrigin() );
 }
 
 

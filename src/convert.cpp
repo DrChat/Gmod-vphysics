@@ -104,9 +104,8 @@ void ConvertDirectionToHL(const btVector3 &dir, Vector &hl) {
 }
 
 void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {
-	RadianEuler radian(angles);
-	Quaternion q(radian);
-	btQuaternion quat(q.x, q.z, -q.y, q.w);
+	btQuaternion quat;
+	ConvertRotationToBull(angles, quat);
 	bull.setRotation(quat);
 }
 
@@ -119,9 +118,7 @@ void ConvertRotationToBull(const QAngle &angles, btQuaternion &bull) {
 void ConvertRotationToHL(const btMatrix3x3 &matrix, QAngle &hl) {
 	btQuaternion quat;
 	matrix.getRotation(quat);
-	Quaternion q(quat.getX(), -quat.getZ(), quat.getY(), quat.getW());
-	RadianEuler radian(q);
-	hl = radian.ToQAngle();
+	ConvertRotationToHL(quat, hl);
 }
 
 void ConvertRotationToHL(const btQuaternion &quat, QAngle &hl) {

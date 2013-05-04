@@ -10,6 +10,8 @@
 
 using namespace GarrysMod::Lua;
 
+#define LINIT_CHECKRET(fn, state) { if ((fn)(state) != 0) { Warning("lua vphysics init: %s failed\n", #fn); return 1; } }
+
 IPhysics1 *g_pPhysics = NULL;
 
 int lPhysStats(lua_State *state) {
@@ -44,8 +46,8 @@ GMOD_MODULE_OPEN() {
 		LUA->SetField(-2, "vphysics");
 	LUA->Pop();
 
-	Init_PhysObj(state);
-	Init_PhysCollision(state);
+	LINIT_CHECKRET(Init_PhysObj, state);
+	LINIT_CHECKRET(Init_PhysCollision, state);
 
 	return 0;
 }

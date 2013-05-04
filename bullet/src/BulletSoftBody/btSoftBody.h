@@ -46,6 +46,7 @@ struct	btSoftBodyWorldInfo
 	btScalar				water_density;
 	btScalar				water_offset;
 	btVector3				water_normal;
+	btScalar				m_maxDisplacement;
 	btBroadphaseInterface*	m_broadphase;
 	btDispatcher*			m_dispatcher;
 	btVector3				m_gravity;
@@ -56,6 +57,7 @@ struct	btSoftBodyWorldInfo
 		water_density(0),
 		water_offset(0),
 		water_normal(0,0,0),
+		m_maxDisplacement(1000.f), // avoid soft body from 'exploding' so use some upper threshold of maximum motion that a node can travel per frame
 		m_broadphase(0),
 		m_dispatcher(0),
 		m_gravity(0,-10,0)

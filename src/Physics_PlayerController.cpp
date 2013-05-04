@@ -104,7 +104,6 @@ bool CPlayerController::IsInContact() {
 
 			if (pPhysOther->IsStatic() || pPhysOther->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION)
 				continue;
-			
 
 			return true;
 		}
@@ -216,7 +215,7 @@ void CPlayerController::Tick(float deltaTime) {
 	m_iTicksSinceUpdate++;
 
 	btRigidBody *body = m_pObject->GetObject();
-	CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
+	//CPhysicsEnvironment *pEnv = m_pObject->GetVPhysicsEnvironment();
 
 	btTransform transform;
 	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);

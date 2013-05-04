@@ -354,9 +354,11 @@ public:
 	const btTransform&  getCenterOfMassTransform() const { 
 		return m_worldTransform; 
 	}
+
 	const btVector3&   getLinearVelocity() const { 
 		return m_linearVelocity; 
 	}
+
 	const btVector3&    getAngularVelocity() const { 
 		return m_angularVelocity; 
 	}
