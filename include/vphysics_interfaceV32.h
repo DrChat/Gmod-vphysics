@@ -1,7 +1,8 @@
 #ifndef VPHYSICS_INTERFACEV32_H
 #define VPHYSICS_INTERFACEV32_H
+
 #ifdef _MSC_VER
-#pragma once
+	#pragma once
 #endif
 
 #include "tier1/interface.h"
@@ -64,6 +65,10 @@ abstract_class IPhysicsCollision1 : public IPhysicsCollision {
 		// Untested as of now, but I believe Vector(1,1,1) is normal scale.
 		virtual void			CollideSetScale(CPhysCollide *pCollide, const Vector &scale) = 0;
 		virtual void			CollideGetScale(const CPhysCollide *pCollide, Vector &scale) = 0;
+
+		// API to disable old vphysics behavior for bboxes
+		virtual void			EnableBBoxCache(bool enable) = 0;
+		virtual bool			IsBBoxCacheEnabled() = 0;
 
 		// New collision shapes
 		// NOTE: VPhysics DOES NOT keep track of these, unlike BBoxes! You must destroy them with DestroyCollide!

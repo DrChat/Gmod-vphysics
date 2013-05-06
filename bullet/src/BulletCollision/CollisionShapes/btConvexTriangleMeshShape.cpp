@@ -45,7 +45,7 @@ public:
 	LocalSupportVertexCallback(const btVector3& supportVecLocal)
 		: m_supportVertexLocal(btScalar(0.), btScalar(0.), btScalar(0.)),
 		m_maxDot(btScalar(-BT_LARGE_FLOAT)),
-                m_supportVecLocal(supportVecLocal)
+				m_supportVecLocal(supportVecLocal)
 	{
 	}
 
@@ -211,89 +211,89 @@ void btConvexTriangleMeshShape::calculatePrincipalAxisTransform(btTransform& pri
 {
    class CenterCallback: public btInternalTriangleIndexCallback
    {
-      bool first;
-      btVector3 ref;
-      btVector3 sum;
-      btScalar volume;
+	  bool first;
+	  btVector3 ref;
+	  btVector3 sum;
+	  btScalar volume;
 
    public:
 
-      CenterCallback() : first(true), ref(0, 0, 0), sum(0, 0, 0), volume(0)
-      {
-      }
+	  CenterCallback() : first(true), ref(0, 0, 0), sum(0, 0, 0), volume(0)
+	  {
+	  }
 
-      virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int triangleIndex)
-      {
-         (void) triangleIndex;
-         (void) partId;
-         if (first)
-         {
-            ref = triangle[0];
-            first = false;
-         }
-         else
-         {
-            btScalar vol = btFabs((triangle[0] - ref).triple(triangle[1] - ref, triangle[2] - ref));
-            sum += (btScalar(0.25) * vol) * ((triangle[0] + triangle[1] + triangle[2] + ref));
-            volume += vol;
-         }
-      }
-      
-      btVector3 getCenter()
-      {
-         return (volume > 0) ? sum / volume : ref;
-      }
+	  virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int triangleIndex)
+	  {
+		 (void) triangleIndex;
+		 (void) partId;
+		 if (first)
+		 {
+			ref = triangle[0];
+			first = false;
+		 }
+		 else
+		 {
+			btScalar vol = btFabs((triangle[0] - ref).triple(triangle[1] - ref, triangle[2] - ref));
+			sum += (btScalar(0.25) * vol) * ((triangle[0] + triangle[1] + triangle[2] + ref));
+			volume += vol;
+		 }
+	  }
+	  
+	  btVector3 getCenter()
+	  {
+		 return (volume > 0) ? sum / volume : ref;
+	  }
 
-      btScalar getVolume()
-      {
-         return volume * btScalar(1. / 6);
-      }
+	  btScalar getVolume()
+	  {
+		 return volume * btScalar(1. / 6);
+	  }
 
    };
 
    class InertiaCallback: public btInternalTriangleIndexCallback
    {
-      btMatrix3x3 sum;
-      btVector3 center;
+	  btMatrix3x3 sum;
+	  btVector3 center;
 
    public:
 
-      InertiaCallback(btVector3& center) : sum(0, 0, 0, 0, 0, 0, 0, 0, 0), center(center)
-      {
-      }
+	  InertiaCallback(btVector3& center) : sum(0, 0, 0, 0, 0, 0, 0, 0, 0), center(center)
+	  {
+	  }
 
-      virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int triangleIndex)
-      {
-         (void) triangleIndex;
-         (void) partId;
-         btMatrix3x3 i;
-         btVector3 a = triangle[0] - center;
-         btVector3 b = triangle[1] - center;
-         btVector3 c = triangle[2] - center;
-         btScalar volNeg = -btFabs(a.triple(b, c)) * btScalar(1. / 6);
-         for (int j = 0; j < 3; j++)
-         {
-            for (int k = 0; k <= j; k++)
-            {
-               i[j][k] = i[k][j] = volNeg * (btScalar(0.1) * (a[j] * a[k] + b[j] * b[k] + c[j] * c[k])
-                  + btScalar(0.05) * (a[j] * b[k] + a[k] * b[j] + a[j] * c[k] + a[k] * c[j] + b[j] * c[k] + b[k] * c[j]));
-            }
-         }
-         btScalar i00 = -i[0][0];
-         btScalar i11 = -i[1][1];
-         btScalar i22 = -i[2][2];
-         i[0][0] = i11 + i22; 
-         i[1][1] = i22 + i00; 
-         i[2][2] = i00 + i11;
-         sum[0] += i[0];
-         sum[1] += i[1];
-         sum[2] += i[2];
-      }
-      
-      btMatrix3x3& getInertia()
-      {
-         return sum;
-      }
+	  virtual void internalProcessTriangleIndex(btVector3* triangle, int partId, int triangleIndex)
+	  {
+		 (void) triangleIndex;
+		 (void) partId;
+		 btMatrix3x3 i;
+		 btVector3 a = triangle[0] - center;
+		 btVector3 b = triangle[1] - center;
+		 btVector3 c = triangle[2] - center;
+		 btScalar volNeg = -btFabs(a.triple(b, c)) * btScalar(1. / 6);
+		 for (int j = 0; j < 3; j++)
+		 {
+			for (int k = 0; k <= j; k++)
+			{
+			   i[j][k] = i[k][j] = volNeg * (btScalar(0.1) * (a[j] * a[k] + b[j] * b[k] + c[j] * c[k])
+				  + btScalar(0.05) * (a[j] * b[k] + a[k] * b[j] + a[j] * c[k] + a[k] * c[j] + b[j] * c[k] + b[k] * c[j]));
+			}
+		 }
+		 btScalar i00 = -i[0][0];
+		 btScalar i11 = -i[1][1];
+		 btScalar i22 = -i[2][2];
+		 i[0][0] = i11 + i22; 
+		 i[1][1] = i22 + i00; 
+		 i[2][2] = i00 + i11;
+		 sum[0] += i[0];
+		 sum[1] += i[1];
+		 sum[2] += i[2];
+	  }
+	  
+	  btMatrix3x3& getInertia()
+	  {
+		 return sum;
+	  }
 
    };
 

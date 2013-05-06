@@ -15,6 +15,9 @@
 
 #define COLLISION_MARGIN 0.004 // 4 mm
 
+// Use btConvexTriangleMeshShape instead of btConvexHullShape?
+#define USE_CONVEX_TRIANGLES 0
+
 /****************************
 * CLASS CCollisionQuery
 ****************************/
@@ -108,17 +111,7 @@ CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) 
 		pConvex->addPoint(vert);
 	}
 
-#if 0
-	CPhysConvex *pOptimizedConvex = OptimizeConvex((CPhysConvex *)pConvex);
-	if (pOptimizedConvex) {
-		delete pConvex;
-		return pOptimizedConvex;
-	} else {
-		return (CPhysConvex *)pConvex;
-	}
-#else
 	return (CPhysConvex *)pConvex;
-#endif
 }
 
 CPhysConvex *CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance) {
@@ -250,6 +243,11 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 	} else if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
 		// Delete the striding mesh interface (which we allocate)
 		btStridingMeshInterface *pMi = ((btTriangleMeshShape *)pShape)->getMeshInterface();
+		delete pMi;
+
+		delete pShape;
+	} else if (pShape->getShapeType() == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
+		btStridingMeshInterface *pMi = ((btConvexTriangleMeshShape *)pShape)->getMeshInterface();
 		delete pMi;
 
 		delete pShape;
@@ -781,10 +779,12 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		for (int j = 0; j < ledges.Count(); j++) {
 			const ivpcompactledge_t *ledge = ledges[j];
+
+			// Large array of all the vertices
 			const char *vertices = (const char *)ledge + ledge->c_point_offset;
 
 			if (ledge->n_triangles > 0) {
-#if 0
+#if USE_CONVEX_TRIANGLES
 				btTriangleMesh *pMesh = new btTriangleMesh;
 
 				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
@@ -795,23 +795,15 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 					for (int l = 0; l < 3; l++) {
 						short idx = tris[k].c_three_edges[l].start_point_index;
-						float *ivpverts = (float *)(vertices + idx * 16);
+						float *ivpvert = (float *)(vertices + idx * 16);
 
-						ConvertIVPPosToBull(ivpverts, verts[l]);
+						ConvertIVPPosToBull(ivpvert, verts[l]);
 					}
 
 					pMesh->addTriangle(verts[0], verts[1], verts[2], true);
 				}
 
-				// TODO: Let's just stick with the btConvexTriangleMeshShape
-				btConvexShape *tmpShape = new btConvexTriangleMeshShape(pMesh);
-				btShapeHull *hull = new btShapeHull(tmpShape);
-				hull->buildHull(0);
-				delete tmpShape;
-				delete pMesh;
-
-				btConvexHullShape *pShape = new btConvexHullShape((btScalar *)hull->getVertexPointer(), hull->numVertices());
-				delete hull;
+				btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
 
 				btTransform trans(btMatrix3x3::getIdentity(), -info->massCenter);
 				pCompound->addChildShape(trans, pShape);
@@ -819,19 +811,41 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				btConvexHullShape *pConvex = new btConvexHullShape;
 				pConvex->setMargin(COLLISION_MARGIN);
 
-				const char *tris = (const char *)ledge + sizeof(ivpcompactledge_t);
+				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
+
+				// This code will find all unique indexes and add them to an array. This avoids
+				// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
+				// If you find a better way then you can replace this!
+				CUtlVector<short> indexes;
+
 				for (int k = 0; k < ledge->n_triangles; k++) {
-					const ivpcompacttriangle_t *ivptri = (ivpcompacttriangle_t *)(tris + (k * sizeof(ivpcompacttriangle_t)));
-					Assert(k == ivptri->tri_index);
+					Assert(k == tris[k].tri_index);
 
 					for (int l = 0; l < 3; l++) {
-						short index = ivptri->c_three_edges[l].start_point_index;
-						float *verts = (float *)(vertices + index * 16);
+						short index = tris[k].c_three_edges[l].start_point_index;
 
-						btVector3 vertex;
-						ConvertIVPPosToBull(verts, vertex);
-						pConvex->addPoint(vertex);
+						bool shouldAdd = true;
+						for (int m = 0; m < indexes.Count(); m++) {
+							if (indexes[m] == index) {
+								shouldAdd = false;
+								break;
+							}
+						}
+
+						if (shouldAdd) {
+							indexes.AddToTail(index);
+						}
 					}
+				}
+
+				for (int k = 0; k < indexes.Count(); k++) {
+					short index = indexes[k];
+
+					float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
+
+					btVector3 vertex;
+					ConvertIVPPosToBull(ivpvert, vertex);
+					pConvex->addPoint(vertex);
 				}
 
 				btTransform offsetTrans(btMatrix3x3::getIdentity(), -info->massCenter);
@@ -867,20 +881,48 @@ void CPhysicsCollision::VPhysicsKeyParserDestroy(IVPhysicsKeyParser *pParser) {
 int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vector **outVerts) {
 	if (!pCollisionModel || !outVerts) return 0;
 
+	btCollisionShape *pShape = (btCollisionShape *)pCollisionModel;
 	int count = 0;
-	btCompoundShape *compound = (btCompoundShape *)pCollisionModel;
-	for (int i = 0; i < compound->getNumChildShapes(); i++)
-		count += ((btConvexHullShape *)compound->getChildShape(i))->getNumVertices();
-	
-	*outVerts = new Vector[count];
-	int k = 0;
 
-	for (int i = 0; i < compound->getNumChildShapes(); i++) {
-		btConvexHullShape *hull = (btConvexHullShape *)compound->getChildShape(i);
-		for (int j = hull->getNumVertices()-1; j >= 0; j--) { // ugh, source wants the vertices in this order or shit begins to draw improperly
-			btVector3 pos;
-			hull->getVertex(j, pos);
-			ConvertPosToHL(pos, (*outVerts)[k++]);
+	if (pShape->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pShape;
+		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+			int shapeType = pCompound->getChildShape(i)->getShapeType();
+
+			if (shapeType == CONVEX_HULL_SHAPE_PROXYTYPE) {
+				count += ((btConvexHullShape *)pCompound->getChildShape(i))->getNumVertices();
+			} else if (shapeType == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
+				count += ((btConvexTriangleMeshShape *)pCompound->getChildShape(i))->getNumVertices();
+			}
+		}
+		
+		if (count >= 0) {
+			*outVerts = new Vector[count];
+			int curVert = 0;
+
+			for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+				int shapeType = pCompound->getChildShape(i)->getShapeType();
+
+				if (shapeType == CONVEX_HULL_SHAPE_PROXYTYPE) {
+					btConvexHullShape *pConvex = (btConvexHullShape *)pCompound->getChildShape(i);
+
+					// Source requires vertices in reverse order
+					for (int j = pConvex->getNumVertices()-1; j >= 0; j--) {
+						btVector3 pos;
+						pConvex->getVertex(j, pos);
+						ConvertPosToHL(pos, (*outVerts)[curVert++]);
+					}
+				} else if (shapeType == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
+					// FYI: Currently unsupported in convex tri meshes
+					btConvexTriangleMeshShape *pConvex = (btConvexTriangleMeshShape *)pCompound->getChildShape(i);
+
+					for (int j = pConvex->getNumVertices()-1; j >= 0; j--) {
+						btVector3 pos;
+						pConvex->getVertex(j, pos);
+						ConvertPosToHL(pos, (*outVerts)[curVert++]);
+					}
+				}
+			}
 		}
 	}
 
