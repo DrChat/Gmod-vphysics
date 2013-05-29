@@ -1,5 +1,5 @@
-#ifndef CPHYSICSCOLLISION_H
-#define CPHYSICSCOLLISION_H
+#ifndef PHYSICS_COLLISION_H
+#define PHYSICS_COLLISION_H
 
 struct PhysicsShapeInfo {
 	btVector3 massCenter;
@@ -44,7 +44,7 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 
 		void					DestroyCollide(CPhysCollide *pCollide);
 		int						CollideSize(CPhysCollide *pCollide);
-		int						CollideWrite(char *pDest, CPhysCollide *pCollide, bool bSwap = false);
+		int						CollideWrite(char *pDest, CPhysCollide *pCollide, bool swap = false);
 		CPhysCollide *			UnserializeCollide(char *pBuffer, int size, int index);
 		float					CollideVolume(CPhysCollide *pCollide);
 		float					CollideSurfaceArea(CPhysCollide *pCollide);
@@ -65,6 +65,7 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		void					AddCachedBBox(CPhysCollide *pModel, const Vector &mins, const Vector &maxs);
 		bool					IsCachedBBox(CPhysCollide *pModel);
 		void					ClearBBoxCache();
+		bool					GetBBoxCacheSize(int *pCachedSize, int *pCachedCount);
 
 		// API for disabling old vphysics behavior.
 		void					EnableBBoxCache(bool enable);
@@ -108,8 +109,6 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		CPhysCollide *			CreateVirtualMesh(const virtualmeshparams_t &params);
 		bool					SupportsVirtualMesh();
 
-		bool					GetBBoxCacheSize(int *pCachedSize, int *pCachedCount);
-
 		CPolyhedron *			PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron);
 
 		void					OutputDebugInfo(const CPhysCollide *pCollide);
@@ -122,4 +121,4 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 
 extern CPhysicsCollision g_PhysicsCollision;
 
-#endif
+#endif // PHYSICS_COLLISION_H

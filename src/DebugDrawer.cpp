@@ -11,8 +11,8 @@
 #include "tier0/vprof.h"
 
 #if RENDER_SDL
-#	include <SDL.h>
-#	include <SDL_opengl.h>
+	#include <SDL.h>
+	#include <SDL_opengl.h>
 #endif // RENDER_SDL
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -20,13 +20,14 @@
 
 #if DEBUG_DRAW
 #if RENDER_SDL
-#	pragma comment(lib, "SDL")
-#	pragma comment(lib, "OpenGL32")
-#	pragma comment(lib, "Glu32")
+	#pragma comment(lib, "SDL")
+	#pragma comment(lib, "OpenGL32")
+	#pragma comment(lib, "Glu32")
 #endif // RENDER_SDL
 
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
 static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)");
+static ConVar cvar_overlaydepthtest("vphysics_overlay_nodepthtest", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "No depth test when rendering the overlay");
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(NULL), m_pDisplay(NULL) {
 	m_pEnv = pEnv;
@@ -91,7 +92,7 @@ void CDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const bt
 	ConvertPosToHL(from, HLFrom);
 	ConvertPosToHL(to, HLTo);
 
-	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x() * 255, fromColor.y() * 255, fromColor.z() * 255, false, 0);
+	m_overlay->AddLineOverlay(HLFrom, HLTo, fromColor.x() * 255, fromColor.y() * 255, fromColor.z() * 255, cvar_overlaydepthtest.GetBool(), 0);
 #endif
 }
 
@@ -173,7 +174,7 @@ void CDebugDrawer::drawTriangle(const btVector3 &a, const btVector3 &b, const bt
 	ConvertPosToHL(a, HLA);
 	ConvertPosToHL(b, HLB);
 	ConvertPosToHL(c, HLC);
-	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x() * 255, color.y() * 255, color.z() * 255, alpha * 255, false, 0);
+	m_overlay->AddTriangleOverlay(HLA, HLB, HLC, color.x() * 255, color.y() * 255, color.z() * 255, alpha * 255, cvar_overlaydepthtest.GetBool(), 0);
 #endif
 }
 
@@ -234,9 +235,5 @@ void CDebugDrawer::DrawWorld() {
 		}
 	}
 #endif
-}
-
-void CDebugDrawer::SyncProfilerResults() {
-
 }
 #endif // DEBUG_DRAW

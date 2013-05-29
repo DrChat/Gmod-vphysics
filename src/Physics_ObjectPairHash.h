@@ -1,5 +1,5 @@
-#ifndef CPHYSICSOBJECTPAIRHASH_H
-#define CPHYSICSOBJECTPAIRHASH_H
+#ifndef PHYSICS_OBJECTPAIRHASH_H
+#define PHYSICS_OBJECTPAIRHASH_H
 
 #include <vphysics/object_hash.h>
 
@@ -27,4 +27,4 @@ class CPhysicsObjectPairHash : public IPhysicsObjectPairHash {
 		pair_hash_list *m_pHashList[256];
 };
 
-#endif // CPHYSICSOBJECTPAIRHASH_H
+#endif // PHYSICS_OBJECTPAIRHASH_H

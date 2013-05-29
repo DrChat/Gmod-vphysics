@@ -1,5 +1,5 @@
-#ifndef CPHYSICSMOTIONCONTROLLER_H
-#define CPHYSICSMOTIONCONTROLLER_H
+#ifndef PHYSICS_MOTIONCONTROLLER_H
+#define PHYSICS_MOTIONCONTROLLER_H
 
 #include "IController.h"
 
@@ -33,4 +33,4 @@ class CPhysicsMotionController : public IController, public IPhysicsMotionContro
 
 IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMotionEvent *pHandler);
 
-#endif
+#endif // PHYSICS_MOTIONCONTROLLER_H

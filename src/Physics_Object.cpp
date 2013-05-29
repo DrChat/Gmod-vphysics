@@ -780,6 +780,8 @@ void CPhysicsObject::RemoveTrigger() {
 	EnableDrag(true);
 	EnableGravity(true);
 
+	m_pObject->setWorldTransform(m_pGhostObject->getWorldTransform());
+
 	if (IsStatic())
 		m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
 	else

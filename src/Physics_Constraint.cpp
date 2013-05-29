@@ -313,7 +313,6 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 	ConvertPosToBull(spring->startPosition, bullRefPos);
 	ConvertPosToBull(spring->endPosition, bullAttPos);
 
-
 	NOT_IMPLEMENTED
 	return NULL;
 }

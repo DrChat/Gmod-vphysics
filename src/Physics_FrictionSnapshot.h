@@ -1,5 +1,5 @@
-#ifndef CPHYSICSFRICTIONSNAPSHOT_H
-#define CPHYSICSFRICTIONSNAPSHOT_H
+#ifndef PHYSICS_FRICTIONSNAPSHOT_H
+#define PHYSICS_FRICTIONSNAPSHOT_H
 
 #include <vphysics/friction.h>
 
@@ -40,4 +40,4 @@ class CPhysicsFrictionSnapshot : public IPhysicsFrictionSnapshot
 
 CPhysicsFrictionSnapshot *CreateFrictionSnapshot(CPhysicsObject *pObject);
 
-#endif
+#endif // PHYSICS_FRICTIONSNAPSHOT_H

@@ -1,5 +1,5 @@
-#ifndef CPHYSICSFLUIDCONTROLLER_H
-#define CPHYSICSFLUIDCONTROLLER_H
+#ifndef PHYSICS_FLUIDCONTROLLER_H
+#define PHYSICS_FLUIDCONTROLLER_H
 
 class CPhysicsObject;
 class CPhysicsEnvironment;
@@ -42,4 +42,4 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 
 CPhysicsFluidController *CreateFluidController(CPhysicsEnvironment *pEnv, CPhysicsObject *pFluidObject, fluidparams_t *pParams);
 
-#endif
+#endif // PHYSICS_FLUIDCONTROLLER_H

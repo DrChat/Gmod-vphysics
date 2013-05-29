@@ -1,5 +1,5 @@
-#ifndef CPHYSICSSOFTBODY_H
-#define CPHYSICSSOFTBODY_H
+#ifndef PHYSICS_SOFTBODY_H
+#define PHYSICS_SOFTBODY_H
 
 // Purpose: Dynamically deforming meshes (blankets, dents in objects, etc.)
 
@@ -33,4 +33,4 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv);
 CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
 
-#endif // CPHYSICSSOFTBODY_H
+#endif // PHYSICS_SOFTBODY_H

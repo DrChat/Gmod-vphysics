@@ -19,9 +19,9 @@ class CDebugDrawer : public btIDebugDraw {
 		virtual void			drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color);
 
 #if RENDER_SDL
-		virtual void			drawSphere (const btVector3 &p, btScalar radius, const btVector3 &color);
+		virtual void			drawSphere(const btVector3 &p, btScalar radius, const btVector3 &color);
 #endif
-		virtual void			drawBox (const btVector3 &boxMin, const btVector3 &boxMax, const btVector3 &color, btScalar alpha);
+		virtual void			drawBox(const btVector3 &boxMin, const btVector3 &boxMax, const btVector3 &color, btScalar alpha);
 		virtual void			drawTriangle(const btVector3 &a, const btVector3 &b, const btVector3 &c, const btVector3 &color, btScalar alpha);
 		virtual void			drawContactPoint(const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color);
 		virtual void			reportErrorWarning(const char *warningString);
@@ -33,8 +33,6 @@ class CDebugDrawer : public btIDebugDraw {
 		IVPhysicsDebugOverlay *	GetDebugOverlay();
 		void					DrawWorld();
 
-		// Yeah, this isn't related to debug drawing but who cares.
-		void					SyncProfilerResults();
 	private:
 		int						m_debugMode;
 		btCollisionWorld *		m_world;

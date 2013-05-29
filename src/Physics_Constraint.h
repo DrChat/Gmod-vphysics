@@ -1,5 +1,5 @@
-#ifndef CCONSTRAINT_H
-#define CCONSTRAINT_H
+#ifndef PHYSICS_CONSTRAINT_H
+#define PHYSICS_CONSTRAINT_H
 
 #include <vphysics/constraints.h>
 
@@ -109,4 +109,4 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
 CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
 
-#endif
+#endif // PHYSICS_CONSTRAINT_H

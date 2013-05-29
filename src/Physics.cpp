@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 
+#include <LinearMath/btDebug.h>
+
 #include "Physics.h"
 #include "Physics_Environment.h"
 #include "Physics_ObjectPairHash.h"
@@ -7,6 +9,18 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+ConVar vphysics_bulletdebugoutput("vphysics_bulletdebugoutput", "0", FCVAR_ARCHIVE | FCVAR_CHEAT);
+
+void btDebugMessage(const char *str) {
+	if (vphysics_bulletdebugoutput.GetBool()) {
+		Msg("%s", str);
+	}
+}
+
+void btDebugWarning(const char *str) {
+	Warning("%s", str);
+}
 
 /******************
 * CLASS CPhysics
@@ -24,6 +38,10 @@ CPhysics::~CPhysics() {
 InitReturnVal_t CPhysics::Init() {
 	InitReturnVal_t nRetVal = BaseClass::Init();
 	if (nRetVal != INIT_OK) return nRetVal;
+
+	// Hook up our debug output functions
+	btSetDbgMsgFn(btDebugMessage);
+	btSetDbgWarnFn(btDebugWarning);
 
 	return INIT_OK;
 }

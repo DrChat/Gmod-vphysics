@@ -1,5 +1,5 @@
-#ifndef CPLAYERCONTROLLER
-#define CPLAYERCONTROLLER
+#ifndef PHYSICS_PLAYERCONTROLLER_H
+#define PHYSICS_PLAYERCONTROLLER_H
 
 #include <vphysics/player_controller.h>
 #include "IController.h"
@@ -9,8 +9,8 @@ class CPhysicsObject;
 class CPlayerController : public IController, public IPhysicsPlayerController
 {
 	public:
-										CPlayerController(CPhysicsObject *pObject);
-										~CPlayerController();
+		CPlayerController(CPhysicsObject *pObject);
+		~CPlayerController();
 
 		void							Update(const Vector &position, const Vector &velocity, float secondsToArrival, bool onground, IPhysicsObject *ground);
 		void							SetEventHandler(IPhysicsPlayerControllerEvent *handler);
@@ -35,6 +35,7 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		// Unexposed functions
 	public:
 		void							Tick(float deltaTime);
+
 	private:
 		void							AttachObject();
 		void							DetachObject();
@@ -63,4 +64,4 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 
 CPlayerController *CreatePlayerController(IPhysicsObject *pObject);
 
-#endif
+#endif // PHYSICS_PLAYERCONTROLLER_H

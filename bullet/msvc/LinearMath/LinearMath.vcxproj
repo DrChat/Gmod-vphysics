@@ -90,6 +90,7 @@
     <ClInclude Include="..\..\src\LinearMath\btAlignedObjectArray.h" />
     <ClInclude Include="..\..\src\LinearMath\btConvexHull.h" />
     <ClInclude Include="..\..\src\LinearMath\btConvexHullComputer.h" />
+    <ClInclude Include="..\..\src\LinearMath\btDebug.h" />
     <ClInclude Include="..\..\src\LinearMath\btDefaultMotionState.h" />
     <ClInclude Include="..\..\src\LinearMath\btDefines.h" />
     <ClInclude Include="..\..\src\LinearMath\btGeometryUtil.h" />
@@ -100,6 +101,7 @@
     <ClInclude Include="..\..\src\LinearMath\btMatrix3x3.h" />
     <ClInclude Include="..\..\src\LinearMath\btMinMax.h" />
     <ClInclude Include="..\..\src\LinearMath\btMotionState.h" />
+    <ClInclude Include="..\..\src\LinearMath\btObjectArray.h" />
     <ClInclude Include="..\..\src\LinearMath\btPolarDecomposition.h" />
     <ClInclude Include="..\..\src\LinearMath\btPoolAllocator.h" />
     <ClInclude Include="..\..\src\LinearMath\btQuadWord.h" />
@@ -117,6 +119,7 @@
     <ClCompile Include="..\..\src\LinearMath\btAlignedAllocator.cpp" />
     <ClCompile Include="..\..\src\LinearMath\btConvexHull.cpp" />
     <ClCompile Include="..\..\src\LinearMath\btConvexHullComputer.cpp" />
+    <ClCompile Include="..\..\src\LinearMath\btDebug.cpp" />
     <ClCompile Include="..\..\src\LinearMath\btGeometryUtil.cpp" />
     <ClCompile Include="..\..\src\LinearMath\btPolarDecomposition.cpp" />
     <ClCompile Include="..\..\src\LinearMath\btQuickprof.cpp" />

@@ -1,5 +1,5 @@
-#ifndef CPHYSICSSURFACEPROPS_H
-#define CPHYSICSSURFACEPROPS_H
+#ifndef PHYSICS_SURFACEPROPS_H
+#define PHYSICS_SURFACEPROPS_H
 
 enum {
 	MATERIAL_INDEX_SHADOW = 0xF000,
@@ -48,4 +48,4 @@ class CPhysicsSurfaceProps : public IPhysicsSurfaceProps {
 
 extern CPhysicsSurfaceProps g_SurfaceDatabase;
 
-#endif
+#endif // PHYSICS_SURFACEPROPS_H

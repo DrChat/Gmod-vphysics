@@ -90,6 +90,10 @@ void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleInde
 // CPhysCollide is usually a btCompoundShape
 // CPhysConvex is usually a btConvexHullShape
 
+#define VPHYSICS_ID					MAKEID('V', 'P', 'H', 'Y')
+#define IVP_COMPACT_SURFACE_ID		MAKEID('I', 'V', 'P', 'S')
+#define IVP_COMPACT_MOPP_ID			MAKEID('M', 'O', 'P', 'P')
+
 CPhysicsCollision::CPhysicsCollision() {
 	// Default to old behavior
 	EnableBBoxCache(true);
@@ -242,13 +246,13 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 		DestroyCompoundShape((btCompoundShape *)pShape);
 	} else if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
 		// Delete the striding mesh interface (which we allocate)
-		btStridingMeshInterface *pMi = ((btTriangleMeshShape *)pShape)->getMeshInterface();
-		delete pMi;
+		btStridingMeshInterface *pMesh = ((btTriangleMeshShape *)pShape)->getMeshInterface();
+		delete pMesh;
 
 		delete pShape;
 	} else if (pShape->getShapeType() == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
-		btStridingMeshInterface *pMi = ((btConvexTriangleMeshShape *)pShape)->getMeshInterface();
-		delete pMi;
+		btStridingMeshInterface *pMesh = ((btConvexTriangleMeshShape *)pShape)->getMeshInterface();
+		delete pMesh;
 
 		delete pShape;
 	} else {
@@ -261,7 +265,7 @@ int CPhysicsCollision::CollideSize(CPhysCollide *pCollide) {
 	return 0;
 }
 
-int CPhysicsCollision::CollideWrite(char *pDest, CPhysCollide *pCollide, bool bSwap) {
+int CPhysicsCollision::CollideWrite(char *pDest, CPhysCollide *pCollide, bool swap) {
 	NOT_IMPLEMENTED
 	return 0;
 }
@@ -470,6 +474,13 @@ void CPhysicsCollision::ClearBBoxCache() {
 
 		DestroyCollide(pCollide);
 	}
+}
+
+bool CPhysicsCollision::GetBBoxCacheSize(int *pCachedSize, int *pCachedCount) {
+	NOT_IMPLEMENTED
+
+	// What do we return?
+	return false;
 }
 
 void CPhysicsCollision::EnableBBoxCache(bool enable) {
@@ -721,6 +732,12 @@ static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivp
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
 	memset(pOutput, 0, sizeof(*pOutput));
+	if (swap) {
+		Warning("VCollideLoad - Abort loading, swap is true\n");
+		Assert(0);
+		return;
+	}
+
 	pOutput->solidCount = solidCount;
 	pOutput->solids = new CPhysCollide *[solidCount];
 
@@ -741,7 +758,6 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 	// swap argument means byte swap - we must byte swap all of the collision shapes before loading them if true!
 	DevMsg("VPhysics: VCollideLoad with %d solids, swap is %s\n", solidCount, swap ? "true" : "false");
-	Assert(swap == false); // TODO
 
 	// Now for the fun part:
 	// We must convert all of the ivp shapes into something we can use.
@@ -749,7 +765,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		// NOTE: modelType 0 is IVPS, 1 is (mostly unused) MOPP format
 		const compactsurfaceheader_t *surfaceheader = (compactsurfaceheader_t *)pOutput->solids[i];
 
-		if (surfaceheader->vphysicsID	!= MAKEID('V', 'P', 'H', 'Y')
+		if (surfaceheader->vphysicsID	!= VPHYSICS_ID
 		 || surfaceheader->version		!= 0x100
 		 || surfaceheader->modelType	!= 0x0) {
 			Warning("VPhysics: Could not load mesh (%d/%d)! (compactsurfaceheader is bad)\n", i+1, solidCount);
@@ -759,7 +775,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
 
-		if (ivpsurface->dummy[2] != MAKEID('I', 'V', 'P', 'S')) {
+		if (ivpsurface->dummy[2] != IVP_COMPACT_SURFACE_ID) {
 			Warning("VPhysics: Could not load mesh (%d/%d)! (ivpcompactsurface id is bad)\n", i+1, solidCount);
 			pOutput->solids[i] = NULL;
 			continue;
@@ -955,7 +971,6 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	virtualmeshlist_t list;
 	handler->GetVirtualMesh(params.userData, &list);
 
-	// FIXME: MEMORY LEAK - Find out where to delete this.
 	btTriangleMesh *btmesh = new btTriangleMesh;
 	btVector3 btvec[3];
 	for (int i = 0; i < list.triangleCount; i++) {
@@ -972,11 +987,6 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 
 bool CPhysicsCollision::SupportsVirtualMesh() {
 	return true;
-}
-
-bool CPhysicsCollision::GetBBoxCacheSize(int *pCachedSize, int *pCachedCount) {
-	NOT_IMPLEMENTED
-	return false;
 }
 
 void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {

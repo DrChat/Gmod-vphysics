@@ -1,5 +1,5 @@
-#ifndef CPHYSICSKEYPARSER_H
-#define CPHYSICSKEYPARSER_H
+#ifndef PHYSICS_KEYPARSER_H
+#define PHYSICS_KEYPARSER_H
 
 #include <vcollide_parse.h>
 #include <vphysics/vehicles.h>
@@ -39,4 +39,4 @@ class CPhysicsKeyParser : public IVPhysicsKeyParser
 		KeyValues *		m_pCurrentBlock;
 };
 
-#endif
+#endif // PHYSICS_KEYPARSER_H

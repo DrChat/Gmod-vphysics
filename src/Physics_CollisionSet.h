@@ -1,5 +1,5 @@
-#ifndef CPHYSICSCOLLISIONSET_H
-#define CPHYSICSCOLLISIONSET_H
+#ifndef PHYSICS_COLLISIONSET_H
+#define PHYSICS_COLLISIONSET_H
 
 class CPhysicsCollisionSet : public IPhysicsCollisionSet {
 	public:
@@ -16,4 +16,4 @@ class CPhysicsCollisionSet : public IPhysicsCollisionSet {
 
 CPhysicsCollisionSet *CreateCollisionSet(int maxElements);
 
-#endif // CPHYSICSCOLLISIONSET_H
+#endif // PHYSICS_COLLISIONSET_H

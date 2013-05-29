@@ -1,5 +1,5 @@
-#ifndef CPHYSICSENVIRONMENT_H
-#define CPHYSICSENVIRONMENT_H
+#ifndef PHYSICS_ENVIRONMENT_H
+#define PHYSICS_ENVIRONMENT_H
 
 #include <vphysics/performance.h>
 #include <vphysics/stats.h>
@@ -185,4 +185,4 @@ private:
 	CDebugDrawer *							m_debugdraw;
 };
 
-#endif
+#endif // PHYSICS_ENVIRONMENT_H

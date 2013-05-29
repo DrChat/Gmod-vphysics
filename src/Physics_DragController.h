@@ -1,5 +1,5 @@
-#ifndef CPHYSICSDRAGCONTROLLER_H
-#define CPHYSICSDRAGCONTROLLER_H
+#ifndef PHYSICS_DRAGCONTROLLER_H
+#define PHYSICS_DRAGCONTROLLER_H
 
 class CPhysicsObject;
 
@@ -19,4 +19,4 @@ class CPhysicsDragController {
 		CUtlVector<CPhysicsObject *>m_ents;
 };
 
-#endif
+#endif // PHYSICS_DRAGCONTROLLER_H

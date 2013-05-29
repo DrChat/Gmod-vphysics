@@ -1,5 +1,5 @@
-#ifndef CSHADOWCONTROLLER_H
-#define CSHADOWCONTROLLER_H
+#ifndef PHYSICS_SHADOWCONTROLLER_H
+#define PHYSICS_SHADOWCONTROLLER_H
 
 #include "IController.h"
 
@@ -73,4 +73,4 @@ float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_p
 
 CShadowController *CreateShadowController(IPhysicsObject *pObject, bool allowPhysicsMovement, bool allowPhysicsRotation);
 
-#endif
+#endif // PHYSICS_SHADOWCONTROLLER_H

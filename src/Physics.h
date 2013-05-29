@@ -1,5 +1,5 @@
-#ifndef CPHYSICS_H
-#define CPHYSICS_H
+#ifndef PHYSICS_H
+#define PHYSICS_H
 
 class IPhysicsEnvironment;
 class IPhysicsCollisionSet;

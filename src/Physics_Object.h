@@ -1,11 +1,10 @@
-#ifndef CPHYSICSOBJECT_H
-#define CPHYSICSOBJECT_H
+#ifndef PHYSICS_OBJECT_H
+#define PHYSICS_OBJECT_H
 
 class CPhysicsEnvironment;
 class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
-class CGhostTriggerCallback;
 
 // Bullet uses this so we can sync the graphics representation of the object.
 struct btMassCenterMotionState : public btMotionState {
@@ -188,7 +187,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 		const char *						m_pName;
 
 		btGhostObject *						m_pGhostObject; // For triggers
-		CGhostTriggerCallback *				m_pGhostCallback;
+		btGhostObjectCallback *				m_pGhostCallback;
 
 		unsigned short						m_materialIndex;
 		unsigned short						m_callbacks;
@@ -216,4 +215,4 @@ class CPhysicsObject : public IPhysicsObject1 {
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic);
 CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic);
 
-#endif
+#endif // PHYSICS_OBJECT_H

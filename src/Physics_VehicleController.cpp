@@ -573,7 +573,6 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 		debugCarSystem.vecWheelRaycastImpacts[i].y = -rayContact.y();
 		debugCarSystem.vecWheelRaycastImpacts[i].z = -rayContact.z();
 	}
-
 }
 
 void CPhysicsVehicleController::VehicleDataReload() {

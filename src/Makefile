@@ -23,7 +23,7 @@ INCLUDES = \
 	-I$(BULLET_SDK)/src
 	
 STATICLIBDIRS = \
-	-L../build/lib/linux/Release
+	-L../build/bin/linux/Release
 	
 STATICLIBS = \
 	-lBulletSoftBody 	\
@@ -32,8 +32,8 @@ STATICLIBS = \
 	-lLinearMath
 	
 DYNAMICLIBS = \
-	$(SOURCE_SDK)/lib/linux/tier1_i486.a 	\
-	$(SOURCE_SDK)/lib/linux/mathlib_i486.a 	\
+	$(SOURCE_SDK)/lib/linux/libtier1_i486.a 	\
+	$(SOURCE_SDK)/lib/linux/libmathlib_i486.a 	\
 	$(SRCDS_BIN_DIR)/libvstdlib_srv.so 		\
 	$(SRCDS_BIN_DIR)/libtier0_srv.so
 		
@@ -53,8 +53,8 @@ CP = cp -f
 MKDIR = mkdir -p
 MAKE = make
 
-all: dirs bullet $(MODULE_NAME) copy
-build: dirs bullet $(MODULE_NAME)
+all: dirs $(MODULE_NAME) copy
+build: dirs $(MODULE_NAME)
 
 dirs:
 	@-$(MKDIR) $(OUT_DIR)

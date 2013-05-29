@@ -1,5 +1,5 @@
-#ifndef CPHYSICSVEHICLECONTROLLER_H
-#define CPHYSICSVEHICLECONTROLLER_H
+#ifndef PHYSICS_VEHICLECONTROLLER_H
+#define PHYSICS_VEHICLECONTROLLER_H
 
 #include <vphysics/vehicles.h>
 #include "vphysics/vehiclesV32.h"
@@ -99,4 +99,4 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 
 IPhysicsVehicleController *CreateVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
 
-#endif // CPHYSICSVEHICLECONTROLLER_H
+#endif // PHYSICS_VEHICLECONTROLLER_H
