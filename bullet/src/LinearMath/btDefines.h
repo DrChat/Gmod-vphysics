@@ -25,6 +25,9 @@ subject to the following restrictions:
 #include <stdlib.h>//size_t for MSVC 6.0
 #include <float.h>
 
+// For some debug print messages
+#include "btDebug.h"
+
 /* SVN $Revision$ on $Date$ from http://bullet.googlecode.com*/
 #define BT_BULLET_VERSION 281
 
@@ -93,8 +96,8 @@ inline int btGetVersion()
 	#ifdef BT_DEBUG
 		#ifdef _MSC_VER
 			#include <stdio.h>
-			#define btAssert(x) { if (!(x)) { printf("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); __debugbreak(); } }
-			#define btAssertMsg(x, str) { if (!(x)) { printf("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); __debugbreak(); } }
+			#define btAssert(x) { if (!(x)) { btDbgWarning("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); __debugbreak(); } }
+			#define btAssertMsg(x, str) { if (!(x)) { btDbgWarning("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); __debugbreak(); } }
 		#else//_MSC_VER
 			#include <assert.h>
 			#define btAssert assert
@@ -124,10 +127,8 @@ inline int btGetVersion()
 
 		#ifdef BT_DEBUG
 			#ifdef __SPU__
-				#include <spu_printf.h>
-				#define printf spu_printf
-				#define btAssert(x) { if(!(x)) { printf("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); spu_hcmpeq(0,0); } }
-				#define btAssertMsg(x, str) { if(!(x)) { printf("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); spu_hcmpeq(0,0); } }
+				#define btAssert(x) { if(!(x)) { btDbgWarning("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); spu_hcmpeq(0,0); } }
+				#define btAssertMsg(x, str) { if(!(x)) { btDbgWarning("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); spu_hcmpeq(0,0); } }
 			#else
 				#define btAssert assert
 				#define btAssertMsg(x, str) assert(x)
@@ -214,8 +215,8 @@ inline int btGetVersion()
 				#if defined(DEBUG) || defined (_DEBUG)
 					#if defined (__i386__) || defined (__x86_64__)
 						#include <stdio.h>
-						#define btAssert(x) { if (!(x)) { printf("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); asm volatile ("int3"); } }
-						#define btAssertMsg(x, str) { if (!(x)) { printf("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); asm volatile ("int3"); } }
+						#define btAssert(x) { if (!(x)) { btDbgWarning("Assert %s:%u (%s)\n", __FILE__, __LINE__, #x); asm volatile ("int3"); } }
+						#define btAssertMsg(x, str) { if (!(x)) { btDbgWarning("Assert %s:%u (%s) %s\n", __FILE__, __LINE__, #x, str); asm volatile ("int3"); } }
 					#else//defined (__i386__) || defined (__x86_64__)
 						#define btAssert assert
 						#define btAssertMsg(x, str) assert(x)

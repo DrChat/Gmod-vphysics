@@ -703,13 +703,19 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 	btTransform bullEndT(btMatrix3x3::getIdentity(), bullEndVec);
 
 	btCollisionWorld::ClosestConvexResultCallback cb(bullStartVec, bullEndVec);
-	//btCollisionWorld::objectQuerySingle(pSweepObject, bullStartT, bullEndT, object, shape, transform, cb, 0);
+	// TODO: Bullet can't do a compound sweep test
+
+	/*
+	pTrace->fraction = cb.m_closestHitFraction;
+	if (cb.m_closestHitFraction < 1.f) {
+		ConvertPosToHL(cb.m_hitPointWorld, pTrace->endpos);
+		ConvertDirectionToHL(cb.m_hitNormalWorld, pTrace->plane.normal);
+	}
+	*/
 
 	// Cleanup
 	delete object;
 	delete pSweepObject;
-
-	NOT_IMPLEMENTED
 }
 
 bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &cone) {

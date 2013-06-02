@@ -9,12 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Header Files\New Thread Stuff">
-      <UniqueIdentifier>{399d59a6-7a1a-4351-b921-08b22af1a354}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\New Thread Stuff">
-      <UniqueIdentifier>{925c25b2-9f30-4554-9611-6e9f31a7622b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuDefines.h">
@@ -107,18 +101,6 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuFakeDma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\btIThreadPool.h">
-      <Filter>Header Files\New Thread Stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\btWin32ThreadPool.h">
-      <Filter>Header Files\New Thread Stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\btPosixThreadPool.h">
-      <Filter>Header Files\New Thread Stuff</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuGatheringCollisionTask.cpp">
@@ -176,12 +158,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuGatheringCollisionDispatcher.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\btWin32ThreadPool.cpp">
-      <Filter>Source Files\New Thread Stuff</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

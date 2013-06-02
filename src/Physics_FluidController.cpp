@@ -11,6 +11,10 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+/********************************
+* CLASS CPhysicsFluidCallback
+********************************/
+
 class CPhysicsFluidCallback : public btGhostObjectCallback {
 	public:
 		CPhysicsFluidCallback(CPhysicsFluidController *pController) {
@@ -157,13 +161,14 @@ void CPhysicsFluidController::Tick(float dt) {
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectAdded(CPhysicsObject *pObject) {
-	m_pEnv->HandleFluidStartTouch(this, pObject);
+	// Disabled due to bug detailed below
+	// m_pEnv->HandleFluidStartTouch(this, pObject);
 }
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
 	// FIXME: Crash when killing jeeps inside of water.
-	m_pEnv->HandleFluidEndTouch(this, pObject);
+	// m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 
 /************************

@@ -343,16 +343,25 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+	btRigidBody *bullObjRef = pObjRef->GetObject();
+	btRigidBody *bullObjAtt = pObjAtt->GetObject();
 
 	btVector3 bullWorldPosition, bullWorldAxis;
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	// FIXME: Position is correct, but rotation isn't
-	btTransform bullAFrame(btQuaternion(bullWorldAxis, 0), bullWorldPosition - pObjRef->GetObject()->getWorldTransform().getOrigin());
-	btTransform bullBFrame(btQuaternion(bullWorldAxis, 0), bullWorldPosition - pObjAtt->GetObject()->getWorldTransform().getOrigin());
+	// How do we transfer the axis into object local coords?
 
-	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
+	// LOL FLIPPED LOL
+	btVector3 attWorldAxis = bullWorldAxis;
+	attWorldAxis.setY(-attWorldAxis.y());
+	attWorldAxis.setZ(-attWorldAxis.z());
+
+	// FIXME: Position is correct, but rotation isn't
+	btVector3 bullPivotA = bullWorldPosition - bullObjRef->getWorldTransform().getOrigin();
+	btVector3 bullPivotB = bullWorldPosition - bullObjAtt->getWorldTransform().getOrigin();
+
+	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullPivotA, bullPivotB, bullWorldAxis, attWorldAxis);
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }
 
@@ -412,7 +421,6 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 	obj1Pos -= ((btMassCenterMotionState *)pObjRef->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
-	// TODO: Not the correct constraint.
 	btPoint2PointConstraint *pBallsock = new btPoint2PointConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos);
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pBallsock, CONSTRAINT_BALLSOCKET);
 }

@@ -3,7 +3,8 @@
 
 class IController {
 	public:
+		// Bullet tick, called post-simulation
 		virtual void Tick(float deltaTime) = 0;
 };
 
-#endif
+#endif // ICONTROLLER_H

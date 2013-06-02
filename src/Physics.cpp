@@ -29,7 +29,7 @@ void btDebugWarning(const char *str) {
 CPhysics::~CPhysics() {
 #if defined(_DEBUG) && defined(_MSC_VER)
 	// Probably not the place we should be doing this, but who cares.
-	// This'll be called when vphysics is unloaded, and since we're the only module with
+	// This'll be called when vphysics is unloaded, and since we're (most likely) the only module with
 	// memory debugging enabled, memory leaks should only correspond to our code.
 	_CrtDumpMemoryLeaks();
 #endif

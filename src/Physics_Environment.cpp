@@ -318,10 +318,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;
 
-	m_pBulletEnvironment->setInternalTickCallback(TickCallback, (void *)(this));
+	m_pBulletEnvironment->setInternalTickCallback(TickCallback, (void *)this);
 
 #if DEBUG_DRAW
-	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment, this);
+	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment);
 #endif
 
 	// HACK: Durr hack to get ourselves a debug overlay on the client
@@ -562,7 +562,7 @@ void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController *pCon
 }
 
 IPhysicsPlayerController *CPhysicsEnvironment::CreatePlayerController(IPhysicsObject *pObject) {
-	CPlayerController *pController = ::CreatePlayerController(pObject);
+	CPlayerController *pController = ::CreatePlayerController(this, pObject);
 	if (pController)
 		m_controllers.AddToTail(pController);
 
@@ -617,6 +617,7 @@ void SerializeWorld_f(const CCommand &args) {
 		btSerializer *pSerializer = new btDefaultSerializer;
 		pWorld->serialize(pSerializer);
 
+		// FIXME: We shouldn't be using this. Find the appropiate method from valve interfaces.
 		FILE *pFile = fopen("testfile.bullet", "wb");
 		if (pFile) {
 			fwrite(pSerializer->getBufferPointer(), pSerializer->getCurrentBufferSize(), 1, pFile);
@@ -1002,6 +1003,10 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 		}
 	}
 }
+
+// ==================
+// EVENTS
+// ==================
 
 // UNEXPOSED
 void CPhysicsEnvironment::HandleConstraintBroken(CPhysicsConstraint *pConstraint) {

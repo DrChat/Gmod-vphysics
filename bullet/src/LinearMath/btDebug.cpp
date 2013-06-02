@@ -17,6 +17,11 @@ subject to the following restrictions:
 
 #include "btDebug.h"
 
+#if defined(__CELLOS_LV2__) && defined(__SPU__)
+	#include <spu_printf.h>
+	#define printf spu_printf
+#endif
+
 void btDefDbgMsg(const char *str) {
 	printf("%s", str);
 }

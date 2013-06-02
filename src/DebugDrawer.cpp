@@ -10,31 +10,27 @@
 
 #include "tier0/vprof.h"
 
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	#include <SDL.h>
 	#include <SDL_opengl.h>
-#endif // RENDER_SDL
+#endif // DEBUGDRAW_RENDER_SDL
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 #if DEBUG_DRAW
-#if RENDER_SDL
-	#pragma comment(lib, "SDL")
-	#pragma comment(lib, "OpenGL32")
-	#pragma comment(lib, "Glu32")
-#endif // RENDER_SDL
 
 static ConVar cvar_renderoverlay("vphysics_renderoverlay", "1", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render debug overlay");
-static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "Render wireframe on the overlay (lags on most maps!)");
+static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHEAT, "Render wireframe on the overlay (lags on most maps!)");
 static ConVar cvar_overlaydepthtest("vphysics_overlay_nodepthtest", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "No depth test when rendering the overlay");
 
-CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) : m_debugMode(0), m_overlay(NULL), m_pDisplay(NULL) {
-	m_pEnv = pEnv;
+CDebugDrawer::CDebugDrawer(btCollisionWorld *world) : m_debugMode(0), m_overlay(NULL) {
 	setDebugMode(DBG_DrawAabb | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
 				DBG_DrawNormals);
 
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
+	m_pDisplay = NULL;
+
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
@@ -61,17 +57,17 @@ CDebugDrawer::CDebugDrawer(btCollisionWorld *world, CPhysicsEnvironment *pEnv) :
 	m_world->setDebugDrawer(this);
 
 #ifndef BT_NO_PROFILE
-	m_pProfIterator = CProfileManager::Get_Iterator();
+	// m_pProfIterator = CProfileManager::Get_Iterator();
 #endif
 }
 
 CDebugDrawer::~CDebugDrawer() {
 	m_world->setDebugDrawer(NULL);
 #ifndef BT_NO_PROFILE
-	CProfileManager::Release_Iterator(m_pProfIterator);
+	// CProfileManager::Release_Iterator(m_pProfIterator);
 #endif
 
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	SDL_FreeSurface(m_pDisplay);
 	SDL_Quit();
 #endif
@@ -79,7 +75,7 @@ CDebugDrawer::~CDebugDrawer() {
 
 void CDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor) {
 	VPROF_BUDGET("CDebugDrawer::drawLine", VPROF_BUDGETGROUP_PHYSICS);
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	glBegin(GL_LINES);
 		glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());
 		glVertex3d(from.getX(), from.getY(), from.getZ());
@@ -100,7 +96,7 @@ void CDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const bt
 	drawLine(from, to, color, color);
 }
 
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 void CDebugDrawer::drawSphere(const btVector3 &p, btScalar radius, const btVector3 &color) {
 	glColor4f (color.getX(), color.getY(), color.getZ(), btScalar(1.0f));
 	glPushMatrix ();
@@ -138,7 +134,7 @@ void CDebugDrawer::drawSphere(const btVector3 &p, btScalar radius, const btVecto
 #endif
 
 void CDebugDrawer::drawBox(const btVector3 &boxMin, const btVector3 &boxMax, const btVector3 &color, btScalar alpha) {
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	btVector3 halfExtent = (boxMax - boxMin) * btScalar(0.5f);
 	btVector3 center = (boxMax + boxMin) * btScalar(0.5f);
 	//glEnable(GL_BLEND);     // Turn blending On
@@ -158,7 +154,7 @@ void CDebugDrawer::drawBox(const btVector3 &boxMin, const btVector3 &boxMax, con
 }
 
 void CDebugDrawer::drawTriangle(const btVector3 &a, const btVector3 &b, const btVector3 &c, const btVector3 &color, btScalar alpha) {
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	const btVector3	n=btCross(b-a, c-a).normalized();
 	glBegin(GL_TRIANGLES);		
 		glColor4f(color.getX(), color.getY(), color.getZ(), alpha);
@@ -183,7 +179,7 @@ void CDebugDrawer::setDebugMode(int debugMode) {
 }
 
 void CDebugDrawer::draw3dText(const btVector3 &location, const char *textString) {
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	glRasterPos3f(location.x(),  location.y(),  location.z());
 #else
 	Vector HLLocation;
@@ -200,7 +196,7 @@ void CDebugDrawer::reportErrorWarning(const char *warningString) {
 void CDebugDrawer::drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color) {
 	btVector3 to = pointOnB + normalOnB * (distance + 0.5); //pointOnB + normalOnB * 1;
 	const btVector3 &from = pointOnB;
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
 	glBegin(GL_LINES);
 		glVertex3d(from.getX(), from.getY(), from.getZ());
@@ -220,7 +216,7 @@ IVPhysicsDebugOverlay *CDebugDrawer::GetDebugOverlay() {
 }
 
 void CDebugDrawer::DrawWorld() {
-#if RENDER_SDL
+#ifdef DEBUGDRAW_RENDER_SDL
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setDebugMode(DBG_DrawWireframe);
 	m_world->debugDrawWorld();
@@ -236,4 +232,5 @@ void CDebugDrawer::DrawWorld() {
 	}
 #endif
 }
+
 #endif // DEBUG_DRAW

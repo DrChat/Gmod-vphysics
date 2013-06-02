@@ -37,8 +37,8 @@ public:
 	IVPhysicsDebugOverlay *					GetDebugOverlay();
 	btIDebugDraw *							GetDebugDrawer();
 
-	void									SetGravity(const Vector& gravityVector);
-	void									GetGravity(Vector* pGravityVector) const;
+	void									SetGravity(const Vector &gravityVector);
+	void									GetGravity(Vector *pGravityVector) const;
 
 	void									SetAirDensity(float density);
 	float									GetAirDensity() const;

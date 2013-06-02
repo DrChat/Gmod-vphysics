@@ -4,12 +4,13 @@
 #include <vphysics/player_controller.h>
 #include "IController.h"
 
+class CPhysicsEnvironment;
 class CPhysicsObject;
 
 class CPlayerController : public IController, public IPhysicsPlayerController
 {
 	public:
-		CPlayerController(CPhysicsObject *pObject);
+		CPlayerController(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject);
 		~CPlayerController();
 
 		void							Update(const Vector &position, const Vector &velocity, float secondsToArrival, bool onground, IPhysicsObject *ground);
@@ -41,27 +42,34 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		void							DetachObject();
 		bool							TryTeleportObject();
 
+		void							CalculateVelocity(float dt);
+
 		bool							m_enable;
 		bool							m_onground;
 		CPhysicsObject *				m_pGround;
 		CPhysicsObject *				m_pObject;
+		CPhysicsEnvironment *			m_pEnv;
 		btVector3						m_saveRot;
 		IPhysicsPlayerControllerEvent *	m_handler;
 		float							m_maxDeltaPosition;
 		float							m_dampFactor;
 		float							m_secondsToArrival;
-		btVector3						m_targetPosition;
 		btVector3						m_maxSpeed;
 		btVector3						m_currentSpeed;
 		btVector3						m_lastImpulse;
-		float							m_PushMassLimit;
-		float							m_PushSpeedLimit;
+		float							m_pushMassLimit;
+		float							m_pushSpeedLimit;
 
-		int								m_iTicksSinceUpdate;
+		// Variables for future use as a kinematic controller.
+		btVector3						m_linVelocity;
+		btVector3						m_targetVelocity;
+		btVector3						m_targetPosition;
+
+		int								m_ticksSinceUpdate;
 };
 
 void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping);
 
-CPlayerController *CreatePlayerController(IPhysicsObject *pObject);
+CPlayerController *CreatePlayerController(CPhysicsEnvironment *pEnv, IPhysicsObject *pObject);
 
 #endif // PHYSICS_PLAYERCONTROLLER_H

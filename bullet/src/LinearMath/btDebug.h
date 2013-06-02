@@ -16,6 +16,7 @@ subject to the following restrictions:
 #define BT_DEBUG_H
 
 // TODO: Do we want versions of these with source information?
+// Can't really do this due to limitations of compiler macros (vararg support for macros changes per compiler)
 
 void btDbgMsgInternal(const char *fmt, ...);
 void btDbgWarningInternal(const char *fmt, ...);
