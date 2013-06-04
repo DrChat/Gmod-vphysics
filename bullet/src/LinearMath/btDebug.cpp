@@ -13,7 +13,7 @@ subject to the following restrictions:
 */
 
 #include <stdio.h>
-#include <cstdarg>
+#include <stdarg.h>
 
 #include "btDebug.h"
 
@@ -47,7 +47,7 @@ void btDbgMsgInternal(const char *fmt, ...) {
 
 	va_list va;
 	va_start(va, fmt);
-	vsprintf_s(buff, fmt, va);
+	vsnprintf(buff, 2048, fmt, va);
 	va_end(va);
 
 	g_pDbgMsg(buff);
@@ -58,7 +58,7 @@ void btDbgWarningInternal(const char *fmt, ...) {
 
 	va_list va;
 	va_start(va, fmt);
-	vsprintf_s(buff, fmt, va);
+	vsnprintf(buff, 2048, fmt, va);
 	va_end(va);
 
 	g_pDbgWarn(buff);

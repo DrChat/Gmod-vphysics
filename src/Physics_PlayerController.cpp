@@ -70,6 +70,15 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	m_targetVelocity = bullTargetVelocity;
 
 	m_enable = true;
+
+#ifdef _DEBUG
+	if (m_onground != onground) {
+		Msg("ONGROUND CHANGED TO %s GROUND IS %s\n", onground ? "true" : "false", ground ? "valid" : "invalid");
+	}
+#endif
+
+	// FYI: The onground stuff includes any props we may be standing on as well as the world.
+	// Why is the ground always NULL?
 	m_onground = onground;
 
 	if (velocity.LengthSqr() <= 0.001f) {
@@ -224,7 +233,7 @@ void CPlayerController::Tick(float deltaTime) {
 	btMassCenterMotionState *motionState = (btMassCenterMotionState *)body->getMotionState();
 
 	// Don't let the player controller travel too far away from the target position.
-	btTransform transform = body->getWorldTransform() * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset;
+	btTransform transform = body->getWorldTransform() * motionState->m_centerOfMassOffset;
 	btVector3 delta_position = m_targetPosition - transform.getOrigin();
 
 	btScalar qdist = delta_position.length2();
