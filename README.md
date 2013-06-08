@@ -10,10 +10,9 @@ Replacement vphysics module for Garry's Mod
 You can download vphysics [here](http://peniscorp.com/vphysics/) (courtesy of Gran PC)
 #### Installation
 1. Copy vphysics.dll to the engine bin directory (same folder as the one that contains hl2.exe)
-2. In the steam directory, create a file called "steam.cfg" and copy this code into it:
-`BootStrapperInhibitAll=enable`
-`MinFootprintAutoRefresh=disable`
-3. Restart steam and launch Garry's Mod.
+2. Run Garry's Mod.
+
+You may have to repeat these steps after updating garry's mod!
 
 
 ### Developers
