@@ -5,7 +5,7 @@ struct PhysicsShapeInfo {
 	btVector3 massCenter;
 };
 
-// NOTE: There can only be up to 15 unique collision groups!
+// NOTE: There can only be up to 15 unique collision groups (short)!
 enum ECollisionGroups {
 	COLGROUP_NONE	= 0,
 	COLGROUP_WORLD	= 1<<1,

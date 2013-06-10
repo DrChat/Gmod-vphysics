@@ -30,7 +30,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		btSoftBody *			m_pSoftBody;
 };
 
-CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv);
+CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
 CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
 
 #endif // PHYSICS_SOFTBODY_H

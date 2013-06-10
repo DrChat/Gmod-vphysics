@@ -21,19 +21,28 @@
 
 class CDefaultCarWheelTracer : public IPhysicsVehicleWheelTrace {
 	public:
-		CDefaultCarWheelTracer(btRaycastVehicle *pVehicle);
-
-		IPhysicsObject *CastRay(int wheelIndex, const Vector &start, const Vector &end, trace_t &result) {
+		CDefaultCarWheelTracer(CPhysicsVehicleController *pVehicle, IPhysicsGameTrace *pGameTrace):
+		m_pVehicle(pVehicle),
+		m_pGameTrace(pGameTrace) {
 
 		}
+
+		IPhysicsObject *CastRay(int wheelIndex, const Vector &start, const Vector &end, trace_t &result) {
+			Ray_t ray;
+			ray.m_Start = start;
+			ray.m_Delta = end - start;
+			m_pGameTrace->VehicleTraceRay(ray, (void *)m_pVehicle, &result);
+		}
+
 	private:
-		btRaycastVehicle *m_pVehicle;
+		CPhysicsVehicleController *m_pVehicle;
+		IPhysicsGameTrace *m_pGameTrace;
 };
 
 // Purpose: This ray will ignore a body AND detect water for use in airboats.
 struct CDetectWaterRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
 	CDetectWaterRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
-			: ClosestRayResultCallback(from, to) {
+	: ClosestRayResultCallback(from, to) {
 		m_pIgnoreObject = pIgnoreObject;
 	}
 
@@ -84,6 +93,7 @@ class CAirboatRaycaster : public btVehicleRaycaster {
 
 			return NULL;
 		}
+
 	private:
 		btDynamicsWorld *	m_pWorld;
 		btRigidBody *		m_pBody;
@@ -137,6 +147,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 
 			return NULL;
 		}
+
 	private:
 		btDynamicsWorld *			m_pWorld;
 		CPhysicsVehicleController *	m_pController;

@@ -13,7 +13,8 @@ struct pair_hash_list {
 
 class CPhysicsObjectPairHash : public IPhysicsObjectPairHash {
 	public:
-						CPhysicsObjectPairHash();
+		CPhysicsObjectPairHash();
+
 		virtual void	AddObjectPair(void *pObject0, void *pObject1);
 		virtual void	RemoveObjectPair(void *pObject0, void *pObject1);
 		virtual bool	IsObjectPairInHash(void *pObject0, void *pObject1);

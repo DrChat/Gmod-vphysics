@@ -125,6 +125,7 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_shadow.teleportDistance = 0;
 	m_shadow.targetPosition.setZero();
 	m_shadow.targetRotation = btQuaternion::getIdentity();
+	m_flags = 0;
 
 	SetAllowsTranslation(allowTranslation);
 	SetAllowsRotation(allowRotation);
@@ -170,7 +171,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 }
 
 void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
-	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
+	btRigidBody *body = m_pObject->GetObject();
 
 	//----------------
 	// Linear
@@ -190,6 +191,7 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 		bullSpeed *= dot * length;
 		available -= bullSpeed;
 	}
+
 	m_shadow.maxSpeed = available.absolute();
 
 	//----------------
@@ -208,6 +210,7 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 		bullAngular *= dotAngular * lengthAngular;
 		availableAngular -= bullAngular;
 	}
+
 	m_shadow.maxAngular = availableAngular.absolute();
 }
 
@@ -238,7 +241,7 @@ bool CShadowController::AllowsRotation() {
 // 1) Game physics controlled, shadow follows game physics (this is the default)
 // 2) Physically controlled - shadow position is a target, but the game hasn't guaranteed that the space can be occupied by this object
 bool CShadowController::IsPhysicallyControlled() {
-	return (m_flags & FLAG_PHYSICALLYCONTROLLED) > 0;
+	return (m_flags & FLAG_PHYSICALLYCONTROLLED) != 0;
 }
 
 void CShadowController::SetAllowsTranslation(bool enable) {
@@ -249,8 +252,11 @@ void CShadowController::SetAllowsRotation(bool enable) {
 	enable ? m_flags |= FLAG_ALLOWPHYSICSROTATION : m_flags &= ~(FLAG_ALLOWPHYSICSROTATION);
 }
 
-void CShadowController::SetPhysicallyControlled(bool isPhysicallyControlled) {
-	if (isPhysicallyControlled) {
+void CShadowController::SetPhysicallyControlled(bool enable) {
+	if (IsPhysicallyControlled() == enable)
+		return;
+
+	if (enable) {
 		m_flags |= FLAG_PHYSICALLYCONTROLLED;
 
 		btRigidBody *body = m_pObject->GetObject();

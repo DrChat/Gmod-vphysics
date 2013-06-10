@@ -62,11 +62,12 @@ abstract_class IPhysicsCollision1 : public IPhysicsCollision {
 		virtual void			RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex) = 0;
 
 		// This will scale a collide
-		// Untested as of now, but I believe Vector(1,1,1) is normal scale.
 		virtual void			CollideSetScale(CPhysCollide *pCollide, const Vector &scale) = 0;
 		virtual void			CollideGetScale(const CPhysCollide *pCollide, Vector &scale) = 0;
 
 		// API to disable old vphysics behavior for bboxes
+		// (holds all bboxes in a cache, and it'll either give you one already created or create a new one)
+		// The bbox cache doesn't provide any speed boost like it does in the old vphysics
 		virtual void			EnableBBoxCache(bool enable) = 0;
 		virtual bool			IsBBoxCacheEnabled() = 0;
 

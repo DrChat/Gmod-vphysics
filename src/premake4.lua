@@ -25,7 +25,7 @@ configuration { "windows", "vs*" }
 configuration { "linux", "gmake" }
 	targetname "vphysics_srv"
 	targetprefix ""
-	buildoptions { "-fpermissive" }
+	buildoptions { "-w", "-fpermissive" }
 	defines { "sprintf_s=snprintf", "strcmpi=strcasecmp", "_alloca=alloca", "stricmp=strcasecmp", "_stricmp=strcasecmp", "strcpy_s=strncpy", "_strnicmp=strncasecmp", "strnicmp=strncasecmp", "_snprintf=snprintf", "_vsnprintf=vsnprintf", "_alloca=alloca", "strcmpi=strcasecmp", "NO_MALLOC_OVERRIDE" }
 
 configuration {}
@@ -64,7 +64,8 @@ configuration { "linux", "gmake" }
 			SRCDS_BIN_DIR,
 		}
 		
-		-- GCC is terrible with static vs. dynamic :(
+		-- GCC is terrible with static vs. dynamic
+		-- FIXME: This doesn't work at all!
 		linkoptions {
 			"-static",
 			"\"" .. path.getabsolute(SDK_DIR) .. "/lib/linux/libtier1_i486.a\"",

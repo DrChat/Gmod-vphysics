@@ -148,7 +148,7 @@ void CPhysicsFluidController::Tick(float dt) {
 		float p = clamp(dist / height, 0.0f, 1.0f);
 		float vol = (pObject->GetVolume() * p) / 64;
 
-		// TODO: We need to calculate this force at several points on the object.
+		// TODO: We need to calculate this force at several points on the object (How do we determine what points?).
 		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();
 		body->applyCentralForce(force);
 

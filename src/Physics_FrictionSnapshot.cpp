@@ -75,7 +75,7 @@ void CPhysicsFrictionSnapshot::GetSurfaceNormal(Vector &out) {
 
 float CPhysicsFrictionSnapshot::GetNormalForce() {
 	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
-	return bullManifoldPoint.m_appliedImpulse; // FIXME: Is this correct?
+	return BULL2HL(bullManifoldPoint.m_appliedImpulse); // Force impulse to HL (kg * m/s) -> (kg * in/s)
 }
 
 float CPhysicsFrictionSnapshot::GetEnergyAbsorbed() {

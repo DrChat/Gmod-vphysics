@@ -71,14 +71,8 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 
 	m_enable = true;
 
-#ifdef _DEBUG
-	if (m_onground != onground) {
-		Msg("ONGROUND CHANGED TO %s GROUND IS %s\n", onground ? "true" : "false", ground ? "valid" : "invalid");
-	}
-#endif
-
 	// FYI: The onground stuff includes any props we may be standing on as well as the world.
-	// Why is the ground always NULL?
+	// The ground is valid only if it's significantly heavier than our object ("Rideable physics"). (> our mass * 2)
 	m_onground = onground;
 
 	if (velocity.LengthSqr() <= 0.001f) {

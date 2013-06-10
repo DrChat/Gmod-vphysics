@@ -336,8 +336,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	SetQuickDelete(true);
 
 	for (int i = m_objects.Count()-1; i >= 0; --i) {
-		CPhysicsObject *pObject = (CPhysicsObject *)(m_objects[i]);
-		delete pObject;
+		delete m_objects[i];
 	}
 
 	m_objects.RemoveAll();
@@ -475,7 +474,7 @@ IPhysicsFluidController *CPhysicsEnvironment::CreateFluidController(IPhysicsObje
 
 void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController *pController) {
 	m_fluids.FindAndRemove((CPhysicsFluidController  *)pController);
-	delete (CPhysicsFluidController *)pController;
+	delete pController;
 }
 
 IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, IPhysicsObject *pObjectEnd, springparams_t *pParams) {
@@ -543,7 +542,7 @@ IPhysicsConstraintGroup *CPhysicsEnvironment::CreateConstraintGroup(const constr
 }
 
 void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup) {
-	delete (CPhysicsConstraintGroup *)pGroup;
+	delete pGroup;
 }
 
 IPhysicsShadowController *CPhysicsEnvironment::CreateShadowController(IPhysicsObject *pObject, bool allowTranslation, bool allowRotation) {
@@ -573,7 +572,7 @@ void CPhysicsEnvironment::DestroyPlayerController(IPhysicsPlayerController *pCon
 	if (!pController) return;
 
 	m_controllers.FindAndRemove((CPlayerController *)pController);
-	delete (CPlayerController *)pController;
+	delete pController;
 }
 
 IPhysicsMotionController *CPhysicsEnvironment::CreateMotionController(IMotionEvent *pHandler) {
@@ -588,7 +587,7 @@ void CPhysicsEnvironment::DestroyMotionController(IPhysicsMotionController *pCon
 	if (!pController) return;
 
 	m_controllers.FindAndRemove((CPhysicsMotionController *)pController);
-	delete (CPhysicsMotionController *)pController;
+	delete pController;
 }
 
 IPhysicsVehicleController *CPhysicsEnvironment::CreateVehicleController(IPhysicsObject *pVehicleBodyObject, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace) {
@@ -596,7 +595,7 @@ IPhysicsVehicleController *CPhysicsEnvironment::CreateVehicleController(IPhysics
 }
 
 void CPhysicsEnvironment::DestroyVehicleController(IPhysicsVehicleController *pController) {
-	delete (CPhysicsVehicleController *)pController;
+	delete pController;
 }
 
 void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
@@ -747,9 +746,7 @@ bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnviro
 
 void CPhysicsEnvironment::CleanupDeleteList() {
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
-		CPhysicsObject *pObject = (CPhysicsObject *)m_deadObjects.Element(i);
-		delete pObject;
-		pObject = NULL;
+		delete m_deadObjects.Element(i);
 	}
 
 	m_deadObjects.Purge();

@@ -2,7 +2,7 @@
 #define BT_TYPE_DEFINITIONS_H
 
 ///This file provides some platform/compiler checks for common definitions
-#include "LinearMath/btScalar.h"
+#include "LinearMath/btDefines.h"
 #include "LinearMath/btMinMax.h"
 
 #ifdef PFX_USE_FREE_VECTORMATH

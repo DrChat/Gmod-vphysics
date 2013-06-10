@@ -97,6 +97,7 @@ class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 
 	private:
 		CUtlVector<CPhysicsConstraint *>	m_constraints;
+		constraint_groupparams_t			m_errorParams;
 };
 
 // CONSTRAINT CREATION FUNCTIONS

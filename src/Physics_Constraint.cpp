@@ -80,7 +80,6 @@ class btLengthConstraint: public btPoint2PointConstraint {
 		}
 };
 
-// TODO: Find out how to use m_mindist to make ropes non-rigid, otherwise this is essentially a ballsocket.
 class btDistanceConstraint : public btPoint2PointConstraint {
 	protected:
 		btScalar	m_dist;
@@ -97,10 +96,15 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 		}
 
 		void getInfo2 (btConstraintInfo2 *info) {
+			// Positions relative to objects
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
 			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
+
+			// Exact world positions
 			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
 			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
+
+			// Delta
 			btVector3 del = posB - posA;
 			btScalar currDist = btSqrt(del.dot(del));
 			btVector3 ortho = del / currDist;
@@ -222,7 +226,7 @@ EConstraintType CPhysicsConstraint::GetType() {
 *********************************/
 
 CPhysicsConstraintGroup::CPhysicsConstraintGroup(const constraint_groupparams_t &params) {
-
+	m_errorParams = params;
 }
 
 CPhysicsConstraintGroup::~CPhysicsConstraintGroup() {
@@ -234,19 +238,23 @@ void CPhysicsConstraintGroup::Activate() {
 }
 
 bool CPhysicsConstraintGroup::IsInErrorState() {
+	// Called every frame
+	// NOT_IMPLEMENTED
 	return false;
 }
 
 void CPhysicsConstraintGroup::ClearErrorState() {
-
+	// Called every frame
+	// NOT_IMPLEMENTED
 }
 
 void CPhysicsConstraintGroup::GetErrorParams(constraint_groupparams_t *pParams) {
-	NOT_IMPLEMENTED
+	if (pParams)
+		*pParams = m_errorParams;
 }
 
 void CPhysicsConstraintGroup::SetErrorParams(const constraint_groupparams_t &params) {
-	NOT_IMPLEMENTED
+	m_errorParams = params;
 }
 
 void CPhysicsConstraintGroup::SolvePenetration(IPhysicsObject *pObj0, IPhysicsObject *pObj1) {
@@ -306,6 +314,7 @@ IPhysicsObject *CPhysicsSpring::GetEndObject() {
 * CREATION FUNCTIONS
 ************************/
 
+// NOT COMPLETE
 CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring) {
 	if (!spring) return NULL;
 
@@ -328,6 +337,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform bullAFrame = constraintToReference;
 	btTransform bullBFrame = constraintToAttached;
 
+	// We shouldn't be using a cone twist constraint! old vphysics uses a "limited ballsocket" constraint
 	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
 
 	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
@@ -336,10 +346,10 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	// swing span 1, swing span 2, twist limit
 	// Bullet only supports setting the maximum limits, not minimums!
 	
-
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
 
+// NOT COMPLETE
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -351,17 +361,14 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
 	// How do we transfer the axis into object local coords?
-
-	// LOL FLIPPED LOL
-	btVector3 attWorldAxis = bullWorldAxis;
-	attWorldAxis.setY(-attWorldAxis.y());
-	attWorldAxis.setZ(-attWorldAxis.z());
+	btVector3 refAxis = bullWorldAxis * bullObjRef->getWorldTransform().getBasis();
+	btVector3 attAxis = -bullWorldAxis * bullObjAtt->getWorldTransform().getBasis();
 
 	// FIXME: Position is correct, but rotation isn't
 	btVector3 bullPivotA = bullWorldPosition - bullObjRef->getWorldTransform().getOrigin();
 	btVector3 bullPivotB = bullWorldPosition - bullObjAtt->getWorldTransform().getOrigin();
 
-	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullPivotA, bullPivotB, bullWorldAxis, attWorldAxis);
+	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullPivotA, bullPivotB, refAxis, attAxis);
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }
 
@@ -379,9 +386,12 @@ CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
 }
 
+// NOT COMPLETE
 CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+	btRigidBody *objRef = pObjRef->GetObject();
+	btRigidBody *objAtt = pObjAtt->GetObject();
 
 	// Position of attached object space relative to reference object space.
 	btTransform bullAttRefXform = btTransform::getIdentity();
@@ -391,10 +401,14 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btVector3 bullSlideAxisRef;
 	ConvertDirectionToBull(sliding.slideAxisRef, bullSlideAxisRef);
 
+	// TODO: How do we convert the slide axis to a btQuaternion?
+
+	// Sliders connect the centers of each object
 	btTransform bullFrameInA = btTransform::getIdentity();
+	bullFrameInA.setRotation(btQuaternion(btVector3(0, 1, 0), 1) * objRef->getWorldTransform().getRotation().inverse());
+
 	btTransform bullFrameInB = btTransform::getIdentity();
-	bullFrameInA.setRotation(btQuaternion(bullSlideAxisRef, 0));
-	bullFrameInB.setRotation(pObjAtt->GetObject()->getWorldTransform().getRotation()); // This is wrong. Should find rot from attached object to ref object.
+	bullFrameInB.setRotation(btQuaternion(btVector3(0, 1, 0), 1) * objAtt->getWorldTransform().getRotation().inverse());
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullFrameInA, bullFrameInB, true);
 
@@ -411,12 +425,12 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 }
 
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket) {
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+
 	btVector3 obj1Pos, obj2Pos;
 	ConvertPosToBull(ballsocket.constraintPosition[0], obj1Pos);
 	ConvertPosToBull(ballsocket.constraintPosition[1], obj2Pos);
-
-	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
-	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
 
 	obj1Pos -= ((btMassCenterMotionState *)pObjRef->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
@@ -425,12 +439,14 @@ CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysi
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pBallsock, CONSTRAINT_BALLSOCKET);
 }
 
+// NOT COMPLETE
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley) {
 	// TODO: Bullet has no default pulley constraint. Make one.
 	NOT_IMPLEMENTED
 	return NULL;
 }
 
+// NOT COMPLETE
 CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length) {
 	btVector3 obj1Pos, obj2Pos;
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);

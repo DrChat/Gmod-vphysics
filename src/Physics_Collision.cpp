@@ -374,8 +374,17 @@ void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vecto
 		btVector3 bullMassCenter;
 		ConvertPosToBull(massCenter, bullMassCenter);
 
-		// TODO: If collide is a compound shape, shift all children by this offset.
-		//btVector3 offset = bullMassCenter - pInfo->massCenter;
+		// Since mass centers are kind of a hack in our implementation, take care of updating the compound shape's children.
+		// FIXME: May cause some issues with rigid bodies "moving" around, or something.
+		btVector3 offset = bullMassCenter - pInfo->massCenter;
+		if (pShape->isCompound()) {
+			btCompoundShape *pCompound = (btCompoundShape *)pShape;
+			for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+				btTransform childTrans = pCompound->getChildTransform(i);
+				childTrans.setOrigin(childTrans.getOrigin() + offset);
+				pCompound->updateChildTransform(i, childTrans);
+			}
+		}
 
 		pInfo->massCenter = bullMassCenter;
 	}
@@ -718,13 +727,33 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 	delete pSweepObject;
 }
 
-bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &cone) {
+bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &truncatedCone) {
+	btVector3 boxMins, boxMaxs;
+	ConvertAABBToBull(boxAbsMins, boxAbsMaxs, boxMins, boxMaxs);
+	btVector3 boxHalfExtents = (boxMaxs - boxMins) / 2;
+
+	btBoxShape *box = new btBoxShape(boxHalfExtents);
+	btTransform boxTrans = btTransform::getIdentity();
+	boxTrans.setOrigin(boxMins + boxHalfExtents);
+	
+	// cone
+	btScalar coneHeight = ConvertDistanceToBull(truncatedCone.h);
+	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta)) * coneHeight;
+
+	btConeShape *cone = new btConeShape(coneRadius, coneHeight);
+
+	// Cleanup
+	delete box;
+	delete cone;
+
 	NOT_IMPLEMENTED
 	return false;
 }
 
 // Purpose: Recursive function that goes through the entire ledge tree and adds ledges
 static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
+	if (!node || !vecOut) return;
+
 	if (node->IsTerminal()) {
 		vecOut->AddToTail(node->GetCompactLedge());
 	} else {
@@ -738,6 +767,8 @@ static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivp
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
 	memset(pOutput, 0, sizeof(*pOutput));
+
+	// TODO: This
 	if (swap) {
 		Warning("VCollideLoad - Abort loading, swap is true\n");
 		Assert(0);

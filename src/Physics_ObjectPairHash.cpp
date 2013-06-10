@@ -15,14 +15,20 @@ CPhysicsObjectPairHash::CPhysicsObjectPairHash() {
 
 void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
 	int entry = (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
+
+	// This particular entry may have more than one hash, so find the last one.
 	pair_hash_list *last = NULL;
 	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = hash->next)
 		last = hash;
+
+	// Setup our hash
 	pair_hash_list *hash = new pair_hash_list;
 	hash->object0 = pObject0;
 	hash->object1 = pObject1;
 	hash->previous = last;
 	hash->next = NULL;
+
+	// Now link ourselves up to the list.
 	if (last)
 		last->next = hash;
 	else
@@ -78,6 +84,7 @@ bool CPhysicsObjectPairHash::IsObjectPairInHash(void *pObject0, void *pObject1) 
 		if (hash->object0 == pObject0 || hash->object0 == pObject1 || hash->object1 == pObject0 || hash->object1 == pObject1)
 			return true;
 	}
+
 	return false;
 }
 
@@ -88,6 +95,7 @@ bool CPhysicsObjectPairHash::IsObjectInHash(void *pObject0) {
 				return true;
 		}
 	}
+
 	return false;
 }
 
@@ -99,6 +107,7 @@ int CPhysicsObjectPairHash::GetPairCountForObject(void *pObject0) {
 				c++;
 		}
 	}
+
 	return c;
 }
 
@@ -112,5 +121,6 @@ int CPhysicsObjectPairHash::GetPairListForObject(void *pObject0, int nMaxCount, 
 				ppObjectList[c++] = hash->object0;
 		}
 	}
+
 	return c;
 }
