@@ -4,9 +4,6 @@
 	#pragma once
 #endif
 
-// TODO: Find a better include
-#include <mathlib/vector.h>
-
 // Class declarations
 
 class CPhysicsEnvironment;

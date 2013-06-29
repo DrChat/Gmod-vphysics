@@ -196,7 +196,9 @@ void ConvertMatrixToBull(const matrix3x4_t &hl, btTransform &transform) {
 	ConvertDirectionToBull(up, bullUp);
 	ConvertPosToBull(pos, origin);
 
-	transform.setBasis(btMatrix3x3(bullForward, bullUp, bullRight));
+	transform.setBasis(btMatrix3x3(bullForward.x(), bullUp.x(), bullRight.x(),
+								   bullForward.y(), bullUp.y(), bullRight.y(),
+								   bullForward.z(), bullUp.z(), bullRight.z()));
 	transform.setOrigin(origin);
 }
 

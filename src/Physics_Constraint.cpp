@@ -228,11 +228,15 @@ void CPhysicsConstraint::UpdateRagdollTransforms(const matrix3x4_t &constraintTo
 }
 
 bool CPhysicsConstraint::GetConstraintTransform(matrix3x4_t *pConstraintToReference, matrix3x4_t *pConstraintToAttached) const {
+	if (!pConstraintToReference && !pConstraintToAttached) return false;
+
 	NOT_IMPLEMENTED
 	return false;
 }
 
 bool CPhysicsConstraint::GetConstraintParams(constraint_breakableparams_t *pParams) const {
+	if (!pParams) return false;
+
 	NOT_IMPLEMENTED
 	return false;
 }
@@ -362,6 +366,7 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 	return NULL;
 }
 
+// NOT COMPLETE
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -385,7 +390,6 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
 
-// NOT COMPLETE
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -399,7 +403,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	btMatrix3x3 worldMatrix;
 	bullAxisToMatrix(bullWorldAxis, worldMatrix);
 
-	// Setup the constraint to be on the expected axis
+	// Setup the constraint to be on the expected axis (flip fwd and right)
 	btVector3 fwd, up, right;
 	fwd = worldMatrix.getColumn(0);
 	up = worldMatrix.getColumn(1);
@@ -417,6 +421,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refTransform, attTransform);
 
 	// FIXME: Unit conversion may be wrong! (Bullet takes in rotations in radians, does HL use degrees?)
+	// In addition, min == max = no limits may be wrong
 	if (hinge.hingeAxis.minRotation != hinge.hingeAxis.maxRotation)
 		pHinge->setLimit(DEG2RAD(hinge.hingeAxis.minRotation), DEG2RAD(hinge.hingeAxis.maxRotation));
 
@@ -463,6 +468,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform refFrame = btTransform::getIdentity();
 	refFrame.setBasis(refMatrix);
 
+	// Reference -> attached object transform
 	btTransform refToAttXform = objAtt->getWorldTransform().inverse() * objRef->getWorldTransform();
 
 	// 1. Transfer ref frame to world space (refFrame * objRef->getWorldTransform())
