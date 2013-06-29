@@ -1,5 +1,8 @@
 #ifndef PHYSICS_VEHICLECONTROLLER_H
 #define PHYSICS_VEHICLECONTROLLER_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 #include <vphysics/vehicles.h>
 #include "vphysics/vehiclesV32.h"
@@ -60,6 +63,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 
 	public:
 		// Unexposed functions
+
 		void								InitVehicleParams(const vehicleparams_t &params);
 		void								InitBullVehicle();
 

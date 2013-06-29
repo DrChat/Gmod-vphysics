@@ -592,11 +592,15 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 
 	pos = pos - m_pObject->getWorldTransform().getOrigin();
 
+	btVector3 cross = pos.cross(force);
+
 	if (centerForce) {
 		ConvertForceImpulseToHL(force, *centerForce);
 	}
 
-	NOT_IMPLEMENTED
+	if (centerTorque) {
+		ConvertAngularImpulseToHL(cross, *centerTorque);
+	}
 }
 
 // Thrusters call this and pass output to AddVelocity
@@ -609,9 +613,9 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 
 	pos = pos - m_pObject->getWorldTransform().getOrigin();
 
-	// Cross product for dummies: Returns a vector perpendicular to the 2 vectors being crossed.
-	// See: http://en.wikipedia.org/wiki/Cross_product
 	btVector3 cross = pos.cross(force);
+
+	// cross.set_pairwise_mult( &cross, core->get_inv_rot_inertia());
 
 	// Linear velocity
 	if (centerVelocity) {
@@ -619,7 +623,9 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 		ConvertForceImpulseToHL(force, *centerVelocity);
 	}
 
-	NOT_IMPLEMENTED
+	if (centerAngularVelocity) {
+		ConvertAngularImpulseToHL(cross, *centerAngularVelocity);
+	}
 }
 
 float CPhysicsObject::CalculateLinearDrag(const Vector &unitDirection) const {
@@ -636,7 +642,7 @@ float CPhysicsObject::CalculateAngularDrag(const Vector &objectSpaceRotationAxis
 
 // This function is a silly hack, games should be using the friction snapshot instead.
 bool CPhysicsObject::GetContactPoint(Vector *contactPoint, IPhysicsObject **contactObject) const {
-	if (!contactPoint && !contactObject) return true;
+	if (!contactPoint && !contactObject) return false;
 
 	int numManifolds = m_pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
@@ -855,9 +861,7 @@ void CPhysicsObject::OutputDebugInfo() const {
 	Msg("Linear Drag: %f, %f, %f (factor %f)\n", dragBasis.x, dragBasis.y, dragBasis.z, m_dragCoefficient);
 	Msg("Angular Drag: %f, %f, %f (factor %f)\n", angDragBasis.x, angDragBasis.y, angDragBasis.z, m_angDragCoefficient);
 
-	// Attached to x controllers
-
-
+	// TODO: Attached to x controllers
 
 	Msg("State: %s, Collision %s, Motion %s, Drag %s, Flags %04X (game %04x, index %d)\n", 
 		IsAsleep() ? "Asleep" : "Awake",
@@ -879,9 +883,6 @@ void CPhysicsObject::OutputDebugInfo() const {
 
 	Msg("-- COLLISION SHAPE INFO --\n");
 	g_PhysicsCollision.OutputDebugInfo((CPhysCollide *)m_pObject->getCollisionShape());
-
-	// FIXME: complete this function via format noted on
-	// http://facepunch.com/threads/1178143?p=35663773&viewfull=1#post35663773
 }
 
 // UNEXPOSED

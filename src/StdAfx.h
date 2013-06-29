@@ -1,4 +1,5 @@
 #include <ctype.h>
+
 #include <tier1/tier1.h>
 #include <tier1/utlsymbol.h>
 #include <tier0/platform.h>
@@ -21,6 +22,7 @@
 	#define DEBUG_DRAW 1
 #endif
 
+// Probably shouldn't be using defines for these.
 #define SLEEP_LINEAR_THRESHOLD 0.1 // m/s
 #define SLEEP_ANGULAR_THRESHOLD 0.4 // rad/s
 

@@ -868,7 +868,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 				// This code will find all unique indexes and add them to an array. This avoids
 				// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
-				// If you find a better way then you can replace this!
+				// If you find a better way you can replace this!
 				CUtlVector<short> indexes;
 
 				for (int k = 0; k < ledge->n_triangles; k++) {

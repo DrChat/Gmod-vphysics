@@ -1,5 +1,8 @@
 #ifndef PHYSICS_CONSTRAINT_H
 #define PHYSICS_CONSTRAINT_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 #include <vphysics/constraints.h>
 

@@ -29,6 +29,11 @@
 *
 ************************************************/
 
+#ifdef _MSC_VER
+	// Conversion from x to x, possible loss of data
+	#pragma warning(disable: 4244)
+#endif
+
 // IVP: Forward down left
 // IVP Units in meters
 void ConvertIVPPosToBull(const float *pos, btVector3 &bull) {
@@ -103,6 +108,22 @@ void ConvertDirectionToHL(const btVector3 &dir, Vector &hl) {
 	hl.z = dir.y();
 }
 
+void ConvertForceImpulseToBull(const Vector &hl, btVector3 &bull) {
+	return ConvertPosToBull(hl, bull);
+}
+
+void ConvertForceImpulseToHL(const btVector3 &bull, Vector &hl) {
+	return ConvertPosToHL(bull, hl);
+}
+
+void ConvertForceImpulseToBull(const float &hl, btScalar &bull) {
+	bull = HL2BULL(hl);
+}
+
+void ConvertForceImpulseToHL(const btScalar &bull, float &hl) {
+	hl = BULL2HL(bull);
+}
+
 void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {
 	btQuaternion quat;
 	ConvertRotationToBull(angles, quat);
@@ -175,7 +196,7 @@ void ConvertMatrixToBull(const matrix3x4_t &hl, btTransform &transform) {
 	ConvertDirectionToBull(up, bullUp);
 	ConvertPosToBull(pos, origin);
 
-	transform.setBasis(btMatrix3x3(bullForward.x(), bullUp.x(), bullRight.x(), bullForward.y(), bullUp.y(), bullRight.y(), bullForward.z(), bullUp.z(), bullRight.z()));
+	transform.setBasis(btMatrix3x3(bullForward, bullUp, bullRight));
 	transform.setOrigin(origin);
 }
 

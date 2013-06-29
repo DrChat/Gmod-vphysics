@@ -1,5 +1,8 @@
 #ifndef PHYSICS_PLAYERCONTROLLER_H
 #define PHYSICS_PLAYERCONTROLLER_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 #include <vphysics/player_controller.h>
 #include "IController.h"

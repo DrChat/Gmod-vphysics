@@ -1,5 +1,8 @@
 #ifndef PHYSICS_SHADOWCONTROLLER_H
 #define PHYSICS_SHADOWCONTROLLER_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 #include "IController.h"
 

@@ -1,5 +1,8 @@
 #ifndef PHYSICS_SURFACEPROPS_H
 #define PHYSICS_SURFACEPROPS_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 enum {
 	MATERIAL_INDEX_SHADOW = 0xF000,

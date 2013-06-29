@@ -1,5 +1,8 @@
 #ifndef PHYSICS_FRICTIONSNAPSHOT_H
 #define PHYSICS_FRICTIONSNAPSHOT_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 #include <vphysics/friction.h>
 

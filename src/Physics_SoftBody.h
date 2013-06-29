@@ -1,5 +1,8 @@
 #ifndef PHYSICS_SOFTBODY_H
 #define PHYSICS_SOFTBODY_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 // Purpose: Dynamically deforming meshes (blankets, dents in objects, etc.)
 

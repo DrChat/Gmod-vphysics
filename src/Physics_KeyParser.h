@@ -1,5 +1,8 @@
 #ifndef PHYSICS_KEYPARSER_H
 #define PHYSICS_KEYPARSER_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 #include <vcollide_parse.h>
 #include <vphysics/vehicles.h>

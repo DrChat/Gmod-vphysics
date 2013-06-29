@@ -86,9 +86,9 @@ void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcon
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);
 
-	ConvertForceImpulseToBull(in.maxSpeed, out.maxSpeed);
+	ConvertForceImpulseToBull(Vector(in.maxSpeed), out.maxSpeed);
 	out.maxSpeed = out.maxSpeed.absolute();
-	ConvertAngularImpulseToBull(in.maxAngular, out.maxAngular);
+	ConvertAngularImpulseToBull(Vector(in.maxAngular), out.maxAngular);
 	out.maxAngular = out.maxAngular.absolute();
 	out.dampFactor = in.dampFactor;
 }
@@ -178,7 +178,7 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 	//----------------
 
 	btVector3 bullSpeed;
-	ConvertPosToBull(maxSpeed, bullSpeed);
+	ConvertPosToBull(Vector(maxSpeed), bullSpeed);
 	btVector3 available = bullSpeed;
 
 	// m_currentSpeed = bullSpeed;
@@ -199,7 +199,7 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 	//----------------
 
 	btVector3 bullAngular;
-	ConvertAngularImpulseToBull(maxAngularSpeed, bullAngular);
+	ConvertAngularImpulseToBull(Vector(maxAngularSpeed), bullAngular);
 	btVector3 availableAngular;
 
 	float lengthAngular = bullAngular.length();

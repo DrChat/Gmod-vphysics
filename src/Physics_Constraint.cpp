@@ -29,6 +29,41 @@ inline void GraphicTransformLocalToWorld(const btTransform &trans, const btRigid
 	out = (trans  * ((btMassCenterMotionState *)obj.getMotionState())->m_centerOfMassOffset) * obj.getWorldTransform();
 }
 
+// Convert an axis to a matrix (where angle around axis does not matter)
+inline void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
+	btVector3 wup(0, 1, 0);
+
+	// Handle cases where the axis is really close to up/down vector
+	// Dot = cos(theta) (for dummies), looking for 0(1) to 180(-1) degrees difference
+	btScalar dot = wup.dot(axis);
+	if ((dot > 1.0f - SIMD_EPSILON) || (dot < -1.0f + SIMD_EPSILON)) {
+		// This part may be broken!
+		btVector3 wside(0, 0, 1);
+
+		// Cross products may not be unit length!
+		btVector3 up = wside.cross(axis);
+		btVector3 side = up.cross(axis);
+
+		side.normalize();
+		up.normalize();
+
+		matrix.setValue(axis.x(), up.x(), side.x(),
+						axis.y(), up.y(), side.y(),
+						axis.z(), up.z(), side.z());
+	} else {
+		btVector3 side = wup.cross(axis);
+		btVector3 up = side.cross(axis);
+
+		// Cross products may not be unit length!
+		side.normalize();
+		up.normalize();
+
+		matrix.setValue(axis.x(), up.x(), side.x(),
+						axis.y(), up.y(), side.y(),
+						axis.z(), up.z(), side.z());
+	}
+}
+
 const char *GetConstraintName(EConstraintType type) {
 	switch (type) {
 		case CONSTRAINT_UNKNOWN:
@@ -143,7 +178,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	if (m_type == CONSTRAINT_RAGDOLL) {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 	} else {
-		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
+		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 	}
 
 	if (pReferenceObject)
@@ -334,8 +369,8 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // constraintToReference is ALWAYS the identity matrix.
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
-	btTransform bullAFrame = constraintToReference;
-	btTransform bullBFrame = constraintToAttached;
+	btTransform bullAFrame = constraintToReference; // Wrong!
+	btTransform bullBFrame = constraintToAttached; // Wrong!
 
 	// We shouldn't be using a cone twist constraint! old vphysics uses a "limited ballsocket" constraint
 	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
@@ -353,22 +388,22 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_hingeparams_t &hinge) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
-	btRigidBody *bullObjRef = pObjRef->GetObject();
-	btRigidBody *bullObjAtt = pObjAtt->GetObject();
+	btRigidBody *objRef = pObjRef->GetObject();
+	btRigidBody *objAtt = pObjAtt->GetObject();
 
 	btVector3 bullWorldPosition, bullWorldAxis;
 	ConvertPosToBull(hinge.worldPosition, bullWorldPosition);
 	ConvertDirectionToBull(hinge.worldAxisDirection, bullWorldAxis);
 
-	// How do we transfer the axis into object local coords?
-	btVector3 refAxis = bullWorldAxis * bullObjRef->getWorldTransform().getBasis();
-	btVector3 attAxis = -bullWorldAxis * bullObjAtt->getWorldTransform().getBasis();
+	btMatrix3x3 worldMatrix;
+	bullAxisToMatrix(bullWorldAxis, worldMatrix);
 
-	// FIXME: Position is correct, but rotation isn't
-	btVector3 bullPivotA = bullWorldPosition - bullObjRef->getWorldTransform().getOrigin();
-	btVector3 bullPivotB = bullWorldPosition - bullObjAtt->getWorldTransform().getOrigin();
+	btTransform worldTrans(worldMatrix, bullWorldPosition);
 
-	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullPivotA, bullPivotB, refAxis, attAxis);
+	btTransform refTransform = objRef->getWorldTransform().inverse() * worldTrans;
+	btTransform attTransform = objAtt->getWorldTransform().inverse() * worldTrans;
+
+	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refTransform, attTransform);
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }
 
@@ -393,24 +428,40 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btRigidBody *objRef = pObjRef->GetObject();
 	btRigidBody *objAtt = pObjAtt->GetObject();
 
-	// Position of attached object space relative to reference object space.
-	btTransform bullAttRefXform = btTransform::getIdentity();
-	ConvertMatrixToBull(sliding.attachedRefXform, bullAttRefXform);
-	
 	// Axis to slide on in reference object space
 	btVector3 bullSlideAxisRef;
 	ConvertDirectionToBull(sliding.slideAxisRef, bullSlideAxisRef);
 
-	// TODO: How do we convert the slide axis to a btQuaternion?
+	btTransform bullAttToRef;
+	ConvertMatrixToBull(sliding.attachedRefXform, bullAttToRef);
 
-	// Sliders connect the centers of each object
-	btTransform bullFrameInA = btTransform::getIdentity();
-	bullFrameInA.setRotation(btQuaternion(btVector3(0, 1, 0), 1) * objRef->getWorldTransform().getRotation().inverse());
+	// TODO: We need to construct local frames from the slide axis in reference object space.
+	// 1. Convert slide axis into a matrix
+	// 2. Setup reference object frame (pos in ref object is 0,0,0)
+	// 3. Figure out attached object frame
 
-	btTransform bullFrameInB = btTransform::getIdentity();
-	bullFrameInB.setRotation(btQuaternion(btVector3(0, 1, 0), 1) * objAtt->getWorldTransform().getRotation().inverse());
+	btMatrix3x3 refMatrix;
+	bullAxisToMatrix(bullSlideAxisRef, refMatrix);
 
-	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullFrameInA, bullFrameInB, true);
+	// Correct!
+	btTransform refFrame = btTransform::getIdentity();
+	refFrame.setBasis(refMatrix);
+
+	btTransform refToAttXform = objAtt->getWorldTransform().inverse() * objRef->getWorldTransform();
+
+	// 1. Transfer ref frame to world space (refFrame * objRef->getWorldTransform())
+	// 2. Transfer ref world space frame to attached world space frame (refWorldSpaceFrame * refToAttXform)
+	// 3. Transfer attached world space frame to local space (objAtt->getWorldTransform().inverse() * attWorldSpaceFrame)
+
+	btTransform refWorldSpaceFrame = refFrame * objRef->getWorldTransform();
+	btTransform attWorldSpaceFrame = refWorldSpaceFrame * refToAttXform;
+
+
+	// Incorrect!
+	btTransform attFrame = objAtt->getWorldTransform().inverse() * attWorldSpaceFrame;
+	attFrame.setOrigin(btVector3(0, 0, 0));
+
+	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refFrame, attFrame, true);
 
 	// If linear min == lin max then there is no limit!
 	if (sliding.limitMin != sliding.limitMax) {

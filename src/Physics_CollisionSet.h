@@ -1,5 +1,8 @@
 #ifndef PHYSICS_COLLISIONSET_H
 #define PHYSICS_COLLISIONSET_H
+#if defined(_MSC_VER) || (defined(__GNUC__) && __GNUC__ > 3)
+	#pragma once
+#endif
 
 class CPhysicsCollisionSet : public IPhysicsCollisionSet {
 	public:
