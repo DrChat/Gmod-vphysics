@@ -30,7 +30,8 @@ inline void GraphicTransformLocalToWorld(const btTransform &trans, const btRigid
 }
 
 // Convert an axis to a matrix (where angle around axis does not matter)
-inline void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
+// Axis will be assumed as the forward vector
+void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
 	btVector3 wup(0, 1, 0);
 
 	// Handle cases where the axis is really close to up/down vector
@@ -178,7 +179,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	if (m_type == CONSTRAINT_RAGDOLL) {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 	} else {
-		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
+		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
 	}
 
 	if (pReferenceObject)
@@ -398,12 +399,27 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	btMatrix3x3 worldMatrix;
 	bullAxisToMatrix(bullWorldAxis, worldMatrix);
 
+	// Setup the constraint to be on the expected axis
+	btVector3 fwd, up, right;
+	fwd = worldMatrix.getColumn(0);
+	up = worldMatrix.getColumn(1);
+	right = worldMatrix.getColumn(2);
+
+	worldMatrix.setValue(right.x(), up.x(), fwd.x(),
+						 right.y(), up.y(), fwd.y(),
+						 right.z(), up.z(), fwd.z());
+
 	btTransform worldTrans(worldMatrix, bullWorldPosition);
 
 	btTransform refTransform = objRef->getWorldTransform().inverse() * worldTrans;
 	btTransform attTransform = objAtt->getWorldTransform().inverse() * worldTrans;
 
 	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refTransform, attTransform);
+
+	// FIXME: Unit conversion may be wrong! (Bullet takes in rotations in radians, does HL use degrees?)
+	if (hinge.hingeAxis.minRotation != hinge.hingeAxis.maxRotation)
+		pHinge->setLimit(DEG2RAD(hinge.hingeAxis.minRotation), DEG2RAD(hinge.hingeAxis.maxRotation));
+
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }
 
