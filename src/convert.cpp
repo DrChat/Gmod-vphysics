@@ -171,24 +171,22 @@ void ConvertMatrixToHL(const btTransform &transform, matrix3x4_t &hl) {
 	hl.Init(forward, left, up, pos);
 }
 
+inline Vector HLGetMatrixColumn(const matrix3x4_t &hl, int col) {
+	Vector ret;
+	ret.x = hl[0][col];
+	ret.y = hl[1][col];
+	ret.z = hl[2][col];
+
+	return ret;
+}
+
 void ConvertMatrixToBull(const matrix3x4_t &hl, btTransform &transform) {
 	Vector forward, left, up, pos;
 
-	forward.x = hl[0][0];
-	forward.y = hl[1][0];
-	forward.z = hl[2][0];
-
-	left.x = hl[0][1];
-	left.y = hl[1][1];
-	left.z = hl[2][1];
-
-	up.x = hl[0][2];
-	up.y = hl[1][2];
-	up.z = hl[2][2];
-
-	pos.x = hl[0][3];
-	pos.y = hl[1][3];
-	pos.z = hl[2][3];
+	forward	= HLGetMatrixColumn(hl, 0);
+	left	= HLGetMatrixColumn(hl, 1);
+	up		= HLGetMatrixColumn(hl, 2);
+	pos		= HLGetMatrixColumn(hl, 3);
 
 	btVector3 bullForward, bullRight, bullUp, origin;
 	ConvertDirectionToBull(forward, bullForward);

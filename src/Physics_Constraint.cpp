@@ -405,9 +405,9 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 
 	// Setup the constraint to be on the expected axis (flip fwd and right)
 	btVector3 fwd, up, right;
-	fwd = worldMatrix.getColumn(0);
-	up = worldMatrix.getColumn(1);
-	right = worldMatrix.getColumn(2);
+	fwd		= worldMatrix.getColumn(0);
+	up		= worldMatrix.getColumn(1);
+	right	= worldMatrix.getColumn(2);
 
 	worldMatrix.setValue(right.x(), up.x(), fwd.x(),
 						 right.y(), up.y(), fwd.y(),
@@ -415,6 +415,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 
 	btTransform worldTrans(worldMatrix, bullWorldPosition);
 
+	// Setup local transforms inside of the objects
 	btTransform refTransform = objRef->getWorldTransform().inverse() * worldTrans;
 	btTransform attTransform = objAtt->getWorldTransform().inverse() * worldTrans;
 
@@ -442,7 +443,6 @@ CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
 }
 
-// NOT COMPLETE
 CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_slidingparams_t &sliding) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -450,38 +450,28 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btRigidBody *objAtt = pObjAtt->GetObject();
 
 	// Axis to slide on in reference object space
-	btVector3 bullSlideAxisRef;
-	ConvertDirectionToBull(sliding.slideAxisRef, bullSlideAxisRef);
-
-	btTransform bullAttToRef;
-	ConvertMatrixToBull(sliding.attachedRefXform, bullAttToRef);
-
-	// TODO: We need to construct local frames from the slide axis in reference object space.
-	// 1. Convert slide axis into a matrix
-	// 2. Setup reference object frame (pos in ref object is 0,0,0)
-	// 3. Figure out attached object frame
-
-	btMatrix3x3 refMatrix;
-	bullAxisToMatrix(bullSlideAxisRef, refMatrix);
-
-	// Correct!
-	btTransform refFrame = btTransform::getIdentity();
-	refFrame.setBasis(refMatrix);
+	btVector3 slideAxisRef;
+	ConvertDirectionToBull(sliding.slideAxisRef, slideAxisRef);
 
 	// Reference -> attached object transform
 	btTransform refToAttXform = objAtt->getWorldTransform().inverse() * objRef->getWorldTransform();
 
-	// 1. Transfer ref frame to world space (refFrame * objRef->getWorldTransform())
-	// 2. Transfer ref world space frame to attached world space frame (refWorldSpaceFrame * refToAttXform)
-	// 3. Transfer attached world space frame to local space (objAtt->getWorldTransform().inverse() * attWorldSpaceFrame)
+	// Build reference matrix
+	btMatrix3x3 refMatrix;
+	bullAxisToMatrix(slideAxisRef, refMatrix);
 
-	btTransform refWorldSpaceFrame = refFrame * objRef->getWorldTransform();
-	btTransform attWorldSpaceFrame = refWorldSpaceFrame * refToAttXform;
+	btQuaternion refQuat;
+	refMatrix.getRotation(refQuat);
 
+	// Important to be the same rotation
+	btQuaternion attQuat = refToAttXform.getRotation() * refQuat;
 
-	// Incorrect!
-	btTransform attFrame = objAtt->getWorldTransform().inverse() * attWorldSpaceFrame;
-	attFrame.setOrigin(btVector3(0, 0, 0));
+	// Final frames
+	btTransform refFrame = btTransform::getIdentity();
+	refFrame.setBasis(refMatrix);
+
+	btTransform attFrame = btTransform::getIdentity();
+	attFrame.setRotation(attQuat);
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refFrame, attFrame, true);
 
