@@ -50,15 +50,17 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		void					ObjectDestroyed(CPhysicsObject *pObject);
 
 		EConstraintType			GetType();
+		btTypedConstraint *		GetConstraint();
 
 	protected:
 		CPhysicsObject *		m_pReferenceObject;
 		CPhysicsObject *		m_pAttachedObject;
 		CPhysicsConstraintGroup *m_pGroup;
-		btTypedConstraint *		m_pConstraint;
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;
 		EConstraintType			m_type;
+
+		btTypedConstraint *		m_pConstraint;
 };
 
 class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {

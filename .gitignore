@@ -10,6 +10,14 @@
 *.ilk
 *.lib
 *.pdb
+*.aps
+*.o
+*.d
+
+*.cproject
+*.project
 
 /build
 /ipch
+proj/gmake
+proj/vs2010

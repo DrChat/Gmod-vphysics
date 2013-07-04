@@ -427,9 +427,12 @@ Vector CPhysicsObject::GetMassCenterLocalSpace() const {
 void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angles, bool isTeleport) {
 	btVector3 bullPos;
 	btMatrix3x3 bullAngles;
+
 	ConvertPosToBull(worldPosition, bullPos);
 	ConvertRotationToBull(angles, bullAngles);
-	m_pObject->setWorldTransform(btTransform(bullAngles, bullPos) * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
+	btTransform trans(bullAngles, bullPos);
+
+	m_pObject->setWorldTransform(trans * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
 	// Assumed this is the behavior of IVP. If you teleport an object, you don't want it to be stupidly frozen in the air.
 	if (isTeleport)
@@ -448,8 +451,7 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTelepor
 void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 	if (!worldPosition && !angles) return;
 
-	btTransform transform;
-	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
+	btTransform transform = m_pObject->getWorldTransform() * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset.inverse();
 	if (worldPosition) ConvertPosToHL(transform.getOrigin(), *worldPosition);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 }
@@ -457,8 +459,7 @@ void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 void CPhysicsObject::GetPositionMatrix(matrix3x4_t *positionMatrix) const {
 	if (!positionMatrix) return;
 
-	btTransform transform;
-	((btMassCenterMotionState*)m_pObject->getMotionState())->getGraphicTransform(transform);
+	btTransform transform = m_pObject->getWorldTransform() * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset.inverse();
 	ConvertMatrixToHL(transform, *positionMatrix);
 }
 
@@ -813,6 +814,7 @@ void CPhysicsObject::TriggerObjectExited(CPhysicsObject *pObject) {
 
 void CPhysicsObject::BecomeHinged(int localAxis) {
 	// localAxis is the axis we're hinged to.
+	// Called on attached object of constraint if the world -> local axis is close enough to a unit axis direction
 	NOT_IMPLEMENTED
 }
 

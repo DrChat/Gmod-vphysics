@@ -16,7 +16,7 @@
 #define COLLISION_MARGIN 0.004 // 4 mm
 
 // Use btConvexTriangleMeshShape instead of btConvexHullShape?
-#define USE_CONVEX_TRIANGLES 0
+//#define USE_CONVEX_TRIANGLES
 
 /****************************
 * CLASS CCollisionQuery
@@ -677,10 +677,11 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 }
 
 void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, const CPhysCollide *pSweepCollide, const QAngle &sweepAngles, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *pTrace) {
+	/*
 	btVector3 bullVec;
 	btMatrix3x3 bullMatrix;
 
-	// Create the collision object
+	// Create the collision object (object to be traced against)
 	btCollisionObject *object = new btCollisionObject;
 	btCollisionShape *shape = (btCollisionShape *)pCollide;
 	object->setCollisionShape(shape);
@@ -693,38 +694,28 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
 	object->setWorldTransform(transform);
 
-	// Create the sweep collision object
-	btCollisionObject *pSweepObject = new btCollisionObject;
-	btCollisionShape *pSweepShape = (btCollisionShape *)pSweepCollide;
-	pSweepObject->setCollisionShape(pSweepShape);
-	ConvertRotationToBull(sweepAngles, bullMatrix);
-	btTransform bullSweepTransform(bullMatrix);
-
-	PhysicsShapeInfo *pSweepShapeInfo = (PhysicsShapeInfo *)pSweepShape->getUserPointer();
-	if (pSweepShapeInfo)
-		bullSweepTransform *= btTransform(btMatrix3x3::getIdentity(), pSweepShapeInfo->massCenter);
-	pSweepObject->setWorldTransform(bullSweepTransform);
-
 	btVector3 bullStartVec, bullEndVec;
 	ConvertPosToBull(start, bullStartVec);
 	ConvertPosToBull(end, bullEndVec);
 	btTransform bullStartT(btMatrix3x3::getIdentity(), bullStartVec);
 	btTransform bullEndT(btMatrix3x3::getIdentity(), bullEndVec);
 
-	btCollisionWorld::ClosestConvexResultCallback cb(bullStartVec, bullEndVec);
-	// TODO: Bullet can't do a compound sweep test
+	btCollisionShape *pSweepShape = (btCollisionShape *)pSweepCollide;
+	if (pSweepShape->isCompound()) {
 
-	/*
+	}
+
 	pTrace->fraction = cb.m_closestHitFraction;
 	if (cb.m_closestHitFraction < 1.f) {
 		ConvertPosToHL(cb.m_hitPointWorld, pTrace->endpos);
 		ConvertDirectionToHL(cb.m_hitNormalWorld, pTrace->plane.normal);
 	}
-	*/
 
 	// Cleanup
 	delete object;
-	delete pSweepObject;
+	*/
+
+	NOT_IMPLEMENTED
 }
 
 bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Vector &boxAbsMaxs, const truncatedcone_t &truncatedCone) {
@@ -741,6 +732,8 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta)) * coneHeight;
 
 	btConeShape *cone = new btConeShape(coneRadius, coneHeight);
+
+	// TODO: Find a static function to do a contact pair test
 
 	// Cleanup
 	delete box;
@@ -837,7 +830,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			const char *vertices = (const char *)ledge + ledge->c_point_offset;
 
 			if (ledge->n_triangles > 0) {
-#if USE_CONVEX_TRIANGLES
+#ifdef USE_CONVEX_TRIANGLES
 				btTriangleMesh *pMesh = new btTriangleMesh;
 
 				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;

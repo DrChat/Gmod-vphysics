@@ -101,8 +101,8 @@ bool CPlayerController::IsInContact() {
 		btPersistentManifold *contactManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
 		const btCollisionObject *obA = contactManifold->getBody0();
 		const btCollisionObject *obB = contactManifold->getBody1();
-		CPhysicsObject *pPhysUs;
-		CPhysicsObject *pPhysOther;
+		CPhysicsObject *pPhysUs = NULL;
+		CPhysicsObject *pPhysOther = NULL;
 
 		if (contactManifold->getNumContacts() > 0 && (obA == m_pObject->GetObject() || obB == m_pObject->GetObject())) {
 			if (obA == m_pObject->GetObject()) {
@@ -179,7 +179,7 @@ void CPlayerController::Jump() {
 void CPlayerController::GetShadowVelocity(Vector *velocity) {
 	if (!velocity) return;
 
-	btRigidBody *body = m_pObject->GetObject();
+	//btRigidBody *body = m_pObject->GetObject();
 	ConvertPosToHL(m_linVelocity, *velocity);
 }
 

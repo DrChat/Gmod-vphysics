@@ -94,6 +94,7 @@ const char *GetConstraintName(EConstraintType type) {
 * BULLET CONSTRAINTS
 ***********************/
 // TODO: Somebody fill this out!
+/*
 class btPulleyConstraint: public btTypedConstraint {
 	protected:
 		// The 2 points the pulley should run through (such as being attached to a roof)
@@ -101,6 +102,7 @@ class btPulleyConstraint: public btTypedConstraint {
 		btVector3	m_attachPointWS2;
 	public:
 };
+*/
 
 // TODO: Finish this (for ropes)
 class btLengthConstraint: public btPoint2PointConstraint {
@@ -113,6 +115,53 @@ class btLengthConstraint: public btPoint2PointConstraint {
 		{
 			m_mindist = minDist;
 			m_maxdist = maxDist;
+		}
+
+		void getInfo1 (btConstraintInfo1 *info) {
+			info->m_numConstraintRows = 1;
+			info->nub = 5;
+		}
+
+		void getInfo2 (btConstraintInfo2 *info) {
+			// Positions relative to objects
+			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
+			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
+
+			// Exact world positions
+			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
+			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
+
+			// Delta
+			btVector3 del = posB - posA;
+			btScalar currDist = btSqrt(del.dot(del));
+			btVector3 ortho = del / currDist;
+			info->m_J1linearAxis[0] = ortho[0];
+			info->m_J1linearAxis[1] = ortho[1];
+			info->m_J1linearAxis[2] = ortho[2];
+			btVector3 p, q;
+			p = relA.cross(ortho);
+			q = relB.cross(ortho);
+			info->m_J1angularAxis[0] = p[0];
+			info->m_J1angularAxis[1] = p[1];
+			info->m_J1angularAxis[2] = p[2];
+			info->m_J2angularAxis[0] = -q[0];
+			info->m_J2angularAxis[1] = -q[1];
+			info->m_J2angularAxis[2] = -q[2];
+
+			btScalar rhs = 0;
+
+			// Keep the distance between min and max dist
+			if (currDist < m_mindist) {
+				rhs = (currDist - m_mindist) * info->fps * info->erp;
+			} /*else if (currDist > m_maxdist) {
+				rhs = (currDist - m_maxdist) * info->fps * info->erp;
+			}
+			*/
+
+			info->m_constraintError[0] = rhs;
+			info->cfm[0] = btScalar(0.f);
+			info->m_lowerLimit[0] = -SIMD_INFINITY;
+			info->m_upperLimit[0] = SIMD_INFINITY;
 		}
 };
 
@@ -156,6 +205,7 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 			info->m_J2angularAxis[0] = -q[0];
 			info->m_J2angularAxis[1] = -q[1];
 			info->m_J2angularAxis[2] = -q[2];
+
 			btScalar rhs = (currDist - m_dist) * info->fps * info->erp;
 			info->m_constraintError[0] = rhs;
 			info->cfm[0] = btScalar(0.f);
@@ -246,6 +296,7 @@ void CPhysicsConstraint::OutputDebugInfo() {
 	Msg("%s constraint\n", GetConstraintName(m_type));
 }
 
+// UNEXPOSED
 void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 	if (pObject == m_pAttachedObject)
 		m_pAttachedObject = NULL;
@@ -253,12 +304,18 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 	if (pObject == m_pReferenceObject)
 		m_pReferenceObject = NULL;
 
-	// HACK: We'll have to remove ourselves from the environment. Hopefully the game is about to destroy us anyways, otherwise prepare for explosions.
+	// Constraint is no longer valid due to one of it's objects being removed, so stop simulating it.
 	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
 }
 
+// UNEXPOSED
 EConstraintType CPhysicsConstraint::GetType() {
 	return m_type;
+}
+
+// UNEXPOSED
+btTypedConstraint *CPhysicsConstraint::GetConstraint() {
+	return m_pConstraint;
 }
 
 /*********************************
@@ -274,7 +331,9 @@ CPhysicsConstraintGroup::~CPhysicsConstraintGroup() {
 }
 
 void CPhysicsConstraintGroup::Activate() {
-	NOT_IMPLEMENTED
+	for (int i = 0; i < m_constraints.Count(); i++) {
+		m_constraints[i]->Activate();
+	}
 }
 
 bool CPhysicsConstraintGroup::IsInErrorState() {
@@ -370,22 +429,26 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+	btRigidBody *objRef = pObjRef->GetObject();
+	btRigidBody *objAtt = pObjAtt->GetObject();
 
 	btTransform constraintToReference, constraintToAttached;
 	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // constraintToReference is ALWAYS the identity matrix.
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
-	btTransform bullAFrame = constraintToReference; // Wrong!
-	btTransform bullBFrame = constraintToAttached; // Wrong!
+	btTransform constraintWorldTrans = constraintToReference.inverse() * objRef->getWorldTransform();
+
+	btTransform bullAFrame = objRef->getWorldTransform().inverse() * constraintWorldTrans;
+	btTransform bullBFrame = objAtt->getWorldTransform().inverse() * constraintWorldTrans;
 
 	// We shouldn't be using a cone twist constraint! old vphysics uses a "limited ballsocket" constraint
 	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
 
 	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
+	pConstraint->setEnabled(ragdoll.isActive);
 
 	// Set axis limits
-	// swing span 1, swing span 2, twist limit
-	// Bullet only supports setting the maximum limits, not minimums!
+	// FIXME: Source wants to set min and max limits to different values, bullet cone twist only supports swing span limits
 	
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
@@ -463,7 +526,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btQuaternion refQuat;
 	refMatrix.getRotation(refQuat);
 
-	// Important to be the same rotation
+	// Important to be the same rotation (prevent attached object from flipping out)
 	btQuaternion attQuat = refToAttXform.getRotation() * refQuat;
 
 	// Final frames
@@ -521,6 +584,6 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	obj1Pos -= ((btMassCenterMotionState *)pObjRef->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 	obj2Pos -= ((btMassCenterMotionState *)pObjAtt->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
-	btPoint2PointConstraint *pLength = new btDistanceConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, ConvertDistanceToBull(length.totalLength));
+	btPoint2PointConstraint *pLength = new btLengthConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, ConvertDistanceToBull(length.minLength), ConvertDistanceToBull(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
 }
