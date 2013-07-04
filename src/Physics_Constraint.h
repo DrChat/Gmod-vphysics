@@ -85,7 +85,7 @@ class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 {
 	public:
-		CPhysicsConstraintGroup(const constraint_groupparams_t &params);
+		CPhysicsConstraintGroup(CPhysicsEnvironment *pEnv, const constraint_groupparams_t &params);
 		~CPhysicsConstraintGroup(void);
 
 		void	Activate();
@@ -103,6 +103,7 @@ class CPhysicsConstraintGroup : public IPhysicsConstraintGroup
 	private:
 		CUtlVector<CPhysicsConstraint *>	m_constraints;
 		constraint_groupparams_t			m_errorParams;
+		CPhysicsEnvironment *				m_pEnvironment;
 };
 
 // CONSTRAINT CREATION FUNCTIONS
@@ -114,5 +115,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 CPhysicsConstraint *CreateBallsocketConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ballsocketparams_t &ballsocket);
 CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
 CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
+
+CPhysicsConstraintGroup *CreateConstraintGroup(CPhysicsEnvironment *pEnv, const constraint_groupparams_t &params);
 
 #endif // PHYSICS_CONSTRAINT_H

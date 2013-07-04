@@ -252,6 +252,10 @@ CPhysicsConstraint::~CPhysicsConstraint() {
 	if (m_pAttachedObject)
 		m_pAttachedObject->DetachedFromConstraint(this);
 
+	if (m_pGroup) {
+		m_pGroup->RemoveConstraint(this);
+	}
+
 	delete m_pConstraint;
 }
 
@@ -322,8 +326,9 @@ btTypedConstraint *CPhysicsConstraint::GetConstraint() {
 * CLASS CPhysicsConstraintGroup
 *********************************/
 
-CPhysicsConstraintGroup::CPhysicsConstraintGroup(const constraint_groupparams_t &params) {
+CPhysicsConstraintGroup::CPhysicsConstraintGroup(CPhysicsEnvironment *pEnv, const constraint_groupparams_t &params) {
 	m_errorParams = params;
+	m_pEnvironment = pEnv;
 }
 
 CPhysicsConstraintGroup::~CPhysicsConstraintGroup() {
@@ -586,4 +591,10 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 
 	btPoint2PointConstraint *pLength = new btLengthConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), obj1Pos, obj2Pos, ConvertDistanceToBull(length.minLength), ConvertDistanceToBull(length.totalLength));
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
+}
+
+CPhysicsConstraintGroup *CreateConstraintGroup(CPhysicsEnvironment *pEnv, const constraint_groupparams_t &params) {
+	if (!pEnv) return NULL;
+
+	return new CPhysicsConstraintGroup(pEnv, params);
 }

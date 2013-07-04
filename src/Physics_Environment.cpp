@@ -538,7 +538,7 @@ void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
 }
 
 IPhysicsConstraintGroup *CPhysicsEnvironment::CreateConstraintGroup(const constraint_groupparams_t &groupParams) {
-	return new CPhysicsConstraintGroup(groupParams);
+	return ::CreateConstraintGroup(this, groupParams);
 }
 
 void CPhysicsEnvironment::DestroyConstraintGroup(IPhysicsConstraintGroup *pGroup) {
@@ -557,7 +557,7 @@ void CPhysicsEnvironment::DestroyShadowController(IPhysicsShadowController *pCon
 	if (!pController) return;
 
 	m_controllers.FindAndRemove((CShadowController *)pController);
-	delete (CShadowController *)pController;
+	delete pController;
 }
 
 IPhysicsPlayerController *CPhysicsEnvironment::CreatePlayerController(IPhysicsObject *pObject) {
@@ -944,7 +944,6 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 			if (contactManifold->getNumContacts() <= 0)
 				continue;
 
-			// obA is the object which is colliding with obB
 			const btCollisionObject *obA = contactManifold->getBody0();
 			const btCollisionObject *obB = contactManifold->getBody1();
 			if (!obA || !obB) continue;
