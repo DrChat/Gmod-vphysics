@@ -144,7 +144,7 @@ public:
 
 	void									DoCollisionEvents(float dt);
 
-	void									HandleConstraintBroken(CPhysicsConstraint *pConstraint); // Call this if you're a constraint that was just broken.
+	void									HandleConstraintBroken(CPhysicsConstraint *pConstraint); // Call this if you're a constraint that was just disabled/broken.
 	void									HandleFluidStartTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject);
 	void									HandleFluidEndTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject);
 	void									HandleObjectEnteredTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject);

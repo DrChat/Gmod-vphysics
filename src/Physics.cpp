@@ -10,7 +10,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar vphysics_bulletdebugoutput("vphysics_bulletdebugoutput", "0", FCVAR_ARCHIVE | FCVAR_CHEAT);
+ConVar vphysics_bulletdebugoutput("vphysics_bulletdebugoutput", "0", FCVAR_ARCHIVE);
 
 void btDebugMessage(const char *str) {
 	if (vphysics_bulletdebugoutput.GetBool()) {

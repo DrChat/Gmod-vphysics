@@ -22,7 +22,7 @@
 * CLASS CCollisionQuery
 ****************************/
 
-// FIXME: Bullet doesn't use triangles to represent shapes internally!
+// FIXME: We don't use triangles to represent shapes internally!
 class CCollisionQuery : public ICollisionQuery {
 	public:
 		CCollisionQuery(btCollisionShape *pShape) {m_pShape = pShape;}
@@ -124,6 +124,8 @@ CPhysConvex *CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount,
 }
 
 float CPhysicsCollision::ConvexVolume(CPhysConvex *pConvex) {
+	if (!pConvex) return 0;
+
 	NOT_IMPLEMENTED
 	return 0;
 }
@@ -155,7 +157,7 @@ void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, con
 	NOT_IMPLEMENTED
 }
 
-// TODO: Support this, lua Entity:PhysicsInitMultiConvex uses this!
+// TODO: Support this, gmod lua Entity:PhysicsInitMultiConvex uses this!
 // IVP internally used QHull to generate the convexes.
 CPhysPolysoup *CPhysicsCollision::PolysoupCreate() {
 	NOT_IMPLEMENTED
@@ -617,6 +619,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide,
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
 	VPROF_BUDGET("CPhysicsCollision::TraceBox", VPROF_BUDGETGROUP_PHYSICS);
 
+	// 2 Variables used mainly for converting units.
 	btVector3 btvec;
 	btMatrix3x3 btmatrix;
 
@@ -638,6 +641,11 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	ConvertPosToBull(ray.m_Start + ray.m_StartOffset, startv);
 	ConvertPosToBull(ray.m_Start + ray.m_StartOffset + ray.m_Delta, endv);
 
+	ConvertPosToHL(startv, ptr->startpos);
+
+	// Zero delta trace is going to fail always.
+	//Assert(ray.m_Delta.Length() != 0);
+
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
@@ -653,9 +661,24 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
 			ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 		}
-	} else {
+	} else if (ray.m_IsSwept) {
 		// BUG: Some traces that should obviously be succeeding are failing
 		// ex. player standing next to brush, trace fails and player goes through
+		// Caused because the ray delta is 0!
+
+		// HACK: I don't know
+		if (ray.m_Delta.Length() == 0) {
+			ptr->startsolid = true;
+			ptr->allsolid = true;
+			ptr->fraction = 0;
+
+			ConvertPosToHL(startv, ptr->endpos);
+
+			delete object;
+			return;
+		}
+
+		// extents are half extents, compatible with bullet.
 		ConvertPosToBull(ray.m_Extents, btvec);
 		btBoxShape *box = new btBoxShape(btvec.absolute());
 
@@ -729,7 +752,7 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	
 	// cone
 	btScalar coneHeight = ConvertDistanceToBull(truncatedCone.h);
-	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta)) * coneHeight;
+	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta)) * coneHeight; // FIXME: Does the theta correspond to the radius or diameter of the bottom?
 
 	btConeShape *cone = new btConeShape(coneRadius, coneHeight);
 
@@ -762,6 +785,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	memset(pOutput, 0, sizeof(*pOutput));
 
 	// TODO: This
+	// In practice, this is never true on a Windows PC (and most likely not a linux dedicated server either)
 	if (swap) {
 		Warning("VCollideLoad - Abort loading, swap is true\n");
 		Assert(0);
@@ -857,7 +881,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 				btConvexHullShape *pConvex = new btConvexHullShape;
 				pConvex->setMargin(COLLISION_MARGIN);
 
-				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
+				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1);
 
 				// This code will find all unique indexes and add them to an array. This avoids
 				// adding duplicate points to the convex hull shape (triangle edges can share a vertex)

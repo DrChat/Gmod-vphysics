@@ -25,34 +25,34 @@
 // NOTE: As of now, the parallel constraint solver has the same performance as the
 // sequential constraint solver, and even in some cases is slower. The parallel dispatcher
 // allows for some speed gain, however.
-// We should try to create a parallel dynamics world that'll support multithreading, and
-// use the sequential dispatcher and constraint solver, as that is where most of the effort
-// in bullet went.
+// We should replace current the bullet multithreaded dispatcher/solver with our own,
+// that internally calls into the sequential dispatcher/solver
 
-#define USE_PARALLEL_DISPATCHER 0
-#define USE_PARALLEL_SOLVER 0
+//#define USE_PARALLEL_DISPATCHER
+//#define USE_PARALLEL_SOLVER
 
-#if USE_PARALLEL_DISPATCHER || USE_PARALLEL_SOLVER
-	#define MULTITHREADED 1
+#if defined(USE_PARALLEL_DISPATCHER) || defined(USE_PARALLEL_SOLVER)
+	#define MULTITHREADED
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 	#ifdef _WIN32
 		#include "BulletMultiThreaded/Win32ThreadSupport.h"
 		#pragma comment(lib, "BulletMultiThreaded.lib")
 	#else
 		#include "BulletMultiThreaded/PosixThreadSupport.h"
+		// TODO: Link to the library automatically if multithreaded
 	#endif
 
 	#include "BulletMultiThreaded/PlatformDefinitions.h"
 #endif
 
-#if USE_PARALLEL_DISPATCHER
+#ifdef USE_PARALLEL_DISPATCHER
 	#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
 	#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 #endif
 
-#if USE_PARALLEL_SOLVER
+#ifdef USE_PARALLEL_SOLVER
 	#include "BulletMultiThreaded/btParallelConstraintSolver.h"
 #endif
 
@@ -218,7 +218,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletSolver = NULL;
 
 	btDefaultCollisionConstructionInfo cci;
-#if MULTITHREADED
+#ifdef MULTITHREADED
 	// Multithreaded versions cannot dynamically expand this pool. Having a small pool causes props to bounce around.
 	cci.m_defaultMaxPersistentManifoldPoolSize = 16384;
 
@@ -232,7 +232,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
-#if USE_PARALLEL_DISPATCHER
+#ifdef USE_PARALLEL_DISPATCHER
 	char dispatcherThreadName[128];
 	sprintf(dispatcherThreadName, "dispatcher%d", uniqueNum);
 
@@ -255,7 +255,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
 #endif
 
-#if USE_PARALLEL_SOLVER
+#ifdef USE_PARALLEL_SOLVER
 	char solverThreadName[128];
 	sprintf(solverThreadName, "solver%d", uniqueNum);
 
@@ -278,7 +278,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 	uniqueNum++;
 #endif
 
@@ -299,10 +299,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_perfparams.Defaults();
 	memset(&m_stats, 0, sizeof(m_stats));
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 	m_pBulletEnvironment->getSolverInfo().m_numIterations = maxTasks;
 	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
-	#if USE_PARALLEL_SOLVER
+	#ifdef USE_PARALLEL_SOLVER
 		// Required for parallel solver (undocumented lolololo)
 		m_pBulletEnvironment->getSimulationIslandManager()->setSplitIslands(false);
 
@@ -354,11 +354,11 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 
 	delete m_pCollisionSolver;
 
-#if MULTITHREAD
+#ifdef MULTITHREAD
 	deleteCollisionLocalStoreMemory();
 	delete m_pThreadSupportCollision;
 
-	#if USE_PARALLEL_SOLVER
+	#ifdef USE_PARALLEL_SOLVER
 		delete m_pThreadSupportSolver;
 	#endif
 #endif
@@ -629,7 +629,7 @@ void SerializeWorld_f(const CCommand &args) {
 
 static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client)\n\tDumps \"testfile.bullet\" out to the exe directory.");
 
-static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", 0, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
+static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	VPROF_BUDGET("CPhysicsEnvironment::Simulate", VPROF_BUDGETGROUP_PHYSICS);
 	if (!m_pBulletEnvironment) Assert(0);
@@ -870,6 +870,7 @@ IPhysicsObject *CPhysicsEnvironment::UnserializeObjectFromBuffer(void *pGameData
 }
 
 void CPhysicsEnvironment::EnableConstraintNotify(bool bEnable) {
+	// Notify game about broken constraints?
 	m_bConstraintNotify = bEnable;
 }
 

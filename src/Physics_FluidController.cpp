@@ -144,7 +144,7 @@ void CPhysicsFluidController::Tick(float dt) {
 		m_pGhostObject->getCollisionShape()->getAabb(m_pGhostObject->getWorldTransform(), omins, omaxs);
 
 		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
-		float dist = omaxs.y() - mins.y();
+		float dist = omaxs.y() - mins.y(); // Distance between top of water and bottom of object (how much of object is in water)
 		float p = clamp(dist / height, 0.0f, 1.0f);
 		float vol = (pObject->GetVolume() * p) / 64;
 
@@ -153,7 +153,7 @@ void CPhysicsFluidController::Tick(float dt) {
 		body->applyCentralForce(force);
 
 		// Damping
-		// FIXME: Damping would be way too much for an object only partially touching our surface.
+		// FIXME: Damping would be way too much for an object only partially touching our surface (ex. giant fucking bridge with like 1 pixel in the water)
 		body->setLinearVelocity(body->getLinearVelocity() * (1.0f - (0.75f * dt)));
 		body->setAngularVelocity(body->getAngularVelocity() * (1.0f - (0.75f * dt)));
 	}
@@ -167,7 +167,7 @@ void CPhysicsFluidController::ObjectAdded(CPhysicsObject *pObject) {
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
-	// FIXME: Crash when killing jeeps inside of water.
+	// FIXME: Crash when killing prop_vehicle_jeep inside of water.
 	// m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 

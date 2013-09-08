@@ -435,6 +435,7 @@ void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angl
 	m_pObject->setWorldTransform(trans * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
 	// Assumed this is the behavior of IVP. If you teleport an object, you don't want it to be stupidly frozen in the air.
+	// Change this if behavior of IVP is different!
 	if (isTeleport)
 		m_pObject->activate();
 }
@@ -522,6 +523,7 @@ void CPhysicsObject::GetVelocityAtPoint(const Vector &worldPosition, Vector *pVe
 void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
 	if (!velocity && !angularVelocity) return;
 
+	// FIXME: What type of velocity is this?
 	NOT_IMPLEMENTED
 }
 

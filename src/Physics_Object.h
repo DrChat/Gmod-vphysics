@@ -180,7 +180,7 @@ class CPhysicsObject : public IPhysicsObject1 {
 		int									GetLastActivationState() { return m_iLastActivationState; }
 		void								SetLastActivationState(int iState) { m_iLastActivationState = iState; }
 
-		CPhysicsFluidController *			GetFluidController(void) { return m_pFluidController; }
+		CPhysicsFluidController *			GetFluidController() { return m_pFluidController; }
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 
 	private:

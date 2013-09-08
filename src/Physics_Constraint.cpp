@@ -36,15 +36,15 @@ void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
 
 	// Handle cases where the axis is really close to up/down vector
 	// Dot = cos(theta) (for dummies), looking for 0(1) to 180(-1) degrees difference
+	// This part may be broken!
 	btScalar dot = wup.dot(axis);
 	if ((dot > 1.0f - SIMD_EPSILON) || (dot < -1.0f + SIMD_EPSILON)) {
-		// This part may be broken!
 		btVector3 wside(0, 0, 1);
 
-		// Cross products may not be unit length!
 		btVector3 up = wside.cross(axis);
 		btVector3 side = up.cross(axis);
 
+		// Normalize the cross products, as they may not be unit length.
 		side.normalize();
 		up.normalize();
 
@@ -272,6 +272,13 @@ void CPhysicsConstraint::SetLinearMotor(float speed, float maxLinearImpulse) {
 }
 
 void CPhysicsConstraint::SetAngularMotor(float rotSpeed, float maxAngularImpulse) {
+	if (m_type == CONSTRAINT_HINGE) {
+		btHingeConstraint *pHinge = (btHingeConstraint *)m_pConstraint;
+
+		// FIXME: Probably not the right conversions!
+		pHinge->enableAngularMotor(true, DEG2RAD(rotSpeed), DEG2RAD(maxAngularImpulse));
+	}
+
 	NOT_IMPLEMENTED
 	//m_pConstraint->enableAngularMotor();
 }
@@ -310,6 +317,9 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 
 	// Constraint is no longer valid due to one of it's objects being removed, so stop simulating it.
 	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+
+	// Tell the game that this constraint was broken.
+	m_pEnv->HandleConstraintBroken(this);
 }
 
 // UNEXPOSED
@@ -481,6 +491,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 						 right.y(), up.y(), fwd.y(),
 						 right.z(), up.z(), fwd.z());
 
+	// Constraint world transform
 	btTransform worldTrans(worldMatrix, bullWorldPosition);
 
 	// Setup local transforms inside of the objects
@@ -489,8 +500,10 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 
 	btHingeConstraint *pHinge = new btHingeConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refTransform, attTransform);
 
-	// FIXME: Unit conversion may be wrong! (Bullet takes in rotations in radians, does HL use degrees?)
-	// In addition, min == max = no limits may be wrong
+	// FIXME: Are we converting the torque correctly? Bullet takes a "max motor impulse"
+	if (hinge.hingeAxis.torque)
+		pHinge->enableAngularMotor(true, DEG2RAD(hinge.hingeAxis.angularVelocity), DEG2RAD(hinge.hingeAxis.torque));
+
 	if (hinge.hingeAxis.minRotation != hinge.hingeAxis.maxRotation)
 		pHinge->setLimit(DEG2RAD(hinge.hingeAxis.minRotation), DEG2RAD(hinge.hingeAxis.maxRotation));
 
@@ -531,7 +544,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btQuaternion refQuat;
 	refMatrix.getRotation(refQuat);
 
-	// Important to be the same rotation (prevent attached object from flipping out)
+	// Important to be the same rotation around axis (prevent attached object from flipping out)
 	btQuaternion attQuat = refToAttXform.getRotation() * refQuat;
 
 	// Final frames

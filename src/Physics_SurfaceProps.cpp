@@ -156,6 +156,9 @@ surfacedata_t *CPhysicsSurfaceProps::GetSurfaceData(int surfaceDataIndex) {
 }
 
 const char *CPhysicsSurfaceProps::GetString(unsigned short stringTableIndex) const {
+	if (stringTableIndex < 0 || stringTableIndex >= m_soundList.Count())
+		return NULL;
+
 	CUtlSymbol index = m_soundList[stringTableIndex];
 	return m_strings->String(index);
 }

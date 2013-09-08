@@ -179,8 +179,8 @@ void CPlayerController::Jump() {
 void CPlayerController::GetShadowVelocity(Vector *velocity) {
 	if (!velocity) return;
 
-	//btRigidBody *body = m_pObject->GetObject();
-	ConvertPosToHL(m_linVelocity, *velocity);
+	btRigidBody *body = m_pObject->GetObject();
+	ConvertPosToHL(body->getLinearVelocity(), *velocity);
 }
 
 IPhysicsObject *CPlayerController::GetObject() {
@@ -237,12 +237,14 @@ void CPlayerController::Tick(float deltaTime) {
 
 	CalculateVelocity(deltaTime);
 
+	/*
 	// Integrate the velocity into our world transform
 	btVector3 deltaPos = m_linVelocity * deltaTime;
 
 	btTransform trans = body->getWorldTransform();
 	trans.setOrigin(trans.getOrigin() + deltaPos);
 	motionState->setWorldTransform(trans);
+	*/
 }
 
 void CPlayerController::CalculateVelocity(float dt) {
@@ -260,10 +262,18 @@ void CPlayerController::CalculateVelocity(float dt) {
 
 	if (frac <= 0) return;
 
+	// TODO: Use m_targetVelocity
+
 	btTransform transform = body->getWorldTransform() * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset;
 	btVector3 deltaPos = m_targetPosition - transform.getOrigin();
 
+	btVector3 vel = body->getLinearVelocity();
+	ComputeController(vel, deltaPos, m_maxSpeed, SAFE_DIVIDE(frac, dt), m_dampFactor);
+	body->setLinearVelocity(vel);
+
+	/*
 	ComputeController(m_linVelocity, deltaPos, m_maxSpeed, SAFE_DIVIDE(frac, dt), m_dampFactor);
+	*/
 
 	// Apply gravity velocity.
 	/*
@@ -280,7 +290,7 @@ void CPlayerController::AttachObject() {
 	body->setAngularFactor(0);
 
 	m_pObject->AddCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
-	body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_KINEMATIC_OBJECT);
+	//body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_KINEMATIC_OBJECT);
 
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
@@ -291,7 +301,7 @@ void CPlayerController::DetachObject() {
 	body->setActivationState(ACTIVE_TAG);
 
 	m_pObject->RemoveCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
-	body->setCollisionFlags(body->getCollisionFlags() & ~(btRigidBody::CF_KINEMATIC_OBJECT));
+	//body->setCollisionFlags(body->getCollisionFlags() & ~(btRigidBody::CF_KINEMATIC_OBJECT));
 
 	m_pObject = NULL;
 }
@@ -307,7 +317,9 @@ bool CPlayerController::TryTeleportObject() {
 
 	btTransform trans = body->getWorldTransform();
 	trans.setOrigin(m_targetPosition);
-	((btMassCenterMotionState *)body->getMotionState())->setGraphicTransform(trans);
+	body->setWorldTransform(trans  * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset);
+
+	//((btMassCenterMotionState *)body->getMotionState())->setGraphicTransform(trans);
 
 	return true;
 }
