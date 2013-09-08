@@ -12,6 +12,12 @@
 
 #include <cmodel.h>
 
+#include <btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <BulletCollision/CollisionShapes/btMaterial.h>
+#include <BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+
 #if defined(_WIN32)
 	#define DEBUG_DRAW 1
 #endif
