@@ -92,6 +92,7 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuDefines.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedCode.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedDefs.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h" />
@@ -114,12 +115,16 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuMinkowskiPenetrationDepthSolver.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuPreferredPenetrationDirections.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuSampleTaskProcess.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\Threading.h" />
+    <ClInclude Include="..\..\src\BulletMultiThreaded\ThreadPool.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\Win32ThreadSupport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphase.cpp" />
+    <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.cpp" />
+    <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreading.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\SequentialThreadSupport.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuCollisionObjectWrapper.cpp" />
@@ -135,7 +140,9 @@
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuMinkowskiPenetrationDepthSolver.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuSampleTaskProcess.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\SpuSampleTask\SpuSampleTask.cpp" />
+    <ClCompile Include="..\..\src\BulletMultiThreaded\ThreadPool.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\Win32ThreadSupport.cpp" />
+    <ClCompile Include="..\..\src\BulletMultiThreaded\Win32Threading.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

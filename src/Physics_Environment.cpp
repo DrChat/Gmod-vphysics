@@ -28,7 +28,7 @@
 // We should replace current the bullet multithreaded dispatcher/solver with our own,
 // that internally calls into the sequential dispatcher/solver
 
-//#define USE_PARALLEL_DISPATCHER
+#define USE_PARALLEL_DISPATCHER
 //#define USE_PARALLEL_SOLVER
 
 #if defined(USE_PARALLEL_DISPATCHER) || defined(USE_PARALLEL_SOLVER)
@@ -48,8 +48,9 @@
 #endif
 
 #ifdef USE_PARALLEL_DISPATCHER
-	#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
-	#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+	//#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
+	//#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
+	#include "BulletMultiThreaded/btParallelCollisionDispatcher.h"
 #endif
 
 #ifdef USE_PARALLEL_SOLVER
@@ -233,24 +234,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
 #ifdef USE_PARALLEL_DISPATCHER
-	char dispatcherThreadName[128];
-	sprintf(dispatcherThreadName, "dispatcher%d", uniqueNum);
-
-	#ifdef _WIN32
-		m_pThreadSupportDispatcher = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																		dispatcherThreadName,
-																		processCollisionTask,
-																		createCollisionLocalStoreMemory,
-																		maxTasks));
-	#else
-		m_pThreadSupportDispatcher = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-																		dispatcherThreadName,
-																		processCollisionTask,
-																		createCollisionLocalStoreMemory,
-																		maxTasks));
-	#endif
-
-	m_pBulletDispatcher = new SpuGatheringCollisionDispatcher(m_pThreadSupportDispatcher, maxTasks, m_pBulletConfiguration);
+	m_pBulletDispatcher = new btParallelCollisionDispatcher(m_pBulletConfiguration, maxTasks);
 #else
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
 #endif

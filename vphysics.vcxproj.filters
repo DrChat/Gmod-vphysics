@@ -165,9 +165,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="todo.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="src\vphysics.rc" />
   </ItemGroup>
 </Project>

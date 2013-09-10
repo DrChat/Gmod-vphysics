@@ -175,25 +175,8 @@ static SIMD_FORCE_INLINE btScalar capsuleCapsuleDistance(
 
 //////////
 
-
-
-
-
-btConvexConvexAlgorithm::CreateFunc::CreateFunc(btSimplexSolverInterface*			simplexSolver, btConvexPenetrationDepthSolver* pdSolver)
-{
-	m_numPerturbationIterations = 0;
-	m_minimumPointsPerturbationThreshold = 3;
-	m_simplexSolver = simplexSolver;
-	m_pdSolver = pdSolver;
-}
-
-btConvexConvexAlgorithm::CreateFunc::~CreateFunc() 
-{ 
-}
-
 btConvexConvexAlgorithm::btConvexConvexAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
 : btActivatingCollisionAlgorithm(ci, body0Wrap, body1Wrap),
-m_simplexSolver(simplexSolver),
 m_pdSolver(pdSolver),
 m_ownManifold (false),
 m_manifoldPtr(mf),
@@ -205,6 +188,11 @@ m_sepDistance((static_cast<btConvexShape*>(body0->getCollisionShape()))->getAngu
 m_numPerturbationIterations(numPerturbationIterations),
 m_minimumPointsPerturbationThreshold(minimumPointsPerturbationThreshold)
 {
+	void *simplexSolverMem = btAlignedAlloc(sizeof(btVoronoiSimplexSolver), 16);
+	m_simplexSolver = new(simplexSolverMem) btVoronoiSimplexSolver();
+
+	// FYI: It's ok to share the pd solver as long as it doesn't use any class members on itself.
+
 	(void)body0Wrap;
 	(void)body1Wrap;
 }
@@ -214,6 +202,9 @@ m_minimumPointsPerturbationThreshold(minimumPointsPerturbationThreshold)
 
 btConvexConvexAlgorithm::~btConvexConvexAlgorithm()
 {
+	((btVoronoiSimplexSolver *)m_simplexSolver)->~btVoronoiSimplexSolver();
+	btAlignedFree(m_simplexSolver);
+
 	if (m_ownManifold)
 	{
 		if (m_manifoldPtr)

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 
+#include "convert.h"
 #include "Physics_FluidController.h"
 #include "Physics_Object.h"
 #include "Physics_Environment.h"
@@ -144,9 +145,10 @@ void CPhysicsFluidController::Tick(float dt) {
 		m_pGhostObject->getCollisionShape()->getAabb(m_pGhostObject->getWorldTransform(), omins, omaxs);
 
 		float height = maxs.y() - mins.y(); // If the plane for the surface can be non-upwards I'm going to murder something
+		//float height = abs(ConvertDistanceToBull(m_vSurfacePlane.w));
 		float dist = omaxs.y() - mins.y(); // Distance between top of water and bottom of object (how much of object is in water)
 		float p = clamp(dist / height, 0.0f, 1.0f);
-		float vol = (pObject->GetVolume() * p) / 64;
+		float vol = (pObject->GetVolume() * p); // / 64; // Submerged volume
 
 		// TODO: We need to calculate this force at several points on the object (How do we determine what points?).
 		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();

@@ -91,9 +91,18 @@ public:
 		int m_numPerturbationIterations;
 		int m_minimumPointsPerturbationThreshold;
 
-		CreateFunc(btSimplexSolverInterface*			simplexSolver, btConvexPenetrationDepthSolver* pdSolver);
+		CreateFunc(btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver)
+		{
+			m_numPerturbationIterations = 0;
+			m_minimumPointsPerturbationThreshold = 3;
+			m_simplexSolver = simplexSolver;
+			m_pdSolver = pdSolver;
+		}
 		
-		virtual ~CreateFunc();
+		virtual ~CreateFunc()
+		{
+
+		}
 
 		virtual	btCollisionAlgorithm* CreateCollisionAlgorithm(btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap)
 		{
