@@ -4,6 +4,8 @@ kind "StaticLib"
 
 language "C++"
 
+links { "BulletCollision" }
+
 includedirs {
 	"..",
 }

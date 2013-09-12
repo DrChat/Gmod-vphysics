@@ -7,7 +7,7 @@
 #include <vphysics/performance.h>
 #include <vphysics/stats.h>
 
-class btThreadSupportInterface;
+class btThreadPool;
 class btCollisionConfiguration;
 class btDispatcher;
 class btBroadphaseInterface;
@@ -158,8 +158,7 @@ private:
 	bool									m_deleteQuick;
 	float									m_timestep;
 
-	btThreadSupportInterface *				m_pThreadSupportDispatcher;
-	btThreadSupportInterface *				m_pThreadSupportSolver;
+	btThreadPool *							m_pSharedThreadPool;
 	btCollisionConfiguration *				m_pBulletConfiguration;
 	btCollisionDispatcher *					m_pBulletDispatcher;
 	btBroadphaseInterface *					m_pBulletBroadphase;

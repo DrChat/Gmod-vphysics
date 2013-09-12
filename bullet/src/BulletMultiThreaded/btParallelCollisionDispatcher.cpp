@@ -31,7 +31,7 @@ class btProcessOverlapTask : public btIThreadTask {
 
 		// Called after run() to destroy this task.
 		void destroy() {
-			btFree(this);
+			m_pDispatcher->freeTask(this);
 		}
 
 	private:
@@ -40,23 +40,24 @@ class btProcessOverlapTask : public btIThreadTask {
 		btParallelCollisionDispatcher *m_pDispatcher;
 };
 
-btParallelCollisionDispatcher::btParallelCollisionDispatcher(btCollisionConfiguration *pConfiguration, int numThreads) : btCollisionDispatcher(pConfiguration) {
-	void *mem = btAlloc(sizeof(btThreadPool));
-	m_pThreadPool = new(mem) btThreadPool();
+btParallelCollisionDispatcher::btParallelCollisionDispatcher(btCollisionConfiguration *pConfiguration, btThreadPool *pThreadPool) : btCollisionDispatcher(pConfiguration) {
+	m_pThreadPool = pThreadPool;
+
+	void *taskPoolMem = btAlloc(sizeof(btPoolAllocator));
+	m_pTaskPool = new(taskPoolMem) btPoolAllocator(sizeof(btProcessOverlapTask), 128);
 
 	m_pPoolCritSect = btCreateCriticalSection();
 	m_pAlgoPoolSect = btCreateCriticalSection();
-
-	m_pThreadPool->startThreads(numThreads);
+	m_pTaskPoolSect = btCreateCriticalSection();
 }
 
 btParallelCollisionDispatcher::~btParallelCollisionDispatcher() {
-	m_pThreadPool->stopThreads();
-	m_pThreadPool->~btThreadPool();
-	btFree(m_pThreadPool);
+	m_pTaskPool->~btPoolAllocator();
+	btFree(m_pTaskPool);
 
 	btDeleteCriticalSection(m_pPoolCritSect);
 	btDeleteCriticalSection(m_pAlgoPoolSect);
+	btDeleteCriticalSection(m_pTaskPoolSect);
 }
 
 btPersistentManifold *btParallelCollisionDispatcher::getNewManifold(const btCollisionObject *ob0, const btCollisionObject *ob1) {
@@ -87,6 +88,30 @@ void btParallelCollisionDispatcher::freeCollisionAlgorithm(void *ptr) {
 	m_pAlgoPoolSect->unlock();
 }
 
+void *btParallelCollisionDispatcher::allocateTask(int size) {
+	m_pTaskPoolSect->lock();
+	void *mem = NULL;
+	if (m_pTaskPool->getFreeCount() > 0) {
+		mem = m_pTaskPool->allocate(size);
+	} else {
+		// Fallback to dynamic alloc
+		mem = btAlloc(size);
+	}
+	m_pTaskPoolSect->unlock();
+
+	return mem;
+}
+
+void btParallelCollisionDispatcher::freeTask(void *ptr) {
+	m_pTaskPoolSect->lock();
+	if (m_pTaskPool->validPtr(ptr)) {
+		m_pTaskPool->freeMemory(ptr);
+	} else {
+		btFree(ptr);
+	}
+	m_pTaskPoolSect->unlock();
+}
+
 class btCollisionPairCallback : public btOverlapCallback {
 	public:
 		btCollisionPairCallback(const btDispatcherInfo &info, btParallelCollisionDispatcher *pDispatcher): m_info(info) {
@@ -98,8 +123,7 @@ class btCollisionPairCallback : public btOverlapCallback {
 			btCollisionObject *obj1 = (btCollisionObject *)pair.m_pProxy1->m_clientObject;
 
 			if (m_pDispatcher->needsCollision(obj0, obj1)) {
-				// FIXME: This uses alot of cycles
-				void *mem = btAlloc(sizeof(btProcessOverlapTask)); // TODO: Persistent pool or something
+				void *mem = m_pDispatcher->allocateTask(sizeof(btProcessOverlapTask));
 				btProcessOverlapTask *task = new(mem) btProcessOverlapTask(pair, m_info, m_pDispatcher);
 				m_pDispatcher->getThreadPool()->addTask(task);
 			}

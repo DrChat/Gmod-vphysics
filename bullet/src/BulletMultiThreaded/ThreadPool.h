@@ -27,10 +27,13 @@ class btThreadPool {
 		void startThreads(int numThreads);
 		void stopThreads();
 
+		int getNumThreads();
+
 		void addTask(btIThreadTask *pTask);
 		void waitIdle(); // Waits until thread pool is idle (no more tasks)
 
 		// Internal functions (do not call these)
+
 		btIThreadTask *getNextTask(btIEvent *pIdleEvent); // Returns new task to execute, or NULL if you should exit. Blocks if no tasks are available atm.
 
 	private:

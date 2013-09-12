@@ -5,30 +5,30 @@ PROJECT_NAME = vphysics
 # Path Configuration
 SOURCE_SDK = ../../../../Libraries/SourceMod/src
 BULLET_SDK = ../bullet
+
 # Note: Srcds is required for a successful build because we need to link to some shared objects.
-SRCDS_BIN_DIR = ~/srcds/orangebox/bin
+SRCDS_BIN_DIR = ~/steamcmd/server/bin
 
 PROJECT_DIR = .
-OUT_DIR = ../build/bin/linux/Release
-OBJ_DIR = ../build/obj/linux/$(PROJECT_NAME)/Release
-
-BULLET_MAKEFILE_DIR = ../bullet/make
+OUT_DIR = ../build/bin/linux/release
+OBJ_DIR = ../build/obj/linux/$(PROJECT_NAME)/release
 
 # Compilation Configuration
 INCLUDES = \
-	-I../include 					\
-	-I$(SOURCE_SDK)/public 			\
+	-I../include 			\
+	-I$(SOURCE_SDK)/public 		\
 	-I$(SOURCE_SDK)/public/tier0 	\
 	-I$(SOURCE_SDK)/public/tier1 	\
 	-I$(BULLET_SDK)/src
 	
 STATICLIBDIRS = \
-	-L../build/bin/linux/Release
+	-L../build/lib/linux/release
 	
 STATICLIBS = \
 	-lBulletSoftBody 	\
 	-lBulletDynamics 	\
-	-lBulletCollision 	\
+	-lBulletMultiThreaded	\
+	-lBulletCollision	\
 	-lLinearMath
 	
 DYNAMICLIBS = \
@@ -60,14 +60,10 @@ dirs:
 	@-$(MKDIR) $(OUT_DIR)
 	@-$(MKDIR) $(OBJ_DIR)
 	
-copy:
+copy: $(MODULE_NAME)
 	@echo " + Copying $(OUT_DIR)/$(MODULE_NAME) to $(SRCDS_BIN_DIR)"
 	@$(CP) $(OUT_DIR)/$(MODULE_NAME) $(SRCDS_BIN_DIR)
-	
-bullet:
-	@echo " + Building bullet..."
-	@$(MAKE) -f Makefile -C $(BULLET_MAKEFILE_DIR)
-	
+		
 $(MODULE_NAME): $(OBJECTS)
 	@echo " + Linking..."
 	@$(LINK) -o $(OUT_DIR)/$@ $(OBJECTS) $(LFLAGS)

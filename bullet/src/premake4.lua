@@ -1,8 +1,10 @@
+--[[
 configuration "Release"
-	--targetdir("../../build/lib/" .. os.get() .. "/release")
+	targetdir("../../build/lib/" .. os.get() .. "/release")
 
 configuration "Debug"
-	--targetdir("../../build/lib/" .. os.get() .. "/debug")
+	targetdir("../../build/lib/" .. os.get() .. "/debug")
+]]
 	
 configuration {}
 

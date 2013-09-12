@@ -2,6 +2,7 @@
 
 #include "LinearMath/btDefines.h"
 
+#include <stdio.h>
 #include <string>
 
 static void ThreadFunc(void *pArg) {
@@ -59,6 +60,7 @@ void btThreadPool::startThreads(int numThreads) {
 		m_pThreadInfo[i]->pThreadPool = this;
 		pThread->setThreadFunc(ThreadFunc);
 
+		// Thread name has to be set before threads are ran on linux!
 		char name[128];
 		sprintf(name, "btThreadPool thread %d", i);
 		pThread->setThreadName(name);
@@ -84,20 +86,28 @@ void btThreadPool::stopThreads() {
 	btFree(m_pThreadInfo);
 }
 
+int btThreadPool::getNumThreads() {
+	return m_numThreads;
+}
+
 void btThreadPool::addTask(btIThreadTask *pTask) {
 	m_pTaskCritSection->lock();
 	m_taskArray.push_back(pTask);
 
+	// This code needs to be executed while we still have the lock to avoid a race condition!
 	for (int i = 0; i < m_numThreads; i++) {
-		// Reset the idle events for the threads
+		// Reset the idle events for the threads (so we can wait on them in waitIdle, avoids a race condition)
 		m_pThreadInfo[i]->pIdleEvent->reset();
 	}
 	m_pTaskCritSection->unlock();
 
-	m_pNewTaskCondVar->wakeAll(); // Wake all threads (they'll fall asleep if they don't get a task)
+	m_pNewTaskCondVar->wakeAll(); // Wake all threads (they'll fall asleep again if they don't get a task)
 }
 
 void btThreadPool::waitIdle() {
+	if (!m_bThreadsStarted) return;
+
+	// Should we find a way to wait for all threads at once? (WaitForMultipleObjects)
 	for (int i = 0; i < m_numThreads; i++) {
 		m_pThreadInfo[i]->pIdleEvent->wait();
 	}
@@ -108,10 +118,9 @@ btIThreadTask *btThreadPool::getNextTask(btIEvent *pIdleEvent) {
 
 	// Task array is empty! Wait until new tasks are added (or the pool is exiting)
 	// While loop because cond vars are subject to spurious wakeups
-	// Also awaken when tasks are added
 	while (m_taskArray.size() <= 0) {
+		// Trigger the idle event (tell everyone we're currently waiting)
 		pIdleEvent->trigger();
-		
 		m_pNewTaskCondVar->wait(m_pTaskCritSection); // Wait for new tasks (and release the crit section, will be reacquired when we wake)
 
 		if (m_bThreadsShouldExit) {
@@ -120,13 +129,12 @@ btIThreadTask *btThreadPool::getNextTask(btIEvent *pIdleEvent) {
 		}
 	}
 
+	btAssert(m_taskArray.size() > 0);
+
 	// Send the new task back.
 	// Although we should never reach here if the task array size is 0, check anyways
-	btIThreadTask *ret = NULL;
-	if (m_taskArray.size() > 0) {
-		ret = m_taskArray[m_taskArray.size() - 1];
-		m_taskArray.pop_back();
-	}
+	btIThreadTask *ret = m_taskArray[m_taskArray.size() - 1];
+	m_taskArray.pop_back();
 
 	m_pTaskCritSection->unlock();
 

@@ -209,8 +209,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pObjectEvent = NULL;
 	m_pCollisionEvent = NULL;
 
-	m_pThreadSupportDispatcher = NULL;
-	m_pThreadSupportSolver = NULL;
 	m_pBulletBroadphase = NULL;
 	m_pBulletConfiguration = NULL;
 	m_pBulletDispatcher = NULL;
@@ -220,50 +218,29 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	btDefaultCollisionConstructionInfo cci;
 #ifdef MULTITHREADED
-	// Multithreaded versions cannot dynamically expand this pool. Having a small pool causes props to bounce around.
-	cci.m_defaultMaxPersistentManifoldPoolSize = 16384;
-
-	// HACK: Fix to prevent crashing on games with more than 1 environment.
-	static unsigned int uniqueNum = 0;
-
 	// Maximum number of parallel tasks (number of threads in the thread support)
 	// Good to set it to the same amount of CPU cores on the system.
-	static const int maxTasks = 4;
+	// TODO: The game dev needs to be able to configure this value. Expose it.
+	static const int maxTasks = 2;
+
+	// Shared thread pool (used by both solver and dispatcher)
+	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (even then it may work)
+	m_pSharedThreadPool = new btThreadPool();
+	m_pSharedThreadPool->startThreads(maxTasks);
 #endif
 
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
 #ifdef USE_PARALLEL_DISPATCHER
-	m_pBulletDispatcher = new btParallelCollisionDispatcher(m_pBulletConfiguration, maxTasks);
+	m_pBulletDispatcher = new btParallelCollisionDispatcher(m_pBulletConfiguration, m_pSharedThreadPool);
 #else
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
 #endif
 
-#ifdef USE_PARALLEL_SOLVER
-	char solverThreadName[128];
-	sprintf(solverThreadName, "solver%d", uniqueNum);
-
-	#ifdef _WIN32
-		m_pThreadSupportSolver = new Win32ThreadSupport(Win32ThreadSupport::Win32ThreadConstructionInfo(
-																			solverThreadName,
-																			SolverThreadFunc,
-																			SolverlsMemoryFunc,
-																			maxTasks));
-	#else
-		m_pThreadSupportSolver = new PosixThreadSupport(PosixThreadSupport::PosixThreadConstructionInfo(
-									 										solverThreadName,
-									 										SolverThreadFunc,
-									 										SolverlsMemoryFunc,
-									 										maxTasks));
-	#endif
-
-	m_pBulletSolver = new btParallelConstraintSolver(m_pThreadSupportSolver);
+#if 0 // USE_PARALLEL_SOLVER
+	// TODO: Parallel solver
 #else
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
-#endif
-
-#ifdef MULTITHREADED
-	uniqueNum++;
 #endif
 
 	m_pBulletBroadphase = new btDbvtBroadphase;
@@ -277,7 +254,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(m_pBulletGhostCallback);
 
 	m_pDeleteQueue = new CDeleteQueue;
-
 	m_pPhysicsDragController = new CPhysicsDragController;
 
 	m_perfparams.Defaults();
@@ -285,14 +261,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 #ifdef MULTITHREADED
 	m_pBulletEnvironment->getSolverInfo().m_numIterations = maxTasks;
-	m_pBulletEnvironment->getDispatchInfo().m_enableSPU = true;
-	#ifdef USE_PARALLEL_SOLVER
-		// Required for parallel solver (undocumented lolololo)
-		m_pBulletEnvironment->getSimulationIslandManager()->setSplitIslands(false);
-
-		// Solver also requires this.
-		m_pBulletDispatcher->setDispatcherFlags(btCollisionDispatcher::CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION);
-	#endif
 #endif
 
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
@@ -329,6 +297,11 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pDeleteQueue;
 	delete m_pPhysicsDragController;
 
+#ifdef MULTITHREADED
+	m_pSharedThreadPool->stopThreads();
+	delete m_pSharedThreadPool;
+#endif
+
 	delete m_pBulletEnvironment;
 	delete m_pBulletSolver;
 	delete m_pBulletBroadphase;
@@ -337,15 +310,6 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pBulletGhostCallback;
 
 	delete m_pCollisionSolver;
-
-#ifdef MULTITHREAD
-	deleteCollisionLocalStoreMemory();
-	delete m_pThreadSupportCollision;
-
-	#ifdef USE_PARALLEL_SOLVER
-		delete m_pThreadSupportSolver;
-	#endif
-#endif
 }
 
 // UNEXPOSED
@@ -891,7 +855,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 		CleanupDeleteList();
 	}
 
-	DoCollisionEvents(dt);
+	//DoCollisionEvents(dt);
 
 	//m_pCollisionSolver->EventPSI(this);
 	//m_pCollisionListener->EventPSI(this);

@@ -43,9 +43,11 @@ btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(const btDefault
 //btDefaultCollisionConfiguration::btDefaultCollisionConfiguration(btStackAlloc*	stackAlloc, btPoolAllocator*	persistentManifoldPool, btPoolAllocator*	collisionAlgorithmPool)
 {
 
+	// TODO: Remove this, useless
 	void* mem = btAlignedAlloc(sizeof(btVoronoiSimplexSolver),16);
 	m_simplexSolver = new (mem)btVoronoiSimplexSolver();
 
+	// Multithreading: DO NOT USE A SOLVER THAT USES CLASS MEMBERS
 	if (constructionInfo.m_useEpaPenetrationAlgorithm)
 	{
 		mem = btAlignedAlloc(sizeof(btGjkEpaPenetrationDepthSolver),16);

@@ -10,7 +10,7 @@
 
 class btParallelCollisionDispatcher : public btCollisionDispatcher {
 	public:
-		btParallelCollisionDispatcher(btCollisionConfiguration *pConfiguration, int numThreads);
+		btParallelCollisionDispatcher(btCollisionConfiguration *pConfiguration, btThreadPool *pThreadPool);
 		~btParallelCollisionDispatcher();
 
 		virtual btPersistentManifold *getNewManifold(const btCollisionObject *ob1, const btCollisionObject *ob2);
@@ -19,13 +19,18 @@ class btParallelCollisionDispatcher : public btCollisionDispatcher {
 		virtual	void *allocateCollisionAlgorithm(int size);
 		virtual	void freeCollisionAlgorithm(void *ptr);
 
+		virtual void *allocateTask(int size);
+		virtual void freeTask(void *ptr);
+
 		virtual void dispatchAllCollisionPairs(btOverlappingPairCache *pairCache, const btDispatcherInfo &dispatchInfo, btDispatcher *dispatcher);
 
 		btThreadPool *getThreadPool();
 
 	private:
+		btPoolAllocator *	m_pTaskPool;
 		btICriticalSection *m_pPoolCritSect;
 		btICriticalSection *m_pAlgoPoolSect;
+		btICriticalSection *m_pTaskPoolSect;
 		btThreadPool *		m_pThreadPool;
 };
 
