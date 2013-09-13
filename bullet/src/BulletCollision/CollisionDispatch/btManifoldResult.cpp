@@ -139,6 +139,8 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld, const 
 	}
 	
 	//User can override friction and/or restitution
+	// DrChat: Removed for multithreading version
+	/*
 	if (gContactAddedCallback &&
 		//and if either of the two bodies requires custom material
 		 ((m_body0Wrap->getCollisionObject()->getCollisionFlags() & btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK) ||
@@ -149,6 +151,6 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld, const 
 		const btCollisionObjectWrapper* obj1Wrap = isSwapped? m_body0Wrap : m_body1Wrap;
 		(*gContactAddedCallback)(m_manifoldPtr->getContactPoint(insertIndex), obj0Wrap, newPt.m_partId0, newPt.m_index0, obj1Wrap, newPt.m_partId1, newPt.m_index1);
 	}
-
+	*/
 }
 

@@ -312,14 +312,7 @@ void	btSequentialImpulseConstraintSolver::initSolverBody(btSolverBody* solverBod
 		solverBody->m_linearVelocity.setValue(0, 0, 0);
 		solverBody->m_angularVelocity.setValue(0, 0, 0);
 	}
-
-
 }
-
-
-
-
-
 
 btScalar btSequentialImpulseConstraintSolver::restitutionCurve(btScalar rel_vel, btScalar restitution)
 {
@@ -329,7 +322,7 @@ btScalar btSequentialImpulseConstraintSolver::restitutionCurve(btScalar rel_vel,
 
 
 
-static void	applyAnisotropicFriction(btCollisionObject* colObj, btVector3& frictionDirection, int frictionMode);
+// static void	applyAnisotropicFriction(btCollisionObject* colObj, btVector3& frictionDirection, int frictionMode);
 static void	applyAnisotropicFriction(btCollisionObject* colObj, btVector3& frictionDirection, int frictionMode)
 {
 	

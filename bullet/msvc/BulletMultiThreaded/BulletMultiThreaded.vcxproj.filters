@@ -20,43 +20,16 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuSampleTaskProcess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphaseSharedTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuCollisionObjectWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuCollisionTaskProcess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuDoubleBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\Box.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuCollisionShapes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuConvexPenetrationDepthSolver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuPreferredPenetrationDirections.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuContactResult.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\boxBoxDistance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuMinkowskiPenetrationDepthSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphaseSharedCode.h">
@@ -68,37 +41,10 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SequentialThreadSupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\Win32ThreadSupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuContactManifoldCollisionAlgorithm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuGatheringCollisionTask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\PpuAddressSpace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuLibspe2Support.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedCode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuGatheringCollisionDispatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuFakeDma.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\Threading.h">
@@ -112,61 +58,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuGatheringCollisionTask.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\Win32ThreadSupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuContactManifoldCollisionAlgorithm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuCollisionShapes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SequentialThreadSupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuSampleTaskProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuCollisionObjectWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuCollisionTaskProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuLibspe2Support.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuFakeDma.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuSampleTask\SpuSampleTask.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuMinkowskiPenetrationDepthSolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\boxBoxDistance.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuContactResult.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuGatheringCollisionDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreading.cpp">

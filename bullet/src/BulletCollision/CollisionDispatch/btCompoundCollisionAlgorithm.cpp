@@ -323,13 +323,11 @@ void btCompoundCollisionAlgorithm::processCollision (const btCollisionObjectWrap
 
 btScalar	btCompoundCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* body0, btCollisionObject* body1, const btDispatcherInfo& dispatchInfo, btManifoldResult* resultOut)
 {
-	btAssert(0);
 	//needs to be fixed, using btCollisionObjectWrapper and NOT modifying internal data structures
 	btCollisionObject* colObj = m_isSwapped? body1 : body0;
 	btCollisionObject* otherObj = m_isSwapped? body0 : body1;
 
 	btAssert (colObj->getCollisionShape()->isCompound());
-	
 	btCompoundShape* compoundShape = static_cast<btCompoundShape*>(colObj->getCollisionShape());
 
 	//We will use the OptimizedBVH, AABB tree to cull potential child-overlaps
@@ -345,30 +343,34 @@ btScalar	btCompoundCollisionAlgorithm::calculateTimeOfImpact(btCollisionObject* 
 	int i;
 	btTransform	orgTrans;
 	btScalar frac;
-	for (i=0;i<numChildren;i++)
+	for (i = 0; i < numChildren; i++)
 	{
 		//btCollisionShape* childShape = compoundShape->getChildShape(i);
+		//if (!m_childCollisionAlgorithms[i])
+		//	m_childCollisionAlgorithms[i] = m_dispatcher->findAlgorithm(
 
-		//backup
-		orgTrans = colObj->getWorldTransform();
+		if (m_childCollisionAlgorithms[i]) {
+			//backup
+			orgTrans = colObj->getWorldTransform();
 	
-		const btTransform& childTrans = compoundShape->getChildTransform(i);
-		//btTransform	newChildWorldTrans = orgTrans*childTrans ;
-		colObj->setWorldTransform( orgTrans*childTrans );
+			const btTransform& childTrans = compoundShape->getChildTransform(i);
+			//btTransform	newChildWorldTrans = orgTrans*childTrans ;
+			colObj->setWorldTransform( orgTrans*childTrans );
 
-		//btCollisionShape* tmpShape = colObj->getCollisionShape();
-		//colObj->internalSetTemporaryCollisionShape( childShape );
-		frac = m_childCollisionAlgorithms[i]->calculateTimeOfImpact(colObj, otherObj, dispatchInfo, resultOut);
-		if (frac<hitFraction)
-		{
-			hitFraction = frac;
+			//btCollisionShape* tmpShape = colObj->getCollisionShape();
+			//colObj->internalSetTemporaryCollisionShape( childShape );
+			frac = m_childCollisionAlgorithms[i]->calculateTimeOfImpact(colObj, otherObj, dispatchInfo, resultOut);
+			if (frac<hitFraction)
+			{
+				hitFraction = frac;
+			}
+			//revert back
+			//colObj->internalSetTemporaryCollisionShape( tmpShape);
+			colObj->setWorldTransform(orgTrans);
 		}
-		//revert back
-		//colObj->internalSetTemporaryCollisionShape( tmpShape);
-		colObj->setWorldTransform( orgTrans);
 	}
-	return hitFraction;
 
+	return hitFraction;
 }
 
 

@@ -5,8 +5,9 @@
 
 class btProcessOverlapTask : public btIThreadTask {
 	public:
-		btProcessOverlapTask(btBroadphasePair &pair, const btDispatcherInfo &info, btParallelCollisionDispatcher *pDispatcher): m_pair(pair), m_info(info) {
+		btProcessOverlapTask(btBroadphasePair &pair, const btDispatcherInfo *info, btParallelCollisionDispatcher *pDispatcher): m_pair(pair) {
 			m_pDispatcher = pDispatcher;
+			m_pInfo = info;
 		}
 
 		void run() {
@@ -23,8 +24,11 @@ class btProcessOverlapTask : public btIThreadTask {
 			if (m_pair.m_algorithm) {
 				btManifoldResult contactPointResult(&obj0Wrap, &obj1Wrap);
 				
-				if (m_info.m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE) {
-					m_pair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, m_info, &contactPointResult);
+				if (m_pInfo->m_dispatchFunc == btDispatcherInfo::DISPATCH_DISCRETE) {
+					m_pair.m_algorithm->processCollision(&obj0Wrap, &obj1Wrap, *m_pInfo, &contactPointResult);
+				} else {
+					// Continuous dispatch
+					m_pair.m_algorithm->calculateTimeOfImpact(obj0, obj1, *m_pInfo, &contactPointResult);
 				}
 			}
 		}
@@ -36,7 +40,7 @@ class btProcessOverlapTask : public btIThreadTask {
 
 	private:
 		btBroadphasePair &m_pair;
-		const btDispatcherInfo &m_info;
+		const btDispatcherInfo *m_pInfo;
 		btParallelCollisionDispatcher *m_pDispatcher;
 };
 
@@ -44,7 +48,7 @@ btParallelCollisionDispatcher::btParallelCollisionDispatcher(btCollisionConfigur
 	m_pThreadPool = pThreadPool;
 
 	void *taskPoolMem = btAlloc(sizeof(btPoolAllocator));
-	m_pTaskPool = new(taskPoolMem) btPoolAllocator(sizeof(btProcessOverlapTask), 128);
+	m_pTaskPool = new(taskPoolMem) btPoolAllocator(sizeof(btProcessOverlapTask), 4096);
 
 	m_pPoolCritSect = btCreateCriticalSection();
 	m_pAlgoPoolSect = btCreateCriticalSection();
@@ -114,8 +118,9 @@ void btParallelCollisionDispatcher::freeTask(void *ptr) {
 
 class btCollisionPairCallback : public btOverlapCallback {
 	public:
-		btCollisionPairCallback(const btDispatcherInfo &info, btParallelCollisionDispatcher *pDispatcher): m_info(info) {
+		btCollisionPairCallback(const btDispatcherInfo &info, btParallelCollisionDispatcher *pDispatcher) {
 			m_pDispatcher = pDispatcher;
+			m_pInfo = &info;
 		}
 
 		bool processOverlap(btBroadphasePair &pair) {
@@ -124,7 +129,7 @@ class btCollisionPairCallback : public btOverlapCallback {
 
 			if (m_pDispatcher->needsCollision(obj0, obj1)) {
 				void *mem = m_pDispatcher->allocateTask(sizeof(btProcessOverlapTask));
-				btProcessOverlapTask *task = new(mem) btProcessOverlapTask(pair, m_info, m_pDispatcher);
+				btProcessOverlapTask *task = new(mem) btProcessOverlapTask(pair, m_pInfo, m_pDispatcher);
 				m_pDispatcher->getThreadPool()->addTask(task);
 			}
 
@@ -133,7 +138,7 @@ class btCollisionPairCallback : public btOverlapCallback {
 		}
 
 	private:
-		const btDispatcherInfo &m_info;
+		const btDispatcherInfo *m_pInfo;
 		btParallelCollisionDispatcher *m_pDispatcher;
 };
 

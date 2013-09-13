@@ -3,7 +3,6 @@
 #include "LinearMath/btDefines.h"
 
 #include <stdio.h>
-#include <string>
 
 static void ThreadFunc(void *pArg) {
 	btThreadPoolInfo *pThreadInfo = (btThreadPoolInfo *)pArg;

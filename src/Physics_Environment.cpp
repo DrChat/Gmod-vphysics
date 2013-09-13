@@ -35,18 +35,6 @@
 	#define MULTITHREADED
 #endif
 
-#ifdef MULTITHREADED
-	#ifdef _WIN32
-		#include "BulletMultiThreaded/Win32ThreadSupport.h"
-		#pragma comment(lib, "BulletMultiThreaded.lib")
-	#else
-		#include "BulletMultiThreaded/PosixThreadSupport.h"
-		// TODO: Link to the library automatically if multithreaded
-	#endif
-
-	#include "BulletMultiThreaded/PlatformDefinitions.h"
-#endif
-
 #ifdef USE_PARALLEL_DISPATCHER
 	//#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
 	//#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
@@ -221,7 +209,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	// Maximum number of parallel tasks (number of threads in the thread support)
 	// Good to set it to the same amount of CPU cores on the system.
 	// TODO: The game dev needs to be able to configure this value. Expose it.
-	static const int maxTasks = 2;
+	static const int maxTasks = 4;
 
 	// Shared thread pool (used by both solver and dispatcher)
 	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (even then it may work)
@@ -237,8 +225,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletDispatcher = new btCollisionDispatcher(m_pBulletConfiguration);
 #endif
 
-#if 0 // USE_PARALLEL_SOLVER
-	// TODO: Parallel solver
+#ifdef USE_PARALLEL_SOLVER
+	m_pBulletSolver = new btParallelConstraintSolver(m_pSharedThreadPool);
 #else
 	m_pBulletSolver = new btSequentialImpulseConstraintSolver;
 #endif
@@ -266,6 +254,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
 	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
 	m_pBulletEnvironment->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
+	//m_pBulletEnvironment->getDispatchInfo().m_dispatchFunc = btDispatcherInfo::DISPATCH_CONTINUOUS;
 
 	//m_simPSIs = 0;
 	//m_invPSIscale = 0;

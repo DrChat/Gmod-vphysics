@@ -72,7 +72,7 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	m_enable = true;
 
 	// FYI: The onground stuff includes any props we may be standing on as well as the world.
-	// The ground is valid only if it's significantly heavier than our object ("Rideable physics"). (> our mass * 2)
+	// The ground is valid only if it's significantly heavier than our object ("Rideable physics" > our mass * 2)
 	m_onground = onground;
 
 	if (velocity.LengthSqr() <= 0.001f) {

@@ -21,22 +21,67 @@ subject to the following restrictions:
 #include "LinearMath/btPoolAllocator.h"
 #include "BulletCollision/NarrowPhaseCollision/btPersistentManifold.h"
 
-#include "LinearMath/btQuickprof.h"
-
-#include "HeapManager.h"
-
 #include "PlatformDefinitions.h"
 #include "ThreadPool.h"
 #include "Threading.h"
 
+#include "LinearMath/btDefines.h"
 #include "LinearMath/btScalar.h"
+
+class btSolveGroupTask : public btIThreadTask {
+	public:
+		btSolveGroupTask(btParallelConstraintSolver *pSolver) {
+			m_pSolver = pSolver;
+		}
+
+		void run() {
+
+		}
+
+		void destroy() {
+			m_pSolver->freeTask(this);
+		}
+
+	private:
+		btParallelConstraintSolver *m_pSolver;
+};
 
 btParallelConstraintSolver::btParallelConstraintSolver(btThreadPool *pThreadPool) {
 	m_pThreadPool = pThreadPool;
 }
 
-btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher) {
+btParallelConstraintSolver::~btParallelConstraintSolver() {
+
+}
+
+void *btParallelConstraintSolver::allocateTask(int size) {
+	m_pTaskPoolSect->lock();
+	void *ret = NULL;
 	
+	if (m_pTaskPool->getFreeCount() > 0) {
+		ret = m_pTaskPool->allocate(size);
+	} else {
+		ret = btAlloc(size);
+	}
+
+	m_pTaskPoolSect->unlock();
+
+	return ret;
+}
+
+void btParallelConstraintSolver::freeTask(void *ptr) {
+	m_pTaskPoolSect->lock();
+	if (m_pTaskPool->validPtr(ptr)) {
+		m_pTaskPool->freeMemory(ptr);
+	} else {
+		btFree(ptr);
+	}
+	m_pTaskPoolSect->unlock();
+}
+
+btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher) {
+	void *mem = allocateTask(sizeof(btSolveGroupTask));
+	btSolveGroupTask *task = new(mem) btSolveGroupTask(this);
 
 	// Unknown return value
 	return btScalar(0);

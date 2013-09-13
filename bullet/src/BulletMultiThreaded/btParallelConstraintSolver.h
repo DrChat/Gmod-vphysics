@@ -22,6 +22,9 @@ subject to the following restrictions:
 #include "PlatformDefinitions.h"
 
 class btThreadPool;
+class btSolveGroupTask;
+class btPoolAllocator;
+class btICriticalSection;
 
 /// The btParallelConstraintSolver performs computations on constraint rows in parallel
 class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver {
@@ -29,10 +32,15 @@ class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver {
 		btParallelConstraintSolver(btThreadPool *pThreadPool);
 		virtual ~btParallelConstraintSolver();
 	
+		virtual void *allocateTask(int size);
+		virtual void freeTask(void *ptr);
+
 		virtual btScalar solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher);
 
 	protected:
 		btThreadPool *m_pThreadPool;
+		btPoolAllocator *m_pTaskPool;
+		btICriticalSection *m_pTaskPoolSect;
 };
 
 

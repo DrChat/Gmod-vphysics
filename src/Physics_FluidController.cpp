@@ -133,12 +133,10 @@ void CPhysicsFluidController::Tick(float dt) {
 	int numObjects = m_pGhostObject->getNumOverlappingObjects();
 	for (int i = 0; i < numObjects; i++) {
 		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
-		if (!body)
-			continue;
+		Assert(body);
 
 		CPhysicsObject *pObject = (CPhysicsObject *)body->getUserPointer();
-		if (!pObject)
-			continue;
+		Assert(pObject);
 
 		btVector3 mins, maxs, omins, omaxs;
 		body->getAabb(mins, maxs);

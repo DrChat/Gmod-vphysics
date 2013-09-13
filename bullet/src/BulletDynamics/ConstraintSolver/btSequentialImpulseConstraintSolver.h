@@ -74,25 +74,25 @@ protected:
 	void	convertContact(btPersistentManifold* manifold, const btContactSolverInfo& infoGlobal);
 
 
-	void	resolveSplitPenetrationSIMD(
+	static void	resolveSplitPenetrationSIMD(
 	 btSolverBody& bodyA, btSolverBody& bodyB,
 		const btSolverConstraint& contactConstraint);
 
-	void	resolveSplitPenetrationImpulseCacheFriendly(
+	static void	resolveSplitPenetrationImpulseCacheFriendly(
 	   btSolverBody& bodyA, btSolverBody& bodyB,
 		const btSolverConstraint& contactConstraint);
 
 	//internal method
 	int		getOrInitSolverBody(btCollisionObject& body);
-	void	initSolverBody(btSolverBody* solverBody, btCollisionObject* collisionObject);
+	static void	initSolverBody(btSolverBody* solverBody, btCollisionObject* collisionObject);
 
-	void	resolveSingleConstraintRowGeneric(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
+	static void	resolveSingleConstraintRowGeneric(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
 
-	void	resolveSingleConstraintRowGenericSIMD(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
+	static void	resolveSingleConstraintRowGenericSIMD(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
 	
-	void	resolveSingleConstraintRowLowerLimit(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
+	static void	resolveSingleConstraintRowLowerLimit(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
 	
-	void	resolveSingleConstraintRowLowerLimitSIMD(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
+	static void	resolveSingleConstraintRowLowerLimitSIMD(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
 		
 protected:
 	

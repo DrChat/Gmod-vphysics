@@ -35,6 +35,9 @@ class btPosixThread : public btIThread {
 	public:
 		btPosixThread() {
 			m_bRunning = false;
+			m_threadParams.pThreadName = NULL;
+			m_threadParams.pArg = NULL;
+			m_threadParams.pFn = NULL;
 		}
 
 		~btPosixThread() {
@@ -144,7 +147,7 @@ class btPosixEvent : public btIEvent {
 	public:
 		btPosixEvent(bool bManualReset) {
 			m_bTriggered = false;
-			m_bManualReset = bManualReset;
+			m_bManualReset = bManualReset; // TOOD: Factor this in
 			pthread_mutex_init(&m_mutex, NULL);
 			pthread_cond_init(&m_condVar, NULL);
 		}
@@ -171,6 +174,7 @@ class btPosixEvent : public btIEvent {
 			pthread_mutex_lock(&m_mutex);
 			while (!m_bTriggered)
 				pthread_cond_wait(&m_condVar, &m_mutex);
+
 			pthread_mutex_unlock(&m_mutex);
 		}
 

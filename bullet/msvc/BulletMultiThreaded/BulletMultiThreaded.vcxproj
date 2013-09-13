@@ -77,6 +77,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/d2Zi+ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -96,28 +97,10 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\PpuAddressSpace.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SequentialThreadSupport.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuCollisionObjectWrapper.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuCollisionTaskProcess.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuContactManifoldCollisionAlgorithm.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuDoubleBuffer.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuFakeDma.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuGatheringCollisionDispatcher.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuLibspe2Support.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\Box.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\boxBoxDistance.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuCollisionShapes.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuContactResult.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuConvexPenetrationDepthSolver.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuGatheringCollisionTask.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuMinkowskiPenetrationDepthSolver.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuPreferredPenetrationDirections.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuSampleTaskProcess.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\Threading.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\ThreadPool.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\Win32ThreadSupport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphase.cpp" />
@@ -125,23 +108,7 @@
     <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreading.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreadSupport.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SequentialThreadSupport.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuCollisionObjectWrapper.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuCollisionTaskProcess.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuContactManifoldCollisionAlgorithm.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuFakeDma.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuGatheringCollisionDispatcher.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuLibspe2Support.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\boxBoxDistance.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuCollisionShapes.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuContactResult.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuGatheringCollisionTask.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\SpuMinkowskiPenetrationDepthSolver.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuSampleTaskProcess.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\SpuSampleTask\SpuSampleTask.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\ThreadPool.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\Win32ThreadSupport.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\Win32Threading.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
