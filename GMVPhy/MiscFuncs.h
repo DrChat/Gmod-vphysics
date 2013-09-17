@@ -1,12 +1,12 @@
 #ifndef MISCFUNCS_H
 #define MISCFUNCS_H
 
-class IPhysicsObject1;
+class IPhysicsObject32;
 class CPhysCollide;
 class Vector;
 struct lua_State;
 
-IPhysicsObject1 *Get_PhysObj(lua_State *state, int stackPos);
+IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos);
 Vector *Get_Vector(lua_State *state, int stackPos);
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos);
 

@@ -18,7 +18,7 @@ using namespace GarrysMod::Lua;
 // Ret1:
 //
 int lPhysObjSetLocalGravity(lua_State *state) {
-	IPhysicsObject1 *	pObject = Get_PhysObj(state, 1);
+	IPhysicsObject32 *	pObject = Get_PhysObj(state, 1);
 	Vector *			pVec = Get_Vector(state, 2);
 
 	if (pVec)
@@ -34,7 +34,7 @@ int lPhysObjSetLocalGravity(lua_State *state) {
 // Ret1: Vector|gravityVec|The gravity vector
 //
 int lPhysObjGetLocalGravity(lua_State *state) {
-	IPhysicsObject1 *pObject = Get_PhysObj(state, 1);
+	IPhysicsObject32 *pObject = Get_PhysObj(state, 1);
 
 	Vector grav = pObject->GetLocalGravity();
 	Push_Vector(state, grav);
@@ -49,7 +49,7 @@ int lPhysObjGetLocalGravity(lua_State *state) {
 // Ret1: CPhysCollide|collide|The collision mesh
 //
 int lPhysObjGetCollide(lua_State *state) {
-	IPhysicsObject1 *pObject = Get_PhysObj(state, 1);
+	IPhysicsObject32 *pObject = Get_PhysObj(state, 1);
 
 	CPhysCollide *pCollide = pObject->GetCollide();
 	Push_PhysCollide(state, pCollide);

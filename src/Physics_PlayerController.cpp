@@ -13,7 +13,7 @@ void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const bt
 	// Timestep scale
 	btVector3 acceleration = delta * scaleDelta;
 
-	if (currentSpeed.length2() < 1e-6) {
+	if (currentSpeed.fuzzyZero() && !currentSpeed.isZero()) {
 		currentSpeed.setZero();
 	}
 	acceleration += currentSpeed * -damping;
@@ -49,25 +49,18 @@ CPlayerController::~CPlayerController() {
 }
 
 void CPlayerController::Update(const Vector &position, const Vector &velocity, float secondsToArrival, bool onground, IPhysicsObject *ground) {
-	btVector3 bullTargetPosition, bullTargetVelocity;
+	btVector3 bullTargetPosition, bullMaxVelocity;
 
 	ConvertPosToBull(position, bullTargetPosition);
-	ConvertPosToBull(velocity, bullTargetVelocity);
+	ConvertPosToBull(velocity, bullMaxVelocity);
 
 	// If the targets haven't changed, abort.
-	if (bullTargetVelocity.distance2(m_targetVelocity) < FLT_EPSILON && bullTargetPosition.distance2(m_targetPosition) < FLT_EPSILON) {
+	if (bullMaxVelocity.distance2(m_maxVelocity) < FLT_EPSILON && bullTargetPosition.distance2(m_targetPosition) < FLT_EPSILON) {
 		return;
 	}
 
-	/*
-	IVPhysicsDebugOverlay *pOverlay = m_pEnv->GetDebugOverlay();
-	if (pOverlay) {
-		pOverlay->AddBoxOverlay(position, Vector(-16, -16, -16), Vector(16, 16, 16), QAngle(0, 0, 0), 255, 0, 0, 255, 0.2f);
-	}
-	*/
-
 	m_targetPosition = bullTargetPosition;
-	m_targetVelocity = bullTargetVelocity;
+	m_maxVelocity = bullMaxVelocity;
 
 	m_enable = true;
 
@@ -179,8 +172,10 @@ void CPlayerController::Jump() {
 void CPlayerController::GetShadowVelocity(Vector *velocity) {
 	if (!velocity) return;
 
-	btRigidBody *body = m_pObject->GetObject();
-	ConvertPosToHL(body->getLinearVelocity(), *velocity);
+	//btRigidBody *body = m_pObject->GetObject();
+	//ConvertPosToHL(body->getLinearVelocity(), *velocity);
+
+	ConvertPosToHL(m_linVelocity, *velocity);
 }
 
 IPhysicsObject *CPlayerController::GetObject() {
@@ -227,7 +222,8 @@ void CPlayerController::Tick(float deltaTime) {
 	btMassCenterMotionState *motionState = (btMassCenterMotionState *)body->getMotionState();
 
 	// Don't let the player controller travel too far away from the target position.
-	btTransform transform = body->getWorldTransform() * motionState->m_centerOfMassOffset;
+	btTransform transform;
+	motionState->getGraphicTransform(transform);
 	btVector3 delta_position = m_targetPosition - transform.getOrigin();
 
 	btScalar qdist = delta_position.length2();
@@ -235,53 +231,47 @@ void CPlayerController::Tick(float deltaTime) {
 		return;
 	}
 
+	m_linVelocity.setZero();
 	CalculateVelocity(deltaTime);
 
-	/*
 	// Integrate the velocity into our world transform
 	btVector3 deltaPos = m_linVelocity * deltaTime;
 
-	btTransform trans = body->getWorldTransform();
-	trans.setOrigin(trans.getOrigin() + deltaPos);
-	motionState->setWorldTransform(trans);
-	*/
+	if (!deltaPos.fuzzyZero()) {
+		btTransform trans;
+		motionState->getGraphicTransform(trans);
+		trans.setOrigin(trans.getOrigin() + deltaPos);
+		motionState->setGraphicTransform(trans);
+	}
 }
 
 void CPlayerController::CalculateVelocity(float dt) {
 	btRigidBody *body = m_pObject->GetObject();
 
 	// Compute controller speed
-	float frac = 1;
-	if (m_secondsToArrival > 0) {
-		frac = dt / m_secondsToArrival;
-		if (frac > 1) frac = 1;
-	}
+	// When we fling off, ComputeController gets a HUGE scale
 
 	m_secondsToArrival -= dt;
 	if (m_secondsToArrival < 0) m_secondsToArrival = 0;
 
-	if (frac <= 0) return;
+	float psiScale = m_pEnv->GetInvPSIScale();
 
-	// TODO: Use m_targetVelocity
-
-	btTransform transform = body->getWorldTransform() * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset;
+	btTransform transform;
+	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 	btVector3 deltaPos = m_targetPosition - transform.getOrigin();
 
-	btVector3 vel = body->getLinearVelocity();
-	ComputeController(vel, deltaPos, m_maxSpeed, SAFE_DIVIDE(frac, dt), m_dampFactor);
-	body->setLinearVelocity(vel);
+	ComputeController(m_linVelocity, deltaPos, m_maxSpeed, SAFE_DIVIDE(psiScale, dt), m_dampFactor);
 
-	/*
-	ComputeController(m_linVelocity, deltaPos, m_maxSpeed, SAFE_DIVIDE(frac, dt), m_dampFactor);
-	*/
-
-	// Apply gravity velocity.
-	/*
-	if (!m_onground) {
-		btVector3 gravVel = body->getGravity() * dt;
-		m_linVelocity -= gravVel;
+	if (abs(m_linVelocity.m_floats[0]) > 50 || abs(m_linVelocity.m_floats[1]) > 50 || abs(m_linVelocity.m_floats[2]) > 50) {
+		Msg("uhoh psiScale %f\n", psiScale);
+		Msg("delta %f %f %f\n", deltaPos.x(), deltaPos.y(), deltaPos.z());
 	}
-	*/
+
+	// Apply gravity velocity for stepping.
+	if (m_onground) {
+		btVector3 gravVel = body->getGravity() * dt;
+		m_linVelocity += gravVel;
+	}
 }
 
 void CPlayerController::AttachObject() {
@@ -290,7 +280,7 @@ void CPlayerController::AttachObject() {
 	body->setAngularFactor(0);
 
 	m_pObject->AddCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
-	//body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_KINEMATIC_OBJECT);
+	body->setCollisionFlags(body->getCollisionFlags() | btRigidBody::CF_KINEMATIC_OBJECT);
 
 	body->setActivationState(DISABLE_DEACTIVATION);
 }
@@ -301,7 +291,7 @@ void CPlayerController::DetachObject() {
 	body->setActivationState(ACTIVE_TAG);
 
 	m_pObject->RemoveCallbackFlags(CALLBACK_IS_PLAYER_CONTROLLER);
-	//body->setCollisionFlags(body->getCollisionFlags() & ~(btRigidBody::CF_KINEMATIC_OBJECT));
+	body->setCollisionFlags(body->getCollisionFlags() & ~(btRigidBody::CF_KINEMATIC_OBJECT));
 
 	m_pObject = NULL;
 }
@@ -317,9 +307,9 @@ bool CPlayerController::TryTeleportObject() {
 
 	btTransform trans = body->getWorldTransform();
 	trans.setOrigin(m_targetPosition);
-	body->setWorldTransform(trans  * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset);
 
-	//((btMassCenterMotionState *)body->getMotionState())->setGraphicTransform(trans);
+	body->setWorldTransform(trans  * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset);
+	((btMassCenterMotionState *)body->getMotionState())->setGraphicTransform(trans);
 
 	return true;
 }

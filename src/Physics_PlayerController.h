@@ -65,7 +65,7 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 
 		// Variables for future use as a kinematic controller.
 		btVector3						m_linVelocity;
-		btVector3						m_targetVelocity;
+		btVector3						m_maxVelocity;
 		btVector3						m_targetPosition;
 
 		int								m_ticksSinceUpdate;

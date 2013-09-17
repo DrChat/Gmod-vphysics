@@ -7,8 +7,8 @@
 class IPhysicsEnvironment;
 class IPhysicsCollisionSet;
 
-class CPhysics : public CTier1AppSystem<IPhysics1> {
-	typedef CTier1AppSystem<IPhysics1> BaseClass;
+class CPhysics : public CTier1AppSystem<IPhysics32> {
+	typedef CTier1AppSystem<IPhysics32> BaseClass;
 	public:
 		~CPhysics();
 

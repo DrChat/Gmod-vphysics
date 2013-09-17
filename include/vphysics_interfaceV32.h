@@ -15,18 +15,18 @@
 
 // THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
 
-abstract_class IPhysics1 : public IPhysics {
+abstract_class IPhysics32 : public IPhysics {
 	public:
 		virtual int		GetNumActiveEnvironments() = 0;
 };
 
 // TODO: Soft bodies
-abstract_class IPhysicsEnvironment1 : public IPhysicsEnvironment {
+abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
 		virtual void	SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) = 0;
 };
 
-abstract_class IPhysicsObject1 : public IPhysicsObject {
+abstract_class IPhysicsObject32 : public IPhysicsObject {
 	public:
 		// You need to call EnableGravity(false) first so we stop using the world's gravity.
 		// To use the world's gravity again, call EnableGravity(true)
@@ -55,7 +55,7 @@ abstract_class IPhysicsObject1 : public IPhysicsObject {
 
 // Note: If you change anything about a collision shape that an IPhysicsObject is using, call UpdateCollide on that object.
 
-abstract_class IPhysicsCollision1 : public IPhysicsCollision {
+abstract_class IPhysicsCollision32 : public IPhysicsCollision {
 	public:
 		// Adds a convex to a collide, with an optional transform to offset the convex.
 		virtual void			AddConvexToCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex, const matrix3x4_t *xform = NULL) = 0;
@@ -75,13 +75,8 @@ abstract_class IPhysicsCollision1 : public IPhysicsCollision {
 		// NOTE: VPhysics DOES NOT keep track of these, unlike BBoxes! You must destroy them with DestroyCollide!
 
 		virtual CPhysConvex *	CylinderToConvex(const Vector &mins, const Vector &maxs) = 0;
-		virtual CPhysCollide *	CylinderToCollide(const Vector &mins, const Vector &maxs) = 0;
-
 		virtual CPhysConvex *	ConeToConvex(const float radius, const float height) = 0;
-		virtual CPhysCollide *	ConeToCollide(const float radius, const float height) = 0;
-
 		virtual CPhysConvex *	SphereToConvex(const float radius) = 0;
-		virtual CPhysCollide *	SphereToCollide(const float radius) = 0;
 };
 
 #endif // VPHYSICS_INTERFACEV32_H

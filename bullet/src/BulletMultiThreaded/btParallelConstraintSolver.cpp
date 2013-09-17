@@ -48,10 +48,13 @@ class btSolveGroupTask : public btIThreadTask {
 
 btParallelConstraintSolver::btParallelConstraintSolver(btThreadPool *pThreadPool) {
 	m_pThreadPool = pThreadPool;
+
+	m_pTaskPool = new btPoolAllocator(sizeof(btSolveGroupTask), 4096);
+	m_pTaskPoolSect = btCreateCriticalSection();
 }
 
 btParallelConstraintSolver::~btParallelConstraintSolver() {
-
+	btDeleteCriticalSection(m_pTaskPoolSect);
 }
 
 void *btParallelConstraintSolver::allocateTask(int size) {
@@ -63,7 +66,6 @@ void *btParallelConstraintSolver::allocateTask(int size) {
 	} else {
 		ret = btAlloc(size);
 	}
-
 	m_pTaskPoolSect->unlock();
 
 	return ret;
@@ -79,10 +81,19 @@ void btParallelConstraintSolver::freeTask(void *ptr) {
 	m_pTaskPoolSect->unlock();
 }
 
-btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher) {
+btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, 
+											int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher) {
+	// We'll have to make a copy of the arrays supplied to us, as they're deleted after this function returns.
+
 	void *mem = allocateTask(sizeof(btSolveGroupTask));
 	btSolveGroupTask *task = new(mem) btSolveGroupTask(this);
+	m_pThreadPool->addTask(task);
 
 	// Unknown return value
 	return btScalar(0);
+}
+
+void btParallelConstraintSolver::allSolved(const btContactSolverInfo & /* info */, class btIDebugDraw * /* debugDrawer */, btStackAlloc * /* stackAlloc */) {
+	// Not really solved. Wait until the threadpool is finished.
+	m_pThreadPool->waitIdle();
 }

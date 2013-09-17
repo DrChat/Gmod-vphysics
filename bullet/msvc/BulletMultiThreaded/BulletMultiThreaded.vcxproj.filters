@@ -26,12 +26,6 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\Box.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\boxBoxDistance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphaseSharedCode.h">
       <Filter>Header Files</Filter>
     </ClInclude>

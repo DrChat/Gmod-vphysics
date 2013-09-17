@@ -127,6 +127,7 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld, const 
 		newPt.m_index0  = m_index0;
 		newPt.m_index1  = m_index1;
 	}
+
 	//printf("depth=%f\n", depth);
 	///@todo, check this for any side effects
 	if (insertIndex >= 0)

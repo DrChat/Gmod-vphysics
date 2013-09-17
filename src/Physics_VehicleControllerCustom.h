@@ -13,15 +13,14 @@ class IPhysicsGameTrace;
 
 // TODO: Move these classes to a public interface
 
-// FIXME: Name conflict with public interface!
-struct vehicle_wheelparams_t {
+struct vehicle_customwheelparams_t {
 	// Position of wheel in world space
 	Vector	worldPosition;
 
-	// Normalized direction the wheel is facing (normally straight down, used for raytrace direction)
+	// Normalized direction the wheel is facing in local space (normally straight down, used for raytrace direction)
 	Vector	wheelDirection;
 
-	// Normalized direction of the axle from the wheel (normally straight left, used for which way the wheel rolls)
+	// Normalized direction of the axle from the wheel in local space (normally straight left, used for which way the wheel rolls)
 	Vector	wheelAxleDirection;
 
 	// Radius of wheel in inches
@@ -41,7 +40,7 @@ struct vehicle_wheelparams_t {
 		wheelDirection.Zero();
 		wheelAxleDirection.Zero();
 
-		wheelRadius			= 32;
+		wheelRadius			= 16;
 		isFrontWheel		= true;
 		maxSuspensionLength = 16;
 		suspensionStiffness = 32;
@@ -55,6 +54,9 @@ struct vehicle_wheelinfo_t {
 
 	// Turn angle in degrees (-left/+right)
 	float	turnAngle;
+
+	// Speed in rpm
+	float	speed;
 };
 
 // Purpose: Custom wheel ray tracing
@@ -79,7 +81,7 @@ class CPhysicsVehicleControllerCustom {
 
 		void Update(float dt);
 
-		void CreateWheel(const vehicle_wheelparams_t &params);
+		void CreateWheel(const vehicle_customwheelparams_t &params);
 
 	public:
 		// Unexposed functions

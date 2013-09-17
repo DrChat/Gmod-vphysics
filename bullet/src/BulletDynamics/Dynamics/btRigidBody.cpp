@@ -22,6 +22,7 @@ subject to the following restrictions:
 #include "LinearMath/btSerializer.h"
 
 //'temporarily' global variables
+// FIXME: These should not be global variables!!!
 btScalar	gDeactivationTime = btScalar(2.);
 bool	gDisableDeactivation = false;
 static int uniqueId = 0;

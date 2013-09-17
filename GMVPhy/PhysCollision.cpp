@@ -11,7 +11,7 @@
 
 using namespace GarrysMod::Lua;
 
-IPhysicsCollision1 *	g_pPhysCollision = NULL;
+IPhysicsCollision32 *	g_pPhysCollision = NULL;
 
 //
 // Name: physcollision.CollideSetScale
@@ -53,7 +53,7 @@ int lPhysCollisionCollideGetScale(lua_State *state) {
 int Init_PhysCollision(lua_State *state) {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory)
-		g_pPhysCollision = (IPhysicsCollision1 *)physFactory(VPHYSICS_COLLISION_INTERFACE_VERSION, NULL);
+		g_pPhysCollision = (IPhysicsCollision32 *)physFactory(VPHYSICS_COLLISION_INTERFACE_VERSION, NULL);
 
 	if (!g_pPhysCollision) {
 		Warning("Couldn't load the physics collision factory!\n");

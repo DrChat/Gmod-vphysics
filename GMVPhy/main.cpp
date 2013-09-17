@@ -12,7 +12,7 @@ using namespace GarrysMod::Lua;
 
 #define LINIT_CHECKRET(fn, state) { if ((fn)(state) != 0) { Warning("lua vphysics init: %s failed\n", #fn); return 1; } }
 
-IPhysics1 *g_pPhysics = NULL;
+IPhysics32 *g_pPhysics = NULL;
 
 int lPhysStats(lua_State *state) {
 	for (int i = 0; i < g_pPhysics->GetNumActiveEnvironments(); i++) {
@@ -30,7 +30,7 @@ int lPhysStats(lua_State *state) {
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory) {
-		g_pPhysics = (IPhysics1 *)physFactory(VPHYSICS_INTERFACE_VERSION, NULL);
+		g_pPhysics = (IPhysics32 *)physFactory(VPHYSICS_INTERFACE_VERSION, NULL);
 	}
 
 #ifdef _DEBUG

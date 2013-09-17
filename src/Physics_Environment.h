@@ -27,7 +27,7 @@ class CDebugDrawer;
 // Temporary; remove later
 class IPhysicsSoftBody;
 
-class CPhysicsEnvironment : public IPhysicsEnvironment {
+class CPhysicsEnvironment : public IPhysicsEnvironment32 {
 public:
 	CPhysicsEnvironment();
 	~CPhysicsEnvironment();
@@ -157,6 +157,8 @@ private:
 	bool									m_bConstraintNotify;
 	bool									m_deleteQuick;
 	float									m_timestep;
+	float									m_invPSIScale;
+	int										m_simPSICurrent;
 
 	btThreadPool *							m_pSharedThreadPool;
 	btCollisionConfiguration *				m_pBulletConfiguration;
@@ -168,6 +170,10 @@ private:
 
 	CUtlVector<IPhysicsObject *>			m_objects;
 	CUtlVector<IPhysicsObject *>			m_deadObjects;
+
+	CUtlVector<IPhysicsObject *>			m_activeObjects;
+	CUtlVector<IPhysicsObject *>			m_sleepObjects;
+	
 	CUtlVector<IPhysicsSoftBody *>			m_softBodies;
 	CUtlVector<CPhysicsFluidController *>	m_fluids;
 	CUtlVector<IController*>				m_controllers;

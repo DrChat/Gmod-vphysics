@@ -394,21 +394,19 @@ void btSimulationIslandManager::buildAndProcessIslands(btDispatcher* dispatcher,
 	//	printf("Start Islands\n");
 
 		//traverse the simulation islands, and call the solver, unless all objects are sleeping/deactivated
-		for ( startIslandIndex=0;startIslandIndex<numElem;startIslandIndex = endIslandIndex)
+		for ( startIslandIndex = 0; startIslandIndex < numElem; startIslandIndex = endIslandIndex)
 		{
 			int islandId = getUnionFind().getElement(startIslandIndex).m_id;
 
-
-			   bool islandSleeping = true;
-	                
-					for (endIslandIndex = startIslandIndex;(endIslandIndex<numElem) && (getUnionFind().getElement(endIslandIndex).m_id == islandId);endIslandIndex++)
-					{
-							int i = getUnionFind().getElement(endIslandIndex).m_sz;
-							btCollisionObject* colObj0 = collisionObjects[i];
-							m_islandBodies.push_back(colObj0);
-							if (colObj0->isActive())
-									islandSleeping = false;
-					}
+			bool islandSleeping = true;
+			for (endIslandIndex = startIslandIndex;(endIslandIndex<numElem) && (getUnionFind().getElement(endIslandIndex).m_id == islandId);endIslandIndex++)
+			{
+					int i = getUnionFind().getElement(endIslandIndex).m_sz;
+					btCollisionObject* colObj0 = collisionObjects[i];
+					m_islandBodies.push_back(colObj0);
+					if (colObj0->isActive())
+							islandSleeping = false;
+			}
 	                
 
 			//find the accompanying contact manifold for this islandId
@@ -427,7 +425,7 @@ void btSimulationIslandManager::buildAndProcessIslands(btDispatcher* dispatcher,
 
 					}
 					/// Process the actual simulation, only if not sleeping/deactivated
-					numIslandManifolds = endManifoldIndex-startManifoldIndex;
+					numIslandManifolds = endManifoldIndex - startManifoldIndex;
 				}
 
 			}

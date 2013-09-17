@@ -74,7 +74,7 @@ static inline void *btDbgAlignedAllocDefault(size_t size, int alignment, int blo
 	if (real)
 	{
 		ret = btAlignPointer(real + sizeof(void *), alignment);
-		*((void **)(ret)-1) = (void *)(real);
+		*((void **)(ret)-1) = (void *)(real); // Save the real pointer to the spot before the return address
 	}
 	else
 	{

@@ -36,6 +36,7 @@ class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver {
 		virtual void freeTask(void *ptr);
 
 		virtual btScalar solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher);
+		virtual void allSolved (const btContactSolverInfo & /* info */, class btIDebugDraw * /* debugDrawer */, btStackAlloc * /* stackAlloc */);
 
 	protected:
 		btThreadPool *m_pThreadPool;

@@ -20,7 +20,7 @@ struct bboxcache_t {
 	Vector			mins, maxs;
 };
 
-class CPhysicsCollision : public IPhysicsCollision1 {
+class CPhysicsCollision : public IPhysicsCollision32 {
 	public:
 		CPhysicsCollision();
 		~CPhysicsCollision();
@@ -77,14 +77,11 @@ class CPhysicsCollision : public IPhysicsCollision1 {
 		CPhysConvex *			BBoxToConvex(const Vector &mins, const Vector &maxs);
 		CPhysCollide *			BBoxToCollide(const Vector &mins, const Vector &maxs);
 
+		// Misc collision shapes
+
 		CPhysConvex *			CylinderToConvex(const Vector &mins, const Vector &maxs);
-		CPhysCollide *			CylinderToCollide(const Vector &mins, const Vector &maxs);
-
 		CPhysConvex *			ConeToConvex(const float radius, const float height);
-		CPhysCollide *			ConeToCollide(const float radius, const float height);
-
 		CPhysConvex *			SphereToConvex(const float radius);
-		CPhysCollide *			SphereToCollide(const float radius);
 
 		void					TraceBox(const Vector &start, const Vector &end, const Vector &mins, const Vector &maxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);
 		void					TraceBox(const Ray_t &ray, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr);

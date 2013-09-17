@@ -21,11 +21,11 @@ inline void PrintArgError(lua_State *state, int stackPos, const char *argType) {
 	LUA->ArgError(stackPos, str);
 }
 
-IPhysicsObject1 *Get_PhysObj(lua_State *state, int stackPos) {
+IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos) {
 	LUA->CheckType(stackPos, Type::PHYSOBJ);
 
 	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
-	return (IPhysicsObject1 *)ud->data;
+	return (IPhysicsObject32 *)ud->data;
 }
 
 Vector *Get_Vector(lua_State *state, int stackPos) {

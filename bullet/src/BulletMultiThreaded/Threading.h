@@ -38,6 +38,7 @@ class btIEvent {
 		virtual void wait() = 0; // Waits for semaphore to be triggered. Once triggered, this is set back to untriggered and function returns.
 };
 
+// TODO in posix: Actually use manual reset (always acts like manual reset = true right now)
 btIEvent *btCreateEvent(bool bManualReset = false);
 void btDeleteEvent(btIEvent *pSemaphore);
 

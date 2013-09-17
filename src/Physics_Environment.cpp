@@ -125,13 +125,16 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
 		return false;
 
+	// No kinematic->static collisions
 	if ((pObject0->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject1->IsStatic())
-	 || (pObject0->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject0->IsStatic()))
+	 || (pObject1->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject0->IsStatic()))
 		return false;
 
+	// No static->static collisions
 	if (pObject0->IsStatic() && pObject1->IsStatic())
 		return false;
 
+	// No shadow->shadow collisions
 	if (pObject0->GetShadowController() && pObject1->GetShadowController())
 		return false;
 
@@ -188,28 +191,32 @@ void CPhysicsCollisionData::GetContactSpeed(Vector &out) {
 * CLASS CPhysicsEnvironment
 *******************************/
 
-CPhysicsEnvironment::CPhysicsEnvironment() {
-	m_deleteQuick = false;
-	m_bUseDeleteQueue = false;
-	m_inSimulation = false;
-	m_pDebugOverlay = NULL;
-	m_pConstraintEvent = NULL;
-	m_pObjectEvent = NULL;
-	m_pCollisionEvent = NULL;
+// Environment ConVars
+static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 0, true, 8);
 
-	m_pBulletBroadphase = NULL;
-	m_pBulletConfiguration = NULL;
-	m_pBulletDispatcher = NULL;
-	m_pBulletEnvironment = NULL;
-	m_pBulletGhostCallback = NULL;
-	m_pBulletSolver = NULL;
+CPhysicsEnvironment::CPhysicsEnvironment() {
+	m_deleteQuick		= false;
+	m_bUseDeleteQueue	= false;
+	m_inSimulation		= false;
+	m_pDebugOverlay		= NULL;
+	m_pConstraintEvent	= NULL;
+	m_pObjectEvent		= NULL;
+	m_pCollisionEvent	= NULL;
+
+	m_pBulletBroadphase		= NULL;
+	m_pBulletConfiguration	= NULL;
+	m_pBulletDispatcher		= NULL;
+	m_pBulletEnvironment	= NULL;
+	m_pBulletGhostCallback	= NULL;
+	m_pBulletSolver			= NULL;
 
 	btDefaultCollisionConstructionInfo cci;
 #ifdef MULTITHREADED
 	// Maximum number of parallel tasks (number of threads in the thread support)
 	// Good to set it to the same amount of CPU cores on the system.
-	// TODO: The game dev needs to be able to configure this value. Expose it.
-	static const int maxTasks = 4;
+	// TODO: The game dev needs to be able to configure this value. Expose it in the interface.
+	int maxTasks = vphysics_numthreads.GetInt();
+	if (maxTasks <= 0) maxTasks = 2;
 
 	// Shared thread pool (used by both solver and dispatcher)
 	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (even then it may work)
@@ -252,6 +259,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 #endif
 
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
+	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 0; // Solve per island only
 	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
 	m_pBulletEnvironment->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
 	//m_pBulletEnvironment->getDispatchInfo().m_dispatchFunc = btDispatcherInfo::DISPATCH_CONTINUOUS;
@@ -310,18 +318,19 @@ void CPhysicsEnvironment::TickCallback(btDynamicsWorld *world, btScalar timeStep
 		pEnv->BulletTick(timeStep);
 }
 
+IVPhysicsDebugOverlay *g_pDebugOverlay = NULL;
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
-	if (!debugOverlayFactory) return;
-	m_pDebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
+	if (!debugOverlayFactory || g_pDebugOverlay) return;
+	g_pDebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
 
 #if DEBUG_DRAW
-	if (m_pDebugOverlay)
-		m_debugdraw->SetDebugOverlay(m_pDebugOverlay);
+	if (g_pDebugOverlay)
+		m_debugdraw->SetDebugOverlay(g_pDebugOverlay);
 #endif
 }
 
 IVPhysicsDebugOverlay *CPhysicsEnvironment::GetDebugOverlay() {
-	return m_pDebugOverlay;
+	return g_pDebugOverlay;
 }
 
 btIDebugDraw *CPhysicsEnvironment::GetDebugDrawer() {
@@ -362,6 +371,7 @@ IPhysicsObject *CPhysicsEnvironment::CreatePolyObjectStatic(const CPhysCollide *
 	return pObject;
 }
 
+// Deprecated. Create a sphere model using collision interface.
 IPhysicsObject *CPhysicsEnvironment::CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
 	IPhysicsObject *pObject = CreatePhysicsSphere(this, radius, materialIndex, position, angles, pParams, isStatic);
 	m_objects.AddToTail(pObject);
@@ -566,7 +576,7 @@ void SerializeWorld_f(const CCommand &args) {
 
 static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client)\n\tDumps \"testfile.bullet\" out to the exe directory.");
 
-static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, true, 150);
+static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, false, 0);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	VPROF_BUDGET("CPhysicsEnvironment::Simulate", VPROF_BUDGETGROUP_PHYSICS);
 	if (!m_pBulletEnvironment) Assert(0);
@@ -580,6 +590,9 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	//m_simPSIs = 0;
 	//FIXME: figure out simulation time
 	//m_simPSIcurrent = m_simPSIs;
+
+	// sim PSI Current: How many substeps are done in a single simulation step
+	m_simPSICurrent = cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1;
 	
 	if (deltaTime > 1e-4) {
 		m_inSimulation = true;
@@ -589,7 +602,8 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
 		
 		VPROF_ENTER_SCOPE("m_pBulletEnvironment->stepSimulation");
-		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt(), timestep);
+		// Returns the number of substeps executed
+		int numSubsteps = m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1, timestep);
 		VPROF_EXIT_SCOPE();
 
 		m_inSimulation = false;
@@ -652,6 +666,7 @@ int CPhysicsEnvironment::GetActiveObjectCount() const {
 	return m_objects.Size();
 }
 
+// FIXME: This means objects that are not currently asleep!
 void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList) const {
 	int size = m_objects.Size();
 	for (int i = 0; i < size; i++)
@@ -823,14 +838,21 @@ btSoftRigidDynamicsWorld *CPhysicsEnvironment::GetBulletEnvironment() {
 
 // UNEXPOSED
 float CPhysicsEnvironment::GetInvPSIScale() {
-	//FIXME: get correct value
-	//return m_invPSIscale;
-	return 0.5;
+	return m_invPSIScale;
 }
 
 // UNEXPOSED
 void CPhysicsEnvironment::BulletTick(btScalar dt) {
 	VPROF_BUDGET("CPhysicsEnvironment::BulletTick", VPROF_BUDGETGROUP_PHYSICS);
+
+	// Dirty hack to spread the controllers throughout the current simulation step
+	if (m_simPSICurrent) {
+		m_invPSIScale = 1.0f / (float)m_simPSICurrent;
+		m_simPSICurrent--;
+	} else {
+		m_invPSIScale = 0;
+	}
+
 	m_pPhysicsDragController->Tick(dt);
 	for (int i = 0; i < m_controllers.Count(); i++)
 		m_controllers[i]->Tick(dt);
@@ -849,14 +871,6 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 	//m_pCollisionSolver->EventPSI(this);
 	//m_pCollisionListener->EventPSI(this);
 
-	/*
-	if (m_simPSIcurrent) {
-		m_invPSIscale = 1.0f / (float)m_simPSIcurrent;
-		m_simPSIcurrent--;
-	} else {
-		m_invPSIscale = 0;
-	}
-	*/
 	if (m_pCollisionEvent)
 		m_pCollisionEvent->PostSimulationFrame();
 

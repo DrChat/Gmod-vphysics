@@ -18,6 +18,9 @@
 // Use btConvexTriangleMeshShape instead of btConvexHullShape?
 //#define USE_CONVEX_TRIANGLES
 
+// lol hack
+extern IVPhysicsDebugOverlay *g_pDebugOverlay;
+
 /****************************
 * CLASS CCollisionQuery
 ****************************/
@@ -552,37 +555,9 @@ CPhysConvex *CPhysicsCollision::CylinderToConvex(const Vector &mins, const Vecto
 	return (CPhysConvex *)pShape;
 }
 
-CPhysCollide *CPhysicsCollision::CylinderToCollide(const Vector &mins, const Vector &maxs) {
-	CPhysConvex *pConvex = CylinderToConvex(mins, maxs);
-	if (!pConvex) return NULL;
-
-	btCompoundShape *pCompound = new btCompoundShape;
-	pCompound->setMargin(COLLISION_MARGIN);
-
-	btVector3 btmins, btmaxs;
-	ConvertAABBToBull(mins, maxs, btmins, btmaxs);
-	btVector3 halfsize = (btmaxs - btmins) / 2;
-
-	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfsize), (btCollisionShape *)pConvex);
-	return (CPhysCollide *)pCompound;
-}
-
 CPhysConvex *CPhysicsCollision::ConeToConvex(const float radius, const float height) {
 	btConeShape *pShape = new btConeShape(ConvertDistanceToBull(radius), ConvertDistanceToBull(height));
 	return (CPhysConvex *)pShape;
-}
-
-CPhysCollide *CPhysicsCollision::ConeToCollide(const float radius, const float height) {
-	CPhysConvex *pConvex = ConeToConvex(radius, height);
-	if (!pConvex) return NULL;
-
-	btCompoundShape *pCompound = new btCompoundShape;
-	pCompound->setMargin(COLLISION_MARGIN);
-
-	// TODO: We need to center the cone shape so that the middle of it is the origin. Find the maths to do it with.
-	NOT_IMPLEMENTED
-
-	return (CPhysCollide *)pCompound;
 }
 
 CPhysConvex *CPhysicsCollision::SphereToConvex(const float radius) {
@@ -590,19 +565,6 @@ CPhysConvex *CPhysicsCollision::SphereToConvex(const float radius) {
 
 	btSphereShape *pShape = new btSphereShape(ConvertDistanceToBull(radius));
 	return (CPhysConvex *)pShape;
-}
-
-CPhysCollide *CPhysicsCollision::SphereToCollide(const float radius) {
-	CPhysConvex *pConvex = SphereToConvex(radius);
-	if (!pConvex) return NULL;
-
-	btCompoundShape *pCompound = new btCompoundShape;
-	pCompound->setMargin(COLLISION_MARGIN);
-
-	// TODO: Center it.
-	NOT_IMPLEMENTED
-
-	return (CPhysCollide *)pCompound;
 }
 
 void CPhysicsCollision::TraceBox(const Vector &start, const Vector &end, const Vector &mins, const Vector &maxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
@@ -614,6 +576,8 @@ void CPhysicsCollision::TraceBox(const Vector &start, const Vector &end, const V
 void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
 	return TraceBox(ray, MASK_ALL, NULL, pCollide, collideOrigin, collideAngles, ptr);
 }
+
+static ConVar vphysics_visualizetraces("vphysics_visualizetraces", "0", FCVAR_CHEAT, "Visualize physics traces");
 
 // TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
@@ -638,10 +602,10 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	object->setWorldTransform(transform);
 
 	btVector3 startv, endv;
-	ConvertPosToBull(ray.m_Start + ray.m_StartOffset, startv);
-	ConvertPosToBull(ray.m_Start + ray.m_StartOffset + ray.m_Delta, endv);
+	ConvertPosToBull(ray.m_Start, startv);
+	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
 
-	ConvertPosToHL(startv, ptr->startpos);
+	ptr->startpos = ray.m_Start + ray.m_StartOffset;
 
 	// Zero delta trace is going to fail always.
 	//Assert(ray.m_Delta.Length() != 0);
@@ -662,38 +626,55 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 		}
 	} else if (ray.m_IsSwept) {
-		// BUG: Some traces that should obviously be succeeding are failing
-		// ex. player standing next to brush, trace fails and player goes through
-		// Caused because the ray delta is 0!
+		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
+			Vector origin = ray.m_Start;
+			Vector mins = -ray.m_Extents;
+			Vector maxs = ray.m_Extents;
+			g_pDebugOverlay->AddBoxOverlay(origin, mins, maxs, QAngle(0, 0, 0), 255, 0, 0, 50, 0.0f);
 
-		// HACK: I don't know
-		if (ray.m_Delta.Length() == 0) {
+			Vector endOrigin = ray.m_Start + ray.m_Delta;
+			g_pDebugOverlay->AddBoxOverlay(endOrigin, mins, maxs, QAngle(0, 0, 0), 0, 0, 255, 50, 0.0f);
+		}
+
+		if (ray.m_Delta.Length() != 0) {
+			// extents are half extents, compatible with bullet.
+			ConvertPosToBull(ray.m_Extents, btvec);
+			btBoxShape *box = new btBoxShape(btvec.absolute());
+
+			btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
+			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.001f);
+
+			ptr->fraction = cb.m_closestHitFraction;
+
+			// Data is uninitialized if frac is 1
+			if (cb.m_closestHitFraction < 1.0) {
+				ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
+
+				if (btFuzzyZero(cb.m_closestHitFraction)) {
+					ptr->startsolid = true;
+					ptr->allsolid = true;
+					ptr->fraction = 0;
+				} else {
+					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+					ptr->contents = CONTENTS_SOLID;
+				}
+
+				if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
+					if (!ptr->allsolid) {
+						Vector lineEnd = ptr->endpos + ptr->plane.normal * 32;
+						g_pDebugOverlay->AddLineOverlay(ptr->endpos, lineEnd, 0, 0, 255, false, 0.0f);
+					}
+				}
+			}
+
+			delete box;
+		} else {
 			ptr->startsolid = true;
 			ptr->allsolid = true;
 			ptr->fraction = 0;
 
 			ConvertPosToHL(startv, ptr->endpos);
-
-			delete object;
-			return;
 		}
-
-		// extents are half extents, compatible with bullet.
-		ConvertPosToBull(ray.m_Extents, btvec);
-		btBoxShape *box = new btBoxShape(btvec.absolute());
-
-		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
-		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.001f);
-
-		ptr->fraction = cb.m_closestHitFraction;
-
-		// Data is uninitialized if frac is 1
-		if (cb.m_closestHitFraction < 1.0) {
-			ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
-			ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-		}
-
-		delete box;
 	}
 
 	delete object;

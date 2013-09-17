@@ -97,8 +97,6 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\Box.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\SpuNarrowPhaseCollisionTask\boxBoxDistance.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\Threading.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\ThreadPool.h" />
   </ItemGroup>

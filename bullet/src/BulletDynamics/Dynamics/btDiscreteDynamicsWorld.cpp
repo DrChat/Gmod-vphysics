@@ -166,14 +166,17 @@ struct InplaceSolverIslandCallback : public btSimulationIslandManager::IslandCal
 				m_solver->solveGroup( bodies, numBodies, manifolds, numManifolds, startConstraint, numCurConstraints,*m_solverInfo, m_debugDrawer, m_stackAlloc, m_dispatcher);
 			} else
 			{
-				
-				for (i=0;i<numBodies;i++)
+				for ( i = 0; i < numBodies; i++)
 					m_bodies.push_back(bodies[i]);
-				for (i=0;i<numManifolds;i++)
+
+				for (i = 0; i < numManifolds; i++)
 					m_manifolds.push_back(manifolds[i]);
-				for (i=0;i<numCurConstraints;i++)
+
+				for (i = 0; i < numCurConstraints; i++)
 					m_constraints.push_back(startConstraint[i]);
-				if ((m_constraints.size()+m_manifolds.size())>m_solverInfo->m_minimumSolverBatchSize)
+
+				// Solve now if we have enough (def over 128)
+				if ((m_constraints.size() + m_manifolds.size()) > m_solverInfo->m_minimumSolverBatchSize)
 				{
 					processConstraints();
 				} else
@@ -185,7 +188,7 @@ struct InplaceSolverIslandCallback : public btSimulationIslandManager::IslandCal
 	}
 	void	processConstraints()
 	{
-
+		// This solves all islands in one batch
 		btCollisionObject** bodies = m_bodies.size()? &m_bodies[0]:0;
 		btPersistentManifold** manifold = m_manifolds.size()?&m_manifolds[0]:0;
 		btTypedConstraint** constraints = m_constraints.size()?&m_constraints[0]:0;
@@ -434,7 +437,7 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 	{
 
 		//clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
-		int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps)? maxSubSteps : numSimulationSubSteps;
+		int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
 
 		saveKinematicState(fixedTimeStep*clampedSimulationSteps);
 
@@ -442,7 +445,7 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 
 		
 
-		for (int i=0;i<clampedSimulationSteps;i++)
+		for (int i = 0; i < clampedSimulationSteps; i++)
 		{
 			internalSingleStepSimulation(fixedTimeStep);
 			synchronizeMotionStates();

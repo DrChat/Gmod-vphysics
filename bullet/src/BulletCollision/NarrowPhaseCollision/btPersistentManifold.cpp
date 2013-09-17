@@ -289,8 +289,11 @@ void btPersistentManifold::refreshContactPoints(const btTransform& trA, const bt
 			} else
 			{
 				//contact point processed callback
+				// DrChat: Removed due to multithreading
+				/*
 				if (gContactProcessedCallback)
 					(*gContactProcessedCallback)(manifoldPoint, (void*)m_body0, (void*)m_body1);
+				*/
 			}
 		}
 	}

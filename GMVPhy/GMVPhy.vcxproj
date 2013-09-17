@@ -55,6 +55,7 @@
       <AdditionalIncludeDirectories>F:\Dev\Libraries\SourceMod\src\public\tier1;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\GMModuleBase\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;GMMODULE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

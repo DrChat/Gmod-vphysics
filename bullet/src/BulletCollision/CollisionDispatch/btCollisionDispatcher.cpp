@@ -109,7 +109,6 @@ void btCollisionDispatcher::clearManifold(btPersistentManifold* manifold)
 	manifold->clearManifold();
 }
 
-	
 void btCollisionDispatcher::releaseManifold(btPersistentManifold* manifold)
 {
 	gNumManifold--;

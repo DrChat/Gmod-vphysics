@@ -33,7 +33,9 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		btVector3 bullSpeed, bullRot;
 
 		// Assert hit = object is DELETED!
+#ifdef _DEBUG
 		Assert(*(char *)m_objectList[i] != '\xDD');
+#endif
 		
 		CPhysicsObject *pObject = (CPhysicsObject *)m_objectList[i];
 		btRigidBody *body = btRigidBody::upcast(pObject->GetObject());
