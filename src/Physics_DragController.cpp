@@ -57,6 +57,7 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		if (dragForce < -1.0f)
 			dragForce = -1.0f;
 
+		// If the drag force actually drags
 		if (dragForce < 0)
 			vel = body->getLinearVelocity() * dragForce;
 
@@ -69,6 +70,7 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		if (angDragForce < -1.0f)
 			angDragForce = -1.0f;
 
+		// If the drag force actually drags
 		if (angDragForce < 0)
 			ang = body->getAngularVelocity() * angDragForce;
 

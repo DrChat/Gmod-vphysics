@@ -38,6 +38,8 @@ class btPosixThread : public btIThread {
 			m_threadParams.pThreadName = NULL;
 			m_threadParams.pArg = NULL;
 			m_threadParams.pFn = NULL;
+
+			m_threadId = 0;
 		}
 
 		~btPosixThread() {

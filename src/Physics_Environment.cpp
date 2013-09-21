@@ -259,6 +259,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 #endif
 
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
+
+	// TODO: Threads solve any oversized batches (>32?), otherwise solving done on main thread.
 	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 0; // Solve per island only
 	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
 	m_pBulletEnvironment->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
@@ -866,7 +868,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 		CleanupDeleteList();
 	}
 
-	//DoCollisionEvents(dt);
+	DoCollisionEvents(dt);
 
 	//m_pCollisionSolver->EventPSI(this);
 	//m_pCollisionListener->EventPSI(this);
@@ -900,26 +902,30 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 			const btCollisionObject *obB = contactManifold->getBody1();
 			if (!obA || !obB) continue;
 
+			CPhysicsObject *physObA = (CPhysicsObject *)obA->getUserPointer();
+			CPhysicsObject *physObB = (CPhysicsObject *)obB->getUserPointer();
+
 			// These are our own internal objects, don't do callbacks on them.
 			if (obA->getInternalType() == btCollisionObject::CO_GHOST_OBJECT || obB->getInternalType() == btCollisionObject::CO_GHOST_OBJECT)
+				continue;
+
+			if (!(physObA->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION)  || !(physObB->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION))
 				continue;
 
 			for (int j = 0; j < contactManifold->getNumContacts(); j++) {
 				btManifoldPoint manPoint = contactManifold->getContactPoint(j);
 				
 				// FRICTION CALLBACK
-				if (((CPhysicsObject *)obA->getUserPointer())->GetCallbackFlags() & CALLBACK_GLOBAL_FRICTION) {
-					// FIXME: We need to find the energy used by the friction! Bullet doesn't provide this in the manifold point.
-					// This may not be the proper variable but whatever, as of now it works.
-					float energy = abs(manPoint.m_appliedImpulseLateral1);
-					if (energy > 0.05f) {
-						CPhysicsCollisionData data(&manPoint);
-						m_pCollisionEvent->Friction((CPhysicsObject *)obA->getUserPointer(),
-													ConvertEnergyToHL(energy),
-													((CPhysicsObject *)obA->getUserPointer())->GetMaterialIndex(),
-													((CPhysicsObject *)obB->getUserPointer())->GetMaterialIndex(),
-													&data);
-					}
+				// FIXME: We need to find the energy used by the friction! Bullet doesn't provide this in the manifold point.
+				// This may not be the proper variable but whatever, as of now it works.
+				float energy = abs(manPoint.m_appliedImpulseLateral1);
+				if (energy > 0.05f) {
+					CPhysicsCollisionData data(&manPoint);
+					m_pCollisionEvent->Friction((CPhysicsObject *)obA->getUserPointer(),
+												ConvertEnergyToHL(energy),
+												((CPhysicsObject *)obA->getUserPointer())->GetMaterialIndex(),
+												((CPhysicsObject *)obB->getUserPointer())->GetMaterialIndex(),
+												&data);
 				}
 
 				// TODO: Collision callback

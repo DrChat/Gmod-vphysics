@@ -65,8 +65,10 @@ void btSequentialImpulseConstraintSolver::resolveSingleConstraintRowGenericSIMD(
 	__m128	lowerLimit1 = _mm_set1_ps(c.m_lowerLimit);
 	__m128	upperLimit1 = _mm_set1_ps(c.m_upperLimit);
 	__m128 deltaImpulse = _mm_sub_ps(_mm_set1_ps(c.m_rhs), _mm_mul_ps(_mm_set1_ps(c.m_appliedImpulse),_mm_set1_ps(c.m_cfm)));
+	
 	__m128 deltaVel1Dotn =	_mm_add_ps(btSimdDot3(c.m_contactNormal1.mVec128, body1.internalGetDeltaLinearVelocity().mVec128), btSimdDot3(c.m_relpos1CrossNormal.mVec128, body1.internalGetDeltaAngularVelocity().mVec128));
 	__m128 deltaVel2Dotn =	_mm_add_ps(btSimdDot3(c.m_contactNormal2.mVec128, body2.internalGetDeltaLinearVelocity().mVec128), btSimdDot3(c.m_relpos2CrossNormal.mVec128, body2.internalGetDeltaAngularVelocity().mVec128));
+	
 	deltaImpulse =	_mm_sub_ps(deltaImpulse,_mm_mul_ps(deltaVel1Dotn,_mm_set1_ps(c.m_jacDiagABInv)));
 	deltaImpulse =	_mm_sub_ps(deltaImpulse,_mm_mul_ps(deltaVel2Dotn,_mm_set1_ps(c.m_jacDiagABInv)));
 	btSimdScalar sum = _mm_add_ps(cpAppliedImp, deltaImpulse);
@@ -1040,7 +1042,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 			
 			m_tmpConstraintSizesPool.resizeNoInitialize(numConstraints);
 			// calculate the total number of contraint rows
-			for (i=0;i<numConstraints;i++)
+			for (i = 0; i < numConstraints; i++)
 			{
 				btTypedConstraint::btConstraintInfo1& info1 = m_tmpConstraintSizesPool[i];
 				btJointFeedback* fb = constraints[i]->getJointFeedback();
@@ -1052,9 +1054,6 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 					fb->m_appliedTorqueBodyB.setZero();
 				}
 
-				if (constraints[i]->isEnabled())
-				{
-				}
 				if (constraints[i]->isEnabled())
 				{
 					constraints[i]->getInfo1(&info1);
@@ -1071,7 +1070,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 			// setup the btSolverConstraints
 			int currentRow = 0;
 
-			for (i=0;i<numConstraints;i++)
+			for (i = 0; i < numConstraints; i++)
 			{
 				const btTypedConstraint::btConstraintInfo1& info1 = m_tmpConstraintSizesPool[i];
 				

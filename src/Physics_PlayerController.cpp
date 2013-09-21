@@ -248,9 +248,6 @@ void CPlayerController::Tick(float deltaTime) {
 void CPlayerController::CalculateVelocity(float dt) {
 	btRigidBody *body = m_pObject->GetObject();
 
-	// Compute controller speed
-	// When we fling off, ComputeController gets a HUGE scale
-
 	m_secondsToArrival -= dt;
 	if (m_secondsToArrival < 0) m_secondsToArrival = 0;
 
@@ -262,16 +259,13 @@ void CPlayerController::CalculateVelocity(float dt) {
 
 	ComputeController(m_linVelocity, deltaPos, m_maxSpeed, SAFE_DIVIDE(psiScale, dt), m_dampFactor);
 
-	if (abs(m_linVelocity.m_floats[0]) > 50 || abs(m_linVelocity.m_floats[1]) > 50 || abs(m_linVelocity.m_floats[2]) > 50) {
-		Msg("uhoh psiScale %f\n", psiScale);
-		Msg("delta %f %f %f\n", deltaPos.x(), deltaPos.y(), deltaPos.z());
-	}
-
 	// Apply gravity velocity for stepping.
+	/*
 	if (m_onground) {
 		btVector3 gravVel = body->getGravity() * dt;
 		m_linVelocity += gravVel;
 	}
+	*/
 }
 
 void CPlayerController::AttachObject() {

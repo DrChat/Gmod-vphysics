@@ -12,8 +12,7 @@ usage() {
 }
 
 build_bullet() {
-	if test -n $BULLET_PROJ_DIR
-	then
+	if test -n $BULLET_PROJ_DIR; then
 		cd "$BULLET_PROJ_DIR"
 		./premake4 gmake
 		cd gmake
@@ -26,8 +25,7 @@ build_vphysics() {
 	make -j$NUM_THREADS
 }
 
-if [ $# -eq 0 ];
-then
+if [ $# -eq 0 ]; then
 	usage
 fi
 

@@ -1041,6 +1041,8 @@ btVector3 CPhysicsObject::GetBullMassCenterOffset() const {
 
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
 	btCollisionShape *shape = (btCollisionShape *)pCollisionModel;
+	Assert(shape);
+	if (!shape) return NULL; 
 	
 	btVector3 vector;
 	btMatrix3x3 matrix;

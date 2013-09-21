@@ -605,35 +605,55 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	ConvertPosToBull(ray.m_Start, startv);
 	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
 
+	// Add start offset to the returned trace only.
 	ptr->startpos = ray.m_Start + ray.m_StartOffset;
-
-	// Zero delta trace is going to fail always.
-	//Assert(ray.m_Delta.Length() != 0);
 
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
 	// Single line trace must be supported in TraceBox? Yep, you betcha.
 	if (ray.m_IsRay) {
-		btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
-		btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
+		if (ray.m_Delta.Length() != 0) {
+			btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
+			btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
 
-		ptr->fraction = cb.m_closestHitFraction;
+			ptr->fraction = cb.m_closestHitFraction;
 
-		// Data is uninitialized if frac is 1
-		if (cb.m_closestHitFraction < 1.0) {
-			ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
-			ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+			// Data is uninitialized if frac is 1
+			if (cb.m_closestHitFraction < 1.0) {
+				if (cb.m_closestHitFraction == 0.f) {
+					ptr->startsolid = true;
+					ptr->allsolid = true;
+					ptr->fraction = 0;
+
+					ptr->endpos = ptr->startpos;
+				} else {
+					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+					ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
+				}
+			} else {
+				ptr->endpos = ptr->startpos + ray.m_Delta;
+			}
+
+			if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
+				g_pDebugOverlay->AddLineOverlay(ptr->startpos, ptr->endpos, 0, 0, 255, false, 0.f);
+			}
+		} else {
+			// For whatever reason...
+			ptr->startsolid = true;
+			ptr->allsolid = true;
+			ptr->fraction = 0;
+
+			ptr->endpos = ptr->startpos;
 		}
 	} else if (ray.m_IsSwept) {
+		// Box trace!
 		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
-			Vector origin = ray.m_Start;
-			Vector mins = -ray.m_Extents;
-			Vector maxs = ray.m_Extents;
-			g_pDebugOverlay->AddBoxOverlay(origin, mins, maxs, QAngle(0, 0, 0), 255, 0, 0, 50, 0.0f);
+			// Trace start box
+			g_pDebugOverlay->AddBoxOverlay(ray.m_Start, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 255, 0, 0, 50, 0.0f);
 
-			Vector endOrigin = ray.m_Start + ray.m_Delta;
-			g_pDebugOverlay->AddBoxOverlay(endOrigin, mins, maxs, QAngle(0, 0, 0), 0, 0, 255, 50, 0.0f);
+			// End trace box
+			g_pDebugOverlay->AddBoxOverlay(ray.m_Start + ray.m_Delta, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 0, 0, 255, 50, 0.0f);
 		}
 
 		if (ray.m_Delta.Length() != 0) {
@@ -645,35 +665,41 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.001f);
 
 			ptr->fraction = cb.m_closestHitFraction;
+			ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 
 			// Data is uninitialized if frac is 1
 			if (cb.m_closestHitFraction < 1.0) {
-				ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
-
-				if (btFuzzyZero(cb.m_closestHitFraction)) {
+				// BUG: We need to have a fraction atleast a bit bigger than 0 if not started inside object, or the game will always
+				// think the player is stuck if walking next to or on top of a physics ent
+				// May have to refactor bullet code to have a cb.m_startInSolid flag?
+				if (cb.m_closestHitFraction == 0.f) {
 					ptr->startsolid = true;
 					ptr->allsolid = true;
 					ptr->fraction = 0;
 				} else {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-					ptr->contents = CONTENTS_SOLID;
 				}
 
 				if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 					if (!ptr->allsolid) {
 						Vector lineEnd = ptr->endpos + ptr->plane.normal * 32;
-						g_pDebugOverlay->AddLineOverlay(ptr->endpos, lineEnd, 0, 0, 255, false, 0.0f);
+						g_pDebugOverlay->AddLineOverlay(ptr->endpos, lineEnd, 0, 255, 0, false, 0.0f);
+					}
+
+					if (ptr->startsolid) {
+						g_pDebugOverlay->AddTextOverlay(ptr->endpos, 0, 0.f, "Trace started in solid!");
 					}
 				}
 			}
 
 			delete box;
 		} else {
+			// For whatever reason...
 			ptr->startsolid = true;
 			ptr->allsolid = true;
 			ptr->fraction = 0;
 
-			ConvertPosToHL(startv, ptr->endpos);
+			ptr->endpos = ptr->startpos;
 		}
 	}
 
@@ -1000,22 +1026,27 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContext) 
 	delete (CPhysicsCollision *)pThreadContext;
 }
 
+// BUG: Weird collisions with these, sometimes phys objs fall through the displacement mesh
 CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
-	IVirtualMeshEvent *handler = params.pMeshEventHandler;
+	IVirtualMeshEvent *pHandler = params.pMeshEventHandler;
+	if (!pHandler) return NULL;
+
+	// TODO: if params.buildOuterHull is true, what do we do?
 
 	virtualmeshlist_t list;
-	handler->GetVirtualMesh(params.userData, &list);
+	pHandler->GetVirtualMesh(params.userData, &list);
 
-	btTriangleMesh *btmesh = new btTriangleMesh;
-	btVector3 btvec[3];
+	btTriangleMesh *pMesh = new btTriangleMesh;
+
+	btVector3 bullVec[3];
 	for (int i = 0; i < list.triangleCount; i++) {
-		ConvertPosToBull(list.pVerts[list.indices[i*3+0]], btvec[0]);
-		ConvertPosToBull(list.pVerts[list.indices[i*3+1]], btvec[1]);
-		ConvertPosToBull(list.pVerts[list.indices[i*3+2]], btvec[2]);
-		btmesh->addTriangle(btvec[0], btvec[1], btvec[2], true);
+		ConvertPosToBull(list.pVerts[list.indices[i*3+0]], bullVec[0]);
+		ConvertPosToBull(list.pVerts[list.indices[i*3+1]], bullVec[1]);
+		ConvertPosToBull(list.pVerts[list.indices[i*3+2]], bullVec[2]);
+		pMesh->addTriangle(bullVec[0], bullVec[1], bullVec[2], true);
 	}
 
-	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(btmesh, true);
+	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(pMesh, true);
 	bull->setMargin(COLLISION_MARGIN);
 	return (CPhysCollide *)bull;
 }

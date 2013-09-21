@@ -537,6 +537,9 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	// Reference -> attached object transform
 	btTransform refToAttXform = objAtt->getWorldTransform().inverse() * objRef->getWorldTransform();
 
+	// Attached -> reference object transform
+	btTransform attToRefXform = objRef->getWorldTransform().inverse() * objAtt->getWorldTransform();
+
 	// Build reference matrix
 	btMatrix3x3 refMatrix;
 	bullAxisToMatrix(slideAxisRef, refMatrix);
@@ -551,7 +554,8 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform refFrame = btTransform::getIdentity();
 	refFrame.setBasis(refMatrix);
 
-	btTransform attFrame = btTransform::getIdentity();
+	// Attached frame will be where reference frame is (keep attached object in it's initial spot instead of snapping to the center)
+	btTransform attFrame = attToRefXform.inverse();
 	attFrame.setRotation(attQuat);
 
 	btSliderConstraint *pSlider = new btSliderConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), refFrame, attFrame, true);

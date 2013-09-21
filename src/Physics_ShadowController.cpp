@@ -14,6 +14,7 @@
 
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
 	// Compute the fraction of time we'll be operating on.
+	// This allows us to move the object within the requested time
 	float fraction = 1;
 	if (secondsToArrival > 0) {
 		fraction = dt / secondsToArrival;
@@ -99,7 +100,6 @@ float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_p
 	return ComputeShadowControllerBull(pObject->GetObject(), bullParams, secondsToArrival, dt);
 }
 
-// FIXME: Broken.
 static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1a) {
 	btQuaternion pt1 = pt0.nearest(pt1a);
 
