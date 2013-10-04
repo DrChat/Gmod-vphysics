@@ -365,11 +365,13 @@ public:
 		m_islandTag1 = tag;
 	}
 
+	/// Get the solver body companion id (internal to solver)
 	SIMD_FORCE_INLINE int getCompanionId() const
 	{
 		return	m_companionId;
 	}
 
+	/// Set the solver body companion id (internal to solver)
 	void	setCompanionId(int id)
 	{
 		m_companionId = id;

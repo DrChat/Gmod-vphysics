@@ -161,12 +161,12 @@ struct InplaceSolverIslandCallback : public btSimulationIslandManager::IslandCal
 				}
 			}
 
-			if (m_solverInfo->m_minimumSolverBatchSize<=1)
+			if (m_solverInfo->m_minimumSolverBatchSize <= 1)
 			{
 				m_solver->solveGroup( bodies, numBodies, manifolds, numManifolds, startConstraint, numCurConstraints,*m_solverInfo, m_debugDrawer, m_stackAlloc, m_dispatcher);
 			} else
 			{
-				for ( i = 0; i < numBodies; i++)
+				for (i = 0; i < numBodies; i++)
 					m_bodies.push_back(bodies[i]);
 
 				for (i = 0; i < numManifolds; i++)
@@ -724,7 +724,9 @@ void	btDiscreteDynamicsWorld::solveConstraints(btContactSolverInfo& solverInfo)
 	/// solve all the constraints for this island
 	m_islandManager->buildAndProcessIslands(getCollisionWorld()->getDispatcher(), getCollisionWorld(), m_solverIslandCallback);
 
+	// Process any constraints on islands that weren't big enough to be processed on their own
 	m_solverIslandCallback->processConstraints();
+	m_constraintSolver->waitUntilFinished();
 
 	m_constraintSolver->allSolved(solverInfo, m_debugDrawer, m_stackAlloc);
 }
@@ -975,6 +977,7 @@ void	btDiscreteDynamicsWorld::createPredictiveContacts(btScalar timeStep)
 		}
 	}
 }
+
 void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 {
 	BT_PROFILE("integrateTransforms");
@@ -986,12 +989,9 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 
 		if (body->isActive() && (!body->isStaticOrKinematicObject()))
 		{
-
 			body->predictIntegratedTransform(timeStep, predictedTrans);
 			
 			btScalar squareMotion = (predictedTrans.getOrigin()-body->getWorldTransform().getOrigin()).length2();
-
-			
 
 			if (getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{

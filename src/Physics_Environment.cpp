@@ -151,6 +151,95 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 }
 
 /*******************************
+* CLASS CObjectTracker
+*******************************/
+
+class CObjectTracker {
+	public:
+		CObjectTracker(CPhysicsEnvironment *pEnv, IPhysicsObjectEvent *pObjectEvents) {
+			m_pEnv = pEnv;
+			m_pObjEvents = pObjectEvents;
+		}
+
+		int GetActiveObjectCount() const {
+			return m_activeObjects.Size();
+		}
+
+		void GetActiveObjects(IPhysicsObject **pOutputObjectList) const {
+			if (!pOutputObjectList) return;
+
+			int size = m_activeObjects.Size();
+			for (int i = 0; i < size; i++) {
+				pOutputObjectList[i] = m_activeObjects[i];
+			}
+		}
+
+		void SetObjectEventHandler(IPhysicsObjectEvent *pEvents) {
+			m_pObjEvents = pEvents;
+		}
+
+		void ObjectRemoved(IPhysicsObject *pObject) {
+			m_activeObjects.FindAndRemove(pObject);
+		}
+
+		void Tick() {
+			btDiscreteDynamicsWorld *pBulletEnv = m_pEnv->GetBulletEnvironment();
+			btCollisionObjectArray &colObjArray = pBulletEnv->getCollisionObjectArray();
+			for (int i = 0; i < colObjArray.size(); i++) {
+				CPhysicsObject *pObj = (CPhysicsObject *)colObjArray[i]->getUserPointer();
+				if (!pObj)
+					continue;
+
+				if (colObjArray[i]->getActivationState() != pObj->GetLastActivationState()) {
+					int newState = colObjArray[i]->getActivationState();
+
+					if (m_pObjEvents) {
+						switch (newState) {
+							case ACTIVE_TAG:
+								m_pObjEvents->ObjectWake(pObj);
+								break;
+							case ISLAND_SLEEPING:
+								m_pObjEvents->ObjectSleep(pObj);
+								break;
+						}
+					}
+
+					switch (newState) {
+						case ACTIVE_TAG:
+							m_activeObjects.AddToTail(pObj);
+							break;
+						case ISLAND_SLEEPING:
+							m_activeObjects.FindAndRemove(pObj);
+							break;
+					}
+
+					pObj->SetLastActivationState(newState);
+				}
+			}
+		}
+
+	private:
+		CPhysicsEnvironment *m_pEnv;
+		IPhysicsObjectEvent *m_pObjEvents;
+
+		CUtlVector<IPhysicsObject *> m_activeObjects;
+};
+
+/*********************************
+* CLASS CCollisionEventListener
+*********************************/
+
+class CCollisionEventListener {
+	public:
+		CCollisionEventListener(CPhysicsEnvironment *pEnv) {
+			m_pEnv = pEnv;
+		}
+
+	private:
+		CPhysicsEnvironment *m_pEnv;
+};
+
+/*******************************
 * CLASS CPhysicsCollisionData
 *******************************/
 
@@ -201,6 +290,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pDebugOverlay		= NULL;
 	m_pConstraintEvent	= NULL;
 	m_pObjectEvent		= NULL;
+	m_pObjectTracker	= NULL;
 	m_pCollisionEvent	= NULL;
 
 	m_pBulletBroadphase		= NULL;
@@ -219,8 +309,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	if (maxTasks <= 0) maxTasks = 2;
 
 	// Shared thread pool (used by both solver and dispatcher)
-	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (even then it may work)
-	m_pSharedThreadPool = new btThreadPool();
+	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (which they can't)
+	m_pSharedThreadPool = new btThreadPool;
 	m_pSharedThreadPool->startThreads(maxTasks);
 #endif
 
@@ -250,6 +340,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pDeleteQueue = new CDeleteQueue;
 	m_pPhysicsDragController = new CPhysicsDragController;
+	m_pObjectTracker = new CObjectTracker(this, NULL);
 
 	m_perfparams.Defaults();
 	memset(&m_stats, 0, sizeof(m_stats));
@@ -296,17 +387,17 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pDeleteQueue;
 	delete m_pPhysicsDragController;
 
-#ifdef MULTITHREADED
-	m_pSharedThreadPool->stopThreads();
-	delete m_pSharedThreadPool;
-#endif
-
 	delete m_pBulletEnvironment;
 	delete m_pBulletSolver;
 	delete m_pBulletBroadphase;
 	delete m_pBulletDispatcher;
 	delete m_pBulletConfiguration;
 	delete m_pBulletGhostCallback;
+
+#ifdef MULTITHREADED
+	m_pSharedThreadPool->stopThreads();
+	delete m_pSharedThreadPool;
+#endif
 
 	delete m_pCollisionSolver;
 }
@@ -385,6 +476,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	Assert(m_deadObjects.Find(pObject) == -1);	// If you hit this assert, the object is already on the list!
 
 	m_objects.FindAndRemove(pObject);
+	m_pObjectTracker->ObjectRemoved(pObject);
 
 	if (m_inSimulation || m_bUseDeleteQueue) {
 		((CPhysicsObject *)pObject)->AddCallbackFlags(CALLBACK_MARKED_FOR_DELETE);
@@ -605,7 +697,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		
 		VPROF_ENTER_SCOPE("m_pBulletEnvironment->stepSimulation");
 		// Returns the number of substeps executed
-		int numSubsteps = m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1, timestep);
+		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1, timestep);
 		VPROF_EXIT_SCOPE();
 
 		m_inSimulation = false;
@@ -654,6 +746,8 @@ void CPhysicsEnvironment::SetCollisionEventHandler(IPhysicsCollisionEvent *pColl
 
 void CPhysicsEnvironment::SetObjectEventHandler(IPhysicsObjectEvent *pObjectEvents) {
 	m_pObjectEvent = pObjectEvents;
+
+	m_pObjectTracker->SetObjectEventHandler(pObjectEvents);
 }
 
 void CPhysicsEnvironment::SetConstraintEventHandler(IPhysicsConstraintEvent *pConstraintEvents) {
@@ -665,14 +759,11 @@ void CPhysicsEnvironment::SetQuickDelete(bool bQuick) {
 }
 
 int CPhysicsEnvironment::GetActiveObjectCount() const {
-	return m_objects.Size();
+	return m_pObjectTracker->GetActiveObjectCount();
 }
 
-// FIXME: This means objects that are not currently asleep!
 void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList) const {
-	int size = m_objects.Size();
-	for (int i = 0; i < size; i++)
-		pOutputObjectList[i] = m_objects[i];
+	return m_pObjectTracker->GetActiveObjects(pOutputObjectList);
 }
 
 const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount) const {
@@ -864,6 +955,9 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 
 	m_inSimulation = false;
 
+	// Update object sleep states
+	m_pObjectTracker->Tick();
+
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
@@ -931,28 +1025,6 @@ void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 				// TODO: Collision callback
 				// Source wants precollision and postcollision callbacks (pre velocity and post velocity, etc.)
 				// How do we generate a callback before the collision happens?
-			}
-		}
-	}
-
-	if (m_pObjectEvent) {
-		int numObjects = m_pBulletEnvironment->getNumCollisionObjects();
-		btCollisionObjectArray collisionObjects = m_pBulletEnvironment->getCollisionObjectArray();
-		for (int i = 0; i < numObjects; i++) {
-			btCollisionObject *obj = collisionObjects[i];
-			CPhysicsObject *physobj = (CPhysicsObject *)collisionObjects[i]->getUserPointer();
-
-			if (physobj->GetLastActivationState() != obj->getActivationState()) {
-				switch (obj->getActivationState()) {
-					case ACTIVE_TAG:
-						m_pObjectEvent->ObjectWake(physobj);
-						break;
-					case ISLAND_SLEEPING:
-						m_pObjectEvent->ObjectSleep(physobj);
-						break;
-				}
-
-				physobj->SetLastActivationState(obj->getActivationState());
 			}
 		}
 	}

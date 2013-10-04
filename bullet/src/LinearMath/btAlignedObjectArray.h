@@ -497,6 +497,15 @@ class btAlignedObjectArray
 			resize (otherSize);
 			otherArray.copy(0, otherSize, m_data);
 		}
+
+		void copyFromArray(const T *otherArray, int arraySize)
+		{
+			resize(arraySize);
+			for (int i = 0; i < arraySize; i++)
+			{
+				m_data[i] = otherArray[i];
+			}
+		}
 };
 
 #endif // BT_ALIGNED_OBJECT_ARRAY_H

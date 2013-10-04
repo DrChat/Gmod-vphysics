@@ -1,4 +1,4 @@
-#include "ThreadPool.h"
+#include "btThreadPool.h"
 
 #include "LinearMath/btDefines.h"
 
@@ -59,7 +59,7 @@ void btThreadPool::startThreads(int numThreads) {
 		m_pThreadInfo[i]->pThreadPool = this;
 		pThread->setThreadFunc(ThreadFunc);
 
-		// Thread name has to be set before threads are ran on linux!
+		// Set the name for debugging purposes
 		char name[128];
 		sprintf(name, "btThreadPool thread %d", i);
 		pThread->setThreadName(name);
@@ -79,7 +79,6 @@ void btThreadPool::stopThreads() {
 		btDeleteThread(m_pThreadInfo[i]->pThread);
 		btDeleteEvent(m_pThreadInfo[i]->pIdleEvent);
 		btFree(m_pThreadInfo[i]);
-		m_pThreadInfo[i] = NULL;
 	}
 
 	btFree(m_pThreadInfo);

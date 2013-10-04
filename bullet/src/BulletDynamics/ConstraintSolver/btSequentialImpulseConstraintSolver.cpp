@@ -37,6 +37,8 @@ int		gNumSplitImpulseRecoveries = 0;
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 
+#include <stdio.h>
+
 btSequentialImpulseConstraintSolver::btSequentialImpulseConstraintSolver()
 :m_btSeed2(0)
 {
@@ -545,8 +547,6 @@ int	btSequentialImpulseConstraintSolver::getOrInitSolverBody(btCollisionObject& 
 	return solverBodyIdA;
 
 }
-#include <stdio.h>
-
 
 void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstraint& solverConstraint, 
 																 int solverBodyIdA, int solverBodyIdB,

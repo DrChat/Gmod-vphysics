@@ -26,7 +26,7 @@ class btSolveGroupTask;
 class btPoolAllocator;
 class btICriticalSection;
 
-/// The btParallelConstraintSolver performs computations on constraint rows in parallel
+/// The btParallelConstraintSolver performs computations on different constraint rows in parallel
 class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver {
 	public:
 		btParallelConstraintSolver(btThreadPool *pThreadPool);
@@ -36,7 +36,7 @@ class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver {
 		virtual void freeTask(void *ptr);
 
 		virtual btScalar solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher);
-		virtual void allSolved (const btContactSolverInfo & /* info */, class btIDebugDraw * /* debugDrawer */, btStackAlloc * /* stackAlloc */);
+		virtual void waitUntilFinished();
 
 	protected:
 		btThreadPool *m_pThreadPool;

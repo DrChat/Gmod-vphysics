@@ -23,6 +23,34 @@ struct ivpcompactsurface_t {
 	int		byte_size : 24;
 	int		offset_ledgetree_root;
 	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
+
+	void byteSwap() {
+		for (int i = 0; i < 3; i++) {
+			// FIXME: Bullet returns an int because the OS may "fix" invalid floats! We need to do the same.
+			mass_center[i] = (float)btSwapEndianFloat(mass_center[i]);
+			rotation_inertia[i] = (float)btSwapEndianFloat(rotation_inertia[i]);
+		}
+
+		upper_limit_radius = (float)btSwapEndianFloat(upper_limit_radius);
+		
+	}
+
+	// Recursively byteswap through the ledge tree
+	void byteSwapAll() {
+		
+	}
+};
+
+struct ivpcompactmopp_t {
+	float	mass_center[3];
+	float	rotation_inertia[3];
+	float	upper_limit_radius;
+	int		dummy; // 16byte memory align
+	int		max_deviation : 8;
+	int		byte_size : 24;
+	int		offset_ledgetree_root; // offset to root node of internal ledgetree
+	int		offset_ledges; // offset to the ledges
+	int		size_convex_hull;
 };
 
 // 16 bytes

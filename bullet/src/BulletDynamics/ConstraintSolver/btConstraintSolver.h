@@ -40,6 +40,9 @@ public:
 	///solve a group of constraints
 	virtual btScalar solveGroup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifold, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& info, class btIDebugDraw* debugDrawer, btStackAlloc* stackAlloc, btDispatcher* dispatcher) = 0;
 
+	/// Wait until solver is finished processing (implemented on multithreaded version)
+	virtual void waitUntilFinished() {};
+
 	virtual void allSolved (const btContactSolverInfo& /* info */, class btIDebugDraw* /* debugDrawer */, btStackAlloc* /* stackAlloc */) {;}
 
 	///clear internal cached data and reset random seed

@@ -787,6 +787,131 @@ static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivp
 	}
 }
 
+static btCollisionShape *LoadMOPP(CPhysCollide *pSolid) {
+	// Parse MOPP surface header
+	const ivpcompactmopp_t *ivpmopp = (ivpcompactmopp_t *)((char *)pSolid + sizeof(compactsurfaceheader_t));
+
+	// valve vphysics casts pSolid to a ivpcompactsurface_t and then compares dummy[2] to this id
+	if (ivpmopp->dummy != IVP_COMPACT_MOPP_ID) {
+		return NULL;
+	}
+
+	// FIXME: Our mopp header is incorrect
+
+	//PhysicsShapeInfo *pInfo = new PhysicsShapeInfo;
+	//ConvertIVPPosToBull(ivpmopp->mass_center, pInfo->massCenter);
+
+	//btCompoundShape *pCompound = new btCompoundShape;
+	//pCompound->setMargin(COLLISION_MARGIN);
+	//pCompound->setUserPointer(pInfo);
+
+	// Add up all of the ledges
+	CUtlVector<const ivpcompactledge_t *> ledges;
+	//GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpmopp + ivpmopp->offset_ledgetree_root), &ledges);
+
+	return NULL;
+}
+
+static btCollisionShape *LoadIVPS(CPhysCollide *pSolid) {
+	// Parse IVP Surface header (which is right after the compact surface header)
+	const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pSolid + sizeof(compactsurfaceheader_t));
+
+	if (ivpsurface->dummy[2] != IVP_COMPACT_SURFACE_ID) {
+		return NULL;
+	}
+
+	// Store info about the mass center for later use.
+	PhysicsShapeInfo *info = new PhysicsShapeInfo;
+	ConvertIVPPosToBull(ivpsurface->mass_center, info->massCenter);
+
+	btCompoundShape *pCompound = new btCompoundShape;
+	pCompound->setMargin(COLLISION_MARGIN);
+	pCompound->setUserPointer(info);
+
+	// Add all of the ledges up
+	CUtlVector<const ivpcompactledge_t *> ledges;
+	GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
+
+	for (int j = 0; j < ledges.Count(); j++) {
+		const ivpcompactledge_t *ledge = ledges[j];
+
+		// Large array of all the vertices
+		const char *vertices = (const char *)ledge + ledge->c_point_offset;
+
+		if (ledge->n_triangles > 0) {
+#ifdef USE_CONVEX_TRIANGLES
+			btTriangleMesh *pMesh = new btTriangleMesh;
+
+			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
+			for (int k = 0; k < ledge->n_triangles; k++) {
+				Assert(k == tris[k].tri_index);
+
+				btVector3 verts[3];
+
+				for (int l = 0; l < 3; l++) {
+					short idx = tris[k].c_three_edges[l].start_point_index;
+					float *ivpvert = (float *)(vertices + idx * 16);
+
+					ConvertIVPPosToBull(ivpvert, verts[l]);
+				}
+
+				pMesh->addTriangle(verts[0], verts[1], verts[2], true);
+			}
+
+			btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
+
+			btTransform trans(btMatrix3x3::getIdentity(), -info->massCenter);
+			pCompound->addChildShape(trans, pShape);
+#else
+			btConvexHullShape *pConvex = new btConvexHullShape;
+			pConvex->setMargin(COLLISION_MARGIN);
+
+			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1);
+
+			// This code will find all unique indexes and add them to an array. This avoids
+			// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
+			// If you find a better way you can replace this!
+			CUtlVector<short> indexes;
+
+			for (int k = 0; k < ledge->n_triangles; k++) {
+				Assert((uint)k == tris[k].tri_index);
+
+				for (int l = 0; l < 3; l++) {
+					short index = tris[k].c_three_edges[l].start_point_index;
+
+					bool shouldAdd = true;
+					for (int m = 0; m < indexes.Count(); m++) {
+						if (indexes[m] == index) {
+							shouldAdd = false;
+							break;
+						}
+					}
+
+					if (shouldAdd) {
+						indexes.AddToTail(index);
+					}
+				}
+			}
+
+			for (int k = 0; k < indexes.Count(); k++) {
+				short index = indexes[k];
+
+				float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
+
+				btVector3 vertex;
+				ConvertIVPPosToBull(ivpvert, vertex);
+				pConvex->addPoint(vertex);
+			}
+
+			btTransform offsetTrans(btMatrix3x3::getIdentity(), -info->massCenter);
+			pCompound->addChildShape(offsetTrans, pConvex);
+#endif
+		}
+	}
+
+	return pCompound;
+}
+
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
 void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const char *pBuffer, int bufferSize, bool swap) {
 	memset(pOutput, 0, sizeof(*pOutput));
@@ -824,114 +949,26 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	// We must convert all of the ivp shapes into something we can use.
 	for (int i = 0; i < solidCount; i++) {
 		// NOTE: modelType 0 is IVPS, 1 is (mostly unused) MOPP format
-		const compactsurfaceheader_t *surfaceheader = (compactsurfaceheader_t *)pOutput->solids[i];
+		const compactsurfaceheader_t &surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
 
-		if (surfaceheader->vphysicsID	!= VPHYSICS_ID
-		 || surfaceheader->version		!= 0x100
-		 || surfaceheader->modelType	!= 0x0) {
-			Warning("VPhysics: Could not load mesh (%d/%d)! (compactsurfaceheader is bad)\n", i+1, solidCount);
+		if (surfaceheader.vphysicsID	!= VPHYSICS_ID
+		 || surfaceheader.version		!= 0x100) {
 			pOutput->solids[i] = NULL;
 			continue;
 		}
 
-		const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pOutput->solids[i] + sizeof(compactsurfaceheader_t));
-
-		if (ivpsurface->dummy[2] != IVP_COMPACT_SURFACE_ID) {
-			Warning("VPhysics: Could not load mesh (%d/%d)! (ivpcompactsurface id is bad)\n", i+1, solidCount);
-			pOutput->solids[i] = NULL;
-			continue;
+		btCollisionShape *pShape = NULL;
+		if (surfaceheader.modelType == 0x0) {
+			pShape = LoadIVPS(pOutput->solids[i]);
+		} else if (surfaceheader.modelType == 0x1) {
+			pShape = LoadMOPP(pOutput->solids[i]);
 		}
 
-		// Store info about the mass center for later use.
-		PhysicsShapeInfo *info = new PhysicsShapeInfo;
-		ConvertIVPPosToBull(ivpsurface->mass_center, info->massCenter);
-
-		btCompoundShape *pCompound = new btCompoundShape;
-		pCompound->setMargin(COLLISION_MARGIN);
-		pCompound->setUserPointer(info);
-
-		// Add all of the ledges up
-		CUtlVector<const ivpcompactledge_t *> ledges;
-		GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
-
-		for (int j = 0; j < ledges.Count(); j++) {
-			const ivpcompactledge_t *ledge = ledges[j];
-
-			// Large array of all the vertices
-			const char *vertices = (const char *)ledge + ledge->c_point_offset;
-
-			if (ledge->n_triangles > 0) {
-#ifdef USE_CONVEX_TRIANGLES
-				btTriangleMesh *pMesh = new btTriangleMesh;
-
-				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
-				for (int k = 0; k < ledge->n_triangles; k++) {
-					Assert(k == tris[k].tri_index);
-
-					btVector3 verts[3];
-
-					for (int l = 0; l < 3; l++) {
-						short idx = tris[k].c_three_edges[l].start_point_index;
-						float *ivpvert = (float *)(vertices + idx * 16);
-
-						ConvertIVPPosToBull(ivpvert, verts[l]);
-					}
-
-					pMesh->addTriangle(verts[0], verts[1], verts[2], true);
-				}
-
-				btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
-
-				btTransform trans(btMatrix3x3::getIdentity(), -info->massCenter);
-				pCompound->addChildShape(trans, pShape);
-#else
-				btConvexHullShape *pConvex = new btConvexHullShape;
-				pConvex->setMargin(COLLISION_MARGIN);
-
-				const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1);
-
-				// This code will find all unique indexes and add them to an array. This avoids
-				// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
-				// If you find a better way you can replace this!
-				CUtlVector<short> indexes;
-
-				for (int k = 0; k < ledge->n_triangles; k++) {
-					Assert(k == tris[k].tri_index);
-
-					for (int l = 0; l < 3; l++) {
-						short index = tris[k].c_three_edges[l].start_point_index;
-
-						bool shouldAdd = true;
-						for (int m = 0; m < indexes.Count(); m++) {
-							if (indexes[m] == index) {
-								shouldAdd = false;
-								break;
-							}
-						}
-
-						if (shouldAdd) {
-							indexes.AddToTail(index);
-						}
-					}
-				}
-
-				for (int k = 0; k < indexes.Count(); k++) {
-					short index = indexes[k];
-
-					float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
-
-					btVector3 vertex;
-					ConvertIVPPosToBull(ivpvert, vertex);
-					pConvex->addPoint(vertex);
-				}
-
-				btTransform offsetTrans(btMatrix3x3::getIdentity(), -info->massCenter);
-				pCompound->addChildShape(offsetTrans, pConvex);
-#endif
-			}
+		if (!pShape) {
+			DevWarning("VCollideLoad: Failed to load a solid!\n");
 		}
 
-		pOutput->solids[i] = (CPhysCollide *)pCompound;
+		pOutput->solids[i] = (CPhysCollide *)pShape;
 	}
 }
 

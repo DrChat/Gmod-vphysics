@@ -94,15 +94,21 @@ const char *GetConstraintName(EConstraintType type) {
 * BULLET CONSTRAINTS
 ***********************/
 // TODO: Somebody fill this out!
-/*
 class btPulleyConstraint: public btTypedConstraint {
 	protected:
 		// The 2 points the pulley should run through (such as being attached to a roof)
 		btVector3	m_attachPointWS1;
 		btVector3	m_attachPointWS2;
+
+		btVector3	m_attachPointLS1;
+		btVector3	m_attachPointLS2;
+
 	public:
+		btPulleyConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, const btVector3 &attachWS1, const btVector3 &attachWS2):
+		btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE, rbA, rbB) {
+
+		}
 };
-*/
 
 // TODO: Finish this (for ropes)
 class btLengthConstraint: public btPoint2PointConstraint {
@@ -110,9 +116,8 @@ class btLengthConstraint: public btPoint2PointConstraint {
 		btScalar	m_mindist;
 		btScalar	m_maxdist;
 	public:
-		btLengthConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, btScalar minDist, btScalar maxDist)
-			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
-		{
+		btLengthConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, btScalar minDist, btScalar maxDist):
+		btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB) {
 			m_mindist = minDist;
 			m_maxdist = maxDist;
 		}
@@ -169,18 +174,17 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 	protected:
 		btScalar	m_dist;
 	public:
-		btDistanceConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB, btScalar dist)
-			: btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB)
-		{
+		btDistanceConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB, btScalar dist):
+		btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB) {
 			m_dist = dist;
 		}
 
-		void getInfo1 (btConstraintInfo1 *info) {
+		void getInfo1(btConstraintInfo1 *info) {
 			info->m_numConstraintRows = 1;
 			info->nub = 5;
 		}
 
-		void getInfo2 (btConstraintInfo2 *info) {
+		void getInfo2(btConstraintInfo2 *info) {
 			// Positions relative to objects
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
 			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
@@ -441,6 +445,7 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 }
 
 // NOT COMPLETE
+// BUG: Deleting ragdolls crashes the game
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -452,15 +457,35 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
 	btTransform constraintWorldTrans = constraintToReference.inverse() * objRef->getWorldTransform();
-
 	btTransform bullAFrame = objRef->getWorldTransform().inverse() * constraintWorldTrans;
 	btTransform bullBFrame = objAtt->getWorldTransform().inverse() * constraintWorldTrans;
+
+	btGeneric6DofConstraint *pConstraint = new btGeneric6DofConstraint(*objRef, *objAtt, bullAFrame, bullBFrame, true);
+
+	// Build up our limits
+	btVector3 angUpperLimit;
+	btVector3 angLowerLimit;
+
+	for (int i = 0; i < 3; i++) {
+		constraint_axislimit_t limit = ragdoll.axes[i];
+
+		// upper
+		angUpperLimit.m_floats[i] = DEG2RAD(limit.maxRotation);
+
+		// lower
+		angLowerLimit.m_floats[i] = DEG2RAD(limit.minRotation);
+	}
+
+	pConstraint->setEnabled(ragdoll.isActive);
+
+	/*
 
 	// We shouldn't be using a cone twist constraint! old vphysics uses a "limited ballsocket" constraint
 	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
 
 	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
 	pConstraint->setEnabled(ragdoll.isActive);
+	*/
 
 	// Set axis limits
 	// FIXME: Source wants to set min and max limits to different values, bullet cone twist only supports swing span limits

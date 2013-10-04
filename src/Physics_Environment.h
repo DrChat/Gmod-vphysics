@@ -17,6 +17,7 @@ class btSoftRigidDynamicsWorld;
 class IController;
 class CDeleteQueue;
 class CCollisionSolver;
+class CObjectTracker;
 class CPhysicsFluidController;
 class CPhysicsDragController;
 class CPhysicsConstraint;
@@ -109,7 +110,7 @@ public:
 	const IPhysicsObject **					GetObjectList(int *pOutputObjectCount) const;
 	bool									TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment);
 
-	void									CleanupDeleteList(void);
+	void									CleanupDeleteList();
 	void									EnableDeleteQueue(bool enable);
 
 	bool									Save(const physsaveparams_t &params);
@@ -180,6 +181,7 @@ private:
 
 	CCollisionSolver *						m_pCollisionSolver;
 	CDeleteQueue *							m_pDeleteQueue;
+	CObjectTracker *						m_pObjectTracker;
 	CPhysicsDragController *				m_pPhysicsDragController;
 	IVPhysicsDebugOverlay *					m_pDebugOverlay;
 

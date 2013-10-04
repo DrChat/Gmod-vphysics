@@ -5,8 +5,8 @@
 #include "BulletCollision/CollisionDispatch/btCollisionDispatcher.h"
 #include "LinearMath/btPoolAllocator.h"
 
-#include "ThreadPool.h"
-#include "Threading.h"
+#include "btThreadPool.h"
+#include "btThreading.h"
 
 class btParallelCollisionDispatcher : public btCollisionDispatcher {
 	public:

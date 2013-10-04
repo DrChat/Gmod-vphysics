@@ -21,17 +21,26 @@ subject to the following restrictions:
 #include "LinearMath/btPoolAllocator.h"
 #include "BulletCollision/NarrowPhaseCollision/btPersistentManifold.h"
 
-#include "PlatformDefinitions.h"
-#include "ThreadPool.h"
-#include "Threading.h"
+#include "btThreadPool.h"
+#include "btThreading.h"
 
 #include "LinearMath/btDefines.h"
 #include "LinearMath/btScalar.h"
 
 class btSolveGroupTask : public btIThreadTask {
 	public:
-		btSolveGroupTask(btParallelConstraintSolver *pSolver) {
+		btSolveGroupTask(btParallelConstraintSolver *pSolver, btCollisionObject **bodies, int numBodies,
+							btPersistentManifold **manifolds, int numManifolds, btTypedConstraint **constraints, int numConstraints) {
 			m_pSolver = pSolver;
+			m_bodies.copyFromArray(bodies, numBodies);
+			m_manifolds.copyFromArray(manifolds, numManifolds);
+			m_constraints.copyFromArray(constraints, numConstraints);
+		}
+
+		~btSolveGroupTask() {
+			m_bodies.clear();
+			m_manifolds.clear();
+			m_constraints.clear();
 		}
 
 		void run() {
@@ -39,22 +48,31 @@ class btSolveGroupTask : public btIThreadTask {
 		}
 
 		void destroy() {
+			this->~btSolveGroupTask();
 			m_pSolver->freeTask(this);
 		}
 
 	private:
 		btParallelConstraintSolver *m_pSolver;
+		btSolverCache m_cache;
+
+		btAlignedObjectArray<btCollisionObject *> m_bodies;
+		btAlignedObjectArray<btPersistentManifold *> m_manifolds;
+		btAlignedObjectArray<btTypedConstraint *> m_constraints;
 };
 
 btParallelConstraintSolver::btParallelConstraintSolver(btThreadPool *pThreadPool) {
 	m_pThreadPool = pThreadPool;
 
-	m_pTaskPool = new btPoolAllocator(sizeof(btSolveGroupTask), 4096);
+	void *taskPoolMem = btAlloc(sizeof(btPoolAllocator));
+	m_pTaskPool = new(taskPoolMem) btPoolAllocator(sizeof(btSolveGroupTask), 4096);
 	m_pTaskPoolSect = btCreateCriticalSection();
 }
 
 btParallelConstraintSolver::~btParallelConstraintSolver() {
 	btDeleteCriticalSection(m_pTaskPoolSect);
+	m_pTaskPool->~btPoolAllocator();
+	btFree(m_pTaskPool);
 }
 
 void *btParallelConstraintSolver::allocateTask(int size) {
@@ -81,19 +99,17 @@ void btParallelConstraintSolver::freeTask(void *ptr) {
 	m_pTaskPoolSect->unlock();
 }
 
-btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, 
+btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifolds, int numManifolds, btTypedConstraint **constraints, 
 											int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher) {
 	// We'll have to make a copy of the arrays supplied to us, as they're deleted after this function returns.
-
 	void *mem = allocateTask(sizeof(btSolveGroupTask));
-	btSolveGroupTask *task = new(mem) btSolveGroupTask(this);
+	btSolveGroupTask *task = new(mem) btSolveGroupTask(this, bodies, numBodies, manifolds, numManifolds, constraints, numConstraints);
 	m_pThreadPool->addTask(task);
 
 	// Unknown return value
 	return btScalar(0);
 }
 
-void btParallelConstraintSolver::allSolved(const btContactSolverInfo & /* info */, class btIDebugDraw * /* debugDrawer */, btStackAlloc * /* stackAlloc */) {
-	// Not really solved. Wait until the threadpool is finished.
+void btParallelConstraintSolver::waitUntilFinished() {
 	m_pThreadPool->waitIdle();
 }

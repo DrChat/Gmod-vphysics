@@ -178,7 +178,8 @@ void CPhysicsObject::EnableMotion(bool enable) {
 	if (IsMotionEnabled() == enable || IsStatic()) return;
 	m_bMotionEnabled = enable;
 
-	// FIXME: Does this cause any issues with player controllers?
+	// FIXME: Does this cause any issues with player controllers? (player controller angular factor is always 0!)
+	// TODO: We should be setting a flag on the object to disable motion, not this!
 	if (enable) {
 		m_pObject->setLinearFactor(btVector3(1, 1, 1));
 		m_pObject->setAngularFactor(1);
@@ -901,7 +902,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_pName				= NULL;
 	m_fVolume			= 0;
 	m_callbacks			= CALLBACK_GLOBAL_COLLISION | CALLBACK_GLOBAL_FRICTION | CALLBACK_FLUID_TOUCH | CALLBACK_GLOBAL_TOUCH | CALLBACK_GLOBAL_COLLIDE_STATIC | CALLBACK_DO_FLUID_SIMULATION;
-	m_iLastActivationState = pObject->getActivationState();
+	m_iLastActivationState = -1;
 
 	m_pObject->setUserPointer(this);
 	m_pObject->setSleepingThresholds(SLEEP_LINEAR_THRESHOLD, SLEEP_ANGULAR_THRESHOLD);
@@ -939,6 +940,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_angDragCoefficient = angDrag;
 
 	// Compute our continuous collision detection stuff (for fast moving objects, prevents tunneling)
+	// This doesn't work on compound objects! see: btDiscreteDynamicsWorld::integrateTransforms
 	if (!isStatic) {
 		btVector3 mins, maxs;
 		m_pObject->getCollisionShape()->getAabb(btTransform::getIdentity(), mins, maxs);
@@ -949,8 +951,8 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		float minradius = min(min(mins.getX(), mins.getY()), mins.getZ());
 		float radius = min(maxradius, minradius);
 
-		m_pObject->setCcdMotionThreshold(radius);
-		m_pObject->setCcdSweptSphereRadius(0.2f * radius);
+		m_pObject->setCcdMotionThreshold(radius / 2);
+		m_pObject->setCcdSweptSphereRadius(0.7f * radius);
 	}
 
 	if (isStatic) {

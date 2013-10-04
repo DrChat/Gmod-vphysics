@@ -1,5 +1,5 @@
 #include "PlatformDefinitions.h"
-#include "Threading.h"
+#include "btThreading.h"
 
 #include "LinearMath/btScalar.h"
 #include "LinearMath/btAlignedAllocator.h"

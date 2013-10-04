@@ -1,7 +1,7 @@
 #ifndef BT_THREADPOOL_H
 #define BT_THREADPOOL_H
 
-#include "Threading.h"
+#include "btThreading.h"
 #include "LinearMath/btAlignedObjectArray.h"
 
 class btIThreadTask {

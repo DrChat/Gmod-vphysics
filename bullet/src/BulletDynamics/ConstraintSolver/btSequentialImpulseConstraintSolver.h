@@ -28,6 +28,20 @@ class btCollisionObject;
 #include "BulletCollision/NarrowPhaseCollision/btManifoldPoint.h"
 #include "BulletDynamics/ConstraintSolver/btConstraintSolver.h"
 
+struct btSolverCache
+{
+	btAlignedObjectArray<btSolverBody>			tmpSolverBodyPool;
+	btAlignedObjectArray<btSolverConstraint>	tmpSolverContactConstraintPool;
+	btAlignedObjectArray<btSolverConstraint>	tmpSolverNonContactConstraintPool;
+	btAlignedObjectArray<btSolverConstraint>	tmpSolverContactFrictionConstraintPool;
+	btAlignedObjectArray<btSolverConstraint>	tmpSolverContactRollingFrictionConstraintPool;
+
+	btAlignedObjectArray<int>					orderTmpConstraintPool;
+	btAlignedObjectArray<int>					orderNonContactConstraintPool;
+	btAlignedObjectArray<int>					orderFrictionConstraintPool;
+	btAlignedObjectArray<btTypedConstraint::btConstraintInfo1> tmpConstraintSizesPool;
+};
+
 ///The btSequentialImpulseConstraintSolver is a fast SIMD implementation of the Projected Gauss Seidel (iterative LCP) method.
 ATTRIBUTE_ALIGNED16(class) btSequentialImpulseConstraintSolver : public btConstraintSolver
 {
