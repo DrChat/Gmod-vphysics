@@ -35,7 +35,7 @@ subject to the following restrictions:
 #include "LinearMath/btSerializer.h"
 #include "BulletCollision/CollisionShapes/btConvexPolyhedron.h"
 #include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h"
-
+#include "BulletCollision/Gimpact/btGImpactShape.h"
 //#define DISABLE_DBVT_COMPOUNDSHAPE_RAYCAST_ACCELERATION
 
 
@@ -73,8 +73,6 @@ m_broadphasePairCache(pairCache),
 m_debugDrawer(0),
 m_forceUpdateAllAabbs(true)
 {
-	m_stackAlloc = collisionConfiguration->getStackAllocator();
-	m_dispatchInfo.m_stackAllocator = m_stackAlloc;
 }
 
 
@@ -179,13 +177,13 @@ void	btCollisionWorld::updateSingleAabb(btCollisionObject* colObj)
 		colObj->setActivationState(DISABLE_SIMULATION);
 
 		static bool reportMe = true;
-		if (reportMe)
+		if (reportMe && m_debugDrawer)
 		{
 			reportMe = false;
-			btDbgWarning("Overflow in AABB, object removed from simulation\n"
-						 "If you can reproduce this, please email bugs@continuousphysics.com\n"
-						 "Please include above information, your Platform, version of OS.\n"
-						 "Thanks.\n");
+			m_debugDrawer->reportErrorWarning("Overflow in AABB, object removed from simulation");
+			m_debugDrawer->reportErrorWarning("If you can reproduce this, please email bugs@continuousphysics.com\n");
+			m_debugDrawer->reportErrorWarning("Please include above information, your Platform, version of OS.\n");
+			m_debugDrawer->reportErrorWarning("Thanks.\n");
 		}
 	}
 }
@@ -290,13 +288,19 @@ void	btCollisionWorld::rayTestSingleInternal(const btTransform& rayFromTrans, co
 
 		btConvexShape* convexShape = (btConvexShape*) collisionShape;
 		btVoronoiSimplexSolver	simplexSolver;
-#define USE_SUBSIMPLEX_CONVEX_CAST 1
-#ifdef USE_SUBSIMPLEX_CONVEX_CAST
-		btSubsimplexConvexCast convexCaster(castShape, convexShape, &simplexSolver);
-#else
-		//btGjkConvexCast	convexCaster(castShape, convexShape, &simplexSolver);
+		btSubsimplexConvexCast subSimplexConvexCaster(castShape,convexShape,&simplexSolver);
+		
+		btGjkConvexCast	gjkConvexCaster(castShape,convexShape,&simplexSolver);
+		
 		//btContinuousConvexCollision convexCaster(castShape, convexShape, &simplexSolver,0);
-#endif //#USE_SUBSIMPLEX_CONVEX_CAST
+		bool condition = true;
+		btConvexCast* convexCasterPtr = 0;
+		if (resultCallback.m_flags & btTriangleRaycastCallback::kF_UseGjkConvexRaytest)
+			convexCasterPtr = &gjkConvexCaster;
+		else
+			convexCasterPtr = &subSimplexConvexCaster;
+		
+		btConvexCast& convexCaster = *convexCasterPtr;
 
 		if (convexCaster.calcTimeOfImpact(rayFromTrans, rayToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
 		{
@@ -328,26 +332,18 @@ void	btCollisionWorld::rayTestSingleInternal(const btTransform& rayFromTrans, co
 	} else {
 		if (collisionShape->isConcave())
 		{
-			//			BT_PROFILE("rayTestConcave");
-			if (collisionShape->getShapeType()==TRIANGLE_MESH_SHAPE_PROXYTYPE)
-			{
-				///optimized version for btBvhTriangleMeshShape
-				btBvhTriangleMeshShape* triangleMesh = (btBvhTriangleMeshShape*)collisionShape;
-				btTransform worldTocollisionObject = colObjWorldTransform.inverse();
-				btVector3 rayFromLocal = worldTocollisionObject * rayFromTrans.getOrigin();
-				btVector3 rayToLocal = worldTocollisionObject * rayToTrans.getOrigin();
 
 				//ConvexCast::CastResult
 				struct BridgeTriangleRaycastCallback : public btTriangleRaycastCallback
 				{
 					btCollisionWorld::RayResultCallback* m_resultCallback;
 					const btCollisionObject*	m_collisionObject;
-					btTriangleMeshShape*	m_triangleMesh;
+					const btConcaveShape*	m_triangleMesh;
 
 					btTransform m_colObjWorldTransform;
 
 					BridgeTriangleRaycastCallback( const btVector3& from, const btVector3& to,
-						btCollisionWorld::RayResultCallback* resultCallback, const btCollisionObject* collisionObject, btTriangleMeshShape*	triangleMesh, const btTransform& colObjWorldTransform):
+					btCollisionWorld::RayResultCallback* resultCallback, const btCollisionObject* collisionObject,const btConcaveShape*	triangleMesh,const btTransform& colObjWorldTransform):
 					//@BP Mod
 					btTriangleRaycastCallback(from, to, resultCallback->m_flags),
 						m_resultCallback(resultCallback),
@@ -378,11 +374,28 @@ void	btCollisionWorld::rayTestSingleInternal(const btTransform& rayFromTrans, co
 
 				};
 
+			btTransform worldTocollisionObject = colObjWorldTransform.inverse();
+			btVector3 rayFromLocal = worldTocollisionObject * rayFromTrans.getOrigin();
+			btVector3 rayToLocal = worldTocollisionObject * rayToTrans.getOrigin();
+
+			//			BT_PROFILE("rayTestConcave");
+			if (collisionShape->getShapeType()==TRIANGLE_MESH_SHAPE_PROXYTYPE)
+			{
+				///optimized version for btBvhTriangleMeshShape
+				btBvhTriangleMeshShape* triangleMesh = (btBvhTriangleMeshShape*)collisionShape;
+				
 				BridgeTriangleRaycastCallback rcb(rayFromLocal, rayToLocal, &resultCallback, collisionObjectWrap->getCollisionObject(), triangleMesh, colObjWorldTransform);
 				rcb.m_hitFraction = resultCallback.m_closestHitFraction;
 				triangleMesh->performRaycast(&rcb, rayFromLocal, rayToLocal);
 			}
-			else
+			else if(collisionShape->getShapeType()==GIMPACT_SHAPE_PROXYTYPE)
+			{
+				btGImpactMeshShape* concaveShape = (btGImpactMeshShape*)collisionShape;
+
+				BridgeTriangleRaycastCallback	rcb(rayFromLocal,rayToLocal,&resultCallback,collisionObjectWrap->getCollisionObject(),concaveShape, colObjWorldTransform);
+				rcb.m_hitFraction = resultCallback.m_closestHitFraction;
+				concaveShape->processAllTrianglesRay(&rcb,rayFromLocal,rayToLocal);
+			}else
 			{
 				//generic (slower) case
 				btConcaveShape* concaveShape = (btConcaveShape*)collisionShape;
@@ -445,10 +458,10 @@ void	btCollisionWorld::rayTestSingleInternal(const btTransform& rayFromTrans, co
 
 				concaveShape->processAllTriangles(&rcb, rayAabbMinLocal, rayAabbMaxLocal);
 			}
-		}
-		else if (collisionShape->isCompound())
-		{
+		} else {
 			//			BT_PROFILE("rayTestCompound");
+			if (collisionShape->isCompound())
+		{
 			struct LocalInfoAdder2 : public RayResultCallback
 			{
 				RayResultCallback* m_userCallback;
@@ -559,6 +572,7 @@ void	btCollisionWorld::rayTestSingleInternal(const btTransform& rayFromTrans, co
 			}
 		}
 	}
+}
 }
 
 void	btCollisionWorld::objectQuerySingle(const btConvexShape* castShape, const btTransform& convexFromTrans, const btTransform& convexToTrans,

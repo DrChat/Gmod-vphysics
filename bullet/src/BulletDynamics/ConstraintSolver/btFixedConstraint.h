@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2013 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -13,34 +13,37 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef BT_COLLISION_CONFIGURATION
-#define BT_COLLISION_CONFIGURATION
+#ifndef BT_FIXED_CONSTRAINT_H
+#define BT_FIXED_CONSTRAINT_H
 
-struct btCollisionAlgorithmCreateFunc;
+#include "btTypedConstraint.h"
 
-class btStackAlloc;
-class btPoolAllocator;
-
-///btCollisionConfiguration allows to configure Bullet collision detection
-///stack allocator size, default collision algorithms and persistent manifold pool size
-///@todo: describe the meaning
-class	btCollisionConfiguration
+ATTRIBUTE_ALIGNED16(class) btFixedConstraint : public btTypedConstraint
 {
+	btVector3 m_pivotInA;
+	btVector3 m_pivotInB;
+	btQuaternion m_relTargetAB;
 
 public:
+	btFixedConstraint(btRigidBody& rbA,btRigidBody& rbB, const btTransform& frameInA,const btTransform& frameInB);
+	
+	virtual ~btFixedConstraint();
 
-	virtual ~btCollisionConfiguration()
+	
+	virtual void getInfo1 (btConstraintInfo1* info);
+
+	virtual void getInfo2 (btConstraintInfo2* info);
+
+	virtual	void	setParam(int num, btScalar value, int axis = -1)
 	{
+		btAssert(0);
 	}
-
-	///memory pools
-	virtual btPoolAllocator* getPersistentManifoldPool() = 0;
-
-	virtual btPoolAllocator* getCollisionAlgorithmPool() = 0;
-
-	virtual btCollisionAlgorithmCreateFunc* getCollisionAlgorithmCreateFunc(int proxyType0, int proxyType1) =0;
+	virtual	btScalar getParam(int num, int axis = -1) const
+	{
+		btAssert(0);
+		return 0.f;
+	}
 
 };
 
-#endif //BT_COLLISION_CONFIGURATION
-
+#endif //BT_FIXED_CONSTRAINT_H

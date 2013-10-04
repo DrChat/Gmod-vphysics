@@ -538,13 +538,9 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 CPhysicsConstraint *CreateFixedConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_fixedparams_t &fixed) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
-	btGeneric6DofConstraint *pWeld = new btGeneric6DofConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(),
+	btFixedConstraint *pWeld = new btFixedConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(),
 																pObjRef->GetObject()->getWorldTransform().inverse() * pObjAtt->GetObject()->getWorldTransform(),
-																btTransform::getIdentity(), true);
-	pWeld->setLinearLowerLimit(btVector3(0, 0, 0));
-	pWeld->setLinearUpperLimit(btVector3(0, 0, 0));
-	pWeld->setAngularLowerLimit(btVector3(0, 0, 0));
-	pWeld->setAngularUpperLimit(btVector3(0, 0, 0));
+																btTransform::getIdentity());
 
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pWeld, CONSTRAINT_FIXED);
 }

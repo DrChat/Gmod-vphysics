@@ -17,6 +17,7 @@
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btContactConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btContactSolverInfo.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btFixedConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btGearConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btGeneric6DofConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btGeneric6DofSpringConstraint.h" />
@@ -36,6 +37,14 @@
     <ClInclude Include="..\..\src\BulletDynamics\Dynamics\btDynamicsWorld.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Dynamics\btRigidBody.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Dynamics\btSimpleDynamicsWorld.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBody.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyConstraint.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyConstraintSolver.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyDynamicsWorld.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyJointLimitConstraint.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyLink.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyLinkCollider.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodySolverConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btRaycastVehicle.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btVehicleRaycaster.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btWheelInfo.h" />
@@ -44,6 +53,7 @@
     <ClCompile Include="..\..\src\BulletDynamics\Character\btKinematicCharacterController.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btConeTwistConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btContactConstraint.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btFixedConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btGearConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btGeneric6DofConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btGeneric6DofSpringConstraint.cpp" />
@@ -59,6 +69,10 @@
     <ClCompile Include="..\..\src\BulletDynamics\Dynamics\btRigidBody.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Dynamics\btSimpleDynamicsWorld.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Dynamics\Bullet-C-API.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBody.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyConstraintSolver.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyDynamicsWorld.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyJointLimitConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btRaycastVehicle.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btWheelInfo.cpp" />
   </ItemGroup>

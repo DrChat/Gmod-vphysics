@@ -53,12 +53,16 @@ subject to the following restrictions:
 	#define btvxyzMaskf btvFFF0fMask
 	#define btvAbsfMask btCastiTo128f(btvAbsMask)
 	
+//there is an issue with XCode 3.2 (LCx errors)
+#define btvMzeroMask (_mm_set_ps(-0.0f, -0.0f, -0.0f, -0.0f))
+#define v1110		 (_mm_set_ps(0.0f, 1.0f, 1.0f, 1.0f))
+#define vHalf		 (_mm_set_ps(0.5f, 0.5f, 0.5f, 0.5f))
+#define v1_5		 (_mm_set_ps(1.5f, 1.5f, 1.5f, 1.5f))
 	
-	
-	const __m128 ATTRIBUTE_ALIGNED16(btvMzeroMask) = {-0.0f, -0.0f, -0.0f, -0.0f};
-	const __m128 ATTRIBUTE_ALIGNED16(v1110) = {1.0f, 1.0f, 1.0f, 0.0f};
-	const __m128 ATTRIBUTE_ALIGNED16(vHalf) = {0.5f, 0.5f, 0.5f, 0.5f};
-	const __m128 ATTRIBUTE_ALIGNED16(v1_5)  = {1.5f, 1.5f, 1.5f, 1.5f};
+//const __m128 ATTRIBUTE_ALIGNED16(btvMzeroMask) = {-0.0f, -0.0f, -0.0f, -0.0f};
+//const __m128 ATTRIBUTE_ALIGNED16(v1110) = {1.0f, 1.0f, 1.0f, 0.0f};
+//const __m128 ATTRIBUTE_ALIGNED16(vHalf) = {0.5f, 0.5f, 0.5f, 0.5f};
+//const __m128 ATTRIBUTE_ALIGNED16(v1_5)  = {1.5f, 1.5f, 1.5f, 1.5f};
 
 #endif
 
@@ -260,6 +264,12 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			return btSqrt(length2());
 		}
 
+	/**@brief Return the norm (length) of the vector */
+	SIMD_FORCE_INLINE btScalar norm() const
+	{
+		return length();
+	}
+
 		/**@brief Return the distance squared between the ends of this and another vector
 		 * This is symantically treating the vector like a point */
 		SIMD_FORCE_INLINE btScalar distance2(const btVector3& v) const;
@@ -285,6 +295,9 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 		 * x^2 + y^2 + z^2 = 1 */
 		SIMD_FORCE_INLINE btVector3& normalize() 
 		{
+		
+		btAssert(length() != btScalar(0));
+
 #if defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE)		
 			// dot product first
 			__m128 vd = _mm_mul_ps(mVec128, mVec128);
@@ -936,13 +949,9 @@ SIMD_FORCE_INLINE btScalar btVector3::distance(const btVector3& v) const
 
 SIMD_FORCE_INLINE btVector3 btVector3::normalized() const
 {
-#if defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE)
 	btVector3 norm = *this;
 
 	return norm.normalize();
-#else
-	return *this / length();
-#endif
 } 
 
 SIMD_FORCE_INLINE btVector3 btVector3::rotate( const btVector3& wAxis, const btScalar _angle ) const

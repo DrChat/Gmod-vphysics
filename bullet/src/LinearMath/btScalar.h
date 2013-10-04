@@ -17,8 +17,19 @@ subject to the following restrictions:
 #ifndef BT_SCALAR_H
 #define BT_SCALAR_H
 
-// Due to the brilliant design choices made in bullet, we'll have to include this here.
+#ifdef BT_MANAGED_CODE
+//Aligned data types not supported in managed code
+#pragma unmanaged
+#endif
+
+
+#include <math.h>
+#include <stdlib.h>//size_t for MSVC 6.0
+#include <float.h>
+
+// Due to the brilliant design choices of bullet, we'll have to include this here.
 #include "btDefines.h"
+
 
 ///The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 #if defined(BT_USE_DOUBLE_PRECISION)
@@ -49,6 +60,8 @@ subject to the following restrictions:
 			#define BT_INFINITY (*(float*)&btInfinityMask)
 		#endif
 		
+//use this, in case there are clashes (such as xnamath.h)
+#ifndef BT_NO_SIMD_OPERATOR_OVERLOADS
 		inline __m128 operator + (const __m128 A, const __m128 B)
 		{
 			return _mm_add_ps(A, B);
@@ -63,6 +76,7 @@ subject to the following restrictions:
 		{
 			return _mm_mul_ps(A, B);
 		}
+#endif //BT_NO_SIMD_OPERATOR_OVERLOADS
 		
 		#define btCastfTo128i(a) (_mm_castps_si128(a))
 		#define btCastfTo128d(a) (_mm_castps_pd(a))
@@ -232,8 +246,8 @@ SIMD_FORCE_INLINE bool btMachineIsLittleEndian()
 
 
 
-// btSelect avoids branches, which makes performance much better for consoles like Playstation 3 and XBox 360
-// Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
+///btSelect avoids branches, which makes performance much better for consoles like Playstation 3 and XBox 360
+///Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
 SIMD_FORCE_INLINE unsigned btSelect(unsigned condition, unsigned valueIfConditionNonZero, unsigned valueIfConditionZero) 
 {
 	// Set testNz to 0xFFFFFFFF if condition is nonzero, 0x00000000 if condition is zero
@@ -270,6 +284,7 @@ template<typename T> SIMD_FORCE_INLINE void btSwap(T& a, T& b)
 
 
 //PCK: endian swapping functions
+// FIXME: Should these really be here?
 SIMD_FORCE_INLINE unsigned btSwapEndian(unsigned val)
 {
 	return (((val & 0xff000000) >> 24) | ((val & 0x00ff0000) >> 8) | ((val & 0x0000ff00) << 8)  | ((val & 0x000000ff) << 24));
