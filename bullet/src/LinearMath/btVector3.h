@@ -264,11 +264,11 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			return btSqrt(length2());
 		}
 
-	/**@brief Return the norm (length) of the vector */
-	SIMD_FORCE_INLINE btScalar norm() const
-	{
-		return length();
-	}
+		/**@brief Return the norm (length) of the vector */
+		SIMD_FORCE_INLINE btScalar norm() const
+		{
+			return length();
+		}
 
 		/**@brief Return the distance squared between the ends of this and another vector
 		 * This is symantically treating the vector like a point */
@@ -1224,7 +1224,7 @@ public:
 ///btSwapVector3Endian swaps vector endianness, useful for network and cross-platform serialization
 SIMD_FORCE_INLINE void	btSwapScalarEndian(const btScalar& sourceVal, btScalar& destVal)
 {
-	#ifdef BT_USE_DOUBLE_PRECISION
+#ifdef BT_USE_DOUBLE_PRECISION
 	unsigned char* dest = (unsigned char*) &destVal;
 	unsigned char* src  = (unsigned char*) &sourceVal;
 	dest[0] = src[7];

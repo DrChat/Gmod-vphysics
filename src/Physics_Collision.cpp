@@ -796,7 +796,7 @@ static btCollisionShape *LoadMOPP(CPhysCollide *pSolid) {
 		return NULL;
 	}
 
-	// FIXME: Our mopp header is incorrect
+	// FIXME: Our mopp header struct is incorrect
 
 	//PhysicsShapeInfo *pInfo = new PhysicsShapeInfo;
 	//ConvertIVPPosToBull(ivpmopp->mass_center, pInfo->massCenter);
@@ -939,6 +939,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		Assert(position < bufferSize);
 	}
 
+	// The rest of the buffer is the key values for the collision mesh
 	pOutput->pKeyValues = new char[bufferSize - position];
 	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
 
@@ -962,6 +963,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			pShape = LoadIVPS(pOutput->solids[i]);
 		} else if (surfaceheader.modelType == 0x1) {
 			pShape = LoadMOPP(pOutput->solids[i]);
+		} else {
+			Warning("VCollideLoad: Unknown modelType %d", surfaceheader.modelType);
 		}
 
 		if (!pShape) {

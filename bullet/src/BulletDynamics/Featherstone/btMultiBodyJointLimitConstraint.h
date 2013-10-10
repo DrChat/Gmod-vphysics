@@ -25,11 +25,11 @@ protected:
 
 	btScalar	m_lowerBound;
 	btScalar	m_upperBound;
-	void btMultiBodyJointLimitConstraint::fillConstraintRow(btMultiBodySolverConstraint& constraintRow,
-															btMultiBodyJacobianData& data,
-																 btScalar* jacOrgA,btScalar* jacOrgB,
-																 btScalar penetration,btScalar combinedFrictionCoeff, btScalar combinedRestitutionCoeff,
-																 const btContactSolverInfo& infoGlobal1);
+	void fillConstraintRow(btMultiBodySolverConstraint& constraintRow,
+												btMultiBodyJacobianData& data,
+												btScalar* jacOrgA,btScalar* jacOrgB,
+												btScalar penetration,btScalar combinedFrictionCoeff, btScalar combinedRestitutionCoeff,
+												const btContactSolverInfo& infoGlobal1);
 public:
 
 	btMultiBodyJointLimitConstraint(btMultiBody* body, int link, btScalar lower, btScalar upper);

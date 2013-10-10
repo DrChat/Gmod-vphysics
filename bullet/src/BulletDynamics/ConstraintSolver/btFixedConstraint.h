@@ -18,6 +18,8 @@ subject to the following restrictions:
 
 #include "btTypedConstraint.h"
 
+class btIDebugDraw;
+
 ATTRIBUTE_ALIGNED16(class) btFixedConstraint : public btTypedConstraint
 {
 	btVector3 m_pivotInA;
@@ -44,6 +46,7 @@ public:
 		return 0.f;
 	}
 
+	void debugDraw(btIDebugDraw *pDebugDrawer);
 };
 
 #endif //BT_FIXED_CONSTRAINT_H

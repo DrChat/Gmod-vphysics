@@ -71,6 +71,7 @@ ATTRIBUTE_ALIGNED16(struct)	btJointFeedback
 	btVector3	m_appliedTorqueBodyB;
 };
 
+class btIDebugDraw;
 
 ///TypedConstraint is the baseclass for Bullet constraints and vehicles
 ATTRIBUTE_ALIGNED16(class) btTypedConstraint : public btTypedObject
@@ -337,6 +338,7 @@ public:
 	///fills the dataBuffer and returns the struct name (and 0 on failure)
 	virtual	const char*	serialize(void* dataBuffer, btSerializer* serializer) const;
 
+	virtual void debugDraw(btIDebugDraw *pDebugDrawer) {};
 };
 
 // returns angle in range [-SIMD_2_PI, SIMD_2_PI], closest to one of the limits 
@@ -414,7 +416,7 @@ struct	btTypedConstraintData
 	int		m_isEnabled;
 	
 };
-#endif BACKWARDS_COMPATIBLE
+#endif // BACKWARDS_COMPATIBLE
 
 struct	btTypedConstraintDoubleData
 {

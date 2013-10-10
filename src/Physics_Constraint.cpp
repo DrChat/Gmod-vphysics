@@ -466,6 +466,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btVector3 angUpperLimit;
 	btVector3 angLowerLimit;
 
+	// FIXME: Wrong conversion
 	for (int i = 0; i < 3; i++) {
 		constraint_axislimit_t limit = ragdoll.axes[i];
 

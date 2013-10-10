@@ -170,6 +170,7 @@ class CObjectTracker {
 
 			int size = m_activeObjects.Size();
 			for (int i = 0; i < size; i++) {
+				Assert(m_activeObjects[i] && *(char *)m_activeObjects[i] != 0xDD);
 				pOutputObjectList[i] = m_activeObjects[i];
 			}
 		}
@@ -187,6 +188,7 @@ class CObjectTracker {
 			btCollisionObjectArray &colObjArray = pBulletEnv->getCollisionObjectArray();
 			for (int i = 0; i < colObjArray.size(); i++) {
 				CPhysicsObject *pObj = (CPhysicsObject *)colObjArray[i]->getUserPointer();
+				Assert(pObj && *(char *)pObj != 0xDD);
 				if (!pObj)
 					continue;
 
@@ -557,6 +559,7 @@ IPhysicsConstraint *CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *
 	return ::CreateLengthConstraint(this, pReferenceObject, pAttachedObject, pGroup, length);
 }
 
+// FIXME: Random crashes happening on constraint destruction, happens when constraint is destroyed but not always!
 void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
 	if (!pConstraint) return;
 
