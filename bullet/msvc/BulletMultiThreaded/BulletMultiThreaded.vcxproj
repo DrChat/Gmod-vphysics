@@ -95,7 +95,6 @@
     <ClInclude Include="..\..\src\BulletMultiThreaded\btGpuUtilsSharedDefs.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.h" />
-    <ClInclude Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\PlatformDefinitions.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btThreading.h" />
     <ClInclude Include="..\..\src\BulletMultiThreaded\btThreadPool.h" />
@@ -104,7 +103,6 @@
     <ClCompile Include="..\..\src\BulletMultiThreaded\btGpu3DGridBroadphase.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelCollisionDispatcher.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btParallelConstraintSolver.cpp" />
-    <ClCompile Include="..\..\src\BulletMultiThreaded\btThreadSupportInterface.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\PosixThreading.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\btThreadPool.cpp" />
     <ClCompile Include="..\..\src\BulletMultiThreaded\Win32Threading.cpp" />

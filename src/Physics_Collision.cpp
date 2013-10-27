@@ -26,6 +26,7 @@ extern IVPhysicsDebugOverlay *g_pDebugOverlay;
 ****************************/
 
 // FIXME: We don't use triangles to represent shapes internally!
+// Low priority, not even used ingame
 class CCollisionQuery : public ICollisionQuery {
 	public:
 		CCollisionQuery(btCollisionShape *pShape) {m_pShape = pShape;}
@@ -246,7 +247,7 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
 
-	// Compound shape? Delete all of it's children.
+	// Compound shape? Delete all of its children.
 	if (pShape->isCompound()) {
 		DestroyCompoundShape((btCompoundShape *)pShape);
 	} else if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
@@ -270,6 +271,7 @@ int CPhysicsCollision::CollideSize(CPhysCollide *pCollide) {
 	return 0;
 }
 
+// TODO: Should we write a binary-compatible version with IVP or use our own format?
 int CPhysicsCollision::CollideWrite(char *pDest, CPhysCollide *pCollide, bool swap) {
 	NOT_IMPLEMENTED
 	return 0;
@@ -280,11 +282,13 @@ CPhysCollide *CPhysicsCollision::UnserializeCollide(char *pBuffer, int size, int
 	return NULL;
 }
 
+// TODO: Use qhull
 float CPhysicsCollision::CollideVolume(CPhysCollide *pCollide) {
 	NOT_IMPLEMENTED
 	return 0;
 }
 
+// TODO: Use qhull
 float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 	NOT_IMPLEMENTED
 	return 0;
@@ -398,7 +402,7 @@ void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vecto
 Vector CPhysicsCollision::CollideGetOrthographicAreas(const CPhysCollide *pCollide) {
 	// What is this?
 	NOT_IMPLEMENTED
-	return Vector(0, 0, 0);
+	return Vector(1, 1, 1); // Documentation says we will return 1,1,1 if ortho areas undefined
 }
 
 void CPhysicsCollision::CollideSetOrthographicAreas(CPhysCollide *pCollide, const Vector &areas) {
@@ -491,7 +495,12 @@ void CPhysicsCollision::ClearBBoxCache() {
 }
 
 bool CPhysicsCollision::GetBBoxCacheSize(int *pCachedSize, int *pCachedCount) {
-	NOT_IMPLEMENTED
+	// FIXME: Probably not correct. (returns the same number for both outputs)
+	if (pCachedSize)
+		*pCachedSize = m_bboxCache.Size();
+
+	if (pCachedCount)
+		*pCachedCount = m_bboxCache.Count();
 
 	// What do we return?
 	return false;
@@ -612,6 +621,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
 	// Single line trace must be supported in TraceBox? Yep, you betcha.
+	// FIXME: We can't use frac == 0 to determine if the trace was started in a solid! Need to detect this separately.
 	if (ray.m_IsRay) {
 		if (ray.m_Delta.Length() != 0) {
 			btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
@@ -787,7 +797,7 @@ static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivp
 	}
 }
 
-static btCollisionShape *LoadMOPP(CPhysCollide *pSolid) {
+static btCollisionShape *LoadMOPP(CPhysCollide *pSolid, bool swap) {
 	// Parse MOPP surface header
 	const ivpcompactmopp_t *ivpmopp = (ivpcompactmopp_t *)((char *)pSolid + sizeof(compactsurfaceheader_t));
 
@@ -812,7 +822,7 @@ static btCollisionShape *LoadMOPP(CPhysCollide *pSolid) {
 	return NULL;
 }
 
-static btCollisionShape *LoadIVPS(CPhysCollide *pSolid) {
+static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 	// Parse IVP Surface header (which is right after the compact surface header)
 	const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pSolid + sizeof(compactsurfaceheader_t));
 
@@ -960,9 +970,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 		btCollisionShape *pShape = NULL;
 		if (surfaceheader.modelType == 0x0) {
-			pShape = LoadIVPS(pOutput->solids[i]);
+			pShape = LoadIVPS(pOutput->solids[i], swap);
 		} else if (surfaceheader.modelType == 0x1) {
-			pShape = LoadMOPP(pOutput->solids[i]);
+			pShape = LoadMOPP(pOutput->solids[i], swap);
 		} else {
 			Warning("VCollideLoad: Unknown modelType %d", surfaceheader.modelType);
 		}
@@ -1055,7 +1065,7 @@ ICollisionQuery *CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {
 }
 
 void CPhysicsCollision::DestroyQueryModel(ICollisionQuery *pQuery) {
-	delete (CCollisionQuery *)pQuery;
+	delete pQuery;
 }
 
 IPhysicsCollision *CPhysicsCollision::ThreadContextCreate() {
@@ -1063,7 +1073,7 @@ IPhysicsCollision *CPhysicsCollision::ThreadContextCreate() {
 }
 
 void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContext) {
-	delete (CPhysicsCollision *)pThreadContext;
+	delete pThreadContext;
 }
 
 // BUG: Weird collisions with these, sometimes phys objs fall through the displacement mesh

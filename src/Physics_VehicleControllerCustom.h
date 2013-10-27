@@ -74,14 +74,14 @@ class CPhysicsVehicleControllerCustom {
 		~CPhysicsVehicleControllerCustom();
 
 		// force in kg*in/s
-		void								SetWheelForce(int wheelIndex, float force);
-		void								SetWheelBrake(int wheelIndex, float brakeVal);
+		void		SetWheelForce(int wheelIndex, float force);
+		void		SetWheelBrake(int wheelIndex, float brakeVal);
 		// steerVal is in degrees!
-		void								SetWheelSteering(int wheelIndex, float steerVal);
+		void		SetWheelSteering(int wheelIndex, float steerVal);
 
-		void Update(float dt);
+		void		Update(float dt);
 
-		void CreateWheel(const vehicle_customwheelparams_t &params);
+		void		CreateWheel(const vehicle_customwheelparams_t &params);
 
 	public:
 		// Unexposed functions

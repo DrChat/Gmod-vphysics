@@ -1019,7 +1019,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 
 	// convert all bodies
 
-	for (int i=0;i<numBodies;i++)
+	for (int i = 0; i < numBodies; i++)
 	{
 		int bodyId = getOrInitSolverBody(*bodies[i]);
 		btRigidBody* body = btRigidBody::upcast(bodies[i]);
@@ -1038,7 +1038,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 	if (1)
 	{
 		int j;
-		for (j=0;j<numConstraints;j++)
+		for (j = 0; j < numConstraints; j++)
 		{
 			btTypedConstraint* constraint = constraints[j];
 			constraint->buildJacobian();

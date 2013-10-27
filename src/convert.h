@@ -12,14 +12,17 @@
 void ConvertIVPPosToBull(const float *pos, btVector3 &bull);
 void ConvertPosToBull(const Vector &pos, btVector3 &bull);
 void ConvertPosToHL(const btVector3 &pos, Vector &hl);
-void ConvertAABBToBull(const Vector &hlMins, const Vector &hlMaxs, btVector3 &bullMins, btVector3 &bullMaxs);
-void ConvertAABBToHL(const btVector3 &bullMins, const btVector3 &bullMaxs, Vector &hlMins, Vector &hlMaxs);
 void ConvertDirectionToBull(const Vector &dir, btVector3 &bull);
 void ConvertDirectionToHL(const btVector3 &dir, Vector &hl);
+
+void ConvertAABBToBull(const Vector &hlMins, const Vector &hlMaxs, btVector3 &bullMins, btVector3 &bullMaxs);
+void ConvertAABBToHL(const btVector3 &bullMins, const btVector3 &bullMaxs, Vector &hlMins, Vector &hlMaxs);
+
 void ConvertForceImpulseToBull(const Vector &pos, btVector3 &bull);
 void ConvertForceImpulseToHL(const btVector3 &pos, Vector &hl);
-void ConvertForceImpulseToBull(const float &hl, btScalar &bull);
-void ConvertForceImpulseToHL(const btScalar &bull, float &hl);
+btScalar ConvertForceImpulseToBull(float hl);
+float ConvertForceImpulseToHL(btScalar bull);
+
 void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull);
 void ConvertRotationToBull(const QAngle &angles, btQuaternion &bull);
 void ConvertRotationToHL(const btMatrix3x3 &matrix, QAngle &hl);

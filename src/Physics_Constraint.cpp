@@ -36,9 +36,10 @@ void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
 
 	// Handle cases where the axis is really close to up/down vector
 	// Dot = cos(theta) (for dummies), looking for 0(1) to 180(-1) degrees difference
-	// This part may be broken!
 	btScalar dot = wup.dot(axis);
 	if ((dot > 1.0f - SIMD_EPSILON) || (dot < -1.0f + SIMD_EPSILON)) {
+		// This part may be broken!
+		// Axis is really close to/is the up/down vector! We'll have to use a side vector as a base instead.
 		btVector3 wside(0, 0, 1);
 
 		btVector3 up = wside.cross(axis);
@@ -445,7 +446,7 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 }
 
 // NOT COMPLETE
-// BUG: Deleting ragdolls crashes the game
+// BUG: Deleting ragdolls crashes the game (SOMETIMES, related to another bug)
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -466,16 +467,18 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btVector3 angUpperLimit;
 	btVector3 angLowerLimit;
 
-	// FIXME: Wrong conversion
-	for (int i = 0; i < 3; i++) {
-		constraint_axislimit_t limit = ragdoll.axes[i];
+	constraint_axislimit_t limit = ragdoll.axes[0];
+	angUpperLimit.m_floats[0] = DEG2RAD(limit.maxRotation);
+	angLowerLimit.m_floats[0] = DEG2RAD(limit.minRotation);
 
-		// upper
-		angUpperLimit.m_floats[i] = DEG2RAD(limit.maxRotation);
+	// FIXME: Correct?
+	limit = ragdoll.axes[2];
+	angUpperLimit.m_floats[1] = DEG2RAD(limit.minRotation);
+	angLowerLimit.m_floats[1] = DEG2RAD(limit.maxRotation);
 
-		// lower
-		angLowerLimit.m_floats[i] = DEG2RAD(limit.minRotation);
-	}
+	limit = ragdoll.axes[1];
+	angUpperLimit.m_floats[2] = DEG2RAD(limit.maxRotation);
+	angLowerLimit.m_floats[2] = DEG2RAD(limit.minRotation);
 
 	pConstraint->setEnabled(ragdoll.isActive);
 

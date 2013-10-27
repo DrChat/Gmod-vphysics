@@ -116,12 +116,12 @@ void ConvertForceImpulseToHL(const btVector3 &bull, Vector &hl) {
 	return ConvertPosToHL(bull, hl);
 }
 
-void ConvertForceImpulseToBull(const float &hl, btScalar &bull) {
-	bull = HL2BULL(hl);
+btScalar ConvertForceImpulseToBull(float hl) {
+	return HL2BULL(hl);
 }
 
-void ConvertForceImpulseToHL(const btScalar &bull, float &hl) {
-	hl = BULL2HL(bull);
+float ConvertForceImpulseToHL(btScalar bull) {
+	return BULL2HL(bull);
 }
 
 void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {

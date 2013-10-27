@@ -45,7 +45,7 @@ struct ivpcompactmopp_t {
 	float	mass_center[3];
 	float	rotation_inertia[3];
 	float	upper_limit_radius;
-	int		dummy; // 16byte memory align
+	int		dummy; // 16byte memory align FIXME: Why is this valid here? It's at the end of the struct in ivp
 	int		max_deviation : 8;
 	int		byte_size : 24;
 	int		offset_ledgetree_root; // offset to root node of internal ledgetree

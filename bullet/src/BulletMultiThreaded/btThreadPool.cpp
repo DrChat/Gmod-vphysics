@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
+// FIXME: This thread pool implementation is absolutely terrible! Slower than singlethreaded versions, fix this!
+
 static void ThreadFunc(void *pArg) {
 	btThreadPoolInfo *pThreadInfo = (btThreadPoolInfo *)pArg;
 	btThreadPool *pThreadPool = pThreadInfo->pThreadPool;
@@ -105,7 +107,6 @@ void btThreadPool::addTask(btIThreadTask *pTask) {
 void btThreadPool::waitIdle() {
 	if (!m_bThreadsStarted) return;
 
-	// Should we find a way to wait for all threads at once? (WaitForMultipleObjects)
 	for (int i = 0; i < m_numThreads; i++) {
 		m_pThreadInfo[i]->pIdleEvent->wait();
 	}

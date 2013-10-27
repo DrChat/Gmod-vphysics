@@ -149,6 +149,7 @@ void CPhysicsFluidController::Tick(float dt) {
 		float vol = (pObject->GetVolume() * p); // / 64; // Submerged volume
 
 		// TODO: We need to calculate this force at several points on the object (How do we determine what points?).
+		// IVP calculates this force per triangle
 		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();
 		body->applyCentralForce(force);
 

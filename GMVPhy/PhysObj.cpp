@@ -43,6 +43,22 @@ int lPhysObjGetLocalGravity(lua_State *state) {
 }
 
 //
+// Name: PhysObj:SetAngleVelocity
+// Desc: Sets the object's angular velocity (because garry didn't put this in the physobj lua class)
+// Arg1: Vector|vel|The new angular velocity
+// Ret1: 
+//
+int lPhysObjSetAngleVelocity(lua_State *state) {
+	IPhysicsObject32 *pObject = Get_PhysObj(state, 1);
+	Vector *pAngVel = Get_Vector(state, 2);
+
+	if (pAngVel)
+		pObject->SetVelocity(NULL, pAngVel);
+
+	return 0;
+}
+
+//
 // Name: PhysObj:GetCollide
 // Desc: Gets the object's current collision mesh.
 // Arg1:
@@ -62,6 +78,7 @@ int Init_PhysObj(lua_State *state) {
 		LUA->GetField(-1, "PhysObj");
 			LUA->PushCFunction(lPhysObjSetLocalGravity);	LUA->SetField(-2, "SetLocalGravity");
 			LUA->PushCFunction(lPhysObjGetLocalGravity);	LUA->SetField(-2, "GetLocalGravity");
+			LUA->PushCFunction(lPhysObjSetAngleVelocity);	LUA->SetField(-2, "SetAngleVelocity");
 			LUA->PushCFunction(lPhysObjGetCollide);			LUA->SetField(-2, "GetCollide");
 	LUA->Pop(2);
 

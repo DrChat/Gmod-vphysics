@@ -150,6 +150,33 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	return collides;
 }
 
+void SerializeWorld_f(const CCommand &args) {
+	if (args.ArgC() != 2) {
+		Msg("Usage: vphysics_serialize <index>\n");
+		return;
+	}
+
+	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(atoi(args.Arg(2)));
+	if (pEnv) {
+		btDiscreteDynamicsWorld *pWorld = (btDiscreteDynamicsWorld *)pEnv->GetBulletEnvironment();
+		if (!pWorld) return;
+
+		btSerializer *pSerializer = new btDefaultSerializer;
+		pWorld->serialize(pSerializer);
+
+		// FIXME: We shouldn't be using this. Find the appropiate method from valve interfaces.
+		FILE *pFile = fopen("testfile.bullet", "wb");
+		if (pFile) {
+			fwrite(pSerializer->getBufferPointer(), pSerializer->getCurrentBufferSize(), 1, pFile);
+			fclose(pFile);
+		} else {
+			Warning("Couldn't open testfile.bullet for writing!\n");
+		}
+	}
+}
+
+static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client)\n\tDumps \"testfile.bullet\" out to the exe directory.");
+
 /*******************************
 * CLASS CObjectTracker
 *******************************/
@@ -170,7 +197,6 @@ class CObjectTracker {
 
 			int size = m_activeObjects.Size();
 			for (int i = 0; i < size; i++) {
-				Assert(m_activeObjects[i] && *(char *)m_activeObjects[i] != 0xDD);
 				pOutputObjectList[i] = m_activeObjects[i];
 			}
 		}
@@ -179,8 +205,15 @@ class CObjectTracker {
 			m_pObjEvents = pEvents;
 		}
 
-		void ObjectRemoved(IPhysicsObject *pObject) {
-			m_activeObjects.FindAndRemove(pObject);
+		void ObjectRemoved(CPhysicsObject *pObject) {
+			bool bRemoved = m_activeObjects.FindAndRemove(pObject);
+			
+			// Apply duct tape to fix the problem!
+			// In linux, if you spam many objects until the server lags and start removing them, the vector may not actually remove them and report them as removed anyways.
+			while (m_activeObjects.Find(pObject) != -1) {
+				Warning("Object was not really removed! (reported as %s)\n", bRemoved ? "removed" : "not removed");
+				m_activeObjects.FindAndRemove(pObject);
+			}
 		}
 
 		void Tick() {
@@ -208,6 +241,7 @@ class CObjectTracker {
 
 					switch (newState) {
 						case ACTIVE_TAG:
+							// FIXME: Fluid controller constantly awoken multiple times a frame! (Probably goes to sleep too)
 							m_activeObjects.AddToTail(pObj);
 							break;
 						case ISLAND_SLEEPING:
@@ -402,6 +436,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 #endif
 
 	delete m_pCollisionSolver;
+	delete m_pObjectTracker;
 }
 
 // UNEXPOSED
@@ -478,14 +513,13 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	Assert(m_deadObjects.Find(pObject) == -1);	// If you hit this assert, the object is already on the list!
 
 	m_objects.FindAndRemove(pObject);
-	m_pObjectTracker->ObjectRemoved(pObject);
+	m_pObjectTracker->ObjectRemoved((CPhysicsObject *)pObject);
 
 	if (m_inSimulation || m_bUseDeleteQueue) {
 		((CPhysicsObject *)pObject)->AddCallbackFlags(CALLBACK_MARKED_FOR_DELETE);
 		m_deadObjects.AddToTail(pObject);
 	} else {
 		delete pObject;
-		pObject = NULL;
 	}
 }
 
@@ -499,13 +533,12 @@ void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
 	if (!pSoftBody) return;
 
 	m_softBodies.FindAndRemove(pSoftBody);
-	NOT_IMPLEMENTED
 	
 	if (m_inSimulation || m_bUseDeleteQueue) {
 		// TODO
+		NOT_IMPLEMENTED
 	} else {
 		delete pSoftBody;
-		pSoftBody = NULL;
 	}
 }
 
@@ -645,33 +678,6 @@ void CPhysicsEnvironment::DestroyVehicleController(IPhysicsVehicleController *pC
 void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
-
-void SerializeWorld_f(const CCommand &args) {
-	if (args.ArgC() != 2) {
-		Msg("Usage: vphysics_serialize <index>\n");
-		return;
-	}
-
-	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(atoi(args.Arg(2)));
-	if (pEnv) {
-		btDiscreteDynamicsWorld *pWorld = (btDiscreteDynamicsWorld *)pEnv->GetBulletEnvironment();
-		if (!pWorld) return;
-
-		btSerializer *pSerializer = new btDefaultSerializer;
-		pWorld->serialize(pSerializer);
-
-		// FIXME: We shouldn't be using this. Find the appropiate method from valve interfaces.
-		FILE *pFile = fopen("testfile.bullet", "wb");
-		if (pFile) {
-			fwrite(pSerializer->getBufferPointer(), pSerializer->getCurrentBufferSize(), 1, pFile);
-			fclose(pFile);
-		} else {
-			Warning("Couldn't open testfile.bullet for writing!\n");
-		}
-	}
-}
-
-static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client)\n\tDumps \"testfile.bullet\" out to the exe directory.");
 
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, false, 0);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
@@ -854,6 +860,32 @@ void CPhysicsEnvironment::SweepCollideable(const CPhysCollide *pCollide, const V
 	NOT_IMPLEMENTED
 }
 
+class CFilteredConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback {
+	public:
+		CFilteredConvexResultCallback(IPhysicsTraceFilter *pFilter, unsigned int mask, const btVector3 &convexFromWorld, const btVector3 &convexToWorld):
+		btCollisionWorld::ClosestConvexResultCallback(convexFromWorld, convexToWorld) {
+			m_pTraceFilter = pFilter;
+			m_mask = mask;
+		}
+
+		virtual bool needsCollision(btBroadphaseProxy *proxy0) const {
+			btCollisionObject *pColObj = (btCollisionObject *)proxy0->m_clientObject;
+			CPhysicsObject *pObj = (CPhysicsObject *)pColObj->getUserPointer();
+			if (pObj && !m_pTraceFilter->ShouldHitObject(pObj, m_mask)) {
+				return false;
+			}
+
+			bool collides = (proxy0->m_collisionFilterGroup & m_collisionFilterMask) != 0;
+			collides = collides && (m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+
+			return collides;
+		}
+
+	private:
+		IPhysicsTraceFilter *m_pTraceFilter;
+		unsigned int m_mask;
+};
+
 void CPhysicsEnvironment::SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) {
 	if (!pConvex || !pTrace) return;
 	
@@ -873,7 +905,7 @@ void CPhysicsEnvironment::SweepConvex(const CPhysConvex *pConvex, const Vector &
 
 	btConvexShape *pShape = (btConvexShape *)pConvex;
 
-	btCollisionWorld::ClosestConvexResultCallback cb(vecStart, vecEnd);
+	CFilteredConvexResultCallback cb(pTraceFilter, fMask, vecStart, vecEnd);
 	m_pBulletEnvironment->convexSweepTest(pShape, transStart, transEnd, cb, 0.0001f);
 
 	pTrace->fraction = cb.m_closestHitFraction;

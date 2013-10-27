@@ -106,7 +106,7 @@ bool CPlayerController::IsInContact() {
 				pPhysOther = (CPhysicsObject *)obA->getUserPointer();
 			}
 
-			if (pPhysOther->IsStatic() || pPhysOther->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION)
+			if (pPhysOther->IsStatic() || (pPhysOther->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION))
 				continue;
 
 			return true;

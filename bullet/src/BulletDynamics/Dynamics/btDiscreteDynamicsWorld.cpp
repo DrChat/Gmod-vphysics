@@ -1163,6 +1163,7 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 				if (drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
 			}
 			break;
+
 		case HINGE_CONSTRAINT_TYPE:
 			{
 				btHingeConstraint* pHinge = (btHingeConstraint*)constraint;
@@ -1192,6 +1193,7 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 				}
 			}
 			break;
+
 		case CONETWIST_CONSTRAINT_TYPE:
 			{
 				btConeTwistConstraint* pCT = (btConeTwistConstraint*)constraint;
@@ -1238,6 +1240,7 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 				}
 			}
 			break;
+
 		case D6_SPRING_CONSTRAINT_TYPE:
 		case D6_CONSTRAINT_TYPE:
 			{
@@ -1287,14 +1290,15 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 				}
 			}
 			break;
+
 		case SLIDER_CONSTRAINT_TYPE:
 			{
 				btSliderConstraint* pSlider = (btSliderConstraint*)constraint;
 				btTransform tr = pSlider->getCalculatedTransformA();
-				if(drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
+				if (drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
 				tr = pSlider->getCalculatedTransformB();
-				if(drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
-				if(drawLimits)
+				if (drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
+				if (drawLimits)
 				{
 					btTransform tr = pSlider->getUseLinearReferenceFrameA() ? pSlider->getCalculatedTransformA() : pSlider->getCalculatedTransformB();
 					btVector3 li_min = tr * btVector3(pSlider->getLowerLinLimit(), 0.f, 0.f);
@@ -1309,11 +1313,11 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 				}
 			}
 			break;
+
 		default:
 			constraint->debugDraw(getDebugDrawer());
 			break;
 	}
-	return;
 }
 
 void	btDiscreteDynamicsWorld::setConstraintSolver(btConstraintSolver* solver)
