@@ -92,16 +92,22 @@ int btThreadPool::getNumThreads() {
 
 void btThreadPool::addTask(btIThreadTask *pTask) {
 	m_pTaskCritSection->lock();
+
 	m_taskArray.push_back(pTask);
 
-	// This code needs to be executed while we still have the lock to avoid a race condition!
+	m_pTaskCritSection->unlock();
+}
+
+void btThreadPool::runTasks() {
+	m_pTaskCritSection->lock();
+
 	for (int i = 0; i < m_numThreads; i++) {
-		// Reset the idle events for the threads (so we can wait on them in waitIdle, avoids a race condition)
 		m_pThreadInfo[i]->pIdleEvent->reset();
 	}
+
 	m_pTaskCritSection->unlock();
 
-	m_pNewTaskCondVar->wakeAll(); // Wake all threads (they'll fall asleep again if they don't get a task)
+	m_pNewTaskCondVar->wakeAll();
 }
 
 void btThreadPool::waitIdle() {

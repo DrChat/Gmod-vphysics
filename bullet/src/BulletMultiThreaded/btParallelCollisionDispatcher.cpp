@@ -146,6 +146,8 @@ void btParallelCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairC
 	btCollisionPairCallback cb(dispatchInfo, this);
 	pairCache->processAllOverlappingPairs(&cb, dispatcher);
 
+	m_pThreadPool->runTasks();
+
 	// Wait until the task pool empties out (all threads are finished executing tasks)
 	m_pThreadPool->waitIdle();
 }
