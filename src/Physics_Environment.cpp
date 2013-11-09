@@ -206,14 +206,7 @@ class CObjectTracker {
 		}
 
 		void ObjectRemoved(CPhysicsObject *pObject) {
-			bool bRemoved = m_activeObjects.FindAndRemove(pObject);
-			
-			// Apply duct tape to fix the problem!
-			// In linux, if you spam many objects until the server lags and start removing them, the vector may not actually remove them and report them as removed anyways.
-			while (m_activeObjects.Find(pObject) != -1) {
-				Warning("Object was not really removed! (reported as %s)\n", bRemoved ? "removed" : "not removed");
-				m_activeObjects.FindAndRemove(pObject);
-			}
+			m_activeObjects.FindAndRemove(pObject);
 		}
 
 		void Tick() {
@@ -222,14 +215,18 @@ class CObjectTracker {
 			for (int i = 0; i < colObjArray.size(); i++) {
 				CPhysicsObject *pObj = (CPhysicsObject *)colObjArray[i]->getUserPointer();
 				Assert(pObj && *(char *)pObj != 0xDD);
-				if (!pObj)
+
+				// Don't add objects marked for delete
+				if (pObj->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) {
 					continue;
+				}
 
 				if (colObjArray[i]->getActivationState() != pObj->GetLastActivationState()) {
 					int newState = colObjArray[i]->getActivationState();
 
 					if (m_pObjEvents) {
 						switch (newState) {
+							case DISABLE_DEACTIVATION:
 							case ACTIVE_TAG:
 								m_pObjEvents->ObjectWake(pObj);
 								break;
@@ -240,8 +237,8 @@ class CObjectTracker {
 					}
 
 					switch (newState) {
+						case DISABLE_DEACTIVATION:
 						case ACTIVE_TAG:
-							// FIXME: Fluid controller constantly awoken multiple times a frame! (Probably goes to sleep too)
 							m_activeObjects.AddToTail(pObj);
 							break;
 						case ISLAND_SLEEPING:
@@ -281,12 +278,26 @@ class CCollisionEventListener {
 
 class CPhysicsCollisionData : public IPhysicsCollisionData {
 	public:
-		void GetSurfaceNormal(Vector &out);		// normal points toward second object (object index 1)
-		void GetContactPoint(Vector &out);		// contact point of collision (in world space)
-		void GetContactSpeed(Vector &out);		// speed of surface 1 relative to surface 0 (in world space)
+		CPhysicsCollisionData(btManifoldPoint *manPoint) {
+			ConvertDirectionToHL(manPoint->m_normalWorldOnB, m_surfaceNormal);
+			ConvertPosToHL(manPoint->getPositionWorldOnA(), m_contactPoint);
+			ConvertPosToHL(manPoint->m_lateralFrictionDir1, m_contactSpeed);	// FIXME: Need the correct variable from the manifold point
+		}
 
-		// UNEXPOSED FUNCTIONS
-		CPhysicsCollisionData(btManifoldPoint *manPoint);
+		// normal points toward second object (object index 1)
+		void GetSurfaceNormal(Vector &out) {
+			out = m_surfaceNormal;
+		}
+
+		// contact point of collision (in world space)
+		void GetContactPoint(Vector &out) {
+			out = m_contactPoint;
+		}
+
+		// speed of surface 1 relative to surface 0 (in world space)
+		void GetContactSpeed(Vector &out) {
+			out = m_contactSpeed;
+		}
 
 	private:
 		Vector m_surfaceNormal;
@@ -294,30 +305,13 @@ class CPhysicsCollisionData : public IPhysicsCollisionData {
 		Vector m_contactSpeed;
 };
 
-CPhysicsCollisionData::CPhysicsCollisionData(btManifoldPoint *manPoint) {
-	ConvertDirectionToHL(manPoint->m_normalWorldOnB, m_surfaceNormal);
-	ConvertPosToHL(manPoint->getPositionWorldOnA(), m_contactPoint);
-	ConvertPosToHL(manPoint->m_lateralFrictionDir1, m_contactSpeed);	// FIXME: Need the correct variable from the manifold point
-}
-
-void CPhysicsCollisionData::GetSurfaceNormal(Vector &out) {
-	out = m_surfaceNormal;
-}
-
-void CPhysicsCollisionData::GetContactPoint(Vector &out) {
-	out = m_contactPoint;
-}
-
-void CPhysicsCollisionData::GetContactSpeed(Vector &out) {
-	out = m_contactSpeed;
-}
-
 /*******************************
 * CLASS CPhysicsEnvironment
 *******************************/
 
 // Environment ConVars
-static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 0, true, 8);
+// Change the hardcoded min and max if you change the min and max here!
+static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 1, true, 8);
 
 CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick		= false;
@@ -342,7 +336,9 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	// Good to set it to the same amount of CPU cores on the system.
 	// TODO: The game dev needs to be able to configure this value. Expose it in the interface.
 	int maxTasks = vphysics_numthreads.GetInt();
-	if (maxTasks <= 0) maxTasks = 2;
+
+	maxTasks = max(maxTasks, 1);
+	maxTasks = min(maxTasks, 8);
 
 	// Shared thread pool (used by both solver and dispatcher)
 	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (which they can't)
@@ -592,7 +588,6 @@ IPhysicsConstraint *CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *
 	return ::CreateLengthConstraint(this, pReferenceObject, pAttachedObject, pGroup, length);
 }
 
-// FIXME: Random crashes happening on constraint destruction, happens when constraint is destroyed but not always!
 void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
 	if (!pConstraint) return;
 

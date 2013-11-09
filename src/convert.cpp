@@ -171,7 +171,7 @@ void ConvertMatrixToHL(const btTransform &transform, matrix3x4_t &hl) {
 	hl.Init(forward, left, up, pos);
 }
 
-inline Vector HLGetMatrixColumn(const matrix3x4_t &hl, int col) {
+static inline Vector HLGetMatrixColumn(const matrix3x4_t &hl, int col) {
 	Vector ret;
 	ret.x = hl[0][col];
 	ret.y = hl[1][col];

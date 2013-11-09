@@ -939,6 +939,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 	int position = 0;
 	for (int i = 0; i < solidCount; i++) {
+		// Size of this solid, excluding the size int itself
 		int size = *(int *)(pBuffer + position);
 		position += 4; // Skip the size int.
 
