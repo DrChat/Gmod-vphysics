@@ -4,7 +4,22 @@
 WORKING_DIR=$(pwd)
 BULLET_PROJ_DIR=$WORKING_DIR/bullet/proj
 
-NUM_THREADS="$1"
+init() {
+	NUM_THREADS="1"
+	CLEAN=""
+
+	while test $# -gt 0; do
+		case "$1" in
+			"-numthreads")
+				NUM_THREADS="$2"
+				shift;;
+			"-clean")
+				CLEAN="yes"
+				;;
+		esac
+		shift # Shifts command line arguments var or something whatever
+	done
+}
 
 usage() {
 	echo "Usage: $0 <num threads>"
@@ -16,18 +31,26 @@ build_bullet() {
 		cd "$BULLET_PROJ_DIR"
 		./premake4 gmake
 		cd gmake
+
+		if test -n "$CLEAN"; then
+			make clean
+		fi
+
 		make -j$NUM_THREADS
 	fi
 }
 
 build_vphysics() {
 	cd "$WORKING_DIR/src"
+
+	if test -n "$CLEAN"; then
+		make clean
+	fi
+
 	make -j$NUM_THREADS
 }
 
-if [ $# -eq 0 ]; then
-	usage
-fi
+init
 
 build_bullet
 build_vphysics
