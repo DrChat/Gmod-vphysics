@@ -183,6 +183,8 @@ class CPhysicsObject : public IPhysicsObject32 {
 		CPhysicsFluidController *			GetFluidController() { return m_pFluidController; }
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 
+		bool								IsBeingRemoved() { return m_bRemoving; }
+
 	private:
 		CPhysicsEnvironment *				m_pEnv;
 		void *								m_pGameData;
@@ -197,6 +199,8 @@ class CPhysicsObject : public IPhysicsObject32 {
 		unsigned short						m_gameFlags;
 		unsigned int						m_contents;
 		unsigned short						m_iGameIndex;
+
+		bool								m_bRemoving; // Object being removed? (in destructor or something)
 
 		bool								m_bIsSphere;
 		bool								m_bMotionEnabled;

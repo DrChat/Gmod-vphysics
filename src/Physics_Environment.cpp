@@ -226,6 +226,7 @@ class CObjectTracker {
 
 					if (m_pObjEvents) {
 						switch (newState) {
+							// FIXME: Objects may call objectwake twice if they go from disable_deactivation -> active_tag
 							case DISABLE_DEACTIVATION:
 							case ACTIVE_TAG:
 								m_pObjEvents->ObjectWake(pObj);
@@ -239,8 +240,12 @@ class CObjectTracker {
 					switch (newState) {
 						case DISABLE_DEACTIVATION:
 						case ACTIVE_TAG:
-							m_activeObjects.AddToTail(pObj);
+							// Don't add the object twice!
+							if (m_activeObjects.Find(pObj) == -1)
+								m_activeObjects.AddToTail(pObj);
+
 							break;
+						case DISABLE_SIMULATION:
 						case ISLAND_SLEEPING:
 							m_activeObjects.FindAndRemove(pObj);
 							break;
@@ -827,6 +832,11 @@ void CPhysicsEnvironment::PostRestore() {
 bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 	for (int i = 0; i < m_objects.Count(); i++) {
 		if (((CPhysicsObject *)m_objects[i])->GetObject()->getCollisionShape() == (btCollisionShape *)pCollide)
+			return true;
+	}
+
+	for (int i = 0; i < m_deadObjects.Count(); i++) {
+		if (((CPhysicsObject *)m_deadObjects[i])->GetObject()->getCollisionShape() == (btCollisionShape *)pCollide)
 			return true;
 	}
 

@@ -20,14 +20,14 @@ struct vehicle_customwheelparams_t {
 	// Normalized direction the wheel is facing in local space (normally straight down, used for raytrace direction)
 	Vector	wheelDirection;
 
-	// Normalized direction of the axle from the wheel in local space (normally straight left, used for which way the wheel rolls)
+	// Normalized direction of the axle from the wheel in local space (normally straight left, used for which way the wheel rolls and turns)
 	Vector	wheelAxleDirection;
 
 	// Radius of wheel in inches
 	float	wheelRadius;
 
-	// Is this a front wheel?
-	bool	isFrontWheel;
+	// Width of cylinder wheel in inches
+	float	wheelWidth;
 
 	// Max suspension length in inches
 	float	maxSuspensionLength;
@@ -41,7 +41,7 @@ struct vehicle_customwheelparams_t {
 		wheelAxleDirection.Zero();
 
 		wheelRadius			= 16;
-		isFrontWheel		= true;
+		wheelWidth			= 8;
 		maxSuspensionLength = 16;
 		suspensionStiffness = 32;
 	}

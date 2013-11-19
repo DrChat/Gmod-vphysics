@@ -23,7 +23,7 @@ subject to the following restrictions:
 
 //'temporarily' global variables
 // FIXME: These should not be global variables!!!
-btScalar	gDeactivationTime = btScalar(2.);
+btScalar	gDeactivationTime = btScalar(.01);
 bool	gDisableDeactivation = false;
 static int uniqueId = 0;
 
@@ -64,6 +64,8 @@ void	btRigidBody::setupRigidBody(const btRigidBody::btRigidBodyConstructionInfo&
 	m_additionalLinearDampingThresholdSqr = constructionInfo.m_additionalLinearDampingThresholdSqr;
 	m_additionalAngularDampingThresholdSqr = constructionInfo.m_additionalAngularDampingThresholdSqr;
 	m_additionalAngularDampingFactor = constructionInfo.m_additionalAngularDampingFactor;
+
+	m_centerOfMassOffset.setZero();
 
 	if (m_optionalMotionState)
 	{
@@ -225,7 +227,19 @@ void btRigidBody::applyGravity()
 
 void btRigidBody::proceedToTransform(const btTransform& newTrans)
 {
-	setCenterOfMassTransform( newTrans );
+	if (isKinematicObject())
+	{
+		m_interpolationWorldTransform = m_worldTransform;
+	}
+	else
+	{
+		m_interpolationWorldTransform = newTrans;
+	}
+
+	m_interpolationLinearVelocity = getLinearVelocity();
+	m_interpolationAngularVelocity = getAngularVelocity();
+	m_worldTransform = newTrans;
+	updateInertiaTensor();
 }
 	
 
@@ -298,24 +312,6 @@ btQuaternion btRigidBody::getOrientation() const
 		btQuaternion orn;
 		m_worldTransform.getBasis().getRotation(orn);
 		return orn;
-}
-	
-	
-void btRigidBody::setCenterOfMassTransform(const btTransform& xform)
-{
-	if (isKinematicObject())
-	{
-		m_interpolationWorldTransform = m_worldTransform;
-	}
-	else
-	{
-		m_interpolationWorldTransform = xform;
-	}
-
-	m_interpolationLinearVelocity = getLinearVelocity();
-	m_interpolationAngularVelocity = getAngularVelocity();
-	m_worldTransform = xform;
-	updateInertiaTensor();
 }
 
 

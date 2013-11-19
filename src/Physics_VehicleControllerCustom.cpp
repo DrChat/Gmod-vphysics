@@ -7,10 +7,28 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-class CRaycastVehicle : public btRaycastVehicle {
+class CWheelVehicle : public btActionInterface {
 	public:
+		CWheelVehicle(btRigidBody *chassis);
 
+		void updateAction(btCollisionWorld *collisionWorld, btScalar dt);
+		void debugDraw(btIDebugDraw *pDebugDraw);
+
+	private:
+		btRigidBody	*	m_pChassis;
 };
+
+CWheelVehicle::CWheelVehicle(btRigidBody *chassis) {
+	m_pChassis = chassis;
+}
+
+void CWheelVehicle::updateAction(btCollisionWorld *collisionWorld, btScalar dt) {
+
+}
+
+void CWheelVehicle::debugDraw(btIDebugDraw *pDebugDraw) {
+
+}
 
 /*****************************************
  * CLASS CPhysicsVehicleControllerCustom
@@ -27,21 +45,21 @@ CPhysicsVehicleControllerCustom::~CPhysicsVehicleControllerCustom() {
 }
 
 void CPhysicsVehicleControllerCustom::SetWheelForce(int wheelIndex, float force) {
-
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsVehicleControllerCustom::SetWheelBrake(int wheelIndex, float brakeVal) {
-
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsVehicleControllerCustom::SetWheelSteering(int wheelIndex, float steerVal) {
-
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsVehicleControllerCustom::Update(float dt) {
-
+	NOT_IMPLEMENTED
 }
 
-void CPhysicsVehicleControllerCustom::CreateWheel(const vehicle_customwheelparams_t& params) {
-
+void CPhysicsVehicleControllerCustom::CreateWheel(const vehicle_customwheelparams_t &params) {
+	NOT_IMPLEMENTED
 }

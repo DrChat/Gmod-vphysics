@@ -135,6 +135,8 @@ float CPhysicsCollision::ConvexVolume(CPhysConvex *pConvex) {
 }
 
 float CPhysicsCollision::ConvexSurfaceArea(CPhysConvex *pConvex) {
+	if (!pConvex) return 0;
+
 	NOT_IMPLEMENTED
 	return 0;
 }

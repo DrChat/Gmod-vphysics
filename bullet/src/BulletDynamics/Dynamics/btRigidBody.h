@@ -65,6 +65,7 @@ class btRigidBody  : public btCollisionObject
 	btVector3		m_angularVelocity;
 	btScalar		m_inverseMass;
 	btVector3		m_linearFactor;
+	btVector3		m_centerOfMassOffset;
 
 	btVector3		m_gravity;	
 	btVector3		m_gravity_acceleration;
@@ -272,7 +273,10 @@ public:
 		
 	void			integrateVelocities(btScalar step);
 
-	void			setCenterOfMassTransform(const btTransform& xform);
+	void			setCenterOfMassOffset(const btVector3 &offset)
+	{
+		m_centerOfMassOffset = offset;
+	}
 
 	void			applyCentralForce(const btVector3& force)
 	{
@@ -346,13 +350,13 @@ public:
 	
 	void updateInertiaTensor();    
 	
-	const btVector3&     getCenterOfMassPosition() const { 
-		return m_worldTransform.getOrigin(); 
+	const btVector3     getCenterOfMassPosition() const { 
+		return m_worldTransform * m_centerOfMassOffset; 
 	}
 	btQuaternion getOrientation() const;
 	
-	const btTransform&  getCenterOfMassTransform() const { 
-		return m_worldTransform; 
+	const btTransform  getCenterOfMassTransform() const { 
+		return m_worldTransform * btTransform(btMatrix3x3::getIdentity(), m_centerOfMassOffset); 
 	}
 
 	const btVector3&   getLinearVelocity() const { 
@@ -424,7 +428,7 @@ public:
 			m_deactivationTime += timeStep;
 		} else
 		{
-			m_deactivationTime=btScalar(0.);
+			m_deactivationTime = btScalar(0.);
 			setActivationState(0);
 		}
 
@@ -437,16 +441,19 @@ public:
 			return false;
 
 		//disable deactivation
+		/*
 		if (gDisableDeactivation || (gDeactivationTime == btScalar(0.)))
 			return false;
+		*/
 
 		if ( (getActivationState() == ISLAND_SLEEPING) || (getActivationState() == WANTS_DEACTIVATION))
 			return true;
 
-		if (m_deactivationTime> gDeactivationTime)
+		if (m_deactivationTime > gDeactivationTime)
 		{
 			return true;
 		}
+
 		return false;
 	}
 
@@ -542,6 +549,8 @@ public:
 	virtual void serializeSingleObject(class btSerializer* serializer) const;
 
 };
+
+// TODO (DrChat): Need to update the dna str for center of mass offset
 
 //@todo add m_optionalMotionState and m_constraintRefs to btRigidBodyData
 ///do not change those serialization structures, it requires an updated sBulletDNAstr/sBulletDNAstr64

@@ -12,6 +12,39 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+static void CalculateConvexBuoyancyForce(btConvexShape *pConvex, btTransform &objRelTrans, Vector4D fluidSurface, float fluidDensity, float convexBuoyancyRatio, btVector3 &force, btVector3 &torque) {
+	force.setZero();
+	torque.setZero();
+
+	
+}
+
+static void CalculateCompoundBuoyancyForce(CPhysicsObject *pObject, btCompoundShape *pCompound, Vector4D fluidSurface, float fluidDensity, btVector3 &force, btVector3 &torque) {
+
+}
+
+// TODO: Buoyancy calculation
+static void CalculateBuoyancyForce(CPhysicsObject *pObject, Vector4D fluidSurface, float fluidDensity) {
+	btRigidBody *pBody = pObject->GetObject();
+	btCollisionShape *pShape = pBody->getCollisionShape();
+
+	if (pShape->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pShape;
+		btVector3 force, torque;
+		CalculateCompoundBuoyancyForce(pObject, pCompound, fluidSurface, fluidDensity, force, torque);
+
+		pBody->applyCentralForce(force);
+		pBody->applyTorque(torque);
+	} else if (pShape->isConvex()) {
+		btConvexShape *pConvex = (btConvexShape *)pShape;
+		btVector3 force, torque;
+		CalculateConvexBuoyancyForce(pConvex, pBody->getWorldTransform(), fluidSurface, fluidDensity, pObject->GetBuoyancyRatio(), force, torque);
+
+		pBody->applyCentralForce(force);
+		pBody->applyTorque(torque);
+	}
+}
+
 /********************************
 * CLASS CPhysicsFluidCallback
 ********************************/
@@ -162,14 +195,14 @@ void CPhysicsFluidController::Tick(float dt) {
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectAdded(CPhysicsObject *pObject) {
-	// Disabled due to bug detailed below
-	// m_pEnv->HandleFluidStartTouch(this, pObject);
+	m_pEnv->HandleFluidStartTouch(this, pObject);
 }
 
 // UNEXPOSED
 void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
-	// FIXME: Crash when killing prop_vehicle_jeep inside of water.
-	// m_pEnv->HandleFluidEndTouch(this, pObject);
+	// Don't send the callback on objects that are being removed
+	if (!pObject->IsBeingRemoved())
+		m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 
 /************************

@@ -171,9 +171,6 @@ private:
 
 	CUtlVector<IPhysicsObject *>			m_objects;
 	CUtlVector<IPhysicsObject *>			m_deadObjects;
-
-	CUtlVector<IPhysicsObject *>			m_activeObjects;
-	CUtlVector<IPhysicsObject *>			m_sleepObjects;
 	
 	CUtlVector<IPhysicsSoftBody *>			m_softBodies;
 	CUtlVector<CPhysicsFluidController *>	m_fluids;

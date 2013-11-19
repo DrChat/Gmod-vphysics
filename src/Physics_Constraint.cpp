@@ -237,6 +237,8 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
 	}
 
+	m_pConstraint->setUserConstraintPtr(this);
+
 	if (pReferenceObject)
 		pReferenceObject->AttachedToConstraint(this);
 
@@ -320,7 +322,7 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 	if (pObject == m_pReferenceObject)
 		m_pReferenceObject = NULL;
 
-	// Constraint is no longer valid due to one of it's objects being removed, so stop simulating it.
+	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
 	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
 
 	// Tell the game that this constraint was broken.
@@ -395,9 +397,11 @@ void CPhysicsConstraintGroup::RemoveConstraint(CPhysicsConstraint *pConstraint) 
 ************************/
 // REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE CPhysicsEnvironment::DestroySpring!!!
 
-CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint)
-	: CPhysicsConstraint(pEnv, NULL, pReferenceObject, pAttachedObject, pConstraint, CONSTRAINT_SPRING) {
-	
+CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint) {
+	m_pEnvironment = pEnv;
+
+	m_pReferenceObject = pReferenceObject;
+	m_pAttachedObject = pAttachedObject;
 }
 
 CPhysicsSpring::~CPhysicsSpring() {
@@ -446,7 +450,6 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 }
 
 // NOT COMPLETE
-// BUG: Deleting ragdolls crashes the game (SOMETIMES, related to another bug)
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -477,19 +480,10 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	angLowerLimit.m_floats[1] = DEG2RAD(limit.maxRotation);
 
 	limit = ragdoll.axes[1];
-	angUpperLimit.m_floats[2] = DEG2RAD(limit.maxRotation);
-	angLowerLimit.m_floats[2] = DEG2RAD(limit.minRotation);
+	angUpperLimit.m_floats[2] = DEG2RAD(-limit.maxRotation);
+	angLowerLimit.m_floats[2] = DEG2RAD(-limit.minRotation);
 
 	pConstraint->setEnabled(ragdoll.isActive);
-
-	/*
-
-	// We shouldn't be using a cone twist constraint! old vphysics uses a "limited ballsocket" constraint
-	btConeTwistConstraint *pConstraint = new btConeTwistConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), bullAFrame, bullBFrame);
-
-	pConstraint->setAngularOnly(ragdoll.onlyAngularLimits);
-	pConstraint->setEnabled(ragdoll.isActive);
-	*/
 
 	// Set axis limits
 	// FIXME: Source wants to set min and max limits to different values, bullet cone twist only supports swing span limits

@@ -63,9 +63,13 @@ CPhysicsObject::CPhysicsObject() {
 	m_pGhostObject = NULL;
 	m_pGhostCallback = NULL;
 	m_pName = NULL;
+
+	m_bRemoving = false;
 }
 
 CPhysicsObject::~CPhysicsObject() {
+	m_bRemoving = true;
+
 	if (m_pEnv) {
 		RemoveShadowController();
 		m_pEnv->GetDragController()->RemovePhysicsObject(this);

@@ -66,39 +66,6 @@ struct CDetectWaterRayResultCallback : public btCollisionWorld::ClosestRayResult
 	const btRigidBody *m_pIgnoreObject;
 };
 
-// Purpose: Airboat raycaster
-class CAirboatRaycaster : public btVehicleRaycaster {
-	public:
-		CAirboatRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
-			m_pWorld = pWorld;
-			m_pBody = pBody;
-		}
-
-		// Returns the rigid body the ray hits
-		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
-			CDetectWaterRayResultCallback rayCallback(m_pBody, from, to);
-
-			m_pWorld->rayTest(from, to, rayCallback);
-
-			if (rayCallback.hasHit()) {
-				const btRigidBody *body = btRigidBody::upcast(rayCallback.m_collisionObject);
-				if (body) {
-					result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
-					result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
-					result.m_hitNormalInWorld.normalize();
-					result.m_distFraction = rayCallback.m_closestHitFraction;
-					return (void *)body;
-				}
-			}
-
-			return NULL;
-		}
-
-	private:
-		btDynamicsWorld *	m_pWorld;
-		btRigidBody *		m_pBody;
-};
-
 struct CIgnoreObjectRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
 	CIgnoreObjectRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
 			: ClosestRayResultCallback(from, to) {
@@ -153,6 +120,52 @@ class CCarRaycaster : public btVehicleRaycaster {
 		CPhysicsVehicleController *	m_pController;
 };
 
+// Purpose: Airboat raycaster
+/*
+class CAirboatRaycaster : public btVehicleRaycaster {
+	public:
+		CAirboatRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
+			m_pWorld = pWorld;
+			m_pBody = pBody;
+		}
+
+		// Returns the rigid body the ray hits
+		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
+			CDetectWaterRayResultCallback rayCallback(m_pBody, from, to);
+
+			m_pWorld->rayTest(from, to, rayCallback);
+
+			if (rayCallback.hasHit()) {
+				const btRigidBody *body = btRigidBody::upcast(rayCallback.m_collisionObject);
+				if (body) {
+					result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+					result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+					result.m_hitNormalInWorld.normalize();
+					result.m_distFraction = rayCallback.m_closestHitFraction;
+					return (void *)body;
+				}
+			}
+
+			return NULL;
+		}
+
+	private:
+		btDynamicsWorld *	m_pWorld;
+		btRigidBody *		m_pBody;
+};
+*/
+
+class CAirboatVehicle : public btActionInterface {
+	public:
+		CAirboatVehicle();
+
+		void updateAction(btCollisionWorld *colWorld, btScalar dt);
+};
+
+void CAirboatVehicle::updateAction(btCollisionWorld *colWorld, btScalar dt) {
+
+}
+
 /*********************************
 * CLASS CPhysicsVehicleController
 *********************************/
@@ -204,7 +217,8 @@ void CPhysicsVehicleController::InitBullVehicle() {
 	else if (m_iVehicleType == VEHICLE_TYPE_CAR_RAYCAST)
 		m_pRaycaster = new CCarRaycaster(m_pEnv->GetBulletEnvironment(), this);
 	else if (m_iVehicleType == VEHICLE_TYPE_AIRBOAT_RAYCAST)
-		m_pRaycaster = new CAirboatRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
+		Assert(0);
+		//m_pRaycaster = new CAirboatRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
 	else
 		Assert(0);
 

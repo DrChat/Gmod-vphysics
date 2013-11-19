@@ -250,7 +250,7 @@ btScalar btRaycastVehicle::rayCast(btWheelInfo& wheel)
 }
 
 
-const btTransform& btRaycastVehicle::getChassisWorldTransform() const
+const btTransform btRaycastVehicle::getChassisWorldTransform() const
 {
 	/*if (getRigidBody()->getMotionState())
 	{

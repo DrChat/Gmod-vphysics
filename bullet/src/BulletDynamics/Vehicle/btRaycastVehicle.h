@@ -58,8 +58,8 @@ public:
 		};
 private:
 
-	btScalar	m_tau;
-	btScalar	m_damping;
+	//btScalar	m_tau; // unused
+	//btScalar	m_damping; // unused
 	btVehicleRaycaster*	m_vehicleRaycaster;
 	btScalar	m_pitchControl;
 	btScalar	m_steeringValue; 
@@ -92,7 +92,7 @@ public:
 	///btActionInterface interface
 	void	debugDraw(btIDebugDraw* debugDrawer);
 			
-	const btTransform& getChassisWorldTransform() const;
+	const btTransform getChassisWorldTransform() const;
 	
 	btScalar rayCast(btWheelInfo& wheel);
 

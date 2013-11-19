@@ -63,7 +63,7 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		btTypedConstraint *		m_pConstraint;
 };
 
-class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
+class CPhysicsSpring : public IPhysicsSpring {
 	public:
 		CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint);
 		~CPhysicsSpring();
@@ -78,6 +78,13 @@ class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 
 		// Get the end object
 		IPhysicsObject *GetEndObject();
+
+	private:
+		CPhysicsObject *m_pReferenceObject;
+		CPhysicsObject *m_pAttachedObject;
+		CPhysicsEnvironment *m_pEnvironment;
+
+		btGeneric6DofSpringConstraint *m_pSpring;
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?

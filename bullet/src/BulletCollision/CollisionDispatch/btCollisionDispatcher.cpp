@@ -57,6 +57,8 @@ m_dispatcherFlags(btCollisionDispatcher::CD_USE_RELATIVE_CONTACT_BREAKING_THRESH
 
 void btCollisionDispatcher::registerCollisionCreateFunc(int proxyType0, int proxyType1, btCollisionAlgorithmCreateFunc *createFunc)
 {
+	btAssert(proxyType0 < MAX_BROADPHASE_COLLISION_TYPES && proxyType1 < MAX_BROADPHASE_COLLISION_TYPES);
+
 	m_doubleDispatch[proxyType0][proxyType1] = createFunc;
 }
 
