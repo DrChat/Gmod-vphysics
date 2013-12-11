@@ -13,8 +13,10 @@ class CPhysicsCollisionSet : public IPhysicsCollisionSet {
 		void			DisableCollisions(int index0, int index1);
 
 		bool			ShouldCollide(int index0, int index1);
+
 	private:
 		int				m_iMaxEntries;
+		bool **			m_collArray;
 };
 
 CPhysicsCollisionSet *CreateCollisionSet(int maxElements);

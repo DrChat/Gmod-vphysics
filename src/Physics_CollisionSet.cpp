@@ -14,23 +14,47 @@
 
 CPhysicsCollisionSet::CPhysicsCollisionSet(int iMaxEntries) {
 	m_iMaxEntries = iMaxEntries;
+
+	// FIXME: This way is total crap, and this should be replaced!!!!1
+	m_collArray = new bool*[iMaxEntries];
+	for (int i = 0; i < iMaxEntries; i++) {
+		m_collArray[i] = new bool[iMaxEntries];
+	}
 }
 
 CPhysicsCollisionSet::~CPhysicsCollisionSet() {
+	for (int i = 0; i < m_iMaxEntries; i++) {
+		delete [] m_collArray[i];
+	}
 
+	delete [] m_collArray;
 }
 
 void CPhysicsCollisionSet::EnableCollisions(int index0, int index1) {
-	NOT_IMPLEMENTED
+	Assert(index0 > m_iMaxEntries || index1 > m_iMaxEntries);
+	if (index0 > m_iMaxEntries || index1 > m_iMaxEntries) {
+		return;
+	}
+
+	m_collArray[index0][index1] = true;
 }
 
 void CPhysicsCollisionSet::DisableCollisions(int index0, int index1) {
-	NOT_IMPLEMENTED
+	Assert(index0 > m_iMaxEntries || index1 > m_iMaxEntries);
+	if (index0 > m_iMaxEntries || index1 > m_iMaxEntries) {
+		return;
+	}
+
+	m_collArray[index0][index1] = false;
 }
 
 bool CPhysicsCollisionSet::ShouldCollide(int index0, int index1) {
-	NOT_IMPLEMENTED
-	return true;
+	Assert(index0 > m_iMaxEntries || index1 > m_iMaxEntries);
+	if (index0 > m_iMaxEntries || index1 > m_iMaxEntries) {
+		return true;
+	}
+
+	return m_collArray[index0][index1];
 }
 
 /*********************
