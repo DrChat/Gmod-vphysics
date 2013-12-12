@@ -1,5 +1,5 @@
-#ifndef MATH_H
-#define MATH_H
+#ifndef MISCMATH_H
+#define MISCMATH_H
 
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btMatrix3x3.h>

@@ -2,7 +2,7 @@
 
 #include <cmodel.h>
 
-#include "math.h"
+#include "miscmath.h"
 #include "Physics_Object.h"
 #include "Physics_Environment.h"
 #include "Physics_Collision.h"
