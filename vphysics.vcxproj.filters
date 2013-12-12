@@ -17,9 +17,6 @@
     <ClCompile Include="src\convert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\math.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,15 +77,15 @@
     <ClCompile Include="src\Physics_VehicleControllerCustom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\miscmath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\convert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\IController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\StdAfx.h">
@@ -161,6 +158,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics_VehicleControllerCustom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\miscmath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

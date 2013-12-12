@@ -179,7 +179,7 @@
     <ClCompile Include="src\Physics_VehicleController.cpp" />
     <ClCompile Include="src\Physics_PlayerController.cpp" />
     <ClCompile Include="src\Physics_ShadowController.cpp" />
-    <ClCompile Include="src\math.cpp" />
+    <ClCompile Include="src\miscmath.cpp" />
     <ClCompile Include="src\Physics_VehicleControllerCustom.cpp" />
     <ClCompile Include="src\StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -210,7 +210,7 @@
     <ClInclude Include="src\Physics_PlayerController.h" />
     <ClInclude Include="src\Physics_ShadowController.h" />
     <ClInclude Include="src\IController.h" />
-    <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\miscmath.h" />
     <ClInclude Include="src\Physics_VehicleControllerCustom.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\StdAfx.h" />
