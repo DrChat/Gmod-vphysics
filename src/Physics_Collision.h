@@ -4,7 +4,7 @@
 	#pragma once
 #endif
 
-struct PhysicsShapeInfo {
+struct physshapeinfo_t {
 	btVector3 massCenter;
 };
 

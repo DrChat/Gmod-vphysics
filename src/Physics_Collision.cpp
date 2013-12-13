@@ -240,7 +240,7 @@ void DestroyCompoundShape(btCompoundShape *pCompound) {
 		g_PhysicsCollision.DestroyCollide((CPhysCollide *)pShape);
 	}
 
-	delete (PhysicsShapeInfo *)pCompound->getUserPointer();
+	delete (physshapeinfo_t *)pCompound->getUserPointer();
 	delete pCompound;
 }
 
@@ -318,7 +318,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 	btTransform trans(bullAng, bullPos);
 
 	// Compensate for mass offset.
-	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
+	physshapeinfo_t *pInfo = (physshapeinfo_t *)pShape->getUserPointer();
 	if (pInfo)
 		trans *= btTransform(btMatrix3x3::getIdentity(), pInfo->massCenter);
 
@@ -345,7 +345,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 	ConvertRotationToBull(collideAngles, rot);
 	btTransform transform(rot, pos);
 
-	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
+	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
 	if (shapeInfo)
 		transform.setOrigin(transform.getOrigin() + shapeInfo->massCenter);
 
@@ -365,7 +365,7 @@ void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOu
 	if (!pCollide || !pOutMassCenter) return;
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
-	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
+	physshapeinfo_t *pInfo = (physshapeinfo_t *)pShape->getUserPointer();
 
 	if (pInfo) {
 		Vector massCenter;
@@ -379,7 +379,7 @@ void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vecto
 	if (!pCollide) return;
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
-	PhysicsShapeInfo *pInfo = (PhysicsShapeInfo *)pShape->getUserPointer();
+	physshapeinfo_t *pInfo = (physshapeinfo_t *)pShape->getUserPointer();
 
 	if (pInfo) {
 		btVector3 bullMassCenter;
@@ -606,7 +606,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	ConvertRotationToBull(collideAngles, btmatrix);
 	btTransform transform(btmatrix, btvec);
 
-	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
+	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
 	if (shapeInfo)
 		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
 
@@ -833,7 +833,7 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 	}
 
 	// Store info about the mass center for later use.
-	PhysicsShapeInfo *info = new PhysicsShapeInfo;
+	physshapeinfo_t *info = new physshapeinfo_t;
 	ConvertIVPPosToBull(ivpsurface->mass_center, info->massCenter);
 
 	btCompoundShape *pCompound = new btCompoundShape;

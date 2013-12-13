@@ -126,6 +126,7 @@ CShadowController::CShadowController(CPhysicsObject *pObject, bool allowTranslat
 	m_shadow.targetPosition.setZero();
 	m_shadow.targetRotation = btQuaternion::getIdentity();
 	m_flags = 0;
+	m_ticksSinceUpdate = 0;
 
 	SetAllowsTranslation(allowTranslation);
 	SetAllowsRotation(allowRotation);
@@ -152,6 +153,8 @@ void CShadowController::Tick(float deltaTime) {
 	} else {
 		m_shadow.lastPosition.setZero();
 	}
+
+	m_ticksSinceUpdate++;
 }
 
 void CShadowController::Update(const Vector &position, const QAngle &angles, float timeOffset) {
@@ -164,6 +167,7 @@ void CShadowController::Update(const Vector &position, const QAngle &angles, flo
 
 	m_enable = true;
 	m_timeOffset = timeOffset;
+	m_ticksSinceUpdate = 0;
 
 	if (IsEqual(targetPosition, m_shadow.targetPosition) && IsEqual(targetRotation, m_shadow.targetRotation)) return;
 
@@ -337,6 +341,10 @@ void CShadowController::DetachObject() {
 	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
 
 	body->setActivationState(ACTIVE_TAG);
+}
+
+int CShadowController::GetTicksSinceUpdate() {
+	return m_ticksSinceUpdate;
 }
 
 /*************************

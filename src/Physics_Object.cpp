@@ -564,30 +564,40 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 	VectorIRotate(worldVector, matrix, *localVector);
 }
 
-// These two functions apply an insanely low force!
 void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
+	if (!IsMoveable()) {
+		return;
+	}
+
 	// forceVector is in kg*in/s
 	// bullet takes forces in newtons, aka kg*m/s
 
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
-	m_pObject->applyCentralForce(force);
+	m_pObject->applyCentralImpulse(force);
+	Wake();
 }
 
 void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &worldPosition) {
+	if (!IsMoveable()) {
+		return;
+	}
+
 	Vector local;
 	WorldToLocal(&local, worldPosition);
 
 	btVector3 force, offset;
 	ConvertForceImpulseToBull(forceVector, force);
 	ConvertPosToBull(local, offset);
-	m_pObject->applyForce(force, offset);
+	m_pObject->applyImpulse(force, offset);
+	Wake();
 }
 
 void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 	btVector3 bullTorque;
 	ConvertAngularImpulseToBull(torque, bullTorque);
-	m_pObject->applyTorque(bullTorque);
+	m_pObject->applyTorqueImpulse(bullTorque);
+	Wake();
 }
 
 // Output passed to ApplyForceCenter/ApplyTorqueCenter
@@ -729,7 +739,7 @@ int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 		ConvertRotationToHL(transform.getBasis(), *angles);
 
 	// Ticks simulated since last UpdateShadow()
-	return 0; // return pVEnv->GetSimulatedPSIs();
+	return m_pShadow->GetTicksSinceUpdate();
 }
 
 IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
@@ -739,6 +749,7 @@ IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
 void CPhysicsObject::RemoveShadowController() {
 	if (m_pShadow)
 		m_pEnv->DestroyShadowController(m_pShadow);
+
 	RemoveCallbackFlags(CALLBACK_SHADOW_COLLISION);
 	AddCallbackFlags(CALLBACK_GLOBAL_FRICTION | CALLBACK_GLOBAL_COLLIDE_STATIC);
 
@@ -1056,7 +1067,7 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
-	PhysicsShapeInfo *shapeInfo = (PhysicsShapeInfo *)shape->getUserPointer();
+	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
 	btTransform masscenter = btTransform::getIdentity();
 	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
 

@@ -49,11 +49,13 @@ class CShadowController : public IController, public IPhysicsShadowController
 		void					Tick(float deltaTime);
 		void					SetAllowsTranslation(bool enable);
 		void					SetAllowsRotation(bool enable);
+
+		int						GetTicksSinceUpdate();
 	private:
 		void					AttachObject();
 		void					DetachObject();
 
-		// NOTE: If you add more than 8 flags, change the m_flags variable type to a short.
+		// NOTE: If you add more than 7 flags, change the m_flags variable type to a short.
 		enum EShadowFlags {
 			FLAG_ALLOWPHYSICSMOVEMENT	= 1<<0,
 			FLAG_ALLOWPHYSICSROTATION	= 1<<1,
@@ -67,6 +69,7 @@ class CShadowController : public IController, public IPhysicsShadowController
 		float					m_savedMass;
 		float					m_timeOffset;
 		int						m_savedMaterialIndex;
+		int						m_ticksSinceUpdate;
 		bool					m_enable;
 		char					m_flags;
 		shadowcontrol_params_t	m_shadow;
