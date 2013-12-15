@@ -304,6 +304,8 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	pWheel->Wake();
 	pWheel->AddCallbackFlags(CALLBACK_IS_VEHICLE_WHEEL);
 
+	pWheel->GetObject()->setActivationState(DISABLE_DEACTIVATION);
+
 	// Create the wheel in bullet
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;

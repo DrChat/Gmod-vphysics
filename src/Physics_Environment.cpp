@@ -224,6 +224,10 @@ class CObjectTracker {
 				if (colObjArray[i]->getActivationState() != pObj->GetLastActivationState()) {
 					int newState = colObjArray[i]->getActivationState();
 
+					// Not a state we want to track.
+					if (newState == WANTS_DEACTIVATION)
+						continue;
+
 					if (m_pObjEvents) {
 						switch (newState) {
 							// FIXME: Objects may call objectwake twice if they go from disable_deactivation -> active_tag
@@ -561,8 +565,9 @@ IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, 
 void CPhysicsEnvironment::DestroySpring(IPhysicsSpring *pSpring) {
 	if (!pSpring) return;
 
+	NOT_IMPLEMENTED
 	// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE THIS FUNCTION!!!
-	DestroyConstraint((IPhysicsConstraint *)pSpring);
+	//DestroyConstraint(pSpring);
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
