@@ -13,6 +13,9 @@
 
 CPhysicsSurfaceProps::CPhysicsSurfaceProps() {
 	m_strings = new CUtlSymbolTable(0, 32, true);
+
+	// HACK: Prevent sound list from starting at index 0 (invalid index)
+	m_soundList.AddToHead();
 }
 
 CPhysicsSurfaceProps::~CPhysicsSurfaceProps() {
@@ -35,7 +38,9 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 		prop.data.game.maxSpeedFactor = 1.0f;
 		prop.data.game.jumpFactor = 1.0f;
 		prop.data.game.climbable = 0.0f;
-		CopyPhysicsProperties(&prop, baseMaterial);
+
+		if (baseMaterial != -1)
+			CopyPhysicsProperties(&prop, baseMaterial);
 
 		for (KeyValues *data = surface->GetFirstSubKey(); data; data = data->GetNextKey()) {
 			const char *key = data->GetName();
@@ -78,34 +83,74 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 				}
 			else if (!Q_stricmp(key, "stepleft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.stepleft = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.stepleft = id;
+				} else {
+					prop.data.sounds.stepleft = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "stepright")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.stepright = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.stepright = id;
+				} else {
+					prop.data.sounds.stepright = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "impactsoft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.impactSoft = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.impactSoft = id;
+				} else {
+					prop.data.sounds.impactSoft = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "impacthard")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.impactHard = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.impactHard = id;
+				} else {
+					prop.data.sounds.impactHard = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "scrapesmooth")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.scrapeSmooth = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.scrapeSmooth = id;
+				} else {
+					prop.data.sounds.scrapeSmooth = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "scraperough")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.scrapeRough = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.scrapeRough = id;
+				} else {
+					prop.data.sounds.scrapeRough = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "bulletimpact")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.bulletImpact = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.bulletImpact = id;
+				} else {
+					prop.data.sounds.bulletImpact = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "break")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.breakSound = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.breakSound = id;
+				} else {
+					prop.data.sounds.breakSound = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "strain")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.strainSound = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.strainSound = id;
+				} else {
+					prop.data.sounds.strainSound = m_soundList.AddToTail(sym);
+				}
 			} else if (!Q_stricmp(key, "rolling")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				prop.data.sounds.rolling = m_soundList.AddToTail(sym);
+				if (int id = m_soundList.Find(sym) != -1) {
+					prop.data.sounds.rolling = id;
+				} else {
+					prop.data.sounds.rolling = m_soundList.AddToTail(sym);
+				}
 			} else
 				AssertMsg2(0, "Bad surfaceprop key %s (%s)\n", key, data->GetString());
 		}
@@ -118,7 +163,7 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 }
 
 int CPhysicsSurfaceProps::SurfacePropCount() const {
-	return m_props.Size();
+	return m_props.Count();
 }
 
 int CPhysicsSurfaceProps::GetSurfaceIndex(const char *pSurfacePropName) const {
@@ -130,7 +175,8 @@ int CPhysicsSurfaceProps::GetSurfaceIndex(const char *pSurfacePropName) const {
 	CUtlSymbol id = m_strings->Find(pSurfacePropName);
 	if (id.IsValid()) {
 		for (int i = 0; i < m_props.Size(); i++) {
-			if (m_props[i].m_name == id) return i;
+			if (m_props[i].m_name == id)
+				return i;
 		}
 	}
 
