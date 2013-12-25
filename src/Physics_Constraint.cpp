@@ -230,6 +230,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_pGroup = (CPhysicsConstraintGroup *)pGroup; // May be NULL in the case of spring constraints.
 	m_pEnv = pEnv;
 	m_type = type;
+	m_bRemovedFromEnv = false;
 
 	if (m_type == CONSTRAINT_RAGDOLL) {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
