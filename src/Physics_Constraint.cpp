@@ -251,7 +251,8 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 }
 
 CPhysicsConstraint::~CPhysicsConstraint() {
-	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+	if (!m_bRemovedFromEnv)
+		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
 
 	if (m_pReferenceObject)
 		m_pReferenceObject->DetachedFromConstraint(this);
@@ -324,6 +325,7 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 
 	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
 	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+	m_bRemovedFromEnv = true;
 
 	// Tell the game that this constraint was broken.
 	m_pEnv->HandleConstraintBroken(this);

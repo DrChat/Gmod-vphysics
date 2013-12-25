@@ -59,6 +59,7 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		void *					m_pGameData;
 		CPhysicsEnvironment *	m_pEnv;
 		EConstraintType			m_type;
+		bool					m_bRemovedFromEnv;
 
 		btTypedConstraint *		m_pConstraint;
 };
