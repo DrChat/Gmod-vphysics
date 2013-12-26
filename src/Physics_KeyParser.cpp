@@ -63,29 +63,29 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "index"))
+		if (!Q_stricmp(key, "index"))
 			pSolid->index = data->GetInt();
-		else if (!stricmp(key, "name"))
+		else if (!Q_stricmp(key, "name"))
 			strncpy(pSolid->name, data->GetString(), sizeof(pSolid->name));
-		else if (!stricmp(key, "parent"))
+		else if (!Q_stricmp(key, "parent"))
 			strncpy(pSolid->parent, data->GetString(), sizeof(pSolid->parent));
-		else if (!stricmp(key, "mass"))
+		else if (!Q_stricmp(key, "mass"))
 			pSolid->params.mass = data->GetFloat();
-		else if (!stricmp(key, "massCenterOverride"))
+		else if (!Q_stricmp(key, "massCenterOverride"))
 			ReadVector(data->GetString(), pSolid->massCenterOverride);
-		else if (!stricmp(key, "surfaceprop"))
+		else if (!Q_stricmp(key, "surfaceprop"))
 			strncpy(pSolid->surfaceprop, data->GetString(), sizeof(pSolid->surfaceprop));
-		else if (!stricmp(key, "damping"))
+		else if (!Q_stricmp(key, "damping"))
 			pSolid->params.damping = data->GetFloat();
-		else if (!stricmp(key, "rotdamping"))
+		else if (!Q_stricmp(key, "rotdamping"))
 			pSolid->params.rotdamping = data->GetFloat();
-		else if (!stricmp(key, "inertia"))
+		else if (!Q_stricmp(key, "inertia"))
 			pSolid->params.inertia = data->GetFloat();
-		else if (!stricmp(key, "volume"))
+		else if (!Q_stricmp(key, "volume"))
 			pSolid->params.volume = data->GetFloat();
-		else if (!stricmp(key, "drag"))
+		else if (!Q_stricmp(key, "drag"))
 			pSolid->params.dragCoefficient = data->GetFloat();
-		//else if (!stricmp(key, "rollingdrag")) // This is in vphysics.so but it doesn't seem to set any variables.
+		//else if (!Q_stricmp(key, "rollingdrag")) // This is in vphysics.so but it doesn't seem to set any variables.
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
 	}
@@ -102,17 +102,17 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "index"))
+		if (!Q_stricmp(key, "index"))
 			pFluid->index = data->GetInt();
-		else if (!stricmp(key, "surfaceprop"))
+		else if (!Q_stricmp(key, "surfaceprop"))
 			strncpy(pFluid->surfaceprop, data->GetString(), sizeof(pFluid->surfaceprop));
-		else if (!stricmp(key, "damping"))
+		else if (!Q_stricmp(key, "damping"))
 			pFluid->params.damping = data->GetFloat();
-		else if (!stricmp(key, "contents"))
+		else if (!Q_stricmp(key, "contents"))
 			pFluid->params.contents = data->GetInt();
-		else if (!stricmp(key, "surfaceplane"))
+		else if (!Q_stricmp(key, "surfaceplane"))
 			ReadVector4D(data->GetString(), pFluid->params.surfacePlane);
-		else if (!stricmp(key, "currentvelocity"))
+		else if (!Q_stricmp(key, "currentvelocity"))
 			ReadVector(data->GetString(), pFluid->params.currentVelocity);
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pFluid, key, data->GetString());
@@ -133,31 +133,31 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "parent"))
+		if (!Q_stricmp(key, "parent"))
 			pConstraint->parentIndex = data->GetInt();
-		if (!stricmp(key, "child"))
+		if (!Q_stricmp(key, "child"))
 			pConstraint->childIndex = data->GetInt();
-		else if (!stricmp(key, "xmin"))
+		else if (!Q_stricmp(key, "xmin"))
 			pConstraint->axes[0].minRotation = data->GetFloat();
-		else if (!stricmp(key, "xmax"))
+		else if (!Q_stricmp(key, "xmax"))
 			pConstraint->axes[0].maxRotation = data->GetFloat();
-		else if (!stricmp(key, "xfriction")) {
+		else if (!Q_stricmp(key, "xfriction")) {
 			pConstraint->axes[0].angularVelocity = 0;
 			pConstraint->axes[0].torque = data->GetFloat();
 		}
-		else if (!stricmp(key, "ymin"))
+		else if (!Q_stricmp(key, "ymin"))
 			pConstraint->axes[1].minRotation = data->GetFloat();
-		else if (!stricmp(key, "ymax"))
+		else if (!Q_stricmp(key, "ymax"))
 			pConstraint->axes[1].maxRotation = data->GetFloat();
-		else if (!stricmp(key, "yfriction")) {
+		else if (!Q_stricmp(key, "yfriction")) {
 			pConstraint->axes[1].angularVelocity = 0;
 			pConstraint->axes[1].torque = data->GetFloat();
 		}
-		else if (!stricmp(key, "zmin"))
+		else if (!Q_stricmp(key, "zmin"))
 			pConstraint->axes[2].minRotation = data->GetFloat();
-		else if (!stricmp(key, "zmax"))
+		else if (!Q_stricmp(key, "zmax"))
 			pConstraint->axes[2].maxRotation = data->GetFloat();
-		else if (!stricmp(key, "zfriction")) {
+		else if (!Q_stricmp(key, "zfriction")) {
 			pConstraint->axes[2].angularVelocity = 0;
 			pConstraint->axes[2].torque = data->GetFloat();
 		}
@@ -206,15 +206,15 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "wheelsperaxle"))
+		if (!Q_stricmp(key, "wheelsperaxle"))
 			pVehicle->wheelsPerAxle = data->GetInt();
-		else if (!stricmp(key, "body"))
+		else if (!Q_stricmp(key, "body"))
 			ParseVehicleBody(pVehicle->body, data);
-		else if (!stricmp(key, "engine"))
+		else if (!Q_stricmp(key, "engine"))
 			ParseVehicleEngine(pVehicle->engine, data);
-		else if (!stricmp(key, "steering"))
+		else if (!Q_stricmp(key, "steering"))
 			ParseVehicleSteering(pVehicle->steering, data);
-		else if (!stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
+		else if (!Q_stricmp(key, "axle") && pVehicle->axleCount < VEHICLE_MAX_AXLE_COUNT)
 			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pVehicle, key, data->GetString());
@@ -228,13 +228,13 @@ void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "wheel"))
+		if (!Q_stricmp(key, "wheel"))
 			ParseVehicleWheel(axle.wheels, data);
-		else if (!stricmp(key, "suspension"))
+		else if (!Q_stricmp(key, "suspension"))
 			ParseVehicleSuspension(axle.suspension, data);
-		else if (!stricmp(key, "torquefactor"))
+		else if (!Q_stricmp(key, "torquefactor"))
 			axle.torqueFactor = data->GetFloat();
-		else if (!stricmp(key, "brakefactor"))
+		else if (!Q_stricmp(key, "brakefactor"))
 			axle.brakeFactor = data->GetFloat();
 	}
 }
@@ -243,23 +243,23 @@ void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValue
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "radius"))
+		if (!Q_stricmp(key, "radius"))
 			wheel.radius = data->GetFloat();
-		else if (!stricmp(key, "mass"))
+		else if (!Q_stricmp(key, "mass"))
 			wheel.mass = data->GetFloat();
-		else if (!stricmp(key, "inertia"))
+		else if (!Q_stricmp(key, "inertia"))
 			wheel.inertia = data->GetFloat();
-		else if (!stricmp(key, "damping"))
+		else if (!Q_stricmp(key, "damping"))
 			wheel.damping = data->GetFloat();
-		else if (!stricmp(key, "rotdamping"))
+		else if (!Q_stricmp(key, "rotdamping"))
 			wheel.rotdamping = data->GetFloat();
-		else if (!stricmp(key, "frictionscale"))
+		else if (!Q_stricmp(key, "frictionscale"))
 			wheel.frictionScale = data->GetFloat(); // UNUSED!
-		else if (!stricmp(key, "material"))
+		else if (!Q_stricmp(key, "material"))
 			wheel.materialIndex = data->GetInt();
-		else if (!stricmp(key, "skidmaterial"))
+		else if (!Q_stricmp(key, "skidmaterial"))
 			wheel.skidMaterialIndex = data->GetInt();
-		else if (!stricmp(key, "brakematerial"))
+		else if (!Q_stricmp(key, "brakematerial"))
 			wheel.brakeMaterialIndex = data->GetInt();
 	}
 }
@@ -268,15 +268,15 @@ void CPhysicsKeyParser::ParseVehicleSuspension(vehicle_suspensionparams_t &suspe
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "springConstant"))
+		if (!Q_stricmp(key, "springConstant"))
 			suspension.springConstant = data->GetFloat();
-		else if (!stricmp(key, "springDamping"))
+		else if (!Q_stricmp(key, "springDamping"))
 			suspension.springDamping = data->GetFloat();
-		else if (!stricmp(key, "stabilizerConstant"))
+		else if (!Q_stricmp(key, "stabilizerConstant"))
 			suspension.stabilizerConstant = data->GetFloat();
-		else if (!stricmp(key, "springDampingCompression"))
+		else if (!Q_stricmp(key, "springDampingCompression"))
 			suspension.springDampingCompression = data->GetFloat();
-		else if (!stricmp(key, "maxBodyForce"))
+		else if (!Q_stricmp(key, "maxBodyForce"))
 			suspension.maxBodyForce = data->GetFloat();
 	}
 }
@@ -285,21 +285,21 @@ void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "countertorquefactor"))
+		if (!Q_stricmp(key, "countertorquefactor"))
 			body.counterTorqueFactor = data->GetFloat();
-		else if (!stricmp(key, "massCenterOverride"))
+		else if (!Q_stricmp(key, "massCenterOverride"))
 			ReadVector(data->GetString(), body.massCenterOverride);
-		else if (!stricmp(key, "massOverride"))
+		else if (!Q_stricmp(key, "massOverride"))
 			body.massOverride = data->GetFloat();
-		else if (!stricmp(key, "addgravity"))
+		else if (!Q_stricmp(key, "addgravity"))
 			body.addGravity = data->GetFloat();
-		else if (!stricmp(key, "maxAngularVelocity"))
+		else if (!Q_stricmp(key, "maxAngularVelocity"))
 			body.maxAngularVelocity = data->GetFloat();
-		else if (!stricmp(key, "tiltforce"))
+		else if (!Q_stricmp(key, "tiltforce"))
 			body.tiltForce = data->GetFloat();
-		else if (!stricmp(key, "tiltforceheight"))
+		else if (!Q_stricmp(key, "tiltforceheight"))
 			body.tiltForceHeight = data->GetFloat();
-		else if (!stricmp(key, "keepuprighttorque"))
+		else if (!Q_stricmp(key, "keepuprighttorque"))
 			body.keepUprightTorque = data->GetFloat();
 	}
 }
@@ -308,31 +308,31 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "horsepower"))
+		if (!Q_stricmp(key, "horsepower"))
 			engine.horsepower = data->GetFloat();
-		else if (!stricmp(key, "maxrpm"))
+		else if (!Q_stricmp(key, "maxrpm"))
 			engine.maxRPM = data->GetFloat();
-		else if (!stricmp(key, "maxspeed"))
+		else if (!Q_stricmp(key, "maxspeed"))
 			engine.maxSpeed = data->GetFloat();
-		else if (!stricmp(key, "maxReverseSpeed"))
+		else if (!Q_stricmp(key, "maxReverseSpeed"))
 			engine.maxRevSpeed = data->GetFloat();
-		else if (!stricmp(key, "autobrakeSpeedGain"))
+		else if (!Q_stricmp(key, "autobrakeSpeedGain"))
 			engine.autobrakeSpeedGain = data->GetFloat();
-		else if (!stricmp(key, "autobrakeSpeedFactor"))
+		else if (!Q_stricmp(key, "autobrakeSpeedFactor"))
 			engine.autobrakeSpeedFactor = data->GetFloat();
-		else if (!stricmp(key, "autotransmission"))
+		else if (!Q_stricmp(key, "autotransmission"))
 			engine.isAutoTransmission = data->GetInt() > 0;
-		else if (!stricmp(key, "throttletime"))
+		else if (!Q_stricmp(key, "throttletime"))
 			engine.throttleTime = data->GetFloat();
-		else if (!stricmp(key, "axleratio"))
+		else if (!Q_stricmp(key, "axleratio"))
 			engine.axleRatio = data->GetFloat();
-		else if (!stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)
+		else if (!Q_stricmp(key, "gear") && engine.gearCount < VEHICLE_MAX_GEAR_COUNT)
 			engine.gearRatio[engine.gearCount++] = data->GetFloat();
-		else if (!stricmp(key, "shiftuprpm"))
+		else if (!Q_stricmp(key, "shiftuprpm"))
 			engine.shiftUpRPM = data->GetFloat();
-		else if (!stricmp(key, "shiftdownrpm"))
+		else if (!Q_stricmp(key, "shiftdownrpm"))
 			engine.shiftDownRPM = data->GetFloat();
-		else if (!stricmp(key, "boost"))
+		else if (!Q_stricmp(key, "boost"))
 			ParseVehicleEngineBoost(engine, data);
 	}
 }
@@ -341,15 +341,15 @@ void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, 
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "force"))
+		if (!Q_stricmp(key, "force"))
 			engine.boostForce = data->GetFloat();
-		else if (!stricmp(key, "duration"))
+		else if (!Q_stricmp(key, "duration"))
 			engine.boostDuration = data->GetFloat();
-		else if (!stricmp(key, "delay"))
+		else if (!Q_stricmp(key, "delay"))
 			engine.boostDelay = data->GetFloat();
-		else if (!stricmp(key, "torqueboost"))
+		else if (!Q_stricmp(key, "torqueboost"))
 			engine.torqueBoost = data->GetInt() > 0;
-		else if (!stricmp(key, "maxspeed"))
+		else if (!Q_stricmp(key, "maxspeed"))
 			engine.boostMaxSpeed = data->GetFloat();
 	}
 }
@@ -358,43 +358,43 @@ void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering,
 	for (KeyValues *data = kv->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
 
-		if (!stricmp(key, "degreesSlow"))
+		if (!Q_stricmp(key, "degreesSlow"))
 			steering.degreesBoost = data->GetFloat();
-		else if (!stricmp(key, "degreesFast"))
+		else if (!Q_stricmp(key, "degreesFast"))
 			steering.degreesFast = data->GetFloat();
-		else if (!stricmp(key, "degreesBoost"))
+		else if (!Q_stricmp(key, "degreesBoost"))
 			steering.degreesSlow = data->GetFloat();
-		else if (!stricmp(key, "steeringExponent"))
+		else if (!Q_stricmp(key, "steeringExponent"))
 			steering.steeringExponent = data->GetFloat();
-		else if (!stricmp(key, "slowcarspeed"))
+		else if (!Q_stricmp(key, "slowcarspeed"))
 			steering.speedSlow = data->GetFloat();
-		else if (!stricmp(key, "fastcarspeed"))
+		else if (!Q_stricmp(key, "fastcarspeed"))
 			steering.speedFast = data->GetFloat();
-		else if (!stricmp(key, "slowSteeringRate"))
+		else if (!Q_stricmp(key, "slowSteeringRate"))
 			steering.steeringRateSlow = data->GetFloat();
-		else if (!stricmp(key, "fastSteeringRate"))
+		else if (!Q_stricmp(key, "fastSteeringRate"))
 			steering.steeringRateFast = data->GetFloat();
-		else if (!stricmp(key, "steeringRestRateSlow"))
+		else if (!Q_stricmp(key, "steeringRestRateSlow"))
 			steering.steeringRestRateSlow = data->GetFloat();
-		else if (!stricmp(key, "steeringRestRateFast"))
+		else if (!Q_stricmp(key, "steeringRestRateFast"))
 			steering.steeringRestRateFast = data->GetFloat();
-		else if (!stricmp(key, "turnThrottleReduceSlow"))
+		else if (!Q_stricmp(key, "turnThrottleReduceSlow"))
 			steering.turnThrottleReduceSlow = data->GetFloat();
-		else if (!stricmp(key, "turnThrottleReduceFast"))
+		else if (!Q_stricmp(key, "turnThrottleReduceFast"))
 			steering.turnThrottleReduceFast = data->GetFloat();
-		else if (!stricmp(key, "brakeSteeringRateFactor"))
+		else if (!Q_stricmp(key, "brakeSteeringRateFactor"))
 			steering.brakeSteeringRateFactor = data->GetFloat();
-		else if (!stricmp(key, "throttleSteeringRestRateFactor"))
+		else if (!Q_stricmp(key, "throttleSteeringRestRateFactor"))
 			steering.throttleSteeringRestRateFactor = data->GetFloat();
-		else if (!stricmp(key, "boostSteeringRestRateFactor"))
+		else if (!Q_stricmp(key, "boostSteeringRestRateFactor"))
 			steering.boostSteeringRestRateFactor = data->GetFloat();
-		else if (!stricmp(key, "boostSteeringRateFactor"))
+		else if (!Q_stricmp(key, "boostSteeringRateFactor"))
 			steering.boostSteeringRateFactor = data->GetFloat();
-		else if (!stricmp(key, "powerSlideAccel"))
+		else if (!Q_stricmp(key, "powerSlideAccel"))
 			steering.powerSlideAccel = data->GetFloat();
-		else if (!stricmp(key, "skidallowed"))
+		else if (!Q_stricmp(key, "skidallowed"))
 			steering.isSkidAllowed = data->GetInt() > 0;
-		else if (!stricmp(key, "dustcloud"))
+		else if (!Q_stricmp(key, "dustcloud"))
 			steering.dustCloud = data->GetInt() > 0;
 	}
 }

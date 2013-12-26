@@ -8,7 +8,7 @@ enum {
 	MATERIAL_INDEX_SHADOW = 0xF000,
 };
 
-class CSurface : public btMaterial {
+class CSurface {
 	public:
 		CUtlSymbol		m_name;
 		surfacedata_t	data;

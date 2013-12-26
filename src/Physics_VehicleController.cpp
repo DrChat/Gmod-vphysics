@@ -49,10 +49,10 @@ struct CDetectWaterRayResultCallback : public btCollisionWorld::ClosestRayResult
 	bool needsCollision(btBroadphaseProxy *proxy0) const {
 		btRigidBody *pBody = (btRigidBody *)proxy0->m_clientObject;
 		if (pBody) {
-			CPhysicsObject *pPhys = (CPhysicsObject *)pBody->getUserPointer();
-
 			if (pBody == m_pIgnoreObject)
 				return false;
+
+			CPhysicsObject *pPhys = (CPhysicsObject *)pBody->getUserPointer();
 
 			if (pPhys) {
 				if (pPhys->GetCallbackFlags() & CALLBACK_FLUID_TOUCH || pPhys->GetContents() & MASK_WATER)
@@ -121,7 +121,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 };
 
 // Purpose: Airboat raycaster
-/*
+// DEPRECATED: To be replaced...
 class CAirboatRaycaster : public btVehicleRaycaster {
 	public:
 		CAirboatRaycaster(btDynamicsWorld *pWorld, btRigidBody *pBody) {
@@ -153,7 +153,6 @@ class CAirboatRaycaster : public btVehicleRaycaster {
 		btDynamicsWorld *	m_pWorld;
 		btRigidBody *		m_pBody;
 };
-*/
 
 class CAirboatVehicle : public btActionInterface {
 	public:
@@ -217,8 +216,7 @@ void CPhysicsVehicleController::InitBullVehicle() {
 	else if (m_iVehicleType == VEHICLE_TYPE_CAR_RAYCAST)
 		m_pRaycaster = new CCarRaycaster(m_pEnv->GetBulletEnvironment(), this);
 	else if (m_iVehicleType == VEHICLE_TYPE_AIRBOAT_RAYCAST)
-		Assert(0);
-		//m_pRaycaster = new CAirboatRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
+		m_pRaycaster = new CAirboatRaycaster(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
 	else
 		Assert(0);
 

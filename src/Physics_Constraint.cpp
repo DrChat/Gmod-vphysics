@@ -317,7 +317,13 @@ void CPhysicsConstraint::OutputDebugInfo() {
 }
 
 // UNEXPOSED
+// This function is called before the rigid body is deleted.
 void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
+	if (pObject != m_pAttachedObject && pObject != m_pReferenceObject) {
+		AssertMsg(0, "ObjectDestroyed called with object that isn't part of this constraint!");
+		return;
+	}
+
 	if (pObject == m_pAttachedObject)
 		m_pAttachedObject = NULL;
 

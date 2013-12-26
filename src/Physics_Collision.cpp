@@ -4,6 +4,7 @@
 #include <cmodel.h>
 
 #include "Physics_Collision.h"
+#include "Physics_Object.h"
 #include "convert.h"
 #include "Physics_KeyParser.h"
 #include "phydata.h"
@@ -616,9 +617,6 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	ConvertPosToBull(ray.m_Start, startv);
 	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
 
-	// Add start offset to the returned trace only.
-	ptr->startpos = ray.m_Start + ray.m_StartOffset;
-
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
@@ -636,7 +634,6 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				if (cb.m_closestHitFraction == 0.f) {
 					ptr->startsolid = true;
 					ptr->allsolid = true;
-					ptr->fraction = 0;
 
 					ptr->endpos = ptr->startpos;
 				} else {
@@ -662,10 +659,10 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 		// Box trace!
 		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 			// Trace start box
-			g_pDebugOverlay->AddBoxOverlay(ray.m_Start, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 255, 0, 0, 50, 0.0f);
+			g_pDebugOverlay->AddBoxOverlay(ray.m_Start, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 255, 0, 0, 10, 0.0f);
 
 			// End trace box
-			g_pDebugOverlay->AddBoxOverlay(ray.m_Start + ray.m_Delta, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 0, 0, 255, 50, 0.0f);
+			g_pDebugOverlay->AddBoxOverlay(ray.m_Start + ray.m_Delta, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 0, 0, 255, 10, 0.0f);
 		}
 
 		if (ray.m_Delta.Length() != 0) {
@@ -674,7 +671,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			btBoxShape *box = new btBoxShape(btvec.absolute());
 
 			btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
-			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.001f);
+			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.1f);
 
 			ptr->fraction = cb.m_closestHitFraction;
 			ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
@@ -691,6 +688,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				} else {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 				}
+
+				// TODO: Give game surface data
 
 				if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 					if (!ptr->allsolid) {
@@ -1080,6 +1079,7 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContext) 
 }
 
 // BUG: Weird collisions with these, sometimes phys objs fall through the displacement mesh
+// Also ray traces randomly fail (jeep humps displacements aggressively)
 CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
 	IVirtualMeshEvent *pHandler = params.pMeshEventHandler;
 	if (!pHandler) return NULL;
@@ -1090,6 +1090,7 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	pHandler->GetVirtualMesh(params.userData, &list);
 
 	btTriangleMesh *pMesh = new btTriangleMesh;
+	pMesh->m_weldingThreshold = 0.1;
 
 	btVector3 bullVec[3];
 	for (int i = 0; i < list.triangleCount; i++) {

@@ -32,7 +32,7 @@ struct ivpcompactsurface_t {
 		}
 
 		upper_limit_radius = (float)btSwapEndianFloat(upper_limit_radius);
-		
+		// FIXME: How do we swap max_deviation and byte_size?
 	}
 
 	// Recursively byteswap through the ledge tree

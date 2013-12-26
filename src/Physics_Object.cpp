@@ -366,6 +366,9 @@ int CPhysicsObject::GetMaterialIndex() const {
 
 void CPhysicsObject::SetMaterialIndex(int materialIndex) {
 	surfacedata_t *pSurface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
+	if (!pSurface)
+		Msg("asdf");
+
 	if (pSurface) {
 		m_materialIndex = materialIndex;
 		m_pObject->setFriction(pSurface->physics.friction);
