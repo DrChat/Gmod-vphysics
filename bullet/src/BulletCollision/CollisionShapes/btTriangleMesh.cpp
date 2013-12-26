@@ -111,7 +111,7 @@ int	btTriangleMesh::findOrAddVertex(const btVector3& vertex, bool removeDuplicat
 					return i/3;
 				}
 			}
-	}
+		}
 		m_3componentVertices.push_back(vertex.getX());
 		m_3componentVertices.push_back(vertex.getY());
 		m_3componentVertices.push_back(vertex.getZ());

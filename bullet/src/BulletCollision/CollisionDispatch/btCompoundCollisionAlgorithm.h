@@ -35,6 +35,7 @@ extern btShapePairCallback gCompoundChildShapePairCallback;
 /// btCompoundCollisionAlgorithm  supports collision between CompoundCollisionShapes and other collision shapes
 class btCompoundCollisionAlgorithm  : public btActivatingCollisionAlgorithm
 {
+protected:
 	btAlignedObjectArray<btCollisionAlgorithm*> m_childCollisionAlgorithms;
 	bool m_isSwapped;
 

@@ -442,7 +442,7 @@ public:
 
 		//disable deactivation
 		/*
-		if (gDisableDeactivation || (gDeactivationTime == btScalar(0.)))
+		if (gDisableDeactivation)
 			return false;
 		*/
 

@@ -69,7 +69,8 @@ subject to the following restrictions:
 #ifdef BT_USE_NEON
 
 	const float32x4_t ATTRIBUTE_ALIGNED16(btvMzeroMask) = (float32x4_t){-0.0f, -0.0f, -0.0f, -0.0f};
-	const int32x4_t ATTRIBUTE_ALIGNED16(btvFFF0Mask) = (int32x4_t){0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x0};
+	const int32x4_t ATTRIBUTE_ALIGNED16(btvFFF0Mask) = (int32x4_t){static_cast<int32_t>(0xFFFFFFFF),
+		static_cast<int32_t>(0xFFFFFFFF), static_cast<int32_t>(0xFFFFFFFF), 0x0};
 	const int32x4_t ATTRIBUTE_ALIGNED16(btvAbsMask) = (int32x4_t){0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF};
 	const int32x4_t ATTRIBUTE_ALIGNED16(btv3AbsMask) = (int32x4_t){0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x0};
 
@@ -296,7 +297,7 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 		SIMD_FORCE_INLINE btVector3& normalize() 
 		{
 		
-		btAssert(length() != btScalar(0));
+		btAssert(!fuzzyZero());
 
 #if defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE)		
 			// dot product first
@@ -684,9 +685,10 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			return m_floats[0] == btScalar(0) && m_floats[1] == btScalar(0) && m_floats[2] == btScalar(0);
 		}
 
+
 		SIMD_FORCE_INLINE bool fuzzyZero() const 
 		{
-			return length2() < SIMD_EPSILON;
+		return length2() < SIMD_EPSILON*SIMD_EPSILON;
 		}
 
 		SIMD_FORCE_INLINE	void	serialize(struct	btVector3Data& dataOut) const;
@@ -731,7 +733,7 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			return btVector3(r);
 		
 #elif defined(BT_USE_NEON)
-			static const uint32x4_t xyzMask = (const uint32x4_t){ -1, -1, -1, 0 };
+        static const uint32x4_t xyzMask = (const uint32x4_t){ static_cast<uint32_t>(-1), static_cast<uint32_t>(-1), static_cast<uint32_t>(-1), 0 };
 			float32x4_t a0 = vmulq_f32( v0.mVec128, this->mVec128);
 			float32x4_t a1 = vmulq_f32( v1.mVec128, this->mVec128);
 			float32x4_t a2 = vmulq_f32( v2.mVec128, this->mVec128);
@@ -949,9 +951,9 @@ SIMD_FORCE_INLINE btScalar btVector3::distance(const btVector3& v) const
 
 SIMD_FORCE_INLINE btVector3 btVector3::normalized() const
 {
-	btVector3 norm = *this;
+	btVector3 nrm = *this;
 
-	return norm.normalize();
+	return nrm.normalize();
 } 
 
 SIMD_FORCE_INLINE btVector3 btVector3::rotate( const btVector3& wAxis, const btScalar _angle ) const
@@ -1009,21 +1011,21 @@ SIMD_FORCE_INLINE   long    btVector3::maxDot( const btVector3 *array, long arra
 	if( array_count < scalar_cutoff )	
 #endif
 	{
-		btScalar maxDot = -SIMD_INFINITY;
+        btScalar maxDot1 = -SIMD_INFINITY;
 		int i = 0;
 		int ptIndex = -1;
 		for( i = 0; i < array_count; i++ )
 		{
 			btScalar dot = array[i].dot(*this);
 			
-			if( dot > maxDot )
+            if( dot > maxDot1 )
 			{
-				maxDot = dot;
+                maxDot1 = dot;
 				ptIndex = i;
 			}
 		}
 		
-		dotOut = maxDot;
+        dotOut = maxDot1;
 		return ptIndex;
 	}
 #if (defined BT_USE_SSE && defined BT_USE_SIMD_VECTOR3 && defined BT_USE_SSE_IN_API) || defined (BT_USE_NEON)

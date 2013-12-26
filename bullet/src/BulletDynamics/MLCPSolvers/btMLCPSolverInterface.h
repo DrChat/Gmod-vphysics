@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2013 Erwin Coumans  http://bulletphysics.org
+Copyright (c) 2003-2013 Erwin Coumans  http://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -12,33 +12,22 @@ subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
+///original version written by Erwin Coumans, October 2013
 
-#ifndef BT_MULTIBODY_JOINT_LIMIT_CONSTRAINT_H
-#define BT_MULTIBODY_JOINT_LIMIT_CONSTRAINT_H
+#ifndef BT_MLCP_SOLVER_INTERFACE_H
+#define BT_MLCP_SOLVER_INTERFACE_H
 
-#include "btMultiBodyConstraint.h"
-struct btSolverInfo;
+#include "LinearMath/btMatrixX.h"
 
-class btMultiBodyJointLimitConstraint : public btMultiBodyConstraint
+class btMLCPSolverInterface
 {
-protected:
-
-	btScalar	m_lowerBound;
-	btScalar	m_upperBound;
 public:
+	virtual ~btMLCPSolverInterface()
+	{
+	}
 
-	btMultiBodyJointLimitConstraint(btMultiBody* body, int link, btScalar lower, btScalar upper);
-	virtual ~btMultiBodyJointLimitConstraint();
-
-	virtual int getIslandIdA() const;
-	virtual int getIslandIdB() const;
-
-	virtual void createConstraintRows(btMultiBodyConstraintArray& constraintRows,
-		btMultiBodyJacobianData& data,
-		const btContactSolverInfo& infoGlobal);
-	
-	
+	//return true is it solves the problem successfully
+	virtual bool solveMLCP(const btMatrixXu & A, const btVectorXu & b, btVectorXu& x, const btVectorXu & lo,const btVectorXu & hi,const btAlignedObjectArray<int>& limitDependency, int numIterations, bool useSparsity = true)=0;
 };
 
-#endif //BT_MULTIBODY_JOINT_LIMIT_CONSTRAINT_H
-
+#endif //BT_MLCP_SOLVER_INTERFACE_H

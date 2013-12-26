@@ -23,7 +23,7 @@ subject to the following restrictions:
 
 //'temporarily' global variables
 // FIXME: These should not be global variables!!!
-btScalar	gDeactivationTime = btScalar(.01);
+btScalar	gDeactivationTime = btScalar(.04);
 bool	gDisableDeactivation = false;
 static int uniqueId = 0;
 

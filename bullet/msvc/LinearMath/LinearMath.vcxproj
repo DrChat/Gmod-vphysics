@@ -100,6 +100,7 @@
     <ClInclude Include="..\..\src\LinearMath\btIDebugDraw.h" />
     <ClInclude Include="..\..\src\LinearMath\btList.h" />
     <ClInclude Include="..\..\src\LinearMath\btMatrix3x3.h" />
+    <ClInclude Include="..\..\src\LinearMath\btMatrixX.h" />
     <ClInclude Include="..\..\src\LinearMath\btMinMax.h" />
     <ClInclude Include="..\..\src\LinearMath\btMotionState.h" />
     <ClInclude Include="..\..\src\LinearMath\btPolarDecomposition.h" />

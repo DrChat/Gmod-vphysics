@@ -24,6 +24,7 @@
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btHinge2Constraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btHingeConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btJacobianEntry.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btNNCGConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btPoint2PointConstraint.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btSequentialImpulseConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletDynamics\ConstraintSolver\btSliderConstraint.h" />
@@ -42,9 +43,19 @@
     <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyConstraintSolver.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyDynamicsWorld.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyJointLimitConstraint.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyJointMotor.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyLink.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyLinkCollider.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyPoint2Point.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Featherstone\btMultiBodySolverConstraint.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btDantzigLCP.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btDantzigSolver.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btLemkeAlgorithm.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btLemkeSolver.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btMLCPSolver.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btMLCPSolverInterface.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btPATHSolver.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btSolveProjectedGaussSeidel.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btRaycastVehicle.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btVehicleRaycaster.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btWheelInfo.h" />
@@ -59,6 +70,7 @@
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btGeneric6DofSpringConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btHinge2Constraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btHingeConstraint.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btNNCGConstraintSolver.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btPoint2PointConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btSequentialImpulseConstraintSolver.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btSliderConstraint.cpp" />
@@ -70,9 +82,15 @@
     <ClCompile Include="..\..\src\BulletDynamics\Dynamics\btSimpleDynamicsWorld.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Dynamics\Bullet-C-API.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBody.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyConstraint.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyConstraintSolver.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyDynamicsWorld.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyJointLimitConstraint.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyJointMotor.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Featherstone\btMultiBodyPoint2Point.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\MLCPSolvers\btDantzigLCP.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\MLCPSolvers\btLemkeAlgorithm.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\MLCPSolvers\btMLCPSolver.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btRaycastVehicle.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btWheelInfo.cpp" />
   </ItemGroup>

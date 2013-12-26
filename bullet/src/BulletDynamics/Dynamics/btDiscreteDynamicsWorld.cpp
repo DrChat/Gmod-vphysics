@@ -210,7 +210,9 @@ btDiscreteDynamicsWorld::btDiscreteDynamicsWorld(btDispatcher* dispatcher,btBroa
 	m_localTime(0),
 	m_synchronizeAllMotionStates(false),
 	m_applySpeculativeContactRestitution(false),
-	m_profileTimings(0)
+	m_profileTimings(0),
+	m_fixedTimeStep(0),
+	m_latencyMotionStateInterpolation(true)
 {
 	if (!m_constraintSolver)
 	{
@@ -352,7 +354,9 @@ void	btDiscreteDynamicsWorld::synchronizeSingleMotionState(btRigidBody* body)
 		{
 			btTransform interpolatedTransform;
 			btTransformUtil::integrateTransform(body->getInterpolationWorldTransform(),
-				body->getInterpolationLinearVelocity(), body->getInterpolationAngularVelocity(), m_localTime*body->getHitFraction(), interpolatedTransform);
+				body->getInterpolationLinearVelocity(), body->getInterpolationAngularVelocity(),
+				(m_latencyMotionStateInterpolation && m_fixedTimeStep) ? m_localTime - m_fixedTimeStep : m_localTime * body->getHitFraction(),
+				interpolatedTransform);
 			body->getMotionState()->setWorldTransform(interpolatedTransform);
 		}
 	}
@@ -396,6 +400,7 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 	if (maxSubSteps)
 	{
 		//fixed timestep with interpolation
+		m_fixedTimeStep = fixedTimeStep;
 		m_localTime += timeStep;
 		if (m_localTime >= fixedTimeStep)
 		{
@@ -406,7 +411,8 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 	{
 		//variable timestep
 		fixedTimeStep = timeStep;
-		m_localTime = timeStep;
+		m_localTime = m_latencyMotionStateInterpolation ? 0 : timeStep;
+		m_fixedTimeStep = 0;
 		if (btFuzzyZero(timeStep))
 		{
 			numSimulationSubSteps = 0;
@@ -1110,7 +1116,6 @@ void	btDiscreteDynamicsWorld::predictUnconstraintMotion(btScalar timeStep)
 		{
 			//don't integrate/update velocities here, it happens in the constraint solver
 
-			//damping
 			body->applyDamping(timeStep);
 
 			body->predictIntegratedTransform(timeStep, body->getInterpolationWorldTransform());

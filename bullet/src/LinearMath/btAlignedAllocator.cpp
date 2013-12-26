@@ -17,6 +17,9 @@ subject to the following restrictions:
 
 #if defined(_MSC_VER) && defined(BT_DEBUG_MEMORY_ALLOCATIONS)
 	#include <crtdbg.h>
+
+	// Debugging for now.
+	#include <windows.h>
 #endif
 
 int gNumAlignedAllocs = 0;
@@ -74,7 +77,7 @@ static inline void *btDbgAlignedAllocDefault(size_t size, int alignment, int blo
 	if (real)
 	{
 		ret = btAlignPointer(real + sizeof(void *), alignment);
-		*((void **)(ret)-1) = (void *)(real); // Save the real pointer to the spot before the return address
+		*((void **)(ret)-1) = (void *)(real); // Save the real pointer to the spot before the returned address
 	}
 	else
 	{

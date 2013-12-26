@@ -95,6 +95,9 @@
     <ClInclude Include="..\..\src\LinearMath\btDebug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\LinearMath\btMatrixX.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\LinearMath\btVector3.cpp">

@@ -54,7 +54,7 @@ class btSolveGroupTask : public btIThreadTask {
 
 	private:
 		btParallelConstraintSolver *m_pSolver;
-		btSolverCache m_cache;
+		//btSolverCache m_cache;
 
 		btAlignedObjectArray<btCollisionObject *> m_bodies;
 		btAlignedObjectArray<btPersistentManifold *> m_manifolds;
