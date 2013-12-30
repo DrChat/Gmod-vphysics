@@ -331,8 +331,10 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 		m_pReferenceObject = NULL;
 
 	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
-	m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
-	m_bRemovedFromEnv = true;
+	if (!m_bRemovedFromEnv) {
+		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+		m_bRemovedFromEnv = true;
+	}
 
 	// Tell the game that this constraint was broken.
 	m_pEnv->HandleConstraintBroken(this);
@@ -495,7 +497,6 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	pConstraint->setEnabled(ragdoll.isActive);
 
 	// Set axis limits
-	// FIXME: Source wants to set min and max limits to different values, bullet cone twist only supports swing span limits
 	
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
