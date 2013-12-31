@@ -657,6 +657,9 @@ void	btDiscreteDynamicsWorld::addConstraint(btTypedConstraint* constraint, bool 
 
 void	btDiscreteDynamicsWorld::removeConstraint(btTypedConstraint* constraint)
 {
+	// If you hit this assert then the constraint has already been removed!
+	btAssert(m_constraints.findLinearSearch(constraint) != m_constraints.size());
+
 	m_constraints.remove(constraint);
 	constraint->getRigidBodyA().removeConstraintRef(constraint);
 	constraint->getRigidBodyB().removeConstraintRef(constraint);
