@@ -247,11 +247,27 @@ void CPhysicsObject::Sleep() {
 }
 
 void CPhysicsObject::RecheckCollisionFilter() {
-	// Bullet caches nothing about what should collide with what
+	// Remove any collision points that we shouldn't be colliding with now
+	btOverlappingPairCache *pCache = m_pEnv->GetBulletEnvironment()->getBroadphase()->getOverlappingPairCache();
+	btBroadphasePairArray arr = pCache->getOverlappingPairArray();
+	CCollisionSolver *pSolver = m_pEnv->GetCollisionSolver();
+
+	for (int i = pCache->getNumOverlappingPairs()-1; i >= 0; i--) {
+		btBroadphasePair &pair = arr[i];
+		btCollisionObject *pBody0 = (btCollisionObject *)pair.m_pProxy0->m_clientObject;
+		btCollisionObject *pBody1 = (btCollisionObject *)pair.m_pProxy1->m_clientObject;
+
+		CPhysicsObject *pObj0 = (CPhysicsObject *)pBody0->getUserPointer();
+		CPhysicsObject *pObj1 = (CPhysicsObject *)pBody1->getUserPointer();
+
+		if (pSolver && !pSolver->NeedsCollision(pObj0, pObj1)) {
+			pCache->removeOverlappingPair(pair.m_pProxy0, pair.m_pProxy1, m_pEnv->GetBulletEnvironment()->getDispatcher());
+		}
+	}
 }
 
 void CPhysicsObject::RecheckContactPoints() {
-	// TODO: May need to use this to remove all our contact points (such as when we're no collided, we'll still collide with the object for a while)
+	return;
 }
 
 void CPhysicsObject::UpdateCollide() {
@@ -366,8 +382,6 @@ int CPhysicsObject::GetMaterialIndex() const {
 
 void CPhysicsObject::SetMaterialIndex(int materialIndex) {
 	surfacedata_t *pSurface = g_SurfaceDatabase.GetSurfaceData(materialIndex);
-	if (!pSurface)
-		Msg("asdf");
 
 	if (pSurface) {
 		m_materialIndex = materialIndex;
@@ -475,6 +489,8 @@ void CPhysicsObject::GetPositionMatrix(matrix3x4_t *positionMatrix) const {
 void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	if (!velocity && !angularVelocity) return;
 
+	if (!IsMotionEnabled()) return;
+
 	btVector3 vel, angvel;
 	if (velocity) {
 		ConvertPosToBull(*velocity, vel);
@@ -504,6 +520,8 @@ void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVeloci
 
 void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	if (!velocity && !angularVelocity) return;
+
+	if (!IsMotionEnabled()) return;
 
 	btVector3 bullvelocity, bullangular;
 	if (velocity) {
