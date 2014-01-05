@@ -487,12 +487,12 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 
 	// FIXME: Correct?
 	limit = ragdoll.axes[2];
-	angUpperLimit.m_floats[1] = DEG2RAD(limit.minRotation);
-	angLowerLimit.m_floats[1] = DEG2RAD(limit.maxRotation);
+	angUpperLimit.m_floats[1] = DEG2RAD(limit.maxRotation);
+	angLowerLimit.m_floats[1] = DEG2RAD(limit.minRotation);
 
 	limit = ragdoll.axes[1];
-	angUpperLimit.m_floats[2] = DEG2RAD(-limit.maxRotation);
-	angLowerLimit.m_floats[2] = DEG2RAD(-limit.minRotation);
+	angUpperLimit.m_floats[2] = DEG2RAD(-limit.minRotation);
+	angLowerLimit.m_floats[2] = DEG2RAD(-limit.maxRotation);
 
 	pConstraint->setEnabled(ragdoll.isActive);
 
