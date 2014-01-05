@@ -28,6 +28,17 @@ class CDebugDrawer;
 // Temporary; remove later
 class IPhysicsSoftBody;
 
+class CCollisionSolver : public btOverlapFilterCallback {
+	public:
+		CCollisionSolver() {m_pSolver = NULL;}
+		void SetHandler(IPhysicsCollisionSolver *pSolver) {m_pSolver = pSolver;}
+		virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const;
+
+		bool NeedsCollision(CPhysicsObject *pObj0, CPhysicsObject *pObj1) const;
+	private:
+		IPhysicsCollisionSolver *m_pSolver;
+};
+
 class CPhysicsEnvironment : public IPhysicsEnvironment32 {
 public:
 	CPhysicsEnvironment();
@@ -142,6 +153,7 @@ public:
 	float									GetInvPSIScale();
 	void									BulletTick(btScalar timeStep);
 	CPhysicsDragController *				GetDragController();
+	CCollisionSolver *						GetCollisionSolver();
 
 	void									DoCollisionEvents(float dt);
 

@@ -496,6 +496,9 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 
 	pConstraint->setEnabled(ragdoll.isActive);
 
+	pConstraint->setAngularUpperLimit(angUpperLimit);
+	pConstraint->setAngularLowerLimit(angLowerLimit);
+
 	// Set axis limits
 	
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);

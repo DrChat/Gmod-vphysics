@@ -94,15 +94,6 @@ class CDeleteQueue {
 		CUtlVector<IDeleteQueueItem *> m_list;
 };
 
-class CCollisionSolver : public btOverlapFilterCallback {
-	public:
-		CCollisionSolver() {m_pSolver = NULL;}
-		void SetHandler(IPhysicsCollisionSolver *pSolver) {m_pSolver = pSolver;}
-		virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const;
-	private:
-		IPhysicsCollisionSolver *m_pSolver;
-};
-
 bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
 	btRigidBody *body0 = btRigidBody::upcast((btCollisionObject *)proxy0->m_clientObject);
 	btRigidBody *body1 = btRigidBody::upcast((btCollisionObject *)proxy1->m_clientObject);
@@ -119,35 +110,46 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	CPhysicsObject *pObject0 = (CPhysicsObject *)body0->getUserPointer();
 	CPhysicsObject *pObject1 = (CPhysicsObject *)body1->getUserPointer();
 
-	if (!pObject0 || !pObject1)
-		return true;
-
-	if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
-		return false;
-
-	// No kinematic->static collisions
-	if ((pObject0->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject1->IsStatic())
-	 || (pObject1->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject0->IsStatic()))
-		return false;
-
-	// No static->static collisions
-	if (pObject0->IsStatic() && pObject1->IsStatic())
-		return false;
-
-	// No shadow->shadow collisions
-	if (pObject0->GetShadowController() && pObject1->GetShadowController())
-		return false;
-
-	if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
-	if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
-
-	if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) return false;
-
-	// And then the default bullet stuff...
-	bool collides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
+	bool collides = NeedsCollision(pObject0, pObject1);
+	collides = collides && (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask);
 	collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
-	
+			
 	return collides;
+}
+
+bool CCollisionSolver::NeedsCollision(CPhysicsObject *pObject0, CPhysicsObject *pObject1) const {
+	if (pObject0 && pObject1) {
+		if (!pObject0->IsCollisionEnabled() || !pObject1->IsCollisionEnabled())
+			return false;
+
+		// No kinematic->static collisions
+		if ((pObject0->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject1->IsStatic())
+		 || (pObject1->GetObject()->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT && pObject0->IsStatic()))
+			return false;
+
+		// No static->static collisions
+		if (pObject0->IsStatic() && pObject1->IsStatic())
+			return false;
+
+		// No shadow->shadow collisions
+		if (pObject0->GetShadowController() && pObject1->GetShadowController())
+			return false;
+
+		if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
+		if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) && (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
+
+		if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData()))
+			return false;
+	} else {
+		// One of the objects has no phys object...
+		if (pObject0 && !pObject0->IsCollisionEnabled())
+			return false;
+
+		if (pObject1 && !pObject1->IsCollisionEnabled())
+			return false;
+	}
+
+	return true;
 }
 
 void SerializeWorld_f(const CCommand &args) {
@@ -455,8 +457,8 @@ void CPhysicsEnvironment::TickCallback(btDynamicsWorld *world, btScalar timeStep
 
 IVPhysicsDebugOverlay *g_pDebugOverlay = NULL;
 void CPhysicsEnvironment::SetDebugOverlay(CreateInterfaceFn debugOverlayFactory) {
-	if (!debugOverlayFactory || g_pDebugOverlay) return;
-	g_pDebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
+	if (debugOverlayFactory && !g_pDebugOverlay)
+		g_pDebugOverlay = (IVPhysicsDebugOverlay *)debugOverlayFactory(VPHYSICS_DEBUG_OVERLAY_INTERFACE_VERSION, NULL);
 
 #if DEBUG_DRAW
 	if (g_pDebugOverlay)
@@ -1021,6 +1023,10 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 // UNEXPOSED
 CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 	return m_pPhysicsDragController;
+}
+
+CCollisionSolver *CPhysicsEnvironment::GetCollisionSolver() {
+	return m_pCollisionSolver;
 }
 
 // UNEXPOSED
