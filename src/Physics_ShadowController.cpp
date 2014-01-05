@@ -79,6 +79,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	ComputeController(rot_speed, deltaAngles, params.maxAngular, scale, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
 
+	object->activate();
+
 	return secondsToArrival;
 }
 

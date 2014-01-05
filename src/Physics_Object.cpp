@@ -490,6 +490,7 @@ void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *a
 	if (!velocity && !angularVelocity) return;
 
 	if (!IsMotionEnabled()) return;
+	Wake();
 
 	btVector3 vel, angvel;
 	if (velocity) {
@@ -522,6 +523,7 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 	if (!velocity && !angularVelocity) return;
 
 	if (!IsMotionEnabled()) return;
+	Wake();
 
 	btVector3 bullvelocity, bullangular;
 	if (velocity) {
@@ -529,8 +531,12 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 		m_pObject->setLinearVelocity(m_pObject->getLinearVelocity() + bullvelocity);
 	}
 
+	// Angular velocity is supplied in local space.
 	if (angularVelocity) {
 		ConvertAngularImpulseToBull(*angularVelocity, bullangular);
+		btMatrix3x3 rot = m_pObject->getWorldTransform().getBasis();
+		bullangular = rot * bullangular;
+
 		m_pObject->setAngularVelocity(m_pObject->getAngularVelocity() + bullangular);
 	}
 }
