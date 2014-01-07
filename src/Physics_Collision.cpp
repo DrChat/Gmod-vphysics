@@ -9,8 +9,6 @@
 #include "Physics_KeyParser.h"
 #include "phydata.h"
 
-#include "tier0/vprof.h"
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -304,7 +302,6 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 // Should we do a raytrace that starts outside of our mesh and goes inwards?
 // From what I gather, valve does this by going through the vertices and returning the one with the nearest dot product to the direction.
 Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction) {
-	VPROF_BUDGET("CPhysicsCollision::CollideGetExtent", VPROF_BUDGETGROUP_PHYSICS);
 	if (!pCollide) return collideOrigin;
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
@@ -333,7 +330,6 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 }
 
 void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles) {
-	VPROF_BUDGET("CPhysicsCollision::CollideGetAABB", VPROF_BUDGETGROUP_PHYSICS);
 	if (!pCollide || (!pMins && !pMaxs)) return;
 
 	// Bullet returns very different AABBs than Havok.
@@ -593,7 +589,6 @@ static ConVar vphysics_visualizetraces("vphysics_visualizetraces", "0", FCVAR_CH
 
 // TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
-	VPROF_BUDGET("CPhysicsCollision::TraceBox", VPROF_BUDGETGROUP_PHYSICS);
 
 	// 2 Variables used mainly for converting units.
 	btVector3 btvec;
@@ -1131,6 +1126,7 @@ void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
 	}
 }
 
+// What is this?
 unsigned int CPhysicsCollision::ReadStat(int statID) {
 	NOT_IMPLEMENTED
 	return 0;

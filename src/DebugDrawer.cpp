@@ -8,8 +8,6 @@
 #include "DebugDrawer.h"
 #include "convert.h"
 
-#include "tier0/vprof.h"
-
 #ifdef DEBUGDRAW_RENDER_SDL
 	#include <SDL.h>
 	#include <SDL_opengl.h>
@@ -76,7 +74,6 @@ CDebugDrawer::~CDebugDrawer() {
 }
 
 void CDebugDrawer::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor) {
-	VPROF_BUDGET("CDebugDrawer::drawLine", VPROF_BUDGETGROUP_PHYSICS);
 #ifdef DEBUGDRAW_RENDER_SDL
 	glBegin(GL_LINES);
 		glColor3f(fromColor.getX(), fromColor.getY(), fromColor.getZ());

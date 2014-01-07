@@ -7,8 +7,6 @@
 #include "Physics_SurfaceProps.h"
 #include "Physics_Collision.h"
 
-#include "tier0/vprof.h"
-
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -161,8 +159,6 @@ int	CPhysicsFluidController::GetContents() const {
 
 // TODO: Refactor this code to be less messy.
 void CPhysicsFluidController::Tick(float dt) {
-	VPROF_BUDGET("CPhysicsFluidController::Tick", VPROF_BUDGETGROUP_PHYSICS);
-
 	int numObjects = m_pGhostObject->getNumOverlappingObjects();
 	for (int i = 0; i < numObjects; i++) {
 		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));

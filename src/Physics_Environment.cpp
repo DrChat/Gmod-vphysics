@@ -15,8 +15,6 @@
 #include "Physics_SoftBody.h"
 #include "convert.h"
 
-#include "tier0/vprof.h"
-
 #if DEBUG_DRAW
 	#include "DebugDrawer.h"
 #endif
@@ -688,7 +686,6 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, false, 0);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
-	VPROF_BUDGET("CPhysicsEnvironment::Simulate", VPROF_BUDGETGROUP_PHYSICS);
 	if (!m_pBulletEnvironment) Assert(0);
 
 	if (deltaTime > 1.0 || deltaTime < 0.0) {
@@ -711,18 +708,14 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		// the same amount of time as a simulation with the requested timestep
 		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
 		
-		VPROF_ENTER_SCOPE("m_pBulletEnvironment->stepSimulation");
 		// Returns the number of substeps executed
 		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1, timestep);
-		VPROF_EXIT_SCOPE();
 
 		m_inSimulation = false;
 	}
 
 #if DEBUG_DRAW
-	VPROF_ENTER_SCOPE("m_debugdraw->DrawWorld");
 	m_debugdraw->DrawWorld();
-	VPROF_EXIT_SCOPE();
 #endif
 
 	if (!m_bUseDeleteQueue) {
@@ -983,8 +976,6 @@ float CPhysicsEnvironment::GetInvPSIScale() {
 
 // UNEXPOSED
 void CPhysicsEnvironment::BulletTick(btScalar dt) {
-	VPROF_BUDGET("CPhysicsEnvironment::BulletTick", VPROF_BUDGETGROUP_PHYSICS);
-
 	// Dirty hack to spread the controllers throughout the current simulation step
 	if (m_simPSICurrent) {
 		m_invPSIScale = 1.0f / (float)m_simPSICurrent;
@@ -1034,8 +1025,6 @@ CCollisionSolver *CPhysicsEnvironment::GetCollisionSolver() {
 // Bullet doesn't provide many callbacks such as the ones we're looking for, so
 // we have to iterate through all the contact manifolds and generate the callbacks ourselves.
 void CPhysicsEnvironment::DoCollisionEvents(float dt) {
-	VPROF_BUDGET("CPhysicsEnvironment::DoCollisionEvents", VPROF_BUDGETGROUP_PHYSICS);
-
 	if (m_pCollisionEvent) {
 		int numManifolds = m_pBulletEnvironment->getDispatcher()->getNumManifolds();
 		for (int i = 0; i < numManifolds; i++) {
