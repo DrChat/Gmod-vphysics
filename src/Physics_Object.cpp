@@ -948,6 +948,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 
 	m_pObject->setUserPointer(this);
 	m_pObject->setSleepingThresholds(SLEEP_LINEAR_THRESHOLD, SLEEP_ANGULAR_THRESHOLD);
+	m_pObject->setActivationState(ISLAND_SLEEPING); // All objects start asleep.
 
 	if (pParams) {
 		m_pGameData		= pParams->pGameData;
@@ -993,7 +994,7 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		float minradius = min(min(mins.getX(), mins.getY()), mins.getZ());
 		float radius = min(maxradius, minradius);
 
-		m_pObject->setCcdMotionThreshold(radius / 2);
+		m_pObject->setCcdMotionThreshold((radius / 2) * (radius / 2));
 		m_pObject->setCcdSweptSphereRadius(0.7f * radius);
 	}
 
@@ -1107,14 +1108,22 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	*/
 
 	float mass = 0;
+	btVector3 inertiaFactor(1, 1, 1);
 
-	if (pParams && !isStatic)
+	if (pParams && !isStatic) {
 		mass = pParams->mass;
+
+		// Don't allow the inertia factor to be less than 0!
+		if (pParams->inertia > 0)
+			inertiaFactor.setValue(pParams->inertia, pParams->inertia, pParams->inertia);
+	}
 
 	btVector3 inertia(0, 0, 0);
 
 	if (!isStatic)
 		shape->calculateLocalInertia(mass, inertia);
+
+	inertia *= inertiaFactor;
 
 	btMassCenterMotionState *motionstate = new btMassCenterMotionState(masscenter);
 	motionstate->setGraphicTransform(transform);
