@@ -43,8 +43,25 @@ int lPhysObjGetLocalGravity(lua_State *state) {
 }
 
 //
+// Name: PhysObj:GetEnvironment
+// Desc: Returns the object's current physics environment
+// Arg1:
+// Ret1: PhysEnv|env|Environment
+//
+/*
+int lPhysObjGetEnvironment(lua_State *state) {
+	IPhysicsObject32 *pObj = Get_PhysObj(state, 1);
+
+	IPhysicsEnvironment32 *pEnv = pObj->GetVPhysicsEnvironment();
+	Push_PhysEnv(state, pEnv);
+
+	return 1;
+}
+*/
+
+//
 // Name: PhysObj:SetAngleVelocity
-// Desc: Sets the object's angular velocity (because garry didn't put this in the physobj lua class)
+// Desc: Sets the object's angular velocity (in local space)
 // Arg1: Vector|vel|The new angular velocity
 // Ret1: 
 //

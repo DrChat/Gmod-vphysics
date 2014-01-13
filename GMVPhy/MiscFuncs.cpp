@@ -8,17 +8,27 @@
 
 using namespace GarrysMod::Lua;
 
-namespace CustomTypes {
-	enum {
-		TYPE_PHYSCOLLIDE = Type::COUNT + 1
-	};
-}
-
 // Prints argument error (type expected, type received)
 inline void PrintArgError(lua_State *state, int stackPos, const char *argType) {
 	static char str[1024];
 	sprintf_s(str, "expected %s, got %s", argType, LUA->GetTypeName(LUA->GetType(stackPos)));
 	LUA->ArgError(stackPos, str);
+}
+
+IPhysicsEnvironment32 *Get_PhysEnv(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, CustomTypes::TYPE_PHYSENV);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (IPhysicsEnvironment32 *)ud->data;
+}
+
+void Push_PhysEnv(lua_State *state, IPhysicsEnvironment32 *pEnv) {
+	UserData *ud = (UserData *)LUA->NewUserdata(sizeof(UserData));
+	ud->type = CustomTypes::TYPE_PHYSENV;
+	ud->data = pEnv;
+
+	LUA->CreateMetaTableType("PhysEnv", CustomTypes::TYPE_PHYSENV);
+	LUA->SetMetaTable(-2);
 }
 
 IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos) {

@@ -133,12 +133,14 @@
     <ClCompile Include="PhysCollision.cpp" />
     <ClCompile Include="PhysEnv.cpp" />
     <ClCompile Include="PhysObj.cpp" />
+    <ClCompile Include="PhysVehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MiscFuncs.h" />
     <ClInclude Include="PhysCollision.h" />
     <ClInclude Include="PhysEnv.h" />
     <ClInclude Include="PhysObj.h" />
+    <ClInclude Include="PhysVehicle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

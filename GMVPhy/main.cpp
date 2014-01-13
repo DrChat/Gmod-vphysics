@@ -4,6 +4,7 @@
 
 #include "PhysObj.h"
 #include "PhysCollision.h"
+#include "PhysEnv.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -15,7 +16,7 @@ using namespace GarrysMod::Lua;
 IPhysics32 *g_pPhysics = NULL;
 
 int lPhysStats(lua_State *state) {
-	for (int i = 0; i < g_pPhysics->GetNumActiveEnvironments(); i++) {
+	for (int i = 0; i < g_pPhysics->GetActiveEnvironmentCount(); i++) {
 		IPhysicsEnvironment *pEnv = g_pPhysics->GetActiveEnvironmentByIndex(i);
 		if (!pEnv)
 			break;
@@ -48,6 +49,7 @@ GMOD_MODULE_OPEN() {
 
 	LINIT_CHECKRET(Init_PhysObj, state);
 	LINIT_CHECKRET(Init_PhysCollision, state);
+	LINIT_CHECKRET(Init_PhysEnv, state);
 
 	return 0;
 }

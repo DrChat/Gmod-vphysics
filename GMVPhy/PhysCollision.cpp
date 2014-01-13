@@ -50,6 +50,34 @@ int lPhysCollisionCollideGetScale(lua_State *state) {
 	return 0;
 }
 
+//
+// Name: physcollision.ConvertConvexToCollide
+// Desc: Converts table of convexes to collide
+// Arg1: Table|convexes|The table of convex meshes
+// Ret1: CPhysCollide|collide|The collision mesh.
+//
+int lPhysCollisionConvertConvexToCollide(lua_State *state) {
+	return 0;
+}
+
+//
+// Name: physcollision.CylinderToConvex
+// Desc: Converts AABB to a cylinder
+// Arg1: Vector|mins|
+// Arg2: Vector|maxs|
+// Ret1: CPhysConvex|convex|The convex mesh.
+//
+int lPhysCollisionCylinderToConvex(lua_State *state) {
+	Vector *pMins = Get_Vector(state, 1);
+	Vector *pMaxs = Get_Vector(state, 2);
+
+	if (pMins && pMaxs) {
+		CPhysConvex *pConvex = g_pPhysCollision->CylinderToConvex(*pMins, *pMaxs);
+	}
+
+	return 0;
+}
+
 int Init_PhysCollision(lua_State *state) {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory)
