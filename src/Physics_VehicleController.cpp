@@ -154,17 +154,6 @@ class CAirboatRaycaster : public btVehicleRaycaster {
 		btRigidBody *		m_pBody;
 };
 
-class CAirboatVehicle : public btActionInterface {
-	public:
-		CAirboatVehicle();
-
-		void updateAction(btCollisionWorld *colWorld, btScalar dt);
-};
-
-void CAirboatVehicle::updateAction(btCollisionWorld *colWorld, btScalar dt) {
-
-}
-
 /*********************************
 * CLASS CPhysicsVehicleController
 *********************************/
@@ -387,8 +376,14 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls, float dt) {
 	float steeringVal = controls.steering;
 
-	// TODO: Calculate for degreesSlow, degreesFast, and degreesBoost
-	steeringVal *= m_vehicleParams.steering.degreesFast;
+	// TODO: Calculate for degreesBoost
+	float speed = -KMH2MS(m_pVehicle->getCurrentSpeedKmHour());
+	if (speed <= m_vehicleParams.steering.speedSlow) {
+		steeringVal *= m_vehicleParams.steering.degreesSlow;
+	} else if (speed >= m_vehicleParams.steering.speedFast) {
+		steeringVal *= m_vehicleParams.steering.degreesFast;
+	}
+
 	m_vehicleState.steeringAngle = steeringVal;
 
 	for (int i = 0; i < m_iWheelCount; i++) {
@@ -601,7 +596,7 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 }
 
 void CPhysicsVehicleController::VehicleDataReload() {
-	// What do?
+	// TODO: This function reloads vehicle params
 	NOT_IMPLEMENTED
 }
 
