@@ -1140,9 +1140,6 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 
 				if (constraints[i]->isEnabled())
 				{
-				}
-				if (constraints[i]->isEnabled())
-				{
 					constraints[i]->getInfo1(&info1);
 				} else
 				{

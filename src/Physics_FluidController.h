@@ -31,6 +31,8 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 
 		void					ObjectAdded(CPhysicsObject *pObject);
 		void					ObjectRemoved(CPhysicsObject *pObject);
+
+		void					TransferToEnvironment(CPhysicsEnvironment *pDest);
 	private:
 		void *					m_pGameData;
 		int						m_iContents;

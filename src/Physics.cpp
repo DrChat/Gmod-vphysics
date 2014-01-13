@@ -25,7 +25,6 @@ void btDebugWarning(const char *str) {
 /******************
 * CLASS CPhysics
 ******************/
-
 CPhysics::~CPhysics() {
 #if defined(_DEBUG) && defined(_MSC_VER)
 	// Probably not the place we should be doing this, but who cares.
@@ -74,7 +73,7 @@ IPhysicsEnvironment *CPhysics::GetActiveEnvironmentByIndex(int index) {
 	return m_envList[index];
 }
 
-int CPhysics::GetNumActiveEnvironments() {
+int CPhysics::GetActiveEnvironmentCount() {
 	return m_envList.Count();
 }
 

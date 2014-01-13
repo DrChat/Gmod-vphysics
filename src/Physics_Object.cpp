@@ -1080,6 +1080,13 @@ btVector3 CPhysicsObject::GetBullMassCenterOffset() const {
 	return ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset.getOrigin();
 }
 
+void CPhysicsObject::TransferToEnvironment(CPhysicsEnvironment *pDest) {
+	m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
+	m_pEnv = pDest;
+
+	m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject);
+}
+
 /************************
 * CREATION FUNCTIONS
 ************************/

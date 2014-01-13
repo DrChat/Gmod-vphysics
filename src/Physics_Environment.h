@@ -118,7 +118,9 @@ public:
 
 	int										GetActiveObjectCount() const;
 	void									GetActiveObjects(IPhysicsObject **pOutputObjectList) const;
+
 	const IPhysicsObject **					GetObjectList(int *pOutputObjectCount) const;
+	int										GetObjectCount() const;
 	bool									TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment);
 
 	void									CleanupDeleteList();

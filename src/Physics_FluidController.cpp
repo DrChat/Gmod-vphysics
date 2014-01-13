@@ -201,6 +201,10 @@ void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
 		m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 
+void CPhysicsFluidController::TransferToEnvironment(CPhysicsEnvironment *pDest) {
+
+}
+
 /************************
 * CREATION FUNCTIONS
 ************************/

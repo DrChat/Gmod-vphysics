@@ -143,10 +143,6 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								BecomeTrigger();
 		void								RemoveTrigger();
 
-		// UNEXPOSED
-		void								TriggerObjectEntered(CPhysicsObject *pObject);
-		void								TriggerObjectExited(CPhysicsObject *pObject);
-
 		void								BecomeHinged(int localAxis);
 		void								RemoveHinged();
 
@@ -159,8 +155,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 	public:
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isStatic, bool isSphere = false);
 
-		CPhysicsEnvironment *				GetVPhysicsEnvironment();
-		btRigidBody *						GetObject();
+		CPhysicsEnvironment *				GetVPhysicsEnvironment();		btRigidBody *						GetObject();
 
 		void								AttachedToConstraint(CPhysicsConstraint *pConstraint);
 		void								DetachedFromConstraint(CPhysicsConstraint *pConstraint);
@@ -175,6 +170,9 @@ class CPhysicsObject : public IPhysicsObject32 {
 		float								GetVolume() const { return m_fVolume; }
 		float								GetBuoyancyRatio() const { return m_fBuoyancyRatio; } // [0..1] value
 
+		void								TriggerObjectEntered(CPhysicsObject *pObject);
+		void								TriggerObjectExited(CPhysicsObject *pObject);
+
 		btVector3							GetBullMassCenterOffset() const;
 
 		int									GetLastActivationState() { return m_iLastActivationState; }
@@ -184,6 +182,8 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 
 		bool								IsBeingRemoved() { return m_bRemoving; }
+
+		void								TransferToEnvironment(CPhysicsEnvironment *pDest);
 
 	private:
 		CPhysicsEnvironment *				m_pEnv;

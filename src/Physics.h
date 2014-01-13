@@ -19,7 +19,7 @@ class CPhysics : public CTier1AppSystem<IPhysics32> {
 		IPhysicsEnvironment *		CreateEnvironment();
 		void						DestroyEnvironment(IPhysicsEnvironment *pEnv);
 		IPhysicsEnvironment *		GetActiveEnvironmentByIndex(int index);
-		int							GetNumActiveEnvironments();
+		int							GetActiveEnvironmentCount();
 
 		IPhysicsObjectPairHash *	CreateObjectPairHash();
 		void						DestroyObjectPairHash(IPhysicsObjectPairHash *pHash);

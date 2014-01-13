@@ -326,6 +326,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick		= false;
 	m_bUseDeleteQueue	= false;
 	m_inSimulation		= false;
+	m_bConstraintNotify = false;
 	m_pDebugOverlay		= NULL;
 	m_pConstraintEvent	= NULL;
 	m_pObjectEvent		= NULL;
@@ -338,6 +339,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment	= NULL;
 	m_pBulletGhostCallback	= NULL;
 	m_pBulletSolver			= NULL;
+
+	m_timestep = 0.f;
+	m_invPSIScale = 0.f;
+	m_simPSICurrent = 0;
 
 	btDefaultCollisionConstructionInfo cci;
 #ifdef MULTITHREADED
@@ -529,9 +534,12 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 }
 
 IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) {
-	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, position, angles);
-	m_softBodies.AddToTail(pSoftBody);
-	return pSoftBody;
+	//CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, position, angles);
+	//m_softBodies.AddToTail(pSoftBody);
+	//return pSoftBody;
+
+	NOT_IMPLEMENTED
+	return NULL;
 }
 
 void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
@@ -549,12 +557,14 @@ void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
 
 IPhysicsFluidController *CPhysicsEnvironment::CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams) {
 	CPhysicsFluidController *pFluid = ::CreateFluidController(this, (CPhysicsObject *)pFluidObject, pParams);
-	m_fluids.AddToTail(pFluid);
+	if (pFluid)
+		m_fluids.AddToTail(pFluid);
+
 	return pFluid;
 }
 
 void CPhysicsEnvironment::DestroyFluidController(IPhysicsFluidController *pController) {
-	m_fluids.FindAndRemove((CPhysicsFluidController  *)pController);
+	m_fluids.FindAndRemove((CPhysicsFluidController *)pController);
 	delete pController;
 }
 
@@ -775,6 +785,10 @@ void CPhysicsEnvironment::GetActiveObjects(IPhysicsObject **pOutputObjectList) c
 	return m_pObjectTracker->GetActiveObjects(pOutputObjectList);
 }
 
+int CPhysicsEnvironment::GetObjectCount() const {
+	return m_objects.Count();
+}
+
 const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCount) const {
 	if (pOutputObjectCount) {
 		*pOutputObjectCount = m_objects.Count();
@@ -783,17 +797,21 @@ const IPhysicsObject **CPhysicsEnvironment::GetObjectList(int *pOutputObjectCoun
 	return (const IPhysicsObject **)m_objects.Base();
 }
 
-// TODO: This function may need some more work such as transferring objects with shadow controllers or fluid controllers
 bool CPhysicsEnvironment::TransferObject(IPhysicsObject *pObject, IPhysicsEnvironment *pDestinationEnvironment) {
 	if (!pObject || !pDestinationEnvironment) return false;
 
 	if (pDestinationEnvironment == this) {
-		m_pBulletEnvironment->addRigidBody(((CPhysicsObject *)pObject)->GetObject());
+		((CPhysicsObject *)pObject)->TransferToEnvironment(this);
 		m_objects.AddToTail(pObject);
+		if (pObject->IsFluid())
+			m_fluids.AddToTail(((CPhysicsObject *)pObject)->GetFluidController());
+
 		return true;
 	} else {
-		m_pBulletEnvironment->removeRigidBody(((CPhysicsObject *)pObject)->GetObject());
 		m_objects.FindAndRemove(pObject);
+		if (pObject->IsFluid())
+			m_fluids.FindAndRemove(((CPhysicsObject *)pObject)->GetFluidController());
+
 		return pDestinationEnvironment->TransferObject(pObject, pDestinationEnvironment);
 	}
 }
@@ -1000,7 +1018,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 		CleanupDeleteList();
 	}
 
-	DoCollisionEvents(dt);
+	//DoCollisionEvents(dt);
 
 	//m_pCollisionSolver->EventPSI(this);
 	//m_pCollisionListener->EventPSI(this);

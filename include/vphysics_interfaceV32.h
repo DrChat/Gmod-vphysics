@@ -11,26 +11,28 @@
 // Purpose: Updated interface to vphysics.dll
 // This interface MUST be ADDITIVE ONLY. DO NOT change old function signatures.
 // To use this new interface, typecast the old interfaces to the newer ones
-// ex. IPhysics1 *newPhysics = (IPhysics1 *)oldPhysics;
+// ex. IPhysics32 *newPhysics = (IPhysics32 *)oldPhysics;
 
 // THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
 
 abstract_class IPhysics32 : public IPhysics {
 	public:
-		virtual int		GetNumActiveEnvironments() = 0;
+		virtual int		GetActiveEnvironmentCount() = 0;
 };
 
 // TODO: Soft bodies
 abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
 		virtual void	SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) = 0;
+
+		virtual int		GetObjectCount() const = 0;
 };
 
 abstract_class IPhysicsObject32 : public IPhysicsObject {
 	public:
-		// You need to call EnableGravity(false) first so we stop using the world's gravity.
-		// To use the world's gravity again, call EnableGravity(true)
-		// (Yes I know it's confusing, nothing I can do about it)
+		// You need to call EnableGravity(false) first so we stop using the environment's gravity.
+		// To use the environment's gravity again, call EnableGravity(true)
+		// (Yes I know it's confusing, nothing I can do about it without breaking backwards compatability)
 		// This will allow you to override the gravity force acted upon the object.
 		virtual void		SetLocalGravity(const Vector &gravityVector) = 0;
 		virtual Vector		GetLocalGravity() const = 0;

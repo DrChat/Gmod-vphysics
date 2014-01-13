@@ -104,8 +104,8 @@ struct	btDbvtTreeCollider : btDbvt::ICollide
 			if(pa->m_uniqueId>pb->m_uniqueId) 
 				btSwap(pa, pb);
 #endif
-			pbp->m_paircache->addOverlappingPair(pa, pb);
-			++pbp->m_newpairs;
+			if (pbp->m_paircache->addOverlappingPair(pa, pb))
+				++pbp->m_newpairs;
 		}
 	}
 	void	Process(const btDbvtNode* n)
