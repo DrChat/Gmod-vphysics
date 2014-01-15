@@ -30,7 +30,6 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
 	for (KeyValues *surface = surfprops; surface; surface = surface->GetNextKey()) {
 		CSurface prop;
-		int baseMaterial = GetSurfaceIndex("default");
 
 		memset(&prop.data, 0, sizeof(prop.data));
 		prop.m_name = m_strings->AddString(surface->GetName());
@@ -39,8 +38,15 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 		prop.data.game.jumpFactor = 1.0f;
 		prop.data.game.climbable = 0.0f;
 
-		if (baseMaterial != -1)
+		int baseMaterial = GetSurfaceIndex("default");
+		if (baseMaterial != -1) {
 			CopyPhysicsProperties(&prop, baseMaterial);
+
+			const CSurface *pSurface = GetInternalSurface(baseMaterial);
+			prop.data.audio = pSurface->data.audio;
+			prop.data.game = pSurface->data.game;
+			prop.data.sounds = pSurface->data.sounds;
+		}
 
 		for (KeyValues *data = surface->GetFirstSubKey(); data; data = data->GetNextKey()) {
 			const char *key = data->GetName();

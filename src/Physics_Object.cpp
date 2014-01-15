@@ -99,7 +99,7 @@ bool CPhysicsObject::IsStatic() const {
 }
 
 bool CPhysicsObject::IsAsleep() const {
-	return m_pObject->getActivationState() == ISLAND_SLEEPING;
+	return m_pObject->getActivationState() == ISLAND_SLEEPING || m_pObject->getActivationState() == DISABLE_SIMULATION;
 }
 
 bool CPhysicsObject::IsFluid() const {
