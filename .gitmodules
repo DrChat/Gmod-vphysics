@@ -1,0 +1,6 @@
+[submodule "qhull"]
+	path = thirdparty/qhull
+	url = https://github.com/manctl/qhull.git
+[submodule "sourcesdk"]
+	path = thirdparty/sourcesdk
+	url = https://github.com/ValveSoftware/source-sdk-2013.git
