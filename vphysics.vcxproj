@@ -57,7 +57,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)bullet\src;$(SolutionDir)include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)bullet\src;$(SolutionDir)include;$(SolutionDir)thirdparty\sourcesdk\mp\src\public;$(SolutionDir)thirdparty\sourcesdk\mp\src\public\tier0;$(SolutionDir)thirdparty\sourcesdk\mp\src\public\tier1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -72,7 +72,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;mathlib.lib;vstdlib.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;BulletMultithreaded.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\lib\$(Platform)\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\lib\$(Platform)\$(Configuration)\;$(SolutionDir)thirdparty\sourcesdk\mp\src\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
@@ -108,7 +108,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)bullet\src;$(SolutionDir)include;F:\Dev\Libraries\SourceMod\src\public;F:\Dev\Libraries\SourceMod\src\public\tier0;F:\Dev\Libraries\SourceMod\src\public\tier1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)bullet\src;$(SolutionDir)include;$(SolutionDir)thirdparty\sourcesdk\mp\src\public;$(SolutionDir)thirdparty\sourcesdk\mp\src\public\tier0;$(SolutionDir)thirdparty\sourcesdk\mp\src\public\tier1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
@@ -125,7 +125,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;mathlib.lib;vstdlib.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;BulletMultithreaded.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\lib\$(Platform)\$(Configuration)\;F:\Dev\Libraries\SourceMod\src\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\lib\$(Platform)\$(Configuration)\;$(SolutionDir)thirdparty\sourcesdk\mp\src\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -176,6 +176,7 @@
     <ClCompile Include="src\Physics_ObjectPairHash.cpp" />
     <ClCompile Include="src\Physics_SoftBody.cpp" />
     <ClCompile Include="src\Physics_SurfaceProps.cpp" />
+    <ClCompile Include="src\Physics_VehicleAirboat.cpp" />
     <ClCompile Include="src\Physics_VehicleController.cpp" />
     <ClCompile Include="src\Physics_PlayerController.cpp" />
     <ClCompile Include="src\Physics_ShadowController.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="src\Physics_ObjectPairHash.h" />
     <ClInclude Include="src\Physics_SoftBody.h" />
     <ClInclude Include="src\Physics_SurfaceProps.h" />
+    <ClInclude Include="src\Physics_VehicleAirboat.h" />
     <ClInclude Include="src\Physics_VehicleController.h" />
     <ClInclude Include="src\Physics_PlayerController.h" />
     <ClInclude Include="src\Physics_ShadowController.h" />
