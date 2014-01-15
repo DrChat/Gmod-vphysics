@@ -141,7 +141,24 @@ float CPhysicsCollision::ConvexSurfaceArea(CPhysConvex *pConvex) {
 }
 
 void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
-	delete (btConvexShape *)pConvex;
+	if (!pConvex) return;
+
+	btCollisionShape *pShape = (btCollisionShape *)pConvex;
+
+	if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
+		// Delete the striding mesh interface (which we allocate)
+		btStridingMeshInterface *pMesh = ((btTriangleMeshShape *)pShape)->getMeshInterface();
+		delete pMesh;
+
+		delete pShape;
+	} else if (pShape->getShapeType() == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
+		btStridingMeshInterface *pMesh = ((btConvexTriangleMeshShape *)pShape)->getMeshInterface();
+		delete pMesh;
+
+		delete pShape;
+	} else {
+		delete pShape;
+	}
 }
 
 void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData) {
@@ -226,23 +243,6 @@ void CPhysicsCollision::RemoveConvexFromCollide(CPhysCollide *pCollide, const CP
 	}
 }
 
-// Purpose: Recursive function that will go through all compounds and delete their children
-void DestroyCompoundShape(btCompoundShape *pCompound) {
-	if (!pCompound) return;
-	int numChildShapes = pCompound->getNumChildShapes();
-
-	// We're looping in reverse because we're removing objects from the compound shape.
-	for (int i = numChildShapes - 1; i >= 0; i--) {
-		btCollisionShape *pShape = pCompound->getChildShape(i);
-
-		pCompound->removeChildShapeByIndex(i);
-		g_PhysicsCollision.DestroyCollide((CPhysCollide *)pShape);
-	}
-
-	delete (physshapeinfo_t *)pCompound->getUserPointer();
-	delete pCompound;
-}
-
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 	if (!pCollide || IsCachedBBox(pCollide)) return;
 
@@ -250,20 +250,20 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 
 	// Compound shape? Delete all of its children.
 	if (pShape->isCompound()) {
-		DestroyCompoundShape((btCompoundShape *)pShape);
-	} else if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
-		// Delete the striding mesh interface (which we allocate)
-		btStridingMeshInterface *pMesh = ((btTriangleMeshShape *)pShape)->getMeshInterface();
-		delete pMesh;
+		btCompoundShape *pCompound = (btCompoundShape *)pShape;
 
-		delete pShape;
-	} else if (pShape->getShapeType() == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
-		btStridingMeshInterface *pMesh = ((btConvexTriangleMeshShape *)pShape)->getMeshInterface();
-		delete pMesh;
+		for (int i = pCompound->getNumChildShapes()-1; i >= 0; i--) {
+			btCollisionShape *pShape = pCompound->getChildShape(i);
 
-		delete pShape;
+			pCompound->removeChildShapeByIndex(i);
+			ConvexFree((CPhysConvex *)pShape);
+		}
+
+		delete (physshapeinfo_t *)pCompound->getUserPointer();
+		delete pCompound;
 	} else {
-		delete pShape;
+		// Those dirty liars!
+		ConvexFree((CPhysConvex *)pCollide);
 	}
 }
 
@@ -618,7 +618,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	// Single line trace must be supported in TraceBox? Yep, you betcha.
 	// FIXME: We can't use frac == 0 to determine if the trace was started in a solid! Need to detect this separately.
 	if (ray.m_IsRay) {
-		if (ray.m_Delta.Length() != 0) {
+		if (ray.m_Delta.LengthSqr() != 0) {
 			btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
 			btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
 
@@ -660,7 +660,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			g_pDebugOverlay->AddBoxOverlay(ray.m_Start + ray.m_Delta, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 0, 0, 255, 10, 0.0f);
 		}
 
-		if (ray.m_Delta.Length() != 0) {
+		if (ray.m_Delta.LengthSqr() != 0) {
 			// extents are half extents, compatible with bullet.
 			ConvertPosToBull(ray.m_Extents, btvec);
 			btBoxShape *box = new btBoxShape(btvec.absolute());

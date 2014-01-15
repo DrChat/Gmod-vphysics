@@ -155,7 +155,8 @@ class CPhysicsObject : public IPhysicsObject32 {
 	public:
 		void								Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int materialIndex, objectparams_t *pParams, bool isStatic, bool isSphere = false);
 
-		CPhysicsEnvironment *				GetVPhysicsEnvironment();		btRigidBody *						GetObject();
+		CPhysicsEnvironment *				GetVPhysicsEnvironment();
+		btRigidBody *						GetObject();
 
 		void								AttachedToConstraint(CPhysicsConstraint *pConstraint);
 		void								DetachedFromConstraint(CPhysicsConstraint *pConstraint);
