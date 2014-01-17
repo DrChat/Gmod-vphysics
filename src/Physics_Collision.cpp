@@ -830,13 +830,19 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 	physshapeinfo_t *info = new physshapeinfo_t;
 	ConvertIVPPosToBull(ivpsurface->mass_center, info->massCenter);
 
-	btCompoundShape *pCompound = new btCompoundShape;
-	pCompound->setMargin(COLLISION_MARGIN);
-	pCompound->setUserPointer(info);
-
 	// Add all of the ledges up
 	CUtlVector<const ivpcompactledge_t *> ledges;
 	GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
+
+	btCompoundShape *pCompound = NULL;
+	
+	if (ledges.Count() == 1)
+		pCompound = new btCompoundShape(false); // Pointless for an AABB tree if it's just one convex
+	else
+		pCompound = new btCompoundShape();
+
+	pCompound->setMargin(COLLISION_MARGIN);
+	pCompound->setUserPointer(info);
 
 	for (int j = 0; j < ledges.Count(); j++) {
 		const ivpcompactledge_t *ledge = ledges[j];
