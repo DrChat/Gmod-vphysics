@@ -497,8 +497,12 @@ void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *a
 		ConvertPosToBull(*velocity, vel);
 		m_pObject->setLinearVelocity(vel);
 	}
+
+	// Angular velocity is supplied in local space.
 	if (angularVelocity) {
 		ConvertAngularImpulseToBull(*angularVelocity, angvel);
+		angvel = m_pObject->getWorldTransform().getBasis() * angvel;
+
 		m_pObject->setAngularVelocity(angvel);
 	}
 }
@@ -515,8 +519,13 @@ void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVeloci
 	if (velocity)
 		ConvertPosToHL(m_pObject->getLinearVelocity(), *velocity);
 
-	if (angularVelocity)
-		ConvertAngularImpulseToHL(m_pObject->getAngularVelocity(), *angularVelocity);
+	// Angular velocity is supplied in local space.
+	if (angularVelocity) {
+		btVector3 angVel = m_pObject->getAngularVelocity();
+		angVel = m_pObject->getWorldTransform().getBasis() * angVel;
+
+		ConvertAngularImpulseToHL(angVel, *angularVelocity);
+	}
 }
 
 void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
@@ -534,8 +543,7 @@ void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *a
 	// Angular velocity is supplied in local space.
 	if (angularVelocity) {
 		ConvertAngularImpulseToBull(*angularVelocity, bullangular);
-		btMatrix3x3 rot = m_pObject->getWorldTransform().getBasis();
-		bullangular = rot * bullangular;
+		bullangular = m_pObject->getWorldTransform().getBasis() * bullangular;
 
 		m_pObject->setAngularVelocity(m_pObject->getAngularVelocity() + bullangular);
 	}
@@ -800,7 +808,7 @@ const char *CPhysicsObject::GetName() const {
 }
 
 bool CPhysicsObject::IsTrigger() const {
-	return m_pGhostObject != NULL;
+	return m_pGhostObject != NULL || m_pFluidController != NULL;
 }
 
 void CPhysicsObject::BecomeTrigger() {
@@ -859,7 +867,7 @@ void CPhysicsObject::TriggerObjectExited(CPhysicsObject *pObject) {
 
 void CPhysicsObject::BecomeHinged(int localAxis) {
 	// localAxis is the axis we're hinged to.
-	// Called on attached object of constraint if the world -> local axis is close enough to a unit axis direction
+	// Called on attached object of constraint if the world -> local axis is close enough to a unit axis direction (I think)
 	NOT_IMPLEMENTED
 }
 
@@ -1102,11 +1110,14 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 	ConvertRotationToBull(angles, matrix);
 	btTransform transform(matrix, vector);
 
-	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
 	btTransform masscenter = btTransform::getIdentity();
-	if (shapeInfo) masscenter.setOrigin(shapeInfo->massCenter);
+
+	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
+	if (shapeInfo)
+		masscenter.setOrigin(shapeInfo->massCenter);
 
 	/*
+	// Doesn't work unless we shift the collision model
 	if (pParams && pParams->massCenterOverride) {
 		btVector3 vecMassCenter;
 		ConvertPosToBull(*pParams->massCenterOverride, vecMassCenter);

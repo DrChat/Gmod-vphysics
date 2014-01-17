@@ -27,12 +27,6 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 	for (int i = 0; i < m_objectList.Count(); i++) {
 		Vector speed;
 		AngularImpulse rot;
-		btVector3 bullSpeed, bullRot;
-
-		// Assert hit = object is DELETED!
-#ifdef _DEBUG
-		Assert(*(char *)m_objectList[i] != '\xDD');
-#endif
 		
 		CPhysicsObject *pObject = (CPhysicsObject *)m_objectList[i];
 		btRigidBody *body = btRigidBody::upcast(pObject->GetObject());
@@ -40,39 +34,39 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 
 		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
 
-		ConvertForceImpulseToBull(speed, bullSpeed);
-		ConvertAngularImpulseToBull(rot, bullRot);
+		speed *= deltaTime;
+		rot *= deltaTime;
+
+		Vector curVel, curAngVel;
+		pObject->GetVelocity(&curVel, &curAngVel);
 
 		switch(ret) {
 			case IMotionEvent::SIM_NOTHING: {
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
-				btTransform transform;
-				((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
-				bullSpeed = transform.getBasis() * bullSpeed;
+				Vector newVel, newAngVel;
+				pObject->WorldToLocalVector(&newVel, speed);
+				newAngVel = rot;
 
-				body->setLinearVelocity(body->getLinearVelocity() + bullSpeed * deltaTime);
-				body->setAngularVelocity(body->getAngularVelocity() + bullRot * deltaTime);
+				pObject->AddVelocity(&newVel, &newAngVel);
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_FORCE: {
-				btTransform transform;
-				((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
-				bullSpeed = transform.getBasis() * bullSpeed;
+				Vector newVel;
+				pObject->WorldToLocalVector(&newVel, speed);
 
-				body->applyCentralForce(bullSpeed * deltaTime);
-				body->applyTorque(bullRot * deltaTime);
+				pObject->ApplyForceCenter(newVel);
+				pObject->ApplyTorqueCenter(rot);
 				break;
 			}
 			case IMotionEvent::SIM_GLOBAL_ACCELERATION: {
-				body->setLinearVelocity(body->getLinearVelocity() + bullSpeed * deltaTime);
-				body->setAngularVelocity(body->getAngularVelocity() + bullRot * deltaTime);
+				pObject->AddVelocity(&speed, &rot);
 				break;
 			}
 			case IMotionEvent::SIM_GLOBAL_FORCE: {
-				body->applyCentralForce(bullSpeed * deltaTime);
-				body->applyTorque(bullRot * deltaTime);
+				pObject->ApplyForceCenter(speed);
+				pObject->ApplyTorqueCenter(rot);
 				break;
 			}
 			default: {
