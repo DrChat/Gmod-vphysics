@@ -239,10 +239,18 @@ void CPhysicsObject::RemoveCallbackFlags(unsigned short flags) {
 }
 
 void CPhysicsObject::Wake() {
+	// Static objects can't wake!
+	if (IsStatic())
+		return;
+
 	m_pObject->setActivationState(ACTIVE_TAG);
 }
 
 void CPhysicsObject::Sleep() {
+	// Static objects can't sleep!
+	if (IsStatic())
+		return;
+
 	m_pObject->setActivationState(ISLAND_SLEEPING);
 }
 
@@ -489,7 +497,9 @@ void CPhysicsObject::GetPositionMatrix(matrix3x4_t *positionMatrix) const {
 void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	if (!velocity && !angularVelocity) return;
 
-	if (!IsMotionEnabled()) return;
+	if (!IsMoveable() || !IsMotionEnabled()) {
+		return;
+	}
 	Wake();
 
 	btVector3 vel, angvel;
@@ -531,7 +541,9 @@ void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVeloci
 void CPhysicsObject::AddVelocity(const Vector *velocity, const AngularImpulse *angularVelocity) {
 	if (!velocity && !angularVelocity) return;
 
-	if (!IsMotionEnabled()) return;
+	if (!IsMoveable() || !IsMotionEnabled()) {
+		return;
+	}
 	Wake();
 
 	btVector3 bullvelocity, bullangular;
@@ -563,7 +575,7 @@ void CPhysicsObject::GetVelocityAtPoint(const Vector &worldPosition, Vector *pVe
 void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angularVelocity) const {
 	if (!velocity && !angularVelocity) return;
 
-	// FIXME: What type of velocity is this?
+	// gets the velocity actually moved by the object in the last simulation update
 	NOT_IMPLEMENTED
 }
 
@@ -600,9 +612,10 @@ void CPhysicsObject::WorldToLocalVector(Vector *localVector, const Vector &world
 }
 
 void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
-	if (!IsMoveable()) {
+	if (!IsMoveable() || !IsMotionEnabled()) {
 		return;
 	}
+	Wake();
 
 	// forceVector is in kg*in/s
 	// bullet takes forces in newtons, aka kg*m/s
@@ -610,13 +623,13 @@ void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
 	m_pObject->applyCentralImpulse(force);
-	Wake();
 }
 
 void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &worldPosition) {
-	if (!IsMoveable()) {
+	if (!IsMoveable() || !IsMotionEnabled()) {
 		return;
 	}
+	Wake();
 
 	Vector local;
 	WorldToLocal(&local, worldPosition);
@@ -629,10 +642,14 @@ void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &w
 }
 
 void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
+	if (!IsMoveable() || !IsMotionEnabled()) {
+		return;
+	}
+	Wake();
+
 	btVector3 bullTorque;
 	ConvertAngularImpulseToBull(torque, bullTorque);
 	m_pObject->applyTorqueImpulse(bullTorque);
-	Wake();
 }
 
 // Output passed to ApplyForceCenter/ApplyTorqueCenter
