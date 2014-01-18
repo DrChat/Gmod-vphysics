@@ -23,6 +23,10 @@ CPhysicsSoftBody::~CPhysicsSoftBody() {
 	delete m_pSoftBody;
 }
 
+void CPhysicsSoftBody::SetTotalMass(float fMass, bool bFromFaces) {
+	m_pSoftBody->setTotalMass(fMass, bFromFaces);
+}
+
 void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody) {
 	m_pEnv			= pEnv;
 	m_pSoftBody		= pSoftBody;
@@ -38,12 +42,25 @@ btSoftBody *CPhysicsSoftBody::GetSoftBody() {
 * CREATION FUNCTIONS
 *************************/
 
-CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv) {
+CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const int *indices, int numIndices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams) {
+	/*
+	btVector3 *bullVerts = new btVector3[numVertices];
+
+	// Make sure numIndices is evenly divisible by 3
+	Assert(numIndices % 3 == 0);
+
+	for (int i = 0; i < numVertices; i++) {
+		ConvertPosToBull(vertices[i], bullVerts[i]);
+	}
+
+	delete [] bullVerts;
+	*/
+
 	NOT_IMPLEMENTED
 	return NULL;
 }
 
-CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) {
+CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams) {
 	btVector3 *bullVerts = new btVector3[numVertices];
 
 	for (int i = 0; i < numVertices; i++) {
@@ -55,7 +72,7 @@ CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Ve
 	wi.m_broadphase = pEnv->GetBulletEnvironment()->getBroadphase();
 	wi.m_dispatcher = pEnv->GetBulletEnvironment()->getDispatcher();
 	wi.m_gravity = pEnv->GetBulletEnvironment()->getGravity();
-	//wi.m_sparsesdf = 0;
+	//wi.m_sparsesdf = 0; // FIXME: Do we need this?
 
 	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateFromConvexHull(wi, bullVerts, numVertices);
 	delete [] bullVerts;

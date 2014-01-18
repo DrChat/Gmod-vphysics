@@ -12,6 +12,10 @@ class IPhysicsSoftBody {
 		virtual ~IPhysicsSoftBody() {}
 };
 
+struct softbodyparams_t {
+
+};
+
 // Class declarations
 class CPhysicsEnvironment;
 
@@ -21,6 +25,8 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 	public:
 		CPhysicsSoftBody();
 		~CPhysicsSoftBody();
+
+		void			SetTotalMass(float fMass, bool bFromFaces);
 
 		// UNEXPOSED FUNCTIONS
 	public:
@@ -34,6 +40,6 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 };
 
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
-CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
+CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams);
 
 #endif // PHYSICS_SOFTBODY_H
