@@ -538,7 +538,7 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 
 	// FIXME: Are we converting the torque correctly? Bullet takes a "max motor impulse"
 	if (hinge.hingeAxis.torque)
-		pHinge->enableAngularMotor(true, DEG2RAD(hinge.hingeAxis.angularVelocity), DEG2RAD(hinge.hingeAxis.torque));
+		pHinge->enableAngularMotor(true, DEG2RAD(hinge.hingeAxis.angularVelocity), DEG2RAD(HL2BULL(hinge.hingeAxis.torque)));
 
 	if (hinge.hingeAxis.minRotation != hinge.hingeAxis.maxRotation)
 		pHinge->setLimit(DEG2RAD(hinge.hingeAxis.minRotation), DEG2RAD(hinge.hingeAxis.maxRotation));
