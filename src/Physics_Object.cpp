@@ -532,7 +532,7 @@ void CPhysicsObject::GetVelocity(Vector *velocity, AngularImpulse *angularVeloci
 	// Angular velocity is supplied in local space.
 	if (angularVelocity) {
 		btVector3 angVel = m_pObject->getAngularVelocity();
-		angVel = m_pObject->getWorldTransform().getBasis() * angVel;
+		angVel = m_pObject->getWorldTransform().getBasis().transpose() * angVel;
 
 		ConvertAngularImpulseToHL(angVel, *angularVelocity);
 	}
