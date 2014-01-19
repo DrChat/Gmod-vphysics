@@ -58,6 +58,10 @@ subject to the following restrictions:
 		#ifndef BT_INFINITY
 			static  int btInfinityMask = 0x7F800000;
 			#define BT_INFINITY (*(float*)&btInfinityMask)
+			inline int btGetInfinityMask() // suppress stupid compiler warning
+			{
+				return btInfinityMask;
+			}
 		#endif
 		
 //use this, in case there are clashes (such as xnamath.h)
@@ -96,7 +100,27 @@ subject to the following restrictions:
 		#define BT_INFINITY INFINITY
 		#define BT_NAN NAN
 	#endif //_WIN32
-#endif //BT_USE_SSE_IN_API
+#else //BT_USE_SSE_IN_API
+
+#ifdef BT_USE_NEON
+	#include <arm_neon.h>
+	
+	typedef float32x4_t btSimdFloat4;
+	#define BT_INFINITY INFINITY
+	#define BT_NAN NAN
+	#define btAssign128(r0,r1,r2,r3) (float32x4_t){r0,r1,r2,r3}
+#else // BT_USE_NEON
+	#ifndef BT_INFINITY
+		static  int btInfinityMask = 0x7F800000;
+		#define BT_INFINITY (*(float*)&btInfinityMask)
+		inline int btGetInfinityMask() // suppress stupid compiler warning
+		{
+			return btInfinityMask;
+		}
+	#endif // BT_INFINITY
+#endif // BT_USE_NEON
+
+#endif // BT_USE_SSE_IN_API
 
 #ifdef BT_USE_NEON
 	#include <arm_neon.h>
@@ -105,7 +129,7 @@ subject to the following restrictions:
 	#define BT_INFINITY INFINITY
 	#define BT_NAN NAN
 	#define btAssign128(r0, r1, r2, r3) (float32x4_t){r0, r1, r2, r3}
-#endif
+#endif // BT_USE_NEON
 
 #if defined(BT_USE_DOUBLE_PRECISION) || defined(BT_FORCE_DOUBLE_FUNCTIONS)
 		
@@ -381,8 +405,8 @@ SIMD_FORCE_INLINE void btSetZero(T* a, int n)
   size_t ncurr = n;
   while (ncurr > 0) 
   {
-    *(acurr++) = 0;
-    --ncurr;
+	*(acurr++) = 0;
+	--ncurr;
   }
 }
 
@@ -393,22 +417,22 @@ SIMD_FORCE_INLINE btScalar btLargeDot(const btScalar *a, const btScalar *b, int 
   sum = 0;
   n -= 2;
   while (n >= 0) {
-    p0 = a[0]; q0 = b[0];
-    m0 = p0 * q0;
-    p1 = a[1]; q1 = b[1];
-    m1 = p1 * q1;
-    sum += m0;
-    sum += m1;
-    a += 2;
-    b += 2;
-    n -= 2;
+	p0 = a[0]; q0 = b[0];
+	m0 = p0 * q0;
+	p1 = a[1]; q1 = b[1];
+	m1 = p1 * q1;
+	sum += m0;
+	sum += m1;
+	a += 2;
+	b += 2;
+	n -= 2;
   }
   n += 2;
   while (n > 0) {
-    sum += (*a) * (*b);
-    a++;
-    b++;
-    n--;
+	sum += (*a) * (*b);
+	a++;
+	b++;
+	n--;
   }
   return sum;
 }
