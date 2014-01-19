@@ -107,7 +107,11 @@ bool CPhysicsObject::IsFluid() const {
 }
 
 bool CPhysicsObject::IsHinged() const {
-	NOT_IMPLEMENTED
+	for (int i = 0; i < m_pConstraintVec.Count(); i++) {
+		if (m_pConstraintVec[i]->GetType() == CONSTRAINT_HINGE)
+			return true;
+	}
+
 	return false;
 }
 
@@ -517,9 +521,8 @@ void CPhysicsObject::SetVelocity(const Vector *velocity, const AngularImpulse *a
 	}
 }
 
+// Sets velocity and forces it into the simulator immediately (unnecessary in bullet)
 void CPhysicsObject::SetVelocityInstantaneous(const Vector *velocity, const AngularImpulse *angularVelocity) {
-	// FIXME: what is different from SetVelocity?
-	// Sets velocity in the same "iteration"
 	SetVelocity(velocity, angularVelocity);
 }
 
