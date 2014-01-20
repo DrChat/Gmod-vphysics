@@ -124,8 +124,25 @@ class btLengthConstraint: public btPoint2PointConstraint {
 		}
 
 		void getInfo1 (btConstraintInfo1 *info) {
-			info->m_numConstraintRows = 1;
-			info->nub = 5;
+			// Positions relative to objects
+			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
+			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
+
+			// Exact world positions
+			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
+			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
+
+			// Delta
+			btVector3 del = posB - posA;
+			btScalar currDist = del.length();
+
+			info->m_numConstraintRows = 0;
+			info->nub = 6; // FIXME: What does this even do?
+
+			if (currDist < m_mindist || currDist > m_maxdist) {
+				info->m_numConstraintRows++;
+				info->nub--;
+			}
 		}
 
 		void getInfo2 (btConstraintInfo2 *info) {
@@ -139,12 +156,15 @@ class btLengthConstraint: public btPoint2PointConstraint {
 
 			// Delta
 			btVector3 del = posB - posA;
-			btScalar currDist = btSqrt(del.dot(del));
-			btVector3 ortho = del / currDist; // Axis to solve along
+			btScalar currDist = del.length();
+
+			btVector3 ortho = del / currDist; // Axis two solve along (normalized delta)
+			// Linear axis for ref object(?)
 			info->m_J1linearAxis[0] = ortho[0];
 			info->m_J1linearAxis[1] = ortho[1];
 			info->m_J1linearAxis[2] = ortho[2];
 			
+			// Linear axis for att object(?)
 			if (info->m_J2linearAxis) {
 				info->m_J2linearAxis[0] = -ortho[0];
 				info->m_J2linearAxis[1] = -ortho[1];
