@@ -7,6 +7,8 @@
 #include "Physics_Environment.h"
 #include "convert.h"
 
+#include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -98,6 +100,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 
 		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CIgnoreObjectRayResultCallback rayCallback(m_pController->GetBody()->GetObject(), from, to);
+			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
 			
 			m_pWorld->rayTest(from, to, rayCallback);
 			
