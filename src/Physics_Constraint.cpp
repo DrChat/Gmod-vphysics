@@ -144,6 +144,12 @@ class btLengthConstraint: public btPoint2PointConstraint {
 			info->m_J1linearAxis[0] = ortho[0];
 			info->m_J1linearAxis[1] = ortho[1];
 			info->m_J1linearAxis[2] = ortho[2];
+			
+			if (info->m_J2linearAxis) {
+				info->m_J2linearAxis[0] = -ortho[0];
+				info->m_J2linearAxis[1] = -ortho[1];
+				info->m_J2linearAxis[2] = -ortho[2];
+			}
 
 			btVector3 p, q;
 			p = relA.cross(ortho);
@@ -631,7 +637,6 @@ CPhysicsConstraint *CreatePulleyConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	return NULL;
 }
 
-// NOT COMPLETE
 CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length) {
 	btVector3 obj1Pos, obj2Pos;
 	ConvertPosToBull(length.objectPosition[0], obj1Pos);
