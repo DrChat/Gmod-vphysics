@@ -140,10 +140,11 @@ class btLengthConstraint: public btPoint2PointConstraint {
 			// Delta
 			btVector3 del = posB - posA;
 			btScalar currDist = btSqrt(del.dot(del));
-			btVector3 ortho = del / currDist;
+			btVector3 ortho = del / currDist; // Axis to solve along
 			info->m_J1linearAxis[0] = ortho[0];
 			info->m_J1linearAxis[1] = ortho[1];
 			info->m_J1linearAxis[2] = ortho[2];
+
 			btVector3 p, q;
 			p = relA.cross(ortho);
 			q = relB.cross(ortho);
@@ -156,18 +157,20 @@ class btLengthConstraint: public btPoint2PointConstraint {
 
 			btScalar rhs = 0;
 
+			info->m_lowerLimit[0] = 0;
+			info->m_upperLimit[0] = 0;
+
 			// Keep the distance between min and max dist
 			if (currDist < m_mindist) {
 				rhs = (currDist - m_mindist) * info->fps * info->erp;
-			} /*else if (currDist > m_maxdist) {
+				info->m_lowerLimit[0] = -SIMD_INFINITY;
+			} else if (currDist > m_maxdist) {
 				rhs = (currDist - m_maxdist) * info->fps * info->erp;
+				info->m_upperLimit[0] = SIMD_INFINITY;
 			}
-			*/
 
-			info->m_constraintError[0] = rhs;
+			info->m_constraintError[0] = rhs; // Constraint error (target rel velocity)
 			info->cfm[0] = btScalar(0.f);
-			info->m_lowerLimit[0] = -SIMD_INFINITY;
-			info->m_upperLimit[0] = SIMD_INFINITY;
 		}
 };
 
@@ -182,7 +185,7 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 
 		void getInfo1(btConstraintInfo1 *info) {
 			info->m_numConstraintRows = 1;
-			info->nub = 5;
+			info->nub = 5; // FIXME: What does this do?
 		}
 
 		void getInfo2(btConstraintInfo2 *info) {
@@ -197,10 +200,11 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 			// Delta
 			btVector3 del = posB - posA;
 			btScalar currDist = btSqrt(del.dot(del));
-			btVector3 ortho = del / currDist;
+			btVector3 ortho = del / currDist; // Axis to solve along
 			info->m_J1linearAxis[0] = ortho[0];
 			info->m_J1linearAxis[1] = ortho[1];
 			info->m_J1linearAxis[2] = ortho[2];
+
 			btVector3 p, q;
 			p = relA.cross(ortho);
 			q = relB.cross(ortho);
@@ -212,8 +216,10 @@ class btDistanceConstraint : public btPoint2PointConstraint {
 			info->m_J2angularAxis[2] = -q[2];
 
 			btScalar rhs = (currDist - m_dist) * info->fps * info->erp;
-			info->m_constraintError[0] = rhs;
+			info->m_constraintError[0] = rhs; // Constraint error (target rel velocity)
 			info->cfm[0] = btScalar(0.f);
+
+			// Max force (or something)
 			info->m_lowerLimit[0] = -SIMD_INFINITY;
 			info->m_upperLimit[0] = SIMD_INFINITY;
 		}
@@ -460,7 +466,6 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 	return NULL;
 }
 
-// NOT COMPLETE
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
