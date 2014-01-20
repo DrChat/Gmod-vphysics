@@ -494,14 +494,14 @@ void CPhysicsCollision::ClearBBoxCache() {
 }
 
 bool CPhysicsCollision::GetBBoxCacheSize(int *pCachedSize, int *pCachedCount) {
-	// FIXME: Probably not correct. (returns the same number for both outputs)
+	// pCachedSize is size in bytes
 	if (pCachedSize)
 		*pCachedSize = m_bboxCache.Size();
 
 	if (pCachedCount)
 		*pCachedCount = m_bboxCache.Count();
 
-	// What do we return?
+	// Bool return value is never used.
 	return false;
 }
 
@@ -1090,19 +1090,36 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	virtualmeshlist_t list;
 	pHandler->GetVirtualMesh(params.userData, &list);
 
-	btTriangleMesh *pMesh = new btTriangleMesh;
-	pMesh->m_weldingThreshold = 0.1;
+	btTriangleIndexVertexArray *pArray = new btTriangleIndexVertexArray;
 
-	btVector3 bullVec[3];
-	for (int i = 0; i < list.triangleCount; i++) {
-		ConvertPosToBull(list.pVerts[list.indices[i*3+0]], bullVec[0]);
-		ConvertPosToBull(list.pVerts[list.indices[i*3+1]], bullVec[1]);
-		ConvertPosToBull(list.pVerts[list.indices[i*3+2]], bullVec[2]);
-		pMesh->addTriangle(bullVec[0], bullVec[1], bullVec[2], true);
+	btIndexedMesh mesh;
+	mesh.m_numVertices = list.vertexCount;
+	mesh.m_numTriangles = list.triangleCount;
+
+	unsigned short *indexArray = new unsigned short[list.indexCount];
+	mesh.m_triangleIndexBase = (unsigned char *)indexArray;
+	mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
+
+	for (int i = 0; i < list.indexCount; i++) {
+		indexArray[i] = list.indices[i];
 	}
 
-	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(pMesh, true);
+	btVector3 *vertexArray = new btVector3[list.vertexCount];
+	mesh.m_vertexBase = (unsigned char *)vertexArray;
+	mesh.m_vertexStride = sizeof(btVector3);
+
+	for (int i = 0; i < list.vertexCount; i++) {
+		ConvertPosToBull(list.pVerts[i], vertexArray[i]);
+	}
+
+	pArray->addIndexedMesh(mesh, PHY_SHORT);
+
+	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(pArray, true);
 	bull->setMargin(COLLISION_MARGIN);
+
+	delete [] indexArray;
+	delete [] vertexArray;
+
 	return (CPhysCollide *)bull;
 }
 
