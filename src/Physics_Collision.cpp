@@ -883,13 +883,13 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 			// This code will find all unique indexes and add them to an array. This avoids
 			// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
 			// If you find a better way you can replace this!
-			CUtlVector<short> indexes;
+			CUtlVector<int> indexes;
 
 			for (int k = 0; k < ledge->n_triangles; k++) {
 				Assert((uint)k == tris[k].tri_index);
 
 				for (int l = 0; l < 3; l++) {
-					short index = tris[k].c_three_edges[l].start_point_index;
+					int index = tris[k].c_three_edges[l].start_point_index;
 
 					bool shouldAdd = true;
 					for (int m = 0; m < indexes.Count(); m++) {
@@ -906,7 +906,7 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 			}
 
 			for (int k = 0; k < indexes.Count(); k++) {
-				short index = indexes[k];
+				int index = indexes[k];
 
 				float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
 
