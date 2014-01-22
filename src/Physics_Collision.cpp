@@ -305,25 +305,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 	if (!pCollide) return collideOrigin;
 
 	btCollisionShape *pShape = (btCollisionShape *)pCollide;
-	btCollisionObject *pObject = new btCollisionObject;
-	pObject->setCollisionShape(pShape);
-
-	// Setup our position
-	btVector3 bullPos;
-	btMatrix3x3 bullAng;
-	ConvertPosToBull(collideOrigin, bullPos);
-	ConvertRotationToBull(collideAngles, bullAng);
-	btTransform trans(bullAng, bullPos);
-
-	// Compensate for mass offset.
-	physshapeinfo_t *pInfo = (physshapeinfo_t *)pShape->getUserPointer();
-	if (pInfo)
-		trans *= btTransform(btMatrix3x3::getIdentity(), pInfo->massCenter);
-
-	pObject->setWorldTransform(trans);
-
-	// Cleanup
-	delete pObject;
+	// TODO: Convex shapes have localGetSupportingVertex defined, but compounds don't!
 
 	NOT_IMPLEMENTED
 	return collideOrigin;
@@ -883,13 +865,13 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 			// This code will find all unique indexes and add them to an array. This avoids
 			// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
 			// If you find a better way you can replace this!
-			CUtlVector<int> indexes;
+			CUtlVector<uint16> indexes;
 
 			for (int k = 0; k < ledge->n_triangles; k++) {
 				Assert((uint)k == tris[k].tri_index);
 
 				for (int l = 0; l < 3; l++) {
-					int index = tris[k].c_three_edges[l].start_point_index;
+					uint16 index = tris[k].c_three_edges[l].start_point_index;
 
 					bool shouldAdd = true;
 					for (int m = 0; m < indexes.Count(); m++) {
@@ -906,7 +888,7 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 			}
 
 			for (int k = 0; k < indexes.Count(); k++) {
-				int index = indexes[k];
+				uint16 index = indexes[k];
 
 				float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
 
