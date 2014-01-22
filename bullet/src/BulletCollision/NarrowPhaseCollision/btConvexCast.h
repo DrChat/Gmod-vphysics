@@ -58,6 +58,8 @@ public:
 		btIDebugDraw* m_debugDrawer;
 		btScalar	m_allowedPenetration;
 
+		btScalar	m_penetrationDist; // Distance last raytest penetrated through object (neg means penetrated)
+
 	};
 
 

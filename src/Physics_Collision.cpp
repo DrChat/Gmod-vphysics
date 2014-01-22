@@ -648,22 +648,35 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			btBoxShape *box = new btBoxShape(btvec.absolute());
 
 			btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
-			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.1f);
+			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.f);
 
 			ptr->fraction = cb.m_closestHitFraction;
 			ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 
 			// Data is uninitialized if frac is 1
 			if (cb.m_closestHitFraction < 1.0) {
-				// BUG: We need to have a fraction atleast a bit bigger than 0 if not started inside object, or the game will always
-				// think the player is stuck if walking next to or on top of a physics ent
-				// May have to refactor bullet code to have a cb.m_startInSolid flag?
-				if (cb.m_closestHitFraction == 0.f) {
+				// Penetration dist is the amount the last ray trace went through the object in meters (neg = penetration)
+				// Allow penetrations up to 1 centimeter
+				if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist < -0.01f) {
 					ptr->startsolid = true;
 					ptr->allsolid = true;
 					ptr->fraction = 0;
 				} else {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+
+					// HACK: Oh whatever, old vphysics did something just as bad
+					if (cb.m_closestHitFraction == 0.f) {
+						// We're here because the penetration distance is within tolerable levels (aka on surface of object)
+						ptr->fraction = 0.0001;
+
+						// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
+						btVector3 delta;
+						ConvertPosToBull(ray.m_Delta, delta);
+						if (btFabs(delta.dot(cb.m_hitNormalWorld)) <= 0.0005) {
+							ptr->fraction = 1;
+							ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
+						}
+					}
 				}
 
 				// TODO: Give game surface data

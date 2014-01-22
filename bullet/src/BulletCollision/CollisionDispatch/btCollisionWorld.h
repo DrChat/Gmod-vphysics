@@ -336,6 +336,7 @@ public:
 		btVector3				m_hitNormalLocal;
 		btVector3				m_hitPointLocal;
 		btScalar				m_hitFraction;
+		btScalar				m_penetrationDist; // How far the last cast penetrated the object (neg means penetrated)
 	};
 
 	///RayResultCallback is used to report new raycast results
@@ -387,6 +388,7 @@ public:
 
 		btVector3	m_hitNormalWorld;
 		btVector3	m_hitPointWorld;
+		btScalar	m_penetrationDist; // How far the last cast penetrated the object + allowed penetration (neg means penetrated)
 		const btCollisionObject*	m_hitCollisionObject;
 		
 		virtual	btScalar	addSingleResult(LocalConvexResult& convexResult, bool normalInWorldSpace)
@@ -405,6 +407,7 @@ public:
 				m_hitNormalWorld = m_hitCollisionObject->getWorldTransform().getBasis()*convexResult.m_hitNormalLocal;
 			}
 			m_hitPointWorld = convexResult.m_hitPointLocal;
+			m_penetrationDist = convexResult.m_penetrationDist;
 			return convexResult.m_hitFraction;
 		}
 	};

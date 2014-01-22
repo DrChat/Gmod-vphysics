@@ -233,6 +233,7 @@ bool	btContinuousConvexCollision::calcTimeOfImpact(
 		result.m_fraction = lambda;
 		result.m_normal = n;
 		result.m_hitPoint = c;
+		result.m_penetrationDist = dist - result.m_allowedPenetration;
 		return true;
 	}
 
