@@ -148,6 +148,19 @@ void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
 	if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
 		// Delete the striding mesh interface (which we allocate)
 		btStridingMeshInterface *pMesh = ((btTriangleMeshShape *)pShape)->getMeshInterface();
+		btTriangleIndexVertexArray *pTriArr = (btTriangleIndexVertexArray *)pMesh;
+		IndexedMeshArray &arr = pTriArr->getIndexedMeshArray();
+		for (int i = arr.size()-1; i >= 0; i--) {
+			btIndexedMesh &mesh = arr[i];
+			unsigned short *indexBase = (unsigned short *)mesh.m_triangleIndexBase;
+			delete [] indexBase;
+
+			btVector3 *vertexBase = (btVector3 *)mesh.m_vertexBase;
+			delete [] vertexBase;
+
+			arr.pop_back();
+		}
+
 		delete pMesh;
 
 		delete pShape;
@@ -651,35 +664,33 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.f);
 
 			ptr->fraction = cb.m_closestHitFraction;
-			ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 
 			// Data is uninitialized if frac is 1
 			if (cb.m_closestHitFraction < 1.0) {
 				// Penetration dist is the amount the last ray trace went through the object in meters (neg = penetration)
 				// Allow penetrations up to 1 centimeter
-				if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist < -0.01f) {
-					ptr->startsolid = true;
-					ptr->allsolid = true;
-					ptr->fraction = 0;
-				} else {
+				if (cb.m_closestHitFraction != 0.f) {
+					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+				} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.02f) {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 
 					// HACK: Oh whatever, old vphysics did something just as bad
-					if (cb.m_closestHitFraction == 0.f) {
-						// We're here because the penetration distance is within tolerable levels (aka on surface of object)
-						ptr->fraction = 0.0001;
+					// We're here because the penetration distance is within tolerable levels (aka on surface of object)
+					ptr->fraction = 0.0001;
 
-						// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
-						btVector3 delta;
-						ConvertPosToBull(ray.m_Delta, delta);
-						if (btFabs(delta.dot(cb.m_hitNormalWorld)) <= 0.0005) {
-							ptr->fraction = 1;
-							ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
-						}
+					// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
+					// FIXME: What if a separate object is at the end of the ray?
+					btVector3 direction;
+					ConvertPosToBull(ray.m_Delta, direction);
+					direction.normalize();
+					if (btFabs(direction.dot(cb.m_hitNormalWorld)) <= 0.005) {
+						ptr->fraction = 1;
 					}
+				} else {
+					ptr->startsolid = true;
+					ptr->allsolid = true;
+					ptr->fraction = 0;
 				}
-
-				// TODO: Give game surface data
 
 				if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 					if (!ptr->allsolid) {
@@ -692,6 +703,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					}
 				}
 			}
+
+			ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 
 			delete box;
 		} else {
@@ -790,14 +803,12 @@ static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivp
 
 static btCollisionShape *LoadMOPP(CPhysCollide *pSolid, bool swap) {
 	// Parse MOPP surface header
-	const ivpcompactmopp_t *ivpmopp = (ivpcompactmopp_t *)((char *)pSolid + sizeof(compactsurfaceheader_t));
+	//const moppsurfaceheader_t *moppSurface = (moppsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
+	const ivpcompactmopp_t *ivpmopp = (ivpcompactmopp_t *)((char *)pSolid + sizeof(collideheader_t) + sizeof(moppsurfaceheader_t));
 
-	// valve vphysics casts pSolid to a ivpcompactsurface_t and then compares dummy[2] to this id
 	if (ivpmopp->dummy != IVP_COMPACT_MOPP_ID) {
 		return NULL;
 	}
-
-	// FIXME: Our mopp header struct is incorrect
 
 	//PhysicsShapeInfo *pInfo = new PhysicsShapeInfo;
 	//ConvertIVPPosToBull(ivpmopp->mass_center, pInfo->massCenter);
@@ -810,12 +821,14 @@ static btCollisionShape *LoadMOPP(CPhysCollide *pSolid, bool swap) {
 	CUtlVector<const ivpcompactledge_t *> ledges;
 	//GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpmopp + ivpmopp->offset_ledgetree_root), &ledges);
 
+	NOT_IMPLEMENTED
 	return NULL;
 }
 
 static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 	// Parse IVP Surface header (which is right after the compact surface header)
-	const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pSolid + sizeof(compactsurfaceheader_t));
+	//const compactsurfaceheader_t *compactSurface = (compactsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
+	const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pSolid + sizeof(collideheader_t) + sizeof(compactsurfaceheader_t));
 
 	if (ivpsurface->dummy[2] != IVP_COMPACT_SURFACE_ID) {
 		return NULL;
@@ -938,10 +951,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	for (int i = 0; i < solidCount; i++) {
 		// Size of this solid, excluding the size int itself
 		int size = *(int *)(pBuffer + position);
-		position += 4; // Skip the size int.
 
 		pOutput->solids[i] = (CPhysCollide *)(pBuffer + position);
-		position += size;
+		position += size + 4;
 
 		// May fail if we're reading a corrupted file.
 		Assert(position < bufferSize);
@@ -958,7 +970,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	// We must convert all of the ivp shapes into something we can use.
 	for (int i = 0; i < solidCount; i++) {
 		// NOTE: modelType 0 is IVPS, 1 is (mostly unused) MOPP format
-		const compactsurfaceheader_t &surfaceheader = *(compactsurfaceheader_t *)pOutput->solids[i];
+		const collideheader_t &surfaceheader = *(collideheader_t *)pOutput->solids[i];
 
 		if (surfaceheader.vphysicsID	!= VPHYSICS_ID
 		 || surfaceheader.version		!= 0x100) {
@@ -1075,7 +1087,7 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContext) 
 }
 
 // BUG: Weird collisions with these, sometimes phys objs fall through the displacement mesh
-// Also ray traces randomly fail (jeep humps displacements aggressively)
+// Appears to have microholes
 CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
 	IVirtualMeshEvent *pHandler = params.pMeshEventHandler;
 	if (!pHandler) return NULL;
@@ -1112,9 +1124,6 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(pArray, true);
 	bull->setMargin(COLLISION_MARGIN);
 
-	delete [] indexArray;
-	delete [] vertexArray;
-
 	return (CPhysCollide *)bull;
 }
 
@@ -1145,6 +1154,7 @@ void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
 }
 
 // What is this?
+// Returns 0 in valve vphysics as well.
 unsigned int CPhysicsCollision::ReadStat(int statID) {
 	NOT_IMPLEMENTED
 	return 0;
