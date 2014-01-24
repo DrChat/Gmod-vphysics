@@ -11,6 +11,7 @@
 #include "Physics_DragController.h"
 #include "Physics_MotionController.h"
 #include "Physics_Constraint.h"
+#include "Physics_Collision.h"
 #include "Physics_VehicleController.h"
 #include "Physics_SoftBody.h"
 #include "convert.h"
@@ -271,6 +272,7 @@ class CObjectTracker {
 * CLASS CCollisionEventListener
 *********************************/
 
+// TODO: Implement some class in bullet code and derive this from that
 class CCollisionEventListener {
 	public:
 		CCollisionEventListener(CPhysicsEnvironment *pEnv) {
@@ -849,12 +851,12 @@ void CPhysicsEnvironment::PostRestore() {
 
 bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 	for (int i = 0; i < m_objects.Count(); i++) {
-		if (((CPhysicsObject *)m_objects[i])->GetObject()->getCollisionShape() == (btCollisionShape *)pCollide)
+		if (((CPhysicsObject *)m_objects[i])->GetObject()->getCollisionShape() == pCollide->GetCollisionShape())
 			return true;
 	}
 
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
-		if (((CPhysicsObject *)m_deadObjects[i])->GetObject()->getCollisionShape() == (btCollisionShape *)pCollide)
+		if (((CPhysicsObject *)m_deadObjects[i])->GetObject()->getCollisionShape() == pCollide->GetCollisionShape())
 			return true;
 	}
 
@@ -1042,6 +1044,7 @@ CCollisionSolver *CPhysicsEnvironment::GetCollisionSolver() {
 // Purpose: To be the biggest eyesore ever
 // Bullet doesn't provide many callbacks such as the ones we're looking for, so
 // we have to iterate through all the contact manifolds and generate the callbacks ourselves.
+// FIXME: Remove this function and implement callbacks in bullet code
 void CPhysicsEnvironment::DoCollisionEvents(float dt) {
 	if (m_pCollisionEvent) {
 		int numManifolds = m_pBulletEnvironment->getDispatcher()->getNumManifolds();

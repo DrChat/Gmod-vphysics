@@ -86,6 +86,18 @@ void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleInde
 }
 
 /****************************
+* CLASS CPhysCollide
+****************************/
+
+CPhysCollide::CPhysCollide(btCollisionShape *pShape) {
+	m_pShape = pShape;
+	m_pShape->setUserPointer(this);
+	m_pNullPtr = (void *)0x3D3D3D3D;
+
+	m_massCenter.setZero();
+}
+
+/****************************
 * CLASS CPhysicsCollision
 ****************************/
 
@@ -221,7 +233,8 @@ CPhysCollide *CPhysicsCollision::ConvertConvexToCollide(CPhysConvex **ppConvex, 
 		pCompound->addChildShape(btTransform::getIdentity(), pShape);
 	}
 
-	return (CPhysCollide *)pCompound;
+	CPhysCollide *pCollide = new CPhysCollide(pCompound);
+	return pCollide;
 }
 
 CPhysCollide *CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pConvex, int convexCount, const convertconvexparams_t &convertParams) {
@@ -232,8 +245,8 @@ CPhysCollide *CPhysicsCollision::ConvertConvexToCollideParams(CPhysConvex **pCon
 void CPhysicsCollision::AddConvexToCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex, const matrix3x4_t *xform) {
 	if (!pCollide || !pConvex) return;
 
-	if (((btCollisionShape *)pCollide)->isCompound()) {
-		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+	if (pCollide->IsCompound()) {
+		btCompoundShape *pCompound = pCollide->GetCompoundShape();
 		btCollisionShape *pShape = (btCollisionShape *)pConvex;
 
 		btTransform trans = btTransform::getIdentity();
@@ -248,10 +261,11 @@ void CPhysicsCollision::AddConvexToCollide(CPhysCollide *pCollide, const CPhysCo
 void CPhysicsCollision::RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex) {
 	if (!pCollide || !pConvex) return;
 
-	if (((btCollisionShape *)pCollide)->isCompound()) {
-		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+	if (pCollide->IsCompound()) {
+		btCompoundShape *pCompound = pCollide->GetCompoundShape();
 		btCollisionShape *pShape = (btCollisionShape *)pConvex;
 
+		// FIXME: Need to recalculate the aabb tree or something
 		pCompound->removeChildShape(pShape);
 	}
 }
@@ -259,7 +273,7 @@ void CPhysicsCollision::RemoveConvexFromCollide(CPhysCollide *pCollide, const CP
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 	if (!pCollide || IsCachedBBox(pCollide)) return;
 
-	btCollisionShape *pShape = (btCollisionShape *)pCollide;
+	btCollisionShape *pShape = pCollide->GetCollisionShape();
 
 	// Compound shape? Delete all of its children.
 	if (pShape->isCompound()) {
@@ -272,7 +286,7 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 			ConvexFree((CPhysConvex *)pShape);
 		}
 
-		delete (physshapeinfo_t *)pCompound->getUserPointer();
+		delete pCollide;
 		delete pCompound;
 	} else {
 		// Those dirty liars!
@@ -317,7 +331,7 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction) {
 	if (!pCollide) return collideOrigin;
 
-	btCollisionShape *pShape = (btCollisionShape *)pCollide;
+	const btCollisionShape *pShape = pCollide->GetCollisionShape();
 	// TODO: Convex shapes have localGetSupportingVertex defined, but compounds don't!
 
 	NOT_IMPLEMENTED
@@ -328,7 +342,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 	if (!pCollide || (!pMins && !pMaxs)) return;
 
 	// Bullet returns very different AABBs than Havok.
-	btCollisionShape *shape = (btCollisionShape *)pCollide;
+	const btCollisionShape *shape = pCollide->GetCollisionShape();
 
 	btVector3 pos, mins, maxs;
 	btMatrix3x3 rot;
@@ -337,9 +351,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 	ConvertRotationToBull(collideAngles, rot);
 	btTransform transform(rot, pos);
 
-	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
-	if (shapeInfo)
-		transform.setOrigin(transform.getOrigin() + shapeInfo->massCenter);
+	transform.setOrigin(transform.getOrigin() + pCollide->GetMassCenter());
 
 	shape->getAabb(transform, mins, maxs);
 
@@ -356,41 +368,30 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 void CPhysicsCollision::CollideGetMassCenter(CPhysCollide *pCollide, Vector *pOutMassCenter) {
 	if (!pCollide || !pOutMassCenter) return;
 
-	btCollisionShape *pShape = (btCollisionShape *)pCollide;
-	physshapeinfo_t *pInfo = (physshapeinfo_t *)pShape->getUserPointer();
-
-	if (pInfo) {
-		Vector massCenter;
-		ConvertPosToHL(pInfo->massCenter, massCenter);
-
-		*pOutMassCenter = massCenter;
-	}
+	ConvertPosToHL(pCollide->GetMassCenter(), *pOutMassCenter);
 }
 
 void CPhysicsCollision::CollideSetMassCenter(CPhysCollide *pCollide, const Vector &massCenter) {
 	if (!pCollide) return;
 
-	btCollisionShape *pShape = (btCollisionShape *)pCollide;
-	physshapeinfo_t *pInfo = (physshapeinfo_t *)pShape->getUserPointer();
+	btCollisionShape *pShape = pCollide->GetCollisionShape();
 
-	if (pInfo) {
-		btVector3 bullMassCenter;
-		ConvertPosToBull(massCenter, bullMassCenter);
+	btVector3 bullMassCenter;
+	ConvertPosToBull(massCenter, bullMassCenter);
 
-		// Since mass centers are kind of a hack in our implementation, take care of updating the compound shape's children.
-		// FIXME: May cause some issues with rigid bodies "moving" around, or something.
-		btVector3 offset = bullMassCenter - pInfo->massCenter;
-		if (pShape->isCompound()) {
-			btCompoundShape *pCompound = (btCompoundShape *)pShape;
-			for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
-				btTransform childTrans = pCompound->getChildTransform(i);
-				childTrans.setOrigin(childTrans.getOrigin() + offset);
-				pCompound->updateChildTransform(i, childTrans);
-			}
+	// Since mass centers are kind of a hack in our implementation, take care of updating the compound shape's children.
+	// FIXME: May cause some issues with rigid bodies "moving" around, or something.
+	btVector3 offset = bullMassCenter - pCollide->GetMassCenter();
+	if (pShape->isCompound()) {
+		btCompoundShape *pCompound = (btCompoundShape *)pShape;
+		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+			btTransform childTrans = pCompound->getChildTransform(i);
+			childTrans.setOrigin(childTrans.getOrigin() + offset);
+			pCompound->updateChildTransform(i, childTrans);
 		}
-
-		pInfo->massCenter = bullMassCenter;
 	}
+
+	pCollide->SetMassCenter(bullMassCenter);
 }
 
 Vector CPhysicsCollision::CollideGetOrthographicAreas(const CPhysCollide *pCollide) {
@@ -406,8 +407,8 @@ void CPhysicsCollision::CollideSetOrthographicAreas(CPhysCollide *pCollide, cons
 void CPhysicsCollision::CollideSetScale(CPhysCollide *pCollide, const Vector &scale) {
 	if (!pCollide) return;
 
-	if (((btCollisionShape *)pCollide)->isCompound()) {
-		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+	if (pCollide->IsCompound()) {
+		btCompoundShape *pCompound = pCollide->GetCompoundShape();
 
 		btVector3 bullScale;
 		ConvertDirectionToBull(scale, bullScale);
@@ -419,8 +420,8 @@ void CPhysicsCollision::CollideSetScale(CPhysCollide *pCollide, const Vector &sc
 void CPhysicsCollision::CollideGetScale(const CPhysCollide *pCollide, Vector &out) {
 	if (!pCollide) return;
 
-	if (((btCollisionShape *)pCollide)->isCompound()) {
-		btCompoundShape *pCompound = (btCompoundShape *)pCollide;
+	if (pCollide->IsCompound()) {
+		const btCompoundShape *pCompound = pCollide->GetCompoundShape();
 
 		btVector3 scale = pCompound->getLocalScaling();
 		ConvertDirectionToHL(scale, out);
@@ -433,10 +434,9 @@ int CPhysicsCollision::CollideIndex(const CPhysCollide *pCollide) {
 }
 
 int CPhysicsCollision::GetConvexesUsedInCollideable(const CPhysCollide *pCollideable, CPhysConvex **pOutputArray, int iOutputArrayLimit) {
-	const btCollisionShape *pShape = (btCollisionShape *)pCollideable;
-	if (!pShape->isCompound()) return 0;
+	if (!pCollideable->IsCompound()) return 0;
 
-	const btCompoundShape *pCompound = (btCompoundShape *)pShape;
+	const btCompoundShape *pCompound = pCollideable->GetCompoundShape();
 	int numSolids = pCompound->getNumChildShapes();
 	for (int i = 0; i < numSolids && i < iOutputArrayLimit; i++) {
 		const btCollisionShape *pConvex = pCompound->getChildShape(i);
@@ -540,10 +540,12 @@ CPhysCollide *CPhysicsCollision::BBoxToCollide(const Vector &mins, const Vector 
 	btVector3 halfExtents = (btmaxs - btmins) / 2;
 	pCompound->addChildShape(btTransform(btMatrix3x3::getIdentity(), btmins + halfExtents), (btCollisionShape *)pConvex);
 
-	if (m_enableBBoxCache)
-		AddCachedBBox((CPhysCollide *)pCompound, mins, maxs);
+	CPhysCollide *pCollide = new CPhysCollide(pCompound);
 
-	return (CPhysCollide *)pCompound;
+	if (m_enableBBoxCache)
+		AddCachedBBox(pCollide, mins, maxs);
+
+	return pCollide;
 }
 
 CPhysConvex *CPhysicsCollision::CylinderToConvex(const Vector &mins, const Vector &maxs) {
@@ -590,16 +592,14 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	btMatrix3x3 btmatrix;
 
 	btCollisionObject *object = new btCollisionObject;
-	btCollisionShape *shape = (btCollisionShape *)pCollide;
+	btCollisionShape *shape = (btCollisionShape *)pCollide->GetCollisionShape();
 	object->setCollisionShape(shape);
 
 	ConvertPosToBull(collideOrigin, btvec);
 	ConvertRotationToBull(collideAngles, btmatrix);
 	btTransform transform(btmatrix, btvec);
 
-	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
-	if (shapeInfo)
-		transform *= btTransform(btMatrix3x3::getIdentity(), shapeInfo->massCenter);
+	transform *= btTransform(btMatrix3x3::getIdentity(), pCollide->GetMassCenter());
 
 	object->setWorldTransform(transform);
 
@@ -671,7 +671,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				// Allow penetrations up to 1 centimeter
 				if (cb.m_closestHitFraction != 0.f) {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-				} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.02f) {
+				} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.01f) {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 
 					// HACK: Oh whatever, old vphysics did something just as bad
@@ -679,11 +679,13 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					ptr->fraction = 0.0001;
 
 					// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
-					// FIXME: What if a separate object is at the end of the ray?
+					// FIXME: What if a separate shape is at the end of the ray?
 					btVector3 direction;
 					ConvertPosToBull(ray.m_Delta, direction);
 					direction.normalize();
 					if (btFabs(direction.dot(cb.m_hitNormalWorld)) <= 0.005) {
+						// Run another trace with an allowed penetration of something above 0.005
+
 						ptr->fraction = 1;
 					}
 				} else {
@@ -727,7 +729,7 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 
 	// Create the collision object (object to be traced against)
 	btCollisionObject *object = new btCollisionObject;
-	btCollisionShape *shape = (btCollisionShape *)pCollide;
+	btCollisionShape *shape = (btCollisionShape *)pCollide->GetCollisionShape();
 	object->setCollisionShape(shape);
 	ConvertRotationToBull(collideAngles, bullMatrix);
 	ConvertPosToBull(collideOrigin, bullVec);
@@ -744,7 +746,7 @@ void CPhysicsCollision::TraceCollide(const Vector &start, const Vector &end, con
 	btTransform bullStartT(btMatrix3x3::getIdentity(), bullStartVec);
 	btTransform bullEndT(btMatrix3x3::getIdentity(), bullEndVec);
 
-	btCollisionShape *pSweepShape = (btCollisionShape *)pSweepCollide;
+	btCollisionShape *pSweepShape = (btCollisionShape *)pSweepCollide->GetCollisionShape();
 	if (pSweepShape->isCompound()) {
 
 	}
@@ -801,59 +803,13 @@ static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivp
 	}
 }
 
-static btCollisionShape *LoadMOPP(CPhysCollide *pSolid, bool swap) {
-	// Parse MOPP surface header
-	//const moppsurfaceheader_t *moppSurface = (moppsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
-	const ivpcompactmopp_t *ivpmopp = (ivpcompactmopp_t *)((char *)pSolid + sizeof(collideheader_t) + sizeof(moppsurfaceheader_t));
-
-	if (ivpmopp->dummy != IVP_COMPACT_MOPP_ID) {
-		return NULL;
-	}
-
-	//PhysicsShapeInfo *pInfo = new PhysicsShapeInfo;
-	//ConvertIVPPosToBull(ivpmopp->mass_center, pInfo->massCenter);
-
-	//btCompoundShape *pCompound = new btCompoundShape;
-	//pCompound->setMargin(COLLISION_MARGIN);
-	//pCompound->setUserPointer(pInfo);
-
-	// Add up all of the ledges
+/*
+static void ParseLedgeTree(const ivpcompactledgenode_t *root, btCompoundShape *pCompound) {
 	CUtlVector<const ivpcompactledge_t *> ledges;
-	//GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpmopp + ivpmopp->offset_ledgetree_root), &ledges);
+	GetAllLedges(root, &ledges);
 
-	NOT_IMPLEMENTED
-	return NULL;
-}
-
-static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
-	// Parse IVP Surface header (which is right after the compact surface header)
-	//const compactsurfaceheader_t *compactSurface = (compactsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
-	const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pSolid + sizeof(collideheader_t) + sizeof(compactsurfaceheader_t));
-
-	if (ivpsurface->dummy[2] != IVP_COMPACT_SURFACE_ID) {
-		return NULL;
-	}
-
-	// Store info about the mass center for later use.
-	physshapeinfo_t *info = new physshapeinfo_t;
-	ConvertIVPPosToBull(ivpsurface->mass_center, info->massCenter);
-
-	// Add all of the ledges up
-	CUtlVector<const ivpcompactledge_t *> ledges;
-	GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
-
-	btCompoundShape *pCompound = NULL;
-	
-	if (ledges.Count() == 1)
-		pCompound = new btCompoundShape(false); // Pointless for an AABB tree if it's just one convex
-	else
-		pCompound = new btCompoundShape();
-
-	pCompound->setMargin(COLLISION_MARGIN);
-	pCompound->setUserPointer(info);
-
-	for (int j = 0; j < ledges.Count(); j++) {
-		const ivpcompactledge_t *ledge = ledges[j];
+	for (int i = 0; i < ledges.Count(); i++) {
+		const ivpcompactledge_t *ledge = ledges[i];
 
 		// Large array of all the vertices
 		const char *vertices = (const char *)ledge + ledge->c_point_offset;
@@ -863,16 +819,16 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 			btTriangleMesh *pMesh = new btTriangleMesh;
 
 			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
-			for (int k = 0; k < ledge->n_triangles; k++) {
-				Assert(k == tris[k].tri_index);
+			for (int j = 0; j < ledge->n_triangles; j++) {
+				Assert(j == tris[j].tri_index);
 
 				btVector3 verts[3];
 
-				for (int l = 0; l < 3; l++) {
-					short idx = tris[k].c_three_edges[l].start_point_index;
+				for (int k = 0; k < 3; k++) {
+					short idx = tris[j].c_three_edges[k].start_point_index;
 					float *ivpvert = (float *)(vertices + idx * 16);
 
-					ConvertIVPPosToBull(ivpvert, verts[l]);
+					ConvertIVPPosToBull(ivpvert, verts[k]);
 				}
 
 				pMesh->addTriangle(verts[0], verts[1], verts[2], true);
@@ -893,15 +849,15 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 			// If you find a better way you can replace this!
 			CUtlVector<uint16> indexes;
 
-			for (int k = 0; k < ledge->n_triangles; k++) {
-				Assert((uint)k == tris[k].tri_index);
+			for (int j = 0; j < ledge->n_triangles; j++) {
+				Assert((uint)j == tris[j].tri_index);
 
-				for (int l = 0; l < 3; l++) {
-					uint16 index = tris[k].c_three_edges[l].start_point_index;
+				for (int k = 0; k < 3; k++) {
+					uint16 index = tris[j].c_three_edges[k].start_point_index;
 
 					bool shouldAdd = true;
-					for (int m = 0; m < indexes.Count(); m++) {
-						if (indexes[m] == index) {
+					for (int l = 0; l < indexes.Count(); l++) {
+						if (indexes[l] == index) {
 							shouldAdd = false;
 							break;
 						}
@@ -913,8 +869,8 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 				}
 			}
 
-			for (int k = 0; k < indexes.Count(); k++) {
-				uint16 index = indexes[k];
+			for (int j = 0; j < indexes.Count(); j++) {
+				uint16 index = indexes[j];
 
 				float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
 
@@ -928,8 +884,141 @@ static btCollisionShape *LoadIVPS(CPhysCollide *pSolid, bool swap) {
 #endif
 		}
 	}
+}
+*/
 
-	return pCompound;
+static CPhysCollide *LoadMOPP(void *pSolid, bool swap) {
+	// Parse MOPP surface header
+	//const moppsurfaceheader_t *moppSurface = (moppsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
+	const ivpcompactmopp_t *ivpmopp = (ivpcompactmopp_t *)((char *)pSolid + sizeof(collideheader_t) + sizeof(moppsurfaceheader_t));
+
+	if (ivpmopp->dummy != IVP_COMPACT_MOPP_ID) {
+		return NULL;
+	}
+
+	btCompoundShape *pCompound = new btCompoundShape;
+	pCompound->setMargin(COLLISION_MARGIN);
+
+	CPhysCollide *pCollide = new CPhysCollide(pCompound);
+
+	// Add up all of the ledges
+	CUtlVector<const ivpcompactledge_t *> ledges;
+	GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpmopp + ivpmopp->offset_ledgetree_root), &ledges);
+
+	// Until this function is setup
+	delete pCompound;
+	delete pCollide;
+
+	NOT_IMPLEMENTED
+	return NULL;
+}
+
+static CPhysCollide *LoadIVPS(void *pSolid, bool swap) {
+	// Parse IVP Surface header (which is right after the compact surface header)
+	//const compactsurfaceheader_t *compactSurface = (compactsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
+	const ivpcompactsurface_t *ivpsurface = (ivpcompactsurface_t *)((char *)pSolid + sizeof(collideheader_t) + sizeof(compactsurfaceheader_t));
+
+	if (ivpsurface->dummy[2] != IVP_COMPACT_SURFACE_ID) {
+		return NULL;
+	}
+
+	// Add all of the ledges up
+	CUtlVector<const ivpcompactledge_t *> ledges;
+	GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
+
+	btCompoundShape *pCompound = NULL;
+	
+	if (ledges.Count() == 1)
+		pCompound = new btCompoundShape(false); // Pointless for an AABB tree if it's just one convex
+	else
+		pCompound = new btCompoundShape();
+
+	CPhysCollide *pCollide = new CPhysCollide(pCompound);
+
+	btVector3 massCenter;
+	ConvertIVPPosToBull(ivpsurface->mass_center, massCenter);
+	pCollide->SetMassCenter(massCenter);
+
+	pCompound->setMargin(COLLISION_MARGIN);
+
+	for (int i = 0; i < ledges.Count(); i++) {
+		const ivpcompactledge_t *ledge = ledges[i];
+
+		// Large array of all the vertices
+		const char *vertices = (const char *)ledge + ledge->c_point_offset;
+
+		if (ledge->n_triangles > 0) {
+#ifdef USE_CONVEX_TRIANGLES
+			btTriangleMesh *pMesh = new btTriangleMesh;
+
+			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
+			for (int j = 0; j < ledge->n_triangles; j++) {
+				Assert(j == tris[j].tri_index);
+
+				btVector3 verts[3];
+
+				for (int k = 0; k < 3; k++) {
+					short idx = tris[j].c_three_edges[k].start_point_index;
+					float *ivpvert = (float *)(vertices + idx * 16);
+
+					ConvertIVPPosToBull(ivpvert, verts[k]);
+				}
+
+				pMesh->addTriangle(verts[0], verts[1], verts[2], true);
+			}
+
+			btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
+
+			btTransform trans(btMatrix3x3::getIdentity(), -info->massCenter);
+			pCompound->addChildShape(trans, pShape);
+#else
+			btConvexHullShape *pConvex = new btConvexHullShape;
+			pConvex->setMargin(COLLISION_MARGIN);
+
+			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1);
+
+			// This code will find all unique indexes and add them to an array. This avoids
+			// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
+			// If you find a better way you can replace this!
+			CUtlVector<uint16> indexes;
+
+			for (int j = 0; j < ledge->n_triangles; j++) {
+				Assert((uint)j == tris[j].tri_index);
+
+				for (int k = 0; k < 3; k++) {
+					uint16 index = tris[j].c_three_edges[k].start_point_index;
+
+					bool shouldAdd = true;
+					for (int l = 0; l < indexes.Count(); l++) {
+						if (indexes[l] == index) {
+							shouldAdd = false;
+							break;
+						}
+					}
+
+					if (shouldAdd) {
+						indexes.AddToTail(index);
+					}
+				}
+			}
+
+			for (int j = 0; j < indexes.Count(); j++) {
+				uint16 index = indexes[j];
+
+				float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
+
+				btVector3 vertex;
+				ConvertIVPPosToBull(ivpvert, vertex);
+				pConvex->addPoint(vertex);
+			}
+
+			btTransform offsetTrans(btMatrix3x3::getIdentity(), -pCollide->GetMassCenter());
+			pCompound->addChildShape(offsetTrans, pConvex);
+#endif
+		}
+	}
+
+	return pCollide;
 }
 
 // Purpose: Loads and converts an ivp mesh to a bullet mesh.
@@ -956,7 +1045,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		position += size + 4;
 
 		// May fail if we're reading a corrupted file.
-		Assert(position < bufferSize);
+		Assert(position < bufferSize && position >= 0);
 	}
 
 	// The rest of the buffer is the key values for the collision mesh
@@ -978,7 +1067,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			continue;
 		}
 
-		btCollisionShape *pShape = NULL;
+		CPhysCollide *pShape = NULL;
 		if (surfaceheader.modelType == 0x0) {
 			pShape = LoadIVPS(pOutput->solids[i], swap);
 		} else if (surfaceheader.modelType == 0x1) {
@@ -991,7 +1080,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			DevWarning("VCollideLoad: Failed to load a solid!\n");
 		}
 
-		pOutput->solids[i] = (CPhysCollide *)pShape;
+		pOutput->solids[i] = pShape;
 	}
 }
 
@@ -1018,11 +1107,11 @@ void CPhysicsCollision::VPhysicsKeyParserDestroy(IVPhysicsKeyParser *pParser) {
 int CPhysicsCollision::CreateDebugMesh(CPhysCollide const *pCollisionModel, Vector **outVerts) {
 	if (!pCollisionModel || !outVerts) return 0;
 
-	btCollisionShape *pShape = (btCollisionShape *)pCollisionModel;
+	const btCollisionShape *pShape = pCollisionModel->GetCollisionShape();
 	int count = 0;
 
 	if (pShape->isCompound()) {
-		btCompoundShape *pCompound = (btCompoundShape *)pShape;
+		const btCompoundShape *pCompound = (btCompoundShape *)pShape;
 		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
 			int shapeType = pCompound->getChildShape(i)->getShapeType();
 
@@ -1071,7 +1160,7 @@ void CPhysicsCollision::DestroyDebugMesh(int vertCount, Vector *outVerts) {
 }
 
 ICollisionQuery *CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {
-	return new CCollisionQuery((btCollisionShape *)pCollide);
+	return new CCollisionQuery(pCollide->GetCollisionShape());
 }
 
 void CPhysicsCollision::DestroyQueryModel(ICollisionQuery *pQuery) {
@@ -1124,7 +1213,7 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(pArray, true);
 	bull->setMargin(COLLISION_MARGIN);
 
-	return (CPhysCollide *)bull;
+	return new CPhysCollide(bull);
 }
 
 bool CPhysicsCollision::SupportsVirtualMesh() {
@@ -1132,7 +1221,7 @@ bool CPhysicsCollision::SupportsVirtualMesh() {
 }
 
 void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
-	btCollisionShape *pShape = (btCollisionShape *)pCollide;
+	const btCollisionShape *pShape = pCollide->GetCollisionShape();
 
 	Msg("Type: %s\n", pShape->getName());
 	if (pShape->isCompound()) {
@@ -1141,7 +1230,7 @@ void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
 
 		Msg("-- CHILD SHAPES:\n");
 		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
-			OutputDebugInfo((CPhysCollide *)pCompound->getChildShape(i));
+			OutputDebugInfo((CPhysCollide *)pCompound->getChildShape(i)->getUserPointer());
 		}
 		Msg("---\n");
 	} else if (pShape->isConvex()) {

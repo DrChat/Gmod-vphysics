@@ -4,10 +4,6 @@
 	#pragma once
 #endif
 
-struct physshapeinfo_t {
-	btVector3 massCenter;
-};
-
 // NOTE: There can only be up to 15 unique collision groups (short)!
 enum ECollisionGroups {
 	COLGROUP_NONE	= 0,
@@ -18,6 +14,61 @@ enum ECollisionGroups {
 struct bboxcache_t {
 	CPhysCollide *	pCollide;
 	Vector			mins, maxs;
+};
+
+class CPhysCollide {
+	public:
+		CPhysCollide(btCollisionShape *pShape);
+
+		const btCollisionShape *GetCollisionShape() const {
+			return m_pShape;
+		}
+
+		btCollisionShape *GetCollisionShape() {
+			return m_pShape;
+		}
+
+		const btCompoundShape *GetCompoundShape() const {
+			Assert(IsCompound());
+			if (!IsCompound())
+				return NULL;
+
+			return (btCompoundShape *)m_pShape;
+		}
+
+		btCompoundShape *GetCompoundShape() {
+			Assert(IsCompound());
+			if (!IsCompound())
+				return NULL;
+
+			return (btCompoundShape *)m_pShape;
+		}
+
+		void SetMassCenter(const btVector3 &center) {
+			m_massCenter = center;
+		}
+
+		btVector3 &GetMassCenter() {
+			return m_massCenter;
+		}
+
+		btVector3 GetMassCenter() const {
+			return m_massCenter;
+		}
+
+		bool IsCompound() const {
+			return m_pShape->isCompound();
+		}
+
+		bool IsConvex() const {
+			return m_pShape->isConvex();
+		}
+
+	private:
+		void *m_pNullPtr;
+		btCollisionShape *m_pShape;
+
+		btVector3 m_massCenter;
 };
 
 class CPhysicsCollision : public IPhysicsCollision32 {

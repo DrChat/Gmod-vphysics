@@ -247,6 +247,7 @@ void CPhysicsObject::Wake() {
 	if (IsStatic())
 		return;
 
+	m_pObject->setDeactivationTime(0);
 	m_pObject->setActivationState(ACTIVE_TAG);
 }
 
@@ -816,11 +817,11 @@ float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t &param
 }
 
 const CPhysCollide *CPhysicsObject::GetCollide() const {
-	return (CPhysCollide *)m_pObject->getCollisionShape();
+	return (CPhysCollide *)m_pObject->getCollisionShape()->getUserPointer();
 }
 
 CPhysCollide *CPhysicsObject::GetCollide() {
-	return (CPhysCollide *)m_pObject->getCollisionShape();
+	return (CPhysCollide *)m_pObject->getCollisionShape()->getUserPointer();
 }
 
 const char *CPhysicsObject::GetName() const {
@@ -957,7 +958,7 @@ void CPhysicsObject::OutputDebugInfo() const {
 	}
 
 	Msg("-- COLLISION SHAPE INFO --\n");
-	g_PhysicsCollision.OutputDebugInfo((CPhysCollide *)m_pObject->getCollisionShape());
+	g_PhysicsCollision.OutputDebugInfo((CPhysCollide *)m_pObject->getCollisionShape()->getUserPointer());
 }
 
 // UNEXPOSED
@@ -1120,67 +1121,46 @@ void CPhysicsObject::TransferToEnvironment(CPhysicsEnvironment *pDest) {
 ************************/
 
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
-	btCollisionShape *shape = (btCollisionShape *)pCollisionModel;
-	Assert(shape);
-	if (!shape) return NULL; 
-	
-	btVector3 vector;
-	btMatrix3x3 matrix;
-	ConvertPosToBull(position, vector);
-	ConvertRotationToBull(angles, matrix);
-	btTransform transform(matrix, vector);
+	if (!pCollisionModel) return NULL;
 
-	btTransform masscenter = btTransform::getIdentity();
+	btCollisionShape *pShape = (btCollisionShape *)pCollisionModel->GetCollisionShape();
 
-	physshapeinfo_t *shapeInfo = (physshapeinfo_t *)shape->getUserPointer();
-	if (shapeInfo)
-		masscenter.setOrigin(shapeInfo->massCenter);
+	btTransform massCenterTrans = btTransform::getIdentity();
+	massCenterTrans.setOrigin(pCollisionModel->GetMassCenter());
+	btMassCenterMotionState *pMotionState = new btMassCenterMotionState(massCenterTrans);
 
-	/*
-	// Doesn't work unless we shift the collision model
-	if (pParams && pParams->massCenterOverride) {
-		btVector3 vecMassCenter;
-		ConvertPosToBull(*pParams->massCenterOverride, vecMassCenter);
-		masscenter.setOrigin(vecMassCenter);
-	}
-	*/
+	btVector3 bullPos;
+	btMatrix3x3 bullMatrix;
+	ConvertPosToBull(position, bullPos);
+	ConvertRotationToBull(angles, bullMatrix);
 
-	float mass = 0;
-	btVector3 inertiaFactor(1, 1, 1);
+	btTransform initialWordTrans(bullMatrix, bullPos);
+	pMotionState->setGraphicTransform(initialWordTrans);
+
+	// Grab some parameters
+	btScalar mass = 0.f;
+	btVector3 inertia(0, 0, 0);
+	btVector3 inertiaCoeff(1, 1, 1);
 
 	if (pParams && !isStatic) {
 		mass = pParams->mass;
 
-		// Don't allow the inertia factor to be less than 0!
-		if (pParams->inertia > 0)
-			inertiaFactor.setValue(pParams->inertia, pParams->inertia, pParams->inertia);
+		// TODO: Grab massCenterOverride and set it up correctly.
+
+		// Don't allow the inertia coefficient to be less than 0!
+		if (pParams->inertia >= 0)
+			inertiaCoeff.setValue(pParams->inertia, pParams->inertia, pParams->inertia);
+
+		pShape->calculateLocalInertia(mass, inertia);
+		inertia *= inertiaCoeff;
 	}
 
-	btVector3 inertia(0, 0, 0);
+	btRigidBody::btRigidBodyConstructionInfo info(mass, pMotionState, pShape, inertia);
+	btRigidBody *pBody = new btRigidBody(info);
 
-	if (!isStatic)
-		shape->calculateLocalInertia(mass, inertia);
+	CPhysicsObject *pObject = new CPhysicsObject();
+	pObject->Init(pEnvironment, pBody, materialIndex, pParams, isStatic);
 
-	inertia *= inertiaFactor;
-
-	btMassCenterMotionState *motionstate = new btMassCenterMotionState(masscenter);
-	motionstate->setGraphicTransform(transform);
-	btRigidBody::btRigidBodyConstructionInfo info(mass, motionstate, shape, inertia);
-
-	if (pParams) {
-		//info.m_linearDamping = pParams->damping;
-		//info.m_angularDamping = pParams->rotdamping;
-
-		// FIXME: We should be using inertia values from source. Figure out a proper conversion.
-		// Inertia with props is 1 (always?) and 25 with ragdolls (always?)
-		//info.m_localInertia = btVector3(pParams->inertia, pParams->inertia, pParams->inertia);
-	}
-
-	btRigidBody *body = new btRigidBody(info);
-
-	CPhysicsObject *pObject = new CPhysicsObject;
-	pObject->Init(pEnvironment, body, materialIndex, pParams, isStatic);
-	
 	return pObject;
 }
 

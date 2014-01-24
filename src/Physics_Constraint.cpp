@@ -97,7 +97,7 @@ const char *GetConstraintName(EConstraintType type) {
 // TODO: Somebody fill this out!
 class btPulleyConstraint: public btTypedConstraint {
 	protected:
-		// The 2 points the pulley should run through (such as being attached to a roof)
+		// The 2 points the pulley should run through in world space (such as being attached to a roof)
 		btVector3	m_attachPointWS1;
 		btVector3	m_attachPointWS2;
 
@@ -111,7 +111,6 @@ class btPulleyConstraint: public btTypedConstraint {
 		}
 };
 
-// TODO: Finish this (for ropes)
 class btLengthConstraint: public btPoint2PointConstraint {
 	protected:
 		btScalar	m_mindist;
@@ -158,7 +157,7 @@ class btLengthConstraint: public btPoint2PointConstraint {
 			btVector3 del = posB - posA;
 			btScalar currDist = del.length();
 
-			btVector3 ortho = del / currDist; // Axis two solve along (normalized delta)
+			btVector3 ortho = del / currDist; // Axis to solve along (normalized delta)
 			// Linear axis for ref object(?)
 			info->m_J1linearAxis[0] = ortho[0];
 			info->m_J1linearAxis[1] = ortho[1];
