@@ -283,16 +283,6 @@ void CPhysicsObject::RecheckContactPoints() {
 	return;
 }
 
-void CPhysicsObject::UpdateCollide() {
-	btVector3 inertia;
-
-	btCollisionShape *pShape = m_pObject->getCollisionShape();
-	pShape->calculateLocalInertia(m_fMass, inertia);
-
-	m_pObject->setMassProps(m_fMass, inertia);
-	m_pObject->updateInertiaTensor();
-}
-
 void CPhysicsObject::SetMass(float mass) {
 	if (IsStatic()) return;
 
@@ -816,12 +806,38 @@ float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t &param
 	return ComputeShadowControllerHL(this, params, secondsToArrival, dt);
 }
 
+void CPhysicsObject::UpdateCollide() {
+	btVector3 inertia;
+
+	btCollisionShape *pShape = m_pObject->getCollisionShape();
+	pShape->calculateLocalInertia(m_fMass, inertia);
+
+	m_pObject->setMassProps(m_fMass, inertia);
+	m_pObject->updateInertiaTensor();
+}
+
 const CPhysCollide *CPhysicsObject::GetCollide() const {
 	return (CPhysCollide *)m_pObject->getCollisionShape()->getUserPointer();
 }
 
 CPhysCollide *CPhysicsObject::GetCollide() {
 	return (CPhysCollide *)m_pObject->getCollisionShape()->getUserPointer();
+}
+
+void CPhysicsObject::SetCollide(CPhysCollide *pCollide) {
+	m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
+
+	btCollisionShape *pShape = pCollide->GetCollisionShape();
+	m_pObject->setCollisionShape(pShape);
+
+	btVector3 inertia;
+	pShape->calculateLocalInertia(m_fMass, inertia);
+
+	m_pObject->setMassProps(m_fMass, inertia);
+	m_pObject->updateInertiaTensor();
+
+	// Remove/add object to update contact points
+	m_pEnv->GetBulletEnvironment()->addRigidBody(m_pObject);
 }
 
 const char *CPhysicsObject::GetName() const {

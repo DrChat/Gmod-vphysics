@@ -64,9 +64,6 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								RecheckCollisionFilter();
 		void								RecheckContactPoints();
 
-		// Call this if you have recently changed the collision shape we're using.
-		void								UpdateCollide();
-
 		void								SetMass(float mass);
 		float								GetMass() const;
 		float								GetInvMass() const;
@@ -134,8 +131,12 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								RemoveShadowController();
 		float								ComputeShadowControl(const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
 
+		// Call this if you have recently changed the collision shape we're using (without setting a new one with SetCollide)
+		void								UpdateCollide();
+
 		const CPhysCollide *				GetCollide() const;
 		CPhysCollide *						GetCollide();
+		void								SetCollide(CPhysCollide *pCollide);
 
 		const char *						GetName() const;
 
