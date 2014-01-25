@@ -92,10 +92,19 @@ void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleInde
 CPhysCollide::CPhysCollide(btCollisionShape *pShape) {
 	m_pShape = pShape;
 	m_pShape->setUserPointer(this);
-	m_pNullPtr = (void *)0x3D3D3D3D;
+	m_pNullPtr = (void *)0x0;
 
 	m_massCenter.setZero();
 }
+
+/****************************
+* CLASS CPhysPolySoup
+****************************/
+
+class CPhysPolysoup {
+	public:
+		CPhysPolysoup();
+};
 
 /****************************
 * CLASS CPhysicsCollision
@@ -288,6 +297,8 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 
 		delete pCollide;
 		delete pCompound;
+	} else if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
+		ConvexFree((CPhysConvex *)pCollide->GetCollisionShape()); // FIXME: Deletion of this should probably be done here.
 	} else {
 		// Those dirty liars!
 		ConvexFree((CPhysConvex *)pCollide);
@@ -676,14 +687,14 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 
 					// HACK: Oh whatever, old vphysics did something just as bad
 					// We're here because the penetration distance is within tolerable levels (aka on surface of object)
-					ptr->fraction = 0.0001;
+					ptr->fraction = 0.0001f;
 
 					// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
 					// FIXME: What if a separate shape is at the end of the ray?
 					btVector3 direction;
 					ConvertPosToBull(ray.m_Delta, direction);
 					direction.normalize();
-					if (btFabs(direction.dot(cb.m_hitNormalWorld)) <= 0.005) {
+					if (direction.dot(cb.m_hitNormalWorld) >= -0.005) {
 						// Run another trace with an allowed penetration of something above 0.005
 
 						ptr->fraction = 1;
@@ -696,8 +707,12 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 
 				if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 					if (!ptr->allsolid) {
-						Vector lineEnd = ptr->endpos + ptr->plane.normal * 32;
-						g_pDebugOverlay->AddLineOverlay(ptr->endpos, lineEnd, 0, 255, 0, false, 0.0f);
+						btVector3 lineEnd = cb.m_hitPointWorld + (cb.m_hitNormalWorld * 1);
+						Vector hlEnd, hlStart;
+						ConvertPosToHL(lineEnd, hlEnd);
+						ConvertPosToHL(cb.m_hitPointWorld, hlStart);
+
+						g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
 					}
 
 					if (ptr->startsolid) {
