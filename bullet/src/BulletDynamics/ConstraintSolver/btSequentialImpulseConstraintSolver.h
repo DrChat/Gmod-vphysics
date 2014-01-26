@@ -42,7 +42,9 @@ protected:
 	btAlignedObjectArray<int>	m_orderFrictionConstraintPool;
 	btAlignedObjectArray<btTypedConstraint::btConstraintInfo1> m_tmpConstraintSizesPool;
 	int							m_maxOverrideNumSolverIterations;
-	int m_fixedBodyId;
+	int							m_fixedBodyId;
+	btSolveCallback *			m_pSolveCallback;
+
 	void setupFrictionConstraint(	btSolverConstraint& solverConstraint, const btVector3& normalAxis,int solverBodyIdA,int  solverBodyIdB,
 									btManifoldPoint& cp,const btVector3& rel_pos1,const btVector3& rel_pos2,
 									btCollisionObject* colObj0,btCollisionObject* colObj1, btScalar relaxation, 
@@ -113,7 +115,7 @@ public:
 
 	virtual btScalar solveGroup(btCollisionObject** bodies,int numBodies,btPersistentManifold** manifold,int numManifolds,btTypedConstraint** constraints,int numConstraints,const btContactSolverInfo& info, btIDebugDraw* debugDrawer,btDispatcher* dispatcher);
 	
-
+	virtual void setSolveCallback(btSolveCallback *callback) {m_pSolveCallback = callback;}
 	
 	///clear internal cached data and reset random seed
 	virtual	void	reset();

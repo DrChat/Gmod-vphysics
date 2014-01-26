@@ -17,6 +17,8 @@ subject to the following restrictions:
 #define BT_SOLVER_BODY_H
 
 class	btRigidBody;
+class	btCollisionObject;	
+
 #include "LinearMath/btVector3.h"
 #include "LinearMath/btMatrix3x3.h"
 
@@ -122,6 +124,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 	btVector3		m_externalTorqueImpulse;
 
 	btRigidBody*	m_originalBody;
+	btCollisionObject* m_originalColObj;
 	void	setWorldTransform(const btTransform& worldTransform)
 	{
 		m_worldTransform = worldTransform;

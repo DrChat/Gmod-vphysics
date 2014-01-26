@@ -1158,12 +1158,12 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 				btTransform tr;
 				tr.setIdentity();
 				btVector3 pivot = p2pC->getPivotInA();
-				pivot = p2pC->getRigidBodyA().getCenterOfMassTransform() * pivot; 
+				pivot = p2pC->getRigidBodyA().getCenterOfMassTransform() * pivot;
 				tr.setOrigin(pivot);
 				getDebugDrawer()->drawTransform(tr, dbgDrawSize);
 				// that ideally should draw the same frame	
 				pivot = p2pC->getPivotInB();
-				pivot = p2pC->getRigidBodyB().getCenterOfMassTransform() * pivot; 
+				pivot = p2pC->getRigidBodyB().getCenterOfMassTransform() * pivot;
 				tr.setOrigin(pivot);
 				if (drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
 			}
@@ -1189,7 +1189,7 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 					maxAng = SIMD_2_PI;
 					drawSect = false;
 				}
-				if(drawLimits) 
+				if(drawLimits)
 				{
 					btVector3& center = tr.getOrigin();
 					btVector3 normal = tr.getBasis().getColumn(2);

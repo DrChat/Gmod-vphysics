@@ -562,6 +562,8 @@ int	btSequentialImpulseConstraintSolver::getOrInitSolverBody(btCollisionObject& 
 			btSolverBody& solverBody = m_tmpSolverBodyPool.expand();
 			initSolverBody(&solverBody,&body,timeStep);
 			body.setCompanionId(solverBodyIdA);
+
+			solverBody.m_originalColObj = &body;
 		} else
 		{
 			
@@ -570,6 +572,8 @@ int	btSequentialImpulseConstraintSolver::getOrInitSolverBody(btCollisionObject& 
 				m_fixedBodyId = m_tmpSolverBodyPool.size();
 				btSolverBody& fixedBody = m_tmpSolverBodyPool.expand();
 				initSolverBody(&fixedBody,0,timeStep);
+
+				fixedBody.m_originalColObj = &body;
 			}
 			return m_fixedBodyId;
 //			return 0;//assume first one is a fixed solver body
@@ -974,8 +978,9 @@ void	btSequentialImpulseConstraintSolver::convertContact(btPersistentManifold* m
 			}
 			setFrictionConstraintImpulse( solverConstraint, solverBodyIdA, solverBodyIdB, cp, infoGlobal);
 		
-
-			
+			// Callback to user code
+			if (m_pSolveCallback)
+				m_pSolveCallback->preSolveContact(colObj0, colObj1, &cp);
 
 		}
 	}
@@ -1654,7 +1659,10 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 			{
 				pt->m_appliedImpulseLateral2 = m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex+1].m_appliedImpulse;
 			}
-			//do a callback here?
+			
+			// User callback
+			if (m_pSolveCallback)
+				m_pSolveCallback->postSolveContact(m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA].m_originalColObj, m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB].m_originalColObj, pt);
 		}
 	}
 

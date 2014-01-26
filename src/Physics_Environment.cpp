@@ -21,11 +21,6 @@
 #endif
 
 // Multithreading stuff
-// NOTE: As of now, the parallel constraint solver has the same performance as the
-// sequential constraint solver, and even in some cases is slower. The parallel dispatcher
-// allows for some speed gain, however.
-// We should replace current the bullet multithreaded dispatcher/solver with our own,
-// that internally calls into the sequential dispatcher/solver
 
 #define USE_PARALLEL_DISPATCHER
 //#define USE_PARALLEL_SOLVER
@@ -35,8 +30,6 @@
 #endif
 
 #ifdef USE_PARALLEL_DISPATCHER
-	//#include "BulletMultiThreaded/SpuGatheringCollisionDispatcher.h"
-	//#include "BulletMultiThreaded/SpuNarrowPhaseCollisionTask/SpuGatheringCollisionTask.h"
 	#include "BulletMultiThreaded/btParallelCollisionDispatcher.h"
 #endif
 
@@ -268,21 +261,6 @@ class CObjectTracker {
 		CUtlVector<IPhysicsObject *> m_activeObjects;
 };
 
-/*********************************
-* CLASS CCollisionEventListener
-*********************************/
-
-// TODO: Implement some class in bullet code and derive this from that
-class CCollisionEventListener {
-	public:
-		CCollisionEventListener(CPhysicsEnvironment *pEnv) {
-			m_pEnv = pEnv;
-		}
-
-	private:
-		CPhysicsEnvironment *m_pEnv;
-};
-
 /*******************************
 * CLASS CPhysicsCollisionData
 *******************************/
@@ -314,6 +292,77 @@ class CPhysicsCollisionData : public IPhysicsCollisionData {
 		Vector m_surfaceNormal;
 		Vector m_contactPoint;
 		Vector m_contactSpeed;
+};
+
+/*********************************
+* CLASS CCollisionEventListener
+*********************************/
+
+// TODO: Implement some class in bullet code and derive this from that
+class CCollisionEventListener : public btSolveCallback {
+	public:
+		CCollisionEventListener(CPhysicsEnvironment *pEnv) {
+			m_pEnv = pEnv;
+			m_pCallback = NULL;
+		}
+
+		virtual void preSolveContact(btCollisionObject *colObj0, btCollisionObject *colObj1, btManifoldPoint *cp) {
+			CPhysicsObject *pObj0 = (CPhysicsObject *)colObj0->getUserPointer();
+			CPhysicsObject *pObj1 = (CPhysicsObject *)colObj1->getUserPointer();
+
+			vcollisionevent_t evt;
+			evt.collisionSpeed = 0.f; // Invalid pre-collision
+			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
+			evt.isCollision = true; // When is this false?
+			evt.isShadowCollision = pObj0->GetShadowController() != NULL || pObj1->GetShadowController() != NULL;
+
+			evt.pObjects[0] = pObj0;
+			evt.pObjects[1] = pObj1;	
+			evt.surfaceProps[0] = pObj0->GetMaterialIndex();
+			evt.surfaceProps[1] = pObj1->GetMaterialIndex();
+
+			CPhysicsCollisionData data(cp);
+			evt.pInternalData = &data;
+
+			if (m_pCallback)
+				m_pCallback->PreCollision(&evt);
+		}
+
+		virtual void postSolveContact(btCollisionObject *colObj0, btCollisionObject *colObj1, btManifoldPoint *cp) {
+			btRigidBody *rb0 = btRigidBody::upcast(colObj0);
+			btRigidBody *rb1 = btRigidBody::upcast(colObj1);
+
+			CPhysicsObject *pObj0 = (CPhysicsObject *)colObj0->getUserPointer();
+			CPhysicsObject *pObj1 = (CPhysicsObject *)colObj1->getUserPointer();
+
+			vcollisionevent_t evt;
+
+			btScalar combinedInvMass = rb0->getInvMass() + rb1->getInvMass();
+			evt.collisionSpeed = BULL2HL(cp->m_appliedImpulse * combinedInvMass);
+
+			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
+			evt.isCollision = true; // When is this false?
+			evt.isShadowCollision = (pObj0 && pObj0->GetShadowController() != NULL) || (pObj1 && pObj1->GetShadowController() != NULL);
+
+			evt.pObjects[0] = pObj0;
+			evt.pObjects[1] = pObj1;	
+			evt.surfaceProps[0] = pObj0 ? pObj0->GetMaterialIndex() : 0;
+			evt.surfaceProps[1] = pObj1 ? pObj1->GetMaterialIndex() : 0;
+
+			CPhysicsCollisionData data(cp);
+			evt.pInternalData = &data;
+
+			if (m_pCallback)
+				m_pCallback->PostCollision(&evt);
+		}
+
+		void SetCollisionEventCallback(IPhysicsCollisionEvent *pCallback) {
+			m_pCallback = pCallback;
+		}
+
+	private:
+		CPhysicsEnvironment *m_pEnv;
+		IPhysicsCollisionEvent *m_pCallback;
 };
 
 /*******************************
@@ -410,6 +459,9 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_pBulletEnvironment->setInternalTickCallback(TickCallback, (void *)this);
 
+	m_pCollisionListener = new CCollisionEventListener(this);
+	m_pBulletSolver->setSolveCallback(m_pCollisionListener);
+
 #if DEBUG_DRAW
 	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment);
 #endif
@@ -447,6 +499,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pSharedThreadPool;
 #endif
 
+	delete m_pCollisionListener;
 	delete m_pCollisionSolver;
 	delete m_pObjectTracker;
 }
@@ -535,6 +588,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	}
 }
 
+// TODO: Should we just use CPhysCollide instead?
 IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) {
 	//CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, position, angles);
 	//m_softBodies.AddToTail(pSoftBody);
@@ -762,6 +816,7 @@ float CPhysicsEnvironment::GetNextFrameTime() const {
 }
 
 void CPhysicsEnvironment::SetCollisionEventHandler(IPhysicsCollisionEvent *pCollisionEvents) {
+	m_pCollisionListener->SetCollisionEventCallback(pCollisionEvents);
 	m_pCollisionEvent = pCollisionEvents;
 }
 

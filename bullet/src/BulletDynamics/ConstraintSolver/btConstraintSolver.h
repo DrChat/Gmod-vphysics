@@ -37,6 +37,13 @@ enum btConstraintSolverType
 	BT_NNCG_SOLVER=4
 };
 
+class btSolveCallback
+{
+	public:
+		virtual void preSolveContact(btCollisionObject *obj0, btCollisionObject *obj1, btManifoldPoint *cp) {};
+		virtual void postSolveContact(btCollisionObject *obj0, btCollisionObject *obj1, btManifoldPoint *cp) {};
+};
+
 class btConstraintSolver
 {
 
@@ -48,6 +55,8 @@ public:
 
 	///solve a group of constraints
 	virtual btScalar solveGroup(btCollisionObject** bodies, int numBodies, btPersistentManifold** manifold, int numManifolds, btTypedConstraint** constraints, int numConstraints, const btContactSolverInfo& info, class btIDebugDraw* debugDrawer, btDispatcher* dispatcher) = 0;
+
+	virtual void setSolveCallback(btSolveCallback *callback) {};
 
 	/// Wait until solver is finished processing (implemented on multithreaded version)
 	virtual void waitUntilFinished() {};

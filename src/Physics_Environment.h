@@ -18,6 +18,7 @@ class IController;
 class CDeleteQueue;
 class CCollisionSolver;
 class CObjectTracker;
+class CCollisionEventListener;
 class CPhysicsFluidController;
 class CPhysicsDragController;
 class CPhysicsConstraint;
@@ -190,6 +191,7 @@ private:
 	CUtlVector<CPhysicsFluidController *>	m_fluids;
 	CUtlVector<IController*>				m_controllers;
 
+	CCollisionEventListener *				m_pCollisionListener;
 	CCollisionSolver *						m_pCollisionSolver;
 	CDeleteQueue *							m_pDeleteQueue;
 	CObjectTracker *						m_pObjectTracker;
