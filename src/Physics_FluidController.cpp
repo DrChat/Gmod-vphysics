@@ -201,6 +201,10 @@ void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
 		m_pEnv->HandleFluidEndTouch(this, pObject);
 }
 
+void CPhysicsFluidController::ObjectDestroyed(CPhysicsObject *) {
+	// Do nothing, our fluid callback will handle this
+}
+
 void CPhysicsFluidController::TransferToEnvironment(CPhysicsEnvironment *pDest) {
 
 }

@@ -8,6 +8,7 @@ class CPhysicsEnvironment;
 class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
+class IController;
 
 // Bullet uses this so we can sync the graphics representation of the object.
 struct btMassCenterMotionState : public btMotionState {
@@ -162,6 +163,9 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								AttachedToConstraint(CPhysicsConstraint *pConstraint);
 		void								DetachedFromConstraint(CPhysicsConstraint *pConstraint);
 
+		void								AttachedToController(IController *pController);
+		void								DetachedFromController(IController *pController);
+
 		void								AddCallbackFlags(unsigned short flag);
 		void								RemoveCallbackFlags(unsigned short flag);
 
@@ -217,6 +221,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 		CShadowController *					m_pShadow;
 		CPhysicsFluidController *			m_pFluidController;
 		CUtlVector<CPhysicsConstraint *>	m_pConstraintVec;
+		CUtlVector<IController *>			m_pControllers;
 
 		int									m_iLastActivationState;
 };

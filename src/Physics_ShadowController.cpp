@@ -159,6 +159,11 @@ void CShadowController::Tick(float deltaTime) {
 	m_ticksSinceUpdate++;
 }
 
+void CShadowController::ObjectDestroyed(CPhysicsObject *pObject) {
+	if (pObject == m_pObject)
+		DetachObject();
+}
+
 void CShadowController::Update(const Vector &position, const QAngle &angles, float timeOffset) {
 	btVector3 targetPosition = m_shadow.targetPosition;
 	btQuaternion targetRotation = m_shadow.targetRotation;
@@ -319,6 +324,9 @@ void CShadowController::GetMaxSpeed(float *pMaxSpeedOut, float *pMaxAngularSpeed
 }
 
 void CShadowController::AttachObject() {
+	if (!m_pObject)
+		return;
+
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	m_savedMass = SAFE_DIVIDE(1, body->getInvMass());
 	m_savedMaterialIndex = m_pObject->GetMaterialIndex();
@@ -334,6 +342,9 @@ void CShadowController::AttachObject() {
 }
 
 void CShadowController::DetachObject() {
+	if (!m_pObject)
+		return;
+
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	btVector3 btvec = body->getInvInertiaDiagLocal();
 	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
@@ -343,6 +354,8 @@ void CShadowController::DetachObject() {
 	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
 
 	body->setActivationState(ACTIVE_TAG);
+
+	m_pObject = NULL;
 }
 
 int CShadowController::GetTicksSinceUpdate() {

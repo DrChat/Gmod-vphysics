@@ -62,7 +62,7 @@ CPhysicsObject::CPhysicsObject() {
 	m_pObject = NULL;
 	m_pGhostObject = NULL;
 	m_pGhostCallback = NULL;
-	m_pName = NULL;
+	m_pName = "UNINITIALIZED";
 
 	m_bRemoving = false;
 }
@@ -80,6 +80,10 @@ CPhysicsObject::~CPhysicsObject() {
 
 	for (int i = 0; i < m_pConstraintVec.Count(); i++) {
 		m_pConstraintVec[i]->ObjectDestroyed(this);
+	}
+
+	for (int i = 0; i < m_pControllers.Count(); i++) {
+		m_pControllers[i]->ObjectDestroyed(this);
 	}
 	
 	if (m_pEnv && m_pObject) {
@@ -1073,22 +1077,26 @@ void CPhysicsObject::DetachedFromConstraint(CPhysicsConstraint *pConstraint) {
 	m_pConstraintVec.FindAndRemove(pConstraint);
 }
 
+void CPhysicsObject::AttachedToController(IController *pController) {
+	m_pControllers.AddToTail(pController);
+}
+
+void CPhysicsObject::DetachedFromController(IController *pController) {
+	m_pControllers.FindAndRemove(pController);
+}
+
 // UNEXPOSED
 float CPhysicsObject::GetDragInDirection(const btVector3 &dir) const {
 	btVector3 out;
 	btMatrix3x3 mat = m_pObject->getCenterOfMassTransform().getBasis();
 	BtMatrix_vimult(mat, dir, out);
 
-	return m_dragCoefficient * fabs(out.getX() * m_dragBasis.getX()) + 
-		fabs(out.getY() * m_dragBasis.getY()) +	
-		fabs(out.getZ() * m_dragBasis.getZ());
+	return m_dragCoefficient * out.absolute().dot(m_dragBasis.absolute());
 }
 
 // UNEXPOSED
 float CPhysicsObject::GetAngularDragInDirection(const btVector3 &dir) const {
-	return m_angDragCoefficient * fabs(dir.getX() * m_angDragBasis.getX()) +
-		fabs(dir.getY() * m_angDragBasis.getY()) +
-		fabs(dir.getZ() * m_angDragBasis.getZ());
+	return m_angDragCoefficient * dir.absolute().dot(m_angDragBasis.absolute());
 }
 
 // UNEXPOSED

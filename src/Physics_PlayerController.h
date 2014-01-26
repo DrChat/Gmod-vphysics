@@ -39,6 +39,7 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		// Unexposed functions
 	public:
 		void							Tick(float deltaTime);
+		void							ObjectDestroyed(CPhysicsObject *pObject);
 
 	private:
 		void							AttachObject();

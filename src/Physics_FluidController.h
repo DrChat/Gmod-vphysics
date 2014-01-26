@@ -28,9 +28,10 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		// UNEXPOSED FUNCTIONS
 	public:
 		void					Tick(float deltaTime);
-
-		void					ObjectAdded(CPhysicsObject *pObject);
 		void					ObjectRemoved(CPhysicsObject *pObject);
+		void					ObjectAdded(CPhysicsObject *pObject);
+
+		void					ObjectDestroyed(CPhysicsObject *pObject);
 
 		void					TransferToEnvironment(CPhysicsEnvironment *pDest);
 	private:

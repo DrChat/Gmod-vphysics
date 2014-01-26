@@ -26,6 +26,7 @@ class CPhysicsMotionController : public IController, public IPhysicsMotionContro
 		void							SetPriority(priority_t priority);
 	public:
 		void							Tick(float deltaTime);
+		void							ObjectDestroyed(CPhysicsObject *pObject);
 	private:
 		IMotionEvent *					m_handler;
 		CUtlVector<CPhysicsObject *>	m_objectList;

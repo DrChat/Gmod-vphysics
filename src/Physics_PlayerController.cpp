@@ -245,6 +245,10 @@ void CPlayerController::Tick(float deltaTime) {
 	}
 }
 
+void CPlayerController::ObjectDestroyed(CPhysicsObject *pObject) {
+	DetachObject();
+}
+
 void CPlayerController::CalculateVelocity(float dt) {
 	btRigidBody *body = m_pObject->GetObject();
 

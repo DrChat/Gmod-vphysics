@@ -76,6 +76,10 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 	}
 }
 
+void CPhysicsMotionController::ObjectDestroyed(CPhysicsObject *pObject) {
+	m_objectList.FindAndRemove(pObject);
+}
+
 void CPhysicsMotionController::SetEventHandler(IMotionEvent *handler) {
 	m_handler = handler;
 }
@@ -89,6 +93,7 @@ void CPhysicsMotionController::AttachObject(IPhysicsObject *pObject, bool checkI
 	if (m_objectList.Find(pPhys) != -1 && checkIfAlreadyAttached)
 		return;
 
+	pPhys->AttachedToController(this);
 	m_objectList.AddToTail(pPhys);
 }
 
@@ -97,6 +102,8 @@ void CPhysicsMotionController::DetachObject(IPhysicsObject *pObject) {
 
 	int index = m_objectList.Find(pPhys);
 	if (!m_objectList.IsValidIndex(index)) return;
+
+	pPhys->DetachedFromController(this);
 	m_objectList.Remove(index);
 }
 

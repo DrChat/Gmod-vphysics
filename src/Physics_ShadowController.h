@@ -50,6 +50,8 @@ class CShadowController : public IController, public IPhysicsShadowController
 		void					SetAllowsTranslation(bool enable);
 		void					SetAllowsRotation(bool enable);
 
+		void					ObjectDestroyed(CPhysicsObject *pObject);
+
 		int						GetTicksSinceUpdate();
 	private:
 		void					AttachObject();
