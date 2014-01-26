@@ -21,6 +21,12 @@ CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhys
 	m_pEnv = pEnv;
 }
 
+CPhysicsMotionController::~CPhysicsMotionController() {
+	for (int i = m_objectList.Count()-1; i >= 0; i--) {
+		DetachObject(m_objectList[i]);
+	}
+}
+
 void CPhysicsMotionController::Tick(float deltaTime) {
 	if (!m_handler) return;
 

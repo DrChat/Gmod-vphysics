@@ -13,6 +13,7 @@ class CPhysicsMotionController : public IController, public IPhysicsMotionContro
 {
 	public:
 										CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv);
+										~CPhysicsMotionController();
 
 		void							SetEventHandler(IMotionEvent *handler);
 		void							AttachObject(IPhysicsObject *pObject, bool checkIfAlreadyAttached);
