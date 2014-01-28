@@ -22,10 +22,6 @@ subject to the following restrictions:
 	#include <windows.h>
 #endif
 
-int gNumAlignedAllocs = 0;
-int gNumAlignedFree = 0;
-int gTotalBytesAlignedAllocs = 0;//detect memory leaks
-
 /************************
 * ALLOCATOR FUNCTIONS
 ************************/
@@ -169,10 +165,7 @@ static inline void btAlignedFreeDefault(void *ptr)
 
 void *btDbgAlignedAllocInternal(size_t size, int alignment, int blockType, const char *fileName, int line)
 {
-	gNumAlignedAllocs++;
-	void *ptr;
-	ptr = sDbgAlignedAllocFunc(size, alignment, blockType, fileName, line);
-	return ptr;
+	return sDbgAlignedAllocFunc(size, alignment, blockType, fileName, line);
 }
 
 void btDbgAlignedFreeInternal(void *ptr, int blockType)
@@ -180,7 +173,6 @@ void btDbgAlignedFreeInternal(void *ptr, int blockType)
 	if (!ptr)
 		return;
 
-	gNumAlignedFree++;
 	sDbgAlignedFreeFunc(ptr, blockType);
 }
 
@@ -216,7 +208,6 @@ void btAlignedAllocSetCustom(btAllocFunc *allocFunc, btFreeFunc *freeFunc)
 
 void *btAlignedAllocInternal(size_t size, int alignment)
 {
-	gNumAlignedAllocs++;
 	void* ptr;
 	ptr = sAlignedAllocFunc(size, alignment);
 //	printf("btAlignedAllocInternal %d, %x\n", size, ptr);
@@ -230,7 +221,6 @@ void btAlignedFreeInternal(void* ptr)
 		return;
 	}
 
-	gNumAlignedFree++;
 //	printf("btAlignedFreeInternal %x\n", ptr);
 	sAlignedFreeFunc(ptr);
 }
