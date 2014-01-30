@@ -40,7 +40,7 @@ void CPhysicsObjectPairHash::RemoveObjectPair(void *pObject0, void *pObject1) {
 
 	pair_hash_list *hashnext = NULL;
 	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = hashnext) {
-		if (hash->object0 == pObject0 || hash->object0 == pObject1 || hash->object1 == pObject0 || hash->object1 == pObject1) {
+		if ((hash->object0 == pObject0 || hash->object0 == pObject1) && (hash->object1 == pObject0 || hash->object1 == pObject1)) {
 			if (hash->previous)
 				hash->previous->next = hash->next;
 			else
@@ -81,7 +81,7 @@ void CPhysicsObjectPairHash::RemoveAllPairsForObject(void *pObject0) {
 
 bool CPhysicsObjectPairHash::IsObjectPairInHash(void *pObject0, void *pObject1) {
 	for (pair_hash_list *hash = m_pHashList[(((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF]; hash; hash = hash->next) {
-		if (hash->object0 == pObject0 || hash->object0 == pObject1 || hash->object1 == pObject0 || hash->object1 == pObject1)
+		if ((hash->object0 == pObject0 || hash->object0 == pObject1) && (hash->object1 == pObject0 || hash->object1 == pObject1))
 			return true;
 	}
 
