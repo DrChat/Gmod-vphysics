@@ -89,9 +89,12 @@ IPhysicsCollisionSet *CPhysics::FindOrCreateCollisionSet(unsigned int id, int ma
 	if (m_collisionSets.IsValidIndex(id))
 		return m_collisionSets[id];
 
-	CPhysicsCollisionSet *set = ::CreateCollisionSet(maxElementCount);
-	//m_collisionSets.InsertBefore(id, set); // FIXME: Assert hit with ragdolls!
-	m_collisionSets.AddToTail(set);
+	CPhysicsCollisionSet *set = NULL;
+	if (maxElementCount < 32) {
+		set = ::CreateCollisionSet(maxElementCount);
+		m_collisionSets.AddToTail(set);
+	}
+
 	return set;
 }
 

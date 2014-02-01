@@ -16,7 +16,7 @@ class CPhysicsCollisionSet : public IPhysicsCollisionSet {
 
 	private:
 		int				m_iMaxEntries;
-		bool **			m_collArray;
+		int *			m_collArray;
 };
 
 CPhysicsCollisionSet *CreateCollisionSet(int maxElements);
