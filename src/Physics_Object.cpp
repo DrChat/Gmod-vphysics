@@ -53,12 +53,17 @@ class CGhostTriggerCallback : public btGhostObjectCallback {
 ***************************/
 
 CPhysicsObject::CPhysicsObject() {
-	m_contents = 0;
-	m_iGameIndex = 0;
 	m_pShadow = NULL;
 	m_pFluidController = NULL;
 	m_pEnv = NULL;
+
+	m_contents = 0;
+	m_iGameIndex = 0;
 	m_pGameData = NULL;
+	m_gameFlags = 0;
+	m_callbacks = 0;
+	m_materialIndex = 0;
+
 	m_pObject = NULL;
 	m_pGhostObject = NULL;
 	m_pGhostCallback = NULL;
