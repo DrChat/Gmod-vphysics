@@ -175,7 +175,7 @@ static SIMD_FORCE_INLINE btScalar capsuleCapsuleDistance(
 
 //////////
 
-btConvexConvexAlgorithm::btConvexConvexAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
+btConvexConvexAlgorithm::btConvexConvexAlgorithm(btPersistentManifold* mf, const btCollisionAlgorithmConstructionInfo& ci, const btCollisionObjectWrapper* body0Wrap, const btCollisionObjectWrapper* body1Wrap, btConvexPenetrationDepthSolver* pdSolver, int numPerturbationIterations, int minimumPointsPerturbationThreshold)
 : btActivatingCollisionAlgorithm(ci, body0Wrap, body1Wrap),
 m_pdSolver(pdSolver),
 m_ownManifold (false),
@@ -188,8 +188,6 @@ m_sepDistance((static_cast<btConvexShape*>(body0->getCollisionShape()))->getAngu
 m_numPerturbationIterations(numPerturbationIterations),
 m_minimumPointsPerturbationThreshold(minimumPointsPerturbationThreshold)
 {
-	void *simplexSolverMem = btAlignedAlloc(sizeof(btVoronoiSimplexSolver), 16);
-	m_simplexSolver = new(simplexSolverMem) btVoronoiSimplexSolver();
 
 	// FYI: It's ok to share the pd solver as long as it doesn't use any class members on itself.
 
@@ -202,9 +200,6 @@ m_minimumPointsPerturbationThreshold(minimumPointsPerturbationThreshold)
 
 btConvexConvexAlgorithm::~btConvexConvexAlgorithm()
 {
-	((btVoronoiSimplexSolver *)m_simplexSolver)->~btVoronoiSimplexSolver();
-	btAlignedFree(m_simplexSolver);
-
 	if (m_ownManifold)
 	{
 		if (m_manifoldPtr)
@@ -341,7 +336,7 @@ void btConvexConvexAlgorithm ::processCollision (const btCollisionObjectWrapper*
 	
 	btGjkPairDetector::ClosestPointInput input;
 
-	btGjkPairDetector	gjkPairDetector(min0, min1, m_simplexSolver, m_pdSolver);
+	btGjkPairDetector	gjkPairDetector(min0, min1, &m_simplexSolver, m_pdSolver);
 	//TODO: if (dispatchInfo.m_useContinuous)
 	gjkPairDetector.setMinkowskiA(min0);
 	gjkPairDetector.setMinkowskiB(min1);

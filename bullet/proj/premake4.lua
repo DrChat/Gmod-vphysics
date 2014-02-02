@@ -39,8 +39,8 @@ configuration {}
 
 -- Only support 32 bit builds
 configuration { "linux", "gmake" }
-	buildoptions { "-fPIC", "-m32" }
-	linkoptions { "-m32" }
+	buildoptions { "-fPIC", "-m32", "-msse2" }
+	linkoptions { "-m32", "-msse2" }
 	
 configuration {}
 
