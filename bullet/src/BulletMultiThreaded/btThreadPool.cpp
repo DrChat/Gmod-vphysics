@@ -4,8 +4,6 @@
 
 #include <stdio.h>
 
-// FIXME: This thread pool implementation is absolutely terrible! Slower than singlethreaded versions, fix this!
-
 static void ThreadFunc(void *pArg) {
 	btThreadPoolInfo *pThreadInfo = (btThreadPoolInfo *)pArg;
 	btThreadPool *pThreadPool = pThreadInfo->pThreadPool;
@@ -63,7 +61,7 @@ void btThreadPool::startThreads(int numThreads) {
 
 		// Set the name for debugging purposes
 		char name[128];
-		sprintf(name, "btThreadPool thread %d", i);
+		sprintf(name, "btThreadPool thread %d", i); // Possible buffer overflow?
 		pThread->setThreadName(name);
 
 		pThread->run(m_pThreadInfo[i]);
@@ -101,6 +99,7 @@ void btThreadPool::addTask(btIThreadTask *pTask) {
 void btThreadPool::runTasks() {
 	m_pTaskCritSection->lock();
 
+	// Reset the idle events here (if threads call this, main thread may be past waitIdle already)
 	for (int i = 0; i < m_numThreads; i++) {
 		m_pThreadInfo[i]->pIdleEvent->reset();
 	}

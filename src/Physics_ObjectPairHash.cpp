@@ -14,6 +14,8 @@ CPhysicsObjectPairHash::CPhysicsObjectPairHash() {
 }
 
 void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
+	// This complex entry stuff is supposed to make lookups faster. Xors the 2 pointers,
+	// then bitshifts them right 4 bits and truncates them to a single byte.
 	int entry = (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
 
 	// This particular entry may have more than one hash, so find the last one.

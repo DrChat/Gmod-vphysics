@@ -158,7 +158,7 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 					prop.data.sounds.rolling = m_soundList.AddToTail(sym);
 				}
 			} else
-				AssertMsg2(0, "Bad surfaceprop key %s (%s)\n", key, data->GetString());
+				AssertMsg2(0, "VPhysics: Bad surfaceprop key %s (%s)\n", key, data->GetString());
 		}
 		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0) break;
 

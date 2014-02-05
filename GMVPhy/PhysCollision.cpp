@@ -13,6 +13,12 @@ using namespace GarrysMod::Lua;
 
 IPhysicsCollision32 *	g_pPhysCollision = NULL;
 
+int lPhysConvex__gc(lua_State *state) {
+	
+
+	return 0;
+}
+
 //
 // Name: physcollision.CollideSetScale
 // Desc: Sets the scale of the specified collision mesh
@@ -53,7 +59,7 @@ int lPhysCollisionCollideGetScale(lua_State *state) {
 //
 // Name: physcollision.ConvertConvexToCollide
 // Desc: Converts table of convexes to collide
-// Arg1: Table|convexes|The table of convex meshes
+// Arg1: Table|convexes|The table of convex meshes {{(optional) pos=Vector(0,0,0), (optional) ang=Angle(0,0,0), convex=nil}, ...}
 // Ret1: CPhysCollide|collide|The collision mesh.
 //
 int lPhysCollisionConvertConvexToCollide(lua_State *state) {
@@ -87,6 +93,10 @@ int Init_PhysCollision(lua_State *state) {
 		Warning("Couldn't load the physics collision factory!\n");
 		return 1;
 	}
+
+	LUA->CreateMetaTableType("PhysConvex", CustomTypes::TYPE_PHYSCONVEX);
+		
+	LUA->Pop();
 
 	LUA->PushSpecial(SPECIAL_GLOB);
 		LUA->CreateTable();

@@ -20,9 +20,17 @@ abstract_class IPhysics32 : public IPhysics {
 		virtual int		GetActiveEnvironmentCount() = 0;
 };
 
+class IPhysicsSoftBody {
+	public:
+		virtual ~IPhysicsSoftBody() {}
+};
+
 // TODO: Soft bodies
 abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
+		virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) = 0;
+		virtual void				DestroySoftBody(IPhysicsSoftBody *pSoftBody) = 0;
+
 		virtual void	SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) = 0;
 
 		virtual int		GetObjectCount() const = 0;

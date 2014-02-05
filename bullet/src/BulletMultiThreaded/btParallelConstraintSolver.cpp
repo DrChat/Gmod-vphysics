@@ -111,5 +111,6 @@ btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int 
 }
 
 void btParallelConstraintSolver::waitUntilFinished() {
+	m_pThreadPool->runTasks();
 	m_pThreadPool->waitIdle();
 }

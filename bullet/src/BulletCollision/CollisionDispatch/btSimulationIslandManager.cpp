@@ -37,7 +37,7 @@ btSimulationIslandManager::~btSimulationIslandManager()
 
 void btSimulationIslandManager::initUnionFind(int n)
 {
-		m_unionFind.reset(n);
+	m_unionFind.reset(n);
 }
 		
 

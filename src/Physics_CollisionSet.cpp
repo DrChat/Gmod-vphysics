@@ -12,6 +12,8 @@
 // Is this class sort of like CPhysicsObjectPairHash?
 // ShouldCollide is called by game code from the collision event handler in CPhysicsEnvironment
 
+// TODO: Needs a better design, right now it's hardcoded to support a max of 32 entries.
+
 CPhysicsCollisionSet::CPhysicsCollisionSet(int iMaxEntries) {
 	m_iMaxEntries = iMaxEntries;
 

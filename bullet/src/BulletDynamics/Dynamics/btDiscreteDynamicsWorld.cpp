@@ -214,9 +214,11 @@ btDiscreteDynamicsWorld::btDiscreteDynamicsWorld(btDispatcher* dispatcher,btBroa
 	m_fixedTimeStep(0),
 	m_latencyMotionStateInterpolation(true)
 {
+	void *mem = NULL;
+
 	if (!m_constraintSolver)
 	{
-		void* mem = btAlignedAlloc(sizeof(btSequentialImpulseConstraintSolver),16);
+		mem = btAlignedAlloc(sizeof(btSequentialImpulseConstraintSolver),16);
 		m_constraintSolver = new (mem) btSequentialImpulseConstraintSolver;
 		m_ownsConstraintSolver = true;
 	} else
@@ -224,17 +226,13 @@ btDiscreteDynamicsWorld::btDiscreteDynamicsWorld(btDispatcher* dispatcher,btBroa
 		m_ownsConstraintSolver = false;
 	}
 
-	{
-		void* mem = btAlignedAlloc(sizeof(btSimulationIslandManager),16);
-		m_islandManager = new (mem) btSimulationIslandManager();
-	}
+	mem = btAlignedAlloc(sizeof(btSimulationIslandManager),16);
+	m_islandManager = new (mem) btSimulationIslandManager();
 
 	m_ownsIslandManager = true;
 
-	{
-		void* mem = btAlignedAlloc(sizeof(InplaceSolverIslandCallback),16);
-		m_solverIslandCallback = new (mem) InplaceSolverIslandCallback (m_constraintSolver, 0, dispatcher);
-	}
+	mem = btAlignedAlloc(sizeof(InplaceSolverIslandCallback),16);
+	m_solverIslandCallback = new (mem) InplaceSolverIslandCallback (m_constraintSolver, 0, dispatcher);
 }
 
 

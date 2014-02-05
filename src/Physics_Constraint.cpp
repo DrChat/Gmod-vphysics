@@ -30,7 +30,7 @@ inline void GraphicTransformLocalToWorld(const btTransform &trans, const btRigid
 }
 
 // Convert an axis to a matrix (where angle around axis does not matter)
-// Axis will be assumed as the forward vector
+// Axis will be assumed as the forward vector (and assumed normalized)
 void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
 	btVector3 wup(0, 1, 0);
 
@@ -138,6 +138,7 @@ class btLengthConstraint: public btPoint2PointConstraint {
 			info->m_numConstraintRows = 0;
 			info->nub = 6; // FIXME: What does this even do?
 
+			// Only need to solve the constraint if there is any error!
 			if (currDist < m_mindist || currDist > m_maxdist) {
 				info->m_numConstraintRows++;
 				info->nub--;
@@ -170,15 +171,19 @@ class btLengthConstraint: public btPoint2PointConstraint {
 				info->m_J2linearAxis[2] = -ortho[2];
 			}
 
+			// Angular axis (relative pos cross normal)
 			btVector3 p, q;
 			p = relA.cross(ortho);
 			q = relB.cross(ortho);
 			info->m_J1angularAxis[0] = p[0];
 			info->m_J1angularAxis[1] = p[1];
 			info->m_J1angularAxis[2] = p[2];
-			info->m_J2angularAxis[0] = -q[0];
-			info->m_J2angularAxis[1] = -q[1];
-			info->m_J2angularAxis[2] = -q[2];
+
+			if (info->m_J2angularAxis) {
+				info->m_J2angularAxis[0] = -q[0];
+				info->m_J2angularAxis[1] = -q[1];
+				info->m_J2angularAxis[2] = -q[2];
+			}
 
 			btScalar rhs = 0;
 

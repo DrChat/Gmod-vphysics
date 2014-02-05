@@ -4,15 +4,20 @@
 class IPhysicsEnvironment32;
 class IPhysicsObject32;
 class CPhysCollide;
+class CPhysConvex;
 class Vector;
 struct lua_State;
 
 #include <GarrysMod/Lua/Interface.h>
 
+// These should probably be in a stdafx.h or something
 namespace CustomTypes {
 	enum {
 		TYPE_PHYSCOLLIDE = GarrysMod::Lua::Type::COUNT + 1,
+		TYPE_PHYSCONVEX,
+
 		TYPE_PHYSENV,
+		TYPE_PHYSSOFTBODY,
 
 		COUNT,
 	};
@@ -28,5 +33,8 @@ void Push_Vector(lua_State *state, const Vector &vec);
 
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos);
 void Push_PhysCollide(lua_State *state, const CPhysCollide *collide);
+
+CPhysConvex *Get_PhysConvex(lua_State *state, int stackPos);
+void Push_PhysConvex(lua_State *state, const CPhysConvex *convex);
 
 #endif // MISCFUNCS_H

@@ -243,6 +243,8 @@ void btCompoundCollisionAlgorithm::processCollision (const btCollisionObjectWrap
 	{
 		int i;
 		btManifoldArray manifoldArray;
+		manifoldArray.reserve(20); // Predict the size so we don't bother with many reallocs
+
 		for (i=0;i<m_childCollisionAlgorithms.size();i++)
 		{
 			if (m_childCollisionAlgorithms[i])

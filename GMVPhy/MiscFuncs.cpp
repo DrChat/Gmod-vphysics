@@ -70,3 +70,19 @@ void Push_PhysCollide(lua_State *state, const CPhysCollide *collide) {
 	ud->data = (void *)collide;
 	ud->type = CustomTypes::TYPE_PHYSCOLLIDE;
 }
+
+CPhysConvex *Get_PhysConvex(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, CustomTypes::TYPE_PHYSCONVEX);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (CPhysConvex *)ud->data;
+}
+
+void Push_PhysConvex(lua_State *state, const CPhysConvex *convex) {
+	UserData *ud = (UserData *)LUA->NewUserdata(sizeof(UserData));
+	ud->type = CustomTypes::TYPE_PHYSCONVEX;
+	ud->data = (void *)convex;
+
+	LUA->CreateMetaTableType("PhysConvex", CustomTypes::TYPE_PHYSCONVEX);
+	LUA->SetMetaTable(-2);
+}

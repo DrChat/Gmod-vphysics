@@ -442,7 +442,7 @@ void CPhysicsVehicleController::CalcEngineTransmission(vehicle_controlparams_t &
 		for (int i = 0; i < m_iWheelCount; i++) {
 			btWheelInfo wheelInfo = m_pVehicle->getWheelInfo(i);
 
-			float rotSpeed = fabs(wheelInfo.m_deltaRotation / dt);
+			float rotSpeed = fabs(wheelInfo.m_deltaRotation * wheelInfo.m_wheelsRadius);
 			avgRotSpeed += rotSpeed;
 		}
 

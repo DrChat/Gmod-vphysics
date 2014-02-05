@@ -324,8 +324,8 @@ class CCollisionEventListener : public btSolveCallback {
 			CPhysicsCollisionData data(cp);
 			evt.pInternalData = &data;
 
-			if (m_pCallback)
-				m_pCallback->PreCollision(&evt);
+			//if (m_pCallback)
+			//	m_pCallback->PreCollision(&evt);
 		}
 
 		virtual void postSolveContact(btCollisionObject *colObj0, btCollisionObject *colObj1, btManifoldPoint *cp) {
@@ -352,8 +352,8 @@ class CCollisionEventListener : public btSolveCallback {
 			CPhysicsCollisionData data(cp);
 			evt.pInternalData = &data;
 
-			if (m_pCallback)
-				m_pCallback->PostCollision(&evt);
+			//if (m_pCallback)
+			//	m_pCallback->PostCollision(&evt);
 		}
 
 		void SetCollisionEventCallback(IPhysicsCollisionEvent *pCallback) {

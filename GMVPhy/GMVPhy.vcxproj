@@ -133,6 +133,7 @@
     <ClCompile Include="PhysCollision.cpp" />
     <ClCompile Include="PhysEnv.cpp" />
     <ClCompile Include="PhysObj.cpp" />
+    <ClCompile Include="PhysSoftBody.cpp" />
     <ClCompile Include="PhysVehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
     <ClInclude Include="PhysCollision.h" />
     <ClInclude Include="PhysEnv.h" />
     <ClInclude Include="PhysObj.h" />
+    <ClInclude Include="PhysSoftBody.h" />
     <ClInclude Include="PhysVehicle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

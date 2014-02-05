@@ -90,7 +90,7 @@ IPhysicsCollisionSet *CPhysics::FindOrCreateCollisionSet(unsigned int id, int ma
 		return m_collisionSets[id];
 
 	CPhysicsCollisionSet *set = NULL;
-	if (maxElementCount < 32) {
+	if (maxElementCount < sizeof(int) * 8) {
 		set = ::CreateCollisionSet(maxElementCount);
 		m_collisionSets.AddToTail(set);
 	}

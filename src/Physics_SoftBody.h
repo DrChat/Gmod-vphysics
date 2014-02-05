@@ -6,12 +6,7 @@
 
 // Purpose: Dynamically deforming meshes (blankets, dents in objects, etc.)
 
-// Public interface to expose later
-class IPhysicsSoftBody {
-	public:
-		virtual ~IPhysicsSoftBody() {}
-};
-
+// TODO: Expose later
 struct softbodyparams_t {
 
 };

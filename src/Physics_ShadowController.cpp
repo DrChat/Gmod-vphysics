@@ -284,7 +284,7 @@ void CShadowController::SetPhysicallyControlled(bool enable) {
 void CShadowController::GetLastImpulse(Vector *pOut) {
 	if (!pOut) return;
 
-	NOT_IMPLEMENTED
+	//NOT_IMPLEMENTED
 	*pOut = Vector(0,0,0);
 }
 

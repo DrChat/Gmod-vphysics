@@ -12,7 +12,7 @@
 ******************************/
 
 CPhysicsDragController::CPhysicsDragController() {
-	m_airDensity = 2; // default
+	m_airDensity = 2.f; // default
 }
 
 void CPhysicsDragController::SetAirDensity(float d) {
@@ -38,8 +38,7 @@ bool CPhysicsDragController::IsControlling(const CPhysicsObject *obj) const {
 }
 
 void CPhysicsDragController::Tick(btScalar dt) {
-	int iEntCount = m_ents.Count();
-	for (int i = 0; i < iEntCount; i++) {
+	for (int i = 0; i < m_ents.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject *)m_ents[i];
 		btRigidBody *body = pObject->GetObject();
 

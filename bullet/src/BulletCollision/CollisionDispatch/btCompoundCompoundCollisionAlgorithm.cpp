@@ -315,7 +315,7 @@ void btCompoundCompoundCollisionAlgorithm::processCollision (const btCollisionOb
 		int i;
 		btManifoldArray manifoldArray;
 		btSimplePairArray& pairs = m_childCollisionAlgorithmCache->getOverlappingPairArray();
-		manifoldArray.reserve(pairs.size()); // Cut down on the allocations (most algorithms only have 1 contact manifold)
+		manifoldArray.reserve(20); // Cut down on the allocations
 
 		for (i=0;i<pairs.size();i++)
 		{
