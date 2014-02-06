@@ -17,6 +17,7 @@ subject to the following restrictions:
 #include "btFixedConstraint.h"
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "LinearMath/btTransformUtil.h"
+#include "LinearMath/btIDebugDraw.h"
 #include <new>
 
 
@@ -183,4 +184,13 @@ void btFixedConstraint::getInfo2 (btConstraintInfo2* info)
 			info->m_upperLimit[srow] = SIMD_INFINITY;
 		}
 	}
+}
+
+void btFixedConstraint::debugDraw(btIDebugDraw *debugDraw)
+{
+	btTransform transA = m_rbA.getCenterOfMassTransform() * m_frameInA;
+	btTransform transB = m_rbB.getCenterOfMassTransform() * m_frameInB;
+
+	debugDraw->drawTransform(transA, m_dbgDrawSize);
+	debugDraw->drawTransform(transB, m_dbgDrawSize);
 }

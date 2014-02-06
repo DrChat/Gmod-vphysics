@@ -43,6 +43,7 @@ public:
 		return 0.f;
 	}
 
+	virtual void debugDraw(btIDebugDraw *debugDraw);
 };
 
 #endif //BT_FIXED_CONSTRAINT_H

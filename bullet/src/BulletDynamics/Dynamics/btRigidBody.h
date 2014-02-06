@@ -351,7 +351,7 @@ public:
 	void updateInertiaTensor();    
 	
 	const btVector3     getCenterOfMassPosition() const { 
-		return m_worldTransform * m_centerOfMassOffset; 
+		return (m_worldTransform * btTransform(btMatrix3x3::getIdentity(), m_centerOfMassOffset)).getOrigin();
 	}
 	btQuaternion getOrientation() const;
 	
