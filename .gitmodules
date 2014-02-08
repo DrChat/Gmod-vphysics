@@ -4,3 +4,6 @@
 [submodule "sourcesdk"]
 	path = thirdparty/sourcesdk
 	url = https://github.com/ValveSoftware/source-sdk-2013.git
+[submodule "thirdparty/gmmodulebase"]
+	path = thirdparty/gmmodulebase
+	url = git@github.com:garrynewman/gmod-module-base.git
