@@ -782,8 +782,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					btVector3 direction;
 					ConvertPosToBull(ray.m_Delta, direction);
 					direction.normalize();
-					if (direction.dot(cb.m_hitNormalWorld) >= -0.005) {
-						// Run another trace with an allowed penetration of something above 0.005
+					if (direction.dot(cb.m_hitNormalWorld) >= -0.0005) {
+						// Run another trace with an allowed penetration of something above 0.01
 
 						ptr->fraction = 1;
 					}
