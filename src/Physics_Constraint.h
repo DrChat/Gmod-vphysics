@@ -5,6 +5,7 @@
 #endif
 
 #include <vphysics/constraints.h>
+#include "vphysics/constraintsV32.h"
 
 class CPhysicsEnvironment;
 class CPhysicsConstraintGroup;
@@ -18,7 +19,8 @@ enum EConstraintType {
 	CONSTRAINT_BALLSOCKET,
 	CONSTRAINT_PULLEY,
 	CONSTRAINT_LENGTH,
-	CONSTRAINT_SPRING
+	CONSTRAINT_SPRING,
+	CONSTRAINT_USER
 };
 
 class CPhysicsConstraint : public IPhysicsConstraint {

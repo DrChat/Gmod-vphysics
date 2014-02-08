@@ -204,55 +204,57 @@ class btLengthConstraint: public btPoint2PointConstraint {
 		}
 };
 
-class btDistanceConstraint : public btPoint2PointConstraint {
-	protected:
-		btScalar	m_dist;
+class btUserConstraint : public btTypedConstraint {
 	public:
-		btDistanceConstraint(btRigidBody& rbA, btRigidBody& rbB, const btVector3& pivotInA, const btVector3& pivotInB, btScalar dist):
-		btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB) {
-			m_dist = dist;
+		btUserConstraint(btRigidBody &rbA, btRigidBody &rbB, IPhysicsUserConstraint *pConstraint): btTypedConstraint(CONSTRAINT_TYPE_USER, rbA, rbB) {
+			m_pUserConstraint = pConstraint;
 		}
 
-		void getInfo1(btConstraintInfo1 *info) {
-			info->m_numConstraintRows = 1;
-			info->nub = 5; // FIXME: What does this do?
+		void getInfo1(btConstraintInfo1 *pInfo) {
+			physconstraintinfo_t info;
+			info.numConstraintRows = 0;
+			info.nub = 0;
+
+			CPhysicsObject *pObjA, *pObjB;
+			pObjA = (CPhysicsObject *)m_rbA.getUserPointer();
+			pObjB = (CPhysicsObject *)m_rbB.getUserPointer();
+			m_pUserConstraint->GetConstraintInfo(pObjA, pObjB, info);
+
+			pInfo->m_numConstraintRows = info.numConstraintRows;
+			pInfo->nub = info.nub;
 		}
 
-		void getInfo2(btConstraintInfo2 *info) {
-			// Positions relative to objects
-			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
-			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
+		void getInfo2(btConstraintInfo2 *pInfo) {
+			physconstraintsolveinfo_t *solveinfo = (physconstraintsolveinfo_t *)stackalloc(pInfo->m_numConstraintRows);
+			for (int i = 0; i < pInfo->m_numConstraintRows; i++) {
+				solveinfo[i].Defaults();
+			}
 
-			// Exact world positions
-			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
-			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
+			CPhysicsObject *pObjA, *pObjB;
+			pObjA = (CPhysicsObject *)m_rbA.getUserPointer();
+			pObjB = (CPhysicsObject *)m_rbB.getUserPointer();
+			m_pUserConstraint->GetConstraintSolveInfo(pObjA, pObjB, solveinfo, pInfo->m_numConstraintRows, pInfo->fps, pInfo->erp);
 
-			// Delta
-			btVector3 del = posB - posA;
-			btScalar currDist = btSqrt(del.dot(del));
-			btVector3 ortho = del / currDist; // Axis to solve along
-			info->m_J1linearAxis[0] = ortho[0];
-			info->m_J1linearAxis[1] = ortho[1];
-			info->m_J1linearAxis[2] = ortho[2];
+			for (int i = 0; i < pInfo->m_numConstraintRows; i++) {
+				ConvertDirectionToBull(solveinfo[i].J1linearAxis, *(btVector3 *)&pInfo->m_J1linearAxis[i * pInfo->rowskip]);
+				ConvertDirectionToBull(solveinfo[i].J1angularAxis, *(btVector3 *)&pInfo->m_J1angularAxis[i * pInfo->rowskip]);
 
-			btVector3 p, q;
-			p = relA.cross(ortho);
-			q = relB.cross(ortho);
-			info->m_J1angularAxis[0] = p[0];
-			info->m_J1angularAxis[1] = p[1];
-			info->m_J1angularAxis[2] = p[2];
-			info->m_J2angularAxis[0] = -q[0];
-			info->m_J2angularAxis[1] = -q[1];
-			info->m_J2angularAxis[2] = -q[2];
+				if (pInfo->m_J2linearAxis)
+					ConvertDirectionToBull(solveinfo[i].J2linearAxis, *(btVector3 *)&pInfo->m_J2linearAxis[i * pInfo->rowskip]);
 
-			btScalar rhs = (currDist - m_dist) * info->fps * info->erp;
-			info->m_constraintError[0] = rhs; // Constraint error (target rel velocity)
-			info->cfm[0] = btScalar(0.f);
+				if (pInfo->m_J2angularAxis)
+					ConvertDirectionToBull(solveinfo[i].J2angularAxis, *(btVector3 *)&pInfo->m_J2angularAxis[i * pInfo->rowskip]);
 
-			// Max force (or something)
-			info->m_lowerLimit[0] = -SIMD_INFINITY;
-			info->m_upperLimit[0] = SIMD_INFINITY;
+				pInfo->cfm[i * pInfo->rowskip] = solveinfo[i].cfm;
+				pInfo->m_constraintError[i * pInfo->rowskip] = solveinfo[i].constraintError;
+
+				pInfo->m_lowerLimit[i * pInfo->rowskip] = solveinfo[i].lowerLimit;
+				pInfo->m_upperLimit[i * pInfo->rowskip] = solveinfo[i].upperLimit;
+			}
 		}
+
+	private:
+		IPhysicsUserConstraint *m_pUserConstraint;
 };
 
 /*********************************
@@ -513,21 +515,40 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btGeneric6DofConstraint *pConstraint = new btGeneric6DofConstraint(*objRef, *objAtt, bullAFrame, bullBFrame, true);
 
 	// Build up our limits
+	// Can't use a for loop here :(
 	btVector3 angUpperLimit;
 	btVector3 angLowerLimit;
 
+	btRotationalLimitMotor *motor = pConstraint->getRotationalLimitMotor(0);
 	constraint_axislimit_t limit = ragdoll.axes[0];
 	angUpperLimit.m_floats[0] = DEG2RAD(limit.maxRotation);
 	angLowerLimit.m_floats[0] = DEG2RAD(limit.minRotation);
+	if (limit.torque != 0) {
+		motor->m_enableMotor = true;
+		motor->m_targetVelocity = DEG2RAD(limit.angularVelocity);
+		motor->m_maxMotorForce = DEG2RAD(HL2BULL(limit.torque));
+	}
 
 	// FIXME: Correct?
+	motor = pConstraint->getRotationalLimitMotor(2);
 	limit = ragdoll.axes[2];
 	angUpperLimit.m_floats[1] = DEG2RAD(limit.maxRotation);
 	angLowerLimit.m_floats[1] = DEG2RAD(limit.minRotation);
+	if (limit.torque != 0) {
+		motor->m_enableMotor = true;
+		motor->m_targetVelocity = DEG2RAD(limit.angularVelocity);
+		motor->m_maxMotorForce = DEG2RAD(HL2BULL(limit.torque));
+	}
 
+	motor = pConstraint->getRotationalLimitMotor(1);
 	limit = ragdoll.axes[1];
 	angUpperLimit.m_floats[2] = DEG2RAD(-limit.minRotation);
 	angLowerLimit.m_floats[2] = DEG2RAD(-limit.maxRotation);
+	if (limit.torque != 0) {
+		motor->m_enableMotor = true;
+		motor->m_targetVelocity = DEG2RAD(-limit.angularVelocity);
+		motor->m_maxMotorForce = DEG2RAD(HL2BULL(-limit.torque));
+	}
 
 	pConstraint->setEnabled(ragdoll.isActive);
 
@@ -680,4 +701,11 @@ CPhysicsConstraintGroup *CreateConstraintGroup(CPhysicsEnvironment *pEnv, const 
 	if (!pEnv) return NULL;
 
 	return new CPhysicsConstraintGroup(pEnv, params);
+}
+
+CPhysicsConstraint *CreateUserConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pUserConstraint) {
+	Assert(pUserConstraint);
+
+	NOT_IMPLEMENTED
+	return NULL;
 }

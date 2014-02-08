@@ -34,6 +34,7 @@ class btSerializer;
 class btIDebugDraw;
 
 //Don't change any of the existing enum values, so add enum types at the end for serialization compatibility
+// Also reverse the names, wtf bullet why isn't it CONSTRAINT_TYPE_*
 enum btTypedConstraintType
 {
 	POINT2POINT_CONSTRAINT_TYPE=3,
@@ -45,6 +46,7 @@ enum btTypedConstraintType
 	D6_SPRING_CONSTRAINT_TYPE,
 	GEAR_CONSTRAINT_TYPE,
 	FIXED_CONSTRAINT_TYPE,
+	CONSTRAINT_TYPE_USER,
 	MAX_CONSTRAINT_TYPE
 };
 
@@ -151,6 +153,9 @@ public:
 		int *findex;
 		// number of solver iterations
 		int m_numIterations;
+
+		// number of constraint rows (returned by user in getInfo1)
+		int m_numConstraintRows;
 
 		//damping of the velocity
 		btScalar	m_damping;

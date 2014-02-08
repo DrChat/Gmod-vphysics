@@ -1229,6 +1229,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlySetup(btCol
 				info2.m_lowerLimit = &currentConstraintRow->m_lowerLimit;
 				info2.m_upperLimit = &currentConstraintRow->m_upperLimit;
 				info2.m_numIterations = infoGlobal.m_numIterations;
+				info2.m_numConstraintRows = info1.m_numConstraintRows;
 				constraints[i]->getInfo2(&info2);
 
 				///finalize the constraint setup
