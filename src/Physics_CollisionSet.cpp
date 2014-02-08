@@ -18,6 +18,9 @@ CPhysicsCollisionSet::CPhysicsCollisionSet(int iMaxEntries) {
 	m_iMaxEntries = iMaxEntries;
 
 	m_collArray = new int[iMaxEntries];
+	for (int i = 0; i < iMaxEntries; i++) {
+		m_collArray[i] = 0;
+	}
 }
 
 CPhysicsCollisionSet::~CPhysicsCollisionSet() {
