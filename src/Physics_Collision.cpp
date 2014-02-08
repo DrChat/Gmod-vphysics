@@ -717,7 +717,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					ptr->endpos = ptr->startpos;
 				} else {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-					ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
+					//ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
+					ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 				}
 			} else {
 				ptr->endpos = ptr->startpos + ray.m_Delta;
@@ -725,6 +726,15 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 
 			if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 				g_pDebugOverlay->AddLineOverlay(ptr->startpos, ptr->endpos, 0, 0, 255, false, 0.f);
+
+				if (ptr->fraction < 1.f) {
+					btVector3 lineEnd = cb.m_hitPointWorld + (cb.m_hitNormalWorld * 1);
+					Vector hlEnd, hlStart;
+					ConvertPosToHL(lineEnd, hlEnd);
+					ConvertPosToHL(cb.m_hitPointWorld, hlStart);
+
+					g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
+				}
 			}
 		} else {
 			// For whatever reason...
@@ -1056,6 +1066,8 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		Assert(position < bufferSize && position >= 0);
 	}
 
+	Assert(bufferSize - position > 0);
+
 	// The rest of the buffer is the key values for the collision mesh
 	pOutput->pKeyValues = new char[bufferSize - position];
 	memcpy(pOutput->pKeyValues, pBuffer + position, bufferSize - position);
@@ -1229,18 +1241,14 @@ bool CPhysicsCollision::SupportsVirtualMesh() {
 }
 
 void CPhysicsCollision::OutputDebugInfo(const CPhysCollide *pCollide) {
+	Assert(pCollide);
+
 	const btCollisionShape *pShape = pCollide->GetCollisionShape();
 
 	Msg("Type: %s\n", pShape->getName());
 	if (pShape->isCompound()) {
 		btCompoundShape *pCompound = (btCompoundShape *)pShape;
 		Msg("Num child shapes: %d\n", pCompound->getNumChildShapes());
-
-		Msg("-- CHILD SHAPES:\n");
-		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
-			OutputDebugInfo((CPhysCollide *)pCompound->getChildShape(i)->getUserPointer());
-		}
-		Msg("---\n");
 	} else if (pShape->isConvex()) {
 		if (pShape->getShapeType() == CONVEX_HULL_SHAPE_PROXYTYPE) {
 			btConvexHullShape *pConvex = (btConvexHullShape *)pShape;

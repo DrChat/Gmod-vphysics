@@ -52,7 +52,7 @@ class CPhysCollide {
 			return m_massCenter;
 		}
 
-		btVector3 GetMassCenter() const {
+		const btVector3 &GetMassCenter() const {
 			return m_massCenter;
 		}
 
