@@ -27,45 +27,11 @@ subject to the following restrictions:
 #include "LinearMath/btDefines.h"
 #include "LinearMath/btScalar.h"
 
-class btSolveGroupTask : public btIThreadTask {
-	public:
-		btSolveGroupTask(btParallelConstraintSolver *pSolver, btCollisionObject **bodies, int numBodies,
-							btPersistentManifold **manifolds, int numManifolds, btTypedConstraint **constraints, int numConstraints) {
-			m_pSolver = pSolver;
-			m_bodies.copyFromArray(bodies, numBodies);
-			m_manifolds.copyFromArray(manifolds, numManifolds);
-			m_constraints.copyFromArray(constraints, numConstraints);
-		}
-
-		~btSolveGroupTask() {
-			m_bodies.clear();
-			m_manifolds.clear();
-			m_constraints.clear();
-		}
-
-		void run() {
-
-		}
-
-		void destroy() {
-			this->~btSolveGroupTask();
-			m_pSolver->freeTask(this);
-		}
-
-	private:
-		btParallelConstraintSolver *m_pSolver;
-		//btSolverCache m_cache;
-
-		btAlignedObjectArray<btCollisionObject *> m_bodies;
-		btAlignedObjectArray<btPersistentManifold *> m_manifolds;
-		btAlignedObjectArray<btTypedConstraint *> m_constraints;
-};
-
 btParallelConstraintSolver::btParallelConstraintSolver(btThreadPool *pThreadPool) {
 	m_pThreadPool = pThreadPool;
 
 	void *taskPoolMem = btAlloc(sizeof(btPoolAllocator));
-	m_pTaskPool = new(taskPoolMem) btPoolAllocator(sizeof(btSolveGroupTask), 4096);
+	//m_pTaskPool = new(taskPoolMem) btPoolAllocator(sizeof(btSolveGroupTask), 4096);
 	m_pTaskPoolSect = btCreateCriticalSection();
 }
 
@@ -101,12 +67,9 @@ void btParallelConstraintSolver::freeTask(void *ptr) {
 
 btScalar btParallelConstraintSolver::solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifolds, int numManifolds, btTypedConstraint **constraints, 
 											int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher) {
-	// We'll have to make a copy of the arrays supplied to us, as they're deleted after this function returns.
-	void *mem = allocateTask(sizeof(btSolveGroupTask));
-	btSolveGroupTask *task = new(mem) btSolveGroupTask(this, bodies, numBodies, manifolds, numManifolds, constraints, numConstraints);
-	m_pThreadPool->addTask(task);
 
-	// Unknown return value
+
+	// Unused return value
 	return btScalar(0);
 }
 

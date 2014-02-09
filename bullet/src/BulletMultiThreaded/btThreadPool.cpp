@@ -8,24 +8,11 @@ static void ThreadFunc(void *pArg) {
 	btThreadPoolInfo *pThreadInfo = (btThreadPoolInfo *)pArg;
 	btThreadPool *pThreadPool = pThreadInfo->pThreadPool;
 
-	while (true) {
-		// Get the next task, or wait until a task is available.
-		// If it returns NULL, that means the wait was cancelled because we're exiting.
-		btIThreadTask *pTask = pThreadPool->getNextTask(pThreadInfo->pIdleEvent);
-		
-		// returns NULL if we're exiting
-		if (pTask) {
-			pTask->run();
-			pTask->destroy();
-		} else {
-			break;
-		}
-	}
+	pThreadPool->threadFunction(pThreadInfo);
 }
 
 btThreadPool::btThreadPool() {
 	m_bThreadsStarted = false;
-	m_pThreadInfo = NULL;
 	m_bThreadsShouldExit = false;
 
 	m_pTaskCritSection = btCreateCriticalSection();
@@ -46,42 +33,46 @@ void btThreadPool::startThreads(int numThreads) {
 	m_bThreadsStarted = true;
 	m_numThreads = numThreads;
 
-	m_pThreadInfo = (btThreadPoolInfo **)btAlloc(numThreads * sizeof(void *));
+	m_pThreadInfo.resize(numThreads);
 
 	for (int i = 0; i < numThreads; i++) {
 		btIThread *pThread = btCreateThread();
 
 		m_pThreadInfo[i] = (btThreadPoolInfo *)btAlloc(sizeof(btThreadPoolInfo));
+		btThreadPoolInfo *pInfo = m_pThreadInfo[i];
 
-		m_pThreadInfo[i]->threadId = i;
-		m_pThreadInfo[i]->pThread = pThread;
-		m_pThreadInfo[i]->pIdleEvent = btCreateEvent(true);
-		m_pThreadInfo[i]->pThreadPool = this;
+		pInfo->threadId = i;
+		pInfo->pThread = pThread;
+		pInfo->pIdleEvent = btCreateEvent(true);
+		pInfo->pStartEvent = btCreateEvent(false);
+		pInfo->pThreadPool = this;
+		pInfo->pTaskArr = NULL;
+		pInfo->numTasks = 0;
 		pThread->setThreadFunc(ThreadFunc);
 
 		// Set the name for debugging purposes
-		char name[128];
-		sprintf(name, "btThreadPool thread %d", i); // Possible buffer overflow?
+		char name[64];
+		sprintf(name, "btThreadPool thread %d", i);
 		pThread->setThreadName(name);
 
-		pThread->run(m_pThreadInfo[i]);
+		pThread->run(pInfo);
 	}
 }
 
 void btThreadPool::stopThreads() {
 	m_bThreadsStarted = false;
 	m_bThreadsShouldExit = true;
-	m_pNewTaskCondVar->wakeAll(); // Wake up all of the threads from their sleep and make them exit.
 
 	for (int i = 0; i < m_numThreads; i++) {
+		m_pThreadInfo[i]->pStartEvent->trigger(); // Start the thread again (to exit)
+
 		m_pThreadInfo[i]->pThread->waitForExit();
 
 		btDeleteThread(m_pThreadInfo[i]->pThread);
 		btDeleteEvent(m_pThreadInfo[i]->pIdleEvent);
+		btDeleteEvent(m_pThreadInfo[i]->pStartEvent);
 		btFree(m_pThreadInfo[i]);
 	}
-
-	btFree(m_pThreadInfo);
 }
 
 int btThreadPool::getNumThreads() {
@@ -89,24 +80,51 @@ int btThreadPool::getNumThreads() {
 }
 
 void btThreadPool::addTask(btIThreadTask *pTask) {
-	m_pTaskCritSection->lock();
-
 	m_taskArray.push_back(pTask);
+}
 
-	m_pTaskCritSection->unlock();
+void btThreadPool::clearTasks() {
+	for (int i = 0; i < m_taskArray.size(); i++) {
+		m_taskArray[i]->destroy(); // Allow the user to deallocate the task or whatever
+	}
+
+	m_taskArray.resize(0);
 }
 
 void btThreadPool::runTasks() {
-	m_pTaskCritSection->lock();
+	btAssert(m_numThreads != 0);
+	if (m_taskArray.size() == 0) return;
 
-	// Reset the idle events here (if threads call this, main thread may be past waitIdle already)
-	for (int i = 0; i < m_numThreads; i++) {
-		m_pThreadInfo[i]->pIdleEvent->reset();
+	if (m_taskArray.size() >= m_numThreads) {
+		int tasksPerThread = m_taskArray.size() / m_numThreads;
+		int remainder = m_taskArray.size() % m_numThreads;
+		int curTask = 0;
+
+		for (int i = 0; i < m_numThreads; i++) {
+			m_pThreadInfo[i]->pTaskArr = &m_taskArray[curTask];
+			m_pThreadInfo[i]->numTasks = tasksPerThread + (remainder ? 1 : 0);
+			curTask += m_pThreadInfo[i]->numTasks;
+
+			if (remainder) remainder--;
+		}
+	} else {
+		// Rare case where tasks are less than num threads
+		// Threads that don't get a task will just loop once and go back to their idle state
+		for (int i = 0; i < m_taskArray.size(); i++) {
+			m_pThreadInfo[i]->pTaskArr = &m_taskArray[i];
+			m_pThreadInfo[i]->numTasks = 1;
+		}
 	}
 
-	m_pTaskCritSection->unlock();
 
-	m_pNewTaskCondVar->wakeAll();
+	// Start the threads!
+	for (int i = 0; i < m_numThreads; i++) {
+		m_pThreadInfo[i]->pIdleEvent->reset(); // Reset the idle event
+		m_pThreadInfo[i]->pStartEvent->trigger(); // Start it
+	}
+
+	waitIdle();
+	clearTasks();
 }
 
 void btThreadPool::waitIdle() {
@@ -117,30 +135,23 @@ void btThreadPool::waitIdle() {
 	}
 }
 
-btIThreadTask *btThreadPool::getNextTask(btIEvent *pIdleEvent) {
-	m_pTaskCritSection->lock();
+void btThreadPool::threadFunction(btThreadPoolInfo *pInfo) {
+	while (true) {
+		pInfo->pIdleEvent->trigger(); // Trigger idle event (tell main thread we're done working)
+		pInfo->pStartEvent->wait(); // Wait on start event (main thread telling us to work on something or quit)
 
-	// Task array is empty! Wait until new tasks are added (or the pool is exiting)
-	// While loop because cond vars are subject to spurious wakeups
-	while (m_taskArray.size() <= 0) {
-		// Trigger the idle event (tell everyone we're currently waiting)
-		pIdleEvent->trigger();
-		m_pNewTaskCondVar->wait(m_pTaskCritSection); // Wait for new tasks (and release the crit section, will be reacquired when we wake)
+		if (m_bThreadsShouldExit)
+			break;
 
-		if (m_bThreadsShouldExit) {
-			m_pTaskCritSection->unlock();
-			return NULL;
+		// We have some work to do!
+		if (pInfo->pTaskArr) {
+			for (int i = 0; i < pInfo->numTasks; i++) {
+				pInfo->pTaskArr[i]->run();
+			}
+			
+			// Nullify this stuff for next time
+			pInfo->pTaskArr = NULL;
+			pInfo->numTasks = 0;
 		}
 	}
-
-	btAssert(m_taskArray.size() > 0);
-
-	// Send the new task back.
-	// Although we should never reach here if the task array size is 0, check anyways
-	btIThreadTask *ret = m_taskArray[m_taskArray.size() - 1];
-	m_taskArray.pop_back();
-
-	m_pTaskCritSection->unlock();
-
-	return ret;
 }

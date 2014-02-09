@@ -52,7 +52,6 @@ btParallelCollisionDispatcher::btParallelCollisionDispatcher(btCollisionConfigur
 
 	m_pPoolCritSect = btCreateCriticalSection();
 	m_pAlgoPoolSect = btCreateCriticalSection();
-	m_pTaskPoolSect = btCreateCriticalSection();
 }
 
 btParallelCollisionDispatcher::~btParallelCollisionDispatcher() {
@@ -61,7 +60,6 @@ btParallelCollisionDispatcher::~btParallelCollisionDispatcher() {
 
 	btDeleteCriticalSection(m_pPoolCritSect);
 	btDeleteCriticalSection(m_pAlgoPoolSect);
-	btDeleteCriticalSection(m_pTaskPoolSect);
 }
 
 btPersistentManifold *btParallelCollisionDispatcher::getNewManifold(const btCollisionObject *ob0, const btCollisionObject *ob1) {
@@ -93,7 +91,6 @@ void btParallelCollisionDispatcher::freeCollisionAlgorithm(void *ptr) {
 }
 
 void *btParallelCollisionDispatcher::allocateTask(int size) {
-	m_pTaskPoolSect->lock();
 	void *mem = NULL;
 	if (m_pTaskPool->getFreeCount() > 0) {
 		mem = m_pTaskPool->allocate(size);
@@ -101,18 +98,15 @@ void *btParallelCollisionDispatcher::allocateTask(int size) {
 		// Fallback to dynamic alloc
 		mem = btAlloc(size);
 	}
-	m_pTaskPoolSect->unlock();
 
 	return mem;
 }
 
 void btParallelCollisionDispatcher::freeTask(void *ptr) {
-	if (m_pTaskPool->validPtr(ptr)) {
-		m_pTaskPoolSect->lock();
-		m_pTaskPool->freeMemory(ptr);
-		m_pTaskPoolSect->unlock();
-	} else {
+	if (!m_pTaskPool->validPtr(ptr)) {
 		btFree(ptr);
+	} else {
+		m_pTaskPool->freeMemory(ptr);
 	}
 }
 
@@ -147,9 +141,6 @@ void btParallelCollisionDispatcher::dispatchAllCollisionPairs(btOverlappingPairC
 	pairCache->processAllOverlappingPairs(&cb, dispatcher);
 
 	m_pThreadPool->runTasks();
-
-	// Wait until the task pool empties out (all threads are finished executing tasks)
-	m_pThreadPool->waitIdle();
 }
 
 btThreadPool *btParallelCollisionDispatcher::getThreadPool() {

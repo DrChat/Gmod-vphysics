@@ -15,8 +15,13 @@ class btThreadPool;
 struct btThreadPoolInfo {
 	btIThread *pThread;
 	btIEvent *pIdleEvent;
+	btIEvent *pStartEvent;
 	btThreadPool *pThreadPool;
 	int threadId;
+
+	// Task information
+	btIThreadTask **pTaskArr;
+	int numTasks;
 };
 
 class btThreadPool {
@@ -30,15 +35,17 @@ class btThreadPool {
 		int getNumThreads();
 
 		void addTask(btIThreadTask *pTask);
+		void clearTasks(); // Clear task queue
 		void runTasks(); // Runs the threads until task pool is empty
 		void waitIdle(); // Waits until thread pool is idle (no more tasks)
 
 		// Internal functions (do not call these)
 
-		btIThreadTask *getNextTask(btIEvent *pIdleEvent); // Returns new task to execute, or NULL if you should exit. Blocks if no tasks are available atm.
+		void threadFunction(btThreadPoolInfo *pInfo);
 
 	private:
-		btThreadPoolInfo **	m_pThreadInfo;
+		btAlignedObjectArray<btThreadPoolInfo *> m_pThreadInfo;
+		//btThreadPoolInfo **	m_pThreadInfo;
 		int					m_numThreads;
 		bool				m_bThreadsStarted;
 		bool				m_bThreadsShouldExit;

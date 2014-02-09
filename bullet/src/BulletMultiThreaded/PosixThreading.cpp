@@ -149,7 +149,7 @@ class btPosixEvent : public btIEvent {
 	public:
 		btPosixEvent(bool bManualReset) {
 			m_bTriggered = false;
-			m_bManualReset = bManualReset; // TOOD: Factor this in
+			m_bManualReset = bManualReset;
 			pthread_mutex_init(&m_mutex, NULL);
 			pthread_cond_init(&m_condVar, NULL);
 		}
@@ -162,13 +162,14 @@ class btPosixEvent : public btIEvent {
 		void trigger() {
 			pthread_mutex_lock(&m_mutex);
 			m_bTriggered = true;
-			pthread_cond_signal(&m_condVar);
+			pthread_cond_broadcast(&m_condVar);
 			pthread_mutex_unlock(&m_mutex);
 		}
 
 		void reset() {
 			pthread_mutex_lock(&m_mutex);
-			m_bTriggered = false;
+			if (!m_bManualReset)
+				m_bTriggered = false;
 			pthread_mutex_unlock(&m_mutex);
 		}
 

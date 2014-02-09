@@ -61,6 +61,7 @@ class btWin32Thread : public btIThread {
 		btWin32Thread() {
 			m_hThread = INVALID_HANDLE_VALUE;
 			m_threadParams.pFn = NULL;
+			m_threadParams.pArg = NULL;
 			m_pThreadName = NULL;
 		}
 

@@ -28,9 +28,9 @@ class btParallelCollisionDispatcher : public btCollisionDispatcher {
 
 	private:
 		btPoolAllocator *	m_pTaskPool;
-		btICriticalSection *m_pPoolCritSect;
-		btICriticalSection *m_pAlgoPoolSect;
-		btICriticalSection *m_pTaskPoolSect;
+
+		btICriticalSection *m_pPoolCritSect; // Manifold pool crit section
+		btICriticalSection *m_pAlgoPoolSect; // Algorithm pool crit section
 		btThreadPool *		m_pThreadPool;
 };
 

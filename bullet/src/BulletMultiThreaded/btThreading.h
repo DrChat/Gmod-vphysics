@@ -39,7 +39,7 @@ class btIEvent {
 };
 
 // TODO in posix: Actually use manual reset (always acts like manual reset = true right now)
-// Beware: Linux with manual reset = false does NOT work!
+// Beware: Linux with manual reset = false is UNTESTED!
 btIEvent *btCreateEvent(bool bManualReset = false);
 void btDeleteEvent(btIEvent *pSemaphore);
 
