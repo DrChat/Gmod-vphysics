@@ -16,7 +16,7 @@ struct threadparams_t {
 	const char *pThreadName;
 };
 
-void *ThreadFn(void *pArg) {
+static void *ThreadFn(void *pArg) {
 	if (!pArg) return NULL;
 
 	threadparams_t *params = (threadparams_t *)pArg;
