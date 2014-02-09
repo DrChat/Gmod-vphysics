@@ -370,6 +370,7 @@ class CCollisionEventListener : public btSolveCallback {
 
 // Environment ConVars
 // Change the hardcoded min and max if you change the min and max here!
+#ifdef MULTITHREADED
 static void vphysics_numthreads_Change(IConVar *var, const char *pOldValue, float flOldValue);
 static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 1, true, 8, vphysics_numthreads_Change);
 
@@ -381,6 +382,7 @@ static void vphysics_numthreads_Change(IConVar *var, const char *pOldValue, floa
 		((CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(i))->ChangeThreadCount(newVal);
 	}
 }
+#endif
 
 CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick		= false;
