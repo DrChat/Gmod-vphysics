@@ -28,6 +28,19 @@ class btPoolAllocator
 	void *			m_firstFree;
 	unsigned char *	m_pool;
 
+	void initPool()
+	{
+		unsigned char *p = m_pool;
+
+		// Loop through the pool and set up a pointer chain to use as free elements
+		int count = m_maxElements;
+		while (--count) {
+			*(void **)p = (p + m_elemSize);
+			p += m_elemSize;
+		}
+		*(void **)p = 0; // Set the very last element's pointer to NULL
+	}
+
 public:
 
 	btPoolAllocator(int elemSize, int maxElements)
@@ -37,14 +50,10 @@ public:
 		m_pool = (unsigned char *)btAlignedAlloc(static_cast<unsigned int>(m_elemSize * m_maxElements), 16);
 
 		unsigned char *p = m_pool;
-		m_firstFree = p;
+		m_firstFree = p; // Set first free element to the pool
 		m_freeCount = m_maxElements;
-		int count = m_maxElements;
-		while (--count) {
-			*(void **)p = (p + m_elemSize);
-			p += m_elemSize;
-		}
-		*(void **)p = 0;
+
+		initPool();
 	}
 
 	~btPoolAllocator()
@@ -74,7 +83,7 @@ public:
 		btAssert(!size || size<=m_elemSize);
 		btAssert(m_freeCount>0);
 		void *result = m_firstFree;
-		m_firstFree = *(void **)m_firstFree;
+		m_firstFree = *(void **)m_firstFree; // Go up the pointer chain
 		--m_freeCount;
 		return result;
 	}
@@ -95,12 +104,27 @@ public:
 	void	freeMemory(void *ptr)
 	{
 		 if (ptr) {
-			btAssert((unsigned char *)ptr >= m_pool && (unsigned char *)ptr < m_pool + m_maxElements * m_elemSize);
+			btAssert(validPtr(ptr));
 
-			*(void **)ptr = m_firstFree;
+#if defined(BT_DEBUG)
+			memset(ptr, 0xDD, m_elemSize);
+#endif
+
+			*(void **)ptr = m_firstFree; // Link to the pointer chain
 			m_firstFree = ptr;
 			++m_freeCount;
 		}
+	}
+
+	/**
+	 * @brief "Frees" all elements
+	 */
+	void freeAll()
+	{
+		m_firstFree = m_pool;
+		m_freeCount = m_maxElements;
+
+		initPool();
 	}
 
 	int	getElementSize() const
