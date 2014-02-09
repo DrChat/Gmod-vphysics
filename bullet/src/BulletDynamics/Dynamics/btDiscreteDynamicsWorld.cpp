@@ -897,7 +897,7 @@ void	btDiscreteDynamicsWorld::createPredictiveContacts(btScalar timeStep)
 			
 			btScalar squareMotion = (predictedTrans.getOrigin()-body->getWorldTransform().getOrigin()).length2();
 
-			if (body->getCollisionShape()->isConvex() && getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
+			if (/*body->getCollisionShape()->isConvex() &&*/ getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{
 				BT_PROFILE("predictive convexSweepTest");
 				gNumClampedCcdMotions++;
@@ -978,7 +978,7 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 			
 			btScalar squareMotion = (predictedTrans.getOrigin()-body->getWorldTransform().getOrigin()).length2();
 
-			if (body->getCollisionShape()->isConvex() && getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
+			if (/*body->getCollisionShape()->isConvex() &&*/ getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{
 				BT_PROFILE("CCD motion clamping");
 #ifdef USE_STATIC_ONLY
