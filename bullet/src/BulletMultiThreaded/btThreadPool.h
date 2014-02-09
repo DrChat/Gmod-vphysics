@@ -54,8 +54,6 @@ class btThreadPool {
 		bool				m_bThreadsStarted;
 		bool				m_bThreadsShouldExit;
 
-		btICriticalSection *m_pTaskCritSection;
-		btIConditionalVariable *m_pNewTaskCondVar;
 		btAlignedObjectArray<btIThreadTask *> m_taskArray; // FIXME: We don't need an aligned array.
 };
 

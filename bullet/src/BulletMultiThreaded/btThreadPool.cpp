@@ -14,17 +14,11 @@ static void ThreadFunc(void *pArg) {
 btThreadPool::btThreadPool() {
 	m_bThreadsStarted = false;
 	m_bThreadsShouldExit = false;
-
-	m_pTaskCritSection = btCreateCriticalSection();
-	m_pNewTaskCondVar = btCreateConditionalVariable();
 }
 
 btThreadPool::~btThreadPool() {
 	if (m_bThreadsStarted)
 		stopThreads();
-
-	btDeleteCriticalSection(m_pTaskCritSection);
-	btDeleteConditionalVariable(m_pNewTaskCondVar);
 }
 
 void btThreadPool::beginThread(btThreadPoolInfo *pInfo) {
