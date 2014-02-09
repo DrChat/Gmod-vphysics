@@ -2,8 +2,8 @@
 MODULE_NAME = vphysics_srv.so
 PROJECT_NAME = vphysics
 
-# Configuration
-CONFIGURATION = debug
+# Configuration (can only be "debug" or "release")
+CONFIGURATION = release
 
 # Path Configuration
 # Doesn't matter whether it's mp or sp.
@@ -14,8 +14,8 @@ BULLET_SDK = ../bullet
 SRCDS_BIN_DIR = ~/steamcmd/server/bin
 
 PROJECT_DIR = .
-OUT_DIR = ../build/bin/linux/release
-OBJ_DIR = ../build/obj/linux/$(PROJECT_NAME)/release
+OUT_DIR = ../build/bin/linux/$(CONFIGURATION)
+OBJ_DIR = ../build/obj/linux/$(PROJECT_NAME)/$(CONFIGURATION)
 
 # Compilation Configuration
 INCLUDES = \
@@ -28,6 +28,7 @@ INCLUDES = \
 STATICLIBDIRS = \
 	-L../build/lib/linux/release
 	
+# Only works in this order for whatever reason!
 STATICLIBS = \
 	-lBulletSoftBody 	\
 	-lBulletDynamics 	\
