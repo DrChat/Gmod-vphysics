@@ -15,6 +15,8 @@
 // TODO: Needs a better design, right now it's hardcoded to support a max of 32 entries.
 
 CPhysicsCollisionSet::CPhysicsCollisionSet(int iMaxEntries) {
+	Assert(iMaxEntries <= 32);
+
 	m_iMaxEntries = iMaxEntries;
 
 	m_collArray = new int[iMaxEntries];
@@ -28,8 +30,8 @@ CPhysicsCollisionSet::~CPhysicsCollisionSet() {
 }
 
 void CPhysicsCollisionSet::EnableCollisions(int index0, int index1) {
-	Assert((index0 < m_iMaxEntries && index0 > 0) || (index1 < m_iMaxEntries && index1 > 0));
-	if ((index0 < m_iMaxEntries && index0 > 0) || (index1 < m_iMaxEntries && index1 > 0)) {
+	Assert((index0 < m_iMaxEntries && index0 >= 0) || (index1 < m_iMaxEntries && index1 >= 0));
+	if ((index0 < m_iMaxEntries && index0 >= 0) || (index1 < m_iMaxEntries && index1 >= 0)) {
 		return;
 	}
 
@@ -39,8 +41,8 @@ void CPhysicsCollisionSet::EnableCollisions(int index0, int index1) {
 }
 
 void CPhysicsCollisionSet::DisableCollisions(int index0, int index1) {
-	Assert((index0 < m_iMaxEntries && index0 > 0) || (index1 < m_iMaxEntries && index1 > 0));
-	if ((index0 < m_iMaxEntries && index0 > 0) || (index1 < m_iMaxEntries && index1 > 0)) {
+	Assert((index0 < m_iMaxEntries && index0 >= 0) || (index1 < m_iMaxEntries && index1 >= 0));
+	if ((index0 < m_iMaxEntries && index0 >= 0) || (index1 < m_iMaxEntries && index1 >= 0)) {
 		return;
 	}
 
@@ -49,8 +51,8 @@ void CPhysicsCollisionSet::DisableCollisions(int index0, int index1) {
 }
 
 bool CPhysicsCollisionSet::ShouldCollide(int index0, int index1) {
-	Assert((index0 < m_iMaxEntries && index0 > 0) || (index1 < m_iMaxEntries && index1 > 0));
-	if ((index0 < m_iMaxEntries && index0 > 0) || (index1 < m_iMaxEntries && index1 > 0)) {
+	Assert((index0 < m_iMaxEntries && index0 >= 0) || (index1 < m_iMaxEntries && index1 >= 0));
+	if ((index0 < m_iMaxEntries && index0 >= 0) || (index1 < m_iMaxEntries && index1 >= 0)) {
 		return true;
 	}
 
