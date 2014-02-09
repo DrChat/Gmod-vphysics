@@ -22,6 +22,18 @@ subject to the following restrictions:
 	#include <windows.h>
 #endif
 
+#if defined(BT_HAS_ALIGNED_ALLOCATOR)
+	// Microsoft
+	#if defined(_MSC_VER)
+		#include <malloc.h>
+	#endif
+
+	// Linux
+	#if defined(_LINUX)
+		#include <stdlib.h>
+	#endif
+#endif
+
 /************************
 * ALLOCATOR FUNCTIONS
 ************************/
@@ -64,6 +76,20 @@ static btFreeFunc *sFreeFunc = btFreeDefault;
 
 #if defined(BT_DEBUG_MEMORY_ALLOCATIONS)
 
+#if defined(BT_HAS_ALIGNED_ALLOCATOR)
+
+static inline void *btDbgAlignedAllocDefault(size_t size, int alignment, int blockType, const char *fileName, int line)
+{
+	return _aligned_malloc_dbg(size, (size_t)alignment, fileName, line);
+}
+
+static inline void btDbgAlignedFreeDefault(void *ptr, int blockType)
+{
+	return _aligned_free_dbg(ptr);
+}
+
+#else
+
 static inline void *btDbgAlignedAllocDefault(size_t size, int alignment, int blockType, const char *fileName, int line)
 {
 	void *ret;
@@ -93,6 +119,8 @@ static inline void btDbgAlignedFreeDefault(void *ptr, int blockType)
 	}
 }
 
+#endif // BT_HAS_ALIGNED_ALLOCATOR
+
 static btDbgAlignedAllocFunc *sDbgAlignedAllocFunc = btDbgAlignedAllocDefault;
 static btDbgAlignedFreeFunc *sDbgAlignedFreeFunc = btDbgAlignedFreeDefault;
 
@@ -100,16 +128,26 @@ static btDbgAlignedFreeFunc *sDbgAlignedFreeFunc = btDbgAlignedFreeDefault;
 
 #if defined (BT_HAS_ALIGNED_ALLOCATOR)
 
-#include <malloc.h>
 static void *btAlignedAllocDefault(size_t size, int alignment)
 {
+#ifdef _WIN32
 	return _aligned_malloc(size, (size_t)alignment);
+#elif _LINUX
+	void *ptr;
+	posix_memalign(&ptr, (size_t)alignment, size);
+	return ptr;
+#endif
 }
 
 static void btAlignedFreeDefault(void *ptr)
 {
-	_aligned_free(ptr);
+#ifdef _WIN32
+	return _aligned_free(ptr);
+#elif _LINUX
+	return free(ptr);
+#endif
 }
+
 #elif defined(__CELLOS_LV2__)
 #include <stdlib.h>
 
