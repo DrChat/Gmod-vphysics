@@ -31,6 +31,7 @@ class btThreadPool {
 
 		void startThreads(int numThreads);
 		void stopThreads();
+		void resizeThreads(int numThreads);
 
 		int getNumThreads();
 
@@ -44,6 +45,9 @@ class btThreadPool {
 		void threadFunction(btThreadPoolInfo *pInfo);
 
 	private:
+		void beginThread(btThreadPoolInfo *pInfo);
+		void endThread(btThreadPoolInfo *pInfo);
+
 		btAlignedObjectArray<btThreadPoolInfo *> m_pThreadInfo;
 		//btThreadPoolInfo **	m_pThreadInfo;
 		int					m_numThreads;

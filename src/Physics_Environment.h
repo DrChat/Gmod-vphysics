@@ -45,6 +45,8 @@ public:
 	CPhysicsEnvironment();
 	~CPhysicsEnvironment();
 
+	void									ChangeThreadCount(int newCount);
+
 	// UNEXPOSED
 	// Don't call this directly!
 	static void								TickCallback(btDynamicsWorld *world, btScalar timestep);

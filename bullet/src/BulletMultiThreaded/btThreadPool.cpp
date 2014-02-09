@@ -27,8 +27,41 @@ btThreadPool::~btThreadPool() {
 	btDeleteConditionalVariable(m_pNewTaskCondVar);
 }
 
+void btThreadPool::beginThread(btThreadPoolInfo *pInfo) {
+	btIThread *pThread = btCreateThread();
+	
+	pInfo->pThread = pThread;
+	pInfo->pIdleEvent = btCreateEvent(true);
+	pInfo->pStartEvent = btCreateEvent(false);
+	pInfo->pThreadPool = this;
+	pInfo->pTaskArr = NULL;
+	pInfo->numTasks = 0;
+	pThread->setThreadFunc(ThreadFunc);
+
+	// Set the name for debugging purposes
+	char name[64];
+	sprintf(name, "btThreadPool thread %d", pInfo->threadId);
+	pThread->setThreadName(name);
+
+	pThread->run(pInfo);
+}
+
+void btThreadPool::endThread(btThreadPoolInfo *pInfo) {
+	m_bThreadsShouldExit = true; // Tell the thread to exit
+
+	pInfo->pStartEvent->trigger(); // Start it (the thread will exit on its own)
+	pInfo->pThread->waitForExit();
+
+	btDeleteThread(pInfo->pThread);
+	btDeleteEvent(pInfo->pIdleEvent);
+	btDeleteEvent(pInfo->pStartEvent);
+
+	m_bThreadsShouldExit = false;
+}
+
 void btThreadPool::startThreads(int numThreads) {
 	btAssert(numThreads > 0);
+	btAssert(!m_bThreadsStarted);
 
 	m_bThreadsStarted = true;
 	m_numThreads = numThreads;
@@ -36,43 +69,50 @@ void btThreadPool::startThreads(int numThreads) {
 	m_pThreadInfo.resize(numThreads);
 
 	for (int i = 0; i < numThreads; i++) {
-		btIThread *pThread = btCreateThread();
-
 		m_pThreadInfo[i] = (btThreadPoolInfo *)btAlloc(sizeof(btThreadPoolInfo));
 		btThreadPoolInfo *pInfo = m_pThreadInfo[i];
-
 		pInfo->threadId = i;
-		pInfo->pThread = pThread;
-		pInfo->pIdleEvent = btCreateEvent(true);
-		pInfo->pStartEvent = btCreateEvent(false);
-		pInfo->pThreadPool = this;
-		pInfo->pTaskArr = NULL;
-		pInfo->numTasks = 0;
-		pThread->setThreadFunc(ThreadFunc);
 
-		// Set the name for debugging purposes
-		char name[64];
-		sprintf(name, "btThreadPool thread %d", i);
-		pThread->setThreadName(name);
-
-		pThread->run(pInfo);
+		beginThread(pInfo);
 	}
 }
 
 void btThreadPool::stopThreads() {
+	btAssert(m_bThreadsStarted);
+
 	m_bThreadsStarted = false;
-	m_bThreadsShouldExit = true;
 
 	for (int i = 0; i < m_numThreads; i++) {
-		m_pThreadInfo[i]->pStartEvent->trigger(); // Start the thread again (to exit)
-
-		m_pThreadInfo[i]->pThread->waitForExit();
-
-		btDeleteThread(m_pThreadInfo[i]->pThread);
-		btDeleteEvent(m_pThreadInfo[i]->pIdleEvent);
-		btDeleteEvent(m_pThreadInfo[i]->pStartEvent);
+		endThread(m_pThreadInfo[i]);
 		btFree(m_pThreadInfo[i]);
 	}
+}
+
+void btThreadPool::resizeThreads(int numThreads) {
+	if (numThreads == m_numThreads) return;
+	btAssert(numThreads > 0); // Don't allow the user to resize the thread count to below 0 or 0 - use stopThreads instead
+
+	if (numThreads < m_numThreads) {
+		for (int i = m_numThreads - 1; i >= numThreads; i--) {
+			endThread(m_pThreadInfo[i]);
+			btFree(m_pThreadInfo[i]);
+
+			m_pThreadInfo.pop_back();
+		}
+	} else {
+		// More threads!
+		m_pThreadInfo.resize(numThreads); // FYI: This doesn't actually change the thread info location since threads still need it!
+		
+		for (int i = m_numThreads; i < numThreads; i++) {
+			m_pThreadInfo[i] = (btThreadPoolInfo *)btAlloc(sizeof(btThreadPoolInfo));
+			btThreadPoolInfo *pInfo = m_pThreadInfo[i];
+			pInfo->threadId = i;
+
+			beginThread(pInfo);
+		}
+	}
+	
+	m_numThreads = numThreads;
 }
 
 int btThreadPool::getNumThreads() {

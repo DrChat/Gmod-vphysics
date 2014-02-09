@@ -298,7 +298,6 @@ class CPhysicsCollisionData : public IPhysicsCollisionData {
 * CLASS CCollisionEventListener
 *********************************/
 
-// TODO: Implement some class in bullet code and derive this from that
 class CCollisionEventListener : public btSolveCallback {
 	public:
 		CCollisionEventListener(CPhysicsEnvironment *pEnv) {
@@ -371,7 +370,17 @@ class CCollisionEventListener : public btSolveCallback {
 
 // Environment ConVars
 // Change the hardcoded min and max if you change the min and max here!
-static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 1, true, 8);
+static void vphysics_numthreads_Change(IConVar *var, const char *pOldValue, float flOldValue);
+static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 1, true, 8, vphysics_numthreads_Change);
+
+static void vphysics_numthreads_Change(IConVar *var, const char *pOldValue, float flOldValue) {
+	int newVal = vphysics_numthreads.GetInt();
+	if (newVal <= 0 || newVal > 8) return;
+
+	for (int i = 0; i < g_Physics.GetActiveEnvironmentCount(); i++) {
+		((CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(i))->ChangeThreadCount(newVal);
+	}
+}
 
 CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_deleteQuick		= false;
@@ -395,7 +404,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_invPSIScale = 0.f;
 	m_simPSICurrent = 0;
 
-	btDefaultCollisionConstructionInfo cci;
 #ifdef MULTITHREADED
 	// Maximum number of parallel tasks (number of threads in the thread support)
 	// Good to set it to the same amount of CPU cores on the system.
@@ -411,6 +419,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pSharedThreadPool->startThreads(maxTasks);
 #endif
 
+	btDefaultCollisionConstructionInfo cci;
 	m_pBulletConfiguration = new btSoftBodyRigidBodyCollisionConfiguration(cci);
 
 #ifdef USE_PARALLEL_DISPATCHER
@@ -502,6 +511,12 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 	delete m_pCollisionListener;
 	delete m_pCollisionSolver;
 	delete m_pObjectTracker;
+}
+
+void CPhysicsEnvironment::ChangeThreadCount(int newThreadCount) {
+#ifdef MULTITHREADED
+	m_pSharedThreadPool->resizeThreads(newThreadCount);
+#endif
 }
 
 // UNEXPOSED
@@ -759,10 +774,6 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	} else if (deltaTime > 0.1) {
 		deltaTime = 0.1f;
 	}
-
-	//m_simPSIs = 0;
-	//FIXME: figure out simulation time
-	//m_simPSIcurrent = m_simPSIs;
 
 	// sim PSI Current: How many substeps are done in a single simulation step
 	m_simPSICurrent = cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1;
