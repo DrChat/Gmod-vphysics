@@ -41,6 +41,10 @@ configuration {}
 configuration { "linux", "gmake" }
 	buildoptions { "-fPIC", "-m32", "-msse2" }
 	linkoptions { "-m32", "-msse2" }
+
+configuration { "linux", "gmake", "Debug" }
+	buildoptions { "-ggdb" }
+	linkoptions { "-ggdb" }
 	
 configuration {}
 
