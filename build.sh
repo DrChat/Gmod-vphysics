@@ -7,6 +7,7 @@ BULLET_PROJ_DIR=$WORKING_DIR/bullet/proj
 init() {
 	NUM_THREADS="1"
 	CLEAN=""
+	CONFIG="release"
 
 	while test $# -gt 0; do
 		case "$1" in
@@ -16,6 +17,9 @@ init() {
 		"-clean")
 			CLEAN="yes"
 			;;
+		"-config")
+			CONFIG="$2"
+			shift ;;
 		esac
 		shift # Shifts command line arguments var or something whatever
 	done
@@ -36,7 +40,7 @@ build_bullet() {
 			make clean
 		fi
 
-		make -j$NUM_THREADS
+		make -j$NUM_THREADS "config=$CONFIG"
 	fi
 }
 
@@ -47,7 +51,7 @@ build_vphysics() {
 		make clean
 	fi
 
-	make -j$NUM_THREADS
+	make -j$NUM_THREADS "CONFIGURATION=$CONFIG"
 }
 
 init $*
