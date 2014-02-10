@@ -22,8 +22,14 @@ static void *ThreadFn(void *pArg) {
 	threadparams_t *params = (threadparams_t *)pArg;
 	btAssert(params->pFn);
 
-	if (params->pThreadName)
-		prctl(PR_SET_NAME, params->pThreadName, 0, 0, 0);
+	if (params->pThreadName) {
+		//prctl(PR_SET_NAME, params->pThreadName, 0, 0, 0);
+
+#ifdef BT_DEBUG
+		// Not supported on all systems equally!
+		pthread_setname_np(pthread_self(), params->pThreadName);
+#endif
+	}
 
 	params->pFn(params->pArg);
 
@@ -168,8 +174,7 @@ class btPosixEvent : public btIEvent {
 
 		void reset() {
 			pthread_mutex_lock(&m_mutex);
-			if (!m_bManualReset)
-				m_bTriggered = false;
+			m_bTriggered = false;
 			pthread_mutex_unlock(&m_mutex);
 		}
 
@@ -177,6 +182,10 @@ class btPosixEvent : public btIEvent {
 			pthread_mutex_lock(&m_mutex);
 			while (!m_bTriggered)
 				pthread_cond_wait(&m_condVar, &m_mutex);
+			
+			// Reset it if automatic reset is enabled
+			if (!m_bManualReset)
+				m_bTriggered = false;
 
 			pthread_mutex_unlock(&m_mutex);
 		}

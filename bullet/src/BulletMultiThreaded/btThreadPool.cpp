@@ -14,6 +14,8 @@ static void ThreadFunc(void *pArg) {
 btThreadPool::btThreadPool() {
 	m_bThreadsStarted = false;
 	m_bThreadsShouldExit = false;
+
+	m_taskArray.reserve(100); // Reserve some space just to reduce some allocations
 }
 
 btThreadPool::~btThreadPool() {
@@ -139,7 +141,7 @@ void btThreadPool::runTasks() {
 			m_pThreadInfo[i]->numTasks = tasksPerThread + (remainder ? 1 : 0);
 			curTask += m_pThreadInfo[i]->numTasks;
 
-			if (remainder) remainder--;
+			if (remainder > 0) remainder--;
 		}
 	} else {
 		// Rare case where tasks are less than num threads
@@ -149,7 +151,6 @@ void btThreadPool::runTasks() {
 			m_pThreadInfo[i]->numTasks = 1;
 		}
 	}
-
 
 	// Start the threads!
 	for (int i = 0; i < m_numThreads; i++) {

@@ -7,7 +7,7 @@
 class btIThreadTask {
 	public:
 		virtual void run() = 0;
-		virtual void destroy() {}; // Destroys this task. Called after run() (not on main thread)
+		virtual void destroy() {}; // Destroys this task. Called on main thread after run (duh)
 };
 
 class btThreadPool;
