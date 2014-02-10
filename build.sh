@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Settings
 WORKING_DIR=$(pwd)
@@ -10,12 +10,12 @@ init() {
 
 	while test $# -gt 0; do
 		case "$1" in
-			"-numthreads")
-				NUM_THREADS="$2"
-				shift;;
-			"-clean")
-				CLEAN="yes"
-				;;
+		"-numthreads")
+			NUM_THREADS="$2"
+			shift ;;
+		"-clean")
+			CLEAN="yes"
+			;;
 		esac
 		shift # Shifts command line arguments var or something whatever
 	done
@@ -50,7 +50,7 @@ build_vphysics() {
 	make -j$NUM_THREADS
 }
 
-init
+init $*
 
 build_bullet
 build_vphysics
