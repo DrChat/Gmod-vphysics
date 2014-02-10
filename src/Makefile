@@ -26,7 +26,7 @@ INCLUDES = \
 	-I$(BULLET_SDK)/src
 	
 STATICLIBDIRS = \
-	-L../build/lib/linux/release
+	-L../build/lib/linux/$(CONFIGURATION)
 	
 # Only works in this order for whatever reason!
 STATICLIBS = \
@@ -48,13 +48,13 @@ CC = /usr/bin/g++
 LINK = /usr/bin/g++
 ARCH = i386
 DEFINES = -DLINUX -D__LINUX__ -D_LINUX -D__linux__ -DPOSIX -DGNUC -DARCH=$(ARCH) -Dsprintf_s=snprintf -Dstrcmpi=strcasecmp -D_alloca=alloca -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrcpy_s=strncpy -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -D_vsnprintf=vsnprintf -D_alloca=alloca -Dstrcmpi=strcasecmp -DNO_MALLOC_OVERRIDE
-CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -fPIC -w -msse2 -m32 -march=$(ARCH) -g3
+CFLAGS = $(INCLUDES) $(DEFINES) -fpermissive -fPIC -w -msse2 -m32 -march=$(ARCH) -g
 LFLAGS = -m32 -msse2 -lm -ldl $(STATICLIBDIRS) -Wl,-Bstatic $(STATICLIBS) -Wl,-Bdynamic $(DYNAMICLIBS) -shared
 
 ifeq ($(CONFIGURATION), debug)
 	# Optimize but don't affect debugging experience. (-Og, only on G++ 4.8 and above)
 	#CFLAGS += -Og
-	CFLAGS += -D_DEBUG
+	CFLAGS += -D_DEBUG -O0
 endif
 
 ifeq ($(CONFIGURATION), release)
