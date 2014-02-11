@@ -453,10 +453,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_perfparams.Defaults();
 	memset(&m_stats, 0, sizeof(m_stats));
 
-#ifdef MULTITHREADED
-	m_pBulletEnvironment->getSolverInfo().m_numIterations = maxTasks;
-#endif
-
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
 
 	// TODO: Threads solve any oversized batches (>32?), otherwise solving done on main thread.
