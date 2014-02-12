@@ -37,6 +37,8 @@ int		gNumSplitImpulseRecoveries = 0;
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 
+#define BT_USE_SSE_IN_API
+
 btSequentialImpulseConstraintSolver::btSequentialImpulseConstraintSolver()
 :m_btSeed2(0)
 {
