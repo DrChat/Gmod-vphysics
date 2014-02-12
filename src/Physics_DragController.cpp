@@ -16,11 +16,12 @@ CPhysicsDragController::CPhysicsDragController() {
 }
 
 void CPhysicsDragController::SetAirDensity(float d) {
-	m_airDensity = d;
+	// Density is kg/in^3 from HL
+	m_airDensity = d / CUBIC_METERS_PER_CUBIC_INCH;
 }
 
 float CPhysicsDragController::GetAirDensity() {
-	return m_airDensity;
+	return m_airDensity * CUBIC_METERS_PER_CUBIC_INCH;
 }
 
 void CPhysicsDragController::RemovePhysicsObject(CPhysicsObject *obj) {
