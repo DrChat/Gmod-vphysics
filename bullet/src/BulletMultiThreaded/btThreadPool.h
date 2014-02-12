@@ -37,6 +37,16 @@ class btThreadPool {
 
 		void addTask(btIThreadTask *pTask);
 		void clearTasks(); // Clear task queue
+
+		int getNumTasks() {
+			return m_taskArray.size();
+		}
+
+		// WARNING: Do not delete the elements here! This will be done in clearTasks()
+		btIThreadTask *getTask(int i) {
+			return m_taskArray[i];
+		}
+
 		void runTasks(); // Runs the threads until task pool is empty
 		void waitIdle(); // Waits until thread pool is idle (no more tasks)
 

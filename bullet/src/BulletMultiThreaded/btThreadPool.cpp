@@ -159,7 +159,6 @@ void btThreadPool::runTasks() {
 	}
 
 	waitIdle();
-	clearTasks();
 }
 
 void btThreadPool::waitIdle() {
