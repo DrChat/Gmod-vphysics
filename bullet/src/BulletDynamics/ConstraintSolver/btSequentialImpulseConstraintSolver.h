@@ -77,23 +77,17 @@ protected:
 
 	void	convertContact(btPersistentManifold* manifold,const btContactSolverInfo& infoGlobal);
 
-
-	void	resolveSplitPenetrationSIMD(
-     btSolverBody& bodyA,btSolverBody& bodyB,
-        const btSolverConstraint& contactConstraint);
-
-	void	resolveSplitPenetrationImpulseCacheFriendly(
-       btSolverBody& bodyA,btSolverBody& bodyB,
-        const btSolverConstraint& contactConstraint);
-
 	//internal method
 	int		getOrInitSolverBody(btCollisionObject& body,btScalar timeStep);
 	void	initSolverBody(btSolverBody* solverBody, btCollisionObject* collisionObject, btScalar timeStep);
 
-	btSimdScalar	resolveSingleConstraintRowGeneric(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
-	btSimdScalar	resolveSingleConstraintRowGenericSIMD(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
-	btSimdScalar	resolveSingleConstraintRowLowerLimit(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
-	btSimdScalar	resolveSingleConstraintRowLowerLimitSIMD(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
+	static void	resolveSplitPenetrationSIMD(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
+	static void	resolveSplitPenetrationImpulseCacheFriendly(btSolverBody& bodyA, btSolverBody& bodyB, const btSolverConstraint& contactConstraint);
+
+	static btSimdScalar	resolveSingleConstraintRowGeneric(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
+	static btSimdScalar	resolveSingleConstraintRowGenericSIMD(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
+	static btSimdScalar	resolveSingleConstraintRowLowerLimit(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
+	static btSimdScalar	resolveSingleConstraintRowLowerLimitSIMD(btSolverBody& bodyA,btSolverBody& bodyB,const btSolverConstraint& contactConstraint);
 		
 protected:
 	

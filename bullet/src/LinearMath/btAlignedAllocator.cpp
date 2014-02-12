@@ -134,8 +134,10 @@ static void *btAlignedAllocDefault(size_t size, int alignment)
 	return _aligned_malloc(size, (size_t)alignment);
 #elif _LINUX
 	void *ptr;
-	posix_memalign(&ptr, (size_t)alignment, size);
-	return ptr;
+	if (posix_memalign(&ptr, (size_t)alignment, size))
+		return ptr;
+	else
+		return NULL;
 #endif
 }
 

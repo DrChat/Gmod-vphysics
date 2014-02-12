@@ -78,9 +78,9 @@ public:
 		return m_maxElements;
 	}
 
-	void *	allocate(int size)
+	void *	allocate(int size=0)
 	{
-		(void)size;
+		(void)size; // Avoid unsued parameter warning
 
 		btAssert(!size || size<=m_elemSize);
 		btAssert(m_freeCount>0);

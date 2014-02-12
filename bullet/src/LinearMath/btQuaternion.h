@@ -536,7 +536,7 @@ public:
 			const btScalar sign = (product < 0) ? btScalar(-1) : btScalar(1);
 
 			const btScalar theta = btAcos(sign * product);
-			const btScalar s1 = btSin(sign * t * theta);   
+			const btScalar s1 = btSin(sign * t * theta);
 			const btScalar d = btScalar(1.0) / btSin(theta);
 			const btScalar s0 = btSin((btScalar(1.0) - t) * theta);
 
