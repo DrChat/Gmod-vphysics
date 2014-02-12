@@ -4,15 +4,13 @@
 	#pragma once
 #endif
 
+#include "vphysics/softbodyV32.h"
+
 // Purpose: Dynamically deforming meshes (blankets, dents in objects, etc.)
-
-// TODO: Expose later
-struct softbodyparams_t {
-
-};
 
 // Class declarations
 class CPhysicsEnvironment;
+class CPhysicsObject;
 
 class btSoftBody;
 
@@ -21,7 +19,14 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		CPhysicsSoftBody();
 		~CPhysicsSoftBody();
 
-		void			SetTotalMass(float fMass, bool bFromFaces);
+		void			SetTotalMass(float fMass, bool bFromFaces = false);
+		void			Anchor(int node, IPhysicsObject *pObj);
+
+		int				GetNodeCount();
+		int				GetFaceCount();
+
+		softbodynode_t	GetNode(int i);
+		softbodyface_t	GetFace(int i);
 
 		// UNEXPOSED FUNCTIONS
 	public:
@@ -36,5 +41,6 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
 CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams);
+CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, const softbodyparams_t *pParams);
 
 #endif // PHYSICS_SOFTBODY_H

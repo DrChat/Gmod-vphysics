@@ -38,13 +38,6 @@ IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos) {
 	return (IPhysicsObject32 *)ud->data;
 }
 
-Vector *Get_Vector(lua_State *state, int stackPos) {
-	LUA->CheckType(stackPos, Type::VECTOR);
-
-	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
-	return (Vector *)ud->data;
-}
-
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
 	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
 	if (ud->type != CustomTypes::TYPE_PHYSCOLLIDE) {
@@ -55,6 +48,13 @@ CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
 	return (CPhysCollide *)ud->data;
 }
 
+Vector *Get_Vector(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, Type::VECTOR);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (Vector *)ud->data;
+}
+
 void Push_Vector(lua_State *state, const Vector &vec) {
 	LUA->PushSpecial(SPECIAL_GLOB);
 		LUA->GetField(-1, "Vector");
@@ -63,6 +63,29 @@ void Push_Vector(lua_State *state, const Vector &vec) {
 			LUA->PushNumber(vec.z);
 		LUA->Call(3, 1);
 	LUA->Remove(-2);
+}
+
+QAngle *Get_Angle(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, Type::ANGLE);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (QAngle *)ud->data;
+}
+
+IPhysicsSoftBody *Get_SoftBody(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, CustomTypes::TYPE_PHYSSOFTBODY);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (IPhysicsSoftBody *)ud->data;
+}
+
+void Push_SoftBody(lua_State *state, IPhysicsSoftBody *softBody) {
+	UserData *ud = (UserData *)LUA->NewUserdata(sizeof(UserData));
+	ud->type = CustomTypes::TYPE_PHYSSOFTBODY;
+	ud->data = (void *)softBody;
+
+	LUA->CreateMetaTableType("PhysSoftBody", CustomTypes::TYPE_PHYSSOFTBODY);
+	LUA->SetMetaTable(-2);
 }
 
 void Push_PhysCollide(lua_State *state, const CPhysCollide *collide) {

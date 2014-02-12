@@ -67,6 +67,7 @@ public:
 	void									DestroyObject(IPhysicsObject *pObject);
 
 	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
+	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &length, const softbodyparams_t *pParams);
 	void									DestroySoftBody(IPhysicsSoftBody *pSoftBody);
 
 	IPhysicsFluidController	*				CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams);
@@ -168,6 +169,8 @@ public:
 	void									HandleObjectEnteredTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject);
 	void									HandleObjectExitedTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject);
 
+	btSoftBodyWorldInfo &					GetSoftBodyWorldInfo() { return m_softBodyWorldInfo; }
+
 	// Soft body functions we'll expose at a later time...
 private:
 	bool									m_inSimulation;
@@ -185,6 +188,7 @@ private:
 	btConstraintSolver *					m_pBulletSolver;
 	btSoftRigidDynamicsWorld *				m_pBulletEnvironment;
 	btOverlappingPairCallback *				m_pBulletGhostCallback;
+	btSoftBodyWorldInfo						m_softBodyWorldInfo;
 
 	CUtlVector<IPhysicsObject *>			m_objects;
 	CUtlVector<IPhysicsObject *>			m_deadObjects;

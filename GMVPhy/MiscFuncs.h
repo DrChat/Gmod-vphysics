@@ -3,9 +3,11 @@
 
 class IPhysicsEnvironment32;
 class IPhysicsObject32;
+class IPhysicsSoftBody;
 class CPhysCollide;
 class CPhysConvex;
 class Vector;
+class QAngle;
 struct lua_State;
 
 #include <GarrysMod/Lua/Interface.h>
@@ -18,6 +20,7 @@ namespace CustomTypes {
 
 		TYPE_PHYSENV,
 		TYPE_PHYSSOFTBODY,
+		TYPE_PHYSUSERCONSTRAINT,
 
 		COUNT,
 	};
@@ -30,6 +33,11 @@ IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos);
 
 Vector *Get_Vector(lua_State *state, int stackPos);
 void Push_Vector(lua_State *state, const Vector &vec);
+
+QAngle *Get_Angle(lua_State *state, int stackPos);
+
+IPhysicsSoftBody *Get_SoftBody(lua_State *state, int stackPos);
+void Push_SoftBody(lua_State *state, IPhysicsSoftBody *softBody);
 
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos);
 void Push_PhysCollide(lua_State *state, const CPhysCollide *collide);

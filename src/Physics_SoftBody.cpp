@@ -3,11 +3,27 @@
 #include "convert.h"
 #include "Physics_SoftBody.h"
 #include "Physics_Environment.h"
+#include "Physics_Object.h"
 
 #include "BulletSoftBody/btSoftBodyHelpers.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+void ConvertNodeToHL(const btSoftBody::Node *node, softbodynode_t &nodeOut) {
+	ConvertPosToHL(node->m_x, nodeOut.pos);
+	ConvertPosToHL(node->m_v, nodeOut.vel);
+	nodeOut.invMass = node->m_im;
+}
+
+void ConvertFaceToHL(const btSoftBody::Face *face, softbodyface_t &faceOut) {
+	for (int i = 0; i < 3; i++) {
+		btSoftBody::Node *node = face->m_n[i];
+		ConvertNodeToHL(node, faceOut.nodes[i]);
+	}
+
+	ConvertDirectionToHL(face->m_normal, faceOut.normal);
+}
 
 /*************************
 * CLASS CPhysicsSoftBody
@@ -25,6 +41,34 @@ CPhysicsSoftBody::~CPhysicsSoftBody() {
 
 void CPhysicsSoftBody::SetTotalMass(float fMass, bool bFromFaces) {
 	m_pSoftBody->setTotalMass(fMass, bFromFaces);
+}
+
+void CPhysicsSoftBody::Anchor(int node, IPhysicsObject *pObj) {
+	m_pSoftBody->appendAnchor(node, ((CPhysicsObject *)pObj)->GetObject());
+}
+
+int CPhysicsSoftBody::GetNodeCount() {
+	return m_pSoftBody->m_nodes.size();
+}
+
+int CPhysicsSoftBody::GetFaceCount() {
+	return m_pSoftBody->m_faces.size();
+}
+
+softbodynode_t CPhysicsSoftBody::GetNode(int i) {
+	btSoftBody::Node node = m_pSoftBody->m_nodes[i];
+
+	softbodynode_t out;
+	ConvertNodeToHL(&node, out);
+	return out;
+}
+
+softbodyface_t CPhysicsSoftBody::GetFace(int i) {
+	btSoftBody::Face face = m_pSoftBody->m_faces[i];
+
+	softbodyface_t out;
+	ConvertFaceToHL(&face, out);
+	return out;
 }
 
 void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody) {
@@ -67,12 +111,7 @@ CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Ve
 		ConvertPosToBull(vertices[i], bullVerts[i]);
 	}
 
-	btSoftBodyWorldInfo wi;
-	wi.air_density = pEnv->GetAirDensity();
-	wi.m_broadphase = pEnv->GetBulletEnvironment()->getBroadphase();
-	wi.m_dispatcher = pEnv->GetBulletEnvironment()->getDispatcher();
-	wi.m_gravity = pEnv->GetBulletEnvironment()->getGravity();
-	//wi.m_sparsesdf = 0; // FIXME: Do we need this?
+	btSoftBodyWorldInfo wi = pEnv->GetSoftBodyWorldInfo();
 
 	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateFromConvexHull(wi, bullVerts, numVertices);
 	delete [] bullVerts;
@@ -88,4 +127,21 @@ CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Ve
 	pBody->Init(pEnv, pSoftBody);
 
 	return pBody;
+}
+
+CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, const softbodyparams_t *pParams) {
+	btSoftBodyWorldInfo &wi = pEnv->GetSoftBodyWorldInfo();
+
+	btVector3 start, end;
+	ConvertPosToBull(position, start);
+	ConvertPosToBull(position + length, end);
+
+	// FIXME: Figure out what last 2 parameters are
+	// last parameter is fixed side
+	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateRope(wi, start, end, 8, 0);
+
+	CPhysicsSoftBody *pPhysBody = new CPhysicsSoftBody;
+	pPhysBody->Init(pEnv, pSoftBody);
+
+	return pPhysBody;
 }

@@ -23,7 +23,7 @@
 // Multithreading stuff
 
 #define USE_PARALLEL_DISPATCHER
-//#define USE_PARALLEL_SOLVER
+//#define USE_PARALLEL_SOLVER // NOT COMPLETE
 
 #if defined(USE_PARALLEL_DISPATCHER) || defined(USE_PARALLEL_SOLVER)
 	#define MULTITHREADED
@@ -208,7 +208,8 @@ class CObjectTracker {
 			btCollisionObjectArray &colObjArray = pBulletEnv->getCollisionObjectArray();
 			for (int i = 0; i < colObjArray.size(); i++) {
 				CPhysicsObject *pObj = (CPhysicsObject *)colObjArray[i]->getUserPointer();
-				Assert(pObj && *(char *)pObj != 0xDD);
+				if (!pObj) continue; // Internal object that the game doesn't need to know about
+				Assert(*(char *)pObj != 0xDD);
 
 				// Don't add objects marked for delete
 				if (pObj->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) {
@@ -416,7 +417,6 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	maxTasks = min(maxTasks, 8);
 
 	// Shared thread pool (used by both solver and dispatcher)
-	// Shouldn't be a problem as long as the solver and dispatcher don't run at the same time (which they can't)
 	m_pSharedThreadPool = new btThreadPool;
 	m_pSharedThreadPool->startThreads(maxTasks);
 #endif
@@ -452,6 +452,12 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_perfparams.Defaults();
 	memset(&m_stats, 0, sizeof(m_stats));
+
+	// Soft body stuff
+	m_softBodyWorldInfo.m_broadphase = m_pBulletBroadphase;
+	m_softBodyWorldInfo.m_dispatcher = m_pBulletDispatcher;
+
+	m_softBodyWorldInfo.m_sparsesdf.Initialize();
 
 	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
 
@@ -550,6 +556,7 @@ void CPhysicsEnvironment::SetGravity(const Vector &gravityVector) {
 	ConvertPosToBull(gravityVector, temp);
 
 	m_pBulletEnvironment->setGravity(temp);
+	m_softBodyWorldInfo.m_gravity = temp;
 }
 
 void CPhysicsEnvironment::GetGravity(Vector *pGravityVector) const {
@@ -561,6 +568,9 @@ void CPhysicsEnvironment::GetGravity(Vector *pGravityVector) const {
 
 void CPhysicsEnvironment::SetAirDensity(float density) {
 	m_pPhysicsDragController->SetAirDensity(density);
+
+	// Density is kg/in^3 from HL
+	m_softBodyWorldInfo.air_density = density / CUBIC_METERS_PER_CUBIC_INCH;
 }
 
 float CPhysicsEnvironment::GetAirDensity() const {
@@ -611,14 +621,21 @@ IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *
 	return NULL;
 }
 
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, const Vector &length, const softbodyparams_t *pParams) {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyRope(this, pos, length, pParams);
+	if (pSoftBody)
+		m_softBodies.AddToTail(pSoftBody);
+
+	return pSoftBody;
+}
+
 void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
 	if (!pSoftBody) return;
 
 	m_softBodies.FindAndRemove(pSoftBody);
 	
 	if (m_inSimulation || m_bUseDeleteQueue) {
-		// TODO
-		NOT_IMPLEMENTED
+		m_pDeleteQueue->QueueForDelete(pSoftBody);
 	} else {
 		delete pSoftBody;
 	}

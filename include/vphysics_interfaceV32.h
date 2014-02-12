@@ -15,20 +15,19 @@
 
 // THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
 
+class IPhysicsSoftBody;
+class softbodyparams_t;
+
 abstract_class IPhysics32 : public IPhysics {
 	public:
 		virtual int		GetActiveEnvironmentCount() = 0;
-};
-
-class IPhysicsSoftBody {
-	public:
-		virtual ~IPhysicsSoftBody() {}
 };
 
 // TODO: Soft bodies
 abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
 		virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) = 0;
+		virtual IPhysicsSoftBody *	CreateSoftBodyRope(const Vector &pos, const Vector &length, const softbodyparams_t *pParams) = 0;
 		virtual void				DestroySoftBody(IPhysicsSoftBody *pSoftBody) = 0;
 
 		virtual void	SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) = 0;
