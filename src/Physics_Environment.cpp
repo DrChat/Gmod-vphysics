@@ -453,10 +453,10 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_perfparams.Defaults();
 	memset(&m_stats, 0, sizeof(m_stats));
 
-	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_RANDMIZE_ORDER | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
+	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
 
 	// TODO: Threads solve any oversized batches (>32?), otherwise solving done on main thread.
-	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 0; // Solve per island only
+	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 128; // Combine islands up to this many constraints
 	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
 	m_pBulletEnvironment->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
 	//m_pBulletEnvironment->getDispatchInfo().m_dispatchFunc = btDispatcherInfo::DISPATCH_CONTINUOUS;
