@@ -13,6 +13,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
+#define BT_USE_SSE_IN_API
 
 #include "btContinuousConvexCollision.h"
 #include "BulletCollision/CollisionShapes/btConvexShape.h"
@@ -23,7 +24,6 @@ subject to the following restrictions:
 #include "btGjkPairDetector.h"
 #include "btPointCollector.h"
 #include "BulletCollision/CollisionShapes/btStaticPlaneShape.h"
-
 
 
 btContinuousConvexCollision::btContinuousConvexCollision ( const btConvexShape*	convexA, const btConvexShape*	convexB, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver* penetrationDepthSolver)

@@ -18,6 +18,8 @@ subject to the following restrictions:
 
 //It is not necessary (redundant) to refresh contact manifolds, this refresh has been moved to the collision algorithms.
 
+#define BT_USE_SSE_IN_API
+
 #include "btSequentialImpulseConstraintSolver.h"
 #include "BulletCollision/NarrowPhaseCollision/btPersistentManifold.h"
 
@@ -36,8 +38,6 @@ subject to the following restrictions:
 int		gNumSplitImpulseRecoveries = 0;
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
-
-#define BT_USE_SSE_IN_API
 
 btSequentialImpulseConstraintSolver::btSequentialImpulseConstraintSolver()
 :m_btSeed2(0)
@@ -1418,7 +1418,7 @@ btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration
 		//-------------------------
 		for (int i = 0; i < numConstraintPool; i++)
 		{
-			const btSolverConstraint &solveManifold = m_tmpSolverContactConstraintPool[m_orderTmpConstraintPool[i]];
+			btSolverConstraint &solveManifold = m_tmpSolverContactConstraintPool[m_orderTmpConstraintPool[i]];
 
 			if (infoGlobal.m_solverMode & SOLVER_SIMD)
 				resolveSingleConstraintRowLowerLimitSIMD(m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], solveManifold);
