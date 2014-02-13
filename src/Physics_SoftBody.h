@@ -19,14 +19,24 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		CPhysicsSoftBody();
 		~CPhysicsSoftBody();
 
+		void			GetPosition(Vector *pos, QAngle *ang) const;
+		void			SetPosition(const Vector *pos, const QAngle *ang);
+
 		void			SetTotalMass(float fMass, bool bFromFaces = false);
 		void			Anchor(int node, IPhysicsObject *pObj);
 
-		int				GetNodeCount();
-		int				GetFaceCount();
+		int				GetNodeCount() const;
+		int				GetFaceCount() const;
 
-		softbodynode_t	GetNode(int i);
-		softbodyface_t	GetFace(int i);
+		softbodynode_t	GetNode(int i) const;
+		softbodyface_t	GetFace(int i) const;
+
+		void			SetNode(int i, softbodynode_t &node);
+
+		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
+		void			GetAABB(Vector *mins, Vector *maxs) const;
+
+		IPhysicsEnvironment32 *GetPhysicsEnvironment() const { return (IPhysicsEnvironment32 *)m_pEnv; }
 
 		// UNEXPOSED FUNCTIONS
 	public:

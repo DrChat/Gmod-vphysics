@@ -16,7 +16,7 @@
 // THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
 
 class IPhysicsSoftBody;
-class softbodyparams_t;
+struct softbodyparams_t;
 
 abstract_class IPhysics32 : public IPhysics {
 	public:

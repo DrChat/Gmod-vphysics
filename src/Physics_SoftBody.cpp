@@ -39,6 +39,34 @@ CPhysicsSoftBody::~CPhysicsSoftBody() {
 	delete m_pSoftBody;
 }
 
+void CPhysicsSoftBody::GetPosition(Vector *pos, QAngle *ang) const {
+	if (!pos && !ang) return;
+
+	btTransform &trans = m_pSoftBody->getWorldTransform();
+	
+	if (pos)
+		ConvertPosToHL(trans.getOrigin(), *pos);
+
+	if (ang)
+		ConvertRotationToHL(trans.getBasis(), *ang);
+}
+
+void CPhysicsSoftBody::SetPosition(const Vector *pos, const QAngle *ang) {
+	if (!pos && !ang) return;
+
+	btTransform trans = m_pSoftBody->getWorldTransform();
+	btVector3 newPos = trans.getOrigin();
+	btQuaternion newAng = trans.getRotation();
+	
+	if (pos)
+		ConvertPosToBull(*pos, newPos);
+
+	if (ang)
+		ConvertRotationToBull(*ang, newAng);
+
+	m_pSoftBody->setWorldTransform(btTransform(newAng, newPos));
+}
+
 void CPhysicsSoftBody::SetTotalMass(float fMass, bool bFromFaces) {
 	m_pSoftBody->setTotalMass(fMass, bFromFaces);
 }
@@ -47,15 +75,15 @@ void CPhysicsSoftBody::Anchor(int node, IPhysicsObject *pObj) {
 	m_pSoftBody->appendAnchor(node, ((CPhysicsObject *)pObj)->GetObject());
 }
 
-int CPhysicsSoftBody::GetNodeCount() {
+int CPhysicsSoftBody::GetNodeCount() const {
 	return m_pSoftBody->m_nodes.size();
 }
 
-int CPhysicsSoftBody::GetFaceCount() {
+int CPhysicsSoftBody::GetFaceCount() const {
 	return m_pSoftBody->m_faces.size();
 }
 
-softbodynode_t CPhysicsSoftBody::GetNode(int i) {
+softbodynode_t CPhysicsSoftBody::GetNode(int i) const {
 	btSoftBody::Node node = m_pSoftBody->m_nodes[i];
 
 	softbodynode_t out;
@@ -63,12 +91,32 @@ softbodynode_t CPhysicsSoftBody::GetNode(int i) {
 	return out;
 }
 
-softbodyface_t CPhysicsSoftBody::GetFace(int i) {
+softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
 	btSoftBody::Face face = m_pSoftBody->m_faces[i];
 
 	softbodyface_t out;
 	ConvertFaceToHL(&face, out);
 	return out;
+}
+
+void CPhysicsSoftBody::SetNode(int i, softbodynode_t &node) {
+	Assert(i >= 0 && i < m_pSoftBody->m_nodes.size());
+}
+
+void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
+	if (!mins && !maxs) return;
+
+	btVector3 btmins, btmaxs;
+	m_pSoftBody->getAabb(btmins, btmaxs);
+
+	Vector tMins, tMaxs;
+	ConvertAABBToHL(btmins, btmaxs, tMins, tMaxs);
+
+	if (mins)
+		*mins = tMins;
+
+	if (maxs)
+		*maxs = tMaxs;
 }
 
 void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody) {
