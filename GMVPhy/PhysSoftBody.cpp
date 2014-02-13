@@ -12,6 +12,12 @@
 #include "tier0/memdbgon.h"
 
 // TODO: Soft bodies should be implemented as an entity later on!
+//
+// Name: softbody.CreateFromVerts
+// Desc: Creates a new soft body from vertex array
+// Arg1: 
+// Ret1: 
+//
 int lCreateSoftBodyFromVerts(lua_State *state) {
 	LUA->CheckType(-1, GarrysMod::Lua::Type::TABLE);
 
@@ -32,6 +38,14 @@ int lCreateSoftBodyFromVerts(lua_State *state) {
 	return 0; // TODO: Return soft body object
 }
 
+//
+// Name: softbody.CreateRope
+// Desc: Creates a new soft body rope
+// Arg1: PhysEnv|env|The physics environment to create the soft body in
+// Arg2: Vector|start|Start position
+// Arg3: Vector|length|Rope length
+// Ret1: PhysSoftBody|softbody|The rope soft body
+//
 int lCreateSoftBodyRope(lua_State *state) {
 	IPhysicsEnvironment32 *pEnv = Get_PhysEnv(state, 1);
 	Vector *pos = Get_Vector(state, 2);
@@ -43,6 +57,17 @@ int lCreateSoftBodyRope(lua_State *state) {
 
 	Push_SoftBody(state, pSoftBody);
 	return 1;
+}
+
+int lDestroySoftBody(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+	pSoftBody->GetPhysicsEnvironment()->DestroySoftBody(pSoftBody);
+
+	// Set a nil metatable so the user can't call any more functions on this
+	LUA->PushNil();
+	LUA->SetMetaTable(1);
+
+	return 0;
 }
 
 int lPhysSoftBodySetTotalMass(lua_State *state) {
@@ -75,6 +100,16 @@ int lPhysSoftBodyGetFaceCount(lua_State *state) {
 	LUA->PushNumber(pSoftBody->GetFaceCount());
 
 	return 1;
+}
+
+int lPhysSoftBodySetNode(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+	int nodeId = LUA->GetNumber(2);
+
+	if (nodeId < 0 || nodeId >= pSoftBody->GetNodeCount())
+		LUA->ThrowError("Out of bounds node ID");
+
+	return 0;
 }
 
 int lPhysSoftBodyGetFaces(lua_State *state) {
@@ -139,6 +174,38 @@ int lPhysSoftBodyGetNodes(lua_State *state) {
 	return 1;
 }
 
+//
+// Name: PhysSoftBody:GetPosition
+// Desc: Get Position of a soft body
+// Arg1: PhysSoftBody|softbody|Soft body to get position from
+// Ret1: Vector|pos|The position
+//
+int lPhysSoftBodyGetPosition(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+
+	Vector pos;
+	pSoftBody->GetPosition(&pos, NULL);
+
+	Push_Vector(state, pos);
+	return 1;
+}
+
+//
+// Name: PhysSoftBody:GetAngle
+// Desc: Get Angle of a soft body
+// Arg1: PhysSoftBody|softbody|Soft body to get position from
+// Ret1: Angle|ang|The angle
+//
+int lPhysSoftBodyGetAngle(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+
+	QAngle ang;
+	pSoftBody->GetPosition(NULL, &ang);
+
+	Push_Angle(state, ang);
+	return 1;
+}
+
 int Init_PhysSoftBody(lua_State *state) {
 	LUA->CreateMetaTableType("PhysSoftBody", CustomTypes::TYPE_PHYSSOFTBODY);
 		LUA->Push(-1); LUA->SetField(-2, "__index"); // Allow function and field lookups on this table
@@ -147,11 +214,14 @@ int Init_PhysSoftBody(lua_State *state) {
 		LUA->PushCFunction(lPhysSoftBodyGetNodeCount); LUA->SetField(-2, "GetNodeCount");
 		LUA->PushCFunction(lPhysSoftBodyGetFaces); LUA->SetField(-2, "GetFaces");
 		LUA->PushCFunction(lPhysSoftBodyGetNodes); LUA->SetField(-2, "GetNodes");
+
+		LUA->PushCFunction(lPhysSoftBodyGetPosition); LUA->SetField(-2, "GetPosition");
 	LUA->Pop();
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 		LUA->CreateTable();
 			LUA->PushCFunction(lCreateSoftBodyRope); LUA->SetField(-2, "CreateRope");
+			LUA->PushCFunction(lDestroySoftBody); LUA->SetField(-2, "Destroy");
 		LUA->SetField(-2, "softbody");
 	LUA->Pop();
 
