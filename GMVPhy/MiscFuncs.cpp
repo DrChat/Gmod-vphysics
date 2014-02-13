@@ -72,6 +72,16 @@ QAngle *Get_Angle(lua_State *state, int stackPos) {
 	return (QAngle *)ud->data;
 }
 
+void Push_Angle(lua_State *state, const QAngle &ang) {
+	LUA->PushSpecial(SPECIAL_GLOB);
+		LUA->GetField(-1, "Angle");
+			LUA->PushNumber(ang.x);
+			LUA->PushNumber(ang.y);
+			LUA->PushNumber(ang.z);
+		LUA->Call(3, 1);
+	LUA->Remove(-2);
+}
+
 IPhysicsSoftBody *Get_SoftBody(lua_State *state, int stackPos) {
 	LUA->CheckType(stackPos, CustomTypes::TYPE_PHYSSOFTBODY);
 

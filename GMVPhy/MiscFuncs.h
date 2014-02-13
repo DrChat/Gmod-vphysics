@@ -35,6 +35,7 @@ Vector *Get_Vector(lua_State *state, int stackPos);
 void Push_Vector(lua_State *state, const Vector &vec);
 
 QAngle *Get_Angle(lua_State *state, int stackPos);
+void Push_Angle(lua_State *state, const QAngle &ang);
 
 IPhysicsSoftBody *Get_SoftBody(lua_State *state, int stackPos);
 void Push_SoftBody(lua_State *state, IPhysicsSoftBody *softBody);
