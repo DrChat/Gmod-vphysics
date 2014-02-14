@@ -174,35 +174,40 @@ int lPhysSoftBodyGetNodes(lua_State *state) {
 	return 1;
 }
 
-//
-// Name: PhysSoftBody:GetPosition
-// Desc: Get Position of a soft body
-// Arg1: PhysSoftBody|softbody|Soft body to get position from
-// Ret1: Vector|pos|The position
-//
-int lPhysSoftBodyGetPosition(lua_State *state) {
+int lPhysSoftBodyGetLinks(lua_State *state) {
 	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
 
-	Vector pos;
-	pSoftBody->GetPosition(&pos, NULL);
+	if (pSoftBody->GetLinkCount()) {
+		LUA->CreateTable(); // table returned
+		for (int i = 0; i < pSoftBody->GetLinkCount(); i++) {
+			softbodylink_t link = pSoftBody->GetLink(i);
+			LUA->PushNumber(i);
+			LUA->CreateTable(); // link
 
-	Push_Vector(state, pos);
-	return 1;
-}
+			// nodes
+			LUA->CreateTable();
+			for (int i = 0; i < 2; i++) {
+				LUA->PushNumber(i); // id
 
-//
-// Name: PhysSoftBody:GetAngle
-// Desc: Get Angle of a soft body
-// Arg1: PhysSoftBody|softbody|Soft body to get position from
-// Ret1: Angle|ang|The angle
-//
-int lPhysSoftBodyGetAngle(lua_State *state) {
-	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+				// node
+				LUA->CreateTable();
+				Push_Vector(state, link.nodes[i].pos);
+				LUA->SetField(-2, "pos");
+				Push_Vector(state, link.nodes[i].vel);
+				LUA->SetField(-2, "vel");
+				LUA->PushNumber(link.nodes[i].invMass);
+				LUA->SetField(-2, "invMass");
 
-	QAngle ang;
-	pSoftBody->GetPosition(NULL, &ang);
+				LUA->SetTable(-3);
+			}
+			LUA->SetField(-2, "nodes");
 
-	Push_Angle(state, ang);
+			LUA->SetTable(-3); // set link to parent table
+		}
+	} else {
+		LUA->PushBool(false);
+	}
+
 	return 1;
 }
 
@@ -214,8 +219,7 @@ int Init_PhysSoftBody(lua_State *state) {
 		LUA->PushCFunction(lPhysSoftBodyGetNodeCount); LUA->SetField(-2, "GetNodeCount");
 		LUA->PushCFunction(lPhysSoftBodyGetFaces); LUA->SetField(-2, "GetFaces");
 		LUA->PushCFunction(lPhysSoftBodyGetNodes); LUA->SetField(-2, "GetNodes");
-
-		LUA->PushCFunction(lPhysSoftBodyGetPosition); LUA->SetField(-2, "GetPosition");
+		LUA->PushCFunction(lPhysSoftBodyGetLinks); LUA->SetField(-2, "GetLinks");
 	LUA->Pop();
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);

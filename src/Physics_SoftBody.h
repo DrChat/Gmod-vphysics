@@ -19,17 +19,16 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		CPhysicsSoftBody();
 		~CPhysicsSoftBody();
 
-		void			GetPosition(Vector *pos, QAngle *ang) const;
-		void			SetPosition(const Vector *pos, const QAngle *ang);
-
 		void			SetTotalMass(float fMass, bool bFromFaces = false);
 		void			Anchor(int node, IPhysicsObject *pObj);
 
 		int				GetNodeCount() const;
 		int				GetFaceCount() const;
+		int				GetLinkCount() const;
 
 		softbodynode_t	GetNode(int i) const;
 		softbodyface_t	GetFace(int i) const;
+		softbodylink_t	GetLink(int i) const;
 
 		void			SetNode(int i, softbodynode_t &node);
 

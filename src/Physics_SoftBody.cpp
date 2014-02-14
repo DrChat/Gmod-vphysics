@@ -16,6 +16,12 @@ void ConvertNodeToHL(const btSoftBody::Node *node, softbodynode_t &nodeOut) {
 	nodeOut.invMass = node->m_im;
 }
 
+void ConvertNodeToBull(const softbodynode_t &node, btSoftBody::Node &nodeOut) {
+	ConvertPosToBull(node.pos, nodeOut.m_x);
+	ConvertPosToBull(node.vel, nodeOut.m_v);
+	nodeOut.m_im = node.invMass;
+}
+
 void ConvertFaceToHL(const btSoftBody::Face *face, softbodyface_t &faceOut) {
 	for (int i = 0; i < 3; i++) {
 		btSoftBody::Node *node = face->m_n[i];
@@ -23,6 +29,13 @@ void ConvertFaceToHL(const btSoftBody::Face *face, softbodyface_t &faceOut) {
 	}
 
 	ConvertDirectionToHL(face->m_normal, faceOut.normal);
+}
+
+void ConvertLinkToHL(const btSoftBody::Link *link, softbodylink_t &linkOut) {
+	for (int i = 0; i < 2; i++) {
+		btSoftBody::Node *node = link->m_n[i];
+		ConvertNodeToHL(node, linkOut.nodes[i]);
+	}
 }
 
 /*************************
@@ -37,34 +50,6 @@ CPhysicsSoftBody::CPhysicsSoftBody() {
 CPhysicsSoftBody::~CPhysicsSoftBody() {
 	m_pEnv->GetBulletEnvironment()->removeSoftBody(m_pSoftBody);
 	delete m_pSoftBody;
-}
-
-void CPhysicsSoftBody::GetPosition(Vector *pos, QAngle *ang) const {
-	if (!pos && !ang) return;
-
-	btTransform &trans = m_pSoftBody->getWorldTransform();
-	
-	if (pos)
-		ConvertPosToHL(trans.getOrigin(), *pos);
-
-	if (ang)
-		ConvertRotationToHL(trans.getBasis(), *ang);
-}
-
-void CPhysicsSoftBody::SetPosition(const Vector *pos, const QAngle *ang) {
-	if (!pos && !ang) return;
-
-	btTransform trans = m_pSoftBody->getWorldTransform();
-	btVector3 newPos = trans.getOrigin();
-	btQuaternion newAng = trans.getRotation();
-	
-	if (pos)
-		ConvertPosToBull(*pos, newPos);
-
-	if (ang)
-		ConvertRotationToBull(*ang, newAng);
-
-	m_pSoftBody->setWorldTransform(btTransform(newAng, newPos));
 }
 
 void CPhysicsSoftBody::SetTotalMass(float fMass, bool bFromFaces) {
@@ -83,8 +68,12 @@ int CPhysicsSoftBody::GetFaceCount() const {
 	return m_pSoftBody->m_faces.size();
 }
 
+int CPhysicsSoftBody::GetLinkCount() const {
+	return m_pSoftBody->m_links.size();
+}
+
 softbodynode_t CPhysicsSoftBody::GetNode(int i) const {
-	btSoftBody::Node node = m_pSoftBody->m_nodes[i];
+	btSoftBody::Node &node = m_pSoftBody->m_nodes[i];
 
 	softbodynode_t out;
 	ConvertNodeToHL(&node, out);
@@ -92,15 +81,26 @@ softbodynode_t CPhysicsSoftBody::GetNode(int i) const {
 }
 
 softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
-	btSoftBody::Face face = m_pSoftBody->m_faces[i];
+	btSoftBody::Face &face = m_pSoftBody->m_faces[i];
 
 	softbodyface_t out;
 	ConvertFaceToHL(&face, out);
 	return out;
 }
 
+softbodylink_t CPhysicsSoftBody::GetLink(int i) const {
+	btSoftBody::Link &link = m_pSoftBody->m_links[i];
+
+	softbodylink_t out;
+	ConvertLinkToHL(&link, out);
+	return out;
+}
+
 void CPhysicsSoftBody::SetNode(int i, softbodynode_t &node) {
 	Assert(i >= 0 && i < m_pSoftBody->m_nodes.size());
+
+	btSoftBody::Node &bnode = m_pSoftBody->m_nodes[i];
+	ConvertNodeToBull(node, bnode);
 }
 
 void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {

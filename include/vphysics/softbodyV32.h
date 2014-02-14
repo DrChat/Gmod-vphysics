@@ -14,6 +14,10 @@ struct softbodyface_t {
 	Vector normal;
 };
 
+struct softbodylink_t {
+	softbodynode_t nodes[2];
+};
+
 struct softbodyparams_t {
 	float	totalMass;
 };
@@ -22,17 +26,16 @@ class IPhysicsSoftBody {
 	public:
 		virtual ~IPhysicsSoftBody() {}
 
-		virtual void	GetPosition(Vector *pos, QAngle *ang) const = 0;
-		virtual void	SetPosition(const Vector *pos, const QAngle *ang) = 0;
-
 		virtual void	SetTotalMass(float fMass, bool bFromFaces = false) = 0;
 		virtual void	Anchor(int node, IPhysicsObject *pObj) = 0;
 
 		virtual int		GetNodeCount() const = 0;
 		virtual int		GetFaceCount() const = 0;
+		virtual int		GetLinkCount() const = 0;
 
 		virtual softbodynode_t	GetNode(int i) const = 0;
 		virtual softbodyface_t	GetFace(int i) const = 0;
+		virtual softbodylink_t	GetLink(int i) const = 0;
 
 		virtual IPhysicsEnvironment32 *GetPhysicsEnvironment() const = 0;
 };
