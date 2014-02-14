@@ -810,6 +810,9 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	m_debugdraw->DrawWorld();
 #endif
 
+	// FIXME: See if this is even needed here
+	m_softBodyWorldInfo.m_sparsesdf.GarbageCollect();
+
 	if (!m_bUseDeleteQueue) {
 		CleanupDeleteList();
 	}
