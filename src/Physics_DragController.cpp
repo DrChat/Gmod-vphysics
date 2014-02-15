@@ -49,27 +49,31 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		//------------------
 		// LINEAR DRAG
 		//------------------
-		float dragForce = -1 * pObject->GetDragInDirection(body->getLinearVelocity()) * m_airDensity * dt;
-		if (dragForce < -1.0f)
-			dragForce = -1.0f;
+		if (!btFuzzyZero(body->getLinearVelocity().length2())) {
+			float dragForce = -1 * pObject->GetDragInDirection(body->getLinearVelocity().normalized()) * m_airDensity * dt;
+			if (dragForce < -1.0f)
+				dragForce = -1.0f;
 
-		// If the drag force actually drags
-		if (dragForce < 0)
-			vel = body->getLinearVelocity() * dragForce;
+			// If the drag force actually drags
+			if (dragForce < 0)
+				vel = body->getLinearVelocity() * dragForce;
 
-		body->setLinearVelocity(body->getLinearVelocity() + vel);
+			body->setLinearVelocity(body->getLinearVelocity() + vel);
+		}
 
 		//------------------
 		// ANGULAR DRAG
 		//------------------
-		float angDragForce = -1 * pObject->GetAngularDragInDirection(body->getAngularVelocity()) * m_airDensity * dt;
-		if (angDragForce < -1.0f)
-			angDragForce = -1.0f;
+		if (!btFuzzyZero(body->getAngularVelocity().length2())) {
+			float angDragForce = -1 * pObject->GetAngularDragInDirection(body->getAngularVelocity().normalized()) * m_airDensity * dt;
+			if (angDragForce < -1.0f)
+				angDragForce = -1.0f;
 
-		// If the drag force actually drags
-		if (angDragForce < 0)
-			ang = body->getAngularVelocity() * angDragForce;
+			// If the drag force actually drags
+			if (angDragForce < 0)
+				ang = body->getAngularVelocity() * angDragForce;
 
-		body->setAngularVelocity(body->getAngularVelocity() + ang);
+			body->setAngularVelocity(body->getAngularVelocity() + ang);
+		}
 	}
 }
