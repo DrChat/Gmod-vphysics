@@ -85,6 +85,19 @@ softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
 
 	softbodyface_t out;
 	ConvertFaceToHL(&face, out);
+
+	// find the node ids
+	// TODO: Is there a better way to do this?
+	int id = 0;
+	for (int i = 0; i < m_pSoftBody->m_nodes.size(); i++) {
+		if (face.m_n[id] == &m_pSoftBody->m_nodes[i]) {
+			out.nodeIndexes[id] = i;
+			
+			id++;
+			if (id > 2) break;
+		}
+	}
+
 	return out;
 }
 
@@ -93,7 +106,24 @@ softbodylink_t CPhysicsSoftBody::GetLink(int i) const {
 
 	softbodylink_t out;
 	ConvertLinkToHL(&link, out);
+
+	// find the node ids
+	// TODO: Is there a better way to do this?
+	int id = 0;
+	for (int i = 0; i < m_pSoftBody->m_nodes.size(); i++) {
+		if (link.m_n[id] == &m_pSoftBody->m_nodes[i]) {
+			out.nodeIndexes[id] = i;
+
+			id++;
+			if (id > 1) break;
+		}
+	}
+
 	return out;
+}
+
+void CPhysicsSoftBody::AddLink(int node1, int node2, bool bCheckExist) {
+	m_pSoftBody->appendLink(node1, node2, NULL, bCheckExist);
 }
 
 void CPhysicsSoftBody::SetNode(int i, softbodynode_t &node) {
@@ -119,10 +149,11 @@ void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
 		*maxs = tMaxs;
 }
 
-void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody) {
+void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, const softbodyparams_t *pParams) {
 	m_pEnv			= pEnv;
 	m_pSoftBody		= pSoftBody;
 
+	pSoftBody->m_cfg.collisions |= btSoftBody::fCollision::VF_SS;
 	pEnv->GetBulletEnvironment()->addSoftBody(m_pSoftBody);
 }
 
@@ -172,24 +203,38 @@ CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Ve
 	pSoftBody->setWorldTransform(btTransform(bullAng, bullPos));
 
 	CPhysicsSoftBody *pBody = new CPhysicsSoftBody;
-	pBody->Init(pEnv, pSoftBody);
+	pBody->Init(pEnv, pSoftBody, pParams);
 
 	return pBody;
 }
 
-CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, const softbodyparams_t *pParams) {
+CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, int resolution, const softbodyparams_t *pParams) {
 	btSoftBodyWorldInfo &wi = pEnv->GetSoftBodyWorldInfo();
 
 	btVector3 start, end;
 	ConvertPosToBull(position, start);
 	ConvertPosToBull(position + length, end);
 
-	// FIXME: Figure out what last 2 parameters are
-	// last parameter is fixed side
-	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateRope(wi, start, end, 8, 0);
+	// Last parameter is fixed sides of the soft body (which we don't set - dev can set these elsewhere)
+	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateRope(wi, start, end, resolution, 0);
+	if (pParams) {
+		pSoftBody->setTotalMass(pParams->totalMass);
+	}
 
 	CPhysicsSoftBody *pPhysBody = new CPhysicsSoftBody;
-	pPhysBody->Init(pEnv, pSoftBody);
+	pPhysBody->Init(pEnv, pSoftBody, pParams);
 
 	return pPhysBody;
+}
+
+CPhysicsSoftBody *CreateSoftBodyPatch(CPhysicsEnvironment *pEnv, const Vector *corners, int resx, int resy, const softbodyparams_t *pParams) {
+	btSoftBodyWorldInfo &wi = pEnv->GetSoftBodyWorldInfo();
+
+	btVector3 bcorners[4];
+	for (int i = 0; i < 4; i++) {
+		ConvertPosToBull(corners[i], bcorners[i]);
+	}
+
+	btSoftBodyHelpers::CreatePatch(wi, bcorners[0], bcorners[1], bcorners[2], bcorners[3], 4, 4, 0, false);
+	return NULL;
 }

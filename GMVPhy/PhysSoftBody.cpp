@@ -44,14 +44,16 @@ int lCreateSoftBodyFromVerts(lua_State *state) {
 // Arg1: PhysEnv|env|The physics environment to create the soft body in
 // Arg2: Vector|start|Start position
 // Arg3: Vector|length|Rope length
+// Arg4: int|resolution|Soft body resolution (# of nodes)
 // Ret1: PhysSoftBody|softbody|The rope soft body
 //
 int lCreateSoftBodyRope(lua_State *state) {
 	IPhysicsEnvironment32 *pEnv = Get_PhysEnv(state, 1);
 	Vector *pos = Get_Vector(state, 2);
 	Vector *length = Get_Vector(state, 3);
+	int res = LUA->GetNumber(4);
 
-	IPhysicsSoftBody *pSoftBody = pEnv->CreateSoftBodyRope(*pos, *length, NULL);
+	IPhysicsSoftBody *pSoftBody = pEnv->CreateSoftBodyRope(*pos, *length, res, NULL);
 	if (!pSoftBody)
 		LUA->ThrowError("Failed to create soft body (environment returned NULL)");
 
@@ -70,6 +72,9 @@ int lDestroySoftBody(lua_State *state) {
 	return 0;
 }
 
+/****************************
+* PhysSoftBody CLASS
+****************************/
 int lPhysSoftBodySetTotalMass(lua_State *state) {
 	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
 	float mass = LUA->GetNumber(2);
@@ -197,6 +202,8 @@ int lPhysSoftBodyGetLinks(lua_State *state) {
 				LUA->SetField(-2, "vel");
 				LUA->PushNumber(link.nodes[i].invMass);
 				LUA->SetField(-2, "invMass");
+				LUA->PushNumber(link.nodeIndexes[i] + 1); // + 1 because lua arrays start at 1
+				LUA->SetField(-2, "index");
 
 				LUA->SetTable(-3);
 			}
@@ -211,6 +218,25 @@ int lPhysSoftBodyGetLinks(lua_State *state) {
 	return 1;
 }
 
+//
+// Name: PhysSoftBody:GetAABB
+// Desc: Get the AABB of a soft body
+// Arg1: PhysSoftBody|softbody|
+// Ret1: Vector|mins|
+// Ret2: Vector|maxs|
+//
+int lPhysSoftBodyGetAABB(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+
+	Vector mins, maxs;
+	pSoftBody->GetAABB(&mins, &maxs);
+
+	Push_Vector(state, mins);
+	Push_Vector(state, maxs);
+
+	return 2;
+}
+
 int Init_PhysSoftBody(lua_State *state) {
 	LUA->CreateMetaTableType("PhysSoftBody", CustomTypes::TYPE_PHYSSOFTBODY);
 		LUA->Push(-1); LUA->SetField(-2, "__index"); // Allow function and field lookups on this table
@@ -220,6 +246,8 @@ int Init_PhysSoftBody(lua_State *state) {
 		LUA->PushCFunction(lPhysSoftBodyGetFaces); LUA->SetField(-2, "GetFaces");
 		LUA->PushCFunction(lPhysSoftBodyGetNodes); LUA->SetField(-2, "GetNodes");
 		LUA->PushCFunction(lPhysSoftBodyGetLinks); LUA->SetField(-2, "GetLinks");
+
+		LUA->PushCFunction(lPhysSoftBodyGetAABB); LUA->SetField(-2, "GetAABB");
 	LUA->Pop();
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);

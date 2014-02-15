@@ -23,6 +23,7 @@ class CPhysicsFluidController;
 class CPhysicsDragController;
 class CPhysicsConstraint;
 class CPhysicsObject;
+class CPhysicsSoftBody;
 
 class CDebugDrawer;
 
@@ -66,8 +67,8 @@ public:
 	IPhysicsObject *						CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic = false);
 	void									DestroyObject(IPhysicsObject *pObject);
 
-	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles);
-	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &length, const softbodyparams_t *pParams);
+	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices);
+	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams);
 	void									DestroySoftBody(IPhysicsSoftBody *pSoftBody);
 
 	IPhysicsFluidController	*				CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams);
@@ -195,7 +196,7 @@ private:
 	
 	CUtlVector<IPhysicsSoftBody *>			m_softBodies;
 	CUtlVector<CPhysicsFluidController *>	m_fluids;
-	CUtlVector<IController*>				m_controllers;
+	CUtlVector<IController *>				m_controllers;
 
 	CCollisionEventListener *				m_pCollisionListener;
 	CCollisionSolver *						m_pCollisionSolver;

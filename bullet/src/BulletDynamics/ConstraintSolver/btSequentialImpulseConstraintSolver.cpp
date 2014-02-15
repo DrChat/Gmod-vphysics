@@ -985,7 +985,7 @@ void	btSequentialImpulseConstraintSolver::convertContact(btPersistentManifold* m
 		
 			// Callback to user code
 			if (m_pSolveCallback)
-				m_pSolveCallback->preSolveContact(colObj0, colObj1, &cp);
+				m_pSolveCallback->preSolveContact(solverBodyA, solverBodyB, &cp);
 
 		}
 	}
@@ -1537,7 +1537,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 			
 			// User callback
 			if (m_pSolveCallback)
-				m_pSolveCallback->postSolveContact(m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA].m_originalColObj, m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB].m_originalColObj, pt);
+				m_pSolveCallback->postSolveContact(&m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], &m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], pt);
 		}
 	}
 

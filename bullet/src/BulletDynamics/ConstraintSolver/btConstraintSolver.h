@@ -40,8 +40,8 @@ enum btConstraintSolverType
 class btSolveCallback
 {
 	public:
-		virtual void preSolveContact(btCollisionObject *obj0, btCollisionObject *obj1, btManifoldPoint *cp) {};
-		virtual void postSolveContact(btCollisionObject *obj0, btCollisionObject *obj1, btManifoldPoint *cp) {};
+		virtual void preSolveContact(btSolverBody *obj0, btSolverBody *obj1, btManifoldPoint *cp) {};
+		virtual void postSolveContact(btSolverBody *obj0, btSolverBody *obj1, btManifoldPoint *cp) {};
 };
 
 class btConstraintSolver

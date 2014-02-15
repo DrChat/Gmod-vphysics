@@ -32,6 +32,10 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 		void			SetNode(int i, softbodynode_t &node);
 
+		void			AddNode(const Vector &pos);
+
+		void			AddLink(int node1, int node2, bool bCheckExist = false);
+
 		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
 		void			GetAABB(Vector *mins, Vector *maxs) const;
 
@@ -39,7 +43,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 		// UNEXPOSED FUNCTIONS
 	public:
-		void			Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody);
+		void			Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, const softbodyparams_t *pParams);
 
 		btSoftBody *	GetSoftBody();
 
@@ -49,7 +53,9 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 };
 
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
+// Vertices are in world space!
 CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams);
-CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, const softbodyparams_t *pParams);
+CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, int resolution, const softbodyparams_t *pParams);
+CPhysicsSoftBody *CreateSoftBodyPatch(CPhysicsEnvironment *pEnv, const Vector *corners, int resx, int resy, const softbodyparams_t *pParams);
 
 #endif // PHYSICS_SOFTBODY_H

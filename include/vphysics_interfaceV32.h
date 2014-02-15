@@ -26,8 +26,9 @@ abstract_class IPhysics32 : public IPhysics {
 // TODO: Soft bodies
 abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
-		virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) = 0;
-		virtual IPhysicsSoftBody *	CreateSoftBodyRope(const Vector &pos, const Vector &length, const softbodyparams_t *pParams) = 0;
+		// Create a convex soft body from vertices. Vertices are in world space!
+		//virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices) = 0;
+		virtual IPhysicsSoftBody *	CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams) = 0;
 		virtual void				DestroySoftBody(IPhysicsSoftBody *pSoftBody) = 0;
 
 		virtual void	SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) = 0;

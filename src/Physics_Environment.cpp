@@ -306,9 +306,9 @@ class CCollisionEventListener : public btSolveCallback {
 			m_pCallback = NULL;
 		}
 
-		virtual void preSolveContact(btCollisionObject *colObj0, btCollisionObject *colObj1, btManifoldPoint *cp) {
-			CPhysicsObject *pObj0 = (CPhysicsObject *)colObj0->getUserPointer();
-			CPhysicsObject *pObj1 = (CPhysicsObject *)colObj1->getUserPointer();
+		virtual void preSolveContact(btSolverBody *body0, btSolverBody *body1, btManifoldPoint *cp) {
+			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
+			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
 
 			vcollisionevent_t evt;
 			evt.collisionSpeed = 0.f; // Invalid pre-collision
@@ -328,12 +328,14 @@ class CCollisionEventListener : public btSolveCallback {
 			//	m_pCallback->PreCollision(&evt);
 		}
 
-		virtual void postSolveContact(btCollisionObject *colObj0, btCollisionObject *colObj1, btManifoldPoint *cp) {
-			btRigidBody *rb0 = btRigidBody::upcast(colObj0);
-			btRigidBody *rb1 = btRigidBody::upcast(colObj1);
+		virtual void postSolveContact(btSolverBody *body0, btSolverBody *body1, btManifoldPoint *cp) {
+			btRigidBody *rb0 = btRigidBody::upcast(body0->m_originalColObj);
+			btRigidBody *rb1 = btRigidBody::upcast(body1->m_originalColObj);
 
-			CPhysicsObject *pObj0 = (CPhysicsObject *)colObj0->getUserPointer();
-			CPhysicsObject *pObj1 = (CPhysicsObject *)colObj1->getUserPointer();
+			// FIXME: Problem with bullet code, only one solver body created for static objects!
+			// There could be more than one static object created by us!
+			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
+			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
 
 			vcollisionevent_t evt;
 
@@ -494,7 +496,12 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 		delete m_objects[i];
 	}
 
+	for (int i = m_softBodies.Count() - 1; i >= 0; --i) {
+		delete m_softBodies[i];
+	}
+
 	m_objects.RemoveAll();
+	m_softBodies.RemoveAll();
 	CleanupDeleteList();
 
 	delete m_pDeleteQueue;
@@ -612,7 +619,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 }
 
 // TODO: Should we just use CPhysCollide instead?
-IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles) {
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices) {
 	//CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, position, angles);
 	//m_softBodies.AddToTail(pSoftBody);
 	//return pSoftBody;
@@ -621,8 +628,8 @@ IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *
 	return NULL;
 }
 
-IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, const Vector &length, const softbodyparams_t *pParams) {
-	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyRope(this, pos, length, pParams);
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams) {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyRope(this, pos, length, resolution, pParams);
 	if (pSoftBody)
 		m_softBodies.AddToTail(pSoftBody);
 

@@ -10,11 +10,13 @@ struct softbodynode_t {
 };
 
 struct softbodyface_t {
+	int nodeIndexes[3]; // Node indexes that can be passed into the node functions
 	softbodynode_t nodes[3];
 	Vector normal;
 };
 
 struct softbodylink_t {
+	int nodeIndexes[2]; // Node indexes that can be passed into the node functions
 	softbodynode_t nodes[2];
 };
 
@@ -36,6 +38,9 @@ class IPhysicsSoftBody {
 		virtual softbodynode_t	GetNode(int i) const = 0;
 		virtual softbodyface_t	GetFace(int i) const = 0;
 		virtual softbodylink_t	GetLink(int i) const = 0;
+
+		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
+		virtual void	GetAABB(Vector *mins, Vector *maxs) const = 0;
 
 		virtual IPhysicsEnvironment32 *GetPhysicsEnvironment() const = 0;
 };
