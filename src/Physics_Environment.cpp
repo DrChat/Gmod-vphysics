@@ -636,6 +636,14 @@ IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, con
 	return pSoftBody;
 }
 
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyPatch(const Vector *corners, int resx, int resy, const softbodyparams_t *pParams) {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyPatch(this, corners, resx, resy, pParams);
+	if (pSoftBody)
+		m_softBodies.AddToTail(pSoftBody);
+
+	return pSoftBody;
+}
+
 void CPhysicsEnvironment::DestroySoftBody(IPhysicsSoftBody *pSoftBody) {
 	if (!pSoftBody) return;
 

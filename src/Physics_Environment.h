@@ -69,6 +69,7 @@ public:
 
 	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices);
 	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams);
+	IPhysicsSoftBody *						CreateSoftBodyPatch(const Vector *corners, int resx, int resy, const softbodyparams_t *pParams);
 	void									DestroySoftBody(IPhysicsSoftBody *pSoftBody);
 
 	IPhysicsFluidController	*				CreateFluidController(IPhysicsObject *pFluidObject, fluidparams_t *pParams);

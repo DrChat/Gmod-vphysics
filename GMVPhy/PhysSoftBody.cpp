@@ -61,6 +61,35 @@ int lCreateSoftBodyRope(lua_State *state) {
 	return 1;
 }
 
+int lCreateSoftBodyPatch(lua_State *state) {
+	IPhysicsEnvironment32 *pEnv = Get_PhysEnv(state, 1);
+	LUA->CheckType(2, GarrysMod::Lua::Type::TABLE);
+
+	Vector corners[4];
+
+	LUA->PushNil();
+	int i = 0;
+	while (LUA->Next(2) != 0) {
+		Vector *vec = Get_Vector(state, -1);
+		corners[i] = *vec;
+
+		i++;
+		if (i > 4) LUA->ThrowError("More than 4 vertices given!"); // Protect against user error
+
+		LUA->Pop(); // Pop the value on the top of the stack
+	}
+
+	int resx = LUA->GetNumber(3);
+	int resy = LUA->GetNumber(4);
+
+	IPhysicsSoftBody *pSoftBody = pEnv->CreateSoftBodyPatch(corners, resx, resy, NULL);
+	if (!pSoftBody)
+		LUA->ThrowError("Failed to create soft body (environment returned NULL)");
+
+	Push_SoftBody(state, pSoftBody);
+	return 1;
+}
+
 int lDestroySoftBody(lua_State *state) {
 	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
 	pSoftBody->GetPhysicsEnvironment()->DestroySoftBody(pSoftBody);
@@ -115,42 +144,6 @@ int lPhysSoftBodySetNode(lua_State *state) {
 		LUA->ThrowError("Out of bounds node ID");
 
 	return 0;
-}
-
-int lPhysSoftBodyGetFaces(lua_State *state) {
-	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
-
-	if (pSoftBody->GetFaceCount()) {
-		LUA->CreateTable();
-		for (int i = 0; i < pSoftBody->GetFaceCount(); i++) {
-			softbodyface_t face = pSoftBody->GetFace(i);
-
-			// Nodes
-			LUA->CreateTable();
-			for (int i = 0; i < 3; i++) {
-				softbodynode_t node = face.nodes[i];
-
-				LUA->PushNumber(i); // Key
-				LUA->CreateTable(); // Value
-				Push_Vector(state, node.pos);
-				LUA->SetField(-2, "pos");
-				Push_Vector(state, node.vel);
-				LUA->SetField(-2, "vel");
-				LUA->PushNumber(node.invMass);
-				LUA->SetField(-2, "invMass");
-
-				LUA->SetTable(-3); // t(-3)[Key(-2)] = Value(-1)
-			}
-			LUA->SetField(-2, "nodes");
-
-			Push_Vector(state, face.normal);
-			LUA->SetField(-2, "normal");
-		}
-	} else {
-		LUA->PushBool(false);
-	}
-
-	return 1;
 }
 
 int lPhysSoftBodyGetNodes(lua_State *state) {
@@ -218,6 +211,48 @@ int lPhysSoftBodyGetLinks(lua_State *state) {
 	return 1;
 }
 
+int lPhysSoftBodyGetFaces(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+
+	if (pSoftBody->GetFaceCount()) {
+		LUA->CreateTable();
+		for (int i = 0; i < pSoftBody->GetFaceCount(); i++) {
+			softbodyface_t face = pSoftBody->GetFace(i);
+			LUA->PushNumber(i);
+			LUA->CreateTable(); // face
+
+			// Nodes
+			LUA->CreateTable();
+			for (int i = 0; i < 3; i++) {
+				softbodynode_t &node = face.nodes[i];
+				LUA->PushNumber(i); // Key
+
+				LUA->CreateTable(); // Value
+				Push_Vector(state, node.pos);
+				LUA->SetField(-2, "pos");
+				Push_Vector(state, node.vel);
+				LUA->SetField(-2, "vel");
+				LUA->PushNumber(node.invMass);
+				LUA->SetField(-2, "invMass");
+				LUA->PushNumber(face.nodeIndexes[i] + 1); // +1 because lua arrays start at 1
+				LUA->SetField(-2, "index");
+
+				LUA->SetTable(-3); // t(-3)[Key(-2)] = Value(-1)
+			}
+			LUA->SetField(-2, "nodes");
+
+			Push_Vector(state, face.normal);
+			LUA->SetField(-2, "normal");
+
+			LUA->SetTable(-3);
+		}
+	} else {
+		LUA->PushBool(false);
+	}
+
+	return 1;
+}
+
 //
 // Name: PhysSoftBody:GetAABB
 // Desc: Get the AABB of a soft body
@@ -253,6 +288,7 @@ int Init_PhysSoftBody(lua_State *state) {
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 		LUA->CreateTable();
 			LUA->PushCFunction(lCreateSoftBodyRope); LUA->SetField(-2, "CreateRope");
+			LUA->PushCFunction(lCreateSoftBodyPatch); LUA->SetField(-2, "CreatePatch");
 			LUA->PushCFunction(lDestroySoftBody); LUA->SetField(-2, "Destroy");
 		LUA->SetField(-2, "softbody");
 	LUA->Pop();
