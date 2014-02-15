@@ -92,9 +92,12 @@ softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
 	for (int i = 0; i < m_pSoftBody->m_nodes.size(); i++) {
 		if (face.m_n[id] == &m_pSoftBody->m_nodes[i]) {
 			out.nodeIndexes[id] = i;
+			i = -1; // Restart the loop (-1 because it will be incremented)
 			
 			id++;
 			if (id > 2) break;
+
+			continue;
 		}
 	}
 
@@ -113,9 +116,12 @@ softbodylink_t CPhysicsSoftBody::GetLink(int i) const {
 	for (int i = 0; i < m_pSoftBody->m_nodes.size(); i++) {
 		if (link.m_n[id] == &m_pSoftBody->m_nodes[i]) {
 			out.nodeIndexes[id] = i;
+			i = -1; // Restart the loop (-1 because it will be incremented)
 
 			id++;
 			if (id > 1) break;
+
+			continue;
 		}
 	}
 
@@ -147,6 +153,31 @@ void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
 
 	if (maxs)
 		*maxs = tMaxs;
+}
+
+void CPhysicsSoftBody::Transform(const matrix3x4_t &mat) {
+	btTransform trans;
+	ConvertMatrixToBull(mat, trans);
+
+	m_pSoftBody->transform(trans);
+}
+
+void CPhysicsSoftBody::Transform(const Vector *vec, const QAngle *ang) {
+	if (!vec && !ang) return;
+
+	if (vec) {
+		btVector3 bVec;
+		ConvertPosToBull(*vec, bVec);
+
+		m_pSoftBody->translate(bVec);
+	}
+
+	if (ang) {
+		btQuaternion quat;
+		ConvertRotationToBull(*ang, quat);
+
+		m_pSoftBody->rotate(quat);
+	}
 }
 
 void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, const softbodyparams_t *pParams) {
@@ -235,6 +266,13 @@ CPhysicsSoftBody *CreateSoftBodyPatch(CPhysicsEnvironment *pEnv, const Vector *c
 		ConvertPosToBull(corners[i], bcorners[i]);
 	}
 
-	btSoftBodyHelpers::CreatePatch(wi, bcorners[0], bcorners[1], bcorners[2], bcorners[3], 4, 4, 0, false);
-	return NULL;
+	btSoftBody *pSoftBody = btSoftBodyHelpers::CreatePatch(wi, bcorners[0], bcorners[1], bcorners[2], bcorners[3], resx, resy, 0, false);
+	if (pParams) {
+		pSoftBody->setTotalMass(pParams->totalMass);
+	}
+
+	CPhysicsSoftBody *pPhysBody = new CPhysicsSoftBody;
+	pPhysBody->Init(pEnv, pSoftBody, pParams);
+
+	return pPhysBody;
 }

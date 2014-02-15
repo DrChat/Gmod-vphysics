@@ -39,6 +39,9 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
 		void			GetAABB(Vector *mins, Vector *maxs) const;
 
+		void			Transform(const matrix3x4_t &mat);
+		void			Transform(const Vector *vec, const QAngle *ang);
+
 		IPhysicsEnvironment32 *GetPhysicsEnvironment() const { return (IPhysicsEnvironment32 *)m_pEnv; }
 
 		// UNEXPOSED FUNCTIONS
