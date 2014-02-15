@@ -121,7 +121,6 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <StringPooling>true</StringPooling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalOptions>/d2Zi+ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>tier0.lib;tier1.lib;tier2.lib;mathlib.lib;vstdlib.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;BulletMultithreaded.lib;LinearMath.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -188,6 +187,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\vphysics\constraintsV32.h" />
+    <ClInclude Include="include\vphysics\softbodyV32.h" />
     <ClInclude Include="include\vphysics\vehiclesV32.h" />
     <ClInclude Include="include\vphysics_interfaceV32.h" />
     <ClInclude Include="src\DebugDrawer.h" />

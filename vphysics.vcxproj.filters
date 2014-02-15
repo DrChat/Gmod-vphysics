@@ -169,6 +169,12 @@
     <ClInclude Include="src\Physics_VehicleAirboat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\vphysics\constraintsV32.h">
+      <Filter>Header Files\public</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vphysics\softbodyV32.h">
+      <Filter>Header Files\public</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\vphysics.rc" />
