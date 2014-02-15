@@ -226,7 +226,10 @@ struct	btSparseSdf
 			Lerp(gy[2], gy[3], ix.f), iz.f));
 		normal.setZ(Lerp(	Lerp(gz[0], gz[1], ix.f),
 			Lerp(gz[2], gz[3], ix.f), iy.f));
-		normal		=	normal.normalized();
+
+		// Don't normalize a 0-length vector.
+		if (normal.length2() > 0)
+			normal.normalize();
 #else
 		normal		=	btVector3(d[1]-d[0], d[3]-d[0], d[4]-d[0]).normalized();
 #endif
