@@ -719,7 +719,6 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					ptr->endpos = ptr->startpos;
 				} else {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-					ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
 					ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 
 					ptr->startsolid = false;
