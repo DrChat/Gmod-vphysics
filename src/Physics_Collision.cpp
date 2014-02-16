@@ -696,6 +696,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	ConvertPosToBull(ray.m_Start, startv);
 	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
 
+	ptr->startpos = ray.m_Start + ray.m_StartOffset;
+
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
@@ -717,8 +719,11 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					ptr->endpos = ptr->startpos;
 				} else {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-					//ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
+					ConvertPosToHL(cb.m_hitPointWorld, ptr->endpos);
 					ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
+
+					ptr->startsolid = false;
+					ptr->allsolid = false;
 				}
 			} else {
 				ptr->endpos = ptr->startpos + ray.m_Delta;
@@ -770,6 +775,9 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				// Allow penetrations up to 1 centimeter
 				if (cb.m_closestHitFraction != 0.f) {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+
+					ptr->startsolid = false;
+					ptr->allsolid = false;
 				} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.01f) {
 					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 
@@ -1196,7 +1204,7 @@ void CPhysicsCollision::ThreadContextDestroy(IPhysicsCollision *pThreadContext) 
 }
 
 // BUG: Weird collisions with these, sometimes phys objs fall through the displacement mesh
-// Appears to have microholes
+// Might be a bullet issue
 CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &params) {
 	IVirtualMeshEvent *pHandler = params.pMeshEventHandler;
 	if (!pHandler) return NULL;
