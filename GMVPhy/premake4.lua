@@ -23,12 +23,14 @@ configuration { "windows", "vs*" }
 
 	linkoptions { "/NODEFAULTLIB:\"LIBCMT\"" }
 
--- Part of a rediculous hack to get source sdk to build
+-- Part of a ridiculous hack to get source sdk to build
 configuration { "linux", "gmake" }
 	buildoptions { "-w", "-fpermissive" }
 	defines { "sprintf_s=snprintf", "strcmpi=strcasecmp", "_alloca=alloca", "stricmp=strcasecmp", "_stricmp=strcasecmp", "strcpy_s=strncpy", "_strnicmp=strncasecmp", "strnicmp=strncasecmp", "_snprintf=snprintf", "_vsnprintf=vsnprintf", "_alloca=alloca", "strcmpi=strcasecmp", "NDEBUG", "NO_MALLOC_OVERRIDE" }
 
 configuration {}
+
+defines {"GMMODULE"}
 
 if _PREMAKE_VERSION == "4.4" then
 	vpaths {
@@ -43,6 +45,7 @@ includedirs {
 	SDK_DIR .. "/public",
 	SDK_DIR .. "/public/tier0",
 	SDK_DIR .. "/public/tier1",
+	GM_MODULEBASE,
 }
 
 files {

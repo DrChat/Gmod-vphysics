@@ -52,18 +52,16 @@ location( "./" .. act )
 --[[--------------
 -- Projects
 ----------------]]
-if USE_GMVPHY then
-	include "../GMVPhy"
-end
+-- Hardcoded path now because this won't ever change
+SDK_DIR = "../thirdparty/sourcesdk/mp/src"
+GM_MODULEBASE = "../thirdparty/gmmodulebase/include"
 
-if SDK_DIR then
-	if os.is("linux") and not SRCDS_BIN_DIR then
-		print "Fatal: SRCDS bin dir was not defined (which is required for linux builds)\nCannot generate vphysics project files" 
-	else
-		include "../src"
-	end
+include "../GMVPhy"
+
+if os.is("linux") and not SRCDS_BIN_DIR then
+	print "Fatal: SRCDS bin dir was not defined (which is required for linux builds)\nCannot generate vphysics project files" 
 else
-	print "Fatal: Source SDK was not defined\nCannot generate vphysics project files"
+	include "../src"
 end
 
 include "../bullet/src"

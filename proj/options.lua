@@ -1,37 +1,15 @@
 --[[-----------
 -- Options
 -------------]]
--- Source SDK Dir
-newoption {
-	trigger		= "sdkdir",
-	value		= "path",
-	description	= "Source SDK Directory (root folder should be src)"
-}
-
-SDK_DIR = _OPTIONS["sdkdir"]
 
 -- SRCDS dir
 newoption {
 	trigger		= "srcdsbindir",
 	value		= "path",
-	description	= "Source Dedicated Server engine bin directory"
+	description	= "Source Dedicated Server engine bin directory (required on linux)"
 }
 
 SRCDS_BIN_DIR = _OPTIONS["srcdsbindir"]
-
--- Gmod Module Base (optional)
-newoption {
-	trigger		= "gmmodulebase",
-	value		= "path",
-	description	= "path to the garry's mod module base (optional, for GMVPhy)"
-}
-
-GMMODULEBASE_DIR = _OPTIONS["gmmodulebase"]
-USE_GMVPHY = true
-
-if not GMMODULEBASE_DIR then
-	USE_GMVPHY = false
-end
 
 -- Generate post build commands for VS projects
 newoption {

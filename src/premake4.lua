@@ -57,7 +57,7 @@ configuration { "windows" }
 	links { "tier0", "tier1", "tier2", "vstdlib", "mathlib" }
 	
 configuration { "linux", "gmake" }
-	-- SRCDS_BIN_DIR is nil on windows :(
+	-- SRCDS_BIN_DIR is nil on windows, and this code runs anyways :(
 	if os.is("linux") then
 		libdirs {
 			SDK_DIR .. "/lib/linux",
