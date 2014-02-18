@@ -48,11 +48,25 @@ SIMD_FORCE_INLINE bool TestPointAgainstAabb2(const btVector3 &aabbMin1, const bt
 SIMD_FORCE_INLINE bool TestAabbAgainstAabb2(const btVector3 &aabbMin1, const btVector3 &aabbMax1,
 								const btVector3 &aabbMin2, const btVector3 &aabbMax2)
 {
+#ifdef BT_USE_SSE_IN_API
+	__m128 a = _mm_cmpgt_ps(aabbMin1.mVec128, aabbMax2.mVec128); // If true, sets all bits to 1, otherwise 0
+	__m128 b = _mm_cmplt_ps(aabbMax1.mVec128, aabbMin2.mVec128); // If true, sets all bits to 1, otherwise 0
+	__m128 r = _mm_or_ps(a, b); // Bitwise OR
+
+#ifdef _WIN32
+	const __int32 *i((const __int32 *)&r);
+#else
+	const int *i((const int *)&r);
+#endif
+	return (i[0] | i[1] | i[2]) == 0;
+#else
 	bool overlap = true;
 	overlap = (aabbMin1.getX() > aabbMax2.getX() || aabbMax1.getX() < aabbMin2.getX()) ? false : overlap;
 	overlap = (aabbMin1.getZ() > aabbMax2.getZ() || aabbMax1.getZ() < aabbMin2.getZ()) ? false : overlap;
 	overlap = (aabbMin1.getY() > aabbMax2.getY() || aabbMax1.getY() < aabbMin2.getY()) ? false : overlap;
+
 	return overlap;
+#endif
 }
 
 /// conservative test for overlap between triangle and aabb
