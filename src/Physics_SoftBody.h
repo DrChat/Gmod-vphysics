@@ -27,14 +27,17 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		int				GetLinkCount() const;
 
 		softbodynode_t	GetNode(int i) const;
-		softbodyface_t	GetFace(int i) const;
 		softbodylink_t	GetLink(int i) const;
+		softbodyface_t	GetFace(int i) const;
 
 		void			SetNode(int i, softbodynode_t &node);
 
 		void			AddNode(const Vector &pos);
-
 		void			AddLink(int node1, int node2, bool bCheckExist = false);
+
+		void			RemoveNode(int i);
+		void			RemoveLink(int i);
+		void			RemoveFace(int i);
 
 		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
 		void			GetAABB(Vector *mins, Vector *maxs) const;

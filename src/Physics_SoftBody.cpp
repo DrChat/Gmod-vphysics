@@ -138,6 +138,36 @@ void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
 		*maxs = tMaxs;
 }
 
+void CPhysicsSoftBody::RemoveNode(int i) {
+	Assert(i >= 0 && i < m_pSoftBody->m_nodes.size());
+
+	btSoftBody::Node &node = m_pSoftBody->m_nodes[i];
+
+	m_pSoftBody->pointersToIndices();
+	m_pSoftBody->m_nodes.remove(node);
+	m_pSoftBody->indicesToPointers();
+}
+
+void CPhysicsSoftBody::RemoveLink(int i) {
+	Assert(i >= 0 && i < m_pSoftBody->m_links.size());
+
+	btSoftBody::Link &link = m_pSoftBody->m_links[i];
+
+	m_pSoftBody->pointersToIndices();
+	m_pSoftBody->m_links.remove(link);
+	m_pSoftBody->indicesToPointers();
+}
+
+void CPhysicsSoftBody::RemoveLink(int i) {
+	Assert(i >= 0 && i < m_pSoftBody->m_faces.size());
+
+	btSoftBody::Face &face = m_pSoftBody->m_faces[i];
+
+	m_pSoftBody->pointersToIndices();
+	m_pSoftBody->m_faces.remove(face);
+	m_pSoftBody->indicesToPointers();
+}
+
 void CPhysicsSoftBody::RayTest(Ray_t &ray, trace_t *pTrace) const {
 	if (!pTrace) return;
 
