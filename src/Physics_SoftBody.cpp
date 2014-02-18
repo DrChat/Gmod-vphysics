@@ -73,6 +73,7 @@ int CPhysicsSoftBody::GetLinkCount() const {
 }
 
 softbodynode_t CPhysicsSoftBody::GetNode(int i) const {
+	Assert(i >= 0 && i < m_pSoftBody->m_nodes.size());
 	btSoftBody::Node &node = m_pSoftBody->m_nodes[i];
 
 	softbodynode_t out;
@@ -80,49 +81,31 @@ softbodynode_t CPhysicsSoftBody::GetNode(int i) const {
 	return out;
 }
 
-softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
-	btSoftBody::Face &face = m_pSoftBody->m_faces[i];
-
-	softbodyface_t out;
-	ConvertFaceToHL(&face, out);
-
-	// find the node ids
-	// TODO: Is there a better way to do this?
-	int id = 0;
-	for (int i = 0; i < m_pSoftBody->m_nodes.size(); i++) {
-		if (face.m_n[id] == &m_pSoftBody->m_nodes[i]) {
-			out.nodeIndexes[id] = i;
-			i = -1; // Restart the loop (-1 because it will be incremented)
-			
-			id++;
-			if (id > 2) break;
-
-			continue;
-		}
-	}
-
-	return out;
-}
-
 softbodylink_t CPhysicsSoftBody::GetLink(int i) const {
+	Assert(i >= 0 && i < m_pSoftBody->m_links.size());
 	btSoftBody::Link &link = m_pSoftBody->m_links[i];
 
 	softbodylink_t out;
 	ConvertLinkToHL(&link, out);
 
-	// find the node ids
-	// TODO: Is there a better way to do this?
-	int id = 0;
-	for (int i = 0; i < m_pSoftBody->m_nodes.size(); i++) {
-		if (link.m_n[id] == &m_pSoftBody->m_nodes[i]) {
-			out.nodeIndexes[id] = i;
-			i = -1; // Restart the loop (-1 because it will be incremented)
+	// Find the node ids with an educated guess
+	for (int i = 0; i < 2; i++) {
+		out.nodeIndexes[i] = (int)(link.m_n[i] - &m_pSoftBody->m_nodes[0]);
+	}
 
-			id++;
-			if (id > 1) break;
+	return out;
+}
 
-			continue;
-		}
+softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
+	Assert(i >= 0 && i < m_pSoftBody->m_faces.size());
+	btSoftBody::Face &face = m_pSoftBody->m_faces[i];
+
+	softbodyface_t out;
+	ConvertFaceToHL(&face, out);
+
+	// Find the node ids with an educated guess
+	for (int i = 0; i < 3; i++) {
+		out.nodeIndexes[i] = (int)(face.m_n[i] - &m_pSoftBody->m_nodes[0]);
 	}
 
 	return out;
@@ -200,7 +183,6 @@ void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, co
 	m_pSoftBody		= pSoftBody;
 
 	pSoftBody->m_cfg.collisions |= btSoftBody::fCollision::VF_SS;
-	//pSoftBody->generateClusters(pSoftBody->m_nodes.size() / 2);
 	pEnv->GetBulletEnvironment()->addSoftBody(m_pSoftBody);
 }
 
