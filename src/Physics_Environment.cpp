@@ -90,6 +90,14 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	btRigidBody *body0 = btRigidBody::upcast((btCollisionObject *)proxy0->m_clientObject);
 	btRigidBody *body1 = btRigidBody::upcast((btCollisionObject *)proxy1->m_clientObject);
 	if (!body0 || !body1) {
+		btCollisionObject *colObj0 = (btCollisionObject *)proxy0->m_clientObject;
+		btCollisionObject *colObj1 = (btCollisionObject *)proxy1->m_clientObject;
+
+		// Check if one of them is a soft body
+		if (colObj0->getInternalType() & btCollisionObject::CO_SOFT_BODY || colObj1->getInternalType() & btCollisionObject::CO_SOFT_BODY) {
+			return true;
+		}
+
 		if (body0)
 			return !(body0->isStaticObject());
 		
@@ -616,6 +624,14 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	} else {
 		delete pObject;
 	}
+}
+
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBody() {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBody(this);
+	if (pSoftBody)
+		m_softBodies.AddToTail(pSoftBody);
+
+	return pSoftBody;
 }
 
 // TODO: Should we just use CPhysCollide instead?

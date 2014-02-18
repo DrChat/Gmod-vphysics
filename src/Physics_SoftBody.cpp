@@ -155,6 +155,21 @@ void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
 		*maxs = tMaxs;
 }
 
+void CPhysicsSoftBody::RayTest(Ray_t &ray, trace_t *pTrace) const {
+	if (!pTrace) return;
+
+	btVector3 start, end;
+	ConvertPosToBull(ray.m_Start, start);
+	ConvertPosToBull(ray.m_Start + ray.m_Delta, end);
+
+	btSoftBody::sRayCast rayCast;
+	m_pSoftBody->rayTest(start, end, rayCast);
+
+	pTrace->fraction = rayCast.fraction;
+	pTrace->startpos = ray.m_Start + ray.m_StartOffset;
+	pTrace->endpos = ray.m_Start + ray.m_StartOffset + (ray.m_Delta * rayCast.fraction);
+}
+
 void CPhysicsSoftBody::Transform(const matrix3x4_t &mat) {
 	btTransform trans;
 	ConvertMatrixToBull(mat, trans);
@@ -185,6 +200,7 @@ void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, co
 	m_pSoftBody		= pSoftBody;
 
 	pSoftBody->m_cfg.collisions |= btSoftBody::fCollision::VF_SS;
+	//pSoftBody->generateClusters(pSoftBody->m_nodes.size() / 2);
 	pEnv->GetBulletEnvironment()->addSoftBody(m_pSoftBody);
 }
 
@@ -196,8 +212,13 @@ btSoftBody *CPhysicsSoftBody::GetSoftBody() {
 * CREATION FUNCTIONS
 *************************/
 
+CPhysicsSoftBody *CreateSoftBody(CPhysicsEnvironment *pEnv) {
+	btSoftBody *pSoftBody = new btSoftBody(&pEnv->GetSoftBodyWorldInfo());
+	CPhysicsSoftBody *pPhysBody = new CPhysicsSoftBody;
+	return pPhysBody;
+}
+
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const int *indices, int numIndices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams) {
-	/*
 	btVector3 *bullVerts = new btVector3[numVertices];
 
 	// Make sure numIndices is evenly divisible by 3
@@ -207,8 +228,14 @@ CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv, const Vec
 		ConvertPosToBull(vertices[i], bullVerts[i]);
 	}
 
-	delete [] bullVerts;
+	/*
+	btSoftBody *pSoftBody = new btSoftBody(&pEnv->GetSoftBodyWorldInfo(), numVertices, bullVerts, NULL);
+	for (int i = 0; i < numIndices; i++) {
+
+	}
 	*/
+
+	delete [] bullVerts;
 
 	NOT_IMPLEMENTED
 	return NULL;

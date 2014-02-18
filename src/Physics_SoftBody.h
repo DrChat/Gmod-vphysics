@@ -38,6 +38,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
 		void			GetAABB(Vector *mins, Vector *maxs) const;
+		void			RayTest(Ray_t &ray, trace_t *pTrace) const;
 
 		void			Transform(const matrix3x4_t &mat);
 		void			Transform(const Vector *vec, const QAngle *ang);
@@ -55,6 +56,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		btSoftBody *			m_pSoftBody;
 };
 
+CPhysicsSoftBody *CreateSoftBody(CPhysicsEnvironment *pEnv);
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
 // Vertices are in world space!
 CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams);
