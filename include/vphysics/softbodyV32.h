@@ -41,6 +41,7 @@ class IPhysicsSoftBody {
 
 		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
 		virtual void	GetAABB(Vector *mins, Vector *maxs) const = 0;
+		virtual void	RayTest(Ray_t &ray, trace_t *pTrace) const = 0;
 
 		virtual void	Transform(const matrix3x4_t &mat) = 0;
 		virtual void	Transform(const Vector *vec, const QAngle *ang) = 0;

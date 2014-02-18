@@ -6,6 +6,8 @@
 #include "../include/vphysics_interfaceV32.h"
 #include "../include/vphysics/softbodyV32.h"
 
+#include <cmodel.h> // Ray_t
+
 #include "MiscFuncs.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -270,6 +272,51 @@ int lPhysSoftBodyGetAABB(lua_State *state) {
 	Push_Vector(state, maxs);
 
 	return 2;
+}
+
+//
+// Name: PhysSoftBody:RayTest
+// Desc: Test a ray
+// Arg1: PhysSoftBody|softbody|
+// Arg2: Table|ray|{start=Vector(), end=Vector()}
+// Ret1: Table|result|Result in the style of Structures/TraceResult
+//
+int lPhysSoftBodyRayTest(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+	LUA->CheckType(2, GarrysMod::Lua::Type::TABLE);
+
+	Ray_t ray;
+	Vector start, end;
+	LUA->PushString("start");
+	LUA->GetTable(2);
+	start = *Get_Vector(state, -1);
+	LUA->Pop();
+
+	LUA->PushString("end");
+	LUA->GetTable(2);
+	end = *Get_Vector(state, -1);
+	LUA->Pop();
+
+	ray.Init(start, end);
+
+	trace_t tr;
+	pSoftBody->RayTest(ray, &tr);
+
+	LUA->CreateTable();
+	LUA->PushNumber(tr.fraction);
+	LUA->SetField(-2, "Fraction");
+	LUA->PushBool(tr.fraction < 1);
+	LUA->SetField(-2, "Hit");
+	Push_Vector(state, tr.plane.normal);
+	LUA->SetField(-2, "HitNormal");
+	Push_Vector(state, tr.startpos);
+	LUA->SetField(-2, "StartPos");
+	Push_Vector(state, tr.endpos);
+	LUA->SetField(-2, "EndPos");
+	Push_Vector(state, ray.m_Delta.Normalized());
+	LUA->SetField(-2, "Normal");
+
+	return 1;
 }
 
 int Init_PhysSoftBody(lua_State *state) {
