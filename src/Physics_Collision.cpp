@@ -377,6 +377,7 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 		delete pCompound;
 	} else if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
 		ConvexFree((CPhysConvex *)pCollide->GetCollisionShape()); // FIXME: Deletion of this should probably be done here.
+		delete pCollide;
 	} else {
 		// Those dirty liars!
 		ConvexFree((CPhysConvex *)pCollide);
