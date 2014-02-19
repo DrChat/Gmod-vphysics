@@ -14,6 +14,7 @@ subject to the following restrictions:
 
 */
 
+#define BT_USE_SSE_IN_API
 #include "BulletCollision/CollisionDispatch/btCompoundCollisionAlgorithm.h"
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 #include "BulletCollision/CollisionShapes/btCompoundShape.h"
