@@ -697,6 +697,19 @@ CPhysicsConstraint *CreateLengthConstraint(CPhysicsEnvironment *pEnv, IPhysicsOb
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pLength, CONSTRAINT_LENGTH);
 }
 
+CPhysicsConstraint *CreateGearConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_gearparams_t &gear) {
+	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
+	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
+
+	btVector3 axes[2];
+	for (int i = 0; i < 2; i++) {
+		ConvertDirectionToBull(gear.objectLocalAxes[i], axes[i]);
+	}
+
+	btGearConstraint *pConstraint = new btGearConstraint(*pObjRef->GetObject(), *pObjAtt->GetObject(), axes[0], axes[1], gear.ratio);
+	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_GEAR);
+}
+
 CPhysicsConstraintGroup *CreateConstraintGroup(CPhysicsEnvironment *pEnv, const constraint_groupparams_t &params) {
 	if (!pEnv) return NULL;
 

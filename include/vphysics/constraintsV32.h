@@ -23,7 +23,7 @@ struct physconstraintsolveinfo_t {
 	// FIXME: Not converted to/from HL units!
 	float lowerLimit, upperLimit;
 
-	void Defaults() {
+	inline void Defaults() {
 		J1linearAxis.Zero();
 		J1angularAxis.Zero();
 		J2linearAxis.Zero();
@@ -49,6 +49,19 @@ public:
 	// Info for constraint solve (an array of size numRows)
 	// FPS - frames per second (1/stepsize), erp - default error reduction parameter (0..1)
 	virtual void			GetConstraintSolveInfo(IPhysicsObject *pObjA, IPhysicsObject *pObjB, physconstraintsolveinfo_t *info, int numRows, float fps, float erp) = 0;
+};
+
+struct constraint_gearparams_t {
+	constraint_breakableparams_t	constraint; // TODO: Will be supported in the future
+	Vector	objectLocalAxes[2]; // Local axis in objects
+	float	ratio; // Gear ratio
+
+	inline void Defaults() {
+		constraint.Defaults();
+		objectLocalAxes[0].Init();
+		objectLocalAxes[1].Init();
+		ratio = 1;
+	}
 };
 
 #endif // CONSTRAINTSV32_h
