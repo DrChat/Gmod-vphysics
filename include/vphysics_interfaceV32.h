@@ -16,6 +16,9 @@
 // THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
 
 class IPhysicsSoftBody;
+class IPhysicsConstraint;
+class IPhysicsConstraintGroup;
+
 struct softbodyparams_t;
 struct constraint_gearparams_t;
 
