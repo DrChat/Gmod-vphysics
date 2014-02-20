@@ -318,11 +318,14 @@ class CCollisionEventListener : public btSolveCallback {
 			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
 			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
 
+			unsigned int flags0 = pObj0->GetCallbackFlags();
+			unsigned int flags1 = pObj1->GetCallbackFlags();
+
 			vcollisionevent_t evt;
 			evt.collisionSpeed = 0.f; // Invalid pre-collision
 			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
-			evt.isCollision = true; // When is this false?
-			evt.isShadowCollision = pObj0->GetShadowController() != NULL || pObj1->GetShadowController() != NULL;
+			evt.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
+			evt.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow
 
 			evt.pObjects[0] = pObj0;
 			evt.pObjects[1] = pObj1;	
@@ -332,8 +335,36 @@ class CCollisionEventListener : public btSolveCallback {
 			CPhysicsCollisionData data(cp);
 			evt.pInternalData = &data;
 
-			//if (m_pCallback)
-			//	m_pCallback->PreCollision(&evt);
+			// Give the game its stupid velocities
+			btVector3 origVel[2];
+			btVector3 origAngVel[2];
+			if (body0->m_originalBody) {
+				origVel[0] = body0->m_originalBody->getLinearVelocity();
+				origAngVel[0] = body0->m_originalBody->getAngularVelocity();
+
+				body0->m_originalBody->setLinearVelocity(origVel[0] + body0->internalGetDeltaLinearVelocity());
+				body0->m_originalBody->setAngularVelocity(origAngVel[0] + body0->internalGetDeltaAngularVelocity());
+			}
+			if (body1->m_originalBody) {
+				origVel[1] = body1->m_originalBody->getLinearVelocity();
+				origAngVel[1] = body1->m_originalBody->getAngularVelocity();
+
+				body1->m_originalBody->setLinearVelocity(origVel[1] + body1->internalGetDeltaLinearVelocity());
+				body1->m_originalBody->setAngularVelocity(origAngVel[1] + body1->internalGetDeltaAngularVelocity());
+			}
+
+			if (m_pCallback)
+				m_pCallback->PreCollision(&evt);
+
+			// Restore the velocities
+			if (body0->m_originalBody) {
+				body0->m_originalBody->setLinearVelocity(origVel[0]);
+				body0->m_originalBody->setLinearVelocity(origAngVel[0]);
+			}
+			if (body1->m_originalBody) {
+				body1->m_originalBody->setLinearVelocity(origVel[1]);
+				body1->m_originalBody->setLinearVelocity(origAngVel[1]);
+			}
 		}
 
 		virtual void postSolveContact(btSolverBody *body0, btSolverBody *body1, btManifoldPoint *cp) {
@@ -345,14 +376,17 @@ class CCollisionEventListener : public btSolveCallback {
 			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
 			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
 
+			unsigned int flags0 = pObj0->GetCallbackFlags();
+			unsigned int flags1 = pObj1->GetCallbackFlags();
+
 			vcollisionevent_t evt;
 
 			btScalar combinedInvMass = rb0->getInvMass() + rb1->getInvMass();
 			evt.collisionSpeed = BULL2HL(cp->m_appliedImpulse * combinedInvMass);
 
 			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
-			evt.isCollision = true; // When is this false?
-			evt.isShadowCollision = (pObj0 && pObj0->GetShadowController() != NULL) || (pObj1 && pObj1->GetShadowController() != NULL);
+			evt.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
+			evt.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow
 
 			evt.pObjects[0] = pObj0;
 			evt.pObjects[1] = pObj1;	
@@ -362,8 +396,36 @@ class CCollisionEventListener : public btSolveCallback {
 			CPhysicsCollisionData data(cp);
 			evt.pInternalData = &data;
 
-			//if (m_pCallback)
-			//	m_pCallback->PostCollision(&evt);
+			// Give the game its stupid velocities
+			btVector3 origVel[2];
+			btVector3 origAngVel[2];
+			if (body0->m_originalBody) {
+				origVel[0] = body0->m_originalBody->getLinearVelocity();
+				origAngVel[0] = body0->m_originalBody->getAngularVelocity();
+
+				body0->m_originalBody->setLinearVelocity(origVel[0] + body0->internalGetDeltaLinearVelocity());
+				body0->m_originalBody->setAngularVelocity(origAngVel[0] + body0->internalGetDeltaAngularVelocity());
+			}
+			if (body1->m_originalBody) {
+				origVel[1] = body1->m_originalBody->getLinearVelocity();
+				origAngVel[1] = body1->m_originalBody->getAngularVelocity();
+
+				body1->m_originalBody->setLinearVelocity(origVel[1] + body1->internalGetDeltaLinearVelocity());
+				body1->m_originalBody->setAngularVelocity(origAngVel[1] + body1->internalGetDeltaAngularVelocity());
+			}
+
+			if (m_pCallback)
+				m_pCallback->PostCollision(&evt);
+
+			// Restore the velocities
+			if (body0->m_originalBody) {
+				body0->m_originalBody->setLinearVelocity(origVel[0]);
+				body0->m_originalBody->setLinearVelocity(origAngVel[0]);
+			}
+			if (body1->m_originalBody) {
+				body1->m_originalBody->setLinearVelocity(origVel[1]);
+				body1->m_originalBody->setLinearVelocity(origAngVel[1]);
+			}
 		}
 
 		void SetCollisionEventCallback(IPhysicsCollisionEvent *pCallback) {

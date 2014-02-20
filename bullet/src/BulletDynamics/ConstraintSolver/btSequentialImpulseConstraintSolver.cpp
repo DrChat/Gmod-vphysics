@@ -982,10 +982,6 @@ void	btSequentialImpulseConstraintSolver::convertContact(btPersistentManifold* m
 
 			}
 			setFrictionConstraintImpulse( solverConstraint, solverBodyIdA, solverBodyIdB, cp, infoGlobal);
-		
-			// Callback to user code
-			if (m_pSolveCallback)
-				m_pSolveCallback->preSolveContact(solverBodyA, solverBodyB, &cp);
 
 		}
 	}
@@ -1420,10 +1416,16 @@ btScalar btSequentialImpulseConstraintSolver::solveSingleIteration(int iteration
 		{
 			btSolverConstraint &solveManifold = m_tmpSolverContactConstraintPool[m_orderTmpConstraintPool[i]];
 
+			if (m_pSolveCallback)
+				m_pSolveCallback->preSolveContact(&m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], &m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], (btManifoldPoint *)solveManifold.m_originalContactPoint);
+
 			if (infoGlobal.m_solverMode & SOLVER_SIMD)
 				resolveSingleConstraintRowLowerLimitSIMD(m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], solveManifold);
 			else
 				resolveSingleConstraintRowLowerLimit(m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], solveManifold);
+
+			if (m_pSolveCallback)
+				m_pSolveCallback->postSolveContact(&m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], &m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], (btManifoldPoint *)solveManifold.m_originalContactPoint);
 		}
 
 		//-------------------------
@@ -1534,10 +1536,6 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 			{
 				pt->m_appliedImpulseLateral2 = m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex+1].m_appliedImpulse;
 			}
-			
-			// User callback
-			if (m_pSolveCallback)
-				m_pSolveCallback->postSolveContact(&m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA], &m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB], pt);
 		}
 	}
 
