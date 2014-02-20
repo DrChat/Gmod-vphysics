@@ -32,7 +32,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 		void			SetNode(int i, softbodynode_t &node);
 
-		void			AddNode(const Vector &pos);
+		void			AddNode(const Vector &pos, float mass); // Appends a new node to the end of the list (size-1)
 		void			AddLink(int node1, int node2, bool bCheckExist = false);
 
 		void			RemoveNode(int i);

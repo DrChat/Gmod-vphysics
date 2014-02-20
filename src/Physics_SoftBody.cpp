@@ -88,7 +88,7 @@ softbodylink_t CPhysicsSoftBody::GetLink(int i) const {
 	softbodylink_t out;
 	ConvertLinkToHL(&link, out);
 
-	// Find the node ids with an educated guess
+	// Find the node ids with an educated guess (this will be some huge number if something bad happened)
 	for (int i = 0; i < 2; i++) {
 		out.nodeIndexes[i] = (int)(link.m_n[i] - &m_pSoftBody->m_nodes[0]);
 	}
@@ -111,15 +111,22 @@ softbodyface_t CPhysicsSoftBody::GetFace(int i) const {
 	return out;
 }
 
-void CPhysicsSoftBody::AddLink(int node1, int node2, bool bCheckExist) {
-	m_pSoftBody->appendLink(node1, node2, NULL, bCheckExist);
-}
-
 void CPhysicsSoftBody::SetNode(int i, softbodynode_t &node) {
 	Assert(i >= 0 && i < m_pSoftBody->m_nodes.size());
 
 	btSoftBody::Node &bnode = m_pSoftBody->m_nodes[i];
 	ConvertNodeToBull(node, bnode);
+}
+
+void CPhysicsSoftBody::AddNode(const Vector &pos, float mass) {
+	btVector3 btpos;
+	ConvertPosToBull(pos, btpos);
+
+	m_pSoftBody->appendNode(btpos, mass);
+}
+
+void CPhysicsSoftBody::AddLink(int node1, int node2, bool bCheckExist) {
+	m_pSoftBody->appendLink(node1, node2, NULL, bCheckExist);
 }
 
 void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
@@ -141,10 +148,8 @@ void CPhysicsSoftBody::GetAABB(Vector *mins, Vector *maxs) const {
 void CPhysicsSoftBody::RemoveNode(int i) {
 	Assert(i >= 0 && i < m_pSoftBody->m_nodes.size());
 
-	btSoftBody::Node &node = m_pSoftBody->m_nodes[i];
-
 	m_pSoftBody->pointersToIndices();
-	m_pSoftBody->m_nodes.remove(node);
+	//m_pSoftBody->m_nodes.remove(m_pSoftBody->m_nodes[i]);
 	m_pSoftBody->indicesToPointers();
 }
 
@@ -154,17 +159,17 @@ void CPhysicsSoftBody::RemoveLink(int i) {
 	btSoftBody::Link &link = m_pSoftBody->m_links[i];
 
 	m_pSoftBody->pointersToIndices();
-	m_pSoftBody->m_links.remove(link);
+	//m_pSoftBody->m_links.remove(link);
 	m_pSoftBody->indicesToPointers();
 }
 
-void CPhysicsSoftBody::RemoveLink(int i) {
+void CPhysicsSoftBody::RemoveFace(int i) {
 	Assert(i >= 0 && i < m_pSoftBody->m_faces.size());
 
 	btSoftBody::Face &face = m_pSoftBody->m_faces[i];
 
 	m_pSoftBody->pointersToIndices();
-	m_pSoftBody->m_faces.remove(face);
+	//m_pSoftBody->m_faces.remove(face);
 	m_pSoftBody->indicesToPointers();
 }
 
