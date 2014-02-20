@@ -17,6 +17,7 @@
 
 class IPhysicsSoftBody;
 struct softbodyparams_t;
+struct constraint_gearparams_t;
 
 abstract_class IPhysics32 : public IPhysics {
 	public:
