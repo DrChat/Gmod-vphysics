@@ -725,6 +725,10 @@ IPhysicsConstraint *CPhysicsEnvironment::CreateLengthConstraint(IPhysicsObject *
 	return ::CreateLengthConstraint(this, pReferenceObject, pAttachedObject, pGroup, length);
 }
 
+IPhysicsConstraint *CPhysicsEnvironment::CreateGearConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_gearparams_t &gear) {
+	return ::CreateGearConstraint(this, pReferenceObject, pAttachedObject, pGroup, gear);
+}
+
 void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
 	if (!pConstraint) return;
 
@@ -813,7 +817,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 
 static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, false, 0);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
-	if (!m_pBulletEnvironment) Assert(0);
+	Assert(m_pBulletEnvironment);
 
 	if (deltaTime > 1.0 || deltaTime < 0.0) {
 		deltaTime = 0;

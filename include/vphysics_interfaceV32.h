@@ -27,7 +27,6 @@ abstract_class IPhysics32 : public IPhysics {
 		virtual int		GetActiveEnvironmentCount() = 0;
 };
 
-// TODO: Soft bodies
 abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
 		// Create a convex soft body from vertices. Vertices are in world space!
