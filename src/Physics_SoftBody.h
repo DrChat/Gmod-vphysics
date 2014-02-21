@@ -45,6 +45,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 		void			Transform(const matrix3x4_t &mat);
 		void			Transform(const Vector *vec, const QAngle *ang);
+		void			Scale(const Vector &scale);
 
 		IPhysicsEnvironment32 *GetPhysicsEnvironment() const { return (IPhysicsEnvironment32 *)m_pEnv; }
 
