@@ -90,9 +90,6 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 		m_vSurfacePlane = pParams->surfacePlane;
 	}
 
-	//m_fDensity = 1.0f;
-
-	// FIXME: The below density is correct (kg/m^3, close to 1000). Adjust our calculations in Tick
 	int matIndex = pFluidObject->GetMaterialIndex();
 	surfacedata_t *pSurface = g_SurfaceDatabase.GetSurfaceData(matIndex);
 	if (pSurface) {
@@ -163,6 +160,7 @@ void CPhysicsFluidController::Tick(float dt) {
 	for (int i = 0; i < numObjects; i++) {
 		btRigidBody *body = btRigidBody::upcast(m_pGhostObject->getOverlappingObject(i));
 		Assert(body);
+		if (!body) continue;
 
 		CPhysicsObject *pObject = (CPhysicsObject *)body->getUserPointer();
 		Assert(pObject);
