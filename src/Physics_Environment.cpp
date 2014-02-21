@@ -14,6 +14,7 @@
 #include "Physics_Collision.h"
 #include "Physics_VehicleController.h"
 #include "Physics_SoftBody.h"
+#include "miscmath.h"
 #include "convert.h"
 
 #if DEBUG_DRAW
@@ -332,6 +333,8 @@ class CCollisionEventListener : public btSolveCallback {
 			evt.surfaceProps[0] = pObj0->GetMaterialIndex();
 			evt.surfaceProps[1] = pObj1->GetMaterialIndex();
 
+			if (!evt.isCollision && !evt.isShadowCollision) return;
+
 			CPhysicsCollisionData data(cp);
 			evt.pInternalData = &data;
 
@@ -359,11 +362,11 @@ class CCollisionEventListener : public btSolveCallback {
 			// Restore the velocities
 			if (body0->m_originalBody) {
 				body0->m_originalBody->setLinearVelocity(origVel[0]);
-				body0->m_originalBody->setLinearVelocity(origAngVel[0]);
+				body0->m_originalBody->setAngularVelocity(origAngVel[0]);
 			}
 			if (body1->m_originalBody) {
 				body1->m_originalBody->setLinearVelocity(origVel[1]);
-				body1->m_originalBody->setLinearVelocity(origAngVel[1]);
+				body1->m_originalBody->setAngularVelocity(origAngVel[1]);
 			}
 		}
 
@@ -393,6 +396,8 @@ class CCollisionEventListener : public btSolveCallback {
 			evt.surfaceProps[0] = pObj0 ? pObj0->GetMaterialIndex() : 0;
 			evt.surfaceProps[1] = pObj1 ? pObj1->GetMaterialIndex() : 0;
 
+			if (!evt.isCollision && !evt.isShadowCollision) return;
+
 			CPhysicsCollisionData data(cp);
 			evt.pInternalData = &data;
 
@@ -420,12 +425,45 @@ class CCollisionEventListener : public btSolveCallback {
 			// Restore the velocities
 			if (body0->m_originalBody) {
 				body0->m_originalBody->setLinearVelocity(origVel[0]);
-				body0->m_originalBody->setLinearVelocity(origAngVel[0]);
+				body0->m_originalBody->setAngularVelocity(origAngVel[0]);
 			}
 			if (body1->m_originalBody) {
 				body1->m_originalBody->setLinearVelocity(origVel[1]);
-				body1->m_originalBody->setLinearVelocity(origAngVel[1]);
+				body1->m_originalBody->setAngularVelocity(origAngVel[1]);
 			}
+		}
+
+		void friction(btSolverBody *body0, btSolverBody *body1, btSolverConstraint *constraint) {
+			/*
+			btRigidBody *rb0 = btRigidBody::upcast(body0->m_originalColObj);
+			btRigidBody *rb1 = btRigidBody::upcast(body1->m_originalColObj);
+
+			// FIXME: Problem with bullet code, only one solver body created for static objects!
+			// There could be more than one static object created by us!
+			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
+			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
+
+			unsigned int flags0 = pObj0->GetCallbackFlags();
+			unsigned int flags1 = pObj1->GetCallbackFlags();
+
+			// Don't do the callback if it's disabled on either object
+			if (!(flags0 & flags1 & CALLBACK_GLOBAL_FRICTION)) return;
+
+			// If the solver uses 2 friction directions
+			btSolverConstraint *constraint2 = NULL;
+			if (m_pEnv->GetBulletEnvironment()->getSolverInfo().m_solverMode & SOLVER_USE_2_FRICTION_DIRECTIONS) {
+				constraint2 = constraint + 1; // Always stored after the first one
+			}
+
+			// Calculate the energy consumed
+			float totalImpulse = constraint->m_appliedImpulse + (constraint2 ? constraint2->m_appliedImpulse : 0);
+			totalImpulse *= rb0->getInvMass(); // Get just the velocity
+			totalImpulse *= totalImpulse; // Square it
+			totalImpulse *= SAFE_DIVIDE(.5, rb0->getInvMass()); // Add back the mass (1/2*mv^2)
+
+			if (m_pCallback)
+				m_pCallback->Friction(pObj0)
+			*/
 		}
 
 		void SetCollisionEventCallback(IPhysicsCollisionEvent *pCallback) {
