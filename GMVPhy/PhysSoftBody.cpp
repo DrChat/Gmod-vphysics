@@ -21,14 +21,14 @@
 // Ret1: 
 //
 int lCreateSoftBodyFromVerts(lua_State *state) {
-	LUA->CheckType(-1, GarrysMod::Lua::Type::TABLE);
+	LUA->CheckType(1, GarrysMod::Lua::Type::TABLE);
 
 	LUA->PushNil(); // Key
 
 	CUtlVector<Vector> vertices;
 
 	// Loop through table
-	while (LUA->Next(-3)) {
+	while (LUA->Next(1)) {
 		// Pos -1 is now the value
 		Vector *pVec = Get_Vector(state, -1);
 		vertices.AddToTail(*pVec);
@@ -118,7 +118,9 @@ int lPhysSoftBodySetTotalMass(lua_State *state) {
 int lPhysSoftBodyAppendAnchor(lua_State *state) {
 	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
 	IPhysicsObject32 *pObj = Get_PhysObj(state, 2);
-	int node = LUA->GetNumber(3);
+	int node = LUA->GetNumber(3) - 1; // - 1 because lua arrays start at 1
+	if (node < 0 || node >= pSoftBody->GetNodeCount())
+		LUA->ThrowError("Soft body node is out of bounds");
 
 	pSoftBody->Anchor(node, pObj);
 	return 0;
