@@ -15,20 +15,21 @@
 
 // TODO: Soft bodies should be implemented as an entity later on!
 //
-// Name: softbody.CreateFromVerts
+// Name: softbody.CreateFromVertices
 // Desc: Creates a new soft body from vertex array
-// Arg1: 
-// Ret1: 
+// Arg1: PhysEnv|env|The physics environment in which to create the soft body
+// Arg2: Table|verts|The vertices
+// Ret1: PhysSoftBody|softbody|The new soft body
 //
-int lCreateSoftBodyFromVerts(lua_State *state) {
-	LUA->CheckType(1, GarrysMod::Lua::Type::TABLE);
-
-	LUA->PushNil(); // Key
+int lCreateSoftBodyFromVertices(lua_State *state) {
+	IPhysicsEnvironment32 *pEnv = Get_PhysEnv(state, 1);
+	LUA->CheckType(2, GarrysMod::Lua::Type::TABLE);
 
 	CUtlVector<Vector> vertices;
 
 	// Loop through table
-	while (LUA->Next(1)) {
+	LUA->PushNil(); // Key (will be popped by lua_next automatically)
+	while (LUA->Next(2)) {
 		// Pos -1 is now the value
 		Vector *pVec = Get_Vector(state, -1);
 		vertices.AddToTail(*pVec);
@@ -36,8 +37,13 @@ int lCreateSoftBodyFromVerts(lua_State *state) {
 		LUA->Pop(); // Pop the value, keep the key for traversal
 	}
 
-	LUA->Pop(); // Pop key
-	return 0; // TODO: Return soft body object
+	IPhysicsSoftBody *pSoftBody = pEnv->CreateSoftBodyFromVertices(&vertices[0], vertices.Count(), NULL);
+	if (!pSoftBody)
+		LUA->ThrowError("Failed to create soft body (environment returned NULL)");
+
+	Push_SoftBody(state, pSoftBody);
+
+	return 1;
 }
 
 //
@@ -307,7 +313,7 @@ int lPhysSoftBodyRayTest(lua_State *state) {
 	LUA->CreateTable();
 	LUA->PushNumber(tr.fraction);
 	LUA->SetField(-2, "Fraction");
-	LUA->PushBool(tr.fraction < 1);
+	LUA->PushBool(tr.DidHit());
 	LUA->SetField(-2, "Hit");
 	Push_Vector(state, tr.plane.normal);
 	LUA->SetField(-2, "HitNormal");
@@ -321,6 +327,51 @@ int lPhysSoftBodyRayTest(lua_State *state) {
 	return 1;
 }
 
+//
+// Name: PhysSoftBody:Translate
+// Desc: Translates a softbody
+// Arg1: PhysSoftBody|softbody|
+// Arg2: Vector|offset|Offset to move the softbody
+// Ret1: 
+//
+int lPhysSoftBodyTranslate(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+	Vector *pos = Get_Vector(state, 2);
+
+	pSoftBody->Transform(pos, NULL);
+	return 0;
+}
+
+//
+// Name: PhysSoftBody:Rotate
+// Desc: Rotates a softbody
+// Arg1: PhysSoftBody|softbody|
+// Arg2: Angle|ang|Angle offset to rotate the softbody
+// Ret1: 
+//
+int lPhysSoftBodyRotate(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+	QAngle *ang = Get_Angle(state, 2);
+
+	pSoftBody->Transform(NULL, ang);
+	return 0;
+}
+
+//
+// Name: PhysSoftBody:Scale
+// Desc: Scales a softbody
+// Arg1: PhysSoftBody|softbody|
+// Arg2: Vector|scl|Scale
+// Ret1: 
+//
+int lPhysSoftBodyScale(lua_State *state) {
+	IPhysicsSoftBody *pSoftBody = Get_SoftBody(state, 1);
+	Vector *scl = Get_Vector(state, 2);
+
+	pSoftBody->Scale(*scl);
+	return 0;
+}
+
 int Init_PhysSoftBody(lua_State *state) {
 	LUA->CreateMetaTableType("PhysSoftBody", CustomTypes::TYPE_PHYSSOFTBODY);
 		LUA->Push(-1); LUA->SetField(-2, "__index"); // Allow function and field lookups on this table
@@ -332,10 +383,16 @@ int Init_PhysSoftBody(lua_State *state) {
 		LUA->PushCFunction(lPhysSoftBodyGetLinks); LUA->SetField(-2, "GetLinks");
 
 		LUA->PushCFunction(lPhysSoftBodyGetAABB); LUA->SetField(-2, "GetAABB");
+		LUA->PushCFunction(lPhysSoftBodyRayTest); LUA->SetField(-2, "RayTest");
+
+		LUA->PushCFunction(lPhysSoftBodyTranslate); LUA->SetField(-2, "Translate");
+		LUA->PushCFunction(lPhysSoftBodyRotate); LUA->SetField(-2, "Rotate");
+		LUA->PushCFunction(lPhysSoftBodyScale); LUA->SetField(-2, "Scale");
 	LUA->Pop();
 
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 		LUA->CreateTable();
+			LUA->PushCFunction(lCreateSoftBodyFromVertices); LUA->SetField(-2, "CreateFromVertices");
 			LUA->PushCFunction(lCreateSoftBodyRope); LUA->SetField(-2, "CreateRope");
 			LUA->PushCFunction(lCreateSoftBodyPatch); LUA->SetField(-2, "CreatePatch");
 			LUA->PushCFunction(lDestroySoftBody); LUA->SetField(-2, "Destroy");
