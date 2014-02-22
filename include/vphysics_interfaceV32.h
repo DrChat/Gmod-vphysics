@@ -30,7 +30,7 @@ abstract_class IPhysics32 : public IPhysics {
 abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
 		// Create a convex soft body from vertices. Vertices are in world space!
-		//virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices) = 0;
+		virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const softbodyparams_t *pParams) = 0;
 		virtual IPhysicsSoftBody *	CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams) = 0;
 		virtual IPhysicsSoftBody *	CreateSoftBodyPatch(const Vector *corners, int resx, int resy, const softbodyparams_t *pParams) = 0;
 		virtual void				DestroySoftBody(IPhysicsSoftBody *pSoftBody) = 0;

@@ -326,7 +326,7 @@ class CCollisionEventListener : public btSolveCallback {
 			evt.collisionSpeed = 0.f; // Invalid pre-collision
 			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
 			evt.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
-			evt.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow
+			evt.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow (if both are shadow, it's handled by the game)
 
 			evt.pObjects[0] = pObj0;
 			evt.pObjects[1] = pObj1;	
@@ -734,14 +734,11 @@ IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBody() {
 	return pSoftBody;
 }
 
-// TODO: Should we just use CPhysCollide instead?
-IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices) {
-	//CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, position, angles);
-	//m_softBodies.AddToTail(pSoftBody);
-	//return pSoftBody;
-
-	NOT_IMPLEMENTED
-	return NULL;
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const softbodyparams_t *pParams) {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, pParams);
+	if (pSoftBody)
+		m_softBodies.AddToTail(pSoftBody);
+	return pSoftBody;
 }
 
 IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams) {

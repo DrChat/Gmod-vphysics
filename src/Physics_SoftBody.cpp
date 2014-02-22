@@ -265,24 +265,17 @@ CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv, const Vec
 	return NULL;
 }
 
-CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams) {
+CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const softbodyparams_t *pParams) {
 	btVector3 *bullVerts = new btVector3[numVertices];
 
 	for (int i = 0; i < numVertices; i++) {
 		ConvertPosToBull(vertices[i], bullVerts[i]);
 	}
 
-	btSoftBodyWorldInfo wi = pEnv->GetSoftBodyWorldInfo();
+	btSoftBodyWorldInfo &wi = pEnv->GetSoftBodyWorldInfo();
 
 	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateFromConvexHull(wi, bullVerts, numVertices);
 	delete [] bullVerts;
-
-	btVector3 bullPos;
-	btMatrix3x3 bullAng;
-	ConvertPosToBull(position, bullPos);
-	ConvertRotationToBull(angles, bullAng);
-
-	pSoftBody->setWorldTransform(btTransform(bullAng, bullPos));
 
 	CPhysicsSoftBody *pBody = new CPhysicsSoftBody;
 	pBody->Init(pEnv, pSoftBody, pParams);

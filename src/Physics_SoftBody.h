@@ -62,8 +62,8 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 
 CPhysicsSoftBody *CreateSoftBody(CPhysicsEnvironment *pEnv);
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
-// Vertices are in world space!
-CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const Vector &position, const QAngle &angles, const softbodyparams_t *pParams);
+// Vertices are in world space! (You can create this in local space then call Transform to move this to the start position)
+CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const softbodyparams_t *pParams);
 CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, int resolution, const softbodyparams_t *pParams);
 CPhysicsSoftBody *CreateSoftBodyPatch(CPhysicsEnvironment *pEnv, const Vector *corners, int resx, int resy, const softbodyparams_t *pParams);
 

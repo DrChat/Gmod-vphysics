@@ -68,7 +68,7 @@ public:
 	void									DestroyObject(IPhysicsObject *pObject);
 
 	IPhysicsSoftBody *						CreateSoftBody();
-	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices);
+	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const softbodyparams_t *pParams);
 	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams);
 	IPhysicsSoftBody *						CreateSoftBodyPatch(const Vector *corners, int resx, int resy, const softbodyparams_t *pParams);
 	void									DestroySoftBody(IPhysicsSoftBody *pSoftBody);
