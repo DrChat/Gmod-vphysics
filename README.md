@@ -41,7 +41,7 @@ Submodules will need to be compiled separately from vphysics if required (atleas
 * Optionally, premake scripts are provided in the proj folder
 
 #### Linux Setup
-* You need to have a dedicated server installed preferably for the game you're building for, as vphysics needs to dynamically link to some modules. Configure the path in ./src/Makefile
+* You need to have the game you're building for installed, as vphysics needs to dynamically link to some modules. Configure the path in ./src/Makefile
 * You can use the build.sh provided in the root directory to compile vphysics. Optional arguments are -numthreads \<count\> and -clean (make clean before make)
 
 #### Automatic Copying
