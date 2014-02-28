@@ -881,6 +881,8 @@ public:
 	void				defaultCollisionHandler(const btCollisionObjectWrapper* pcoWrap);
 	void				defaultCollisionHandler(btSoftBody* psb);
 
+	/// Object removed callback from the soft rigid dynamics world
+	void				objectRemoved(btCollisionObject *colObj);
 
 
 	//

@@ -3161,7 +3161,7 @@ void			btSoftBody::defaultCollisionHandler(const btCollisionObjectWrapper* pcoWr
 			btRigidBody*		prb1=(btRigidBody*) btRigidBody::upcast(pcoWrap->getCollisionObject());
 			btTransform	wtr=pcoWrap->getWorldTransform();
 
-			const btTransform	ctr=pcoWrap->getWorldTransform();
+			const btTransform	ctr = pcoWrap->getWorldTransform();
 			const btScalar		timemargin=(wtr.getOrigin()-ctr.getOrigin()).length();
 			const btScalar		basemargin=getCollisionShape()->getMargin();
 			btVector3			mins;
@@ -3239,6 +3239,17 @@ void			btSoftBody::defaultCollisionHandler(btSoftBody* psb)
 	}
 }
 
+void btSoftBody::objectRemoved(btCollisionObject *colObj)
+{
+	// Check anchors
+	for (int i = m_anchors.size() - 1; i >= 0; i--) {
+		if (m_anchors[i].m_body == colObj) {
+			// Swap n' pop
+			m_anchors.swap(m_anchors.size() - 1, i);
+			m_anchors.pop_back();
+		}
+	}
+}
 
 
 void btSoftBody::setWindVelocity( const btVector3 &velocity )

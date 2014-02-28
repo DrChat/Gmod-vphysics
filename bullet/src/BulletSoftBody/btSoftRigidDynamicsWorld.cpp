@@ -151,8 +151,14 @@ void	btSoftRigidDynamicsWorld::removeCollisionObject(btCollisionObject* collisio
 	btSoftBody* body = btSoftBody::upcast(collisionObject);
 	if (body)
 		removeSoftBody(body);
-	else
+	else {
+		// Tell the soft bodies
+		for (int i = 0; i < m_softBodies.size(); i++) {
+			m_softBodies[i]->objectRemoved(collisionObject);
+		}
+
 		btDiscreteDynamicsWorld::removeCollisionObject(collisionObject);
+	}
 }
 
 void	btSoftRigidDynamicsWorld::debugDrawWorld()

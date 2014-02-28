@@ -92,7 +92,9 @@ CPhysicsObject::~CPhysicsObject() {
 	}
 	
 	if (m_pEnv && m_pObject) {
-		m_pEnv->GetBulletEnvironment()->removeRigidBody(m_pObject);
+		// Don't change this. This will eventually pan out to removeRigidBody.
+		// Using removeCollisionObject because of a certain soft body fix.
+		m_pEnv->GetBulletEnvironment()->removeCollisionObject(m_pObject);
 
 		// Sphere collision shape is allocated when we're a sphere. Delete it.
 		if (m_bIsSphere)

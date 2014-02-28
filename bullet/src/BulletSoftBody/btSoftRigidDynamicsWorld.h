@@ -58,7 +58,7 @@ public:
 
 	void	removeSoftBody(btSoftBody* body);
 
-	///removeCollisionObject will first check if it is a rigid body, if so call removeRigidBody otherwise call btDiscreteDynamicsWorld::removeCollisionObject
+	///removeCollisionObject will first check if it is a soft body, if so call removeSoftBody otherwise call btDiscreteDynamicsWorld::removeCollisionObject
 	virtual void	removeCollisionObject(btCollisionObject* collisionObject);
 
 	int		getDrawFlags() const { return(m_drawFlags); }
