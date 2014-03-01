@@ -230,6 +230,14 @@ class btSpringConstraint : public btPoint2PointConstraint {
 			m_constant = constant;
 		}
 
+		void setMaxForce(btScalar maxForce) {
+			m_maxForce = maxForce;
+		}
+
+		void setDamping(btScalar damping) {
+			m_damping = damping;
+		}
+
 		void getInfo1(btConstraintInfo1 *info) {
 			// Positions relative to objects
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
@@ -302,6 +310,7 @@ class btSpringConstraint : public btPoint2PointConstraint {
 			info->m_lowerLimit[0] = 0;
 			info->m_upperLimit[0] = 0;
 
+			// Always solve for stretching, push objects away if it's enabled
 			if (currDist > m_length || (!m_onlyStretch && currDist < m_length)) {
 				btScalar deltaX = currDist - m_length;
 
@@ -596,15 +605,15 @@ void CPhysicsSpring::GetEndpoints(Vector *worldPositionStart, Vector *worldPosit
 }
 
 void CPhysicsSpring::SetSpringConstant(float flSpringContant) {
-	NOT_IMPLEMENTED
+	((btSpringConstraint *)m_pConstraint)->setConstant(flSpringContant);
 }
 
 void CPhysicsSpring::SetSpringDamping(float flSpringDamping) {
-	NOT_IMPLEMENTED
+	((btSpringConstraint *)m_pConstraint)->setDamping(flSpringDamping);
 }
 
 void CPhysicsSpring::SetSpringLength(float flSpringLength) {
-	NOT_IMPLEMENTED
+	((btSpringConstraint *)m_pConstraint)->setLength(ConvertDistanceToBull(flSpringLength));
 }
 
 void CPhysicsSpring::ObjectDestroyed(CPhysicsObject *pObject) {
