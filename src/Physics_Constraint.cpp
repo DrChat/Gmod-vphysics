@@ -204,6 +204,134 @@ class btLengthConstraint: public btPoint2PointConstraint {
 		}
 };
 
+class btSpringConstraint : public btPoint2PointConstraint {
+	protected:
+		btScalar	m_length; // Natural length (delta x = 0)
+		btScalar	m_constant; // Spring constant (F=kx)
+		btScalar	m_maxForce; // max force (0 for disable)
+		btScalar	m_damping;
+
+		bool		m_onlyStretch; // Only apply forces if the spring is stretched
+	public:
+		btSpringConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, btScalar length, btScalar constant, bool onlyStretch, btScalar damping=1, btScalar maxForce=0) :
+		btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB) {
+			m_length = length;
+			m_constant = constant;
+			m_onlyStretch = onlyStretch;
+			m_damping = damping;
+			m_maxForce = maxForce;
+		}
+
+		void setLength(btScalar len) {
+			m_length = len;
+		}
+
+		void setConstant(btScalar constant) {
+			m_constant = constant;
+		}
+
+		void getInfo1(btConstraintInfo1 *info) {
+			// Positions relative to objects
+			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
+			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
+
+			// Exact world positions
+			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
+			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
+
+			// Delta
+			btVector3 del = posB - posA;
+			btScalar currDist = del.length();
+
+			info->m_numConstraintRows = 0;
+			info->nub = 6; // FIXME: What does this even do?
+
+			// Only solve the constraint if needed
+			if ((currDist > m_length) || (!m_onlyStretch && currDist < m_length)) {
+				info->m_numConstraintRows++;
+				info->nub--;
+			}
+		}
+
+		void getInfo2(btConstraintInfo2 *info) {
+			// Positions relative to objects
+			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
+			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
+
+			// Exact world positions
+			btVector3 posA = m_rbA.getCenterOfMassTransform().getOrigin() + relA;
+			btVector3 posB = m_rbB.getCenterOfMassTransform().getOrigin() + relB;
+
+			btVector3 velA = m_rbA.getLinearVelocity();
+			btVector3 velB = m_rbB.getLinearVelocity();
+			btVector3 relVel = velB - velA;
+
+			// Delta
+			btVector3 del = posB - posA;
+			btScalar currDist = del.length();
+
+			btVector3 ortho = del / currDist; // Axis to solve along (normalized delta)
+			// Linear axis for ref object(?)
+			info->m_J1linearAxis[0] = ortho[0];
+			info->m_J1linearAxis[1] = ortho[1];
+			info->m_J1linearAxis[2] = ortho[2];
+
+			// Linear axis for att object(?)
+			if (info->m_J2linearAxis) {
+				info->m_J2linearAxis[0] = -ortho[0];
+				info->m_J2linearAxis[1] = -ortho[1];
+				info->m_J2linearAxis[2] = -ortho[2];
+			}
+
+			// Angular axis (relative pos cross normal)
+			btVector3 p, q;
+			p = relA.cross(ortho);
+			q = relB.cross(ortho);
+			info->m_J1angularAxis[0] = p[0];
+			info->m_J1angularAxis[1] = p[1];
+			info->m_J1angularAxis[2] = p[2];
+
+			if (info->m_J2angularAxis) {
+				info->m_J2angularAxis[0] = -q[0];
+				info->m_J2angularAxis[1] = -q[1];
+				info->m_J2angularAxis[2] = -q[2];
+			}
+
+			btScalar rhs = 0;
+
+			info->m_lowerLimit[0] = 0;
+			info->m_upperLimit[0] = 0;
+
+			if (currDist > m_length || (!m_onlyStretch && currDist < m_length)) {
+				btScalar deltaX = currDist - m_length;
+
+				// F=kx
+				btScalar force = m_constant * deltaX;
+				btScalar velFactor = info->fps * m_damping / btScalar(info->m_numIterations);
+
+				rhs = velFactor * force;
+
+				if (m_maxForce) {
+					if (deltaX < 0) {
+						info->m_lowerLimit[0] = -m_maxForce * info->fps;
+					} else {
+						info->m_upperLimit[0] = m_maxForce * info->fps;
+					}
+				} else {
+					btScalar maxForce = btFabs(force) / info->fps;
+
+					info->m_lowerLimit[0] = -maxForce;
+					info->m_upperLimit[0] =  maxForce;
+				}
+			}
+
+			// Upper/Lower limits are impulses
+
+			info->m_constraintError[0] = rhs; // Constraint error (target rel velocity)
+			info->cfm[0] = btScalar(0.f);
+		}
+};
+
 class btUserConstraint : public btTypedConstraint {
 	public:
 		btUserConstraint(btRigidBody &rbA, btRigidBody &rbB, IPhysicsUserConstraint *pConstraint): btTypedConstraint(CONSTRAINT_TYPE_USER, rbA, rbB) {
@@ -251,6 +379,14 @@ class btUserConstraint : public btTypedConstraint {
 				pInfo->m_lowerLimit[i * pInfo->rowskip] = solveinfo[i].lowerLimit;
 				pInfo->m_upperLimit[i * pInfo->rowskip] = solveinfo[i].upperLimit;
 			}
+		}
+
+		btScalar getParam(int num, int axis = -1) const {
+			return 0xB16B00B5;
+		}
+
+		void setParam(int num, btScalar value, int axis = -1) {
+
 		}
 
 	private:
@@ -444,13 +580,10 @@ void CPhysicsConstraintGroup::RemoveConstraint(CPhysicsConstraint *pConstraint) 
 /************************
 * CLASS CPhysicsSpring
 ************************/
-// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE CPhysicsEnvironment::DestroySpring!!!
 
-CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint) {
-	m_pEnvironment = pEnv;
+CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type):
+CPhysicsConstraint(pEnv, NULL, pObject1, pObject2, pConstraint, type) {
 
-	m_pReferenceObject = pReferenceObject;
-	m_pAttachedObject = pAttachedObject;
 }
 
 CPhysicsSpring::~CPhysicsSpring() {
@@ -474,6 +607,27 @@ void CPhysicsSpring::SetSpringLength(float flSpringLength) {
 	NOT_IMPLEMENTED
 }
 
+void CPhysicsSpring::ObjectDestroyed(CPhysicsObject *pObject) {
+	if (pObject != m_pAttachedObject && pObject != m_pReferenceObject) {
+		AssertMsg(0, "ObjectDestroyed called with object that isn't part of this constraint!");
+		return;
+	}
+
+	if (pObject == m_pAttachedObject)
+		m_pAttachedObject = NULL;
+
+	if (pObject == m_pReferenceObject)
+		m_pReferenceObject = NULL;
+
+	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
+	if (!m_bRemovedFromEnv) {
+		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+		m_bRemovedFromEnv = true;
+	}
+
+	// Can't tell the game this constraint was disabled :(
+}
+
 IPhysicsObject *CPhysicsSpring::GetStartObject() {
 	return m_pReferenceObject;
 }
@@ -490,12 +644,25 @@ IPhysicsObject *CPhysicsSpring::GetEndObject() {
 CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring) {
 	if (!spring) return NULL;
 
+	btRigidBody *rbA = ((CPhysicsObject *)pReferenceObject)->GetObject();
+	btRigidBody *rbB = ((CPhysicsObject *)pAttachedObject)->GetObject();
+
 	btVector3 bullRefPos, bullAttPos;
 	ConvertPosToBull(spring->startPosition, bullRefPos);
 	ConvertPosToBull(spring->endPosition, bullAttPos);
 
-	NOT_IMPLEMENTED
-	return NULL;
+	if (!spring->useLocalPositions) {
+		// TODO: Convert from world to local
+		bullRefPos = rbA->getWorldTransform().inverse() * bullRefPos;
+		bullAttPos = rbB->getWorldTransform().inverse() * bullAttPos;
+	}
+
+	btScalar length = ConvertDistanceToBull(spring->naturalLength);
+
+	btSpringConstraint *pConstraint = new btSpringConstraint(*((CPhysicsObject *)pReferenceObject)->GetObject(), *((CPhysicsObject *)pAttachedObject)->GetObject(), bullRefPos, bullAttPos,
+																length, spring->constant, spring->onlyStretch, spring->damping);
+
+	return new CPhysicsSpring(pEnv, (CPhysicsObject *)pReferenceObject, (CPhysicsObject *)pAttachedObject, pConstraint, CONSTRAINT_SPRING);
 }
 
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
@@ -719,6 +886,6 @@ CPhysicsConstraintGroup *CreateConstraintGroup(CPhysicsEnvironment *pEnv, const 
 CPhysicsConstraint *CreateUserConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pUserConstraint) {
 	Assert(pUserConstraint);
 
-	NOT_IMPLEMENTED
-	return NULL;
+	btTypedConstraint *pConstraint = new btUserConstraint(*((CPhysicsObject *)pReferenceObject)->GetObject(), *((CPhysicsObject *)pAttachedObject)->GetObject(), pUserConstraint);
+	return new CPhysicsConstraint(pEnv, pGroup, (CPhysicsObject *)pReferenceObject, (CPhysicsObject *)pAttachedObject, pConstraint, CONSTRAINT_USER);
 }

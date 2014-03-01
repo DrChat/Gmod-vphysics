@@ -333,6 +333,10 @@ class CCollisionEventListener : public btSolveCallback {
 			evt.surfaceProps[0] = pObj0->GetMaterialIndex();
 			evt.surfaceProps[1] = pObj1->GetMaterialIndex();
 
+			if ((pObj0->IsStatic() && !(flags1 & CALLBACK_GLOBAL_COLLIDE_STATIC)) || (pObj1->IsStatic() && !(flags0 & CALLBACK_GLOBAL_COLLIDE_STATIC))) {
+				evt.isCollision = false;
+			}
+
 			if (!evt.isCollision && !evt.isShadowCollision) return;
 
 			CPhysicsCollisionData data(cp);
@@ -600,7 +604,7 @@ CPhysicsEnvironment::~CPhysicsEnvironment() {
 #endif
 	SetQuickDelete(true);
 
-	for (int i = m_objects.Count()-1; i >= 0; --i) {
+	for (int i = m_objects.Count() - 1; i >= 0; --i) {
 		delete m_objects[i];
 	}
 
@@ -738,6 +742,7 @@ IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *
 	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyFromVertices(this, vertices, numVertices, pParams);
 	if (pSoftBody)
 		m_softBodies.AddToTail(pSoftBody);
+
 	return pSoftBody;
 }
 
@@ -789,9 +794,24 @@ IPhysicsSpring *CPhysicsEnvironment::CreateSpring(IPhysicsObject *pObjectStart, 
 void CPhysicsEnvironment::DestroySpring(IPhysicsSpring *pSpring) {
 	if (!pSpring) return;
 
-	NOT_IMPLEMENTED
-	// REMEMBER: If you allocate anything inside IPhysicsSpring, you'll have to REWRITE THIS FUNCTION!!!
-	//DestroyConstraint(pSpring);
+	CPhysicsConstraint *pConstraint = (CPhysicsConstraint *)pSpring;
+
+	if (m_deleteQuick) {
+		IPhysicsObject *pObj0 = pConstraint->GetReferenceObject();
+		if (pObj0 && !pObj0->IsStatic())
+			pObj0->Wake();
+
+		IPhysicsObject *pObj1 = pConstraint->GetAttachedObject();
+		if (pObj1 && !pObj0->IsStatic())
+			pObj1->Wake();
+	}
+
+	if (m_inSimulation) {
+		pConstraint->Deactivate();
+		m_pDeleteQueue->QueueForDelete(pSpring);
+	} else {
+		delete pSpring;
+	}
 }
 
 IPhysicsConstraint *CPhysicsEnvironment::CreateRagdollConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {

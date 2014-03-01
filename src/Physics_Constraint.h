@@ -9,6 +9,7 @@
 
 class CPhysicsEnvironment;
 class CPhysicsConstraintGroup;
+class btSpringConstraint;
 
 enum EConstraintType {
 	CONSTRAINT_UNKNOWN,
@@ -50,7 +51,7 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		// UNEXPOSED FUNCTIONS
 	public:
 		// Call this if you're an object currently being destroyed.
-		void					ObjectDestroyed(CPhysicsObject *pObject);
+		virtual void			ObjectDestroyed(CPhysicsObject *pObject);
 
 		EConstraintType			GetType();
 		btTypedConstraint *		GetConstraint();
@@ -67,9 +68,9 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		btTypedConstraint *		m_pConstraint;
 };
 
-class CPhysicsSpring : public IPhysicsSpring {
+class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 	public:
-		CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pReferenceObject, CPhysicsObject *pAttachedObject, btTypedConstraint *pConstraint);
+		CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
 		~CPhysicsSpring();
 
 		void			GetEndpoints(Vector *worldPositionStart, Vector *worldPositionEnd);
@@ -77,18 +78,13 @@ class CPhysicsSpring : public IPhysicsSpring {
 		void			SetSpringDamping(float flSpringDamping);
 		void			SetSpringLength(float flSpringLength);
 
+		void			ObjectDestroyed(CPhysicsObject *pObject);
+
 		// Get the starting object
 		IPhysicsObject *GetStartObject();
 
 		// Get the end object
 		IPhysicsObject *GetEndObject();
-
-	private:
-		CPhysicsObject *m_pReferenceObject;
-		CPhysicsObject *m_pAttachedObject;
-		CPhysicsEnvironment *m_pEnvironment;
-
-		btGeneric6DofSpringConstraint *m_pSpring;
 };
 
 // FIXME: I dont think we can implement this in Bullet anyways?
