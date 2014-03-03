@@ -784,10 +784,14 @@ void CPhysicsObject::UpdateShadow(const Vector &targetPosition, const QAngle &ta
 }
 
 int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
-	if (!m_pShadow || (!position && !angles)) return 1;
+	// Valve vphysics just interpolates current position to next PSI
+	if (!position && !angles) return -1;
 
 	btTransform transform;
 	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
+
+	float deltaTime = m_pEnv->GetSubStepTime();
+	btTransformUtil::integrateTransform(transform, m_pObject->getLinearVelocity(), m_pObject->getAngularVelocity(), deltaTime, transform);
 
 	if (position)
 		ConvertPosToHL(transform.getOrigin(), *position);
@@ -795,8 +799,8 @@ int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 	if (angles)
 		ConvertRotationToHL(transform.getBasis(), *angles);
 
-	// Ticks simulated since last UpdateShadow()
-	return m_pShadow->GetTicksSinceUpdate();
+	// Simulated PSIs
+	return m_pEnv->GetNumSubSteps();
 }
 
 IPhysicsShadowController *CPhysicsObject::GetShadowController() const {
