@@ -212,6 +212,11 @@ class btSpringConstraint : public btPoint2PointConstraint {
 		btScalar	m_damping;
 
 		bool		m_onlyStretch; // Only apply forces if the spring is stretched
+
+		void wakeObjects() {
+			m_rbA.activate();
+			m_rbB.activate();
+		}
 	public:
 		btSpringConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, btScalar length, btScalar constant, bool onlyStretch, btScalar damping=1, btScalar maxForce=0) :
 		btPoint2PointConstraint(rbA, rbB, pivotInA, pivotInB) {
@@ -224,10 +229,12 @@ class btSpringConstraint : public btPoint2PointConstraint {
 
 		void setLength(btScalar len) {
 			m_length = len;
+			wakeObjects();
 		}
 
 		void setConstant(btScalar constant) {
 			m_constant = constant;
+			wakeObjects();
 		}
 
 		void setMaxForce(btScalar maxForce) {
@@ -236,6 +243,7 @@ class btSpringConstraint : public btPoint2PointConstraint {
 
 		void setDamping(btScalar damping) {
 			m_damping = damping;
+			wakeObjects();
 		}
 
 		void getInfo1(btConstraintInfo1 *info) {
@@ -341,6 +349,7 @@ class btSpringConstraint : public btPoint2PointConstraint {
 		}
 };
 
+// Purpose: Bind IPhysicsUserConstraint to a bullet constraint
 class btUserConstraint : public btTypedConstraint {
 	public:
 		btUserConstraint(btRigidBody &rbA, btRigidBody &rbB, IPhysicsUserConstraint *pConstraint): btTypedConstraint(CONSTRAINT_TYPE_USER, rbA, rbB) {
@@ -818,7 +827,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform refFrame = btTransform::getIdentity();
 	refFrame.setBasis(refMatrix);
 
-	// Attached frame will be where reference frame is (keep attached object in it's initial spot instead of snapping to the center)
+	// Attached frame will be where reference frame is (keep attached object in its initial spot instead of snapping to the center)
 	btTransform attFrame = attToRefXform.inverse();
 	attFrame.setRotation(attQuat);
 
