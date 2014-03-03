@@ -315,6 +315,7 @@ class CCollisionEventListener : public btSolveCallback {
 			m_pCallback = NULL;
 		}
 
+		// TODO: Optimize this, heavily!
 		virtual void preSolveContact(btSolverBody *body0, btSolverBody *body1, btManifoldPoint *cp) {
 			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
 			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
@@ -374,6 +375,7 @@ class CCollisionEventListener : public btSolveCallback {
 			}
 		}
 
+		// TODO: Optimize this, heavily!
 		virtual void postSolveContact(btSolverBody *body0, btSolverBody *body1, btManifoldPoint *cp) {
 			btRigidBody *rb0 = btRigidBody::upcast(body0->m_originalColObj);
 			btRigidBody *rb1 = btRigidBody::upcast(body1->m_originalColObj);
@@ -932,7 +934,7 @@ void CPhysicsEnvironment::SetCollisionSolver(IPhysicsCollisionSolver *pSolver) {
 	m_pCollisionSolver->SetHandler(pSolver);
 }
 
-static ConVar cvar_maxsubsteps("vphysics_maxsubsteps", "4", FCVAR_REPLICATED, "Sets the maximum amount of simulation substeps (higher number means higher precision)", true, 1, false, 0);
+static ConVar cvar_substeps("vphysics_substeps", "4", FCVAR_REPLICATED, "Sets the amount of simulation substeps (higher number means higher precision)", true, 1, false, 0);
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	Assert(m_pBulletEnvironment);
 
@@ -943,17 +945,19 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 	}
 
 	// sim PSI Current: How many substeps are done in a single simulation step
-	m_simPSICurrent = cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1;
+	m_simPSICurrent = cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1;
 	
 	if (deltaTime > 1e-4) {
 		m_inSimulation = true;
 
 		// We're scaling the timestep down by the number of substeps to have a higher precision and take
 		// the same amount of time as a simulation with the requested timestep
-		float timestep = cvar_maxsubsteps.GetInt() != 0 ? m_timestep / cvar_maxsubsteps.GetInt() : m_timestep;
+		float timestep = cvar_substeps.GetInt() != 0 ? m_timestep / cvar_substeps.GetInt() : m_timestep;
+		m_subStepTime = timestep;
+		m_numSubSteps = m_simPSICurrent;
 		
 		// Returns the number of substeps executed
-		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_maxsubsteps.GetInt() != 0 ? cvar_maxsubsteps.GetInt() : 1, timestep);
+		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1, timestep);
 
 		m_inSimulation = false;
 	}
