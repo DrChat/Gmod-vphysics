@@ -70,7 +70,7 @@ void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
 
 void CPhysicsFrictionSnapshot::GetSurfaceNormal(Vector &out) {
 	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
-	ConvertPosToHL(bullManifoldPoint.m_normalWorldOnB, out);
+	ConvertDirectionToHL(bullManifoldPoint.m_normalWorldOnB, out);
 }
 
 float CPhysicsFrictionSnapshot::GetNormalForce() {
