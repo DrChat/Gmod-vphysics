@@ -92,7 +92,6 @@ void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleInde
 CPhysCollide::CPhysCollide(btCollisionShape *pShape) {
 	m_pShape = pShape;
 	m_pShape->setUserPointer(this);
-	m_pNullPtr = (void *)0x0;
 
 	m_massCenter.setZero();
 }
@@ -501,7 +500,9 @@ void CPhysicsCollision::CollideSetScale(CPhysCollide *pCollide, const Vector &sc
 		btCompoundShape *pCompound = pCollide->GetCompoundShape();
 
 		btVector3 bullScale;
-		ConvertDirectionToBull(scale, bullScale);
+		bullScale.setX(scale.x);
+		bullScale.setY(scale.z);
+		bullScale.setZ(scale.y);
 
 		pCompound->setLocalScaling(bullScale);
 	}
@@ -514,7 +515,9 @@ void CPhysicsCollision::CollideGetScale(const CPhysCollide *pCollide, Vector &ou
 		const btCompoundShape *pCompound = pCollide->GetCompoundShape();
 
 		btVector3 scale = pCompound->getLocalScaling();
-		ConvertDirectionToHL(scale, out);
+		out.x = scale.getX();
+		out.y = scale.getZ();
+		out.z = scale.getY();
 	}
 }
 
@@ -886,7 +889,7 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	
 	// cone
 	btScalar coneHeight = ConvertDistanceToBull(truncatedCone.h);
-	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta)) * coneHeight; // FIXME: Does the theta correspond to the radius or diameter of the bottom?
+	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta/2)) * coneHeight; // FIXME: Does the theta correspond to the radius or diameter of the bottom?
 
 	btConeShape *cone = new btConeShape(coneRadius, coneHeight);
 

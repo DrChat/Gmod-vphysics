@@ -65,7 +65,6 @@ class CPhysCollide {
 		}
 
 	private:
-		void *m_pNullPtr; // DEBUG: Deals with anything still casting this
 		btCollisionShape *m_pShape;
 
 		btVector3 m_massCenter;
