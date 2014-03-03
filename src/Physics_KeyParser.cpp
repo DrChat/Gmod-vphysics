@@ -359,11 +359,11 @@ void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering,
 		const char *key = data->GetName();
 
 		if (!Q_stricmp(key, "degreesSlow"))
-			steering.degreesBoost = data->GetFloat();
+			steering.degreesSlow = data->GetFloat();
 		else if (!Q_stricmp(key, "degreesFast"))
 			steering.degreesFast = data->GetFloat();
 		else if (!Q_stricmp(key, "degreesBoost"))
-			steering.degreesSlow = data->GetFloat();
+			steering.degreesBoost = data->GetFloat();
 		else if (!Q_stricmp(key, "steeringExponent"))
 			steering.steeringExponent = data->GetFloat();
 		else if (!Q_stricmp(key, "slowcarspeed"))
