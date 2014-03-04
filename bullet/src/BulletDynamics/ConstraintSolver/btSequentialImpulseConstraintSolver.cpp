@@ -1539,6 +1539,19 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 		}
 	}
 
+	// Friction callback
+	if (m_pSolveCallback) {
+		for (i = 0; i < numPoolConstraints; i++) {
+			const btSolverConstraint &solveManifold = m_tmpSolverContactConstraintPool[i];
+			btManifoldPoint *pt = (btManifoldPoint *)solveManifold.m_originalContactPoint;
+			btAssert(pt);
+
+			m_pSolveCallback->friction(&m_tmpSolverBodyPool[solveManifold.m_solverBodyIdA],
+										&m_tmpSolverBodyPool[solveManifold.m_solverBodyIdB],
+										&m_tmpSolverContactFrictionConstraintPool[solveManifold.m_frictionIndex]);
+		}
+	}
+
 	numPoolConstraints = m_tmpSolverNonContactConstraintPool.size();
 	for (j=0;j<numPoolConstraints;j++)
 	{

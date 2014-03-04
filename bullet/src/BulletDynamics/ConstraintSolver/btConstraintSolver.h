@@ -42,6 +42,8 @@ class btSolveCallback
 	public:
 		virtual void preSolveContact(btSolverBody *obj0, btSolverBody *obj1, btManifoldPoint *cp) {};
 		virtual void postSolveContact(btSolverBody *obj0, btSolverBody *obj1, btManifoldPoint *cp) {};
+
+		virtual void friction(btSolverBody *obj0, btSolverBody *obj1, btSolverConstraint *fric) {};
 };
 
 class btConstraintSolver
