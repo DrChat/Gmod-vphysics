@@ -55,7 +55,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <FloatingPointModel>Fast</FloatingPointModel>
+      <FloatingPointModel>Strict</FloatingPointModel>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
