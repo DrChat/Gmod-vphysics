@@ -214,10 +214,13 @@ void CPhysicsSoftBody::Transform(const Vector *vec, const QAngle *ang) {
 }
 
 void CPhysicsSoftBody::Scale(const Vector &scale) {
-	btVector3 btscale;
-	ConvertPosToBull(scale, btscale);
+	// No conversion
+	btVector3 btScale;
+	btScale.setX(scale.x);
+	btScale.setY(scale.z);
+	btScale.setZ(scale.y);
 
-	m_pSoftBody->scale(btscale);
+	m_pSoftBody->scale(btScale);
 }
 
 void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, const softbodyparams_t *pParams) {
@@ -225,6 +228,7 @@ void CPhysicsSoftBody::Init(CPhysicsEnvironment *pEnv, btSoftBody *pSoftBody, co
 	m_pSoftBody		= pSoftBody;
 
 	m_pSoftBody->m_cfg.collisions |= btSoftBody::fCollision::VF_SS;
+	m_pSoftBody->m_cfg.viterations = 1;
 	pEnv->GetBulletEnvironment()->addSoftBody(m_pSoftBody);
 }
 

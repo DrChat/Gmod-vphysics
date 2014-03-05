@@ -45,7 +45,7 @@ class IPhysicsSoftBody {
 
 		virtual void	Transform(const matrix3x4_t &mat) = 0;
 		virtual void	Transform(const Vector *vec, const QAngle *ang) = 0;
-		virtual void	Scale(const Vector &scale) = 0;
+		virtual void	Scale(const Vector &scale) = 0; // Scales a softbody. Do this before it's moved from the origin, or bad things will happen!
 
 		virtual IPhysicsEnvironment32 *GetPhysicsEnvironment() const = 0;
 };
