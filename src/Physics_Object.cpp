@@ -283,6 +283,7 @@ void CPhysicsObject::RecheckCollisionFilter() {
 
 		CPhysicsObject *pObj0 = (CPhysicsObject *)pBody0->getUserPointer();
 		CPhysicsObject *pObj1 = (CPhysicsObject *)pBody1->getUserPointer();
+		if (pObj0 != this && pObj1 != this) continue; // Don't check objects that aren't me
 
 		if (pSolver && !pSolver->NeedsCollision(pObj0, pObj1)) {
 			pCache->removeOverlappingPair(pair.m_pProxy0, pair.m_pProxy1, m_pEnv->GetBulletEnvironment()->getDispatcher());
@@ -302,9 +303,9 @@ void CPhysicsObject::SetMass(float mass) {
 	btVector3 inertia = m_pObject->getInvInertiaDiagLocal();
 
 	// Inverse the inverse to get the not inverse (unless in the case that the not inverse is inverse, therefore you must inverse the universe)
-	inertia.setX(SAFE_DIVIDE(1.0, inertia.x()));
-	inertia.setY(SAFE_DIVIDE(1.0, inertia.y()));
-	inertia.setZ(SAFE_DIVIDE(1.0, inertia.z()));
+	inertia.setX(SAFE_DIVIDE(1.0f, inertia.x()));
+	inertia.setY(SAFE_DIVIDE(1.0f, inertia.y()));
+	inertia.setZ(SAFE_DIVIDE(1.0f, inertia.z()));
 
 	m_pObject->setMassProps(mass, inertia);
 }
@@ -321,9 +322,9 @@ Vector CPhysicsObject::GetInertia() const {
 	btVector3 btvec = m_pObject->getInvInertiaDiagLocal();
 
 	// Invert the inverse inertia to get inertia
-	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
-	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
-	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+	btvec.setX(SAFE_DIVIDE(1.0f, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0f, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0f, btvec.z()));
 
 	Vector hlvec;
 	ConvertDirectionToHL(btvec, hlvec);
@@ -344,9 +345,9 @@ void CPhysicsObject::SetInertia(const Vector &inertia) {
 	ConvertDirectionToBull(inertia, btvec);
 	btvec = btvec.absolute();
 
-	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
-	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
-	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+	btvec.setX(SAFE_DIVIDE(1.0f, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0f, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0f, btvec.z()));
 
 	m_pObject->setInvInertiaDiagLocal(btvec);
 	m_pObject->updateInertiaTensor();
@@ -785,7 +786,7 @@ void CPhysicsObject::UpdateShadow(const Vector &targetPosition, const QAngle &ta
 
 int CPhysicsObject::GetShadowPosition(Vector *position, QAngle *angles) const {
 	// Valve vphysics just interpolates current position to next PSI
-	if (!position && !angles) return -1;
+	if (!position && !angles) return m_pEnv->GetNumSubSteps();
 
 	btTransform transform;
 	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
@@ -1158,6 +1159,9 @@ void CPhysicsObject::TransferToEnvironment(CPhysicsEnvironment *pDest) {
 CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
 	if (!pCollisionModel) return NULL;
 
+	// Some checks
+	Assert(position.IsValid() && angles.IsValid());
+
 	btCollisionShape *pShape = (btCollisionShape *)pCollisionModel->GetCollisionShape();
 
 	btTransform massCenterTrans = btTransform::getIdentity();
@@ -1201,6 +1205,10 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 
 CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic) {
 	if (!pEnvironment) return NULL;
+
+	// Some checks
+	// P.S.: Why the fuck does a sphere have angles
+	Assert(position.IsValid() && angles.IsValid());
 
 	// Conversion unnecessary as this is an exposed function.
 	btSphereShape *shape = (btSphereShape *)g_PhysicsCollision.SphereToConvex(radius);
