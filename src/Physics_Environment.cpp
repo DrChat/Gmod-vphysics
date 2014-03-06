@@ -848,6 +848,10 @@ IPhysicsConstraint *CPhysicsEnvironment::CreateGearConstraint(IPhysicsObject *pR
 	return ::CreateGearConstraint(this, pReferenceObject, pAttachedObject, pGroup, gear);
 }
 
+IPhysicsConstraint *CPhysicsEnvironment::CreateUserConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pConstraint) {
+	return ::CreateUserConstraint(this, pReferenceObject, pAttachedObject, pGroup, pConstraint);
+}
+
 void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
 	if (!pConstraint) return;
 

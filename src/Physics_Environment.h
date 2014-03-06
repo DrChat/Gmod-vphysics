@@ -14,6 +14,7 @@ class btBroadphaseInterface;
 class btConstraintSolver;
 class btSoftRigidDynamicsWorld;
 
+class IPhysicsUserConstraint;
 class IController;
 class CDeleteQueue;
 class CCollisionSolver;
@@ -87,6 +88,7 @@ public:
 	IPhysicsConstraint *					CreatePulleyConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_pulleyparams_t &pulley);
 	IPhysicsConstraint *					CreateLengthConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_lengthparams_t &length);
 	IPhysicsConstraint *					CreateGearConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_gearparams_t &gear);
+	IPhysicsConstraint *					CreateUserConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pConstraint);
 
 	void									DestroyConstraint(IPhysicsConstraint *pConstraint);
 

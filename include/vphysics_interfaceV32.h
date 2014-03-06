@@ -18,6 +18,7 @@
 class IPhysicsSoftBody;
 class IPhysicsConstraint;
 class IPhysicsConstraintGroup;
+class IPhysicsUserConstraint;
 
 struct softbodyparams_t;
 struct constraint_gearparams_t;
@@ -36,6 +37,7 @@ abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 		virtual void				DestroySoftBody(IPhysicsSoftBody *pSoftBody) = 0;
 
 		virtual IPhysicsConstraint *CreateGearConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_gearparams_t &gear) = 0;
+		virtual IPhysicsConstraint *CreateUserConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pConstraint) = 0;
 
 		virtual void	SweepConvex(const CPhysConvex *pConvex, const Vector &vecAbsStart, const Vector &vecAbsEnd, const QAngle &vecAngles, unsigned int fMask, IPhysicsTraceFilter *pTraceFilter, trace_t *pTrace) = 0;
 

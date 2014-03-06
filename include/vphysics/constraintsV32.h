@@ -41,7 +41,11 @@ class IPhysicsUserConstraint {
 public:
 	virtual ~IPhysicsUserConstraint() {}
 
-	// WARNING: These functions may not be called on the main thread! Do not do any non-threadsafe operations here!
+	// Optional function. Called when a constraint is destroyed that was attached to this constraint.
+	// No other functions on this user constraint will be called afterwards from that constraint.
+	virtual void			ConstraintDestroyed(IPhysicsConstraint *pConstraint) {}
+
+	// WARNING: The following functions may not be called on the main thread! Do not do any non-threadsafe operations here!
 
 	// Basic constraint info for internal setup
 	virtual void			GetConstraintInfo(IPhysicsObject *pObjA, IPhysicsObject *pObjB, physconstraintinfo_t &info) = 0;

@@ -269,6 +269,7 @@ class btSpringConstraint : public btPoint2PointConstraint {
 			}
 		}
 
+		// FYI: This isn't called if getInfo1 returns 0 rows or less
 		void getInfo2(btConstraintInfo2 *info) {
 			// Positions relative to objects
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
@@ -318,11 +319,11 @@ class btSpringConstraint : public btPoint2PointConstraint {
 			info->m_lowerLimit[0] = 0;
 			info->m_upperLimit[0] = 0;
 
-			// Always solve for stretching, push objects away if it's enabled
+			// Always solve for stretching, push objects away if onlyStretch is false
 			if (currDist > m_length || (!m_onlyStretch && currDist < m_length)) {
 				btScalar deltaX = currDist - m_length;
 
-				// F=kx
+				// F=kx (Hooke's law)
 				btScalar force = m_constant * deltaX;
 				btScalar velFactor = info->fps * m_damping / btScalar(info->m_numIterations);
 
@@ -424,7 +425,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_type = type;
 	m_bRemovedFromEnv = false;
 
-	if (m_type == CONSTRAINT_RAGDOLL) {
+	if (m_type == CONSTRAINT_RAGDOLL || m_type == CONSTRAINT_BALLSOCKET) {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 	} else {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
@@ -477,7 +478,7 @@ void CPhysicsConstraint::SetAngularMotor(float rotSpeed, float maxAngularImpulse
 		btHingeConstraint *pHinge = (btHingeConstraint *)m_pConstraint;
 
 		// FIXME: Probably not the right conversions!
-		pHinge->enableAngularMotor(true, DEG2RAD(rotSpeed), DEG2RAD(maxAngularImpulse));
+		pHinge->enableAngularMotor(true, DEG2RAD(rotSpeed), DEG2RAD(HL2BULL(maxAngularImpulse)));
 	}
 
 	NOT_IMPLEMENTED
