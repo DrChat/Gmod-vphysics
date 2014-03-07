@@ -38,6 +38,7 @@ class btCompoundCollisionAlgorithm  : public btActivatingCollisionAlgorithm
 protected:
 	btAlignedObjectArray<btCollisionAlgorithm*> m_childCollisionAlgorithms;
 	bool m_isSwapped;
+	btManifoldArray m_tmpManifoldArray;
 
 	class btPersistentManifold*	m_sharedManifold;
 	bool					m_ownsManifold;

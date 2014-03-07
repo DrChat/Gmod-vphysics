@@ -243,26 +243,25 @@ void btCompoundCollisionAlgorithm::processCollision (const btCollisionObjectWrap
 	///so we should add a 'refreshManifolds' in the btCollisionAlgorithm
 	{
 		int i;
-		btManifoldArray manifoldArray;
 
-		if (m_childCollisionAlgorithms.size() > 0)
-			manifoldArray.reserve(5); // Predict the size so we don't bother with many reallocs
+		if (m_childCollisionAlgorithms.size() > m_tmpManifoldArray.capacity())
+			m_tmpManifoldArray.reserve(m_childCollisionAlgorithms.size()); // Predict the size so we don't bother with many reallocs
 
 		for (i=0;i<m_childCollisionAlgorithms.size();i++)
 		{
 			if (m_childCollisionAlgorithms[i])
 			{
-				m_childCollisionAlgorithms[i]->getAllContactManifolds(manifoldArray);
-				for (int m=0;m<manifoldArray.size();m++)
+				m_childCollisionAlgorithms[i]->getAllContactManifolds(m_tmpManifoldArray);
+				for (int m=0;m<m_tmpManifoldArray.size();m++)
 				{
-					if (manifoldArray[m]->getNumContacts())
+					if (m_tmpManifoldArray[m]->getNumContacts())
 					{
-						resultOut->setPersistentManifold(manifoldArray[m]);
+						resultOut->setPersistentManifold(m_tmpManifoldArray[m]);
 						resultOut->refreshContactPoints();
 						resultOut->setPersistentManifold(0);//??necessary?
 					}
 				}
-				manifoldArray.resize(0);
+				m_tmpManifoldArray.resize(0);
 			}
 		}
 	}
@@ -294,7 +293,6 @@ void btCompoundCollisionAlgorithm::processCollision (const btCollisionObjectWrap
 				//iterate over all children, perform an AABB check inside ProcessChildShape
 		int numChildren = m_childCollisionAlgorithms.size();
 		int i;
-		btManifoldArray	manifoldArray;
 		const btCollisionShape* childShape = 0;
 		btTransform	orgTrans;
 		btTransform	orgInterpolationTrans;
