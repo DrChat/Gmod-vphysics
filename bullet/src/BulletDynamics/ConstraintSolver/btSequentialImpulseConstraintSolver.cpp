@@ -34,8 +34,7 @@ subject to the following restrictions:
 //#include "btSolverConstraint.h"
 #include "LinearMath/btAlignedObjectArray.h"
 #include <string.h> //for memset
-
-int		gNumSplitImpulseRecoveries = 0;
+#include <math.h> // Finite checks
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 
@@ -196,7 +195,6 @@ void	btSequentialImpulseConstraintSolver::resolveSplitPenetrationImpulseCacheFri
 {
 		if (c.m_rhsPenetration)
         {
-			gNumSplitImpulseRecoveries++;
 			btScalar deltaImpulse = c.m_rhsPenetration-btScalar(c.m_appliedPushImpulse)*c.m_cfm;
 			const btScalar deltaVel1Dotn	=	c.m_contactNormal1.dot(body1.internalGetPushVelocity()) 	+ c.m_relpos1CrossNormal.dot(body1.internalGetTurnVelocity());
 			const btScalar deltaVel2Dotn	=	c.m_contactNormal2.dot(body2.internalGetPushVelocity())		+ c.m_relpos2CrossNormal.dot(body2.internalGetTurnVelocity());
@@ -223,8 +221,6 @@ void	btSequentialImpulseConstraintSolver::resolveSplitPenetrationImpulseCacheFri
 #ifdef USE_SIMD
 	if (!c.m_rhsPenetration)
 		return;
-
-	gNumSplitImpulseRecoveries++;
 
 	__m128 cpAppliedImp = _mm_set1_ps(c.m_appliedPushImpulse);
 	__m128	lowerLimit1 = _mm_set1_ps(c.m_lowerLimit);
@@ -809,7 +805,7 @@ void btSequentialImpulseConstraintSolver::setFrictionConstraintImpulse( btSolver
 
 
 
-
+// Purpose: Convert btPersistentManifold to btSolverConstraint (and friction constraints)
 void	btSequentialImpulseConstraintSolver::convertContact(btPersistentManifold* manifold,const btContactSolverInfo& infoGlobal)
 {
 	btCollisionObject* colObj0=0,*colObj1=0;
@@ -935,6 +931,8 @@ void	btSequentialImpulseConstraintSolver::convertContact(btPersistentManifold* m
 			{
 				cp.m_lateralFrictionDir1 = vel - cp.m_normalWorldOnB * rel_vel;
 				btScalar lat_rel_vel = cp.m_lateralFrictionDir1.length2();
+				btAssert(!isnan(lat_rel_vel) && isfinite(lat_rel_vel)); // Make sure the number is valid
+
 				if (!(infoGlobal.m_solverMode & SOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION) && lat_rel_vel > SIMD_EPSILON)
 				{
 					cp.m_lateralFrictionDir1 *= 1.f/btSqrt(lat_rel_vel);
@@ -1575,7 +1573,7 @@ btScalar btSequentialImpulseConstraintSolver::solveGroupCacheFriendlyFinish(btCo
 	}
 
 
-
+	// Write back the new velocities to the rigid bodies
 	for ( i=0;i<m_tmpSolverBodyPool.size();i++)
 	{
 		btRigidBody* body = m_tmpSolverBodyPool[i].m_originalBody;
