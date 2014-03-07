@@ -400,6 +400,10 @@ class btUserConstraint : public btTypedConstraint {
 			}
 		}
 
+		IPhysicsUserConstraint *getUserConstraint() {
+			return m_pUserConstraint;
+		}
+
 		btScalar getParam(int num, int axis = -1) const {
 			return 0xB16B00B5;
 		}
@@ -420,7 +424,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_pReferenceObject = pReferenceObject;
 	m_pAttachedObject = pAttachedObject;
 	m_pConstraint = pConstraint;
-	m_pGroup = (CPhysicsConstraintGroup *)pGroup; // May be NULL in the case of spring constraints.
+	m_pGroup = (CPhysicsConstraintGroup *)pGroup; // May be NULL.
 	m_pEnv = pEnv;
 	m_type = type;
 	m_bRemovedFromEnv = false;
@@ -445,8 +449,13 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 }
 
 CPhysicsConstraint::~CPhysicsConstraint() {
-	if (!m_bRemovedFromEnv)
+	if (!m_bRemovedFromEnv) {
 		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
+		if (m_type == CONSTRAINT_USER)
+			((btUserConstraint *)m_pConstraint)->getUserConstraint()->ConstraintDestroyed(this);
+
+		m_bRemovedFromEnv = true;
+	}
 
 	if (m_pReferenceObject)
 		m_pReferenceObject->DetachedFromConstraint(this);
@@ -527,6 +536,9 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 	if (!m_bRemovedFromEnv) {
 		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
 		m_bRemovedFromEnv = true;
+
+		if (m_type == CONSTRAINT_USER)
+			((btUserConstraint *)m_pConstraint)->getUserConstraint()->ConstraintDestroyed(this);
 	}
 
 	// Tell the game that this constraint was broken.
