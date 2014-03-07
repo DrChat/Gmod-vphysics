@@ -105,12 +105,7 @@ float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_p
 static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1a) {
 	btQuaternion pt1 = pt0.nearest(pt1a);
 
-	float delta = 0.0f;
-	delta += fabs(pt0.x() - pt1.x());
-	delta += fabs(pt0.y() - pt1.y());
-	delta += fabs(pt0.z() - pt1.z());
-	delta += fabs(pt0.w() - pt1.w());
-	return delta < 1e-8f;
+	return pt0.dot(pt1) > 1 - SIMD_EPSILON;
 }
 
 static bool IsEqual(const btVector3 &pt0, const btVector3 &pt1) {
