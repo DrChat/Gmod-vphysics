@@ -4,7 +4,7 @@
 	#pragma once
 #endif
 
-// NOTE: There can only be up to 15 unique collision groups (short)!
+// NOTE: There can only be up to 16 unique collision groups (data type of short)!
 enum ECollisionGroups {
 	COLGROUP_NONE	= 0,
 	COLGROUP_WORLD	= 1<<1,
@@ -129,7 +129,7 @@ class CPhysicsCollision : public IPhysicsCollision32 {
 
 		// Misc collision shapes
 
-		CPhysConvex *			CylinderToConvex(const Vector &mins, const Vector &maxs);
+		CPhysConvex *			CylinderToConvex(const Vector &mins, const Vector &maxs); // Cylinder. Flat sides are on top/bottom (z axis)
 		CPhysConvex *			ConeToConvex(const float radius, const float height);
 		CPhysConvex *			SphereToConvex(const float radius);
 

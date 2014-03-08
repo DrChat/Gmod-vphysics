@@ -28,7 +28,7 @@ extern IVPhysicsDebugOverlay *g_pDebugOverlay;
 // Low priority, not even used ingame
 class CCollisionQuery : public ICollisionQuery {
 	public:
-		CCollisionQuery(btCollisionShape *pShape) {m_pShape = pShape;}
+		CCollisionQuery(CPhysCollide *pCollide) {m_pCollide = pCollide;}
 
 		// number of convex pieces in the whole solid
 		int					ConvexCount();
@@ -46,12 +46,12 @@ class CCollisionQuery : public ICollisionQuery {
 		void				SetTriangleMaterialIndex(int convexIndex, int triangleIndex, int index7bits);
 
 	private:
-		btCollisionShape *	m_pShape;
+		CPhysCollide *	m_pCollide;
 };
 
 int CCollisionQuery::ConvexCount() {
-	if (m_pShape->isCompound()) {
-		btCompoundShape *pShape = (btCompoundShape *)m_pShape;
+	if (m_pCollide->IsCompound()) {
+		btCompoundShape *pShape = m_pCollide->GetCompoundShape();
 		return pShape->getNumChildShapes();
 	}
 
@@ -59,8 +59,16 @@ int CCollisionQuery::ConvexCount() {
 }
 
 int CCollisionQuery::TriangleCount(int convexIndex) {
+#ifdef USE_CONVEX_TRIANGLES
+	Assert(convexIndex < m_pCollide->GetCompoundShape()->getNumChildShapes());
+	btConvexTriangleMeshShape *pChild = (btConvexTriangleMeshShape *)m_pCollide->GetCompoundShape()->getChildShape(convexIndex);
+
+	//return pChild->getNumVertices
+	return 0;
+#else
 	NOT_IMPLEMENTED
 	return 0;
+#endif
 }
 
 unsigned int CCollisionQuery::GetGameData(int convexIndex) {
@@ -264,6 +272,19 @@ void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
 		delete pShape;
 	} else if (pShape->getShapeType() == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
 		btStridingMeshInterface *pMesh = ((btConvexTriangleMeshShape *)pShape)->getMeshInterface();
+		btTriangleIndexVertexArray *pTriArr = (btTriangleIndexVertexArray *)pMesh;
+		IndexedMeshArray &arr = pTriArr->getIndexedMeshArray();
+		for (int i = arr.size()-1; i >= 0; i--) {
+			btIndexedMesh &mesh = arr[i];
+			unsigned short *indexBase = (unsigned short *)mesh.m_triangleIndexBase;
+			delete [] indexBase;
+
+			btVector3 *vertexBase = (btVector3 *)mesh.m_vertexBase;
+			delete [] vertexBase;
+
+			arr.pop_back();
+		}
+
 		delete pMesh;
 
 		delete pShape;
@@ -679,6 +700,8 @@ static ConVar vphysics_visualizetraces("vphysics_visualizetraces", "0", FCVAR_CH
 
 // TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
+	if (!pCollide || !ptr) return;
+	Assert(!ptr->m_pEnt);
 
 	// 2 Variables used mainly for converting units.
 	btVector3 btvec;
@@ -978,27 +1001,53 @@ static CPhysCollide *LoadIVPS(void *pSolid, bool swap) {
 
 		if (ledge->n_triangles > 0) {
 #ifdef USE_CONVEX_TRIANGLES
-			btTriangleMesh *pMesh = new btTriangleMesh;
+			btTriangleIndexVertexArray *pMesh = new btTriangleIndexVertexArray;
 
-			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)ledge + 1;
+			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1); // Triangles start right after the ledge
+
+			// Make an index array
+			unsigned short *indexes = new unsigned short[ledge->n_triangles * 3];
+			int curIdx = 0;
 			for (int j = 0; j < ledge->n_triangles; j++) {
 				Assert(j == tris[j].tri_index);
 
-				btVector3 verts[3];
-
 				for (int k = 0; k < 3; k++) {
-					short idx = tris[j].c_three_edges[k].start_point_index;
-					float *ivpvert = (float *)(vertices + idx * 16);
-
-					ConvertIVPPosToBull(ivpvert, verts[k]);
+					// Make sure it isn't out of bounds
+					if (curIdx < ledge->n_triangles * 3)
+						indexes[curIdx++] = tris[j].c_three_edges[k].start_point_index;
 				}
-
-				pMesh->addTriangle(verts[0], verts[1], verts[2], true);
 			}
+
+			// Find the maximum index (number of vertices)
+			unsigned short maxIdx = 0;
+			for (int j = 0; j < ledge->n_triangles * 3; j++) {
+				if (indexes[j] > maxIdx) maxIdx = indexes[j];
+			}
+
+			// Convert IVP vertices
+			btVector3 *vertexArray = new btVector3[maxIdx];
+			for (int j = 0; j < maxIdx; j++) {
+				float *ivpVert = (float *)(vertices + j * 16);
+				ConvertIVPPosToBull(ivpVert, vertexArray[j]);
+			}
+
+			// Now set up the mesh
+			btIndexedMesh mesh;
+			mesh.m_numTriangles = ledge->n_triangles;
+
+			mesh.m_numVertices = maxIdx;
+			mesh.m_vertexBase = (unsigned char *)vertexArray;
+			mesh.m_vertexStride = sizeof(btVector3);
+			mesh.m_vertexType = PHY_FLOAT;
+
+			mesh.m_triangleIndexBase = (unsigned char *)indexes;
+			mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
+
+			pMesh->addIndexedMesh(mesh, PHY_SHORT); // And add it (with index type of PHY_SHORT)
 
 			btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
 
-			btTransform trans(btMatrix3x3::getIdentity(), -info->massCenter);
+			btTransform trans(btMatrix3x3::getIdentity(), -pCollide->GetMassCenter());
 			pCompound->addChildShape(trans, pShape);
 #else
 			btConvexHullShape *pConvex = new btConvexHullShape;
@@ -1191,7 +1240,7 @@ void CPhysicsCollision::DestroyDebugMesh(int vertCount, Vector *outVerts) {
 }
 
 ICollisionQuery *CPhysicsCollision::CreateQueryModel(CPhysCollide *pCollide) {
-	return new CCollisionQuery(pCollide->GetCollisionShape());
+	return new CCollisionQuery(pCollide);
 }
 
 void CPhysicsCollision::DestroyQueryModel(ICollisionQuery *pQuery) {
@@ -1223,6 +1272,7 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	mesh.m_numVertices = list.vertexCount;
 	mesh.m_numTriangles = list.triangleCount;
 
+	// Copy the array (because this is needed to exist for the lifetime of the triangle)
 	unsigned short *indexArray = new unsigned short[list.indexCount];
 	mesh.m_triangleIndexBase = (unsigned char *)indexArray;
 	mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
