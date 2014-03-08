@@ -455,7 +455,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 			const btCollisionShape *pShape = pCompound->getChildShape(i);
 			if (pShape->isConvex()) {
 				const btConvexShape *pConvex = (const btConvexShape *)pShape;
-				btVector3 extents = pConvex->localGetSupportingVertexWithoutMargin(btDirection);
+				btVector3 extents = pConvex->localGetSupportingVertex(btDirection);
 
 				if (extents.length2() > maxLength2) {
 					maxExtents = extents;
@@ -478,7 +478,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 		return hlVec;
 	} else if (pCollide->IsConvex()) {
 		const btConvexShape *pConvex = pCollide->GetConvexShape();
-		btVector3 maxExtents = pConvex->localGetSupportingVertexWithoutMargin(btDirection);
+		btVector3 maxExtents = pConvex->localGetSupportingVertex(btDirection);
 
 		btVector3 vec = trans * maxExtents;
 		Vector hlVec;
