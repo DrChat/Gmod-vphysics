@@ -44,6 +44,22 @@ class CPhysCollide {
 			return (btCompoundShape *)m_pShape;
 		}
 
+		const btConvexShape *GetConvexShape() const {
+			Assert(IsConvex());
+			if (!IsConvex())
+				return NULL;
+
+			return (btConvexShape *)m_pShape;
+		}
+
+		btConvexShape *GetConvexShape() {
+			Assert(IsConvex());
+			if (!IsConvex())
+				return NULL;
+
+			return (btConvexShape *)m_pShape;
+		}
+
 		void SetMassCenter(const btVector3 &center) {
 			m_massCenter = center;
 		}

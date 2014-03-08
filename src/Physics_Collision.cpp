@@ -433,18 +433,67 @@ float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
 }
 
 // This'll return the farthest possible vector that's still within our collision mesh.
-// direction argument is a normalized Vector, literally a direction. (to/from the center?)
-// TODO: Methods on doing this?
-// Does bullet provide any APIs for doing this?
-// Should we do a raytrace that starts outside of our mesh and goes inwards?
-// From what I gather, valve does this by going through the vertices and returning the one with the nearest dot product to the direction.
 Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, const Vector &direction) {
 	if (!pCollide) return collideOrigin;
 
-	const btCollisionShape *pShape = pCollide->GetCollisionShape();
-	// TODO: Convex shapes have localGetSupportingVertex defined, but compounds don't!
+	btVector3 btDirection;
+	ConvertDirectionToBull(direction, btDirection);
 
-	NOT_IMPLEMENTED
+	btVector3 origin;
+	btQuaternion angles;
+	ConvertPosToBull(collideOrigin, origin);
+	ConvertRotationToBull(collideAngles, angles);
+
+	btTransform trans(angles, origin);
+
+	if (pCollide->IsCompound()) {
+		btVector3 maxExtents(0, 0, 0);
+		btScalar maxLength2 = 0;
+
+		const btCompoundShape *pCompound = pCollide->GetCompoundShape();
+		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+			const btCollisionShape *pShape = pCompound->getChildShape(i);
+			if (pShape->isConvex()) {
+				const btConvexShape *pConvex = (const btConvexShape *)pShape;
+				btVector3 extents = pConvex->localGetSupportingVertexWithoutMargin(btDirection);
+
+				if (extents.length2() > maxLength2) {
+					maxExtents = extents;
+					maxLength2 = extents.length2();
+				}
+			}
+		}
+
+		btVector3 vec = trans * maxExtents;
+		Vector hlVec;
+		ConvertPosToHL(vec, hlVec);
+
+		/*
+		if (g_pDebugOverlay) {
+			g_pDebugOverlay->AddLineOverlay(collideOrigin, hlVec, 0, 255, 0, true, 5.f);
+			g_pDebugOverlay->AddBoxOverlay(hlVec, Vector(-4, -4, -4), Vector(4, 4, 4), QAngle(0, 0, 0), 255, 0, 0, 255, 5.f);
+		}
+		*/
+
+		return hlVec;
+	} else if (pCollide->IsConvex()) {
+		const btConvexShape *pConvex = pCollide->GetConvexShape();
+		btVector3 maxExtents = pConvex->localGetSupportingVertexWithoutMargin(btDirection);
+
+		btVector3 vec = trans * maxExtents;
+		Vector hlVec;
+		ConvertPosToHL(vec, hlVec);
+
+		/*
+		if (g_pDebugOverlay) {
+			g_pDebugOverlay->AddLineOverlay(collideOrigin, hlVec, 0, 255, 0, true, 5.f);
+			g_pDebugOverlay->AddBoxOverlay(hlVec, Vector(-4, -4, -4), Vector(4, 4, 4), QAngle(0, 0, 0), 255, 0, 0, 255, 5.f);
+		}
+		*/
+
+		return hlVec;
+	}
+
 	return collideOrigin;
 }
 
