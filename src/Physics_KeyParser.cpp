@@ -28,7 +28,7 @@ static void ReadVector4D(const char *pString, Vector4D &out) {
 
 CPhysicsKeyParser::CPhysicsKeyParser(const char *pKeyValues) {
 	m_pKeyValues = new KeyValues("CPhysicsKeyParser");
-	m_pKeyValues->LoadFromBuffer("CPhysicsKeyParser", pKeyValues);
+	m_pKeyValues->LoadFromBuffer("(unknown file)", pKeyValues);
 	m_pCurrentBlock = m_pKeyValues;
 }
 
@@ -88,6 +88,8 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 		//else if (!Q_stricmp(key, "rollingdrag")) // This is in vphysics.so but it doesn't seem to set any variables.
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
+		else
+			DevWarning("KeyParser ParseSolid: Unknown Key %s\n", key);
 	}
 
 	NextBlock();
@@ -116,6 +118,8 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 			ReadVector(data->GetString(), pFluid->params.currentVelocity);
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pFluid, key, data->GetString());
+		else
+			DevWarning("KeyParser ParseFluid: Unknown Key %s\n", key);
 	}
 
 	NextBlock();
@@ -135,7 +139,7 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 
 		if (!Q_stricmp(key, "parent"))
 			pConstraint->parentIndex = data->GetInt();
-		if (!Q_stricmp(key, "child"))
+		else if (!Q_stricmp(key, "child"))
 			pConstraint->childIndex = data->GetInt();
 		else if (!Q_stricmp(key, "xmin"))
 			pConstraint->axes[0].minRotation = data->GetFloat();
@@ -163,6 +167,8 @@ void CPhysicsKeyParser::ParseRagdollConstraint(constraint_ragdollparams_t *pCons
 		}
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pConstraint, key, data->GetString());
+		else
+			DevWarning("KeyParser ParseRagdollConstraint: Unknown Key %s\n", key);
 	}
 
 	NextBlock();
@@ -218,6 +224,8 @@ void CPhysicsKeyParser::ParseVehicle(vehicleparams_t *pVehicle, IVPhysicsKeyHand
 			ParseVehicleAxle(pVehicle->axles[pVehicle->axleCount++], data);
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pVehicle, key, data->GetString());
+		else
+			DevWarning("KeyParser ParseVehicle: Unknown Key %s\n", key);
 	}
 
 	NextBlock();
@@ -236,6 +244,8 @@ void CPhysicsKeyParser::ParseVehicleAxle(vehicle_axleparams_t &axle, KeyValues *
 			axle.torqueFactor = data->GetFloat();
 		else if (!Q_stricmp(key, "brakefactor"))
 			axle.brakeFactor = data->GetFloat();
+		else
+			DevWarning("KeyParser ParseVehicleAxle: Unknown Key %s\n", key);
 	}
 }
 
@@ -261,6 +271,8 @@ void CPhysicsKeyParser::ParseVehicleWheel(vehicle_wheelparams_t &wheel, KeyValue
 			wheel.skidMaterialIndex = data->GetInt();
 		else if (!Q_stricmp(key, "brakematerial"))
 			wheel.brakeMaterialIndex = data->GetInt();
+		else
+			DevWarning("KeyParser ParseVehicleWheel: Unknown Key %s\n", key);
 	}
 }
 
@@ -278,6 +290,8 @@ void CPhysicsKeyParser::ParseVehicleSuspension(vehicle_suspensionparams_t &suspe
 			suspension.springDampingCompression = data->GetFloat();
 		else if (!Q_stricmp(key, "maxBodyForce"))
 			suspension.maxBodyForce = data->GetFloat();
+		else
+			DevWarning("KeyParser ParseVehicleSuspension: Unknown Key %s\n", key);
 	}
 }
 
@@ -301,6 +315,8 @@ void CPhysicsKeyParser::ParseVehicleBody(vehicle_bodyparams_t &body, KeyValues *
 			body.tiltForceHeight = data->GetFloat();
 		else if (!Q_stricmp(key, "keepuprighttorque"))
 			body.keepUprightTorque = data->GetFloat();
+		else
+			DevWarning("KeyParser ParseVehicleBody: Unknown Key %s\n", key);
 	}
 }
 
@@ -334,6 +350,8 @@ void CPhysicsKeyParser::ParseVehicleEngine(vehicle_engineparams_t &engine, KeyVa
 			engine.shiftDownRPM = data->GetFloat();
 		else if (!Q_stricmp(key, "boost"))
 			ParseVehicleEngineBoost(engine, data);
+		else
+			DevWarning("KeyParser ParseVehicleEngine: Unknown Key %s\n", key);
 	}
 }
 
@@ -351,6 +369,8 @@ void CPhysicsKeyParser::ParseVehicleEngineBoost(vehicle_engineparams_t &engine, 
 			engine.torqueBoost = data->GetInt() > 0;
 		else if (!Q_stricmp(key, "maxspeed"))
 			engine.boostMaxSpeed = data->GetFloat();
+		else
+			DevWarning("KeyParser ParseVehicleEngineBoost: Unknown Key %s\n", key);
 	}
 }
 
@@ -396,5 +416,7 @@ void CPhysicsKeyParser::ParseVehicleSteering(vehicle_steeringparams_t &steering,
 			steering.isSkidAllowed = data->GetInt() > 0;
 		else if (!Q_stricmp(key, "dustcloud"))
 			steering.dustCloud = data->GetInt() > 0;
+		else
+			DevWarning("KeyParser ParseVehicleSteering: Unknown Key %s\n", key);
 	}
 }
