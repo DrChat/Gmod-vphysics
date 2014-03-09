@@ -21,8 +21,6 @@ subject to the following restrictions:
 #include "btVector3.h"
 #include "btMinMax.h"
 
-
-
 SIMD_FORCE_INLINE void AabbExpand (btVector3& aabbMin,
 								   btVector3& aabbMax,
 								   const btVector3& expansionMin,
@@ -48,7 +46,7 @@ SIMD_FORCE_INLINE bool TestPointAgainstAabb2(const btVector3 &aabbMin1, const bt
 SIMD_FORCE_INLINE bool TestAabbAgainstAabb2(const btVector3 &aabbMin1, const btVector3 &aabbMax1,
 								const btVector3 &aabbMin2, const btVector3 &aabbMax2)
 {
-#ifdef BT_USE_SSE_IN_API
+#if defined(BT_USE_SSE) && defined(BT_USE_SSE_IN_API)
 	__m128 a = _mm_cmpgt_ps(aabbMin1.mVec128, aabbMax2.mVec128); // If true, sets all bits to 1, otherwise 0
 	__m128 b = _mm_cmplt_ps(aabbMax1.mVec128, aabbMin2.mVec128); // If true, sets all bits to 1, otherwise 0
 	__m128 r = _mm_or_ps(a, b); // Bitwise OR
