@@ -60,6 +60,18 @@ class CPhysCollide {
 			return (btConvexShape *)m_pShape;
 		}
 
+		void SetRotationInertia(const btVector3 &inertia) {
+			m_rotInertia = inertia;
+		}
+
+		btVector3 &GetRotationInertia() {
+			return m_rotInertia;
+		}
+
+		const btVector3 &GetRotationInertia() const {
+			return m_rotInertia;
+		}
+
 		void SetMassCenter(const btVector3 &center) {
 			m_massCenter = center;
 		}
@@ -83,6 +95,7 @@ class CPhysCollide {
 	private:
 		btCollisionShape *m_pShape;
 
+		btVector3 m_rotInertia;
 		btVector3 m_massCenter;
 };
 

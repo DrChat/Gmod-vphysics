@@ -12,7 +12,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define COLLISION_MARGIN 0.004 // 4 mm
+#define COLLISION_MARGIN 0.015 // 15 mm
 
 // Use btConvexTriangleMeshShape instead of btConvexHullShape?
 //#define USE_CONVEX_TRIANGLES
@@ -445,6 +445,7 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 	ConvertRotationToBull(collideAngles, angles);
 
 	btTransform trans(angles, origin);
+	trans *= btTransform(btQuaternion::getIdentity(), pCollide->GetMassCenter());
 
 	if (pCollide->IsCompound()) {
 		btVector3 maxExtents(0, 0, 0);
@@ -750,7 +751,13 @@ static ConVar vphysics_visualizetraces("vphysics_visualizetraces", "0", FCVAR_CH
 // TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
 	if (!pCollide || !ptr) return;
-	Assert(!ptr->m_pEnt);
+
+	// Clear the trace
+	memset(ptr, 0, sizeof(trace_t));
+	ptr->fraction = 1.f;
+	ptr->fractionleftsolid = 0;
+	ptr->surface.flags = 0;
+	ptr->surface.name = "**empty**";
 
 	// 2 Variables used mainly for converting units.
 	btVector3 btvec;
@@ -975,20 +982,117 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	return false;
 }
 
-// Purpose: Recursive function that goes through the entire ledge tree and adds ledges
-static void GetAllLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
-	if (!node || !vecOut) return;
+static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
+	btConvexShape *pConvexOut = NULL;
 
-	if (node->IsTerminal()) {
-		vecOut->AddToTail(node->GetCompactLedge());
-	} else {
-		const ivpcompactledgenode_t *rs = node->GetRightSon();
-		const ivpcompactledgenode_t *ls = node->GetLeftSon();
-		GetAllLedges(rs, vecOut);
-		GetAllLedges(ls, vecOut);
+	// Large array of all the vertices
+	const char *vertices = (const char *)ledge + ledge->c_point_offset;
+
+	if (ledge->n_triangles > 0) {
+#ifdef USE_CONVEX_TRIANGLES
+		btTriangleIndexVertexArray *pMesh = new btTriangleIndexVertexArray;
+
+		const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1); // Triangles start right after the ledge
+
+		// Make an index array
+		unsigned short *indexes = new unsigned short[ledge->n_triangles * 3];
+		int curIdx = 0;
+		for (int j = 0; j < ledge->n_triangles; j++) {
+			Assert(j == tris[j].tri_index);
+
+			for (int k = 0; k < 3; k++) {
+				// Make sure it isn't out of bounds
+				if (curIdx < ledge->n_triangles * 3)
+					indexes[curIdx++] = tris[j].c_three_edges[k].start_point_index;
+			}
+		}
+
+		// Find the maximum index (number of vertices)
+		unsigned short maxIdx = 0;
+		for (int j = 0; j < ledge->n_triangles * 3; j++) {
+			if (indexes[j] > maxIdx) maxIdx = indexes[j];
+		}
+
+		// Convert IVP vertices
+		btVector3 *vertexArray = new btVector3[maxIdx];
+		for (int j = 0; j < maxIdx; j++) {
+			float *ivpVert = (float *)(vertices + j * 16);
+			ConvertIVPPosToBull(ivpVert, vertexArray[j]);
+		}
+
+		// Now set up the mesh
+		btIndexedMesh mesh;
+		mesh.m_numTriangles = ledge->n_triangles;
+
+		mesh.m_numVertices = maxIdx;
+		mesh.m_vertexBase = (unsigned char *)vertexArray;
+		mesh.m_vertexStride = sizeof(btVector3);
+		mesh.m_vertexType = PHY_FLOAT;
+
+		mesh.m_triangleIndexBase = (unsigned char *)indexes;
+		mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
+
+		pMesh->addIndexedMesh(mesh, PHY_SHORT); // And add it (with index type of PHY_SHORT)
+
+		btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
+
+		pConvexOut = pShape;
+#else
+		btConvexHullShape *pConvex = new btConvexHullShape;
+		pConvex->setMargin(COLLISION_MARGIN);
+
+		const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1);
+
+		// This code will find all unique indexes and add them to an array. This avoids
+		// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
+		// If you find a better way you can replace this!
+		CUtlVector<uint16> indexes;
+
+		for (int j = 0; j < ledge->n_triangles; j++) {
+			Assert((uint)j == tris[j].tri_index);
+
+			for (int k = 0; k < 3; k++) {
+				uint16 index = tris[j].c_three_edges[k].start_point_index;
+
+				bool shouldAdd = indexes.Find(index) == -1;
+
+				if (shouldAdd) {
+					indexes.AddToTail(index);
+				}
+			}
+		}
+
+		for (int j = 0; j < indexes.Count(); j++) {
+			uint16 index = indexes[j];
+
+			float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
+
+			btVector3 vertex;
+			ConvertIVPPosToBull(ivpvert, vertex);
+			pConvex->addPoint(vertex);
+		}
+
+		pConvexOut = pConvex;
+#endif
+	}
+
+	return pConvexOut;
+}
+
+static void GetAllMOPPLedges(const ivpcompactmopp_t *mopp, CUtlVector<const ivpcompactledge_t *> *vecOut) {
+	char *ledge = (char *)mopp + mopp->offset_ledges + mopp->size_convex_hull;
+	char *points = ledge + ((ivpcompactledge_t *)ledge)->c_point_offset;
+
+	// Loop until we hit the vertex array
+	while (ledge < points) {
+		Assert(((ivpcompactledge_t *)ledge)->for_future_use == 0); // Validity check
+
+		vecOut->AddToTail((ivpcompactledge_t *)ledge);
+		ledge += ((ivpcompactledge_t *)ledge)->size_div_16 * 16;
 	}
 }
 
+// A MOPP is a collection of ivpcompactledges
 static CPhysCollide *LoadMOPP(void *pSolid, bool swap) {
 	// Parse MOPP surface header
 	//const moppsurfaceheader_t *moppSurface = (moppsurfaceheader_t *)((char *)pSolid + sizeof(collideheader_t));
@@ -998,8 +1102,16 @@ static CPhysCollide *LoadMOPP(void *pSolid, bool swap) {
 		return NULL;
 	}
 
-	btCompoundShape *pCompound = new btCompoundShape;
-	pCompound->setMargin(COLLISION_MARGIN);
+	CUtlVector<const ivpcompactledge_t *> ledges;
+	GetAllMOPPLedges(ivpmopp, &ledges);
+	DevMsg("MOPP with %d ledges\n", ledges.Count());
+
+	btCompoundShape *pCompound = NULL;
+	
+	if (ledges.Count() == 1)
+		pCompound = new btCompoundShape(false); // Pointless for an AABB tree if it's just one convex
+	else
+		pCompound = new btCompoundShape();
 
 	CPhysCollide *pCollide = new CPhysCollide(pCompound);
 
@@ -1007,11 +1119,30 @@ static CPhysCollide *LoadMOPP(void *pSolid, bool swap) {
 	ConvertIVPPosToBull(ivpmopp->mass_center, massCenter);
 	pCollide->SetMassCenter(massCenter);
 
-	delete pCompound;
-	delete pCollide;
+	pCompound->setMargin(COLLISION_MARGIN);
 
-	NOT_IMPLEMENTED
-	return NULL;
+	for (int i = 0; i < ledges.Count(); i++) {
+		const ivpcompactledge_t *ledge = ledges[i];
+
+		btTransform offsetTrans(btMatrix3x3::getIdentity(), -pCollide->GetMassCenter());
+		pCompound->addChildShape(offsetTrans, LedgeToConvex(ledge));
+	}
+
+	return pCollide;
+}
+
+// Purpose: Recursive function that goes through the entire ledge tree and adds ledges
+static void GetAllIVPSLedges(const ivpcompactledgenode_t *node, CUtlVector<const ivpcompactledge_t *> *vecOut) {
+	if (!node || !vecOut) return;
+
+	if (node->IsTerminal()) {
+		vecOut->AddToTail(node->GetCompactLedge());
+	} else {
+		const ivpcompactledgenode_t *rs = node->GetRightSon();
+		const ivpcompactledgenode_t *ls = node->GetLeftSon();
+		GetAllIVPSLedges(rs, vecOut);
+		GetAllIVPSLedges(ls, vecOut);
+	}
 }
 
 static CPhysCollide *LoadIVPS(void *pSolid, bool swap) {
@@ -1025,7 +1156,7 @@ static CPhysCollide *LoadIVPS(void *pSolid, bool swap) {
 
 	// Add all of the ledges up
 	CUtlVector<const ivpcompactledge_t *> ledges;
-	GetAllLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
+	GetAllIVPSLedges((const ivpcompactledgenode_t *)((char *)ivpsurface + ivpsurface->offset_ledgetree_root), &ledges);
 
 	btCompoundShape *pCompound = NULL;
 	
@@ -1040,109 +1171,16 @@ static CPhysCollide *LoadIVPS(void *pSolid, bool swap) {
 	ConvertIVPPosToBull(ivpsurface->mass_center, massCenter);
 	pCollide->SetMassCenter(massCenter);
 
+	// No conversion necessary (IVP in meters and we don't need to flip any axes)
+	pCollide->SetRotationInertia(btVector3(ivpsurface->rotation_inertia[0], ivpsurface->rotation_inertia[1], ivpsurface->rotation_inertia[2]));
+
 	pCompound->setMargin(COLLISION_MARGIN);
 
 	for (int i = 0; i < ledges.Count(); i++) {
 		const ivpcompactledge_t *ledge = ledges[i];
 
-		// Large array of all the vertices
-		const char *vertices = (const char *)ledge + ledge->c_point_offset;
-
-		if (ledge->n_triangles > 0) {
-#ifdef USE_CONVEX_TRIANGLES
-			btTriangleIndexVertexArray *pMesh = new btTriangleIndexVertexArray;
-
-			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1); // Triangles start right after the ledge
-
-			// Make an index array
-			unsigned short *indexes = new unsigned short[ledge->n_triangles * 3];
-			int curIdx = 0;
-			for (int j = 0; j < ledge->n_triangles; j++) {
-				Assert(j == tris[j].tri_index);
-
-				for (int k = 0; k < 3; k++) {
-					// Make sure it isn't out of bounds
-					if (curIdx < ledge->n_triangles * 3)
-						indexes[curIdx++] = tris[j].c_three_edges[k].start_point_index;
-				}
-			}
-
-			// Find the maximum index (number of vertices)
-			unsigned short maxIdx = 0;
-			for (int j = 0; j < ledge->n_triangles * 3; j++) {
-				if (indexes[j] > maxIdx) maxIdx = indexes[j];
-			}
-
-			// Convert IVP vertices
-			btVector3 *vertexArray = new btVector3[maxIdx];
-			for (int j = 0; j < maxIdx; j++) {
-				float *ivpVert = (float *)(vertices + j * 16);
-				ConvertIVPPosToBull(ivpVert, vertexArray[j]);
-			}
-
-			// Now set up the mesh
-			btIndexedMesh mesh;
-			mesh.m_numTriangles = ledge->n_triangles;
-
-			mesh.m_numVertices = maxIdx;
-			mesh.m_vertexBase = (unsigned char *)vertexArray;
-			mesh.m_vertexStride = sizeof(btVector3);
-			mesh.m_vertexType = PHY_FLOAT;
-
-			mesh.m_triangleIndexBase = (unsigned char *)indexes;
-			mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
-
-			pMesh->addIndexedMesh(mesh, PHY_SHORT); // And add it (with index type of PHY_SHORT)
-
-			btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
-
-			btTransform trans(btMatrix3x3::getIdentity(), -pCollide->GetMassCenter());
-			pCompound->addChildShape(trans, pShape);
-#else
-			btConvexHullShape *pConvex = new btConvexHullShape;
-			pConvex->setMargin(COLLISION_MARGIN);
-
-			const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1);
-
-			// This code will find all unique indexes and add them to an array. This avoids
-			// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
-			// If you find a better way you can replace this!
-			CUtlVector<uint16> indexes;
-
-			for (int j = 0; j < ledge->n_triangles; j++) {
-				Assert((uint)j == tris[j].tri_index);
-
-				for (int k = 0; k < 3; k++) {
-					uint16 index = tris[j].c_three_edges[k].start_point_index;
-
-					bool shouldAdd = true;
-					for (int l = 0; l < indexes.Count(); l++) {
-						if (indexes[l] == index) {
-							shouldAdd = false;
-							break;
-						}
-					}
-
-					if (shouldAdd) {
-						indexes.AddToTail(index);
-					}
-				}
-			}
-
-			for (int j = 0; j < indexes.Count(); j++) {
-				uint16 index = indexes[j];
-
-				float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
-
-				btVector3 vertex;
-				ConvertIVPPosToBull(ivpvert, vertex);
-				pConvex->addPoint(vertex);
-			}
-
-			btTransform offsetTrans(btMatrix3x3::getIdentity(), -pCollide->GetMassCenter());
-			pCompound->addChildShape(offsetTrans, pConvex);
-#endif
-		}
+		btTransform offsetTrans(btMatrix3x3::getIdentity(), -pCollide->GetMassCenter());
+		pCompound->addChildShape(offsetTrans, LedgeToConvex(ledge));
 	}
 
 	return pCollide;
