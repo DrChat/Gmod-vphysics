@@ -106,7 +106,7 @@ bool CPlayerController::IsInContact() {
 				pPhysOther = (CPhysicsObject *)obA->getUserPointer();
 			}
 
-			if (pPhysOther->IsStatic() || (pPhysOther->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION))
+			if (pPhysOther->IsStatic() || !pPhysOther->IsMotionEnabled() || (pPhysOther->GetCallbackFlags() & CALLBACK_SHADOW_COLLISION))
 				continue;
 
 			return true;
@@ -133,13 +133,20 @@ void CPlayerController::MaxSpeed(const Vector &maxVelocity) {
 	m_maxSpeed = available.absolute();
 }
 
+// Called when the game wants to swap hulls (such as from standing to crouching)
 void CPlayerController::SetObject(IPhysicsObject *pObject) {
 	if (pObject == m_pObject)
 		return;
 
+	// HACK: Freeze our current object (so it doesn't fall through the world and create nastiness when the AABB overflows)
+	m_pObject->EnableMotion(false);
+
 	DetachObject();
 	m_pObject = (CPhysicsObject *)pObject;
 	AttachObject();
+
+	// Enable motion for our new object
+	m_pObject->EnableMotion(true);
 }
 
 int CPlayerController::GetShadowPosition(Vector *position, QAngle *angles) {
@@ -306,7 +313,7 @@ bool CPlayerController::TryTeleportObject() {
 	btTransform trans = body->getWorldTransform();
 	trans.setOrigin(m_targetPosition);
 
-	body->setWorldTransform(trans  * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset);
+	body->setWorldTransform(trans * ((btMassCenterMotionState *)body->getMotionState())->m_centerOfMassOffset);
 	((btMassCenterMotionState *)body->getMotionState())->setGraphicTransform(trans);
 
 	return true;
