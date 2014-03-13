@@ -582,7 +582,13 @@ void CPhysicsObject::GetImplicitVelocity(Vector *velocity, AngularImpulse *angul
 	if (!velocity && !angularVelocity) return;
 
 	// gets the velocity actually moved by the object in the last simulation update
-	NOT_IMPLEMENTED
+	btTransform frameMotion = m_pObject->getWorldTransform().inverse() * m_pObject->getInterpolationWorldTransform();
+
+	if (velocity)
+		ConvertPosToHL(frameMotion.getOrigin(), *velocity);
+
+	if (angularVelocity)
+		ConvertAngularImpulseToHL(frameMotion.getRotation().getAxis() * frameMotion.getRotation().getAngle(), *angularVelocity);
 }
 
 void CPhysicsObject::LocalToWorld(Vector *worldPosition, const Vector &localPosition) const {
@@ -1191,7 +1197,8 @@ CPhysicsObject *CreatePhysicsObject(CPhysicsEnvironment *pEnvironment, const CPh
 			inertiaCoeff.setValue(pParams->inertia, pParams->inertia, pParams->inertia);
 
 		pShape->calculateLocalInertia(mass, inertia);
-		inertia *= inertiaCoeff;
+		//inertia = pCollisionModel->GetRotationInertia();
+		//inertia *= inertiaCoeff * mass;
 	}
 
 	btRigidBody::btRigidBodyConstructionInfo info(mass, pMotionState, pShape, inertia);
