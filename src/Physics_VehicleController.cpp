@@ -13,9 +13,9 @@
 #include "tier0/memdbgon.h"
 
 // MPH2INS: 1(miles/hr) = 0.44704(meters/sec)
-#define MPH2MS(x) ((x) * 0.44704)
+#define MPH2MS(x) ((x) * 0.44704f)
 // KMH2MS: 1(km/h) = 0.27777778(meters/sec)
-#define KMH2MS(x) ((x) * 0.27777778)
+#define KMH2MS(x) ((x) * 0.27777778f)
 
 /*********************************
 * MISC CLASSES
