@@ -717,10 +717,12 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btVector3 angUpperLimit;
 	btVector3 angLowerLimit;
 
+	bool bClockwise = ragdoll.useClockwiseRotations;
+
 	btRotationalLimitMotor *motor = pConstraint->getRotationalLimitMotor(0);
 	constraint_axislimit_t limit = ragdoll.axes[0];
-	angUpperLimit.m_floats[0] = DEG2RAD(limit.maxRotation);
-	angLowerLimit.m_floats[0] = DEG2RAD(limit.minRotation);
+	angUpperLimit.m_floats[0] = bClockwise ? -DEG2RAD(limit.maxRotation) : DEG2RAD(limit.maxRotation);
+	angLowerLimit.m_floats[0] = bClockwise ? -DEG2RAD(limit.minRotation) : DEG2RAD(limit.minRotation);
 	if (limit.torque != 0) {
 		motor->m_enableMotor = true;
 		motor->m_targetVelocity = DEG2RAD(limit.angularVelocity);
@@ -730,8 +732,8 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	// FIXME: Correct?
 	motor = pConstraint->getRotationalLimitMotor(2);
 	limit = ragdoll.axes[2];
-	angUpperLimit.m_floats[1] = DEG2RAD(limit.maxRotation);
-	angLowerLimit.m_floats[1] = DEG2RAD(limit.minRotation);
+	angUpperLimit.m_floats[1] = bClockwise ? -DEG2RAD(limit.maxRotation) : DEG2RAD(limit.maxRotation);
+	angLowerLimit.m_floats[1] = bClockwise ? -DEG2RAD(limit.minRotation) : DEG2RAD(limit.minRotation);
 	if (limit.torque != 0) {
 		motor->m_enableMotor = true;
 		motor->m_targetVelocity = DEG2RAD(limit.angularVelocity);
@@ -740,13 +742,17 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 
 	motor = pConstraint->getRotationalLimitMotor(1);
 	limit = ragdoll.axes[1];
-	angUpperLimit.m_floats[2] = DEG2RAD(-limit.minRotation);
-	angLowerLimit.m_floats[2] = DEG2RAD(-limit.maxRotation);
+	angUpperLimit.m_floats[2] = bClockwise ? -DEG2RAD(limit.maxRotation) : DEG2RAD(limit.maxRotation);
+	angLowerLimit.m_floats[2] = bClockwise ? -DEG2RAD(limit.minRotation) : DEG2RAD(limit.minRotation);
 	if (limit.torque != 0) {
 		motor->m_enableMotor = true;
 		motor->m_targetVelocity = DEG2RAD(-limit.angularVelocity);
 		motor->m_maxMotorForce = DEG2RAD(HL2BULL(-limit.torque));
 	}
+
+	Assert(	angLowerLimit.x() <= angUpperLimit.x() &&
+			angLowerLimit.y() <= angUpperLimit.y() &&
+			angLowerLimit.z() <= angUpperLimit.z());
 
 	pConstraint->setEnabled(ragdoll.isActive);
 
