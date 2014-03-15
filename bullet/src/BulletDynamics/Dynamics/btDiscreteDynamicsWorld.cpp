@@ -535,6 +535,26 @@ void	btDiscreteDynamicsWorld::addCollisionObject(btCollisionObject* collisionObj
 
 void	btDiscreteDynamicsWorld::removeCollisionObject(btCollisionObject* collisionObject)
 {
+	// Activate any objects sharing a contact point with this object
+	btOverlappingPairCache *pCache = m_broadphasePairCache->getOverlappingPairCache();
+	for (int i = 0; i < pCache->getNumOverlappingPairs(); i++)
+	{
+		btBroadphasePair &pair = pCache->getOverlappingPairArray()[i];
+		if (!pair.m_algorithm) continue;
+
+		if (pair.m_pProxy0->m_clientObject == collisionObject || pair.m_pProxy1->m_clientObject == collisionObject)
+		{
+			// Inefficient because we really don't need the manifold array, but there isn't a getNumContactManifolds
+			btManifoldArray arr;
+			pair.m_algorithm->getAllContactManifolds(arr);
+			if (arr.size() > 0)
+			{
+				btBroadphaseProxy *otherObj = collisionObject->getBroadphaseHandle() == pair.m_pProxy0 ? pair.m_pProxy1 : pair.m_pProxy0;
+				((btCollisionObject *)otherObj->m_clientObject)->activate();
+			}
+		}
+	}
+
 	btRigidBody* body = btRigidBody::upcast(collisionObject);
 	if (body)
 		removeRigidBody(body);
@@ -627,7 +647,7 @@ void	btDiscreteDynamicsWorld::updateActivationState(btScalar timeStep)
 				{
 					if (body->getActivationState() == ACTIVE_TAG)
 						body->setActivationState( WANTS_DEACTIVATION );
-					if (body->getActivationState() == ISLAND_SLEEPING) 
+					else if (body->getActivationState() == ISLAND_SLEEPING) 
 					{
 						body->setAngularVelocity(btVector3(0,0,0));
 						body->setLinearVelocity(btVector3(0,0,0));
@@ -754,6 +774,7 @@ void	btDiscreteDynamicsWorld::calculateSimulationIslands()
 	}
 	
 	{
+		// Merge islands based on common constraints
 		int i;
 		int numConstraints = int(m_constraints.size());
 		for (i=0;i< numConstraints ; i++ )

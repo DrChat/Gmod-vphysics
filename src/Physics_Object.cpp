@@ -285,8 +285,11 @@ void CPhysicsObject::RecheckCollisionFilter() {
 		CPhysicsObject *pObj1 = (CPhysicsObject *)pBody1->getUserPointer();
 		if (pObj0 != this && pObj1 != this) continue; // Don't check objects that aren't me
 
+		CPhysicsObject *pOther = pObj0 == this ? pObj1 : pObj0;
+
 		if (pSolver && !pSolver->NeedsCollision(pObj0, pObj1)) {
 			pCache->removeOverlappingPair(pair.m_pProxy0, pair.m_pProxy1, m_pEnv->GetBulletEnvironment()->getDispatcher());
+			pOther->Wake(); // Wake it up because shit changed
 		}
 	}
 }
