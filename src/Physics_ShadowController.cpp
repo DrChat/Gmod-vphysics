@@ -9,6 +9,8 @@
 #include "convert.h"
 #include "miscmath.h"
 
+#include <math.h>
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -105,7 +107,7 @@ float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_p
 static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1a) {
 	btQuaternion pt1 = pt0.nearest(pt1a);
 
-	return pt0.dot(pt1) > 1 - SIMD_EPSILON;
+	return pt0.normalized().dot(pt1.normalized()) >= 1 - SIMD_EPSILON;
 }
 
 static bool IsEqual(const btVector3 &pt0, const btVector3 &pt1) {
@@ -145,6 +147,7 @@ void CShadowController::Tick(float deltaTime) {
 			// TODO: Need to use secondsToArrival
 
 			btTransform target(m_shadow.targetRotation, m_shadow.targetPosition);
+			target *= ((btMassCenterMotionState *)m_pObject->GetObject()->getMotionState())->m_centerOfMassOffset;
 			m_pObject->GetObject()->setWorldTransform(target);
 		}
 	} else {
@@ -298,8 +301,6 @@ void CShadowController::ObjectMaterialChanged(int materialIndex) {
 
 // Basically get the last inputs to IPhysicsShadowController::Update(), returns last input to timeOffset in Update()
 float CShadowController::GetTargetPosition(Vector *pPositionOut, QAngle *pAnglesOut) {
-	if (!pPositionOut && !pAnglesOut) return 0;
-
 	if (pPositionOut)
 		ConvertPosToHL(m_shadow.targetPosition, *pPositionOut);
 
@@ -342,9 +343,9 @@ void CShadowController::DetachObject() {
 
 	btRigidBody *body = btRigidBody::upcast(m_pObject->GetObject());
 	btVector3 btvec = body->getInvInertiaDiagLocal();
-	btvec.setX(SAFE_DIVIDE(1.0, btvec.x()));
-	btvec.setY(SAFE_DIVIDE(1.0, btvec.y()));
-	btvec.setZ(SAFE_DIVIDE(1.0, btvec.z()));
+	btvec.setX(SAFE_DIVIDE(1.0f, btvec.x()));
+	btvec.setY(SAFE_DIVIDE(1.0f, btvec.y()));
+	btvec.setZ(SAFE_DIVIDE(1.0f, btvec.z()));
 	body->setMassProps(m_savedMass, btvec);
 	m_pObject->SetMaterialIndex(m_savedMaterialIndex);
 
