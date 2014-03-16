@@ -787,49 +787,40 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	// Single line trace must be supported in TraceBox? Yep, you betcha.
 	// FIXME: We can't use frac == 0 to determine if the trace was started in a solid! Need to detect this separately.
 	if (ray.m_IsRay) {
-		if (ray.m_Delta.LengthSqr() != 0) {
-			btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
-			btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
+		btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
+		btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
 
-			ptr->fraction = cb.m_closestHitFraction;
+		ptr->fraction = cb.m_closestHitFraction;
 
-			// Data is uninitialized if frac is 1
-			if (cb.m_closestHitFraction < 1.0) {
-				if (cb.m_closestHitFraction == 0.f) {
-					ptr->startsolid = true;
-					ptr->allsolid = true;
+		// Data is uninitialized if frac is 1
+		if (cb.m_closestHitFraction < 1.0) {
+			if (cb.m_closestHitFraction == 0.f) {
+				ptr->startsolid = true;
+				ptr->allsolid = true;
 
-					ptr->endpos = ptr->startpos;
-				} else {
-					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
-					ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
-
-					ptr->startsolid = false;
-					ptr->allsolid = false;
-				}
+				ptr->endpos = ptr->startpos;
 			} else {
-				ptr->endpos = ptr->startpos + ray.m_Delta;
-			}
+				ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+				ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
 
-			if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
-				g_pDebugOverlay->AddLineOverlay(ptr->startpos, ptr->endpos, 0, 0, 255, false, 0.f);
-
-				if (ptr->fraction < 1.f) {
-					btVector3 lineEnd = cb.m_hitPointWorld + (cb.m_hitNormalWorld * 1);
-					Vector hlEnd, hlStart;
-					ConvertPosToHL(lineEnd, hlEnd);
-					ConvertPosToHL(cb.m_hitPointWorld, hlStart);
-
-					g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
-				}
+				ptr->startsolid = false;
+				ptr->allsolid = false;
 			}
 		} else {
-			// For whatever reason...
-			ptr->startsolid = true;
-			ptr->allsolid = true;
-			ptr->fraction = 0;
+			ptr->endpos = ptr->startpos + ray.m_Delta;
+		}
 
-			ptr->endpos = ptr->startpos;
+		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
+			g_pDebugOverlay->AddLineOverlay(ptr->startpos, ptr->endpos, 0, 0, 255, false, 0.f);
+
+			if (ptr->fraction < 1.f) {
+				btVector3 lineEnd = cb.m_hitPointWorld + (cb.m_hitNormalWorld * 1);
+				Vector hlEnd, hlStart;
+				ConvertPosToHL(lineEnd, hlEnd);
+				ConvertPosToHL(cb.m_hitPointWorld, hlStart);
+
+				g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
+			}
 		}
 	} else if (ray.m_IsSwept) {
 		// Box trace!
@@ -841,36 +832,36 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			g_pDebugOverlay->AddBoxOverlay(ray.m_Start + ray.m_Delta, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 0, 0, 255, 10, 0.0f);
 		}
 
-		if (ray.m_Delta.LengthSqr() != 0) {
-			// extents are half extents, compatible with bullet.
-			ConvertPosToBull(ray.m_Extents, btvec);
-			btBoxShape *box = new btBoxShape(btvec.absolute());
+		// extents are half extents, compatible with bullet.
+		ConvertPosToBull(ray.m_Extents, btvec);
+		btBoxShape *box = new btBoxShape(btvec.absolute());
 
-			btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
-			btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.f);
+		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
+		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.f);
 
-			ptr->fraction = cb.m_closestHitFraction;
+		ptr->fraction = cb.m_closestHitFraction;
 
-			// Data is uninitialized if frac is 1
-			if (cb.m_closestHitFraction < 1.0) {
-				// Penetration dist is the amount the last ray trace went through the object in meters (neg = penetration)
-				// Allow penetrations up to 1 centimeter
-				if (cb.m_closestHitFraction != 0.f) {
-					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+		// Data is uninitialized if frac is 1
+		if (cb.m_closestHitFraction < 1.0) {
+			// Penetration dist is the amount the last ray trace went through the object in meters (neg = penetration)
+			// Allow penetrations up to 1 centimeter
+			if (cb.m_closestHitFraction != 0.f) {
+				ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 
-					ptr->startsolid = false;
-					ptr->allsolid = false;
-				} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.01f) {
-					ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
+				ptr->startsolid = false;
+				ptr->allsolid = false;
+			} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.01f) {
+				ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 
-					// HACK: Oh whatever, old vphysics did something just as bad
-					// We're here because the penetration distance is within tolerable levels (aka on surface of object)
-					ptr->fraction = 0.0001f;
+				// HACK: Oh whatever, old vphysics did something just as bad
+				// We're here because the penetration distance is within tolerable levels (aka on surface of object)
+				ptr->fraction = 0.0001f;
 
-					// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
-					// FIXME: What if a separate shape is at the end of the ray?
-					btVector3 direction;
-					ConvertPosToBull(ray.m_Delta, direction);
+				// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
+				// FIXME: What if a separate shape is at the end of the ray?
+				btVector3 direction;
+				ConvertPosToBull(ray.m_Delta, direction);
+				if (!btFuzzyZero(direction.length2())) {
 					direction.normalize();
 					if (direction.dot(cb.m_hitNormalWorld) >= -0.0005) {
 						// Run another trace with an allowed penetration of something above 0.01
@@ -878,38 +869,37 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 						ptr->fraction = 1;
 					}
 				} else {
+					// Zero-length trace.
+					ptr->fraction = 0.f;
 					ptr->startsolid = true;
 					ptr->allsolid = true;
-					ptr->fraction = 0;
 				}
-
-				if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
-					if (!ptr->allsolid) {
-						btVector3 lineEnd = cb.m_hitPointWorld + (cb.m_hitNormalWorld * 1);
-						Vector hlEnd, hlStart;
-						ConvertPosToHL(lineEnd, hlEnd);
-						ConvertPosToHL(cb.m_hitPointWorld, hlStart);
-
-						g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
-					}
-
-					if (ptr->startsolid) {
-						g_pDebugOverlay->AddTextOverlay(ptr->endpos, 0, 0.f, "Trace started in solid!");
-					}
-				}
+			} else {
+				ptr->fraction = 0.f;
+				ptr->startsolid = true;
+				ptr->allsolid = true;
 			}
 
-			ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
+			// Debug trace visualizing
+			if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
+				if (!ptr->allsolid) {
+					btVector3 lineEnd = cb.m_hitPointWorld + (cb.m_hitNormalWorld * 1);
+					Vector hlEnd, hlStart;
+					ConvertPosToHL(lineEnd, hlEnd);
+					ConvertPosToHL(cb.m_hitPointWorld, hlStart);
 
-			delete box;
-		} else {
-			// For whatever reason...
-			ptr->startsolid = true;
-			ptr->allsolid = true;
-			ptr->fraction = 0;
+					g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
+				}
 
-			ptr->endpos = ptr->startpos;
+				if (ptr->startsolid) {
+					g_pDebugOverlay->AddTextOverlay(ptr->endpos, 0, 0.f, "Trace started in solid!");
+				}
+			}
 		}
+
+		ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
+
+		delete box;
 	}
 
 	delete object;
@@ -1238,6 +1228,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		if (surfaceheader.modelType == 0x0) {
 			pShape = LoadIVPS(pOutput->solids[i], swap);
 		} else if (surfaceheader.modelType == 0x1) {
+			// One big use of mopps is in old map displacement data
 			pShape = LoadMOPP(pOutput->solids[i], swap);
 		} else {
 			Warning("VCollideLoad: Unknown modelType %d", surfaceheader.modelType);

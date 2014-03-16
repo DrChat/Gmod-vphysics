@@ -110,10 +110,28 @@ bool	btContinuousConvexCollision::calcTimeOfImpact(
 
 	btScalar relLinVelocLength = (linVelB-linVelA).length();
 	
-	if ((relLinVelocLength+maxAngularProjectedVelocity) == 0.f)
-		return false;
+	if ((relLinVelocLength + maxAngularProjectedVelocity) == 0.f)
+	{
+		// Check for collision
+		btPointCollector collector;
+		computeClosestPoints(fromA, fromB, collector);
+		if (!collector.m_hasResult)
+			return false;
 
+		btScalar dist = collector.m_distance + result.m_allowedPenetration;
+		if (dist < 0.001f) {
+			result.m_fraction = 0.f;
+			result.m_normal = collector.m_normalOnBInWorld;
+			result.m_hitPoint = collector.m_pointInWorld;
+			result.m_penetrationDist = dist - result.m_allowedPenetration;
+		}
+		else
+		{
+			result.m_fraction = 1.f;
+		}
 
+		return true;
+	}
 
 	btScalar lambda = btScalar(0.);
 	btVector3 v(1,0,0);
