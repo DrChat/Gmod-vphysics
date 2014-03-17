@@ -131,6 +131,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MiscFuncs.cpp" />
     <ClCompile Include="PhysCollision.cpp" />
+    <ClCompile Include="PhysConstraint.cpp" />
     <ClCompile Include="PhysEnv.cpp" />
     <ClCompile Include="PhysObj.cpp" />
     <ClCompile Include="PhysSoftBody.cpp" />
@@ -139,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="MiscFuncs.h" />
     <ClInclude Include="PhysCollision.h" />
+    <ClInclude Include="PhysConstraint.h" />
     <ClInclude Include="PhysEnv.h" />
     <ClInclude Include="PhysObj.h" />
     <ClInclude Include="PhysSoftBody.h" />

@@ -38,6 +38,15 @@ IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos) {
 	return (IPhysicsObject32 *)ud->data;
 }
 
+void Push_PhysObj(lua_State *state, IPhysicsObject *pPhysObj) {
+	UserData *ud = (UserData *)LUA->NewUserdata(sizeof(UserData));
+	ud->type = Type::PHYSOBJ;
+	ud->data = pPhysObj;
+
+	LUA->CreateMetaTableType("PhysObj", Type::PHYSOBJ);
+	LUA->SetMetaTable(-2);
+}
+
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
 	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
 	if (ud->type != CustomTypes::TYPE_PHYSCOLLIDE) {

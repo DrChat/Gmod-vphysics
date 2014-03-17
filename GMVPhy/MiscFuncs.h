@@ -3,6 +3,7 @@
 
 class IPhysicsEnvironment32;
 class IPhysicsObject32;
+class IPhysicsObject;
 class IPhysicsSoftBody;
 class CPhysCollide;
 class CPhysConvex;
@@ -30,6 +31,7 @@ IPhysicsEnvironment32 *Get_PhysEnv(lua_State *state, int stackPos);
 void Push_PhysEnv(lua_State *state, IPhysicsEnvironment32 *pEnv);
 
 IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos);
+void Push_PhysObj(lua_State *state, IPhysicsObject *pObj);
 
 Vector *Get_Vector(lua_State *state, int stackPos);
 void Push_Vector(lua_State *state, const Vector &vec);
