@@ -30,11 +30,14 @@ class CLuaUserConstraint : public IPhysicsUserConstraint {
 		}
 
 		// Purpose: Get basic constraint info (# rows) for initialization
-		void GetConstraintInfo(IPhysicsObject *pObjA, IPhysicsObject *pObjB, physconstraintinfo_t &info) {
+		void GetConstraintInfo(IPhysicsObject32 *pObjA, IPhysicsObject32 *pObjB, physconstraintinfo_t &info) {
 			m_pLua->ReferencePush(m_tableReference);
 			m_pLua->GetField(-1, "GetConstraintInfo"); // No checking (assumed already done on creation)
 			
-			m_pLua->Call(0, 1);
+			m_pLua->ReferencePush(m_tableReference);
+			Push_PhysObj(m_pLuaState, pObjA);
+			Push_PhysObj(m_pLuaState, pObjB);
+			m_pLua->Call(3, 1);
 			if (!m_pLua->IsType(-1, Type::TABLE)) {
 				m_pLua->ThrowError("GetConstraintInfo did not return a table!");
 			}
@@ -47,28 +50,25 @@ class CLuaUserConstraint : public IPhysicsUserConstraint {
 			info.nub = m_pLua->GetNumber(-1);
 			m_pLua->Pop();
 
-			int top = m_pLua->Top();
-
 			// Pop the returned table and the referenced table
 			m_pLua->Pop(2);
 		}
 
-		void GetConstraintSolveInfo(IPhysicsObject *pObjA, IPhysicsObject *pObjB, physconstraintsolveinfo_t *info, int numRows, float fps, float erp) {
+		void GetConstraintSolveInfo(IPhysicsObject32 *pObjA, IPhysicsObject32 *pObjB, physconstraintsolveinfo_t *info, int numRows, float fps, float erp) {
 			m_pLua->ReferencePush(m_tableReference);
 			m_pLua->GetField(-1, "GetConstraintSolveInfo");
 
+			m_pLua->ReferencePush(m_tableReference);
 			Push_PhysObj(m_pLuaState, pObjA);
 			Push_PhysObj(m_pLuaState, pObjB);
 			m_pLua->PushNumber(numRows);
 			m_pLua->PushNumber(fps);
 			m_pLua->PushNumber(erp);
-			m_pLua->Call(5, 1);
+			m_pLua->Call(6, 1);
 
 			// User should return a table with numRows inner tables
 			// The inner tables are the actual constraint rows
 			m_pLua->CheckType(-1, Type::TABLE);
-
-			int top = m_pLua->Top();
 
 			m_pLua->PushNil(); // Key
 			int next = m_pLua->Next(-2);
@@ -128,22 +128,15 @@ class CLuaUserConstraint : public IPhysicsUserConstraint {
 					curInfo.upperLimit = m_pLua->GetNumber();
 				m_pLua->Pop();
 
-				top = m_pLua->Top();
-
 				// Pop the value
 				m_pLua->Pop();
 				int next = m_pLua->Next(-2);
-
-				top = m_pLua->Top();
 			}
 			// Pop the key
 			m_pLua->Pop();
-			top = m_pLua->Top();
 
-			// Pop the ref and the return table
+			// Pop the ref table
 			m_pLua->Pop();
-
-			top = m_pLua->Top();
 		}
 
 	private:
@@ -207,10 +200,21 @@ int lPhysUserConstraint__index(lua_State *state) {
 
 int Init_PhysConstraint(lua_State *state) {
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
+	LUA->GetField(-1, "constraint");
+	bool newTable = false;
+	if (LUA->IsType(-1, Type::NIL)) { // Table is probably nil at this stage so make it.
+		LUA->Pop();
 		LUA->CreateTable();
-			LUA->PushCFunction(lConstraintUser); LUA->SetField(-2, "User");
+		newTable = true;
+	}
+
+	LUA->PushCFunction(lConstraintUser); LUA->SetField(-2, "User");
+	if (newTable) {
 		LUA->SetField(-2, "CoolConstraint");
-	LUA->Pop(1);
+		LUA->Pop(1);
+	} else {
+		LUA->Pop(2);
+	}
 
 	// Returned constraint type
 	LUA->CreateMetaTableType("PhysUserConstraint", CustomTypes::TYPE_PHYSUSERCONSTRAINT);
