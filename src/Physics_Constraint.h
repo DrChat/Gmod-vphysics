@@ -56,6 +56,8 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		EConstraintType			GetType();
 		btTypedConstraint *		GetConstraint();
 
+		void					SetNotifyBroken(bool notify) {m_bNotifyBroken = notify;}
+
 	protected:
 		CPhysicsObject *		m_pReferenceObject;
 		CPhysicsObject *		m_pAttachedObject;
@@ -64,6 +66,7 @@ class CPhysicsConstraint : public IPhysicsConstraint {
 		CPhysicsEnvironment *	m_pEnv;
 		EConstraintType			m_type;
 		bool					m_bRemovedFromEnv;
+		bool					m_bNotifyBroken; // Should we notify the game that the constraint was broken?
 
 		btTypedConstraint *		m_pConstraint;
 };
@@ -77,8 +80,6 @@ class CPhysicsSpring : public IPhysicsSpring, public CPhysicsConstraint {
 		void			SetSpringConstant(float flSpringContant);
 		void			SetSpringDamping(float flSpringDamping);
 		void			SetSpringLength(float flSpringLength);
-
-		void			ObjectDestroyed(CPhysicsObject *pObject);
 
 		// Get the starting object
 		IPhysicsObject *GetStartObject();

@@ -372,7 +372,7 @@ class btUserConstraint : public btTypedConstraint {
 		}
 
 		void getInfo2(btConstraintInfo2 *pInfo) {
-			physconstraintsolveinfo_t *solveinfo = (physconstraintsolveinfo_t *)stackalloc(pInfo->m_numConstraintRows);
+			physconstraintsolveinfo_t *solveinfo = (physconstraintsolveinfo_t *)stackalloc(sizeof(physconstraintsolveinfo_t) * pInfo->m_numConstraintRows);
 			for (int i = 0; i < pInfo->m_numConstraintRows; i++) {
 				solveinfo[i].Defaults();
 			}
@@ -428,6 +428,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_pEnv = pEnv;
 	m_type = type;
 	m_bRemovedFromEnv = false;
+	m_bNotifyBroken = true;
 
 	if (m_type == CONSTRAINT_RAGDOLL || m_type == CONSTRAINT_BALLSOCKET) {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
@@ -542,7 +543,8 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 	}
 
 	// Tell the game that this constraint was broken.
-	m_pEnv->HandleConstraintBroken(this);
+	if (m_bNotifyBroken)
+		m_pEnv->HandleConstraintBroken(this);
 }
 
 // UNEXPOSED
@@ -614,7 +616,7 @@ void CPhysicsConstraintGroup::RemoveConstraint(CPhysicsConstraint *pConstraint) 
 
 CPhysicsSpring::CPhysicsSpring(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type):
 CPhysicsConstraint(pEnv, NULL, pObject1, pObject2, pConstraint, type) {
-
+	m_bNotifyBroken = false; // Don't tell the game as this isn't a normal constraint
 }
 
 CPhysicsSpring::~CPhysicsSpring() {
@@ -636,27 +638,6 @@ void CPhysicsSpring::SetSpringDamping(float flSpringDamping) {
 
 void CPhysicsSpring::SetSpringLength(float flSpringLength) {
 	((btSpringConstraint *)m_pConstraint)->setLength(ConvertDistanceToBull(flSpringLength));
-}
-
-void CPhysicsSpring::ObjectDestroyed(CPhysicsObject *pObject) {
-	if (pObject != m_pAttachedObject && pObject != m_pReferenceObject) {
-		AssertMsg(0, "ObjectDestroyed called with object that isn't part of this constraint!");
-		return;
-	}
-
-	if (pObject == m_pAttachedObject)
-		m_pAttachedObject = NULL;
-
-	if (pObject == m_pReferenceObject)
-		m_pReferenceObject = NULL;
-
-	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
-	if (!m_bRemovedFromEnv) {
-		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
-		m_bRemovedFromEnv = true;
-	}
-
-	// Can't tell the game this constraint was disabled :(
 }
 
 IPhysicsObject *CPhysicsSpring::GetStartObject() {
@@ -923,6 +904,9 @@ CPhysicsConstraintGroup *CreateConstraintGroup(CPhysicsEnvironment *pEnv, const 
 CPhysicsConstraint *CreateUserConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pUserConstraint) {
 	Assert(pUserConstraint);
 
-	btTypedConstraint *pConstraint = new btUserConstraint(*((CPhysicsObject *)pReferenceObject)->GetObject(), *((CPhysicsObject *)pAttachedObject)->GetObject(), pUserConstraint);
-	return new CPhysicsConstraint(pEnv, pGroup, (CPhysicsObject *)pReferenceObject, (CPhysicsObject *)pAttachedObject, pConstraint, CONSTRAINT_USER);
+	btTypedConstraint *constraint = new btUserConstraint(*((CPhysicsObject *)pReferenceObject)->GetObject(), *((CPhysicsObject *)pAttachedObject)->GetObject(), pUserConstraint);
+
+	CPhysicsConstraint *pConstraint = new CPhysicsConstraint(pEnv, pGroup, (CPhysicsObject *)pReferenceObject, (CPhysicsObject *)pAttachedObject, constraint, CONSTRAINT_USER);
+	pConstraint->SetNotifyBroken(false); // Until an entity is hooked up or whatever
+	return pConstraint;
 }
