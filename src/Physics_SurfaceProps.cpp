@@ -28,6 +28,8 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 
 	KeyValues *surfprops = new KeyValues("CPhysicsSurfaceProps");
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
+
+	// Loop the outer elements (prop names and contain the data as subkeys)
 	for (KeyValues *surface = surfprops; surface; surface = surface->GetNextKey()) {
 		CSurface prop;
 
@@ -48,6 +50,7 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 			prop.data.sounds = pSurface->data.sounds;
 		}
 
+		// Subkeys that contain the actual data
 		for (KeyValues *data = surface->GetFirstSubKey(); data; data = data->GetNextKey()) {
 			const char *key = data->GetName();
 			if (!Q_stricmp(key, "base")) {
@@ -160,7 +163,8 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 			} else
 				AssertMsg2(0, "VPhysics: Bad surfaceprop key %s (%s)\n", key, data->GetString());
 		}
-		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0) break;
+		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0)
+			continue;
 
 		m_props.AddToTail(prop);
 	}
