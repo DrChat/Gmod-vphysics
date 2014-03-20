@@ -29,10 +29,15 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 	KeyValues *surfprops = new KeyValues("CPhysicsSurfaceProps");
 	surfprops->LoadFromBuffer(pFilename, pTextfile);
 
-	// Loop the outer elements (prop names and contain the data as subkeys)
+	// Loop the outer elements (prop names with the data as subkeys)
 	for (KeyValues *surface = surfprops; surface; surface = surface->GetNextKey()) {
-		CSurface prop;
+		// Ignore duplicates
+		if (GetSurfaceIndex(surface->GetName()) >= 0) {
+			DevWarning("VPhysics: Ignoring duplicate surfaceprop \"%s\"\n", surface->GetName());
+			continue;
+		}
 
+		CSurface prop;
 		memset(&prop.data, 0, sizeof(prop.data));
 		prop.m_name = m_strings->AddString(surface->GetName());
 		prop.data.game.material = 0;
@@ -153,7 +158,7 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 				} else {
 					prop.data.sounds.strainSound = m_soundList.AddToTail(sym);
 				}
-			} else if (!Q_stricmp(key, "rolling")) {
+			} else if (!Q_stricmp(key, "rolling") || !Q_stricmp(key, "roll")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
 				if (int id = m_soundList.Find(sym) != -1) {
 					prop.data.sounds.rolling = id;
@@ -161,10 +166,8 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 					prop.data.sounds.rolling = m_soundList.AddToTail(sym);
 				}
 			} else
-				AssertMsg2(0, "VPhysics: Bad surfaceprop key %s (%s)\n", key, data->GetString());
+				DevWarning("VPhysics: Surfaceprop \"%s\" has unknown key %s (data: %s)\n", surface->GetName(), key, data->GetString());
 		}
-		if (GetSurfaceIndex(m_strings->String(prop.m_name)) >= 0)
-			continue;
 
 		m_props.AddToTail(prop);
 	}
