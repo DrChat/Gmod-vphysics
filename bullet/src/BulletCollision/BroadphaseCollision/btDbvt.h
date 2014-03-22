@@ -580,7 +580,7 @@ DBVT_INLINE int			Select(	const btDbvtAabbMm& o,
 #if defined (_WIN32)
 	static ATTRIBUTE_ALIGNED16(const unsigned __int32)	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x7fffffff};
 #else
-	static ATTRIBUTE_ALIGNED16(const unsigned int)	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x00000000 /*0x7fffffff*/};
+	ATTRIBUTE_ALIGNED16(const unsigned int)	mask[]={0x7fffffff,0x7fffffff,0x7fffffff,0x00000000 /*0x7fffffff*/};
 #endif
 	///@todo: the intrinsic version is 11% slower
 #if DBVT_USE_INTRINSIC_SSE
@@ -1013,7 +1013,8 @@ inline void		btDbvt::rayTest(	const btDbvtNode* root,
 		if(root)
 		{
 			btVector3 rayDir = (rayTo-rayFrom);
-			rayDir.normalize ();
+			if (!btFuzzyZero(rayDir.length2()))
+				rayDir.normalize();
 
 			///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
 			btVector3 rayDirectionInverse;
