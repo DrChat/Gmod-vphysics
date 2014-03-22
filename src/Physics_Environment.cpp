@@ -323,56 +323,58 @@ class CCollisionEventListener : public btSolveCallback {
 			unsigned int flags0 = pObj0->GetCallbackFlags();
 			unsigned int flags1 = pObj1->GetCallbackFlags();
 
-			vcollisionevent_t evt;
-			evt.collisionSpeed = 0.f; // Invalid pre-collision
-			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
-			evt.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
-			evt.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow (if both are shadow, it's handled by the game)
+			// Clear it
+			memset(&m_tmpEvent, 0, sizeof(m_tmpEvent));
+			m_tmpEvent.collisionSpeed = 0.f; // Invalid pre-collision
+			m_tmpEvent.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
+			m_tmpEvent.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
+			m_tmpEvent.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow (if both are shadow, it's handled by the game)
 
-			evt.pObjects[0] = pObj0;
-			evt.pObjects[1] = pObj1;	
-			evt.surfaceProps[0] = pObj0->GetMaterialIndex();
-			evt.surfaceProps[1] = pObj1->GetMaterialIndex();
+			m_tmpEvent.pObjects[0] = pObj0;
+			m_tmpEvent.pObjects[1] = pObj1;	
+			m_tmpEvent.surfaceProps[0] = pObj0->GetMaterialIndex();
+			m_tmpEvent.surfaceProps[1] = pObj1->GetMaterialIndex();
 
 			if ((pObj0->IsStatic() && !(flags1 & CALLBACK_GLOBAL_COLLIDE_STATIC)) || (pObj1->IsStatic() && !(flags0 & CALLBACK_GLOBAL_COLLIDE_STATIC))) {
-				evt.isCollision = false;
+				m_tmpEvent.isCollision = false;
 			}
 
-			if (!evt.isCollision && !evt.isShadowCollision) return;
+			if (!m_tmpEvent.isCollision && !m_tmpEvent.isShadowCollision) return;
 
 			CPhysicsCollisionData data(cp);
-			evt.pInternalData = &data;
+			m_tmpEvent.pInternalData = &data;
 
 			// Give the game its stupid velocities
-			btVector3 origVel[2];
-			btVector3 origAngVel[2];
 			if (body0->m_originalBody) {
-				origVel[0] = body0->m_originalBody->getLinearVelocity();
-				origAngVel[0] = body0->m_originalBody->getAngularVelocity();
+				m_tmpVelocities[0] = body0->m_originalBody->getLinearVelocity();
+				m_tmpAngVelocities[0] = body0->m_originalBody->getAngularVelocity();
 
-				body0->m_originalBody->setLinearVelocity(origVel[0] + body0->internalGetDeltaLinearVelocity());
-				body0->m_originalBody->setAngularVelocity(origAngVel[0] + body0->internalGetDeltaAngularVelocity());
+				body0->m_originalBody->setLinearVelocity(m_tmpVelocities[0] + body0->internalGetDeltaLinearVelocity());
+				body0->m_originalBody->setAngularVelocity(m_tmpAngVelocities[0] + body0->internalGetDeltaAngularVelocity());
 			}
 			if (body1->m_originalBody) {
-				origVel[1] = body1->m_originalBody->getLinearVelocity();
-				origAngVel[1] = body1->m_originalBody->getAngularVelocity();
+				m_tmpVelocities[1] = body1->m_originalBody->getLinearVelocity();
+				m_tmpAngVelocities[1] = body1->m_originalBody->getAngularVelocity();
 
-				body1->m_originalBody->setLinearVelocity(origVel[1] + body1->internalGetDeltaLinearVelocity());
-				body1->m_originalBody->setAngularVelocity(origAngVel[1] + body1->internalGetDeltaAngularVelocity());
+				body1->m_originalBody->setLinearVelocity(m_tmpVelocities[1] + body1->internalGetDeltaLinearVelocity());
+				body1->m_originalBody->setAngularVelocity(m_tmpAngVelocities[1] + body1->internalGetDeltaAngularVelocity());
 			}
 
 			if (m_pCallback)
-				m_pCallback->PreCollision(&evt);
+				m_pCallback->PreCollision(&m_tmpEvent);
 
 			// Restore the velocities
+			// UNDONE: No need, postSolveContact will do this.
+			/*
 			if (body0->m_originalBody) {
-				body0->m_originalBody->setLinearVelocity(origVel[0]);
-				body0->m_originalBody->setAngularVelocity(origAngVel[0]);
+				body0->m_originalBody->setLinearVelocity(m_tmpVelocities[0]);
+				body0->m_originalBody->setAngularVelocity(m_tmpAngVelocities[0]);
 			}
 			if (body1->m_originalBody) {
-				body1->m_originalBody->setLinearVelocity(origVel[1]);
-				body1->m_originalBody->setAngularVelocity(origAngVel[1]);
+				body1->m_originalBody->setLinearVelocity(m_tmpVelocities[1]);
+				body1->m_originalBody->setAngularVelocity(m_tmpAngVelocities[1]);
 			}
+			*/
 		}
 
 		// TODO: Optimize this, heavily!
@@ -382,60 +384,58 @@ class CCollisionEventListener : public btSolveCallback {
 
 			// FIXME: Problem with bullet code, only one solver body created for static objects!
 			// There could be more than one static object created by us!
-			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
-			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
+			//CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
+			//CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
 
-			unsigned int flags0 = pObj0->GetCallbackFlags();
-			unsigned int flags1 = pObj1->GetCallbackFlags();
-
-			vcollisionevent_t evt;
+			//unsigned int flags0 = pObj0->GetCallbackFlags();
+			//unsigned int flags1 = pObj1->GetCallbackFlags();
 
 			btScalar combinedInvMass = rb0->getInvMass() + rb1->getInvMass();
-			evt.collisionSpeed = BULL2HL(cp->m_appliedImpulse * combinedInvMass);
+			m_tmpEvent.collisionSpeed = BULL2HL(cp->m_appliedImpulse * combinedInvMass);
 
-			evt.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
-			evt.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
-			evt.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow
+			m_tmpEvent.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
+			/*
+			m_tmpEvent.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
+			m_tmpEvent.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow
 
-			evt.pObjects[0] = pObj0;
-			evt.pObjects[1] = pObj1;	
-			evt.surfaceProps[0] = pObj0 ? pObj0->GetMaterialIndex() : 0;
-			evt.surfaceProps[1] = pObj1 ? pObj1->GetMaterialIndex() : 0;
+			m_tmpEvent.pObjects[0] = pObj0;
+			m_tmpEvent.pObjects[1] = pObj1;	
+			m_tmpEvent.surfaceProps[0] = pObj0 ? pObj0->GetMaterialIndex() : 0;
+			m_tmpEvent.surfaceProps[1] = pObj1 ? pObj1->GetMaterialIndex() : 0;
+			*/
 
-			if (!evt.isCollision && !evt.isShadowCollision) return;
+			if (!m_tmpEvent.isCollision && !m_tmpEvent.isShadowCollision) return;
 
 			CPhysicsCollisionData data(cp);
-			evt.pInternalData = &data;
+			m_tmpEvent.pInternalData = &data;
 
 			// Give the game its stupid velocities
-			btVector3 origVel[2];
-			btVector3 origAngVel[2];
 			if (body0->m_originalBody) {
-				origVel[0] = body0->m_originalBody->getLinearVelocity();
-				origAngVel[0] = body0->m_originalBody->getAngularVelocity();
+				m_tmpVelocities[0] = body0->m_originalBody->getLinearVelocity();
+				m_tmpAngVelocities[0] = body0->m_originalBody->getAngularVelocity();
 
-				body0->m_originalBody->setLinearVelocity(origVel[0] + body0->internalGetDeltaLinearVelocity());
-				body0->m_originalBody->setAngularVelocity(origAngVel[0] + body0->internalGetDeltaAngularVelocity());
+				body0->m_originalBody->setLinearVelocity(m_tmpVelocities[0] + body0->internalGetDeltaLinearVelocity());
+				body0->m_originalBody->setAngularVelocity(m_tmpAngVelocities[0] + body0->internalGetDeltaAngularVelocity());
 			}
 			if (body1->m_originalBody) {
-				origVel[1] = body1->m_originalBody->getLinearVelocity();
-				origAngVel[1] = body1->m_originalBody->getAngularVelocity();
+				m_tmpVelocities[1] = body1->m_originalBody->getLinearVelocity();
+				m_tmpAngVelocities[1] = body1->m_originalBody->getAngularVelocity();
 
-				body1->m_originalBody->setLinearVelocity(origVel[1] + body1->internalGetDeltaLinearVelocity());
-				body1->m_originalBody->setAngularVelocity(origAngVel[1] + body1->internalGetDeltaAngularVelocity());
+				body1->m_originalBody->setLinearVelocity(m_tmpVelocities[1] + body1->internalGetDeltaLinearVelocity());
+				body1->m_originalBody->setAngularVelocity(m_tmpAngVelocities[1] + body1->internalGetDeltaAngularVelocity());
 			}
 
 			if (m_pCallback)
-				m_pCallback->PostCollision(&evt);
+				m_pCallback->PostCollision(&m_tmpEvent);
 
 			// Restore the velocities
 			if (body0->m_originalBody) {
-				body0->m_originalBody->setLinearVelocity(origVel[0]);
-				body0->m_originalBody->setAngularVelocity(origAngVel[0]);
+				body0->m_originalBody->setLinearVelocity(m_tmpVelocities[0]);
+				body0->m_originalBody->setAngularVelocity(m_tmpAngVelocities[0]);
 			}
 			if (body1->m_originalBody) {
-				body1->m_originalBody->setLinearVelocity(origVel[1]);
-				body1->m_originalBody->setAngularVelocity(origAngVel[1]);
+				body1->m_originalBody->setLinearVelocity(m_tmpVelocities[1]);
+				body1->m_originalBody->setAngularVelocity(m_tmpAngVelocities[1]);
 			}
 		}
 
@@ -479,6 +479,11 @@ class CCollisionEventListener : public btSolveCallback {
 	private:
 		CPhysicsEnvironment *m_pEnv;
 		IPhysicsCollisionEvent *m_pCallback;
+
+		// Temp. variables saved between Pre/PostCollision
+		btVector3 m_tmpVelocities[2];
+		btVector3 m_tmpAngVelocities[2];
+		vcollisionevent_t m_tmpEvent;
 };
 
 /*******************************
@@ -489,11 +494,13 @@ class CCollisionEventListener : public btSolveCallback {
 // Change the hardcoded min and max if you change the min and max here!
 #ifdef MULTITHREADED
 static void vphysics_numthreads_Change(IConVar *var, const char *pOldValue, float flOldValue);
-static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high). Takes effect when environment is (re)created.", true, 1, true, 8, vphysics_numthreads_Change);
+static ConVar vphysics_numthreads("vphysics_numthreads", "4", FCVAR_ARCHIVE, "Amount of threads to use in simulation (don't set this too high).", true, 1, true, 8, vphysics_numthreads_Change);
 
 static void vphysics_numthreads_Change(IConVar *var, const char *pOldValue, float flOldValue) {
 	int newVal = vphysics_numthreads.GetInt();
 	if (newVal <= 0 || newVal > 8) return;
+
+	Msg("VPhysics: Resizing to %d threads\n", newVal);
 
 	for (int i = 0; i < g_Physics.GetActiveEnvironmentCount(); i++) {
 		((CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(i))->ChangeThreadCount(newVal);
@@ -579,8 +586,8 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	// TODO: Threads solve any oversized batches (>32?), otherwise solving done on main thread.
 	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 128; // Combine islands up to this many constraints
-	m_pBulletEnvironment->getDispatchInfo().m_useContinuous = true;
 	m_pBulletEnvironment->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
+	m_pBulletEnvironment->setApplySpeculativeContactRestitution(true);
 	//m_pBulletEnvironment->getDispatchInfo().m_dispatchFunc = btDispatcherInfo::DISPATCH_CONTINUOUS;
 
 	//m_simPSIs = 0;
@@ -972,10 +979,6 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 
 	// FIXME: See if this is even needed here
 	m_softBodyWorldInfo.m_sparsesdf.GarbageCollect();
-
-	if (!m_bUseDeleteQueue) {
-		CleanupDeleteList();
-	}
 }
 
 bool CPhysicsEnvironment::IsInSimulation() const {

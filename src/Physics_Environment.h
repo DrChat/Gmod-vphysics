@@ -14,6 +14,7 @@ class btBroadphaseInterface;
 class btConstraintSolver;
 class btSoftRigidDynamicsWorld;
 
+class IPhysicsConstraintGroup;
 class IPhysicsUserConstraint;
 class IController;
 class CDeleteQueue;
