@@ -42,14 +42,15 @@ void CPhysicsDragController::Tick(btScalar dt) {
 	for (int i = 0; i < m_ents.Count(); i++) {
 		CPhysicsObject *pObject = (CPhysicsObject *)m_ents[i];
 		btRigidBody *body = pObject->GetObject();
-
-		btVector3 vel(0, 0, 0);
-		btVector3 ang(0, 0, 0);
+		if (body->getActivationState() == ISLAND_SLEEPING || body->getActivationState() == DISABLE_SIMULATION)
+			continue;
 
 		//------------------
 		// LINEAR DRAG
 		//------------------
 		if (!btFuzzyZero(body->getLinearVelocity().length2())) {
+			btVector3 vel;
+
 			float dragForce = -1 * pObject->GetDragInDirection(body->getLinearVelocity().normalized()) * m_airDensity * dt;
 			if (dragForce < -1.0f)
 				dragForce = -1.0f;
@@ -65,6 +66,8 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		// ANGULAR DRAG
 		//------------------
 		if (!btFuzzyZero(body->getAngularVelocity().length2())) {
+			btVector3 ang;
+
 			float angDragForce = -1 * pObject->GetAngularDragInDirection(body->getAngularVelocity().normalized()) * m_airDensity * dt;
 			if (angDragForce < -1.0f)
 				angDragForce = -1.0f;
