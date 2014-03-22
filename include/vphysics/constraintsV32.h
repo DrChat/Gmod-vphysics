@@ -48,11 +48,11 @@ public:
 	// WARNING: The following functions may not be called on the main thread! Do not do any non-threadsafe operations here!
 
 	// Basic constraint info for internal setup
-	virtual void			GetConstraintInfo(IPhysicsObject *pObjA, IPhysicsObject *pObjB, physconstraintinfo_t &info) = 0;
+	virtual void			GetConstraintInfo(IPhysicsObject32 *pObjA, IPhysicsObject32 *pObjB, physconstraintinfo_t &info) = 0;
 
 	// Info for constraint solve (an array of size numRows)
 	// FPS - frames per second (1/stepsize), erp - default error reduction parameter (0..1)
-	virtual void			GetConstraintSolveInfo(IPhysicsObject *pObjA, IPhysicsObject *pObjB, physconstraintsolveinfo_t *info, int numRows, float fps, float erp) = 0;
+	virtual void			GetConstraintSolveInfo(IPhysicsObject32 *pObjA, IPhysicsObject32 *pObjB, physconstraintsolveinfo_t *info, int numRows, float fps, float erp) = 0;
 };
 
 struct constraint_gearparams_t {
