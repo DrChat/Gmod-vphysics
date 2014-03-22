@@ -16,6 +16,8 @@ IPhysicsMotionController *CreateMotionController(CPhysicsEnvironment *pEnv, IMot
 * CLASS CPhysicsMotionController
 ***********************************/
 
+// This class can totally be moved back to game code.
+
 CPhysicsMotionController::CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv) {
 	m_handler = pHandler;
 	m_pEnv = pEnv;
@@ -35,8 +37,6 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		AngularImpulse rot;
 		
 		CPhysicsObject *pObject = (CPhysicsObject *)m_objectList[i];
-		btRigidBody *body = btRigidBody::upcast(pObject->GetObject());
-		if (!body) continue;
 
 		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
 
