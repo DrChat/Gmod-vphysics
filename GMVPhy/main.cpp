@@ -4,6 +4,7 @@
 
 #include "PhysObj.h"
 #include "PhysCollision.h"
+#include "PhysConstraint.h"
 #include "PhysEnv.h"
 #include "PhysSoftBody.h"
 
@@ -50,6 +51,7 @@ GMOD_MODULE_OPEN() {
 
 	LINIT_CHECKRET(Init_PhysObj, state);
 	LINIT_CHECKRET(Init_PhysCollision, state);
+	LINIT_CHECKRET(Init_PhysConstraint, state);
 	LINIT_CHECKRET(Init_PhysEnv, state);
 	LINIT_CHECKRET(Init_PhysSoftBody, state);
 

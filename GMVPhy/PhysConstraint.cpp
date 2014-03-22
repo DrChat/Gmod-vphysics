@@ -210,7 +210,7 @@ int Init_PhysConstraint(lua_State *state) {
 
 	LUA->PushCFunction(lConstraintUser); LUA->SetField(-2, "User");
 	if (newTable) {
-		LUA->SetField(-2, "CoolConstraint");
+		LUA->SetField(-2, "constraint");
 		LUA->Pop(1);
 	} else {
 		LUA->Pop(2);

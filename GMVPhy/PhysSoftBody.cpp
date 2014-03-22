@@ -286,7 +286,7 @@ int lPhysSoftBodyGetAABB(lua_State *state) {
 // Name: PhysSoftBody:RayTest
 // Desc: Test a ray
 // Arg1: PhysSoftBody|softbody|
-// Arg2: Table|ray|{start=Vector(), end=Vector()}
+// Arg2: Table|ray|{startpos=Vector(), endpos=Vector()}
 // Ret1: Table|result|Result in the style of Structures/TraceResult
 //
 int lPhysSoftBodyRayTest(lua_State *state) {
@@ -295,12 +295,12 @@ int lPhysSoftBodyRayTest(lua_State *state) {
 
 	Ray_t ray;
 	Vector start, end;
-	LUA->PushString("start");
+	LUA->PushString("startpos");
 	LUA->GetTable(2);
 	start = *Get_Vector(state, -1);
 	LUA->Pop();
 
-	LUA->PushString("end");
+	LUA->PushString("endpos");
 	LUA->GetTable(2);
 	end = *Get_Vector(state, -1);
 	LUA->Pop();
