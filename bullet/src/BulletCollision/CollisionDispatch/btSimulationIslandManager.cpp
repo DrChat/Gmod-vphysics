@@ -249,7 +249,7 @@ void btSimulationIslandManager::buildIslands(btDispatcher* dispatcher, btCollisi
 				{
 					allSleeping = false;
 				}
-				if (colObj0->getActivationState()== DISABLE_DEACTIVATION)
+				else if (colObj0->getActivationState()== DISABLE_DEACTIVATION)
 				{
 					allSleeping = false;
 				}
