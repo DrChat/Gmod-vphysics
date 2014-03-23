@@ -268,6 +268,7 @@ SIMD_FORCE_INLINE bool btMachineIsLittleEndian()
 	   return false;
 }
 
+/*
 SIMD_FORCE_INLINE bool btIsFinite(btScalar x)
 {
 	return isfinite(x);
@@ -277,6 +278,7 @@ SIMD_FORCE_INLINE bool btIsNaN(btScalar x)
 {
 	return isnan(x);
 }
+*/
 
 ///btSelect avoids branches, which makes performance much better for consoles like Playstation 3 and XBox 360
 ///Thanks Phil Knight. See also http://www.cellperformance.com/articles/2006/04/more_techniques_for_eliminatin_1.html
