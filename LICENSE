@@ -1,3 +1,7 @@
+The following license covers all vphysics code, which is every file and directory
+except for files and directories under bullet/* and thirdparty/*
+
+------------------------------------------------------------------------------
             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
                     Version 2, December 2004
 
@@ -11,4 +15,6 @@
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
   0. You just DO WHAT THE FUCK YOU WANT TO.
+------------------------------------------------------------------------------
 
+Third party libraries are covered by their respective licenses.
