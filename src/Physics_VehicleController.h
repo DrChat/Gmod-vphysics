@@ -68,6 +68,7 @@ class CPhysicsVehicleController : public IPhysicsVehicleController1 {
 		void								InitBullVehicle();
 
 		void								InitCarWheels();
+		void								DestroyCarWheels();
 		CPhysicsObject *					CreateWheel(int wheelIndex, vehicle_axleparams_t &axle);
 
 		CPhysicsObject *					GetBody();

@@ -251,6 +251,13 @@ void CPhysicsVehicleController::InitCarWheels() {
 	}
 }
 
+void CPhysicsVehicleController::DestroyCarWheels() {
+	for (int i = 0; i < m_iWheelCount; i++) {
+		m_pEnv->DestroyObject(m_pWheels[i]);
+		m_pWheels[i] = NULL;
+	}
+}
+
 // Purpose: Create wheel on source side (CPhysicsObject *) and add a wheel to the raycaster.
 CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_axleparams_t &axle) {
 	if (wheelIndex >= VEHICLE_MAX_WHEEL_COUNT)
@@ -408,6 +415,9 @@ void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, 
 }
 
 void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, float dt) {
+	m_vehicleState.wheelsInContact = 0;
+	m_vehicleState.wheelsNotInContact = 0;
+
 	for (int i = 0; i < m_iWheelCount; i++) {
 		btTransform bullTransform = m_pVehicle->getWheelTransformWS(i);
 		btVector3 bullPos = bullTransform.getOrigin();
@@ -423,6 +433,13 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 		HLRot.z = -HLRot.z;
 
 		m_pWheels[i]->SetPosition(HLPos, HLRot, true);
+
+		// Update wheels on ground
+		btWheelInfo &wheel = m_pVehicle->getWheelInfo(i);
+		if (wheel.m_raycastInfo.m_groundObject)
+			m_vehicleState.wheelsInContact++;
+		else
+			m_vehicleState.wheelsNotInContact++;
 	}
 }
 
@@ -601,9 +618,14 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 	}
 }
 
+// Purpose: Reload vehicle params
 void CPhysicsVehicleController::VehicleDataReload() {
-	// TODO: This function reloads vehicle params
-	NOT_IMPLEMENTED
+	// Destroy the wheels first
+	DestroyCarWheels();
+
+	// Re-init
+	InitVehicleParams(m_vehicleParams);
+	InitCarWheels();
 }
 
 /****************************
