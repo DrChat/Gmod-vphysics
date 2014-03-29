@@ -54,7 +54,7 @@ int lPhysCollisionCollideGetScale(lua_State *state) {
 
 //
 // Name: physcollision.ConvertConvexesToCollide
-// Desc: Converts table of convexes to collide
+// Desc: Converts table of convexes to collide. It's safe to discard the convexes after this call, but DO NOT free them!
 // Arg1: Table|convexes|The table of convex meshes {{(optional) pos=Vector(0,0,0), (optional) ang=Angle(0,0,0), convex=nil}, ...}
 // Ret1: CPhysCollide|collide|The collision mesh.
 //
@@ -92,6 +92,23 @@ int lPhysCollisionCylinderToConvex(lua_State *state) {
 	return 1;
 }
 
+int lPhysCollisionSphereToConvex(lua_State *state) {
+	float radius = LUA->GetNumber(1);
+
+	CPhysConvex *pConvex = g_pPhysCollision->SphereToConvex(radius);
+	Push_PhysConvex(state, pConvex);
+	return 1;
+}
+
+int lPhysCollisionConeToConvex(lua_State *state) {
+	float radius = LUA->GetNumber(1);
+	float height = LUA->GetNumber(2);
+
+	CPhysConvex *pConvex = g_pPhysCollision->ConeToConvex(radius, height);
+	Push_PhysConvex(state, pConvex);
+	return 1;
+}
+
 int Init_PhysCollision(lua_State *state) {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory)
@@ -112,6 +129,8 @@ int Init_PhysCollision(lua_State *state) {
 			LUA->PushCFunction(lPhysCollisionCollideGetScale);	LUA->SetField(-2, "CollideGetScale");
 			LUA->PushCFunction(lPhysCollisionConvertConvexesToCollide); LUA->SetField(-2, "ConvertConvexesToCollide");
 			LUA->PushCFunction(lPhysCollisionCylinderToConvex);	LUA->SetField(-2, "CylinderToConvex");
+			LUA->PushCFunction(lPhysCollisionSphereToConvex);	LUA->SetField(-2, "SphereToConvex");
+			LUA->PushCFunction(lPhysCollisionConeToConvex);		LUA->SetField(-2, "ConeToConvex");
 		LUA->SetField(-2, "physcollision");
 	LUA->Pop();
 
