@@ -3,6 +3,7 @@
 #include <GarrysMod/Lua/Interface.h>
 #include <vphysics_interface.h>
 #include "../include/vphysics_interfaceV32.h"
+#include <tier1.h>
 
 #include "MiscFuncs.h"
 
@@ -29,9 +30,8 @@ int lPhysConvex__gc(lua_State *state) {
 int lPhysCollisionCollideSetScale(lua_State *state) {
 	CPhysCollide *pCollide = Get_PhysCollide(state, 1);
 	Vector *scale = Get_Vector(state, 2);
-	if (pCollide && scale) {
-		g_pPhysCollision->CollideSetScale(pCollide, *scale);
-	}
+
+	g_pPhysCollision->CollideSetScale(pCollide, *scale);
 
 	return 0;
 }
@@ -44,31 +44,41 @@ int lPhysCollisionCollideSetScale(lua_State *state) {
 //
 int lPhysCollisionCollideGetScale(lua_State *state) {
 	CPhysCollide *pCollide = Get_PhysCollide(state, 1);
-	
-	if (pCollide) {
-		Vector scale;
-		g_pPhysCollision->CollideGetScale(pCollide, scale);
-		Push_Vector(state, scale);
 
-		return 1;
-	}
-	
-	return 0;
+	Vector scale;
+	g_pPhysCollision->CollideGetScale(pCollide, scale);
+	Push_Vector(state, scale);
+
+	return 1;
 }
 
 //
-// Name: physcollision.ConvertConvexToCollide
+// Name: physcollision.ConvertConvexesToCollide
 // Desc: Converts table of convexes to collide
 // Arg1: Table|convexes|The table of convex meshes {{(optional) pos=Vector(0,0,0), (optional) ang=Angle(0,0,0), convex=nil}, ...}
 // Ret1: CPhysCollide|collide|The collision mesh.
 //
-int lPhysCollisionConvertConvexToCollide(lua_State *state) {
-	return 0;
+int lPhysCollisionConvertConvexesToCollide(lua_State *state) {
+	LUA->CheckType(1, Type::TABLE);
+
+	CUtlVector<CPhysConvex *> convexes;
+	LUA->PushNil(); // First key
+	while (LUA->Next(1)) {
+		CPhysConvex *pConvex = Get_PhysConvex(state, -1);
+		convexes.AddToTail(pConvex);
+
+		// Pop the value
+		LUA->Pop();
+	}
+
+	CPhysCollide *pCollide = g_pPhysCollision->ConvertConvexToCollide(convexes.Base(), convexes.Count());
+	Push_PhysCollide(state, pCollide);
+	return 1;
 }
 
 //
 // Name: physcollision.CylinderToConvex
-// Desc: Converts AABB to a cylinder
+// Desc: Converts AABB to a cylinder. Top/bottom sides are flat.
 // Arg1: Vector|mins|
 // Arg2: Vector|maxs|
 // Ret1: CPhysConvex|convex|The convex mesh.
@@ -77,11 +87,9 @@ int lPhysCollisionCylinderToConvex(lua_State *state) {
 	Vector *pMins = Get_Vector(state, 1);
 	Vector *pMaxs = Get_Vector(state, 2);
 
-	if (pMins && pMaxs) {
-		CPhysConvex *pConvex = g_pPhysCollision->CylinderToConvex(*pMins, *pMaxs);
-	}
-
-	return 0;
+	CPhysConvex *pConvex = g_pPhysCollision->CylinderToConvex(*pMins, *pMaxs);
+	Push_PhysConvex(state, pConvex);
+	return 1;
 }
 
 int Init_PhysCollision(lua_State *state) {
@@ -102,6 +110,8 @@ int Init_PhysCollision(lua_State *state) {
 		LUA->CreateTable();
 			LUA->PushCFunction(lPhysCollisionCollideSetScale);	LUA->SetField(-2, "CollideSetScale");
 			LUA->PushCFunction(lPhysCollisionCollideGetScale);	LUA->SetField(-2, "CollideGetScale");
+			LUA->PushCFunction(lPhysCollisionConvertConvexesToCollide); LUA->SetField(-2, "ConvertConvexesToCollide");
+			LUA->PushCFunction(lPhysCollisionCylinderToConvex);	LUA->SetField(-2, "CylinderToConvex");
 		LUA->SetField(-2, "physcollision");
 	LUA->Pop();
 

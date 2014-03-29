@@ -90,6 +90,14 @@ int lPhysObjGetCollide(lua_State *state) {
 	return 1;
 }
 
+int lPhysObjSetCollide(lua_State *state) {
+	IPhysicsObject32 *pObject = Get_PhysObj(state, 1);
+	CPhysCollide *pCollide = Get_PhysCollide(state, 2);
+
+	pObject->SetCollide(pCollide);
+	return 0;
+}
+
 int lPhysObjGetVehicleController(lua_State *state) {
 	IPhysicsObject32 *pObject = Get_PhysObj(state, 1);
 
@@ -110,6 +118,7 @@ int Init_PhysObj(lua_State *state) {
 			LUA->PushCFunction(lPhysObjGetLocalGravity);	LUA->SetField(-2, "GetLocalGravity");
 			LUA->PushCFunction(lPhysObjSetAngleVelocity);	LUA->SetField(-2, "SetAngleVelocity");
 			LUA->PushCFunction(lPhysObjGetCollide);			LUA->SetField(-2, "GetCollide");
+			LUA->PushCFunction(lPhysObjSetCollide);			LUA->SetField(-2, "SetCollide");
 			LUA->PushCFunction(lPhysObjGetVehicleController); LUA->SetField(-2, "GetVehicleController");
 	LUA->Pop(2);
 

@@ -64,6 +64,8 @@ abstract_class IPhysicsObject32 : public IPhysicsObject {
 
 		// Get a modifiable version of the collision mesh we're using. If you change it at all, remember to call UpdateCollide()
 		virtual CPhysCollide *	GetCollide() = 0;
+		// Set the collision model of an object. You don't need to call UpdateCollide after this.
+		virtual void		SetCollide(CPhysCollide *pCollide) = 0;
 
 		// Call this if you have recently changed the collision shape we're using.
 		virtual void		UpdateCollide() = 0;

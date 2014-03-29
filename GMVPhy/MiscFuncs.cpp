@@ -63,16 +63,6 @@ void Push_PhysVehicleController(lua_State *state, IPhysicsVehicleController *pCo
 	LUA->SetMetaTable(-2);
 }
 
-CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
-	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
-	if (ud->type != CustomTypes::TYPE_PHYSCOLLIDE) {
-		PrintArgError(state, stackPos, "PhysCollide");
-		return NULL;
-	}
-
-	return (CPhysCollide *)ud->data;
-}
-
 Vector *Get_Vector(lua_State *state, int stackPos) {
 	LUA->CheckType(stackPos, Type::VECTOR);
 
@@ -121,6 +111,13 @@ void Push_SoftBody(lua_State *state, IPhysicsSoftBody *softBody) {
 
 	LUA->CreateMetaTableType("PhysSoftBody", CustomTypes::TYPE_PHYSSOFTBODY);
 	LUA->SetMetaTable(-2);
+}
+
+CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, CustomTypes::TYPE_PHYSCOLLIDE);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (CPhysCollide *)ud->data;
 }
 
 void Push_PhysCollide(lua_State *state, const CPhysCollide *collide) {
