@@ -755,8 +755,8 @@ IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyFromVertices(const Vector *
 	return pSoftBody;
 }
 
-IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams) {
-	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyRope(this, pos, length, resolution, pParams);
+IPhysicsSoftBody *CPhysicsEnvironment::CreateSoftBodyRope(const Vector &pos, const Vector &end, int resolution, const softbodyparams_t *pParams) {
+	CPhysicsSoftBody *pSoftBody = ::CreateSoftBodyRope(this, pos, end, resolution, pParams);
 	if (pSoftBody)
 		m_softBodies.AddToTail(pSoftBody);
 

@@ -66,12 +66,13 @@ public:
 	
 	IPhysicsObject *						CreatePolyObject(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
 	IPhysicsObject *						CreatePolyObjectStatic(const CPhysCollide *pCollisionModel, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams);
+	// Deprecated. Use the collision interface instead.
 	IPhysicsObject *						CreateSphereObject(float radius, int materialIndex, const Vector &position, const QAngle &angles, objectparams_t *pParams, bool isStatic = false);
 	void									DestroyObject(IPhysicsObject *pObject);
 
 	IPhysicsSoftBody *						CreateSoftBody();
 	IPhysicsSoftBody *						CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const softbodyparams_t *pParams);
-	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams);
+	IPhysicsSoftBody *						CreateSoftBodyRope(const Vector &pos, const Vector &end, int resolution, const softbodyparams_t *pParams);
 	IPhysicsSoftBody *						CreateSoftBodyPatch(const Vector *corners, int resx, int resy, const softbodyparams_t *pParams);
 	void									DestroySoftBody(IPhysicsSoftBody *pSoftBody);
 

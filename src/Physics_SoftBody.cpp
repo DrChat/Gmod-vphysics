@@ -52,6 +52,10 @@ CPhysicsSoftBody::~CPhysicsSoftBody() {
 	delete m_pSoftBody;
 }
 
+bool CPhysicsSoftBody::IsAsleep() const {
+	return m_pSoftBody->getActivationState() == ISLAND_SLEEPING || m_pSoftBody->getActivationState() == DISABLE_SIMULATION;
+}
+
 void CPhysicsSoftBody::SetTotalMass(float fMass, bool bFromFaces) {
 	m_pSoftBody->setTotalMass(fMass, bFromFaces);
 }
@@ -182,10 +186,19 @@ void CPhysicsSoftBody::RayTest(Ray_t &ray, trace_t *pTrace) const {
 
 	btSoftBody::sRayCast rayCast;
 	m_pSoftBody->rayTest(start, end, rayCast);
-
 	pTrace->fraction = rayCast.fraction;
 	pTrace->startpos = ray.m_Start + ray.m_StartOffset;
 	pTrace->endpos = ray.m_Start + ray.m_StartOffset + (ray.m_Delta * rayCast.fraction);
+}
+
+void CPhysicsSoftBody::BoxTest(Ray_t &ray, trace_t *pTrace) const {
+	if (!pTrace) return;
+
+	btVector3 start, end;
+	ConvertPosToBull(ray.m_Start, start);
+	ConvertPosToBull(ray.m_Start + ray.m_Delta, end);
+
+	NOT_IMPLEMENTED
 }
 
 void CPhysicsSoftBody::Transform(const matrix3x4_t &mat) {
@@ -287,15 +300,15 @@ CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Ve
 	return pBody;
 }
 
-CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, int resolution, const softbodyparams_t *pParams) {
+CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &end, int resolution, const softbodyparams_t *pParams) {
 	btSoftBodyWorldInfo &wi = pEnv->GetSoftBodyWorldInfo();
 
-	btVector3 start, end;
-	ConvertPosToBull(position, start);
-	ConvertPosToBull(position + length, end);
+	btVector3 btStart, btEnd;
+	ConvertPosToBull(position, btStart);
+	ConvertPosToBull(end, btEnd);
 
 	// Last parameter is fixed sides of the soft body (which we don't set - dev can set these elsewhere)
-	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateRope(wi, start, end, resolution, 0);
+	btSoftBody *pSoftBody = btSoftBodyHelpers::CreateRope(wi, btStart, btEnd, resolution, 0);
 	if (pParams) {
 		pSoftBody->setTotalMass(pParams->totalMass);
 	}

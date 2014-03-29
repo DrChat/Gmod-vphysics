@@ -19,6 +19,8 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		CPhysicsSoftBody();
 		~CPhysicsSoftBody();
 
+		bool			IsAsleep() const;
+
 		void			SetTotalMass(float fMass, bool bFromFaces = false);
 		void			Anchor(int node, IPhysicsObject *pObj);
 
@@ -42,6 +44,7 @@ class CPhysicsSoftBody : public IPhysicsSoftBody {
 		// Get soft body AABB (cannot be implemented in collision interface because soft bodies change shape)
 		void			GetAABB(Vector *mins, Vector *maxs) const;
 		void			RayTest(Ray_t &ray, trace_t *pTrace) const;
+		void			BoxTest(Ray_t &ray, trace_t *pTrace) const;
 
 		void			Transform(const matrix3x4_t &mat);
 		void			Transform(const Vector *vec, const QAngle *ang);
@@ -64,7 +67,7 @@ CPhysicsSoftBody *CreateSoftBody(CPhysicsEnvironment *pEnv);
 CPhysicsSoftBody *CreateSoftBodyFromTriMesh(CPhysicsEnvironment *pEnv); // TODO: Not complete
 // Vertices are in world space! (You can create this in local space then call Transform to move this to the start position)
 CPhysicsSoftBody *CreateSoftBodyFromVertices(CPhysicsEnvironment *pEnv, const Vector *vertices, int numVertices, const softbodyparams_t *pParams);
-CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &length, int resolution, const softbodyparams_t *pParams);
+CPhysicsSoftBody *CreateSoftBodyRope(CPhysicsEnvironment *pEnv, const Vector &position, const Vector &end, int resolution, const softbodyparams_t *pParams);
 CPhysicsSoftBody *CreateSoftBodyPatch(CPhysicsEnvironment *pEnv, const Vector *corners, int resx, int resy, const softbodyparams_t *pParams);
 
 #endif // PHYSICS_SOFTBODY_H
