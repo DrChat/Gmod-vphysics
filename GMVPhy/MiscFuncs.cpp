@@ -47,6 +47,22 @@ void Push_PhysObj(lua_State *state, IPhysicsObject *pPhysObj) {
 	LUA->SetMetaTable(-2);
 }
 
+IPhysicsVehicleController *Get_PhysVehicleController(lua_State *state, int stackPos) {
+	LUA->CheckType(stackPos, CustomTypes::TYPE_PHYSVEHICLECONTROLLER);
+
+	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	return (IPhysicsVehicleController *)ud->data;
+}
+
+void Push_PhysVehicleController(lua_State *state, IPhysicsVehicleController *pController) {
+	UserData *ud = (UserData *)LUA->NewUserdata(sizeof(UserData));
+	ud->type = CustomTypes::TYPE_PHYSVEHICLECONTROLLER;
+	ud->data = pController;
+
+	LUA->CreateMetaTableType("PhysVehicleController", CustomTypes::TYPE_PHYSVEHICLECONTROLLER);
+	LUA->SetMetaTable(-2);
+}
+
 CPhysCollide *Get_PhysCollide(lua_State *state, int stackPos) {
 	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
 	if (ud->type != CustomTypes::TYPE_PHYSCOLLIDE) {

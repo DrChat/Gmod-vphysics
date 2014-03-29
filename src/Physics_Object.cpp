@@ -11,6 +11,7 @@
 #include "Physics_ShadowController.h"
 #include "Physics_DragController.h"
 #include "Physics_SurfaceProps.h"
+#include "Physics_VehicleController.h"
 #include "convert.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -831,6 +832,10 @@ float CPhysicsObject::ComputeShadowControl(const hlshadowcontrol_params_t &param
 	return ComputeShadowControllerHL(this, params, secondsToArrival, dt);
 }
 
+IPhysicsVehicleController *CPhysicsObject::GetVehicleController() const {
+	return m_pVehicleController;
+}
+
 void CPhysicsObject::UpdateCollide() {
 	btVector3 inertia;
 
@@ -1217,7 +1222,6 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 	if (!pEnvironment) return NULL;
 
 	// Some checks
-	// P.S.: Why the fuck does a sphere have angles
 	Assert(position.IsValid() && angles.IsValid());
 
 	// Conversion unnecessary as this is an exposed function.

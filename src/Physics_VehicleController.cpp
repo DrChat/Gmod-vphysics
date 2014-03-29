@@ -176,6 +176,8 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	}
 
 	m_pBody->GetObject()->setActivationState(DISABLE_DEACTIVATION);
+	m_pBody->SetVehicleController(this);
+
 	m_iWheelCount = m_vehicleParams.axleCount * m_vehicleParams.wheelsPerAxle;
 
 	// Initialization and setup
@@ -183,6 +185,7 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 }
 
 CPhysicsVehicleController::~CPhysicsVehicleController() {
+	m_pBody->SetVehicleController(NULL);
 	ShutdownBullVehicle();
 }
 

@@ -7,6 +7,7 @@
 #include "PhysConstraint.h"
 #include "PhysEnv.h"
 #include "PhysSoftBody.h"
+#include "PhysVehicle.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -54,6 +55,7 @@ GMOD_MODULE_OPEN() {
 	LINIT_CHECKRET(Init_PhysConstraint, state);
 	LINIT_CHECKRET(Init_PhysEnv, state);
 	LINIT_CHECKRET(Init_PhysSoftBody, state);
+	LINIT_CHECKRET(Init_PhysVehicle, state);
 
 	return 0;
 }

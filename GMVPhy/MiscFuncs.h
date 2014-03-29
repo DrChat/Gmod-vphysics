@@ -5,6 +5,7 @@ class IPhysicsEnvironment32;
 class IPhysicsObject32;
 class IPhysicsObject;
 class IPhysicsSoftBody;
+class IPhysicsVehicleController;
 class CPhysCollide;
 class CPhysConvex;
 class Vector;
@@ -22,6 +23,7 @@ namespace CustomTypes {
 		TYPE_PHYSENV,
 		TYPE_PHYSSOFTBODY,
 		TYPE_PHYSUSERCONSTRAINT,
+		TYPE_PHYSVEHICLECONTROLLER,
 
 		COUNT,
 	};
@@ -32,6 +34,9 @@ void Push_PhysEnv(lua_State *state, IPhysicsEnvironment32 *pEnv);
 
 IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos);
 void Push_PhysObj(lua_State *state, IPhysicsObject *pObj);
+
+IPhysicsVehicleController *Get_PhysVehicleController(lua_State *state, int stackPos);
+void Push_PhysVehicleController(lua_State *state, IPhysicsVehicleController *pController);
 
 Vector *Get_Vector(lua_State *state, int stackPos);
 void Push_Vector(lua_State *state, const Vector &vec);

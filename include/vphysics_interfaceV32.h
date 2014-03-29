@@ -19,6 +19,7 @@ class IPhysicsSoftBody;
 class IPhysicsConstraint;
 class IPhysicsConstraintGroup;
 class IPhysicsUserConstraint;
+class IPhysicsVehicleController;
 
 struct softbodyparams_t;
 struct constraint_gearparams_t;
@@ -32,10 +33,12 @@ abstract_class IPhysicsEnvironment32 : public IPhysicsEnvironment {
 	public:
 		// Create a convex soft body from vertices. Vertices are in world space!
 		virtual IPhysicsSoftBody *	CreateSoftBodyFromVertices(const Vector *vertices, int numVertices, const softbodyparams_t *pParams) = 0;
-		virtual IPhysicsSoftBody *	CreateSoftBodyRope(const Vector &pos, const Vector &length, int resolution, const softbodyparams_t *pParams) = 0;
+		// Resolution is the amount of nodes in the rope. Higher number means less passthrough and a finer rope.
+		virtual IPhysicsSoftBody *	CreateSoftBodyRope(const Vector &start, const Vector &length, int resolution, const softbodyparams_t *pParams) = 0;
 		virtual IPhysicsSoftBody *	CreateSoftBodyPatch(const Vector *corners, int resx, int resy, const softbodyparams_t *pParams) = 0;
 		virtual void				DestroySoftBody(IPhysicsSoftBody *pSoftBody) = 0;
 
+		// Constraint group is not required (can be NULL)
 		virtual IPhysicsConstraint *CreateGearConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_gearparams_t &gear) = 0;
 		virtual IPhysicsConstraint *CreateUserConstraint(IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, IPhysicsUserConstraint *pConstraint) = 0;
 
@@ -64,6 +67,8 @@ abstract_class IPhysicsObject32 : public IPhysicsObject {
 
 		// Call this if you have recently changed the collision shape we're using.
 		virtual void		UpdateCollide() = 0;
+
+		virtual IPhysicsVehicleController *GetVehicleController() const = 0;
 };
 
 // A note about CPhysConvex / CPhysCollide:

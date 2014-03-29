@@ -5,6 +5,7 @@
 #endif
 
 class CPhysicsEnvironment;
+class CPhysicsVehicleController;
 class CShadowController;
 class CPhysicsFluidController;
 class CPhysicsConstraint;
@@ -132,6 +133,8 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								RemoveShadowController();
 		float								ComputeShadowControl(const hlshadowcontrol_params_t &params, float secondsToArrival, float dt);
 
+		IPhysicsVehicleController *			GetVehicleController() const;
+
 		// Call this if you have recently changed the collision shape we're using (without setting a new one with SetCollide)
 		void								UpdateCollide();
 
@@ -187,6 +190,8 @@ class CPhysicsObject : public IPhysicsObject32 {
 		CPhysicsFluidController *			GetFluidController() { return m_pFluidController; }
 		void								SetFluidController(CPhysicsFluidController *controller) { m_pFluidController = controller; }
 
+		void								SetVehicleController(CPhysicsVehicleController *pController) { m_pVehicleController = pController; }
+
 		bool								IsBeingRemoved() { return m_bRemoving; }
 
 		void								TransferToEnvironment(CPhysicsEnvironment *pDest);
@@ -219,6 +224,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 		btVector3							m_angDragBasis;
 		Vector								m_massCenterOverride;
 		CShadowController *					m_pShadow;
+		CPhysicsVehicleController *			m_pVehicleController;
 		CPhysicsFluidController *			m_pFluidController;
 		CUtlVector<CPhysicsConstraint *>	m_pConstraintVec;
 		CUtlVector<IController *>			m_pControllers;
