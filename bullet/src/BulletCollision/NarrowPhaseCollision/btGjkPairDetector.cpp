@@ -456,7 +456,7 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			m_minkowskiB->getAabb(localTransB,aabbMin,aabbMax);
 			btVector3 posB = (aabbMin+aabbMax)*btScalar(0.5);
 
-			btVector3 diff = ((posA-posB)*normalInB.absolute()).normalized();
+			btVector3 diff = posA-posB;
 			if (diff.dot(normalInB) <= 0.f)
 				normalInB *= -1.f;
 		}
