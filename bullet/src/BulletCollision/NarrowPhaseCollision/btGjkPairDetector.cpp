@@ -277,12 +277,12 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 
 							  printf("btGjkPairDetector maxIter exceeded:%i\n", m_curIter);   
 							  printf("sepAxis=(%f, %f, %f), squaredDistance = %f, shapeTypeA=%i, shapeTypeB=%i\n",   
-							  m_cachedSeparatingAxis.getX(),   
-							  m_cachedSeparatingAxis.getY(),   
-							  m_cachedSeparatingAxis.getZ(),   
-							  squaredDistance,   
-							  m_minkowskiA->getShapeType(),   
-							  m_minkowskiB->getShapeType());   
+								m_cachedSeparatingAxis.getX(),   
+								m_cachedSeparatingAxis.getY(),   
+								m_cachedSeparatingAxis.getZ(),   
+								squaredDistance,   
+								m_minkowskiA->getShapeType(),   
+								m_minkowskiB->getShapeType());   
 
 					  #endif   
 					  break;   
@@ -449,15 +449,22 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			//We like to use a dot product of the normal against the difference of the centroids, 
 			//once the centroid is available in the API
 			//until then we use the center of the aabb to approximate the centroid
-			btVector3 aabbMin,aabbMax;
-			m_minkowskiA->getAabb(localTransA,aabbMin,aabbMax);
-			btVector3 posA  = (aabbMax+aabbMin)*btScalar(0.5);
+			btVector3 aabbAMin,aabbAMax;
+			m_minkowskiA->getAabb(localTransA,aabbAMin,aabbAMax);
+			btVector3 posA  = (aabbAMax+aabbAMin)*btScalar(0.5);
 		
-			m_minkowskiB->getAabb(localTransB,aabbMin,aabbMax);
-			btVector3 posB = (aabbMin+aabbMax)*btScalar(0.5);
+			btVector3 aabbBMin,aabbBMax;
+			m_minkowskiB->getAabb(localTransB,aabbBMin,aabbBMax);
+			btVector3 posB = (aabbBMin+aabbBMax) * btScalar(0.5);
 
-			btVector3 diff = posA-posB;
-			if (diff.dot(normalInB) <= 0.f)
+			// Bring out the most significant numbers!
+			btVector3 d = (posA - posB) * normalInB.absolute();
+			d.normalize();
+
+			btVector3 diff = (posA-posB).normalized();
+
+			// Use the d, but don't depend on it alone.
+			if ((diff.dot(normalInB) < -SIMD_EPSILON) && (d.dot(normalInB) < -SIMD_EPSILON))
 				normalInB *= -1.f;
 		}
 		m_cachedSeparatingAxis = normalInB;
