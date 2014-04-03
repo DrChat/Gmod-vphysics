@@ -73,7 +73,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	// So we don't end up having a huge delta angle (such as instead of doing 379 deg turn, do a -1 deg turn)
 	if (angle > M_PI) {
-		angle -= 2 * M_PI;
+		angle -= btScalar(2 * M_PI);
 	}
 
 	btVector3 deltaAngles = axis * angle;
