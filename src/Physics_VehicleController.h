@@ -23,7 +23,7 @@ class IPhysicsVehicleWheelTrace {
 		virtual IPhysicsObject *					CastRay(int wheelIndex, const Vector &start, const Vector &end, trace_t &result) = 0;
 };
 
-class CPhysicsVehicleController : public IPhysicsVehicleController1 {
+class CPhysicsVehicleController : public IPhysicsVehicleController32 {
 	public:
 		CPhysicsVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);
 		~CPhysicsVehicleController();

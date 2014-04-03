@@ -8,7 +8,7 @@
 
 // THIS INTERFACE IS NOT FINALIZED! FUNCTIONS MAY CHANGE!
 
-class IPhysicsVehicleController1 : public IPhysicsVehicleController {
+class IPhysicsVehicleController32 : public IPhysicsVehicleController {
 	public:
 		// Updates the internal vehicle without calculating anything related to controls.
 		// Use this instead of Update if you want to manually control handling.
