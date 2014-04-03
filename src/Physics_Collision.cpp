@@ -94,26 +94,6 @@ void CCollisionQuery::SetTriangleMaterialIndex(int convexIndex, int triangleInde
 }
 
 /****************************
-* CLASS CPhysCollide
-****************************/
-
-CPhysCollide::CPhysCollide(btCollisionShape *pShape) {
-	m_pShape = pShape;
-	m_pShape->setUserPointer(this);
-
-	m_massCenter.setZero();
-}
-
-/****************************
-* CLASS CPhysPolySoup
-****************************/
-
-class CPhysPolysoup {
-	public:
-		CPhysPolysoup();
-};
-
-/****************************
 * BYTESWAP DATA DESCRIPTIONS
 ****************************/
 
@@ -192,6 +172,31 @@ BEGIN_BYTESWAP_DATADESC(ivpcompactledgenode_t)
 END_BYTESWAP_DATADESC()
 
 /****************************
+* CLASS CPhysCollide
+****************************/
+
+CPhysCollide::CPhysCollide(btCollisionShape *pShape) {
+	m_pShape = pShape;
+	m_pShape->setUserPointer(this);
+
+	m_massCenter.setZero();
+}
+
+/****************************
+* CLASS CPhysPolySoup
+****************************/
+
+class CPhysPolysoup {
+	public:
+		CPhysPolysoup() {
+
+		}
+
+	private:
+		
+};
+
+/****************************
 * CLASS CPhysicsCollision
 ****************************/
 
@@ -212,17 +217,36 @@ CPhysicsCollision::~CPhysicsCollision() {
 	ClearBBoxCache();
 }
 
-CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **pVerts, int vertCount) {
+// FIXME: Why is it important to have a pointer to an array?
+CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **ppVerts, int vertCount) {
+	if (!ppVerts) return NULL;
+
+	btConvexHullShape *pConvex = new btConvexHullShape;
+
+	for (int i = 0; i < vertCount; i++) {
+		btVector3 vert;
+		ConvertPosToBull(*ppVerts[i], vert);
+
+		pConvex->addPoint(vert, false);
+	}
+	pConvex->recalcLocalAabb();
+
+	return (CPhysConvex *)pConvex;
+}
+
+// Newer version of the above (just an array, not an array of pointers)
+CPhysConvex *CPhysicsCollision::ConvexFromVerts(const Vector *pVerts, int vertCount) {
 	if (!pVerts) return NULL;
 
 	btConvexHullShape *pConvex = new btConvexHullShape;
 
 	for (int i = 0; i < vertCount; i++) {
 		btVector3 vert;
-		ConvertPosToBull(*pVerts[i], vert);
+		ConvertPosToBull(pVerts[i], vert);
 
-		pConvex->addPoint(vert);
+		pConvex->addPoint(vert, false);
 	}
+	pConvex->recalcLocalAabb();
 
 	return (CPhysConvex *)pConvex;
 }
@@ -297,6 +321,7 @@ void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gam
 	NOT_IMPLEMENTED
 }
 
+// Appears to use a polyhedron class from mathlib
 CPolyhedron *CPhysicsCollision::PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron) {
 	NOT_IMPLEMENTED
 	return NULL;
@@ -314,18 +339,19 @@ void CPhysicsCollision::ConvexesFromConvexPolygon(const Vector &vPolyNormal, con
 // TODO: Support this, gmod lua Entity:PhysicsInitMultiConvex uses this!
 // IVP internally used QHull to generate the convexes.
 CPhysPolysoup *CPhysicsCollision::PolysoupCreate() {
-	NOT_IMPLEMENTED
-	return NULL;
+	return new CPhysPolysoup();
 }
 
 void CPhysicsCollision::PolysoupDestroy(CPhysPolysoup *pSoup) {
-	NOT_IMPLEMENTED
+	delete pSoup;
 }
 
 void CPhysicsCollision::PolysoupAddTriangle(CPhysPolysoup *pSoup, const Vector &a, const Vector &b, const Vector &c, int materialIndex7bits) {
 	NOT_IMPLEMENTED
 }
 
+// TODO: This will involve convex decomposition, which breaks a concave shape into multiple convex shapes.
+// Too complex to write myself, will need a library to do this. QHull does not support this.
 CPhysCollide *CPhysicsCollision::ConvertPolysoupToCollide(CPhysPolysoup *pSoup, bool useMOPP) {
 	NOT_IMPLEMENTED
 	return NULL;
@@ -339,6 +365,8 @@ CPhysCollide *CPhysicsCollision::ConvertConvexToCollide(CPhysConvex **ppConvex, 
 		btCollisionShape *pShape = (btCollisionShape *)ppConvex[i];
 		pCompound->addChildShape(btTransform::getIdentity(), pShape);
 	}
+
+	pCompound->setMargin(COLLISION_MARGIN);
 
 	CPhysCollide *pCollide = new CPhysCollide(pCompound);
 	return pCollide;
@@ -377,6 +405,11 @@ void CPhysicsCollision::RemoveConvexFromCollide(CPhysCollide *pCollide, const CP
 	}
 }
 
+CPhysCollide *CPhysicsCollision::CreateCollide() {
+	btCompoundShape *pShape = new btCompoundShape();
+	return new CPhysCollide(pShape);
+}
+
 void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 	if (!pCollide || IsCachedBBox(pCollide)) return;
 
@@ -388,6 +421,7 @@ void CPhysicsCollision::DestroyCollide(CPhysCollide *pCollide) {
 
 		for (int i = pCompound->getNumChildShapes()-1; i >= 0; i--) {
 			btCollisionShape *pShape = pCompound->getChildShape(i);
+			Assert(!pShape->isCompound()); // Compounds shouldn't have compound children.
 
 			pCompound->removeChildShapeByIndex(i);
 			ConvexFree((CPhysConvex *)pShape);
@@ -409,7 +443,7 @@ int CPhysicsCollision::CollideSize(CPhysCollide *pCollide) {
 	return 0;
 }
 
-// TODO: Should we write a binary-compatible version with IVP or use our own format?
+// TODO: Design a new file format
 int CPhysicsCollision::CollideWrite(char *pDest, CPhysCollide *pCollide, bool swap) {
 	NOT_IMPLEMENTED
 	return 0;
@@ -1221,6 +1255,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		if (surfaceheader.vphysicsID	!= VPHYSICS_ID
 		 || surfaceheader.version		!= 0x100) {
 			pOutput->solids[i] = NULL;
+			Warning("VCollideLoad: Skipped solid %d (magic: %.4s version: %d)", i+1, surfaceheader.vphysicsID, surfaceheader.version);
 			continue;
 		}
 

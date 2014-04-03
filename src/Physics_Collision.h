@@ -104,26 +104,30 @@ class CPhysicsCollision : public IPhysicsCollision32 {
 		CPhysicsCollision();
 		~CPhysicsCollision();
 
-		CPhysConvex *			ConvexFromVerts(Vector **pVerts, int vertCount);
+		CPhysConvex *			ConvexFromVerts(Vector **ppVerts, int vertCount);
+		CPhysConvex *			ConvexFromVerts(const Vector *pVerts, int vertCount); // A more sensible version!
 		CPhysConvex *			ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance);
 		float					ConvexVolume(CPhysConvex *pConvex);
 		float					ConvexSurfaceArea(CPhysConvex *pConvex);
 		void					SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData);
 		void					ConvexFree(CPhysConvex *pConvex);
 		CPhysConvex *			ConvexFromConvexPolyhedron(const CPolyhedron &ConvexPolyhedron);
+		CPolyhedron *			PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron);
 		void					ConvexesFromConvexPolygon(const Vector &vPolyNormal, const Vector *pPoints, int iPointCount, CPhysConvex **pOutput);
 
 		CPhysPolysoup *			PolysoupCreate();
 		void					PolysoupDestroy(CPhysPolysoup *pSoup);
 		void					PolysoupAddTriangle(CPhysPolysoup *pSoup, const Vector &a, const Vector &b, const Vector &c, int materialIndex7bits);
 
-		CPhysCollide *			ConvertPolysoupToCollide(CPhysPolysoup *pSoup, bool useMOPP);
+		CPhysCollide *			ConvertPolysoupToCollide(CPhysPolysoup *pSoup, bool useMOPP); // Deprecated: useMOPP
 		CPhysCollide *			ConvertConvexToCollide(CPhysConvex **pConvex, int convexCount);
 		CPhysCollide *			ConvertConvexToCollideParams(CPhysConvex **pConvex, int convexCount, const convertconvexparams_t &convertParams);
 
 		void					AddConvexToCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex, const matrix3x4_t *xform = NULL);
 		void					RemoveConvexFromCollide(CPhysCollide *pCollide, const CPhysConvex *pConvex);
+		void					RemoveConvexFromCollide(CPhysCollide *pCollide, int index);
 
+		CPhysCollide *			CreateCollide(); // Create an empty collision shape (to be used with AddConvexToCollide/RemoveConvexFromCollide)
 		void					DestroyCollide(CPhysCollide *pCollide);
 		int						CollideSize(CPhysCollide *pCollide);
 		int						CollideWrite(char *pDest, CPhysCollide *pCollide, bool swap = false);
@@ -187,8 +191,6 @@ class CPhysicsCollision : public IPhysicsCollision32 {
 
 		CPhysCollide *			CreateVirtualMesh(const virtualmeshparams_t &params);
 		bool					SupportsVirtualMesh();
-
-		CPolyhedron *			PolyhedronFromConvex(CPhysConvex *const pConvex, bool bUseTempPolyhedron);
 
 		void					OutputDebugInfo(const CPhysCollide *pCollide);
 		unsigned int			ReadStat(int statID);
