@@ -176,6 +176,10 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	}
 
 	m_pBody->GetObject()->setActivationState(DISABLE_DEACTIVATION);
+	if (m_pBody->GetVehicleController() != NULL) {
+		Warning("VPhysics: Attaching a vehicle controller to an object that already has one attached!\n");
+	}
+
 	m_pBody->SetVehicleController(this);
 
 	m_iWheelCount = m_vehicleParams.axleCount * m_vehicleParams.wheelsPerAxle;
