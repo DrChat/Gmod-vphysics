@@ -56,6 +56,7 @@ class CGhostTriggerCallback : public btGhostObjectCallback {
 CPhysicsObject::CPhysicsObject() {
 	m_pShadow = NULL;
 	m_pFluidController = NULL;
+	m_pVehicleController = NULL;
 	m_pEnv = NULL;
 
 	m_contents = 0;
@@ -872,6 +873,10 @@ void CPhysicsObject::SetCollide(CPhysCollide *pCollide) {
 
 const char *CPhysicsObject::GetName() const {
 	return m_pName;
+}
+
+IPhysicsEnvironment32 *CPhysicsObject::GetEnvironment() const {
+	return m_pEnv;
 }
 
 bool CPhysicsObject::IsTrigger() const {

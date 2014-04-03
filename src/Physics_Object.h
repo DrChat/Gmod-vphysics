@@ -143,6 +143,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								SetCollide(CPhysCollide *pCollide);
 
 		const char *						GetName() const;
+		IPhysicsEnvironment32 *				GetEnvironment() const;
 
 		bool								IsTrigger() const;
 		void								BecomeTrigger();

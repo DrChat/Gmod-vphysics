@@ -70,6 +70,8 @@ abstract_class IPhysicsObject32 : public IPhysicsObject {
 		// Call this if you have recently changed the collision shape we're using.
 		virtual void		UpdateCollide() = 0;
 
+		virtual IPhysicsEnvironment32 *GetEnvironment() const = 0;
+
 		virtual IPhysicsVehicleController *GetVehicleController() const = 0;
 };
 
