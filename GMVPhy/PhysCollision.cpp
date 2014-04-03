@@ -52,6 +52,15 @@ int lPhysCollisionCollideGetScale(lua_State *state) {
 	return 1;
 }
 
+int lPhysCollisionDestroyCollide(lua_State *state) {
+	CPhysCollide *pCollide = Get_PhysCollide(state, 1);
+	g_pPhysCollision->DestroyCollide(pCollide);
+
+	LUA->PushNil();
+	LUA->SetMetaTable(1);
+	return 0;
+}
+
 //
 // Name: physcollision.ConvertConvexesToCollide
 // Desc: Converts table of convexes to collide. It's safe to discard the convexes after this call, but DO NOT free them!
@@ -74,6 +83,15 @@ int lPhysCollisionConvertConvexesToCollide(lua_State *state) {
 	CPhysCollide *pCollide = g_pPhysCollision->ConvertConvexToCollide(convexes.Base(), convexes.Count());
 	Push_PhysCollide(state, pCollide);
 	return 1;
+}
+
+int lPhysCollisionConvexFree(lua_State *state) {
+	CPhysConvex *pConvex = Get_PhysConvex(state, 1);
+	g_pPhysCollision->ConvexFree(pConvex);
+
+	LUA->PushNil();
+	LUA->SetMetaTable(1);
+	return 0;
 }
 
 //
@@ -127,7 +145,10 @@ int Init_PhysCollision(lua_State *state) {
 		LUA->CreateTable();
 			LUA->PushCFunction(lPhysCollisionCollideSetScale);	LUA->SetField(-2, "CollideSetScale");
 			LUA->PushCFunction(lPhysCollisionCollideGetScale);	LUA->SetField(-2, "CollideGetScale");
+			LUA->PushCFunction(lPhysCollisionDestroyCollide);	LUA->SetField(-2, "DestroyCollide");
+
 			LUA->PushCFunction(lPhysCollisionConvertConvexesToCollide); LUA->SetField(-2, "ConvertConvexesToCollide");
+			LUA->PushCFunction(lPhysCollisionConvexFree);		LUA->SetField(-2, "ConvexFree");
 			LUA->PushCFunction(lPhysCollisionCylinderToConvex);	LUA->SetField(-2, "CylinderToConvex");
 			LUA->PushCFunction(lPhysCollisionSphereToConvex);	LUA->SetField(-2, "SphereToConvex");
 			LUA->PushCFunction(lPhysCollisionConeToConvex);		LUA->SetField(-2, "ConeToConvex");
