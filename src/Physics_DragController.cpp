@@ -49,7 +49,7 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		// LINEAR DRAG
 		//------------------
 		if (!btFuzzyZero(body->getLinearVelocity().length2())) {
-			btVector3 vel;
+			btVector3 vel(0, 0, 0);
 
 			float dragForce = -1 * pObject->GetDragInDirection(body->getLinearVelocity().normalized()) * m_airDensity * dt;
 			if (dragForce < -1.0f)
@@ -66,7 +66,7 @@ void CPhysicsDragController::Tick(btScalar dt) {
 		// ANGULAR DRAG
 		//------------------
 		if (!btFuzzyZero(body->getAngularVelocity().length2())) {
-			btVector3 ang;
+			btVector3 ang(0, 0, 0);
 
 			float angDragForce = -1 * pObject->GetAngularDragInDirection(body->getAngularVelocity().normalized()) * m_airDensity * dt;
 			if (angDragForce < -1.0f)
