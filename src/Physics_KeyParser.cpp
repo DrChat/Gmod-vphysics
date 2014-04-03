@@ -86,6 +86,7 @@ void CPhysicsKeyParser::ParseSolid(solid_t *pSolid, IVPhysicsKeyHandler *unknown
 		else if (!Q_stricmp(key, "drag"))
 			pSolid->params.dragCoefficient = data->GetFloat();
 		//else if (!Q_stricmp(key, "rollingdrag")) // This is in vphysics.so but it doesn't seem to set any variables.
+		//else if (!Q_stricmp(key, "massbias")) // TODO: What is this
 		else if (unknownKeyHandler)
 			unknownKeyHandler->ParseKeyValue(pSolid, key, data->GetString());
 		else
@@ -100,6 +101,8 @@ void CPhysicsKeyParser::ParseFluid(fluid_t *pFluid, IVPhysicsKeyHandler *unknown
 		unknownKeyHandler->SetDefaults(pFluid);
 	else
 		memset(pFluid, 0, sizeof(*pFluid));
+
+	pFluid->index = -1;
 
 	for (KeyValues *data = m_pCurrentBlock->GetFirstSubKey(); data; data = data->GetNextKey()) {
 		const char *key = data->GetName();
