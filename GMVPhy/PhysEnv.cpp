@@ -88,6 +88,21 @@ int lPhysEnvTransferObject(lua_State *state) {
 }
 
 //
+// Name: PhysEnv:IsCollisionModelUsed
+// Desc: Is the CPhysCollide being used by any objects?
+// Arg1: PhysEnv|self|
+// Arg2: PhysCollide|collide|collision model
+// Ret1: bool|used|Used?
+//
+int lPhysEnvIsCollisionModelUsed(lua_State *state) {
+	IPhysicsEnvironment32 *pPhysEnv = Get_PhysEnv(state, 1);
+	CPhysCollide *pCollide = Get_PhysCollide(state, 2);
+
+	LUA->PushBool(pPhysEnv->IsCollisionModelUsed(pCollide));
+	return 1;
+}
+
+//
 // Name: physenv.CreateNew
 // Desc: Creates a new physics environment
 // Arg1:
@@ -161,6 +176,7 @@ int Init_PhysEnv(lua_State *state) {
 		LUA->PushCFunction(lPhysEnvGetGravity); LUA->SetField(-2, "GetGravity");
 		LUA->PushCFunction(lPhysEnvSimulate); LUA->SetField(-2, "Simulate");
 		LUA->PushCFunction(lPhysEnvTransferObject); LUA->SetField(-2, "TransferObject");
+		LUA->PushCFunction(lPhysEnvIsCollisionModelUsed); LUA->SetField(-2, "IsCollisionModelUsed");
 	LUA->Pop(1);
 
 	LUA->PushSpecial(SPECIAL_GLOB);
