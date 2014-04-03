@@ -154,31 +154,34 @@ bool CCollisionSolver::NeedsCollision(CPhysicsObject *pObject0, CPhysicsObject *
 }
 
 void SerializeWorld_f(const CCommand &args) {
-	if (args.ArgC() != 2) {
-		Msg("Usage: vphysics_serialize <index>\n");
+	if (args.ArgC() != 3) {
+		Msg("Usage: vphysics_serialize <index> <name>\n");
 		return;
 	}
 
 	CPhysicsEnvironment *pEnv = (CPhysicsEnvironment *)g_Physics.GetActiveEnvironmentByIndex(atoi(args.Arg(2)));
 	if (pEnv) {
 		btDiscreteDynamicsWorld *pWorld = (btDiscreteDynamicsWorld *)pEnv->GetBulletEnvironment();
-		if (!pWorld) return;
+		Assert(pWorld);
 
 		btSerializer *pSerializer = new btDefaultSerializer;
 		pWorld->serialize(pSerializer);
 
 		// FIXME: We shouldn't be using this. Find the appropiate method from valve interfaces.
-		FILE *pFile = fopen("testfile.bullet", "wb");
+		const char *pName = args.Arg(3);
+		FILE *pFile = fopen(pName, "wb");
 		if (pFile) {
 			fwrite(pSerializer->getBufferPointer(), pSerializer->getCurrentBufferSize(), 1, pFile);
 			fclose(pFile);
 		} else {
-			Warning("Couldn't open testfile.bullet for writing!\n");
+			Warning("Couldn't open \"%s\" for writing!\n", pName);
 		}
+	} else {
+		Warning("Invalid environment index supplied!\n");
 	}
 }
 
-static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client)\n\tDumps \"testfile.bullet\" out to the exe directory.");
+static ConCommand cmd_serializeworld("vphysics_serialize", SerializeWorld_f, "Serialize environment by index (usually 0=server, 1=client)\n\tDumps the file out to the exe directory.");
 
 /*******************************
 * CLASS CObjectTracker
@@ -218,8 +221,9 @@ class CObjectTracker {
 			for (int i = 0; i < colObjArray.size(); i++) {
 				CPhysicsObject *pObj = (CPhysicsObject *)colObjArray[i]->getUserPointer();
 				if (!pObj) continue; // Internal object that the game doesn't need to know about
-				Assert(*(char *)pObj != 0xDD);
 
+				Assert(*(char *)pObj != 0xDD); // Make sure the object isn't deleted (only works in debug builds)
+ 
 				// Don't add objects marked for delete
 				if (pObj->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) {
 					continue;
@@ -239,7 +243,7 @@ class CObjectTracker {
 							case ACTIVE_TAG:
 								m_pObjEvents->ObjectWake(pObj);
 								break;
-							case ISLAND_SLEEPING:
+							case ISLAND_SLEEPING: // Don't call ObjectSleep on DISABLE_SIMULATION on purpose.
 								m_pObjEvents->ObjectSleep(pObj);
 								break;
 						}
@@ -1102,6 +1106,7 @@ bool CPhysicsEnvironment::IsCollisionModelUsed(CPhysCollide *pCollide) const {
 			return true;
 	}
 
+	// Also scan the to-be-deleted objects list
 	for (int i = 0; i < m_deadObjects.Count(); i++) {
 		if (((CPhysicsObject *)m_deadObjects[i])->GetObject()->getCollisionShape() == pCollide->GetCollisionShape())
 			return true;
