@@ -19,7 +19,6 @@ CPhysicsFrictionSnapshot::CPhysicsFrictionSnapshot(CPhysicsObject *pObject) {
 	int numManifolds = pEnv->GetBulletEnvironment()->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; i++) {
 		btPersistentManifold *pManifold = pEnv->GetBulletEnvironment()->getDispatcher()->getManifoldByIndexInternal(i);
-		// pObjA is the object colliding with pObjB
 		const btCollisionObject *pObjA = pManifold->getBody0();
 		const btCollisionObject *pObjB = pManifold->getBody1();
 
@@ -41,25 +40,29 @@ bool CPhysicsFrictionSnapshot::IsValid() {
 }
 
 IPhysicsObject *CPhysicsFrictionSnapshot::GetObject(int index) {
-	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
-	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
+	const btCollisionObject *colObjA = m_manifolds[m_iCurManifold]->getBody0();
+	const btCollisionObject *colObjB = m_manifolds[m_iCurManifold]->getBody1();
+	const CPhysicsObject *pObjA = (CPhysicsObject *)colObjA->getUserPointer();
+	const CPhysicsObject *pObjB = (CPhysicsObject *)colObjB->getUserPointer();
 
 	// index 0 is this object, 1 is other object
 	if (index == 0)
-		return ((CPhysicsObject *)pObjA->getUserPointer() == m_pObject) ? (IPhysicsObject *)pObjA->getUserPointer() : (IPhysicsObject *)pObjB->getUserPointer();
+		return (pObjA == m_pObject) ? (IPhysicsObject *)pObjA : (IPhysicsObject *)pObjB;
 	else
-		return ((CPhysicsObject *)pObjA->getUserPointer() != m_pObject) ? (IPhysicsObject *)pObjA->getUserPointer() : (IPhysicsObject *)pObjB->getUserPointer();
+		return (pObjA != m_pObject) ? (IPhysicsObject *)pObjA : (IPhysicsObject *)pObjB;
 }
 
 int CPhysicsFrictionSnapshot::GetMaterial(int index) {
-	const btCollisionObject *pObjA = m_manifolds[m_iCurManifold]->getBody0();
-	const btCollisionObject *pObjB = m_manifolds[m_iCurManifold]->getBody1();
+	const btCollisionObject *colObjA = m_manifolds[m_iCurManifold]->getBody0();
+	const btCollisionObject *colObjB = m_manifolds[m_iCurManifold]->getBody1();
+	const CPhysicsObject *pObjA = (CPhysicsObject *)colObjA->getUserPointer();
+	const CPhysicsObject *pObjB = (CPhysicsObject *)colObjB->getUserPointer();
 
 	// index 0 is this object, 1 is other object
 	if (index == 0)
-		return ((CPhysicsObject *)pObjA->getUserPointer() == m_pObject) ? ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex() : ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
+		return (pObjA == m_pObject) ? pObjA->GetMaterialIndex() : pObjB->GetMaterialIndex();
 	else
-		return ((CPhysicsObject *)pObjA->getUserPointer() != m_pObject) ? ((CPhysicsObject *)pObjA->getUserPointer())->GetMaterialIndex() : ((CPhysicsObject *)pObjB->getUserPointer())->GetMaterialIndex();
+		return (pObjA != m_pObject) ? pObjA->GetMaterialIndex() : pObjB->GetMaterialIndex();
 }
 
 void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
