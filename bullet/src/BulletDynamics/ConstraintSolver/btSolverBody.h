@@ -25,87 +25,6 @@ class	btCollisionObject;
 #include "LinearMath/btAlignedAllocator.h"
 #include "LinearMath/btTransformUtil.h"
 
-///Until we get other contributions, only use SIMD on Windows, when using Visual Studio 2008 or later, and not double precision
-#ifdef BT_USE_SSE
-#define USE_SIMD 1
-#endif //
-
-
-#ifdef USE_SIMD
-
-struct	btSimdScalar
-{
-	SIMD_FORCE_INLINE	btSimdScalar()
-	{
-
-	}
-
-	SIMD_FORCE_INLINE	btSimdScalar(float	fl)
-	:m_vec128 (_mm_set1_ps(fl))
-	{
-	}
-
-	SIMD_FORCE_INLINE	btSimdScalar(__m128 v128)
-		:m_vec128(v128)
-	{
-	}
-	union
-	{
-		__m128		m_vec128;
-		float		m_floats[4];
-		int			m_ints[4];
-		btScalar	m_unusedPadding;
-	};
-	SIMD_FORCE_INLINE	__m128	get128()
-	{
-		return m_vec128;
-	}
-
-	SIMD_FORCE_INLINE	const __m128	get128() const
-	{
-		return m_vec128;
-	}
-
-	SIMD_FORCE_INLINE	void	set128(__m128 v128)
-	{
-		m_vec128 = v128;
-	}
-
-	SIMD_FORCE_INLINE	operator       __m128()       
-	{ 
-		return m_vec128; 
-	}
-	SIMD_FORCE_INLINE	operator const __m128() const 
-	{ 
-		return m_vec128; 
-	}
-	
-	SIMD_FORCE_INLINE	operator float() const 
-	{ 
-		return m_floats[0]; 
-	}
-
-};
-
-///@brief Return the elementwise product of two btSimdScalar
-SIMD_FORCE_INLINE btSimdScalar 
-operator*(const btSimdScalar& v1, const btSimdScalar& v2) 
-{
-	return btSimdScalar(_mm_mul_ps(v1.get128(), v2.get128()));
-}
-
-///@brief Return the elementwise product of two btSimdScalar
-SIMD_FORCE_INLINE btSimdScalar 
-operator+(const btSimdScalar& v1, const btSimdScalar& v2) 
-{
-	return btSimdScalar(_mm_add_ps(v1.get128(), v2.get128()));
-}
-
-
-#else
-#define btSimdScalar btScalar
-#endif
-
 ///The btSolverBody is an internal datastructure for the constraint solver. Only necessary data is packed to increase cache coherence/performance.
 ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 {
@@ -125,6 +44,8 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 
 	btRigidBody*	m_originalBody;
 	btCollisionObject* m_originalColObj;
+	bool			m_bFixed;
+
 	void	setWorldTransform(const btTransform& worldTransform)
 	{
 		m_worldTransform = worldTransform;

@@ -484,5 +484,79 @@ struct btTypedObject
 	int	m_objectType;
 };
 
+// btSimdScalar class
+#ifdef BT_USE_SSE
+
+struct	btSimdScalar
+{
+	SIMD_FORCE_INLINE	btSimdScalar()
+	{
+
+	}
+
+	SIMD_FORCE_INLINE	btSimdScalar(float	fl)
+	:m_vec128 (_mm_set1_ps(fl))
+	{
+	}
+
+	SIMD_FORCE_INLINE	btSimdScalar(__m128 v128)
+		:m_vec128(v128)
+	{
+	}
+	union
+	{
+		__m128		m_vec128;
+		float		m_floats[4];
+		int			m_ints[4];
+		btScalar	m_unusedPadding;
+	};
+	SIMD_FORCE_INLINE	__m128	get128()
+	{
+		return m_vec128;
+	}
+
+	SIMD_FORCE_INLINE	const __m128	get128() const
+	{
+		return m_vec128;
+	}
+
+	SIMD_FORCE_INLINE	void	set128(__m128 v128)
+	{
+		m_vec128 = v128;
+	}
+
+	SIMD_FORCE_INLINE	operator       __m128()       
+	{ 
+		return m_vec128; 
+	}
+	SIMD_FORCE_INLINE	operator const __m128() const 
+	{ 
+		return m_vec128; 
+	}
+	
+	SIMD_FORCE_INLINE	operator float() const 
+	{ 
+		return m_floats[0]; 
+	}
+
+};
+
+///@brief Return the elementwise product of two btSimdScalar
+SIMD_FORCE_INLINE btSimdScalar 
+operator*(const btSimdScalar& v1, const btSimdScalar& v2) 
+{
+	return btSimdScalar(_mm_mul_ps(v1.get128(), v2.get128()));
+}
+
+///@brief Return the elementwise product of two btSimdScalar
+SIMD_FORCE_INLINE btSimdScalar 
+operator+(const btSimdScalar& v1, const btSimdScalar& v2) 
+{
+	return btSimdScalar(_mm_add_ps(v1.get128(), v2.get128()));
+}
+
+#else
+	#define btSimdScalar btScalar
+#endif
 
 #endif //BT_SCALAR_H
