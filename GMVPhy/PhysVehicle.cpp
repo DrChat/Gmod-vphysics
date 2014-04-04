@@ -228,6 +228,32 @@ int lPhysVehicleGetWheel(lua_State *state) {
 	return 1;
 }
 
+int lPhysVehicleSetSpringLength(lua_State *state) {
+	IPhysicsVehicleController *pController = Get_PhysVehicleController(state, 1);
+	LUA->CheckType(2, Type::NUMBER);
+	LUA->CheckType(3, Type::NUMBER);
+
+	int wheel = LUA->GetNumber(2);
+	if (wheel < 0 || wheel >= pController->GetWheelCount())
+		LUA->ThrowError("Wheel index is out of bounds!");
+
+	pController->SetSpringLength(wheel, LUA->GetNumber(3));
+	return 0;
+}
+
+int lPhysVehicleSetWheelFriction(lua_State *state) {
+	IPhysicsVehicleController *pController = Get_PhysVehicleController(state, 1);
+	LUA->CheckType(2, Type::NUMBER);
+	LUA->CheckType(3, Type::NUMBER);
+
+	int wheel = LUA->GetNumber(2);
+	if (wheel < 0 || wheel >= pController->GetWheelCount())
+		LUA->ThrowError("Wheel index is out of bounds!");
+
+	pController->SetWheelFriction(wheel, LUA->GetNumber(3));
+	return 0;
+}
+
 int lPhysVehicleDataReload(lua_State *state) {
 	IPhysicsVehicleController *pController = Get_PhysVehicleController(state, 1);
 	pController->VehicleDataReload();
@@ -241,6 +267,8 @@ int Init_PhysVehicle(lua_State *state) {
 		LUA->PushCFunction(lPhysVehicleGetWheelMaterial);	LUA->SetField(-2, "GetWheelMaterial");
 		LUA->PushCFunction(lPhysVehicleSetWheelMaterial);	LUA->SetField(-2, "SetWheelMaterial");
 		LUA->PushCFunction(lPhysVehicleGetWheel);			LUA->SetField(-2, "GetWheel");
+		LUA->PushCFunction(lPhysVehicleSetSpringLength);	LUA->SetField(-2, "SetSpringLength");
+		LUA->PushCFunction(lPhysVehicleSetWheelFriction);	LUA->SetField(-2, "SetWheelFriction");
 		LUA->PushCFunction(lPhysVehicleDataReload);			LUA->SetField(-2, "VehicleDataReload");
 	LUA->Pop();
 
