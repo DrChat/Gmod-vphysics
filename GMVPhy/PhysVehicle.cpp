@@ -254,6 +254,38 @@ int lPhysVehicleSetWheelFriction(lua_State *state) {
 	return 0;
 }
 
+//
+// Name: PhysVehicle:GetWheelContactPoint
+// Desc: Get wheel contact point
+// Arg1: PhysVehicle|vehicle|The vehicle
+// Arg2: int|wheel|Wheel index
+// Ret1: table|contact|Contact details, or nil if not in contact
+//
+int lPhysVehicleGetWheelContactPoint(lua_State *state) {
+	IPhysicsVehicleController *pController = Get_PhysVehicleController(state, 1);
+	LUA->CheckType(2, Type::NUMBER);
+
+	int wheel = LUA->GetNumber(2);
+	if (wheel < 0 || wheel >= pController->GetWheelCount())
+		LUA->ThrowError("Wheel index is out of bounds!");
+
+	Vector contact(0, 0, 0);
+	int surfProps = 0;
+	if (pController->GetWheelContactPoint(wheel, &contact, &surfProps)) {
+		LUA->CreateTable();
+		Push_Vector(state, contact);
+		LUA->SetField(-2, "contact");
+
+		LUA->PushNumber(surfProps);
+		LUA->SetField(-2, "surfaceProps");
+
+		return 1;
+	} else {
+		LUA->PushNil();
+		return 0;
+	}
+}
+
 int lPhysVehicleDataReload(lua_State *state) {
 	IPhysicsVehicleController *pController = Get_PhysVehicleController(state, 1);
 	pController->VehicleDataReload();
@@ -269,6 +301,7 @@ int Init_PhysVehicle(lua_State *state) {
 		LUA->PushCFunction(lPhysVehicleGetWheel);			LUA->SetField(-2, "GetWheel");
 		LUA->PushCFunction(lPhysVehicleSetSpringLength);	LUA->SetField(-2, "SetSpringLength");
 		LUA->PushCFunction(lPhysVehicleSetWheelFriction);	LUA->SetField(-2, "SetWheelFriction");
+		LUA->PushCFunction(lPhysVehicleGetWheelContactPoint); LUA->SetField(-2, "GetWheelContactPoint");
 		LUA->PushCFunction(lPhysVehicleDataReload);			LUA->SetField(-2, "VehicleDataReload");
 	LUA->Pop();
 
