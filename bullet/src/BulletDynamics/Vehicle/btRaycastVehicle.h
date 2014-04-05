@@ -94,7 +94,7 @@ public:
 			
 	const btTransform getChassisWorldTransform() const;
 	
-	btScalar rayCast(btWheelInfo& wheel);
+	btScalar rayCast(int wheel);
 
 	virtual void updateVehicle(btScalar step);
 	
