@@ -25,6 +25,18 @@ int lPhysVehicleGetOperatingParams(lua_State *state) {
 		LUA->PushNumber(params.gear);
 		LUA->SetField(-2, "gear");
 
+		LUA->PushNumber(params.boostDelay);
+		LUA->SetField(-2, "boostDelay");
+
+		LUA->PushNumber(params.boostTimeLeft);
+		LUA->SetField(-2, "boostTimeLeft");
+
+		LUA->PushNumber(params.skidSpeed);
+		LUA->SetField(-2, "skidSpeed");
+
+		LUA->PushNumber(params.skidMaterial);
+		LUA->SetField(-2, "skidMaterial");
+
 		LUA->PushNumber(params.steeringAngle);
 		LUA->SetField(-2, "steeringAngle");
 
@@ -259,7 +271,7 @@ int lPhysVehicleSetWheelFriction(lua_State *state) {
 // Desc: Get wheel contact point
 // Arg1: PhysVehicle|vehicle|The vehicle
 // Arg2: int|wheel|Wheel index
-// Ret1: table|contact|Contact details, or nil if not in contact
+// Ret1: any|contact|Table contact details {contact=Vector(), surfaceProps=int}, or nil if not in contact
 //
 int lPhysVehicleGetWheelContactPoint(lua_State *state) {
 	IPhysicsVehicleController *pController = Get_PhysVehicleController(state, 1);
@@ -282,7 +294,7 @@ int lPhysVehicleGetWheelContactPoint(lua_State *state) {
 		return 1;
 	} else {
 		LUA->PushNil();
-		return 0;
+		return 1;
 	}
 }
 
