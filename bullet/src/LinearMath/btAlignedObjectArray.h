@@ -472,13 +472,24 @@ class btAlignedObjectArray
 
 		void	remove(const T& key)
 		{
-
 			int findIndex = findLinearSearch(key);
 			if (findIndex<size())
 			{
-				swap( findIndex, size()-1);
-				pop_back();
+				remove(findIndex);
 			}
+		}
+
+		/**
+		* @brief Remove an index from this array. Will mess up the sorting if this array is sorted.
+		* @param index Index to remove
+		*/
+		void remove(int index)
+		{
+			btAssert(index >= 0 && index < m_size);
+
+			// Swap with the last index of the array
+			swap(index, size() - 1);
+			pop_back(); // And pop
 		}
 
 		// PCK: whole function
