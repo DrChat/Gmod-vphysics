@@ -138,6 +138,16 @@ public:
 		return btVector3(m_el[0][i], m_el[1][i], m_el[2][i]);
 	}
 
+	/**
+	* @brief Set a column of the matrix with a vector
+	* @param i Column number
+	* @param vec Input data
+	*/
+	SIMD_FORCE_INLINE void setColumn(int i, const btVector3 &vec) {
+		m_el[0][i] = vec[0];
+		m_el[1][i] = vec[1];
+		m_el[2][i] = vec[2];
+	}
 
 	/** @brief Get a row of the matrix as a vector 
 	*  @param i Row number 0 indexed */
