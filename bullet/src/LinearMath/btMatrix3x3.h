@@ -143,7 +143,8 @@ public:
 	* @param i Column number
 	* @param vec Input data
 	*/
-	SIMD_FORCE_INLINE void setColumn(int i, const btVector3 &vec) {
+	SIMD_FORCE_INLINE void setColumn(int i, const btVector3 &vec)
+	{
 		m_el[0][i] = vec[0];
 		m_el[1][i] = vec[1];
 		m_el[2][i] = vec[2];
