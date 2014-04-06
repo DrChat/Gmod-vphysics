@@ -81,6 +81,7 @@ struct btWheelInfo
 	btScalar	m_steering;
 	btScalar	m_rotation;
 	btScalar	m_deltaRotation;
+	btScalar	m_rotationDamping; // Damping when not in contact
 	btScalar	m_rollInfluence;
 	btScalar	m_maxSuspensionForce;
 
@@ -111,6 +112,7 @@ struct btWheelInfo
 		m_engineForce = btScalar(0.);
 		m_rotation = btScalar(0.);
 		m_deltaRotation = btScalar(0.);
+		m_rotationDamping = btScalar(0.99);
 		m_brake = btScalar(0.);
 		m_rollInfluence = btScalar(0.1);
 		m_bIsFrontWheel = ci.m_bIsFrontWheel;
