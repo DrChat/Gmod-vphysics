@@ -18,6 +18,7 @@ class CPhysicsSurfaceProps : public IPhysicsSurfaceProps {
 	public:
 								CPhysicsSurfaceProps();
 								~CPhysicsSurfaceProps();
+								
 		int						ParseSurfaceData(const char *pFilename, const char *pTextfile);
 		int						SurfacePropCount() const;
 
@@ -41,6 +42,7 @@ class CPhysicsSurfaceProps : public IPhysicsSurfaceProps {
 
 		void					CopyPhysicsProperties(CSurface *pOut, int baseIndex);
 		bool					AddFileToDatabase(const char *pFilename);
+		int						FindOrAddSound(CUtlSymbol sym);
 
 	private:
 		CUtlSymbolTable *		m_strings;

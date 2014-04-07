@@ -89,82 +89,42 @@ int CPhysicsSurfaceProps::ParseSurfaceData(const char *pFilename, const char *pT
 				prop.data.game.jumpFactor = data->GetFloat();
 			else if (!Q_stricmp(key, "climbable"))
 				prop.data.game.climbable = data->GetInt();
-			else if (!Q_stricmp(key, "gamematerial"))
+			else if (!Q_stricmp(key, "gamematerial")) {
 				if (data->GetDataType() == KeyValues::TYPE_STRING && strlen(data->GetString()) == 1) {
 					prop.data.game.material = toupper(data->GetString()[0]);
 				} else {
 					prop.data.game.material = data->GetInt();
 				}
-			else if (!Q_stricmp(key, "stepleft")) {
+			} else if (!Q_stricmp(key, "stepleft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.stepleft = id;
-				} else {
-					prop.data.sounds.stepleft = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.stepleft = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "stepright")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.stepright = id;
-				} else {
-					prop.data.sounds.stepright = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.stepright = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "impactsoft")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.impactSoft = id;
-				} else {
-					prop.data.sounds.impactSoft = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.impactSoft = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "impacthard")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.impactHard = id;
-				} else {
-					prop.data.sounds.impactHard = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.impactHard = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "scrapesmooth")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.scrapeSmooth = id;
-				} else {
-					prop.data.sounds.scrapeSmooth = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.scrapeSmooth = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "scraperough")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.scrapeRough = id;
-				} else {
-					prop.data.sounds.scrapeRough = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.scrapeRough = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "bulletimpact")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.bulletImpact = id;
-				} else {
-					prop.data.sounds.bulletImpact = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.bulletImpact = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "break")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.breakSound = id;
-				} else {
-					prop.data.sounds.breakSound = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.breakSound = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "strain")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.strainSound = id;
-				} else {
-					prop.data.sounds.strainSound = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.strainSound = FindOrAddSound(sym);
 			} else if (!Q_stricmp(key, "rolling") || !Q_stricmp(key, "roll")) {
 				CUtlSymbol sym = m_strings->AddString(data->GetString());
-				if (int id = m_soundList.Find(sym) != -1) {
-					prop.data.sounds.rolling = id;
-				} else {
-					prop.data.sounds.rolling = m_soundList.AddToTail(sym);
-				}
+				prop.data.sounds.rolling = FindOrAddSound(sym);
 			} else
 				DevWarning("VPhysics: Surfaceprop \"%s\" has unknown key %s (data: %s)\n", surface->GetName(), key, data->GetString());
 		}
@@ -280,6 +240,14 @@ bool CPhysicsSurfaceProps::AddFileToDatabase(const char *pFilename) {
 
 	m_fileList.AddToTail(id);
 	return true;
+}
+
+int CPhysicsSurfaceProps::FindOrAddSound(CUtlSymbol sym) {
+	int id = m_soundList.Find(sym);
+	if (id != -1)
+		return id;
+	else
+		return m_soundList.AddToTail(sym);
 }
 
 CPhysicsSurfaceProps g_SurfaceDatabase;
