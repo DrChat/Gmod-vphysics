@@ -475,7 +475,7 @@ class btAlignedObjectArray
 			int findIndex = findLinearSearch(key);
 			if (findIndex<size())
 			{
-				remove(findIndex);
+				removeAt(findIndex);
 			}
 		}
 
@@ -483,7 +483,7 @@ class btAlignedObjectArray
 		* @brief Remove an index from this array. Will mess up the sorting if this array is sorted.
 		* @param index Index to remove
 		*/
-		void remove(int index)
+		void removeAt(int index)
 		{
 			btAssert(index >= 0 && index < m_size);
 
