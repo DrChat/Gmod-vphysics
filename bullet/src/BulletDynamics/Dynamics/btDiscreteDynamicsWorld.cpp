@@ -545,6 +545,7 @@ void	btDiscreteDynamicsWorld::removeCollisionObject(btCollisionObject* collision
 		if (pair.m_pProxy0->m_clientObject == collisionObject || pair.m_pProxy1->m_clientObject == collisionObject)
 		{
 			// Inefficient because we really don't need the manifold array, but there isn't a getNumContactManifolds
+			// Let's just hope the user isn't removing an object every frame, or prepare for malloc/free lag
 			btManifoldArray arr;
 			pair.m_algorithm->getAllContactManifolds(arr);
 			if (arr.size() > 0)
@@ -851,6 +852,10 @@ public:
 
 		///don't do CCD when the collision filters are not matching
 		if (!ClosestConvexResultCallback::needsCollision(proxy0))
+			return false;
+
+		// Check collide with
+		if (!m_me->checkCollideWith((btCollisionObject *)proxy0->m_clientObject))
 			return false;
 
 		btCollisionObject* otherObj = (btCollisionObject*) proxy0->m_clientObject;
