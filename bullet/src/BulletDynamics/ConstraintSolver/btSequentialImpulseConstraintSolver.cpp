@@ -35,8 +35,13 @@ subject to the following restrictions:
 #include "LinearMath/btAlignedObjectArray.h"
 #include <string.h> //for memset
 #include <math.h> // Finite checks
+#include <stdio.h>
 
 #include "BulletDynamics/Dynamics/btRigidBody.h"
+
+#ifdef BT_USE_SSE
+	#define USE_SIMD
+#endif
 
 btSequentialImpulseConstraintSolver::btSequentialImpulseConstraintSolver()
 :m_btSeed2(0)
@@ -310,7 +315,7 @@ void	btSequentialImpulseConstraintSolver::initSolverBody(btSolverBody* solverBod
 		solverBody->m_angularVelocity = rb->getAngularVelocity();
 		solverBody->m_externalForceImpulse = rb->getTotalForce()*rb->getInvMass()*timeStep;
 		solverBody->m_externalTorqueImpulse = rb->getTotalTorque()*rb->getInvInertiaTensorWorld()*timeStep ;
-		
+		solverBody->m_bFixed = false;
 	} else
 	{
 		solverBody->m_worldTransform.setIdentity();
@@ -322,6 +327,7 @@ void	btSequentialImpulseConstraintSolver::initSolverBody(btSolverBody* solverBod
 		solverBody->m_angularVelocity.setValue(0,0,0);
 		solverBody->m_externalForceImpulse.setValue(0,0,0);
 		solverBody->m_externalTorqueImpulse.setValue(0,0,0);
+		solverBody->m_bFixed = true;
 	}
 
 
@@ -573,7 +579,7 @@ int	btSequentialImpulseConstraintSolver::getOrInitSolverBody(btCollisionObject& 
 			{
 				m_fixedBodyId = m_tmpSolverBodyPool.size();
 				btSolverBody& fixedBody = m_tmpSolverBodyPool.expand();
-				initSolverBody(&fixedBody,0,timeStep);
+				initSolverBody(&fixedBody, NULL, timeStep);
 
 				fixedBody.m_originalColObj = &body; // FIXME: Won't work! Only one fixed body added to the body pool!
 			}
@@ -584,8 +590,6 @@ int	btSequentialImpulseConstraintSolver::getOrInitSolverBody(btCollisionObject& 
 	return solverBodyIdA;
 
 }
-#include <stdio.h>
-
 
 void btSequentialImpulseConstraintSolver::setupContactConstraint(btSolverConstraint& solverConstraint, 
 																 int solverBodyIdA, int solverBodyIdB,
