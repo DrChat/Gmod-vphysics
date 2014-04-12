@@ -172,12 +172,14 @@ void	btCollisionWorld::updateSingleAabb(btCollisionObject* colObj)
 		bp->setAabb(colObj->getBroadphaseHandle(), minAabb, maxAabb, m_dispatcher1);
 	} else
 	{
-		//something went wrong, investigate
-		//this assert is unwanted in 3D modelers (danger of losing work)
-		colObj->setActivationState(DISABLE_SIMULATION);
+		if (colObj->getActivationState() != DISABLE_SIMULATION) {
+			//something went wrong, investigate
+			//this assert is unwanted in 3D modelers (danger of losing work)
+			colObj->setActivationState(DISABLE_SIMULATION);
 
-		btDbgWarning("Overflow in AABB, object \"%s\" removed from simulation!\n", colObj->getDebugName() ? colObj->getDebugName() : "<unset name>");
-		btDbgWarning("Usually this means an object was travelling too fast\n");
+			btDbgWarning("Overflow in AABB, object \"%s\" removed from simulation!\n", colObj->getDebugName() ? colObj->getDebugName() : "<unset name>");
+			btDbgWarning("Usually this means an object was travelling too fast\n");
+		}
 	}
 }
 
