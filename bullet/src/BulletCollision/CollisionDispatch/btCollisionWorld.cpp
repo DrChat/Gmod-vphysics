@@ -173,16 +173,11 @@ void	btCollisionWorld::updateSingleAabb(btCollisionObject* colObj)
 	} else
 	{
 		//something went wrong, investigate
-		//this assert is unwanted in 3D modelers (danger of loosing work)
+		//this assert is unwanted in 3D modelers (danger of losing work)
 		colObj->setActivationState(DISABLE_SIMULATION);
 
-		static bool reportMe = true;
-		if (reportMe && m_debugDrawer)
-		{
-			reportMe = false;
-			m_debugDrawer->reportErrorWarning("Overflow in AABB, object removed from simulation\n");
-			m_debugDrawer->reportErrorWarning("Usually this means something bad has happened!\n");
-		}
+		btDbgWarning("Overflow in AABB, object \"%s\" removed from simulation!\n", colObj->getDebugName() ? colObj->getDebugName() : "<unset name>");
+		btDbgWarning("Usually this means an object was travelling too fast\n");
 	}
 }
 
