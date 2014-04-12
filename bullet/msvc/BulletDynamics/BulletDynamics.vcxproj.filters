@@ -155,6 +155,9 @@
     <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btDantzigSolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btWheeledVehicle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\BulletDynamics\ConstraintSolver\btPoint2PointConstraint.cpp">
@@ -251,6 +254,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\BulletDynamics\MLCPSolvers\btDantzigLCP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btWheeledVehicle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

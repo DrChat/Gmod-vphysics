@@ -13,6 +13,10 @@ class CPhysicsEnvironment;
 
 struct btVehicleRaycaster;
 class btRaycastVehicle;
+class btWheeledVehicle;
+
+// Toggle wheeled/raycast car (wheeled is not complete yet)
+//#define USE_WHEELED_VEHICLE
 
 // TODO: Implement this class and move it to the public interface.
 // The game can implement this class to override wheel ray traces.
@@ -57,6 +61,10 @@ class CPhysicsVehicleController : public IPhysicsVehicleController32 {
 		void								SetEngineDisabled(bool bDisable) { m_bEngineDisabled = bDisable; }
 		bool								IsEngineDisabled() { return m_bEngineDisabled; }
 
+		// Set the position of the vehicle controller and its wheels (wheels relative to vehicle pos).
+		// Use this instead of calling SetPosition on the chassis.
+		void								SetPosition(const Vector *pos, const QAngle *ang);
+
 		// Debug
 		void								GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem);
 		void								VehicleDataReload();
@@ -85,21 +93,25 @@ class CPhysicsVehicleController : public IPhysicsVehicleController32 {
 		// To be exposed functions
 		CPhysicsObject *					AddWheel();
 	private:
-		vehicleparams_t						m_vehicleParams;
-		vehicle_operatingparams_t			m_vehicleState;
-		CPhysicsObject *					m_pBody;
-		CPhysicsEnvironment *				m_pEnv;
-		IPhysicsGameTrace *					m_pGameTrace;
-		unsigned int						m_iVehicleType;
-		bool								m_bEngineDisabled;
-		bool								m_bOccupied;
-		CPhysicsObject *					m_pWheels[VEHICLE_MAX_WHEEL_COUNT];
-		int									m_iWheelCount;
-		bool								m_bSlipperyWheels;
+		vehicleparams_t				m_vehicleParams;
+		vehicle_operatingparams_t	m_vehicleState;
+		CPhysicsObject *			m_pBody;
+		CPhysicsEnvironment *		m_pEnv;
+		IPhysicsGameTrace *			m_pGameTrace;
+		unsigned int				m_iVehicleType;
+		bool						m_bEngineDisabled;
+		bool						m_bOccupied;
+		CPhysicsObject *			m_pWheels[VEHICLE_MAX_WHEEL_COUNT];
+		int							m_iWheelCount;
+		bool						m_bSlipperyWheels;
 
-		btVehicleRaycaster *				m_pRaycaster;
-		btRaycastVehicle *					m_pVehicle;
+#ifdef USE_WHEELED_VEHICLE
+		btWheeledVehicle *			m_pVehicle;
+#else
+		btRaycastVehicle *			m_pVehicle;
+		btVehicleRaycaster *		m_pRaycaster;
 		btRaycastVehicle::btVehicleTuning	m_tuning;
+#endif
 };
 
 IPhysicsVehicleController *CreateVehicleController(CPhysicsEnvironment *pEnv, CPhysicsObject *pBody, const vehicleparams_t &params, unsigned int nVehicleType, IPhysicsGameTrace *pGameTrace);

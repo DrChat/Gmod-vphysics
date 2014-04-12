@@ -58,6 +58,7 @@
     <ClInclude Include="..\..\src\BulletDynamics\MLCPSolvers\btSolveProjectedGaussSeidel.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btRaycastVehicle.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btVehicleRaycaster.h" />
+    <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btWheeledVehicle.h" />
     <ClInclude Include="..\..\src\BulletDynamics\Vehicle\btWheelInfo.h" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +93,7 @@
     <ClCompile Include="..\..\src\BulletDynamics\MLCPSolvers\btLemkeAlgorithm.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\MLCPSolvers\btMLCPSolver.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btRaycastVehicle.cpp" />
+    <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btWheeledVehicle.cpp" />
     <ClCompile Include="..\..\src\BulletDynamics\Vehicle\btWheelInfo.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

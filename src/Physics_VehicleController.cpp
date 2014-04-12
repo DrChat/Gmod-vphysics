@@ -8,6 +8,7 @@
 #include "convert.h"
 
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
+#include "BulletDynamics/Vehicle/btWheeledVehicle.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -69,8 +70,8 @@ struct CDetectWaterRayResultCallback : public btCollisionWorld::ClosestRayResult
 };
 
 struct CIgnoreObjectRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
-	CIgnoreObjectRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to)
-			: ClosestRayResultCallback(from, to) {
+	CIgnoreObjectRayResultCallback(const btRigidBody *pIgnoreObject, const btVector3 &from, const btVector3 &to):
+	ClosestRayResultCallback(from, to) {
 		m_pIgnoreObject = pIgnoreObject;
 	}
 
@@ -100,7 +101,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 
 		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CIgnoreObjectRayResultCallback rayCallback(m_pController->GetBody()->GetObject(), from, to);
-			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
+			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
 			
 			m_pWorld->rayTest(from, to, rayCallback);
 			
@@ -203,6 +204,7 @@ void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params)
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
 		m_vehicleParams.axles[i].wheels.radius					= ConvertDistanceToBull(params.axles[i].wheels.radius);
 		m_vehicleParams.axles[i].wheels.springAdditionalLength	= ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
+		//m_vehicleParams.axles[i].suspension.springConstant		*= 1/HL2BULL_FACTOR;
 	}
 }
 
@@ -210,6 +212,7 @@ void CPhysicsVehicleController::InitBullVehicle() {
 	// NOTE: We're faking the car wheels for now because bullet does not offer a vehicle with physical wheels.
 	// TODO: Simulate the car wheels to a degree
 	// See: http://www.bulletphysics.org/Bullet/phpBB3/viewtopic.php?p=&f=&t=1817
+#ifndef USE_WHEELED_VEHICLE
 	if (m_iVehicleType == VEHICLE_TYPE_CAR_WHEELS)
 		m_pRaycaster = new CCarRaycaster(m_pEnv->GetBulletEnvironment(), this);
 	else if (m_iVehicleType == VEHICLE_TYPE_CAR_RAYCAST)
@@ -221,6 +224,10 @@ void CPhysicsVehicleController::InitBullVehicle() {
 
 	m_pVehicle = new btRaycastVehicle(m_tuning, m_pBody->GetObject(), m_pRaycaster);
 	m_pVehicle->setCoordinateSystem(0, 1, 2);
+#else
+	m_pVehicle = new btWheeledVehicle(m_pEnv->GetBulletEnvironment(), m_pBody->GetObject());
+#endif
+
 	m_pEnv->GetBulletEnvironment()->addAction(m_pVehicle);
 
 	InitCarWheels();
@@ -229,13 +236,18 @@ void CPhysicsVehicleController::InitBullVehicle() {
 void CPhysicsVehicleController::ShutdownBullVehicle() {
 	m_pEnv->GetBulletEnvironment()->removeAction(m_pVehicle);
 
+	// Delete the vehicle before the wheels so the constraints are freed
+#ifdef USE_WHEELED_VEHICLE
+	delete m_pVehicle;
+#else
+	delete m_pVehicle;
+	delete m_pRaycaster;
+#endif
+
 	for (int i = 0; i < m_iWheelCount; i++) {
 		m_pEnv->DestroyObject(m_pWheels[i]);
 		m_pWheels[i] = NULL;
 	}
-
-	delete m_pRaycaster;
-	delete m_pVehicle;
 }
 
 void CPhysicsVehicleController::InitCarWheels() {
@@ -290,7 +302,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	params.damping = axle.wheels.damping;
 	params.dragCoefficient = 0;
-	params.enableCollisions = false;
+	params.enableCollisions = true;
 	params.inertia = axle.wheels.inertia;
 	params.mass = axle.wheels.mass;
 	params.pGameData = m_pBody->GetGameData();
@@ -304,12 +316,25 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	float r3 = radius * radius * radius;
 	params.volume = (4 / 3) * M_PI * r3;
 
+	// TODO: Change this to a cylinder!
 	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject(radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params);
 	pWheel->Wake();
 	pWheel->AddCallbackFlags(CALLBACK_IS_VEHICLE_WHEEL);
 
 	pWheel->GetObject()->setActivationState(DISABLE_DEACTIVATION);
 
+	// Create it in bullet now
+#ifdef USE_WHEELED_VEHICLE
+	btVector3 wheelOffset;
+	ConvertPosToBull(position, wheelOffset);
+	wheelOffset -= ((btMassCenterMotionState *)m_pBody->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
+
+	btVehicleWheel &wheel = m_pVehicle->addWheel(pWheel->GetObject(), wheelOffset, btMatrix3x3::getIdentity(), btVector3(0, -1, 0), btVector3(-1, 0, 0));
+	wheel.suspensionRestLength = axle.wheels.springAdditionalLength;
+	wheel.suspensionConstant = axle.suspension.springConstant;
+	wheel.suspensionDamping = axle.suspension.springDamping;
+	wheel.maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();
+#else
 	// Create the wheel in bullet
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
@@ -332,14 +357,15 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	wheelInfo.m_frictionSlip = 1.5f; // debug value
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();
 	wheelInfo.m_suspensionStiffness = axle.suspension.springConstant;
-
+	
 	wheelInfo.m_clientInfo = pWheel;
+#endif
 
 	return pWheel;
 }
 
 void CPhysicsVehicleController::UpdateVehicle(float dt) {
-	m_pVehicle->updateVehicle(dt);
+	//m_pVehicle->updateVehicle(dt);
 }
 
 // Bullet appears to take force in newtons. Correct this if it's wrong.
@@ -351,7 +377,7 @@ void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
 
 	// convert from kg*in/s to kg*m/s
 	force *= METERS_PER_INCH;
-	m_pVehicle->applyEngineForce(force, wheelIndex);
+	//m_pVehicle->applyEngineForce(force, wheelIndex);
 }
 
 void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
@@ -362,7 +388,7 @@ void CPhysicsVehicleController::SetWheelBrake(int wheelIndex, float brakeVal) {
 
 	// convert from kg*in/s to kg*m/s
 	brakeVal *= METERS_PER_INCH;
-	m_pVehicle->setBrake(brakeVal, wheelIndex);
+	//m_pVehicle->setBrake(brakeVal, wheelIndex);
 }
 
 void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal) {
@@ -371,7 +397,11 @@ void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal)
 		return;
 	}
 
-	m_pVehicle->setSteeringValue(DEG2RAD(steerVal), wheelIndex);
+#ifdef USE_WHEELED_VEHICLE
+	m_pVehicle->getWheel(wheelIndex).steering = DEG2RAD(steerVal);
+#else
+	//m_pVehicle->setSteeringValue(DEG2RAD(steerVal), wheelIndex);
+#endif
 }
 
 void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &controls) {
@@ -383,18 +413,21 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 		controls.brake = 0.1f;
 	}
 
+#ifndef USE_WHEELED_VEHICLE
 	UpdateSteering(controls, dt);
 	UpdateEngine(controls, dt);
 	UpdateWheels(controls, dt);
 
 	m_pVehicle->updateVehicle(dt);
+#endif
 }
 
+#ifndef USE_WHEELED_VEHICLE
 void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls, float dt) {
 	float steeringVal = controls.steering;
 
 	// TODO: Calculate for degreesBoost
-	float speed = -KMH2MS(m_pVehicle->getCurrentSpeedKmHour());
+	float speed = KMH2MS(m_pVehicle->getCurrentSpeedKmHour());
 	if (speed <= m_vehicleParams.steering.speedSlow) {
 		steeringVal *= m_vehicleParams.steering.degreesSlow;
 	} else if (speed >= m_vehicleParams.steering.speedFast) {
@@ -412,7 +445,7 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, float dt) {
 	// Update the operating params
 	float fSpeed = m_pVehicle->getCurrentSpeedKmHour();
-	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(-fSpeed));
+	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(fSpeed));
 
 	CalcEngineTransmission(controls, dt);
 	CalcEngine(controls, dt);
@@ -434,7 +467,10 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 
 		// z = spin
 		// flip it because HL expects it to come in opposite for some reason.
-		HLRot.z = -HLRot.z;
+		//HLRot.z = HLRot.z;
+		//float t = HLRot.x;
+		//HLRot.x = HLRot.z;
+		//HLRot.z = t;
 
 		m_pWheels[i]->SetPosition(HLPos, HLRot, true);
 
@@ -446,12 +482,14 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 			m_vehicleState.wheelsNotInContact++;
 	}
 }
+#endif
 
 float CPhysicsVehicleController::UpdateBooster(float dt) {
 	NOT_IMPLEMENTED
 	return 0.0f; // Return boost delay.
 }
 
+#ifndef USE_WHEELED_VEHICLE
 void CPhysicsVehicleController::CalcEngineTransmission(vehicle_controlparams_t &controls, float dt) {
 	// throttle goes forward and backward, [-1, 1]
 	// brake_val [0..1]
@@ -543,6 +581,7 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 		}
 	}
 }
+#endif
 
 CPhysicsObject *CPhysicsVehicleController::GetBody() {
 	return m_pBody;
@@ -561,6 +600,7 @@ IPhysicsObject *CPhysicsVehicleController::GetWheel(int index) {
 bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContactPoint, int *pSurfaceProps) {
 	if ((index >= m_iWheelCount || index < 0) || (!pContactPoint && !pSurfaceProps)) return false;
 
+#ifndef USE_WHEELED_VEHICLE
 	btWheelInfo wheelInfo = m_pVehicle->getWheelInfo(index);
 	if (wheelInfo.m_raycastInfo.m_isInContact) {
 		btVector3 bullContactVec = wheelInfo.m_raycastInfo.m_contactPointWS;
@@ -575,27 +615,63 @@ bool CPhysicsVehicleController::GetWheelContactPoint(int index, Vector *pContact
 
 		return true;
 	}
+#endif
 
 	return false;
 }
 
 void CPhysicsVehicleController::SetSpringLength(int wheelIndex, float length) {
+	Assert(wheelIndex >= m_iWheelCount || wheelIndex < 0);
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
-		Assert(0);
 		return;
 	}
 
 	btScalar bullDist = ConvertDistanceToBull(length);
+#ifdef USE_WHEELED_VEHICLE
+	m_pVehicle->getWheel(wheelIndex).suspensionRestLength = bullDist;
+#else
 	m_pVehicle->getWheelInfo(wheelIndex).m_suspensionRestLength1 = bullDist;
+#endif
 }
 
 void CPhysicsVehicleController::SetWheelFriction(int wheelIndex, float friction) {
+	Assert(wheelIndex >= m_iWheelCount || wheelIndex < 0);
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
-		Assert(0);
 		return;
 	}
 
+#ifndef USE_WHEELED_VEHICLE
 	m_pVehicle->getWheelInfo(wheelIndex).m_frictionSlip = friction;
+#endif
+}
+
+void CPhysicsVehicleController::SetPosition(const Vector *pos, const QAngle *ang) {
+	if (!pos && !ang) return;
+
+	const btTransform oldTrans = m_pBody->GetObject()->getWorldTransform();
+	btTransform &newTrans = m_pBody->GetObject()->getWorldTransform();
+	if (pos) {
+		btVector3 btPos;
+		ConvertPosToBull(*pos, btPos);
+
+		newTrans.setOrigin(btPos);
+	}
+
+	if (ang) {
+		btMatrix3x3 btAng;
+		ConvertRotationToBull(*ang, btAng);
+
+		newTrans.setBasis(btAng);
+	}
+
+#ifdef USE_WHEELED_VEHICLE
+	btTransform deltaTrans = newTrans.inverse() * oldTrans;
+	for (int i = 0; i < m_iWheelCount; i++) {
+		CPhysicsObject *pWheel = m_pWheels[i];
+		btTransform &trans = pWheel->GetObject()->getWorldTransform();
+		trans *= deltaTrans;
+	}
+#endif
 }
 
 void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &debugCarSystem) {
@@ -606,6 +682,7 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 	// Luckily this is easy (us: Forward Up Right) (IVP: Forward Down Left)
 
 	// wheel stuff
+#ifndef USE_WHEELED_VEHICLE
 	for (int i = 0; i < m_iWheelCount; i++) {
 		btWheelInfo &wheelInfo = m_pVehicle->getWheelInfo(i);
 
@@ -620,6 +697,7 @@ void CPhysicsVehicleController::GetCarSystemDebugData(vehicle_debugcarsystem_t &
 		debugCarSystem.vecWheelRaycastImpacts[i].y = -rayContact.y();
 		debugCarSystem.vecWheelRaycastImpacts[i].z = -rayContact.z();
 	}
+#endif
 }
 
 // Purpose: Reload vehicle params
