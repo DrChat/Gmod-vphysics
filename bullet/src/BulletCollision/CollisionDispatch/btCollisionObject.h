@@ -113,6 +113,9 @@ protected:
 	///internal update revision number. It will be increased when the object changes. This allows some subsystems to perform lazy evaluation.
 	int			m_updateRevision;
 
+	// Name to print for debug messages pertaining to this object
+	const char *m_pDebugName;
+
 	virtual bool	checkCollideWithOverride(const btCollisionObject* /* co */) const
 	{
 		return true;
@@ -471,6 +474,15 @@ public:
 		return m_updateRevision;
 	}
 
+	void setDebugName(const char *pName)
+	{
+		m_pDebugName = pName;
+	}
+
+	const char *getDebugName() const
+	{
+		return m_pDebugName;
+	}
 
 	inline bool checkCollideWith(const btCollisionObject* co) const
 	{

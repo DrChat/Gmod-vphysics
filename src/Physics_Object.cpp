@@ -1035,6 +1035,8 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		m_pName			= pParams->pName;
 		m_fVolume		= pParams->volume * CUBIC_METERS_PER_CUBIC_INCH;
 		EnableCollisions(pParams->enableCollisions);
+
+		m_pObject->setDebugName(m_pName);
 	}
 
 	SetMaterialIndex(materialIndex);
