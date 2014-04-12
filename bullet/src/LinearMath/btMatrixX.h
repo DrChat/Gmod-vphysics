@@ -26,6 +26,8 @@ subject to the following restrictions:
 #include <iomanip>      // std::setw
 #endif //BT_DEBUG_OSTREAM
 
+#include <stdio.h>
+
 class btIntSortPredicate
 {
 	public:
