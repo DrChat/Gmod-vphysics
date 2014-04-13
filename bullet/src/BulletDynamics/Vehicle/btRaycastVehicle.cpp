@@ -9,6 +9,13 @@
  * It is provided "as is" without express or implied warranty.
 */
 
+#include "LinearMath/btDefines.h"
+
+#ifdef BT_USE_SSE
+	// Allow SSE operations because we don't directly use user data.
+	#define BT_USE_SSE_IN_API
+#endif
+
 #include "LinearMath/btVector3.h"
 #include "btRaycastVehicle.h"
 
@@ -29,9 +36,9 @@ btRaycastVehicle::btRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* c
 m_pitchControl(btScalar(0.))
 {
 	m_chassisBody = chassis;
-	m_indexRightAxis = 0;
-	m_indexUpAxis = 2;
-	m_indexForwardAxis = 1;
+	m_indexForwardAxis = 0;
+	m_indexUpAxis = 1;
+	m_indexRightAxis = 2;
 	defaultInit(tuning);
 }
 
@@ -97,42 +104,33 @@ void	btRaycastVehicle::updateWheelTransform( int wheelIndex, bool interpolatedTr
 	
 	btWheelInfo& wheel = m_wheelInfo[ wheelIndex ];
 	updateWheelTransformsWS(wheel, interpolatedTransform);
+
 	btVector3 up = -wheel.m_raycastInfo.m_wheelDirectionWS;
 	const btVector3& right = wheel.m_raycastInfo.m_wheelAxleWS;
 	btVector3 fwd = up.cross(right);
-	fwd = fwd.normalize();
+	fwd.normalize();
 //	up = right.cross(fwd);
 //	up.normalize();
 
-	//rotate around steering over de wheelAxleWS
-	btScalar steering = wheel.m_steering;
-	
-	btQuaternion steeringOrn(up, steering);//wheel.m_steering);
+	// Steering rotation
+	btQuaternion steeringOrn(up, wheel.m_steering);
 	btMatrix3x3 steeringMat(steeringOrn);
 
+	// Rotation rotation
 	btQuaternion rotatingOrn(right, -wheel.m_rotation);
 	btMatrix3x3 rotatingMat(rotatingOrn);
 
-	/*
+	// FIXME: Why is this working?
 	btMatrix3x3 basis2(
 		right[0], fwd[0], up[0],
 		right[1], fwd[1], up[1],
 		right[2], fwd[2], up[2]
 	);
-	*/
 
-	btMatrix3x3 basis2;
-	basis2[0][m_indexRightAxis] = right[0];
-	basis2[1][m_indexRightAxis] = right[1];
-	basis2[2][m_indexRightAxis] = right[2];
-
-	basis2[0][m_indexUpAxis] = up[0];
-	basis2[1][m_indexUpAxis] = up[1];
-	basis2[2][m_indexUpAxis] = up[2];
-
-	basis2[0][m_indexForwardAxis] = fwd[0];
-	basis2[1][m_indexForwardAxis] = fwd[1];
-	basis2[2][m_indexForwardAxis] = fwd[2];
+	//btMatrix3x3 basis2;
+	//basis2.setColumn(m_indexForwardAxis, fwd);
+	//basis2.setColumn(m_indexUpAxis, up);
+	//basis2.setColumn(m_indexRightAxis, right);
 	
 	wheel.m_worldTransform.setBasis(steeringMat * rotatingMat * basis2);
 	wheel.m_worldTransform.setOrigin(
@@ -166,8 +164,8 @@ void	btRaycastVehicle::updateWheelTransformsWS(btWheelInfo& wheel, bool interpol
 		getRigidBody()->getMotionState()->getWorldTransform(chassisTrans);
 	}
 
-	wheel.m_raycastInfo.m_hardPointWS = chassisTrans( wheel.m_chassisConnectionPointCS );
-	wheel.m_raycastInfo.m_wheelDirectionWS = chassisTrans.getBasis() *  wheel.m_wheelDirectionCS ;
+	wheel.m_raycastInfo.m_hardPointWS = chassisTrans * wheel.m_chassisConnectionPointCS;
+	wheel.m_raycastInfo.m_wheelDirectionWS = chassisTrans.getBasis() * wheel.m_wheelDirectionCS ;
 	wheel.m_raycastInfo.m_wheelAxleWS = chassisTrans.getBasis() * wheel.m_wheelAxleCS;
 }
 
@@ -180,6 +178,7 @@ btScalar btRaycastVehicle::rayCast(int w)
 	
 	btScalar depth = -1;
 	
+	// Suspension rest length goes to center of wheel, so add radius to get to the ground
 	btScalar raylen = wheel.getSuspensionRestLength()+wheel.m_wheelsRadius;
 
 	btVector3 rayvector = wheel.m_raycastInfo.m_wheelDirectionWS * (raylen);

@@ -302,7 +302,11 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	params.damping = axle.wheels.damping;
 	params.dragCoefficient = 0;
+#ifdef USE_WHEELED_VEHICLE
 	params.enableCollisions = true;
+#else
+	params.enableCollisions = false;
+#endif
 	params.inertia = axle.wheels.inertia;
 	params.mass = axle.wheels.mass;
 	params.pGameData = m_pBody->GetGameData();
@@ -354,7 +358,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	// FIXME: frictionScale is UNUSED (or we're not parsing something correctly)!
 	//wheelInfo.m_frictionSlip = axle.wheels.frictionScale;
-	wheelInfo.m_frictionSlip = 1.5f; // debug value
+	wheelInfo.m_frictionSlip = 1.f; // debug value
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();
 	wheelInfo.m_suspensionStiffness = axle.suspension.springConstant;
 	
@@ -444,8 +448,9 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 
 void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, float dt) {
 	// Update the operating params
+	// If speed is high negative, the brake will be applied!
 	float fSpeed = m_pVehicle->getCurrentSpeedKmHour();
-	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(fSpeed));
+	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(-fSpeed));
 
 	CalcEngineTransmission(controls, dt);
 	CalcEngine(controls, dt);
@@ -457,22 +462,24 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 
 	for (int i = 0; i < m_iWheelCount; i++) {
 		btTransform bullTransform = m_pVehicle->getWheelTransformWS(i);
-		btVector3 bullPos = bullTransform.getOrigin();
-		btQuaternion bullRot = bullTransform.getRotation();
+		m_pWheels[i]->GetObject()->setWorldTransform(bullTransform);
 
-		Vector HLPos;
-		QAngle HLRot;
-		ConvertPosToHL(bullPos, HLPos);
-		ConvertRotationToHL(bullRot, HLRot);
+		//btVector3 bullPos = bullTransform.getOrigin();
+		//btQuaternion bullRot = bullTransform.getRotation();
+
+		//Vector HLPos;
+		//QAngle HLRot;
+		//ConvertPosToHL(bullPos, HLPos);
+		//ConvertRotationToHL(bullRot, HLRot);
 
 		// z = spin
 		// flip it because HL expects it to come in opposite for some reason.
-		//HLRot.z = HLRot.z;
+		//HLRot.z = -HLRot.z;
 		//float t = HLRot.x;
 		//HLRot.x = HLRot.z;
 		//HLRot.z = t;
 
-		m_pWheels[i]->SetPosition(HLPos, HLRot, true);
+		//m_pWheels[i]->SetPosition(HLPos, HLRot, true);
 
 		// Update wheels on ground
 		btWheelInfo &wheel = m_pVehicle->getWheelInfo(i);

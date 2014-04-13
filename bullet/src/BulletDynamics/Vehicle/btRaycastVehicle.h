@@ -56,8 +56,8 @@ public:
 			btScalar	m_maxSuspensionForce;
 
 		};
-private:
 
+private:
 	//btScalar	m_tau; // unused
 	//btScalar	m_damping; // unused
 	btVehicleRaycaster*	m_vehicleRaycaster;
@@ -74,6 +74,7 @@ private:
 	void defaultInit(const btVehicleTuning& tuning);
 
 public:
+	btAlignedObjectArray<btWheelInfo>	m_wheelInfo;
 
 	//constructor to create a car from an existing rigidbody
 	btRaycastVehicle(const btVehicleTuning& tuning, btRigidBody* chassis, btVehicleRaycaster* raycaster);
@@ -119,8 +120,6 @@ public:
 	inline int		getNumWheels() const {
 		return int (m_wheelInfo.size());
 	}
-	
-	btAlignedObjectArray<btWheelInfo>	m_wheelInfo;
 
 
 	const btWheelInfo&	getWheelInfo(int index) const;

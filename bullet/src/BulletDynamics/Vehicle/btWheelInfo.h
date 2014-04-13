@@ -35,7 +35,7 @@ struct btWheelInfoConstructionInfo
 };
 
 /// btWheelInfo contains information per wheel about friction and suspension.
-struct btWheelInfo
+ATTRIBUTE_ALIGNED16(struct) btWheelInfo
 {
 	struct RaycastInfo
 	{
@@ -67,9 +67,9 @@ struct btWheelInfo
 
 	btTransform	m_worldTransform;
 	
-	btVector3	m_chassisConnectionPointCS; //const
-	btVector3	m_wheelDirectionCS;//const
-	btVector3	m_wheelAxleCS; // const or modified by steering
+	btVector3	m_chassisConnectionPointCS; // Connection point in chassis space - const
+	btVector3	m_wheelDirectionCS;// Direction in chassis space - const
+	btVector3	m_wheelAxleCS; // Axle in chassis space - const or modified by steering
 	btScalar	m_suspensionRestLength1;//const
 	btScalar	m_maxSuspensionTravelCm;
 	btScalar	getSuspensionRestLength() const;
@@ -94,9 +94,7 @@ struct btWheelInfo
 	void*		m_clientInfo;//can be used to store pointer to sync transforms...
 
 	btWheelInfo(btWheelInfoConstructionInfo& ci)
-
 	{
-
 		m_suspensionRestLength1 = ci.m_suspensionRestLength;
 		m_maxSuspensionTravelCm = ci.m_maxSuspensionTravelCm;
 
