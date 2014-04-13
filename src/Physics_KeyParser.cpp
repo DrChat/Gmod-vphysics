@@ -189,12 +189,13 @@ void CPhysicsKeyParser::ParseSurfaceTable(int *table, IVPhysicsKeyHandler *unkno
 // Purpose: Recursive function to loop through all the keyvalues!
 static void RecursiveKeyLoop(KeyValues *pBlock, void *pCustom, IVPhysicsKeyHandler *unknownKeyHandler) {
 	for (KeyValues *pKey = pBlock; pKey; pKey = pKey->GetNextKey()) {
-		if (pKey->GetFirstSubKey())
-			RecursiveKeyLoop(pKey->GetFirstSubKey(), pCustom, unknownKeyHandler);
-	
 		const char *key = pKey->GetName();
 		const char *value = pKey->GetString();
 		unknownKeyHandler->ParseKeyValue(pCustom, key, value);
+
+		// Recurse
+		if (pKey->GetFirstSubKey())
+			RecursiveKeyLoop(pKey->GetFirstSubKey(), pCustom, unknownKeyHandler);
 	}
 }
 
