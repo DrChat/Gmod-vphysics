@@ -338,6 +338,10 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 
 		if (wheel.m_raycastInfo.m_isInContact)
 		{
+			btRigidBody *pOther = (btRigidBody *)wheel.m_raycastInfo.m_groundObject;
+			btVector3 groundVel = pOther->getVelocityInLocalPoint(wheel.m_raycastInfo.m_contactPointWS - pOther->getWorldTransform().getOrigin());
+			btVector3 relvel = vel - groundVel;
+
 			/*
 			const btTransform&	chassisWorldTransform = getChassisWorldTransform();
 
@@ -360,7 +364,7 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 			btScalar proj = fwd.dot(wheel.m_raycastInfo.m_contactNormalWS);
 			fwd -= wheel.m_raycastInfo.m_contactNormalWS * proj;
 
-			btScalar proj2 = fwd.dot(vel);
+			btScalar proj2 = fwd.dot(relvel);
 			
 			wheel.m_deltaRotation = (proj2 * step) / (wheel.m_wheelsRadius);
 			wheel.m_rotation += wheel.m_deltaRotation;
