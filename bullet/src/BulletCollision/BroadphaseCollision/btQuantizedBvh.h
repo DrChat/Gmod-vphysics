@@ -305,9 +305,11 @@ protected:
 
 	void	buildTree	(int startIndex, int endIndex);
 
-	int	calcSplittingAxis(int startIndex, int endIndex);
+	int		calcSplittingAxis(int startIndex,int endIndex,const btVector3 &means) const;
 
-	int	sortAndCalcSplittingIndex(int startIndex, int endIndex, int splitAxis);
+	btVector3 calcMeanCenter(int startIndex, int endIndex) const;
+
+	int		sortAndCalcSplittingIndex(int startIndex, int endIndex, int splitAxis, const btVector3 &means);
 	
 	void	walkStacklessTree(btNodeOverlapCallback* nodeCallback, const btVector3& aabbMin, const btVector3& aabbMax) const;
 

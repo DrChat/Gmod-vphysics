@@ -141,6 +141,7 @@ void	btQuantizedBvh::buildTree	(int startIndex, int endIndex)
 	int splitAxis, splitIndex, i;
 	int numIndices =endIndex-startIndex;
 	int curIndex = m_curNodeIndex;
+	btVector3 means;
 
 	btAssert(numIndices>0);
 
@@ -156,10 +157,11 @@ void	btQuantizedBvh::buildTree	(int startIndex, int endIndex)
 		return;	
 	}
 	//calculate Best Splitting Axis and where to split it. Sort the incoming 'leafNodes' array within range 'startIndex/endIndex'.
-	
-	splitAxis = calcSplittingAxis(startIndex, endIndex);
+	means = calcMeanCenter(startIndex,endIndex);
 
-	splitIndex = sortAndCalcSplittingIndex(startIndex, endIndex, splitAxis);
+	splitAxis = calcSplittingAxis(startIndex, endIndex, means);
+
+	splitIndex = sortAndCalcSplittingIndex(startIndex, endIndex, splitAxis, means);
 
 	int internalNodeIndex = m_curNodeIndex;
 	
@@ -245,21 +247,30 @@ void	btQuantizedBvh::updateSubtreeHeaders(int leftChildNodexIndex, int rightChil
 }
 
 
-int	btQuantizedBvh::sortAndCalcSplittingIndex(int startIndex, int endIndex, int splitAxis)
+btVector3 btQuantizedBvh::calcMeanCenter(int startIndex, int endIndex) const
 {
 	int i;
-	int splitIndex =startIndex;
 	int numIndices = endIndex - startIndex;
-	btScalar splitValue;
-
 	btVector3 means(btScalar(0.), btScalar(0.), btScalar(0.));
+
 	for (i=startIndex;i<endIndex;i++)
 	{
 		btVector3 center = btScalar(0.5)*(getAabbMax(i)+getAabbMin(i));
 		means+=center;
 	}
 	means *= (btScalar(1.)/(btScalar)numIndices);
-	
+
+	return means;
+}
+
+
+int	btQuantizedBvh::sortAndCalcSplittingIndex(int startIndex,int endIndex,int splitAxis, const btVector3 &means)
+{
+	int i;
+	int splitIndex =startIndex;
+	int numIndices = endIndex - startIndex;
+	btScalar splitValue;
+
 	splitValue = means[splitAxis];
 	
 	//sort leafNodes so all values larger then splitValue comes first, and smaller values start from 'splitIndex'.
@@ -299,21 +310,13 @@ int	btQuantizedBvh::sortAndCalcSplittingIndex(int startIndex, int endIndex, int 
 }
 
 
-int	btQuantizedBvh::calcSplittingAxis(int startIndex, int endIndex)
+int	btQuantizedBvh::calcSplittingAxis(int startIndex, int endIndex, const btVector3 &means) const
 {
 	int i;
 
-	btVector3 means(btScalar(0.), btScalar(0.), btScalar(0.));
 	btVector3 variance(btScalar(0.), btScalar(0.), btScalar(0.));
 	int numIndices = endIndex-startIndex;
 
-	for (i=startIndex;i<endIndex;i++)
-	{
-		btVector3 center = btScalar(0.5)*(getAabbMax(i)+getAabbMin(i));
-		means+=center;
-	}
-	means *= (btScalar(1.)/(btScalar)numIndices);
-		
 	for (i=startIndex;i<endIndex;i++)
 	{
 		btVector3 center = btScalar(0.5)*(getAabbMax(i)+getAabbMin(i));
