@@ -35,8 +35,14 @@ int lPhysStats(lua_State *state) {
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory) {
-		g_pPhysics = (IPhysics32 *)physFactory(VPHYSICS_INTERFACE_VERSION, NULL);
+		g_pPhysics = (IPhysics32 *)physFactory("VPhysics032", NULL);
 		g_pSurfProps = (IPhysicsSurfaceProps *)physFactory(VPHYSICS_SURFACEPROPS_INTERFACE_VERSION, NULL);
+	}
+
+	// Check if the interface was created (if it wasn't, we're not running the newer vphysics)
+	if (!g_pPhysics) {
+		Warning("VPhysics lua init failed (vphysics module is too old!)");
+		return 1;
 	}
 
 #ifdef _DEBUG
