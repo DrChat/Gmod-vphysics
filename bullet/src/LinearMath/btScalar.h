@@ -64,23 +64,28 @@ subject to the following restrictions:
 			}
 		#endif
 		
-//use this, in case there are clashes (such as xnamath.h)
-#ifndef BT_NO_SIMD_OPERATOR_OVERLOADS
-		inline __m128 operator + (const __m128 A, const __m128 B)
-		{
-			return _mm_add_ps(A, B);
-		}
-		
-		inline __m128 operator - (const __m128 A, const __m128 B)
-		{
-			return _mm_sub_ps(A, B);
-		}
-		
-		inline __m128 operator * (const __m128 A, const __m128 B)
-		{
-			return _mm_mul_ps(A, B);
-		}
-#endif //BT_NO_SIMD_OPERATOR_OVERLOADS
+		//use this, in case there are clashes (such as xnamath.h)
+		#ifndef BT_NO_SIMD_OPERATOR_OVERLOADS
+			SIMD_FORCE_INLINE __m128 operator + (const __m128 A, const __m128 B)
+			{
+				return _mm_add_ps(A, B);
+			}
+			
+			SIMD_FORCE_INLINE __m128 operator - (const __m128 A, const __m128 B)
+			{
+				return _mm_sub_ps(A, B);
+			}
+			
+			SIMD_FORCE_INLINE __m128 operator * (const __m128 A, const __m128 B)
+			{
+				return _mm_mul_ps(A, B);
+			}
+
+			SIMD_FORCE_INLINE __m128 operator / (const __m128 A, const __m128 B)
+			{
+				return _mm_div_ps(A, B);
+			}
+		#endif //BT_NO_SIMD_OPERATOR_OVERLOADS
 		
 		#define btCastfTo128i(a) (_mm_castps_si128(a))
 		#define btCastfTo128d(a) (_mm_castps_pd(a))
@@ -487,76 +492,167 @@ struct btTypedObject
 // btSimdScalar class
 #ifdef BT_USE_SSE
 
-struct	btSimdScalar
+ATTRIBUTE_ALIGNED16(struct) btSimdScalar
 {
-	SIMD_FORCE_INLINE	btSimdScalar()
-	{
+	//BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	}
-
-	SIMD_FORCE_INLINE	btSimdScalar(float	fl)
-	:m_vec128 (_mm_set1_ps(fl))
-	{
-	}
-
-	SIMD_FORCE_INLINE	btSimdScalar(__m128 v128)
-		:m_vec128(v128)
-	{
-	}
+	// Data
 	union
 	{
-		__m128		m_vec128;
-		float		m_floats[4];
-		int			m_ints[4];
-		btScalar	m_unusedPadding;
+		btSimdFloat4	m_vec128;
+		btScalar		m_floats[4];
+		int				m_ints[4];
 	};
-	SIMD_FORCE_INLINE	__m128	get128()
+
+	SIMD_FORCE_INLINE btSimdScalar()
+	{}
+
+	SIMD_FORCE_INLINE btSimdScalar(float	fl)
+	:m_vec128 (_mm_set1_ps(fl))
+	{}
+
+	SIMD_FORCE_INLINE btSimdScalar(__m128 v128)
+		:m_vec128(v128)
+	{}
+
+	SIMD_FORCE_INLINE btSimdFloat4 get128()
 	{
 		return m_vec128;
 	}
 
-	SIMD_FORCE_INLINE	const __m128	get128() const
+	SIMD_FORCE_INLINE const btSimdFloat4 get128() const
 	{
 		return m_vec128;
 	}
 
-	SIMD_FORCE_INLINE	void	set128(__m128 v128)
+	SIMD_FORCE_INLINE void set128(btSimdFloat4 v128)
 	{
 		m_vec128 = v128;
 	}
 
-	SIMD_FORCE_INLINE	operator       __m128()       
+	SIMD_FORCE_INLINE operator btSimdFloat4()       
 	{ 
 		return m_vec128; 
 	}
-	SIMD_FORCE_INLINE	operator const __m128() const 
+
+	SIMD_FORCE_INLINE operator const btSimdFloat4() const 
 	{ 
 		return m_vec128; 
 	}
 	
-	SIMD_FORCE_INLINE	operator float() const 
+	SIMD_FORCE_INLINE operator btScalar() const 
 	{ 
 		return m_floats[0]; 
 	}
 
+	// Operators
+
+	SIMD_FORCE_INLINE btSimdScalar operator|(const btSimdScalar &other) const
+	{
+		return btSimdScalar(_mm_or_ps(get128(), other.get128()));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator&(const btSimdScalar &other) const
+	{
+		return btSimdScalar(_mm_and_ps(get128(), other.get128()));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator*(const btSimdScalar &other) const
+	{
+		return btSimdScalar(_mm_mul_ps(get128(), other.get128()));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator*(const btScalar &other) const
+	{
+		return btSimdScalar(_mm_mul_ps(get128(), _mm_set1_ps(other)));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator/(const btSimdScalar &other) const
+	{
+		return btSimdScalar(_mm_div_ps(get128(), other.get128()));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator/(const btScalar &other) const
+	{
+		return btSimdScalar(_mm_div_ps(get128(), _mm_set1_ps(other)));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator+(const btSimdScalar &other) const
+	{
+		return btSimdScalar(_mm_add_ps(get128(), other.get128()));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator+(const btScalar &other) const
+	{
+		return btSimdScalar(_mm_add_ps(get128(), _mm_set1_ps(other)));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator-(const btSimdScalar &other) const
+	{
+		return btSimdScalar(_mm_sub_ps(get128(), other.get128()));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar operator-(const btScalar &other) const
+	{
+		return btSimdScalar(_mm_sub_ps(get128(), _mm_set1_ps(other)));
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar &operator+=(const btSimdScalar &other)
+	{
+		*this = *this + other;
+		return *this;
+	}
+
+	SIMD_FORCE_INLINE btSimdScalar &operator-=(const btSimdScalar &other)
+	{
+		*this = *this - other;
+		return *this;
+	}
 };
 
+SIMD_FORCE_INLINE
+btSimdScalar operator-(const float &v1, const btSimdScalar &v2)
+{
+	return btSimdScalar(_mm_sub_ps(_mm_set1_ps(v1), v2.get128()));
+}
+
+SIMD_FORCE_INLINE
+btSimdScalar operator+(const float &v1, const btSimdScalar &v2)
+{
+	return btSimdScalar(_mm_add_ps(_mm_set1_ps(v1), v2.get128()));
+}
+
+/*
 ///@brief Return the elementwise product of two btSimdScalar
-SIMD_FORCE_INLINE btSimdScalar 
-operator*(const btSimdScalar& v1, const btSimdScalar& v2) 
+SIMD_FORCE_INLINE
+btSimdScalar operator*(const btSimdScalar& v1, const btSimdScalar& v2) 
 {
 	return btSimdScalar(_mm_mul_ps(v1.get128(), v2.get128()));
 }
 
-///@brief Return the elementwise product of two btSimdScalar
-SIMD_FORCE_INLINE btSimdScalar 
-operator+(const btSimdScalar& v1, const btSimdScalar& v2) 
+SIMD_FORCE_INLINE
+btSimdScalar operator/(const btSimdScalar &v1, const btSimdScalar &v2)
+{
+	return btSimdScalar(_mm_div_ps(v1.get128(), v2.get128()));
+}
+
+///@brief Return the elementwise sum of two btSimdScalar
+SIMD_FORCE_INLINE
+btSimdScalar operator+(const btSimdScalar& v1, const btSimdScalar& v2) 
 {
 	return btSimdScalar(_mm_add_ps(v1.get128(), v2.get128()));
 }
 
+///@brief Return the elementwise difference of two btSimdScalar
+SIMD_FORCE_INLINE
+btSimdScalar operator-(const btSimdScalar &v1, const btSimdScalar &v2)
+{
+	return btSimdScalar(_mm_sub_ps(v1.get128(), v2.get128()));
+}
+*/
+
 #else
-	#define btSimdScalar btScalar
+typedef btSimdScalar btScalar;
 #endif
 
 #endif //BT_SCALAR_H
