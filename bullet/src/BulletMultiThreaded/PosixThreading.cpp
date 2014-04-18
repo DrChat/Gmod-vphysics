@@ -22,15 +22,6 @@ static void *ThreadFn(void *pArg) {
 	threadparams_t *params = (threadparams_t *)pArg;
 	btAssert(params->pFn);
 
-	if (params->pThreadName) {
-		//prctl(PR_SET_NAME, params->pThreadName, 0, 0, 0);
-
-#ifdef BT_DEBUG
-		// Not supported on all systems equally!
-		pthread_setname_np(pthread_self(), params->pThreadName);
-#endif
-	}
-
 	params->pFn(params->pArg);
 
 	pthread_exit(0);
@@ -60,6 +51,9 @@ class btPosixThread : public btIThread {
 				return;
 			}
 
+			if (m_pThreadName)
+				pthread_setname_np(m_threadId, m_pThreadName);
+
 			m_bRunning = true;
 		}
 
@@ -87,8 +81,10 @@ class btPosixThread : public btIThread {
 		}
 
 		void setThreadName(const char *pName) {
-			// Does absolutely nothing on linux!
 			m_pThreadName = pName;
+			
+			if (m_bRunning)
+				pthread_setname_np(m_threadId, pName);
 		}
 	private:
 		pthread_t m_threadId;
