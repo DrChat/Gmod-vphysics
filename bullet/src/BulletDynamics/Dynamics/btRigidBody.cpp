@@ -162,15 +162,18 @@ void btRigidBody::setDamping(btScalar lin_damping, btScalar ang_damping)
 void			btRigidBody::applyDamping(btScalar timeStep)
 {
 	//On new damping: see discussion/issue report here: http://code.google.com/p/bullet/issues/detail?id=74
-	//todo: do some performance comparisons (but other parts of the engine are probably bottleneck anyway
+	//todo: do some performance comparisons (but other parts of the engine are probably bottleneck anyway)
 
 //#define USE_OLD_DAMPING_METHOD 1
 #ifdef USE_OLD_DAMPING_METHOD
 	m_linearVelocity *= GEN_clamped((btScalar(1.) - timeStep * m_linearDamping), (btScalar)btScalar(0.0), (btScalar)btScalar(1.0));
 	m_angularVelocity *= GEN_clamped((btScalar(1.) - timeStep * m_angularDamping), (btScalar)btScalar(0.0), (btScalar)btScalar(1.0));
 #else
-	m_linearVelocity *= btPow(btScalar(1)-m_linearDamping, timeStep);
-	m_angularVelocity *= btPow(btScalar(1)-m_angularDamping, timeStep);
+	if (!btFuzzyZero(m_linearDamping) && !m_linearVelocity.fuzzyZero())
+		m_linearVelocity *= btPow(btScalar(1)-m_linearDamping, timeStep);
+
+	if (!btFuzzyZero(m_angularDamping) && !m_angularVelocity.fuzzyZero())
+		m_angularVelocity *= btPow(btScalar(1)-m_angularDamping, timeStep);
 #endif
 
 	if (m_additionalDamping)
