@@ -232,6 +232,26 @@ inline int btGetVersion()
 				#define btUnlikely(_c) _c
 			
 			#else
+				// Linux
+				#define BT_USE_SIMD_VECTOR3
+				#define BT_USE_SSE
+				#define BT_HAS_ALIGNED_ALLOCATOR
+		
+				// Disabled because linux does not allocate memory on 16-byte boundaries by default.
+				//#define BT_USE_SSE_IN_API
+				
+				#ifdef BT_USE_SSE
+					// include appropriate SSE level
+					#if defined (__SSE4_1__)
+						#include <smmintrin.h>
+					#elif defined (__SSSE3__)
+						#include <tmmintrin.h>
+					#elif defined (__SSE3__)
+						#include <pmmintrin.h>
+					#else
+						#include <emmintrin.h>
+					#endif
+				#endif //BT_USE_SSE
 			
 				#define SIMD_FORCE_INLINE inline
 				/// todo: check out alignment methods for other platforms/compilers
@@ -307,6 +327,7 @@ inline int btGetVersion()
 #endif
 
 /// align a pointer to the provided alignment, upwards
+/// alignment must be a multiple of 2!
 template <typename T>
 T *btAlignPointer(T *unalignedPtr, size_t alignment)
 {
