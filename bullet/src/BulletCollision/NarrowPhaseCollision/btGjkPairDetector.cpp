@@ -33,10 +33,6 @@ subject to the following restrictions:
 //must be above the machine epsilon
 #define REL_ERROR2 btScalar(1.0e-6)
 
-//temp globals, to improve GJK/EPA/penetration calculations
-int gNumDeepPenetrationChecks = 0;
-int gNumGjkChecks = 0;
-
 
 btGjkPairDetector::btGjkPairDetector(const btConvexShape* objectA, const btConvexShape* objectB, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver*	penetrationDepthSolver)
 :m_cachedSeparatingAxis(btScalar(0.), btScalar(1.), btScalar(0.)),
@@ -54,6 +50,7 @@ m_catchDegeneracies(1),
 m_fixContactNormalDirection(1)
 {
 }
+
 btGjkPairDetector::btGjkPairDetector(const btConvexShape* objectA, const btConvexShape* objectB, int shapeTypeA, int shapeTypeB, btScalar marginA, btScalar marginB, btSimplexSolverInterface* simplexSolver, btConvexPenetrationDepthSolver*	penetrationDepthSolver)
 :m_cachedSeparatingAxis(btScalar(0.), btScalar(1.), btScalar(0.)),
 m_penetrationDepthSolver(penetrationDepthSolver),
@@ -98,8 +95,6 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 
 	btScalar marginA = m_marginA;
 	btScalar marginB = m_marginB;
-
-	gNumGjkChecks++;
 
 #ifdef DEBUG_SPU_COLLISION_DETECTION
 	spu_printf("inside gjk\n");
@@ -273,19 +268,17 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			  //degeneracy, this is typically due to invalid/uninitialized worldtransforms for a btCollisionObject   
 			  if (m_curIter++ > gGjkMaxIter)   
 			  {   
-					  #if defined(DEBUG) || defined (_DEBUG) || defined (DEBUG_SPU_COLLISION_DETECTION)
-
-							  printf("btGjkPairDetector maxIter exceeded:%i\n", m_curIter);   
-							  printf("sepAxis=(%f, %f, %f), squaredDistance = %f, shapeTypeA=%i, shapeTypeB=%i\n",   
-								m_cachedSeparatingAxis.getX(),   
-								m_cachedSeparatingAxis.getY(),   
-								m_cachedSeparatingAxis.getZ(),   
-								squaredDistance,   
-								m_minkowskiA->getShapeType(),   
-								m_minkowskiB->getShapeType());   
-
-					  #endif   
-					  break;   
+#if defined(BT_DEBUG) || defined (DEBUG_SPU_COLLISION_DETECTION)
+					btDbgWarning("btGjkPairDetector maxIter exceeded:%i\n", m_curIter);
+					btDbgWarning("sepAxis=(%f, %f, %f), squaredDistance = %f, shapeTypeA=%i, shapeTypeB=%i\n",   
+						m_cachedSeparatingAxis.getX(),   
+						m_cachedSeparatingAxis.getY(),   
+						m_cachedSeparatingAxis.getZ(),   
+						squaredDistance,   
+						m_minkowskiA->getShapeType(),   
+						m_minkowskiB->getShapeType());   
+#endif   
+					break;   
 
 			  } 
 
@@ -300,7 +293,7 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 				m_degenerateSimplex = 13;
 				break;
 			}
-		}
+		} // end for loop
 
 		if (checkSimplex)
 		{
@@ -346,7 +339,6 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 				// Penetration depth case.
 				btVector3 tmpPointOnA, tmpPointOnB;
 				
-				gNumDeepPenetrationChecks++;
 				m_cachedSeparatingAxis.setZero();
 
 				bool isValid2 = m_penetrationDepthSolver->calcPenDepth( 
@@ -457,15 +449,19 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 			m_minkowskiB->getAabb(localTransB,aabbBMin,aabbBMax);
 			btVector3 posB = (aabbBMin+aabbBMax) * btScalar(0.5);
 
-			// Bring out the most significant numbers!
-			btVector3 d = (posA - posB) * normalInB.absolute();
-			d.normalize();
+			btVector3 diff = (posA-posB);
+			if (!diff.fuzzyZero()) {
+				diff.normalize();
 
-			btVector3 diff = (posA-posB).normalized();
+				// Bring out the most significant numbers!
+				btVector3 d = (posA - posB) * normalInB.absolute();
+				d.normalize();
 
-			// Use the d, but don't depend on it alone.
-			if ((diff.dot(normalInB) < -SIMD_EPSILON) && (d.dot(normalInB) < -SIMD_EPSILON))
-				normalInB *= -1.f;
+				// Use the d, but don't depend on it alone.
+				// BUG: Still happens at extremes when the normal isn't completely flat.
+				if ((diff.dot(normalInB) < -SIMD_EPSILON) && (d.dot(normalInB) < -SIMD_EPSILON))
+					normalInB *= -1.f;
+			}
 		}
 		m_cachedSeparatingAxis = normalInB;
 		m_cachedSeparatingDistance = distance;
@@ -479,8 +475,4 @@ void btGjkPairDetector::getClosestPointsNonVirtual(const ClosestPointInput& inpu
 
 
 }
-
-
-
-
 
