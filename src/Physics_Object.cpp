@@ -159,7 +159,7 @@ bool CPhysicsObject::IsDragEnabled() const {
 }
 
 bool CPhysicsObject::IsMotionEnabled() const {
-	return m_bMotionEnabled;
+	return m_pObject->isMotionEnabled();
 }
 
 void CPhysicsObject::EnableCollisions(bool enable) {
@@ -197,19 +197,16 @@ void CPhysicsObject::EnableDrag(bool enable)  {
 
 void CPhysicsObject::EnableMotion(bool enable) {
 	if (IsMotionEnabled() == enable || IsStatic()) return;
-	m_bMotionEnabled = enable;
 
 	// FIXME: Does this cause any issues with player controllers? (player controller angular factor is always 0!)
 	// TODO: We should be setting a flag on the object to disable motion, not this!
 	if (enable) {
-		m_pObject->setLinearFactor(btVector3(1, 1, 1));
-		m_pObject->setAngularFactor(1);
+		m_pObject->setFlags(m_pObject->getFlags() & ~(BT_DISABLE_MOTION));
 	} else {
 		m_pObject->setLinearVelocity(btVector3(0, 0, 0));
 		m_pObject->setAngularVelocity(btVector3(0, 0, 0));
-		
-		m_pObject->setLinearFactor(btVector3(0, 0, 0));
-		m_pObject->setAngularFactor(0);
+
+		m_pObject->setFlags(m_pObject->getFlags() | BT_DISABLE_MOTION);
 	}
 }
 
@@ -634,8 +631,8 @@ void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 	}
 	Wake();
 
-	// forceVector is in kg*in/s
-	// bullet takes forces in newtons, aka kg*m/s
+	// forceVector is in kg*in/s*time
+	// bullet takes forces in newtons, aka kg*m/s*time
 
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
@@ -1018,7 +1015,6 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	m_pObject			= pObject;
 	m_bIsSphere			= isSphere;
 	m_gameFlags			= 0;
-	m_bMotionEnabled	= !isStatic;
 	m_fMass				= (pParams && !isStatic) ? pParams->mass : 0;
 	m_pGameData			= NULL;
 	m_pName				= NULL;

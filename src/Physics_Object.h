@@ -215,7 +215,6 @@ class CPhysicsObject : public IPhysicsObject32 {
 		bool								m_bRemoving; // Object being removed? (in destructor or something)
 
 		bool								m_bIsSphere;
-		bool								m_bMotionEnabled;
 		float								m_fMass;
 		float								m_fVolume;
 		float								m_fBuoyancyRatio;
