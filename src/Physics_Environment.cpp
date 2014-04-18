@@ -323,6 +323,8 @@ class CCollisionEventListener : public btSolveCallback {
 		virtual void preSolveContact(btSolverBody *body0, btSolverBody *body1, btManifoldPoint *cp) {
 			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
 			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
+			if (pObj0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE || pObj1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)
+				return;
 
 			unsigned int flags0 = pObj0->GetCallbackFlags();
 			unsigned int flags1 = pObj1->GetCallbackFlags();
@@ -388,8 +390,10 @@ class CCollisionEventListener : public btSolveCallback {
 
 			// FIXME: Problem with bullet code, only one solver body created for static objects!
 			// There could be more than one static object created by us!
-			//CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
-			//CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
+			CPhysicsObject *pObj0 = (CPhysicsObject *)body0->m_originalColObj->getUserPointer();
+			CPhysicsObject *pObj1 = (CPhysicsObject *)body1->m_originalColObj->getUserPointer();
+			if (pObj0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE || pObj1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)
+				return;
 
 			//unsigned int flags0 = pObj0->GetCallbackFlags();
 			//unsigned int flags1 = pObj1->GetCallbackFlags();
@@ -586,7 +590,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_softBodyWorldInfo.m_sparsesdf.Initialize();
 
-	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_USE_2_FRICTION_DIRECTIONS | SOLVER_USE_WARMSTARTING;
+	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_USE_2_FRICTION_DIRECTIONS;
 
 	// TODO: Threads solve any oversized batches (>32?), otherwise solving done on main thread.
 	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 128; // Combine islands up to this many constraints
@@ -606,7 +610,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_debugdraw = new CDebugDrawer(m_pBulletEnvironment);
 #endif
 
-	// HACK: Durr hack to get ourselves a debug overlay on the client
+	// HACK: Get ourselves a debug overlay on the client
 	CreateInterfaceFn engine = Sys_GetFactory("engine");
 	SetDebugOverlay(engine);
 }
@@ -736,6 +740,7 @@ void CPhysicsEnvironment::DestroyObject(IPhysicsObject *pObject) {
 	m_pObjectTracker->ObjectRemoved((CPhysicsObject *)pObject);
 
 	if (m_inSimulation || m_bUseDeleteQueue) {
+		// We're still in the simulation, so deleting an object would be disastrous here. Queue it!
 		((CPhysicsObject *)pObject)->AddCallbackFlags(CALLBACK_MARKED_FOR_DELETE);
 		m_deadObjects.AddToTail(pObject);
 	} else {
@@ -1355,24 +1360,32 @@ void CPhysicsEnvironment::HandleConstraintBroken(CPhysicsConstraint *pConstraint
 
 // UNEXPOSED
 void CPhysicsEnvironment::HandleFluidStartTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject) {
+	if (pObject->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) return;
+
 	if (m_pCollisionEvent)
 		m_pCollisionEvent->FluidStartTouch(pObject, pController);
 }
 
 // UNEXPOSED
 void CPhysicsEnvironment::HandleFluidEndTouch(CPhysicsFluidController *pController, CPhysicsObject *pObject) {
+	if (pObject->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) return;
+
 	if (m_pCollisionEvent)
 		m_pCollisionEvent->FluidEndTouch(pObject, pController);
 }
 
 // UNEXPOSED
 void CPhysicsEnvironment::HandleObjectEnteredTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject) {
+	if (pObject->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) return;
+
 	if (m_pCollisionEvent)
 		m_pCollisionEvent->ObjectEnterTrigger(pTrigger, pObject);
 }
 
 // UNEXPOSED
 void CPhysicsEnvironment::HandleObjectExitedTrigger(CPhysicsObject *pTrigger, CPhysicsObject *pObject) {
+	if (pObject->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE) return;
+
 	if (m_pCollisionEvent)
 		m_pCollisionEvent->ObjectLeaveTrigger(pTrigger, pObject);
 }
