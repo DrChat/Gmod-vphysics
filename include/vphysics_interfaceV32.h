@@ -75,11 +75,6 @@ abstract_class IPhysicsObject32 : public IPhysicsObject {
 		virtual IPhysicsVehicleController *GetVehicleController() const = 0;
 };
 
-// A note about CPhysConvex / CPhysCollide:
-// These structures can be used interchangeably in our implementation.
-// Typically we use a CPhysCollide to represent a collection of CPhysConvexes
-// You can create a physics object using a CPhysConvex if you REALLY want to.
-
 // Note: If you change anything about a collision shape that an IPhysicsObject is using, call UpdateCollide on that object.
 
 abstract_class IPhysicsCollision32 : public IPhysicsCollision {
