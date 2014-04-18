@@ -338,18 +338,14 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 
 		if (wheel.m_raycastInfo.m_isInContact)
 		{
-			btRigidBody *pOther = (btRigidBody *)wheel.m_raycastInfo.m_groundObject;
-			btVector3 groundVel = pOther->getVelocityInLocalPoint(wheel.m_raycastInfo.m_contactPointWS - pOther->getWorldTransform().getOrigin());
-			btVector3 relvel = vel - groundVel;
-
-			/*
-			const btTransform&	chassisWorldTransform = getChassisWorldTransform();
-
-			btVector3 fwd (
-				chassisWorldTransform.getBasis()[0][m_indexForwardAxis],
-				chassisWorldTransform.getBasis()[1][m_indexForwardAxis],
-				chassisWorldTransform.getBasis()[2][m_indexForwardAxis]);
-			*/
+			btVector3 relvel = vel;
+ 
+			// Spin the wheels relative to the ground velocity
+			btRigidBody *pOther = btRigidBody::upcast((btCollisionObject *)wheel.m_raycastInfo.m_groundObject);
+			if (pOther) {
+				btVector3 groundVel = pOther->getVelocityInLocalPoint(wheel.m_raycastInfo.m_contactPointWS - pOther->getWorldTransform().getOrigin());
+				relvel -= groundVel;
+			}
 
 			// Credit: https://code.google.com/p/bullet/issues/detail?id=714
 			btVector3 up = -wheel.m_raycastInfo.m_wheelDirectionWS;
