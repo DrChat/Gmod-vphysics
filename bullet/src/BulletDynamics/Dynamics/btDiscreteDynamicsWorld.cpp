@@ -331,7 +331,7 @@ void	btDiscreteDynamicsWorld::applyGravity()
 	for ( int i=0;i<m_nonStaticRigidBodies.size();i++)
 	{
 		btRigidBody* body = m_nonStaticRigidBodies[i];
-		if (body->isActive())
+		if (body->isActive() && body->isMotionEnabled())
 		{
 			body->applyGravity();
 		}
@@ -343,7 +343,7 @@ void	btDiscreteDynamicsWorld::synchronizeSingleMotionState(btRigidBody* body)
 {
 	btAssert(body);
 
-	if (body->getMotionState() && !body->isStaticOrKinematicObject())
+	if (body->getMotionState() && !body->isStaticOrKinematicObject() && body->isMotionEnabled())
 	{
 		//we need to call the update at least once, even for sleeping objects
 		//otherwise the 'graphics' transform never updates properly
@@ -428,17 +428,15 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 		btIDebugDraw* debugDrawer = getDebugDrawer ();
 		gDisableDeactivation = (debugDrawer->getDebugMode() & btIDebugDraw::DBG_NoDeactivation) != 0;
 	}
+
 	if (numSimulationSubSteps)
 	{
-
 		//clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
 		int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
 
 		saveKinematicState(fixedTimeStep*clampedSimulationSteps);
 
 		applyGravity();
-
-		
 
 		for (int i = 0; i < clampedSimulationSteps; i++)
 		{
@@ -484,17 +482,14 @@ void	btDiscreteDynamicsWorld::internalSingleStepSimulation(btScalar timeStep)
 	///perform collision detection
 	performDiscreteCollisionDetection();
 
+	// Setup and solve simulation islands
 	calculateSimulationIslands();
 
-	
+	// Solver information
 	getSolverInfo().m_timeStep = timeStep;
-	
-
 
 	///solve contact and other joint constraints
 	solveConstraints(getSolverInfo());
-	
-	///CallbackTriggers();
 
 	///integrate transforms
 
@@ -975,8 +970,7 @@ void	btDiscreteDynamicsWorld::createPredictiveContacts(btScalar timeStep)
 
 					btManifoldPoint newPoint(btVector3(0,0,0), localPointB, sweepResults.m_hitNormalWorld, distance);
 
-					bool isPredictive = true;
-					int index = manifold->addManifoldPoint(newPoint, isPredictive);
+					int index = manifold->addManifoldPoint(newPoint, true);
 					btManifoldPoint& pt = manifold->getContactPoint(index);
 					pt.m_combinedRestitution = 0;
 					pt.m_combinedFriction = btManifoldResult::calculateCombinedFriction(body, sweepResults.m_hitCollisionObject);
@@ -998,7 +992,7 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 		btRigidBody* body = m_nonStaticRigidBodies[i];
 		body->setHitFraction(1.f);
 
-		if (body->isActive() && (!body->isStaticOrKinematicObject()))
+		if (body->isActive() && (!body->isStaticOrKinematicObject()) && body->isMotionEnabled())
 		{
 			body->predictIntegratedTransform(timeStep, predictedTrans);
 			
@@ -1067,23 +1061,18 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 						printf("sm2=%f\n", sm2);
 					}
 #else
-					
 					//don't apply the collision response right now, it will happen next frame
 					//if you really need to, you can uncomment next 3 lines. Note that is uses zero restitution.
 					//btScalar appliedImpulse = 0.f;
 					//btScalar depth = 0.f;
 					//appliedImpulse = resolveSingleCollision(body, (btCollisionObject*)sweepResults.m_hitCollisionObject, sweepResults.m_hitPointWorld, sweepResults.m_hitNormalWorld, getSolverInfo(), depth);
-					
-
 #endif
 
 					continue;
 				}
 			}
-			
 
-			body->proceedToTransform( predictedTrans);
-		
+			body->proceedToTransform(predictedTrans);
 		}
 
 	}
@@ -1367,13 +1356,14 @@ btConstraintSolver* btDiscreteDynamicsWorld::getConstraintSolver()
 
 int		btDiscreteDynamicsWorld::getNumConstraints() const
 {
-	return int(m_constraints.size());
+	return m_constraints.size();
 }
 
 btTypedConstraint* btDiscreteDynamicsWorld::getConstraint(int index)
 {
 	return m_constraints[index];
 }
+
 const btTypedConstraint* btDiscreteDynamicsWorld::getConstraint(int index) const
 {
 	return m_constraints[index];

@@ -44,9 +44,10 @@ enum	btRigidBodyFlags
 	///The BT_ENABLE_GYROPSCOPIC_FORCE can easily introduce instability
 	///So generally it is best to not enable it. 
 	///If really needed, run at a high frequency like 1000 Hertz:	///See Demos/GyroscopicDemo for an example use
-	BT_ENABLE_GYROPSCOPIC_FORCE = 2
+	BT_ENABLE_GYROPSCOPIC_FORCE = 2,
 
 	// DrChat - TODO: We need a disable motion flag.
+	BT_DISABLE_MOTION = 4
 };
 
 
@@ -510,6 +511,11 @@ public:
 	bool	isInWorld() const
 	{
 		return (getBroadphaseProxy() != 0);
+	}
+
+	bool isMotionEnabled() const
+	{
+		return !(getFlags() & BT_DISABLE_MOTION);
 	}
 
 	virtual bool checkCollideWithOverride(const  btCollisionObject* co) const;
