@@ -16,7 +16,7 @@ CPhysicsObjectPairHash::CPhysicsObjectPairHash() {
 void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
 	// This complex entry stuff is supposed to make lookups faster. Xors the 2 pointers,
 	// then bitshifts them right 4 bits and truncates them to a single byte.
-	int entry = (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
+	int entry = GetEntry(pObject0, pObject1);
 
 	// This particular entry may have more than one hash, so find the last one.
 	pair_hash_list *last = NULL;
@@ -27,7 +27,7 @@ void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
 	pair_hash_list *hash = new pair_hash_list;
 	hash->object0 = pObject0;
 	hash->object1 = pObject1;
-	hash->previous = last;
+	//hash->previous = last;
 	hash->next = NULL;
 
 	// Now link ourselves up to the list.
@@ -38,51 +38,59 @@ void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
 }
 
 void CPhysicsObjectPairHash::RemoveObjectPair(void *pObject0, void *pObject1) {
-	int entry = (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
+	int entry = GetEntry(pObject0, pObject1);
 
-	pair_hash_list *hashnext = NULL;
-	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = hashnext) {
+	pair_hash_list *next = NULL;
+	pair_hash_list *last = NULL;
+
+	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = next) {
 		if ((hash->object0 == pObject0 || hash->object0 == pObject1) && (hash->object1 == pObject0 || hash->object1 == pObject1)) {
-			if (hash->previous)
-				hash->previous->next = hash->next;
+			if (last)
+				last->next = hash->next;
 			else
 				m_pHashList[entry] = hash->next;
 
-			if (hash->next)
-				hash->next->previous = hash->previous;
-			hashnext = hash->next;	// Fix for access violation
+			//if (hash->next)
+			//	hash->next->previous = hash->previous;
+			next = hash->next;	// Fix for access violation
 
 			delete hash;
 		} else {
-			hashnext = hash->next;
+			next = hash->next;
+			last = hash;
 		}
 	}
 }
 
 void CPhysicsObjectPairHash::RemoveAllPairsForObject(void *pObject0) {
+	// Loop through all entries
 	for (int i = 0; i < 256; i++) {
-		pair_hash_list *hashnext = NULL;
-		for (pair_hash_list *hash = m_pHashList[i]; hash; hash = hashnext) {
+		pair_hash_list *next = NULL;
+		pair_hash_list *last = NULL;
+
+		for (pair_hash_list *hash = m_pHashList[i]; hash; hash = next) {
 			if (hash->object0 == pObject0 || hash->object1 == pObject0) {
-				if (hash->previous)
-					hash->previous->next = hash->next;
+				if (last)
+					last->next = hash->next;
 				else
 					m_pHashList[i] = hash->next;
 
-				if (hash->next)
-					hash->next->previous = hash->previous;
-				hashnext = hash->next;	// Fix for access violation
+				//if (hash->next)
+				//	hash->next->previous = hash->previous;
+				next = hash->next;	// Fix for access violation
 
 				delete hash;
 			} else {
-				hashnext = hash->next;
+				next = hash->next;
+				last = hash;
 			}
 		}
 	}
 }
 
 bool CPhysicsObjectPairHash::IsObjectPairInHash(void *pObject0, void *pObject1) {
-	for (pair_hash_list *hash = m_pHashList[(((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF]; hash; hash = hash->next) {
+	int entry = GetEntry(pObject0, pObject1);
+	for (pair_hash_list *hash = m_pHashList[entry]; hash; hash = hash->next) {
 		if ((hash->object0 == pObject0 || hash->object0 == pObject1) && (hash->object1 == pObject0 || hash->object1 == pObject1))
 			return true;
 	}
@@ -117,12 +125,14 @@ int CPhysicsObjectPairHash::GetPairListForObject(void *pObject0, int nMaxCount, 
 	int c = 0;
 	for (int i = 0; i < 256; i++) {
 		for (pair_hash_list *hash = m_pHashList[i]; hash; hash = hash->next) {
-			if (c < nMaxCount && hash->object0 == pObject0)
-				ppObjectList[c++] = hash->object1;
-			if (c < nMaxCount && hash->object1 == pObject0)
-				ppObjectList[c++] = hash->object0;
+			if (c < nMaxCount)
+				ppObjectList[c++] = hash->object0 == pObject0 ? hash->object1 : hash->object0;
 		}
 	}
 
 	return c;
+}
+
+int CPhysicsObjectPairHash::GetEntry(void *pObject0, void *pObject1) {
+	return (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
 }
