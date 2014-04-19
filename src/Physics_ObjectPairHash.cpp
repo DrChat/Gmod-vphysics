@@ -124,9 +124,15 @@ int CPhysicsObjectPairHash::GetPairCountForObject(void *pObject0) {
 int CPhysicsObjectPairHash::GetPairListForObject(void *pObject0, int nMaxCount, void **ppObjectList) {
 	int c = 0;
 	for (int i = 0; i < 256; i++) {
+		if (c >= nMaxCount)
+			break;
+
 		for (pair_hash_list *hash = m_pHashList[i]; hash; hash = hash->next) {
-			if (c < nMaxCount)
-				ppObjectList[c++] = hash->object0 == pObject0 ? hash->object1 : hash->object0;
+			if (c >= nMaxCount)
+				break;
+
+			// Get the opposite object in the pair
+			ppObjectList[c++] = hash->object0 == pObject0 ? hash->object1 : hash->object0;
 		}
 	}
 
