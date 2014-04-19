@@ -198,8 +198,6 @@ void CPhysicsObject::EnableDrag(bool enable)  {
 void CPhysicsObject::EnableMotion(bool enable) {
 	if (IsMotionEnabled() == enable || IsStatic()) return;
 
-	// FIXME: Does this cause any issues with player controllers? (player controller angular factor is always 0!)
-	// TODO: We should be setting a flag on the object to disable motion, not this!
 	if (enable) {
 		m_pObject->setFlags(m_pObject->getFlags() & ~(BT_DISABLE_MOTION));
 	} else {

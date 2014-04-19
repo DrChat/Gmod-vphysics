@@ -206,7 +206,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 		btGhostObject *						m_pGhostObject; // For triggers
 		btGhostObjectCallback *				m_pGhostCallback;
 
-		unsigned short						m_materialIndex;
+		unsigned int						m_materialIndex;
 		unsigned short						m_callbacks;
 		unsigned short						m_gameFlags;
 		unsigned int						m_contents;
