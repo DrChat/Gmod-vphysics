@@ -47,7 +47,7 @@ public:
 protected:
 #else //__CELLOS_LV2__ __SPU__
 
-#if (defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)) || defined(BT_USE_NEON) 
+#if defined(BT_USE_SSE) || defined(BT_USE_NEON) 
 	union {
 		btSimdFloat4 mVec128;
 		btScalar	m_floats[4];
