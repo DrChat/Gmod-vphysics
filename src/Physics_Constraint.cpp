@@ -53,11 +53,11 @@ void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
 						axis.y(), up.y(), side.y(),
 						axis.z(), up.z(), side.z());
 	} else {
-		btVector3 side = wup.cross(axis);
-		btVector3 up = side.cross(axis);
-
 		// Cross products may not be unit length!
+		btVector3 side = wup.cross(axis);
 		side.normalize();
+
+		btVector3 up = side.cross(axis);
 		up.normalize();
 
 		matrix.setValue(axis.x(), up.x(), side.x(),
@@ -98,15 +98,56 @@ const char *GetConstraintName(EConstraintType type) {
 class btPulleyConstraint: public btTypedConstraint {
 	protected:
 		// The 2 points the pulley should run through in world space (such as being attached to a roof)
-		btVector3	m_attachPointWS1;
-		btVector3	m_attachPointWS2;
+		btVector3	m_attachPointWS1; // Directly attached to object A
+		btVector3	m_attachPointWS2; // Directly attached to object B
 
-		btVector3	m_attachPointLS1;
-		btVector3	m_attachPointLS2;
+		// The attachment points on the 2 objects in local space
+		btVector3	m_attachPointA;
+		btVector3	m_attachPointB;
+
+		btScalar	m_totalLength; // Length including gearing
+		btScalar	m_gearRatio; // Affects attached object ALWAYS
 
 	public:
-		btPulleyConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, const btVector3 &attachWS1, const btVector3 &attachWS2):
-		btTypedConstraint(POINT2POINT_CONSTRAINT_TYPE, rbA, rbB) {
+		btPulleyConstraint(btRigidBody &rbA, btRigidBody &rbB, const btVector3 &pivotInA, const btVector3 &pivotInB, const btVector3 &attachWS1, const btVector3 &attachWS2, 
+							btScalar totalLength, btScalar gearRatio):
+							btTypedConstraint(CONSTRAINT_TYPE_USER, rbA, rbB) {
+			m_attachPointA = pivotInA;
+			m_attachPointB = pivotInB;
+
+			m_attachPointWS1 = attachWS1;
+			m_attachPointWS2 = attachWS2;
+		}
+
+		void getInfo1(btConstraintInfo1 *info) {
+
+		}
+
+		void getInfo2(btConstraintInfo2 *info) {
+
+		}
+
+		void debugDraw(btIDebugDraw *pDrawer) {
+			btVector3 worldA, worldB;
+			worldA = m_rbA.getWorldTransform() * m_attachPointA;
+			worldB = m_rbB.getWorldTransform() * m_attachPointB;
+
+			// Draw the transforms on the objects
+			pDrawer->drawTransform(btTransform(btMatrix3x3::getIdentity(), worldA), 1);
+			pDrawer->drawTransform(btTransform(btMatrix3x3::getIdentity(), worldB), 1);
+
+			// World transforms
+			pDrawer->drawTransform(btTransform(btMatrix3x3::getIdentity(), m_attachPointWS1), 1);
+			pDrawer->drawTransform(btTransform(btMatrix3x3::getIdentity(), m_attachPointWS2), 1);
+		}
+
+		// These functions do absolutely nothing!
+
+		btScalar getParam(int num, int axis = -1) const {
+			return 0xB16B00B5;
+		}
+
+		void setParam(int num, btScalar value, int axis = -1) {
 
 		}
 };
@@ -122,7 +163,7 @@ class btLengthConstraint: public btPoint2PointConstraint {
 			m_maxdist = maxDist;
 		}
 
-		void getInfo1 (btConstraintInfo1 *info) {
+		void getInfo1(btConstraintInfo1 *info) {
 			// Positions relative to objects
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
 			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
@@ -145,7 +186,7 @@ class btLengthConstraint: public btPoint2PointConstraint {
 			}
 		}
 
-		void getInfo2 (btConstraintInfo2 *info) {
+		void getInfo2(btConstraintInfo2 *info) {
 			// Positions relative to objects
 			btVector3 relA = m_rbA.getCenterOfMassTransform().getBasis() * getPivotInA();
 			btVector3 relB = m_rbB.getCenterOfMassTransform().getBasis() * getPivotInB();
@@ -336,7 +377,7 @@ class btSpringConstraint : public btPoint2PointConstraint {
 						info->m_upperLimit[0] = m_maxForce * info->fps;
 					}
 				} else {
-					btScalar maxForce = btFabs(force) / info->fps;
+					btScalar maxForce = btFabs(force) / info->fps; // Change it into an impulse.
 
 					info->m_lowerLimit[0] = -maxForce;
 					info->m_upperLimit[0] =  maxForce;
@@ -430,7 +471,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_bRemovedFromEnv = false;
 	m_bNotifyBroken = true;
 
-	if (m_type == CONSTRAINT_RAGDOLL || m_type == CONSTRAINT_BALLSOCKET) {
+	if (m_type == CONSTRAINT_RAGDOLL || m_type == CONSTRAINT_BALLSOCKET || m_type == CONSTRAINT_FIXED) {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
 	} else {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
@@ -534,16 +575,18 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 		m_pReferenceObject = NULL;
 
 	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
+	bool notify = false; // Don't run the callback more than once!
 	if (!m_bRemovedFromEnv) {
 		m_pEnv->GetBulletEnvironment()->removeConstraint(m_pConstraint);
 		m_bRemovedFromEnv = true;
+		notify = true;
 
 		if (m_type == CONSTRAINT_USER)
 			((btUserConstraint *)m_pConstraint)->getUserConstraint()->ConstraintDestroyed(this);
 	}
 
 	// Tell the game that this constraint was broken.
-	if (m_bNotifyBroken)
+	if (notify && m_bNotifyBroken)
 		m_pEnv->HandleConstraintBroken(this);
 }
 
@@ -687,9 +730,9 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	ConvertMatrixToBull(ragdoll.constraintToReference, constraintToReference); // constraintToReference is ALWAYS the identity matrix.
 	ConvertMatrixToBull(ragdoll.constraintToAttached, constraintToAttached);
 
-	btTransform constraintWorldTrans = constraintToReference.inverse() * objRef->getWorldTransform();
-	btTransform bullAFrame = objRef->getWorldTransform().inverse() * constraintWorldTrans;
-	btTransform bullBFrame = objAtt->getWorldTransform().inverse() * constraintWorldTrans;
+	// Constraint needs to be positioned at the point where the objects need to rotate around
+	btTransform bullAFrame = ((btMassCenterMotionState *)objRef->getMotionState())->m_centerOfMassOffset.inverse() * constraintToReference;
+	btTransform bullBFrame = ((btMassCenterMotionState *)objAtt->getMotionState())->m_centerOfMassOffset.inverse() * constraintToAttached;
 
 	btGeneric6DofConstraint *pConstraint = new btGeneric6DofConstraint(*objRef, *objAtt, bullAFrame, bullBFrame, true);
 
