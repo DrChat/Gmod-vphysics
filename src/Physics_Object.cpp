@@ -774,7 +774,7 @@ void CPhysicsObject::SetShadow(float maxSpeed, float maxAngularSpeed, bool allow
 		m_pShadow->SetAllowsTranslation(allowPhysicsMovement);
 		m_pShadow->SetAllowsRotation(allowPhysicsRotation);
 	} else {
-		unsigned int flags = GetCallbackFlags() | CALLBACK_SHADOW_COLLISION;
+		unsigned short flags = GetCallbackFlags() | CALLBACK_SHADOW_COLLISION;
 		flags &= ~CALLBACK_GLOBAL_FRICTION;
 		flags &= ~CALLBACK_GLOBAL_COLLIDE_STATIC;
 		SetCallbackFlags(flags);
@@ -1242,7 +1242,7 @@ CPhysicsObject *CreatePhysicsSphere(CPhysicsEnvironment *pEnvironment, float rad
 
 		volume = pParams->volume;
 		if (volume <= 0) {
-			pParams->volume = (4 / 3) * M_PI * radius * radius * radius;
+			pParams->volume = (4 / 3) * M_PI_F * radius * radius * radius;
 		}
 	}
 

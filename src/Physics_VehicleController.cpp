@@ -318,7 +318,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	// the wheels
 	float radius = ConvertDistanceToHL(axle.wheels.radius);
 	float r3 = radius * radius * radius;
-	params.volume = (4 / 3) * M_PI * r3;
+	params.volume = (4 / 3) * M_PI_F * r3;
 
 	// TODO: Change this to a cylinder!
 	CPhysicsObject *pWheel = (CPhysicsObject *)m_pEnv->CreateSphereObject(radius, axle.wheels.materialIndex, wheelPositionHL, angles, &params);
@@ -557,7 +557,7 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 		float force = controls.throttle * 
 			m_vehicleParams.engine.horsepower * (watt_per_hp * seconds_per_minute) * 
 			m_vehicleParams.engine.gearRatio[m_vehicleState.gear]  * m_vehicleParams.engine.axleRatio / 
-			(m_vehicleParams.engine.maxRPM * (2 * M_PI));
+			(m_vehicleParams.engine.maxRPM * (2 * M_PI_F));
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
