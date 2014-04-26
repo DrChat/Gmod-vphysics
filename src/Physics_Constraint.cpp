@@ -413,7 +413,7 @@ class btUserConstraint : public btTypedConstraint {
 		}
 
 		void getInfo2(btConstraintInfo2 *pInfo) {
-			physconstraintsolveinfo_t *solveinfo = (physconstraintsolveinfo_t *)stackalloc(sizeof(physconstraintsolveinfo_t) * pInfo->m_numConstraintRows);
+			physconstraintsolveinfo_t *solveinfo = new physconstraintsolveinfo_t[pInfo->m_numConstraintRows];
 			for (int i = 0; i < pInfo->m_numConstraintRows; i++) {
 				solveinfo[i].Defaults();
 			}
@@ -439,6 +439,8 @@ class btUserConstraint : public btTypedConstraint {
 				pInfo->m_lowerLimit[i * pInfo->rowskip] = solveinfo[i].lowerLimit;
 				pInfo->m_upperLimit[i * pInfo->rowskip] = solveinfo[i].upperLimit;
 			}
+
+			delete[] solveinfo;
 		}
 
 		IPhysicsUserConstraint *getUserConstraint() {
@@ -720,6 +722,36 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 	return new CPhysicsSpring(pEnv, (CPhysicsObject *)pReferenceObject, (CPhysicsObject *)pAttachedObject, pConstraint, CONSTRAINT_SPRING);
 }
 
+static void SetupAxis(int axis, btGeneric6DofConstraint *pConstraint, const constraint_axislimit_t &axisData, bool clockwise) {
+	// HL to bullet axis map
+	static const int axisMap[] = {0, 2, 1};
+
+	btRotationalLimitMotor *motor = pConstraint->getRotationalLimitMotor(axisMap[axis]);
+
+	if (axisData.torque != 0) {
+		motor->m_enableMotor = true;
+		motor->m_maxMotorForce = DEG2RAD(HL2BULL(axisData.torque));
+	}
+
+	if (axis == 1) {
+		motor->m_hiLimit = -DEG2RAD(axisData.minRotation);
+		motor->m_loLimit = -DEG2RAD(axisData.maxRotation);
+
+		if (axisData.torque != 0) {
+			motor->m_targetVelocity = -DEG2RAD(axisData.angularVelocity);
+		}
+	} else {
+		motor->m_hiLimit = DEG2RAD(axisData.maxRotation);
+		motor->m_loLimit = DEG2RAD(axisData.minRotation);
+
+		if (axisData.torque != 0) {
+			motor->m_targetVelocity = DEG2RAD(axisData.angularVelocity);
+		}
+	}
+
+	Assert(motor->m_loLimit <= motor->m_hiLimit);
+}
+
 CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, IPhysicsConstraintGroup *pGroup, const constraint_ragdollparams_t &ragdoll) {
 	CPhysicsObject *pObjRef = (CPhysicsObject *)pReferenceObject;
 	CPhysicsObject *pObjAtt = (CPhysicsObject *)pAttachedObject;
@@ -734,56 +766,15 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	btTransform bullAFrame = ((btMassCenterMotionState *)objRef->getMotionState())->m_centerOfMassOffset.inverse() * constraintToReference;
 	btTransform bullBFrame = ((btMassCenterMotionState *)objAtt->getMotionState())->m_centerOfMassOffset.inverse() * constraintToAttached;
 
+	// TODO: btGeneric6DofConstraint has a bug where if y-axis is the only unlocked axis and the difference approaches pi/2, the other two axes
+	// become "undefined" and causes the constraint to explode.
 	btGeneric6DofConstraint *pConstraint = new btGeneric6DofConstraint(*objRef, *objAtt, bullAFrame, bullBFrame, true);
-
-	// Build up our limits
-	// Can't use a for loop here :(
-	btVector3 angUpperLimit;
-	btVector3 angLowerLimit;
-
-	bool bClockwise = ragdoll.useClockwiseRotations;
-
-	btRotationalLimitMotor *motor = pConstraint->getRotationalLimitMotor(0);
-	constraint_axislimit_t limit = ragdoll.axes[0];
-	angUpperLimit.m_floats[0] = bClockwise ? -DEG2RAD(limit.maxRotation) : DEG2RAD(limit.maxRotation);
-	angLowerLimit.m_floats[0] = bClockwise ? -DEG2RAD(limit.minRotation) : DEG2RAD(limit.minRotation);
-	if (limit.torque != 0) {
-		motor->m_enableMotor = true;
-		motor->m_targetVelocity = DEG2RAD(limit.angularVelocity);
-		motor->m_maxMotorForce = DEG2RAD(HL2BULL(limit.torque));
-	}
-
-	// FIXME: Correct?
-	motor = pConstraint->getRotationalLimitMotor(2);
-	limit = ragdoll.axes[2];
-	angUpperLimit.m_floats[1] = bClockwise ? -DEG2RAD(limit.maxRotation) : DEG2RAD(limit.maxRotation);
-	angLowerLimit.m_floats[1] = bClockwise ? -DEG2RAD(limit.minRotation) : DEG2RAD(limit.minRotation);
-	if (limit.torque != 0) {
-		motor->m_enableMotor = true;
-		motor->m_targetVelocity = DEG2RAD(limit.angularVelocity);
-		motor->m_maxMotorForce = DEG2RAD(HL2BULL(limit.torque));
-	}
-
-	motor = pConstraint->getRotationalLimitMotor(1);
-	limit = ragdoll.axes[1];
-	angUpperLimit.m_floats[2] = bClockwise ? -DEG2RAD(limit.maxRotation) : DEG2RAD(limit.maxRotation);
-	angLowerLimit.m_floats[2] = bClockwise ? -DEG2RAD(limit.minRotation) : DEG2RAD(limit.minRotation);
-	if (limit.torque != 0) {
-		motor->m_enableMotor = true;
-		motor->m_targetVelocity = DEG2RAD(-limit.angularVelocity);
-		motor->m_maxMotorForce = DEG2RAD(HL2BULL(-limit.torque));
-	}
-
-	Assert(	angLowerLimit.x() <= angUpperLimit.x() &&
-			angLowerLimit.y() <= angUpperLimit.y() &&
-			angLowerLimit.z() <= angUpperLimit.z());
-
 	pConstraint->setEnabled(ragdoll.isActive);
 
-	pConstraint->setAngularUpperLimit(angUpperLimit);
-	pConstraint->setAngularLowerLimit(angLowerLimit);
-
 	// Set axis limits
+	for (int i = 0; i < 3; i++) {
+		SetupAxis(i, pConstraint, ragdoll.axes[i], ragdoll.useClockwiseRotations);
+	}
 	
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
 }
