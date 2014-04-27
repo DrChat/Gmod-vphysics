@@ -33,6 +33,11 @@ git submodule init
 git submodule update
 ```
 
+Alternatively, you can also clone the repository with the --recursive switch, as so:
+```
+git clone --recursive <url>
+```
+
 Submodules will need to be compiled separately from vphysics if required (atleast until a script is setup)
 
 #### Windows Setup
