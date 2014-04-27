@@ -219,7 +219,7 @@ CPhysicsCollision::~CPhysicsCollision() {
 
 // FIXME: Why is it important to have a pointer to an array?
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **ppVerts, int vertCount) {
-	if (!ppVerts) return NULL;
+	if (!ppVerts || vertCount == 0) return NULL;
 
 	btConvexHullShape *pConvex = new btConvexHullShape;
 
@@ -236,7 +236,7 @@ CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **ppVerts, int vertCount)
 
 // Newer version of the above (just an array, not an array of pointers)
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(const Vector *pVerts, int vertCount) {
-	if (!pVerts) return NULL;
+	if (!pVerts || vertCount == 0) return NULL;
 
 	btConvexHullShape *pConvex = new btConvexHullShape;
 
@@ -260,14 +260,14 @@ float CPhysicsCollision::ConvexVolume(CPhysConvex *pConvex) {
 	if (!pConvex) return 0;
 
 	NOT_IMPLEMENTED
-	return 0;
+	return 0.1f;
 }
 
 float CPhysicsCollision::ConvexSurfaceArea(CPhysConvex *pConvex) {
 	if (!pConvex) return 0;
 
 	NOT_IMPLEMENTED
-	return 0;
+	return 0.1f;
 }
 
 void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
@@ -362,7 +362,11 @@ CPhysCollide *CPhysicsCollision::ConvertConvexToCollide(CPhysConvex **ppConvex, 
 
 	btCompoundShape *pCompound = new btCompoundShape;
 	for (int i = 0; i < convexCount; i++) {
+		// TODO: Copy the convex and delete all of the convexes in the array, as that's how IVP worked.
 		btCollisionShape *pShape = (btCollisionShape *)ppConvex[i];
+		//btCollisionShape *pShape = (btCollisionShape *)btAlignedAlloc(pOldShape->getByteSize(), 16);
+		//*pShape = *pOldShape; // Now copy the data
+
 		pCompound->addChildShape(btTransform::getIdentity(), pShape);
 	}
 
@@ -859,10 +863,10 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	} else if (ray.m_IsSwept) {
 		// Box trace!
 		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
-			// Trace start box
+			// Trace start box (red)
 			g_pDebugOverlay->AddBoxOverlay(ray.m_Start, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 255, 0, 0, 10, 0.0f);
 
-			// End trace box
+			// End trace box (blue)
 			g_pDebugOverlay->AddBoxOverlay(ray.m_Start + ray.m_Delta, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 0, 0, 255, 10, 0.0f);
 		}
 
