@@ -35,6 +35,9 @@ IPhysicsObject32 *Get_PhysObj(lua_State *state, int stackPos) {
 	LUA->CheckType(stackPos, Type::PHYSOBJ);
 
 	UserData *ud = (UserData *)LUA->GetUserdata(stackPos);
+	if (!ud->data)
+		LUA->ThrowError("NULL or invalid physics object userdata!");
+
 	return (IPhysicsObject32 *)ud->data;
 }
 

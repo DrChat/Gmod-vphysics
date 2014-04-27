@@ -26,8 +26,8 @@ int lPhysEnv__tostring(lua_State *state) {
 
 //
 // Name: PhysEnv:SetGravity
-// Desc: 
-// Arg1:
+// Desc: Sets the global environment gravity
+// Arg1: Vector|grav|Gravity vector
 // Ret1: 
 //
 int lPhysEnvSetGravity(lua_State *state) {
@@ -41,9 +41,9 @@ int lPhysEnvSetGravity(lua_State *state) {
 
 //
 // Name: PhysEnv:GetGravity
-// Desc: 
+// Desc: Get the global environment gravity
 // Arg1:
-// Ret1: 
+// Ret1: Vector|grav|Gravity vector
 //
 int lPhysEnvGetGravity(lua_State *state) {
 	IPhysicsEnvironment32 *pEnv = Get_PhysEnv(state, 1);
@@ -57,8 +57,8 @@ int lPhysEnvGetGravity(lua_State *state) {
 
 //
 // Name: PhysEnv:Simulate
-// Desc: Simulates the environment for deltaTime seconds
-// Arg1: Number|deltaTime|Amount of seconds to simulate
+// Desc: Advances the simulation by deltaTime seconds
+// Arg1: Number|deltaTime|Number of seconds to advance
 // Ret1: 
 //
 int lPhysEnvSimulate(lua_State *state) {

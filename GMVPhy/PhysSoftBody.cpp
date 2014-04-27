@@ -189,7 +189,7 @@ int lPhysSoftBodyGetLinks(lua_State *state) {
 		LUA->CreateTable(); // table returned
 		for (int i = 0; i < pSoftBody->GetLinkCount(); i++) {
 			softbodylink_t link = pSoftBody->GetLink(i);
-			LUA->PushNumber(i);
+			LUA->PushNumber(i); // id key
 			LUA->CreateTable(); // link
 
 			// nodes
