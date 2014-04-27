@@ -20,7 +20,7 @@ subject to the following restrictions:
 
 
 
-#if defined(DEBUG) || defined (_DEBUG)
+#if defined(BT_DEBUG)
 //#define TEST_NON_VIRTUAL 1
 #include <stdio.h> //for debug printf
 #ifdef __SPU__
@@ -47,7 +47,7 @@ m_marginB(objectB->getMargin()),
 m_ignoreMargin(false),
 m_lastUsedMethod(-1),
 m_catchDegeneracies(1),
-m_fixContactNormalDirection(1)
+m_fixContactNormalDirection(0)
 {
 }
 
