@@ -11,7 +11,7 @@
 
 #include "LinearMath/btDefines.h"
 
-#ifdef BT_USE_SSE
+#if defined(BT_USE_SSE) && !defined(BT_DEBUG)
 	// Allow SSE operations because we don't directly use user data.
 	#define BT_USE_SSE_IN_API
 #endif
@@ -331,7 +331,7 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 		btVector3 relpos = wheel.m_raycastInfo.m_hardPointWS - getRigidBody()->getCenterOfMassPosition();
 		btVector3 vel = getRigidBody()->getVelocityInLocalPoint( relpos );
 
-		if (wheel.m_raycastInfo.m_isInContact)
+		if (!vel.fuzzyZero() && wheel.m_raycastInfo.m_isInContact)
 		{
 			btVector3 relvel = vel;
  
@@ -684,8 +684,6 @@ void	btRaycastVehicle::updateFriction(btScalar	timeStep)
 	}
 }
 
-
-
 void btRaycastVehicle::debugDraw(btIDebugDraw* debugDrawer)
 {
 	for (int v = 0; v < this->getNumWheels(); v++)
@@ -701,7 +699,7 @@ void btRaycastVehicle::debugDraw(btIDebugDraw* debugDrawer)
 
 		btVector3 wheelPosWS = getWheelInfo(v).m_worldTransform.getOrigin();
 
-		btVector3 axle = btVector3(	
+		btVector3 axle = btVector3(
 			getWheelInfo(v).m_worldTransform.getBasis()[0][getRightAxis()],
 			getWheelInfo(v).m_worldTransform.getBasis()[1][getRightAxis()],
 			getWheelInfo(v).m_worldTransform.getBasis()[2][getRightAxis()]);
