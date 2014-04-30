@@ -13,7 +13,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-// MPH2INS: 1(miles/hr) = 0.44704(meters/sec)
+// MPH2MS: 1(miles/hr) = 0.44704(meters/sec)
 #define MPH2MS(x) ((x) * 0.44704f)
 // KMH2MS: 1(km/h) = 0.27777778(meters/sec)
 #define KMH2MS(x) ((x) * 0.27777778f)
@@ -176,6 +176,7 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 		m_pWheels[i] = NULL;
 	}
 
+	// Keep the vehicle active (or it might go to sleep while a player's driving it and make it unmoveable)
 	m_pBody->GetObject()->setActivationState(DISABLE_DEACTIVATION);
 	if (m_pBody->GetVehicleController() != NULL) {
 		Warning("VPhysics: Attaching a vehicle controller to an object that already has one attached!\n");
@@ -196,14 +197,14 @@ CPhysicsVehicleController::~CPhysicsVehicleController() {
 
 void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {
 	m_vehicleParams							= params;
-	m_vehicleParams.engine.maxSpeed			= MPH2MS(params.engine.maxSpeed);
-	m_vehicleParams.engine.maxRevSpeed		= MPH2MS(params.engine.maxRevSpeed);
-	m_vehicleParams.engine.boostMaxSpeed	= MPH2MS(params.engine.boostMaxSpeed);
-	m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
+	//m_vehicleParams.engine.maxSpeed			= MPH2MS(params.engine.maxSpeed);
+	//m_vehicleParams.engine.maxRevSpeed		= MPH2MS(params.engine.maxRevSpeed);
+	//m_vehicleParams.engine.boostMaxSpeed	= MPH2MS(params.engine.boostMaxSpeed);
+	//m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
 
 	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-		m_vehicleParams.axles[i].wheels.radius					= ConvertDistanceToBull(params.axles[i].wheels.radius);
-		m_vehicleParams.axles[i].wheels.springAdditionalLength	= ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
+		//m_vehicleParams.axles[i].wheels.radius					= ConvertDistanceToBull(params.axles[i].wheels.radius);
+		//m_vehicleParams.axles[i].wheels.springAdditionalLength	= ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
 		//m_vehicleParams.axles[i].suspension.springConstant		*= 1/HL2BULL_FACTOR;
 	}
 }
@@ -316,7 +317,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 
 	// needs to be in HL units because we're calling through the "outer" interface to create
 	// the wheels
-	float radius = ConvertDistanceToHL(axle.wheels.radius);
+	float radius = axle.wheels.radius;
 	float r3 = radius * radius * radius;
 	params.volume = (4 / 3) * M_PI_F * r3;
 
@@ -334,7 +335,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	wheelOffset -= ((btMassCenterMotionState *)m_pBody->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
 	btVehicleWheel &wheel = m_pVehicle->addWheel(pWheel->GetObject(), wheelOffset, btMatrix3x3::getIdentity(), btVector3(0, -1, 0), btVector3(-1, 0, 0));
-	wheel.suspensionRestLength = axle.wheels.springAdditionalLength;
+	wheel.suspensionRestLength = ConvertDistanceToBull(axle.wheels.springAdditionalLength);
 	wheel.suspensionConstant = axle.suspension.springConstant;
 	wheel.suspensionDamping = axle.suspension.springDamping;
 	wheel.maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();
@@ -343,6 +344,7 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	btVector3 bullConnectionPointCS0;
 	btScalar bullSuspensionRestLength, bullWheelRadius;
 
+	// This parameter is unused by bullet.
 	bool bIsFrontWheel = (wheelIndex < 2);		// HACK: Only works with 2 front wheels
 
 	btVector3 bullWheelDirectionCS0(0, -1, 0);	// Straight down
@@ -351,14 +353,14 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	ConvertPosToBull(position, bullConnectionPointCS0);
 	bullConnectionPointCS0 -= ((btMassCenterMotionState *)m_pBody->GetObject()->getMotionState())->m_centerOfMassOffset.getOrigin();
 
-	bullSuspensionRestLength = axle.wheels.springAdditionalLength;
-	bullWheelRadius = axle.wheels.radius;
+	bullSuspensionRestLength = ConvertDistanceToBull(axle.wheels.springAdditionalLength);
+	bullWheelRadius = ConvertDistanceToBull(axle.wheels.radius);
 
 	btWheelInfo &wheelInfo = m_pVehicle->addWheel(bullConnectionPointCS0, bullWheelDirectionCS0, bullWheelAxleCS, bullSuspensionRestLength, bullWheelRadius, m_tuning, bIsFrontWheel);
 
 	// FIXME: frictionScale is UNUSED (or we're not parsing something correctly)!
 	//wheelInfo.m_frictionSlip = axle.wheels.frictionScale;
-	wheelInfo.m_frictionSlip = 1.f; // debug value
+	wheelInfo.m_frictionSlip = 1.5f; // debug value
 	wheelInfo.m_maxSuspensionForce = axle.suspension.maxBodyForce * m_pBody->GetMass();
 	wheelInfo.m_suspensionStiffness = axle.suspension.springConstant;
 	
@@ -421,8 +423,6 @@ void CPhysicsVehicleController::Update(float dt, vehicle_controlparams_t &contro
 	UpdateSteering(controls, dt);
 	UpdateEngine(controls, dt);
 	UpdateWheels(controls, dt);
-
-	m_pVehicle->updateVehicle(dt);
 #endif
 }
 
@@ -431,11 +431,13 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 	float steeringVal = controls.steering;
 
 	// TODO: Calculate for degreesBoost
-	float speed = KMH2MS(m_pVehicle->getCurrentSpeedKmHour());
-	if (speed <= m_vehicleParams.steering.speedSlow) {
+	float speed = -KMH2MS(m_pVehicle->getCurrentSpeedKmHour());
+	if (speed <= MPH2MS(m_vehicleParams.steering.speedSlow)) {
 		steeringVal *= m_vehicleParams.steering.degreesSlow;
-	} else if (speed >= m_vehicleParams.steering.speedFast) {
+	} else if (speed >= MPH2MS(m_vehicleParams.steering.speedFast)) {
 		steeringVal *= m_vehicleParams.steering.degreesFast;
+	} else {
+		steeringVal *= m_vehicleParams.steering.degreesSlow;
 	}
 
 	m_vehicleState.steeringAngle = steeringVal;
@@ -561,7 +563,7 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-			float wheelForce = force * m_vehicleParams.axles[i].torqueFactor * m_vehicleParams.axles[i].wheels.radius;
+			float wheelForce = force * m_vehicleParams.axles[i].torqueFactor * ConvertDistanceToBull(m_vehicleParams.axles[i].wheels.radius);
 
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 				m_pVehicle->applyEngineForce(wheelForce, wheelIndex);
@@ -577,7 +579,7 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-			float wheelForce = 0.5f * brakeForce * m_vehicleParams.axles[i].brakeFactor * m_vehicleParams.axles[i].wheels.radius;
+			float wheelForce = 0.5f * brakeForce * m_vehicleParams.axles[i].brakeFactor * ConvertDistanceToBull(m_vehicleParams.axles[i].wheels.radius);
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 				m_pVehicle->setBrake(wheelForce, wheelIndex);
 			}
