@@ -419,16 +419,10 @@ class CCollisionEventListener : public btSolveCallback {
 
 			// Give the game its stupid velocities
 			if (body0->m_originalBody) {
-				m_tmpVelocities[0] = body0->m_originalBody->getLinearVelocity();
-				m_tmpAngVelocities[0] = body0->m_originalBody->getAngularVelocity();
-
 				body0->m_originalBody->setLinearVelocity(m_tmpVelocities[0] + body0->internalGetDeltaLinearVelocity());
 				body0->m_originalBody->setAngularVelocity(m_tmpAngVelocities[0] + body0->internalGetDeltaAngularVelocity());
 			}
 			if (body1->m_originalBody) {
-				m_tmpVelocities[1] = body1->m_originalBody->getLinearVelocity();
-				m_tmpAngVelocities[1] = body1->m_originalBody->getAngularVelocity();
-
 				body1->m_originalBody->setLinearVelocity(m_tmpVelocities[1] + body1->internalGetDeltaLinearVelocity());
 				body1->m_originalBody->setAngularVelocity(m_tmpAngVelocities[1] + body1->internalGetDeltaAngularVelocity());
 			}
@@ -877,7 +871,7 @@ void CPhysicsEnvironment::DestroyConstraint(IPhysicsConstraint *pConstraint) {
 			pObj0->Wake();
 
 		IPhysicsObject *pObj1 = pConstraint->GetAttachedObject();
-		if (pObj1 && !pObj0->IsStatic())
+		if (pObj1 && !pObj1->IsStatic())
 			pObj1->Wake();
 	}
 
