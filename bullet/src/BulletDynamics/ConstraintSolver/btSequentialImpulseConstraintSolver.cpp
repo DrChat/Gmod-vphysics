@@ -273,7 +273,7 @@ void btSequentialImpulseConstraintSolver::resolveSplitPenetrationSIMD(btSolverBo
 	{
 		btSimdScalar linearComponentA = _mm_mul_ps(c.m_contactNormal1.mVec128,body1.internalGetInvMass().mVec128);
 		body1.internalGetPushVelocity().mVec128 = _mm_add_ps(body1.internalGetPushVelocity().mVec128, linearComponentA * deltaImpulse);
-		body1.internalGetTurnVelocity().mVec128 = _mm_add_ps(body1.internalGetTurnVelocity().mVec128, c.m_angularComponentA.mVec128 * deltaImpulse);
+		body1.internalGetTurnVelocity().mVec128 = _mm_add_ps(body1.internalGetTurnVelocity().mVec128, _mm_mul_ps(c.m_angularComponentA.mVec128, deltaImpulse));
 	}
 
 	// No sense in doing it if it's a fixed body.
@@ -281,7 +281,7 @@ void btSequentialImpulseConstraintSolver::resolveSplitPenetrationSIMD(btSolverBo
 	{
 		btSimdScalar linearComponentB = _mm_mul_ps(c.m_contactNormal2.mVec128,body2.internalGetInvMass().mVec128);
 		body2.internalGetPushVelocity().mVec128 = _mm_add_ps(body2.internalGetPushVelocity().mVec128, linearComponentB * deltaImpulse);
-		body2.internalGetTurnVelocity().mVec128 = _mm_add_ps(body2.internalGetTurnVelocity().mVec128, c.m_angularComponentB.mVec128 * deltaImpulse);
+		body2.internalGetTurnVelocity().mVec128 = _mm_add_ps(body2.internalGetTurnVelocity().mVec128, _mm_mul_ps(c.m_angularComponentB.mVec128, deltaImpulse));
 	}
 #else
 	resolveSplitPenetrationImpulseCacheFriendly(body1,body2,c);
@@ -435,13 +435,8 @@ void	btSequentialImpulseConstraintSolver::applyAnisotropicFriction(btCollisionOb
 
 }
 
-
-
-
 void btSequentialImpulseConstraintSolver::setupFrictionConstraint(btSolverConstraint& solverConstraint, const btVector3& normalAxis,int  solverBodyIdA,int solverBodyIdB,btManifoldPoint& cp,const btVector3& rel_pos1,const btVector3& rel_pos2,btCollisionObject* colObj0,btCollisionObject* colObj1, btScalar relaxation, btScalar desiredVelocity, btScalar cfmSlip)
 {
-
-	
 	btSolverBody& solverBodyA = m_tmpSolverBodyPool[solverBodyIdA];
 	btSolverBody& solverBodyB = m_tmpSolverBodyPool[solverBodyIdB];
 
@@ -467,7 +462,7 @@ void btSequentialImpulseConstraintSolver::setupFrictionConstraint(btSolverConstr
 	{
 		solverConstraint.m_contactNormal1.setZero();
 		solverConstraint.m_relpos1CrossNormal.setZero();
-		solverConstraint.m_angularComponentA .setZero();
+		solverConstraint.m_angularComponentA.setZero();
 	}
 
 	if (body1)
@@ -502,8 +497,6 @@ void btSequentialImpulseConstraintSolver::setupFrictionConstraint(btSolverConstr
 	}
 
 	{
-		
-
 		btScalar rel_vel;
 		btScalar vel1Dotn = solverConstraint.m_contactNormal1.dot(body0?solverBodyA.m_linearVelocity+solverBodyA.m_externalForceImpulse:btVector3(0,0,0)) 
 			+ solverConstraint.m_relpos1CrossNormal.dot(body0?solverBodyA.m_angularVelocity:btVector3(0,0,0));
@@ -521,7 +514,6 @@ void btSequentialImpulseConstraintSolver::setupFrictionConstraint(btSolverConstr
 		solverConstraint.m_cfm = cfmSlip;
 		solverConstraint.m_lowerLimit = -solverConstraint.m_friction;
 		solverConstraint.m_upperLimit = solverConstraint.m_friction;
-		
 	}
 }
 
