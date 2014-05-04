@@ -2,6 +2,7 @@
 
 #include "BulletCollision/BroadphaseCollision/btOverlappingPairCache.h"
 #include "BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h"
+#include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 
 class btProcessOverlapTask : public btIThreadTask {
 	public:
@@ -13,6 +14,10 @@ class btProcessOverlapTask : public btIThreadTask {
 		void run() {
 			btCollisionObject *obj0 = (btCollisionObject *)m_pair.m_pProxy0->m_clientObject;
 			btCollisionObject *obj1 = (btCollisionObject *)m_pair.m_pProxy1->m_clientObject;
+
+			// Check for invalid numbers being passed through
+			btAssert(obj0->getWorldTransform() == obj0->getWorldTransform());
+			btAssert(obj1->getWorldTransform() == obj1->getWorldTransform());
 
 			btCollisionObjectWrapper obj0Wrap(0, obj0->getCollisionShape(), obj0, obj0->getWorldTransform(), -1, -1);
 			btCollisionObjectWrapper obj1Wrap(0, obj1->getCollisionShape(), obj1, obj1->getWorldTransform(), -1, -1);
@@ -120,6 +125,7 @@ class btCollisionPairCallback : public btOverlapCallback {
 		bool processOverlap(btBroadphasePair &pair) {
 			btCollisionObject *obj0 = (btCollisionObject *)pair.m_pProxy0->m_clientObject;
 			btCollisionObject *obj1 = (btCollisionObject *)pair.m_pProxy1->m_clientObject;
+			btAssert(m_pDispatcher->needsCollision(obj0, obj1) == m_pDispatcher->needsCollision(obj1, obj0));
 
 			if (m_pDispatcher->needsCollision(obj0, obj1)) {
 				void *mem = m_pDispatcher->allocateTask(sizeof(btProcessOverlapTask));
