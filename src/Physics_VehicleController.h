@@ -36,10 +36,6 @@ class CPhysicsVehicleController : public IPhysicsVehicleController32 {
 		const vehicleparams_t &				GetVehicleParams() { return m_vehicleParams; }
 		vehicleparams_t &					GetVehicleParamsForChange() { return m_vehicleParams; }
 
-		// Updates the internal vehicle without calculating anything related to controls.
-		// Use this instead of Update if your car has manual handling.
-		void								UpdateVehicle(float dt);
-
 		// force in kg*in/s
 		void								SetWheelForce(int wheelIndex, float force);
 		void								SetWheelBrake(int wheelIndex, float brakeVal);

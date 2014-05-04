@@ -196,17 +196,7 @@ CPhysicsVehicleController::~CPhysicsVehicleController() {
 }
 
 void CPhysicsVehicleController::InitVehicleParams(const vehicleparams_t &params) {
-	m_vehicleParams							= params;
-	//m_vehicleParams.engine.maxSpeed			= MPH2MS(params.engine.maxSpeed);
-	//m_vehicleParams.engine.maxRevSpeed		= MPH2MS(params.engine.maxRevSpeed);
-	//m_vehicleParams.engine.boostMaxSpeed	= MPH2MS(params.engine.boostMaxSpeed);
-	//m_vehicleParams.body.tiltForceHeight	= ConvertDistanceToBull(params.body.tiltForceHeight);
-
-	for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-		//m_vehicleParams.axles[i].wheels.radius					= ConvertDistanceToBull(params.axles[i].wheels.radius);
-		//m_vehicleParams.axles[i].wheels.springAdditionalLength	= ConvertDistanceToBull(params.axles[i].wheels.springAdditionalLength);
-		//m_vehicleParams.axles[i].suspension.springConstant		*= 1/HL2BULL_FACTOR;
-	}
+	m_vehicleParams = params;
 }
 
 void CPhysicsVehicleController::InitBullVehicle() {
@@ -370,10 +360,6 @@ CPhysicsObject *CPhysicsVehicleController::CreateWheel(int wheelIndex, vehicle_a
 	return pWheel;
 }
 
-void CPhysicsVehicleController::UpdateVehicle(float dt) {
-	//m_pVehicle->updateVehicle(dt);
-}
-
 // Bullet appears to take force in newtons. Correct this if it's wrong.
 void CPhysicsVehicleController::SetWheelForce(int wheelIndex, float force) {
 	if (wheelIndex >= m_iWheelCount || wheelIndex < 0) {
@@ -465,6 +451,11 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 	for (int i = 0; i < m_iWheelCount; i++) {
 		btTransform bullTransform = m_pVehicle->getWheelTransformWS(i);
 		m_pWheels[i]->GetObject()->setWorldTransform(bullTransform);
+
+		btTransform deltaTrans = m_pBody->GetObject()->getWorldTransform().inverse() * bullTransform;
+
+		// Linear velocity for interpolation
+		m_pWheels[i]->GetObject()->setLinearVelocity(m_pBody->GetObject()->getVelocityInLocalPoint(deltaTrans.getOrigin()));
 
 		//btVector3 bullPos = bullTransform.getOrigin();
 		//btQuaternion bullRot = bullTransform.getRotation();
