@@ -226,7 +226,7 @@ public:
 	{
 	}
 
-	virtual void* castRay(const btVector3& from, const btVector3& to, btVehicleRaycasterResult& result);
+	virtual void* castRay(btWheelInfo *wheel, const btVector3& from, const btVector3& to, btVehicleRaycasterResult& result) = 0;
 
 };
 

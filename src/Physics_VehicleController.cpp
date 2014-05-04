@@ -99,7 +99,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 			m_pController = pController;
 		}
 
-		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
+		void *castRay(btWheelInfo *wheel, const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CIgnoreObjectRayResultCallback rayCallback(m_pController->GetBody()->GetObject(), from, to);
 			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
 			
@@ -134,7 +134,7 @@ class CAirboatRaycaster : public btVehicleRaycaster {
 		}
 
 		// Returns the rigid body the ray hits
-		void *castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
+		void *castRay(btWheelInfo *wheel, const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CDetectWaterRayResultCallback rayCallback(m_pBody, from, to);
 
 			m_pWorld->rayTest(from, to, rayCallback);

@@ -13,6 +13,8 @@
 
 #include "LinearMath/btVector3.h"
 
+struct btWheelInfo;
+
 /// btVehicleRaycaster is provides interface for between vehicle simulation and raycasting
 struct btVehicleRaycaster
 {
@@ -28,7 +30,7 @@ struct btVehicleRaycaster
 		btScalar	m_distFraction;
 	};
 
-	virtual void* castRay(const btVector3& from, const btVector3& to, btVehicleRaycasterResult& result) = 0;
+	virtual void* castRay(btWheelInfo *wheel, const btVector3& from, const btVector3& to, btVehicleRaycasterResult& result) = 0;
 
 };
 
