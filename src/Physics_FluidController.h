@@ -41,6 +41,7 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 
 		// surface plane is a Vector surface normal and float distance
 		Vector4D				m_vSurfacePlane;
+		btVector3				m_currentVelocity; // Velocity of water current
 		CPhysicsEnvironment *	m_pEnv;
 		btGhostObject *			m_pGhostObject;
 		CPhysicsFluidCallback *	m_pCallback;

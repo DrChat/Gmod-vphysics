@@ -11,14 +11,27 @@
 #include "tier0/memdbgon.h"
 
 static void CalculateConvexBuoyancyForce(btConvexShape *pConvex, btTransform &objRelTrans, Vector4D fluidSurface, float fluidDensity, float convexBuoyancyRatio, btVector3 &force, btVector3 &torque) {
-	force.setZero();
-	torque.setZero();
+	static const btVector3 parallelDirections[4] = {
+		btVector3( 1, 0, 0),
+		btVector3(-1, 0, 0),
+		btVector3( 0, 0, 1),
+		btVector3( 0, 0,-1),
+	};
+	static const btVector3 up(0, 1, 0);
 
-	
+	btVector3 norm;
+	ConvertDirectionToBull(fluidSurface.AsVector3D(), norm);
+	for (int i = 0; i < 4; i++) {
+
+	}
 }
 
-static void CalculateCompoundBuoyancyForce(CPhysicsObject *pObject, btCompoundShape *pCompound, Vector4D fluidSurface, float fluidDensity, btVector3 &force, btVector3 &torque) {
-
+static void CalculateCompoundBuoyancyForce(btCompoundShape *pCompound, Vector4D fluidSurface, btScalar fluidDensity, btScalar ratio, btVector3 &force, btVector3 &torque) {
+	
+	
+	for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+		
+	}
 }
 
 // TODO: Buoyancy calculation
@@ -29,7 +42,7 @@ static void CalculateBuoyancyForce(CPhysicsObject *pObject, Vector4D fluidSurfac
 	if (pShape->isCompound()) {
 		btCompoundShape *pCompound = (btCompoundShape *)pShape;
 		btVector3 force, torque;
-		CalculateCompoundBuoyancyForce(pObject, pCompound, fluidSurface, fluidDensity, force, torque);
+		CalculateCompoundBuoyancyForce(pCompound, fluidSurface, fluidDensity, pObject->GetBuoyancyRatio(), force, torque);
 
 		pBody->applyCentralForce(force);
 		pBody->applyTorque(torque);
@@ -81,13 +94,11 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 	m_iContents = 0;
 	m_vSurfacePlane = Vector4D(0, 0, 0, 0);
 
-	Assert(pEnv);
-	Assert(pFluidObject);
-
 	if (pParams) {
 		m_pGameData = pParams->pGameData;
 		m_iContents = pParams->contents;
 		m_vSurfacePlane = pParams->surfacePlane;
+		ConvertPosToBull(pParams->currentVelocity, m_currentVelocity);
 	}
 
 	int matIndex = pFluidObject->GetMaterialIndex();
@@ -107,7 +118,7 @@ CPhysicsFluidController::CPhysicsFluidController(CPhysicsEnvironment *pEnv, CPhy
 	m_pGhostObject->setCallback(m_pCallback);
 	m_pGhostObject->setCollisionShape(pFluidObject->GetObject()->getCollisionShape());
 	m_pGhostObject->setWorldTransform(pFluidObject->GetObject()->getWorldTransform());
-	m_pGhostObject->setCollisionFlags(m_pGhostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_STATIC_OBJECT);
+	m_pGhostObject->setCollisionFlags(m_pGhostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
 	m_pEnv->GetBulletEnvironment()->addCollisionObject(m_pGhostObject, COLGROUP_WORLD, ~COLGROUP_WORLD);
 }
 
@@ -176,6 +187,9 @@ void CPhysicsFluidController::Tick(float dt) {
 		float vol = (pObject->GetVolume() * p); // / 64; // Submerged volume
 
 		// TODO: We need to calculate this force at several points on the object (How do we determine what points?).
+		// Maybe have the points determined by the extents of the shape at 4 directions parallel to our surface
+		// Simulate buoyant force per convex or just on the compound?
+
 		// IVP calculates this force per triangle
 		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();
 		body->applyCentralForce(force);
