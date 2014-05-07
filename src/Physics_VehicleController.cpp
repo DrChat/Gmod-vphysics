@@ -423,7 +423,10 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 	} else if (speed >= MPH2MS(m_vehicleParams.steering.speedFast)) {
 		steeringVal *= m_vehicleParams.steering.degreesFast;
 	} else {
-		steeringVal *= m_vehicleParams.steering.degreesSlow;
+		// Inbetween, interpolate
+		float val = (speed - MPH2MS(m_vehicleParams.steering.speedSlow)) / (MPH2MS(m_vehicleParams.steering.speedFast) - MPH2MS(m_vehicleParams.steering.speedSlow));
+
+		steeringVal *= m_vehicleParams.steering.degreesFast + (val * m_vehicleParams.steering.degreesSlow);
 	}
 
 	m_vehicleState.steeringAngle = steeringVal;
@@ -456,23 +459,6 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 
 		// Linear velocity for interpolation
 		m_pWheels[i]->GetObject()->setLinearVelocity(m_pBody->GetObject()->getVelocityInLocalPoint(deltaTrans.getOrigin()));
-
-		//btVector3 bullPos = bullTransform.getOrigin();
-		//btQuaternion bullRot = bullTransform.getRotation();
-
-		//Vector HLPos;
-		//QAngle HLRot;
-		//ConvertPosToHL(bullPos, HLPos);
-		//ConvertRotationToHL(bullRot, HLRot);
-
-		// z = spin
-		// flip it because HL expects it to come in opposite for some reason.
-		//HLRot.z = -HLRot.z;
-		//float t = HLRot.x;
-		//HLRot.x = HLRot.z;
-		//HLRot.z = t;
-
-		//m_pWheels[i]->SetPosition(HLPos, HLRot, true);
 
 		// Update wheels on ground
 		btWheelInfo &wheel = m_pVehicle->getWheelInfo(i);
@@ -565,18 +551,32 @@ void CPhysicsVehicleController::CalcEngine(vehicle_controlparams_t &controls, fl
 			m_pVehicle->applyEngineForce(0, i);
 		}
 
+		// Calculate the brake impulse
 		// float wheel_force_by_brake = brake_val * m_gravityLength * ( m_bodyMass + m_totalWheelMass );
-		float brakeForce = controls.brake * m_pBody->GetMass();
+		float brakeImpulse = controls.brake * m_pBody->GetMass() * dt;
 
 		int wheelIndex = 0;
 		for (int i = 0; i < m_vehicleParams.axleCount; i++) {
-			float wheelForce = 0.5f * brakeForce * m_vehicleParams.axles[i].brakeFactor * ConvertDistanceToBull(m_vehicleParams.axles[i].wheels.radius);
+			float wheelForce = brakeImpulse * m_vehicleParams.axles[i].brakeFactor;
 			for (int w = 0; w < m_vehicleParams.wheelsPerAxle; w++, wheelIndex++) {
 				m_pVehicle->setBrake(wheelForce, wheelIndex);
 			}
 		}
 	} else {
 		for (int i = 0; i < m_iWheelCount; i++) {
+			m_pVehicle->applyEngineForce(0, i);
+		}
+	}
+
+	if (controls.handbrake) {
+		// IVP will freeze the wheel rotations, but we'll have to apply full friction on ground vs vehicle
+		float normalForce = m_pBody->GetMass() * m_pEnv->GetBulletEnvironment()->getGravity().length();
+
+		for (int i = 0; i < m_iWheelCount; i++) {
+			float fricCoeff = m_pWheels[i]->GetObject()->getFriction();
+			float wheelForce = (fricCoeff * normalForce) / m_iWheelCount;
+
+			m_pVehicle->setBrake(wheelForce * dt, i);
 			m_pVehicle->applyEngineForce(0, i);
 		}
 	}
