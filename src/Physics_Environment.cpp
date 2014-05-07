@@ -584,7 +584,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 
 	m_softBodyWorldInfo.m_sparsesdf.Initialize();
 
-	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD | SOLVER_USE_2_FRICTION_DIRECTIONS;
+	m_pBulletEnvironment->getSolverInfo().m_solverMode |= SOLVER_SIMD;
 
 	// TODO: Threads solve any oversized batches (>32?), otherwise solving done on main thread.
 	m_pBulletEnvironment->getSolverInfo().m_minimumSolverBatchSize = 128; // Combine islands up to this many constraints
@@ -952,16 +952,17 @@ static ConVar cvar_substeps("vphysics_substeps", "4", FCVAR_REPLICATED, "Sets th
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	Assert(m_pBulletEnvironment);
 
-	if (deltaTime > 1.0 || deltaTime < 0.0) {
-		deltaTime = 0;
-	} else if (deltaTime > 0.1) {
-		deltaTime = 0.1f;
-	}
+	// This stuff already done before physics frame
+	//if (deltaTime > 1.0 || deltaTime < 0.0) {
+	//	deltaTime = 0;
+	//} else if (deltaTime > 0.1) {
+	//	deltaTime = 0.1f;
+	//}
 
 	// sim PSI Current: How many substeps are done in a single simulation step
 	m_simPSICurrent = cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1;
 	
-	if (deltaTime > 1e-4) {
+	if (!btFuzzyZero(deltaTime)) {
 		m_inSimulation = true;
 
 		// We're scaling the timestep down by the number of substeps to have a higher precision and take
