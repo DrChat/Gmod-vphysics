@@ -3,6 +3,8 @@
 #include <vphysics/virtualmesh.h>
 #include <cmodel.h>
 
+#include "BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
+
 #include "Physics_Collision.h"
 #include "Physics_Object.h"
 #include "convert.h"
@@ -278,6 +280,9 @@ void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
 	if (pShape->getShapeType() == TRIANGLE_MESH_SHAPE_PROXYTYPE) {
 		// Delete the striding mesh interface (which we allocate)
 		btStridingMeshInterface *pMesh = ((btTriangleMeshShape *)pShape)->getMeshInterface();
+		if (((btBvhTriangleMeshShape *)pShape)->getTriangleInfoMap())
+			delete ((btBvhTriangleMeshShape *)pShape)->getTriangleInfoMap(); // Probably shouldn't be casting this to a btBvhTriangleMeshShape. Whatever.
+
 		btTriangleIndexVertexArray *pTriArr = (btTriangleIndexVertexArray *)pMesh;
 		IndexedMeshArray &arr = pTriArr->getIndexedMeshArray();
 		for (int i = arr.size()-1; i >= 0; i--) {
@@ -483,22 +488,24 @@ Vector CPhysicsCollision::CollideGetExtent(const CPhysCollide *pCollide, const V
 	ConvertRotationToBull(collideAngles, angles);
 
 	btTransform trans(angles, origin);
-	trans *= btTransform(btQuaternion::getIdentity(), pCollide->GetMassCenter());
+	trans *= btTransform(btQuaternion::getIdentity(), pCollide->GetMassCenter()).inverse();
 
 	if (pCollide->IsCompound()) {
 		btVector3 maxExtents(0, 0, 0);
-		btScalar maxLength2 = 0;
+		btScalar maxDot = 0;
 
 		const btCompoundShape *pCompound = pCollide->GetCompoundShape();
 		for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
 			const btCollisionShape *pShape = pCompound->getChildShape(i);
+			const btTransform &childTrans = pCompound->getChildTransform(i);
 			if (pShape->isConvex()) {
 				const btConvexShape *pConvex = (const btConvexShape *)pShape;
 				btVector3 extents = pConvex->localGetSupportingVertex(btDirection);
+				extents = childTrans * extents; // Move the extents by the object's transform
 
-				if (extents.length2() > maxLength2) {
+				if (extents.dot(btDirection) > maxDot) {
 					maxExtents = extents;
-					maxLength2 = extents.length2();
+					maxDot = extents.dot(btDirection);
 				}
 			}
 		}
@@ -1077,7 +1084,7 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 		CUtlVector<uint16> indexes;
 
 		for (int j = 0; j < ledge->n_triangles; j++) {
-			Assert((uint)j == tris[j].tri_index);
+			Assert((uint)j == tris[j].tri_index); // Sanity check
 
 			for (int k = 0; k < 3; k++) {
 				uint16 index = tris[j].c_three_edges[k].start_point_index;
@@ -1268,7 +1275,9 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 			pShape = LoadIVPS(pOutput->solids[i], swap);
 		} else if (surfaceheader.modelType == 0x1) {
 			// One big use of mopps is in old map displacement data
-			pShape = LoadMOPP(pOutput->solids[i], swap);
+			//pShape = LoadMOPP(pOutput->solids[i], swap);
+
+			// If we leave this as NULL, the game will use CreateVirtualMesh instead.
 		} else {
 			Warning("VCollideLoad: Unknown modelType %d", surfaceheader.modelType);
 		}
