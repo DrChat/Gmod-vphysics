@@ -25,7 +25,7 @@ static ConVar cvar_overlaywireframe("vphysics_overlay_wireframe", "0", FCVAR_CHE
 static ConVar cvar_overlaydepthtest("vphysics_overlay_nodepthtest", "0", FCVAR_CHEAT | FCVAR_ARCHIVE, "No depth test when rendering the overlay");
 
 CDebugDrawer::CDebugDrawer(btCollisionWorld *world) : m_debugMode(0), m_overlay(NULL) {
-	setDebugMode(DBG_DrawAabb | DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
+	setDebugMode(/*DBG_DrawAabb |*/ DBG_DrawConstraintLimits | DBG_DrawConstraints | DBG_DrawContactPoints |
 				DBG_DrawNormals);
 
 #ifdef DEBUGDRAW_RENDER_SDL
@@ -193,7 +193,7 @@ void CDebugDrawer::reportErrorWarning(const char *warningString) {
 }
 
 void CDebugDrawer::drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color) {
-	btVector3 to = pointOnB + normalOnB * (distance + 0.5); //pointOnB + normalOnB * 1;
+	btVector3 to = pointOnB + normalOnB * (distance + 0.2); //pointOnB + normalOnB * 1;
 	const btVector3 &from = pointOnB;
 #ifdef DEBUGDRAW_RENDER_SDL
 	glColor4f(color.getX(), color.getY(), color.getZ(),1.f);
