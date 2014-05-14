@@ -201,7 +201,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 		CPhysicsEnvironment *				m_pEnv;
 		void *								m_pGameData;
 		btRigidBody *						m_pObject;
-		const char *						m_pName;
+		char *								m_pName;
 
 		btGhostObject *						m_pGhostObject; // For triggers
 		btGhostObjectCallback *				m_pGhostCallback;

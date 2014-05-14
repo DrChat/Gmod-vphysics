@@ -93,6 +93,9 @@ CPhysicsObject::~CPhysicsObject() {
 		m_pControllers[i]->ObjectDestroyed(this);
 	}
 	
+	if (m_pName)
+		delete [] m_pName;
+
 	if (m_pEnv && m_pObject) {
 		// Don't change this. This will eventually pan out to removeRigidBody.
 		// Using removeCollisionObject because of a certain soft body fix.
@@ -672,9 +675,9 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 	ConvertPosToBull(worldPosition, pos);
 	ConvertForceImpulseToBull(forceVector, force);
 
-	pos = pos - m_pObject->getWorldTransform().getOrigin();
+	btVector3 relpos = pos - m_pObject->getCenterOfMassPosition();
 
-	btVector3 cross = pos.cross(force);
+	btVector3 cross = relpos.cross(force);
 
 	if (centerForce) {
 		ConvertForceImpulseToHL(force, *centerForce);
@@ -685,17 +688,18 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 	}
 }
 
-// Thrusters call this and pass output to AddVelocity
+// forceVector is an impulse (F*t AKA m*v)
 void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	if (!centerVelocity && !centerAngularVelocity) return;
 
-	btVector3 force, pos;
+	btVector3 force, relpos;
 	ConvertForceImpulseToBull(forceVector, force);
-	ConvertPosToBull(worldPosition, pos);
+	ConvertPosToBull(worldPosition, relpos);
 
-	pos = pos - m_pObject->getWorldTransform().getOrigin();
+	relpos = relpos - m_pObject->getCenterOfMassPosition();
 
-	btVector3 cross = pos.cross(force);
+	// Relative pos cross normal
+	btVector3 cross = relpos.cross(force);
 
 	// cross.set_pairwise_mult( &cross, core->get_inv_rot_inertia());
 
@@ -706,6 +710,8 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 	}
 
 	if (centerAngularVelocity) {
+		// Convert to local space and give it to the game (game rotations in local space)
+		cross = m_pObject->getWorldTransform().getBasis().transpose() * cross;
 		ConvertAngularImpulseToHL(cross, *centerAngularVelocity);
 	}
 }
@@ -1026,9 +1032,17 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 
 	if (pParams) {
 		m_pGameData		= pParams->pGameData;
-		m_pName			= pParams->pName;
 		m_fVolume		= pParams->volume * CUBIC_METERS_PER_CUBIC_INCH;
 		EnableCollisions(pParams->enableCollisions);
+
+		// Name must be copied because the game may use temporary memory to give it to us.
+		if (pParams->pName) {
+			int len = strlen(pParams->pName);
+
+			m_pName = new char[len + 1];
+			strcpy(m_pName, pParams->pName);
+			m_pName[len] = 0;
+		}
 
 		m_pObject->setDebugName(m_pName);
 	}
@@ -1047,6 +1061,10 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 	if (isStatic || !GetCollide()) {
 		drag = 0;
 		angDrag = 0;
+	}
+
+	if (isStatic) {
+		m_pObject->setCollisionFlags(m_pObject->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
 	}
 
 	ComputeDragBasis(isStatic);
