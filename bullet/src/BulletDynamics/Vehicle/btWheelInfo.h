@@ -70,11 +70,13 @@ ATTRIBUTE_ALIGNED16(struct) btWheelInfo
 	btVector3	m_chassisConnectionPointCS; // Connection point in chassis space - const
 	btVector3	m_wheelDirectionCS;// Direction in chassis space - const
 	btVector3	m_wheelAxleCS; // Axle in chassis space - const or modified by steering
+
+	btScalar	getSuspensionRestLength() const;
 	btScalar	m_suspensionRestLength1;//const
 	btScalar	m_maxSuspensionTravelCm;
-	btScalar	getSuspensionRestLength() const;
-	btScalar	m_wheelsRadius;//const
 	btScalar	m_suspensionStiffness;//const
+
+	btScalar	m_wheelsRadius;//const
 	btScalar	m_wheelsDampingCompression;//const
 	btScalar	m_wheelsDampingRelaxation;//const
 	btScalar	m_frictionSlip;
@@ -82,7 +84,7 @@ ATTRIBUTE_ALIGNED16(struct) btWheelInfo
 	btScalar	m_rotation;
 	btScalar	m_deltaRotation;
 	btScalar	m_rotationDamping; // Damping when not in contact
-	btScalar	m_rollInfluence;
+	btScalar	m_rollInfluence; // y-offset of wheel forces on the vehicle
 	btScalar	m_maxSuspensionForce;
 
 	btScalar	m_engineForce;

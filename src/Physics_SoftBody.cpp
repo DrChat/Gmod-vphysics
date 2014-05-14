@@ -163,6 +163,8 @@ void CPhysicsSoftBody::RemoveLink(int i) {
 	btSoftBody::Link &link = m_pSoftBody->m_links[i];
 
 	m_pSoftBody->pointersToIndices();
+	// TODO: Need to update the indices of anything referencing
+	// the link that is swapped to this position
 	//m_pSoftBody->m_links.remove(link);
 	m_pSoftBody->indicesToPointers();
 }

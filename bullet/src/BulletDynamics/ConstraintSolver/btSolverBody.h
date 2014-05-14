@@ -35,7 +35,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverBody
 	btVector3		m_angularFactor;
 	btVector3		m_linearFactor;
 	btVector3		m_invMass;
-	btVector3		m_pushVelocity;
+	btVector3		m_pushVelocity; // Split impulse velocity, instantly applied.
 	btVector3		m_turnVelocity;
 	btVector3		m_linearVelocity;
 	btVector3		m_angularVelocity;

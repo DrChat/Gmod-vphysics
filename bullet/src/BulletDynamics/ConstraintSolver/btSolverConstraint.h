@@ -53,7 +53,7 @@ ATTRIBUTE_ALIGNED16 (struct)	btSolverConstraint
 	btScalar		m_rhsPenetration;
     union
 	{
-		void*		m_originalContactPoint;
+		void*		m_originalContactPoint; // Either a btTypedConstraint or btManifoldPoint
 		btScalar	m_unusedPadding4;
 		int			m_numRowsForNonContactConstraint;
 	};

@@ -106,7 +106,8 @@ public:
 
 	void	setSteeringValue(btScalar steering, int wheel);
 
-
+	// Set the engine force in newtons
+	// This will override the brake!
 	void	applyEngineForce(btScalar force, int wheel);
 
 	const btTransform&	getWheelTransformWS( int wheelIndex ) const;
@@ -128,7 +129,7 @@ public:
 
 	void	updateWheelTransformsWS(btWheelInfo& wheel, bool interpolatedTransform = true);
 
-	
+	// Brake impulse
 	void setBrake(btScalar brake, int wheelIndex);
 
 	void	setPitchControl(btScalar pitch)

@@ -740,7 +740,6 @@ void	btDiscreteDynamicsWorld::solveConstraints(btContactSolverInfo& solverInfo)
 
 	// Process any constraints on islands that weren't big enough to be processed on their own
 	m_solverIslandCallback->processConstraints();
-	m_constraintSolver->waitUntilFinished();
 
 	m_constraintSolver->allSolved(solverInfo, m_debugDrawer);
 }

@@ -50,7 +50,7 @@ const char *CPhysicsKeyParser::GetCurrentBlockName() {
 	return NULL;
 }
 
-bool CPhysicsKeyParser::Finished(void) {
+bool CPhysicsKeyParser::Finished() {
 	return m_pCurrentBlock == NULL;
 }
 

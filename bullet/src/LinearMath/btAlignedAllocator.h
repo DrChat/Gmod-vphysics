@@ -20,7 +20,7 @@ subject to the following restrictions:
 // so we replace _aligned_malloc and _aligned_free with our own
 // that is better portable and more predictable
 
-#include "btScalar.h"
+#include "btDefines.h"
 
 #if defined(BT_DEBUG) && defined(_MSC_VER)
 	#define BT_DEBUG_MEMORY_ALLOCATIONS

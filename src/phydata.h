@@ -52,6 +52,7 @@ struct ivpcompactsurface_t {
 	int		dummy[3]; 			// dummy[2] is "IVPS" or 0
 };
 
+// Appears to be used on older maps to represent displacements (someone at valve must've been out of their mind when writing that)
 struct ivpcompactmopp_t {
 	DECLARE_BYTESWAP_DATADESC()
 

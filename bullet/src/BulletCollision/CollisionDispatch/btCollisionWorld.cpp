@@ -178,7 +178,6 @@ void	btCollisionWorld::updateSingleAabb(btCollisionObject* colObj)
 			colObj->setActivationState(DISABLE_SIMULATION);
 
 			btDbgWarning("Overflow in AABB, object \"%s\" removed from simulation!\n", colObj->getDebugName() ? colObj->getDebugName() : "<unset name>");
-			btDbgWarning("Usually this means an object was travelling too fast\n");
 		}
 	}
 }

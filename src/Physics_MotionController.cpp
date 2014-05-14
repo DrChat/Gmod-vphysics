@@ -36,8 +36,7 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		Vector speed;
 		AngularImpulse rot;
 		
-		CPhysicsObject *pObject = (CPhysicsObject *)m_objectList[i];
-
+		CPhysicsObject *pObject = m_objectList[i];
 		IMotionEvent::simresult_e ret = m_handler->Simulate(this, pObject, deltaTime, speed, rot);
 
 		speed *= deltaTime;

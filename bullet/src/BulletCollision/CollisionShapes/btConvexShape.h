@@ -73,10 +73,6 @@ public:
 	virtual int		getNumPreferredPenetrationDirections() const=0;
 	
 	virtual void	getPreferredPenetrationDirection(int index, btVector3& penetrationVector) const=0;
-
-
-	
-	
 };
 
 

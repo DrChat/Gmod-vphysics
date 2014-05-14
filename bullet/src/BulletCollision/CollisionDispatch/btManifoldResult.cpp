@@ -19,6 +19,8 @@ subject to the following restrictions:
 #include "BulletCollision/CollisionDispatch/btCollisionObject.h"
 #include "BulletCollision/CollisionDispatch/btCollisionObjectWrapper.h"
 
+#include "BulletCollision/CollisionShapes/btCollisionShape.h"
+
 ///This is to allow MaterialCombiner/Custom Friction/Restitution values
 ContactAddedCallback		gContactAddedCallback=0;
 
@@ -79,8 +81,8 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld, const 
 	btAssert(m_manifoldPtr);
 	//order in manifold needs to match
 
-	if (depth > m_manifoldPtr->getContactBreakingThreshold())
 //	if (depth > m_manifoldPtr->getContactProcessingThreshold())
+	if (depth > m_manifoldPtr->getContactBreakingThreshold())
 		return;
 
 	bool isSwapped = m_manifoldPtr->getBody0() != m_body0Wrap->getCollisionObject();
@@ -110,8 +112,6 @@ void btManifoldResult::addContactPoint(const btVector3& normalOnBInWorld, const 
 	newPt.m_combinedRestitution = calculateCombinedRestitution(m_body0Wrap->getCollisionObject(), m_body1Wrap->getCollisionObject());
 	newPt.m_combinedRollingFriction = calculateCombinedRollingFriction(m_body0Wrap->getCollisionObject(), m_body1Wrap->getCollisionObject());
 	btPlaneSpace1(newPt.m_normalWorldOnB, newPt.m_lateralFrictionDir1, newPt.m_lateralFrictionDir2);
-	
-
 	
    //BP mod, store contact triangles.
 	if (isSwapped)

@@ -14,8 +14,6 @@ CPhysicsObjectPairHash::CPhysicsObjectPairHash() {
 }
 
 void CPhysicsObjectPairHash::AddObjectPair(void *pObject0, void *pObject1) {
-	// This complex entry stuff is supposed to make lookups faster. Xors the 2 pointers,
-	// then bitshifts them right 4 bits and truncates them to a single byte.
 	int entry = GetEntry(pObject0, pObject1);
 
 	// This particular entry may have more than one hash, so find the last one.
@@ -139,6 +137,7 @@ int CPhysicsObjectPairHash::GetPairListForObject(void *pObject0, int nMaxCount, 
 	return c;
 }
 
+// Purpose: Generate a number in [0,255] given 2 pointers. Must be the same for the same 2 pointers.
 int CPhysicsObjectPairHash::GetEntry(void *pObject0, void *pObject1) {
 	return (((int)pObject0 ^ (int)pObject1) >> 4) & 0xFF;
 }

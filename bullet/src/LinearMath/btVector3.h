@@ -86,6 +86,8 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 	
 		BT_DECLARE_ALIGNED_ALLOCATOR();
 	
+		// FIXME: If we change btScalar to double, it will be unaligned with __m128!
+		// Need to change __m128 to __m128d in this case.
 #if defined (__SPU__) && defined (__CELLOS_LV2__)
 		btScalar	m_floats[4];
 	public:
@@ -97,8 +99,8 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 #else //__CELLOS_LV2__ __SPU__
 	#if defined (BT_USE_SSE) || defined(BT_USE_NEON) // _WIN32 || ARM
 		union {
-			btSimdFloat4      mVec128;
-			btScalar	m_floats[4];
+			btSimdFloat4	mVec128;
+			btScalar		m_floats[4];
 		};
 		SIMD_FORCE_INLINE	btSimdFloat4	get128() const
 		{
@@ -136,7 +138,7 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			m_floats[3] = btScalar(0.f);
 		}
 
-#if (defined (BT_USE_SSE_IN_API) && defined (BT_USE_SSE) )|| defined (BT_USE_NEON)
+#if (defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE) )|| defined (BT_USE_NEON)
 		// Set Vector 
 		SIMD_FORCE_INLINE btVector3( btSimdFloat4 v)
 		{
@@ -662,9 +664,9 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			v1->mVec128 = V1;
 			v2->mVec128 = V2;
 #else
-			v0->setValue(0.		,-z()		, y());
-			v1->setValue(z()	,0.			,-x());
-			v2->setValue(-y()	,x()		,0.);
+			v0->setValue( 0.,	-z(),	 y());
+			v1->setValue( z(),	 0.,	-x());
+			v2->setValue(-y(),	 x(),	 0.);
 #endif
 		}
 

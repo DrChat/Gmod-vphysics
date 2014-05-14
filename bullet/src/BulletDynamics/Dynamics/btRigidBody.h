@@ -46,7 +46,6 @@ enum	btRigidBodyFlags
 	///If really needed, run at a high frequency like 1000 Hertz:	///See Demos/GyroscopicDemo for an example use
 	BT_ENABLE_GYROPSCOPIC_FORCE = 2,
 
-	// DrChat - TODO: We need a disable motion flag.
 	BT_DISABLE_MOTION = 4
 };
 

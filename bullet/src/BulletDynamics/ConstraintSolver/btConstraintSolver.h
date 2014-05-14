@@ -60,9 +60,6 @@ public:
 
 	virtual void setSolveCallback(btSolveCallback *callback) {};
 
-	/// Wait until solver is finished processing (implemented on multithreaded version)
-	virtual void waitUntilFinished() {};
-
 	virtual void allSolved (const btContactSolverInfo& /* info */, class btIDebugDraw* /* debugDrawer */) {;}
 
 	///clear internal cached data and reset random seed

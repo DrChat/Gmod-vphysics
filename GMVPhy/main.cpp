@@ -35,7 +35,7 @@ int lPhysStats(lua_State *state) {
 GMOD_MODULE_OPEN() {
 	CreateInterfaceFn physFactory = Sys_GetFactory("vphysics");
 	if (physFactory) {
-		g_pPhysics = (IPhysics32 *)physFactory("VPhysics032", NULL);
+		g_pPhysics = (IPhysics32 *)physFactory("VPhysics032", NULL); // This specific interface is defined in the newer vphysics
 		g_pSurfProps = (IPhysicsSurfaceProps *)physFactory(VPHYSICS_SURFACEPROPS_INTERFACE_VERSION, NULL);
 	}
 
