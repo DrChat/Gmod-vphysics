@@ -45,9 +45,16 @@ struct	btTriangleInfo
 
 	int			m_flags;
 
-	btScalar	m_edgeV0V1Angle;
-	btScalar	m_edgeV1V2Angle;
-	btScalar	m_edgeV2V0Angle;
+	union {
+		btScalar	m_edgeAngles[3];
+
+		struct {
+			btScalar	m_edgeV0V1Angle;
+			btScalar	m_edgeV1V2Angle;
+			btScalar	m_edgeV2V0Angle;
+		};
+	};
+	
 
 };
 

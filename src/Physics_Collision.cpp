@@ -1420,6 +1420,9 @@ CPhysCollide *CPhysicsCollision::CreateVirtualMesh(const virtualmeshparams_t &pa
 	btBvhTriangleMeshShape *bull = new btBvhTriangleMeshShape(pArray, true);
 	bull->setMargin(COLLISION_MARGIN);
 
+	btTriangleInfoMap *pMap = new btTriangleInfoMap;
+	btGenerateInternalEdgeInfo(bull, pMap);
+
 	return new CPhysCollide(bull);
 }
 
