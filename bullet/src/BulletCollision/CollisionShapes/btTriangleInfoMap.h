@@ -22,6 +22,7 @@ subject to the following restrictions:
 
 
 ///for btTriangleInfo m_flags
+// DrChat: DON'T CHANGE THESE WITHOUT CHANGING btInternalEdgeUtility.cpp (it depends on these numbers being constant)
 #define TRI_INFO_V0V1_CONVEX 1
 #define TRI_INFO_V1V2_CONVEX 2
 #define TRI_INFO_V2V0_CONVEX 4
@@ -40,7 +41,7 @@ struct	btTriangleInfo
 		m_edgeV0V1Angle = SIMD_2_PI;
 		m_edgeV1V2Angle = SIMD_2_PI;
 		m_edgeV2V0Angle = SIMD_2_PI;
-		m_flags=0;
+		m_flags = 0;
 	}
 
 	int			m_flags;
