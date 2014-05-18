@@ -22,7 +22,6 @@ subject to the following restrictions:
 #include "PlatformDefinitions.h"
 
 class btThreadPool;
-class btSolveGroupTask;
 class btPoolAllocator;
 class btICriticalSection;
 
@@ -35,13 +34,16 @@ class btParallelConstraintSolver : public btSequentialImpulseConstraintSolver {
 		virtual void *allocateTask(int size);
 		virtual void freeTask(void *ptr);
 
-		virtual btScalar solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btStackAlloc *stackAlloc, btDispatcher *dispatcher);
+		void solveSingleIterationParallel(int iteration, const btContactSolverInfo &infoGlobal);
+
+		virtual btScalar solveGroupCacheFriendlyIterations(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifolds, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &infoGlobal, btIDebugDraw *debugDrawer);
+
+		virtual btScalar solveGroup(btCollisionObject **bodies, int numBodies, btPersistentManifold **manifold, int numManifolds, btTypedConstraint **constraints, int numConstraints, const btContactSolverInfo &info, btIDebugDraw *debugDrawer, btDispatcher *dispatcher);
 		virtual void waitUntilFinished();
 
 	protected:
 		btThreadPool *m_pThreadPool;
 		btPoolAllocator *m_pTaskPool;
-		btICriticalSection *m_pTaskPoolSect;
 };
 
 
