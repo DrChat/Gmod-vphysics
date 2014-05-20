@@ -423,8 +423,11 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 	} else if (speed >= MPH2MS(m_vehicleParams.steering.speedFast)) {
 		steeringVal *= m_vehicleParams.steering.degreesFast;
 	} else {
+		// Don't allow a division by zero
+		Assert(m_vehicleParams.steering.speedFast != m_vehicleParams.steering.speedSlow);
+
 		// Inbetween, interpolate
-		float val = (speed - MPH2MS(m_vehicleParams.steering.speedSlow)) / (MPH2MS(m_vehicleParams.steering.speedFast) - MPH2MS(m_vehicleParams.steering.speedSlow));
+		float val = (MPH2MS(m_vehicleParams.steering.speedFast) - speed) / (MPH2MS(m_vehicleParams.steering.speedFast) - MPH2MS(m_vehicleParams.steering.speedSlow));
 
 		steeringVal *= m_vehicleParams.steering.degreesFast + (val * m_vehicleParams.steering.degreesSlow);
 	}
