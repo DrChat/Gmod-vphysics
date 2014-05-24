@@ -935,14 +935,16 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 
 					g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
 				}
-
-				if (ptr->startsolid) {
-					g_pDebugOverlay->AddTextOverlay(ptr->endpos, 0, 0.f, "Trace started in solid!");
-				}
 			}
 		}
 
 		ptr->endpos = ptr->startpos + (ray.m_Delta * ptr->fraction);
+
+		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
+			if (ptr->startsolid) {
+				g_pDebugOverlay->AddTextOverlay(ptr->endpos, 0, 0.f, "Trace started in solid!");
+			}
+		}
 
 		delete box;
 	}
@@ -1279,11 +1281,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 
 			// If we leave this as NULL, the game will use CreateVirtualMesh instead.
 		} else {
-			Warning("VCollideLoad: Unknown modelType %d", surfaceheader.modelType);
-		}
-
-		if (!pShape) {
-			DevWarning("VCollideLoad: Failed to load a solid!\n");
+			Warning("VCollideLoad: Unknown modelType %d (solid %d). Skipped!", surfaceheader.modelType, i+1);
 		}
 
 		pOutput->solids[i] = pShape;
