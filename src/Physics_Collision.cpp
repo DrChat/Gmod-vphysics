@@ -556,7 +556,7 @@ void CPhysicsCollision::CollideGetAABB(Vector *pMins, Vector *pMaxs, const CPhys
 	ConvertRotationToBull(collideAngles, rot);
 	btTransform transform(rot, pos);
 
-	transform.setOrigin(transform.getOrigin() + pCollide->GetMassCenter());
+	transform *= btTransform(btQuaternion::getIdentity(), pCollide->GetMassCenter());
 
 	shape->getAabb(transform, mins, maxs);
 
