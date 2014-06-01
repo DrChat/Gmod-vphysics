@@ -143,19 +143,22 @@ void btThreadPool::runTasks() {
 
 			if (remainder > 0) remainder--;
 		}
+
+		// Start the threads!
+		for (int i = 0; i < m_numThreads; i++) {
+			m_pThreadInfo[i]->pIdleEvent->reset(); // Reset the idle event
+			m_pThreadInfo[i]->pStartEvent->trigger(); // Start it
+		}
 	} else {
 		// Rare case where tasks are less than num threads
-		// Threads that don't get a task will just loop once and go back to their idle state
+		// Probably better to just run the task on the main thread if it's only one task, but whatever.
 		for (int i = 0; i < m_taskArray.size(); i++) {
 			m_pThreadInfo[i]->pTaskArr = &m_taskArray[i];
 			m_pThreadInfo[i]->numTasks = 1;
-		}
-	}
 
-	// Start the threads!
-	for (int i = 0; i < m_numThreads; i++) {
-		m_pThreadInfo[i]->pIdleEvent->reset(); // Reset the idle event
-		m_pThreadInfo[i]->pStartEvent->trigger(); // Start it
+			m_pThreadInfo[i]->pIdleEvent->reset(); // Reset the idle event
+			m_pThreadInfo[i]->pStartEvent->trigger(); // Go!
+		}
 	}
 
 	waitIdle();
