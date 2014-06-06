@@ -50,16 +50,15 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
-				Vector newVel, newAngVel;
-				pObject->WorldToLocalVector(&newVel, speed);
-				newAngVel = rot;
+				Vector newVel;
+				pObject->LocalToWorldVector(&newVel, speed);
 
-				pObject->AddVelocity(&newVel, &newAngVel);
+				pObject->AddVelocity(&newVel, &rot); // Rotation already in local space.
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_FORCE: {
 				Vector newVel;
-				pObject->WorldToLocalVector(&newVel, speed);
+				pObject->LocalToWorldVector(&newVel, speed);
 
 				pObject->ApplyForceCenter(newVel);
 				pObject->ApplyTorqueCenter(rot);
