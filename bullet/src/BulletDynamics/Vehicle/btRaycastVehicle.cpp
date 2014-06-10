@@ -363,6 +363,9 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 		{
 			wheel.m_rotation += wheel.m_deltaRotation;
 		}
+
+		// Normalize it so we don't get floating point issues
+		wheel.m_rotation = btNormalizeAngle(wheel.m_rotation);
 		
 		//wheel.m_deltaRotation *= wheel.m_rotationDamping;
 		wheel.m_deltaRotation *= (btScalar(1.f) - (wheel.m_rotationDamping * step));
@@ -385,7 +388,7 @@ btScalar btRaycastVehicle::getSteeringValue(int wheel) const
 
 void btRaycastVehicle::applyEngineForce(btScalar force, int wheel)
 {
-	btAssert(wheel>=0 && wheel < getNumWheels());
+	btAssert(wheel >= 0 && wheel < getNumWheels());
 	btWheelInfo& wheelInfo = getWheelInfo(wheel);
 	wheelInfo.m_engineForce = force;
 }
