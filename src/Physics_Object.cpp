@@ -283,13 +283,14 @@ void CPhysicsObject::RecheckCollisionFilter() {
 
 		CPhysicsObject *pObj0 = (CPhysicsObject *)pBody0->getUserPointer();
 		CPhysicsObject *pObj1 = (CPhysicsObject *)pBody1->getUserPointer();
-		if (pObj0 != this && pObj1 != this) continue; // Don't check objects that aren't me
+		if (pObj0 != this && pObj1 != this) continue; // Don't check pairs that don't involve this object
 
 		CPhysicsObject *pOther = pObj0 == this ? pObj1 : pObj0;
 
 		if (pSolver && !pSolver->NeedsCollision(pObj0, pObj1)) {
 			pCache->removeOverlappingPair(pair.m_pProxy0, pair.m_pProxy1, m_pEnv->GetBulletEnvironment()->getDispatcher());
-			pOther->Wake(); // Wake it up because shit changed
+			if (pOther)
+				pOther->Wake(); // Wake it up because shit changed
 		}
 	}
 }
@@ -656,6 +657,7 @@ void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &w
 	Wake();
 }
 
+// FIXME: Is this in local or world space?
 void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 	if (!IsMoveable() || !IsMotionEnabled()) {
 		return;
@@ -688,7 +690,7 @@ void CPhysicsObject::CalculateForceOffset(const Vector &forceVector, const Vecto
 	}
 }
 
-// forceVector is an impulse (F*t AKA m*v)
+// forceVector is an impulse (F*t AKA m*v) in world space
 void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Vector &worldPosition, Vector *centerVelocity, AngularImpulse *centerAngularVelocity) const {
 	if (!centerVelocity && !centerAngularVelocity) return;
 
@@ -696,12 +698,10 @@ void CPhysicsObject::CalculateVelocityOffset(const Vector &forceVector, const Ve
 	ConvertForceImpulseToBull(forceVector, force);
 	ConvertPosToBull(worldPosition, relpos);
 
-	relpos = relpos - m_pObject->getCenterOfMassPosition();
+	relpos -= m_pObject->getCenterOfMassPosition();
 
 	// Relative pos cross normal
 	btVector3 cross = relpos.cross(force);
-
-	// cross.set_pairwise_mult( &cross, core->get_inv_rot_inertia());
 
 	// Linear velocity
 	if (centerVelocity) {
@@ -968,6 +968,9 @@ void CPhysicsObject::OutputDebugInfo() const {
 	QAngle ang;
 	GetPosition(&pos, &ang);
 	Msg("Position: %f %f %f\nAngle: %f %f %f\n", pos.x, pos.y, pos.z, ang.x, ang.y, ang.z);
+
+	btVector3 bullPos = m_pObject->getWorldTransform().getOrigin();
+	Msg("Bullet Position: %f %f %f\n", bullPos.x(), bullPos.y(), bullPos.z());
 
 	Vector inertia = GetInertia();
 	Vector invinertia = GetInvInertia();
