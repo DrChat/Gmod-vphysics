@@ -51,17 +51,17 @@ int lCreateSoftBodyFromVertices(lua_State *state) {
 // Desc: Creates a new soft body rope
 // Arg1: PhysEnv|env|The physics environment to create the soft body in
 // Arg2: Vector|start|Start position
-// Arg3: Vector|length|Rope length
+// Arg3: Vector|end|End position
 // Arg4: int|resolution|Soft body resolution (# of nodes)
 // Ret1: PhysSoftBody|softbody|The rope soft body
 //
 int lCreateSoftBodyRope(lua_State *state) {
 	IPhysicsEnvironment32 *pEnv = Get_PhysEnv(state, 1);
 	Vector *pos = Get_Vector(state, 2);
-	Vector *length = Get_Vector(state, 3);
+	Vector *end = Get_Vector(state, 3);
 	int res = LUA->GetNumber(4);
 
-	IPhysicsSoftBody *pSoftBody = pEnv->CreateSoftBodyRope(*pos, *length, res, NULL);
+	IPhysicsSoftBody *pSoftBody = pEnv->CreateSoftBodyRope(*pos, *end, res, NULL);
 	if (!pSoftBody)
 		LUA->ThrowError("Failed to create soft body (environment returned NULL)");
 
