@@ -73,7 +73,13 @@ void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
 
 void CPhysicsFrictionSnapshot::GetSurfaceNormal(Vector &out) {
 	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
-	ConvertDirectionToHL(bullManifoldPoint.m_normalWorldOnB, out);
+	btVector3 norm = bullManifoldPoint.m_normalWorldOnB;
+
+	// Flip the normal so it's world on A (needs to be pointed away from m_pObject)
+	if (m_pObject->GetObject() == m_manifolds[m_iCurManifold]->getBody0())
+		norm *= -1;
+
+	ConvertDirectionToHL(norm, out); // The game expects the normal to point away from our object
 }
 
 float CPhysicsFrictionSnapshot::GetNormalForce() {
