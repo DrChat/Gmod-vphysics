@@ -311,7 +311,7 @@ protected:
 	btTransform m_calculatedTransformA;
 	btTransform m_calculatedTransformB;
 	btVector3 m_calculatedAxisAngleDiff;
-	btVector3 m_calculatedAxis[3];
+	btMatrix3x3 m_calculatedAxis;
 	btVector3 m_calculatedLinearDiff;
 	btScalar	m_factA;
 	btScalar	m_factB;
@@ -361,6 +361,8 @@ public:
 
 	btGeneric6DofConstraint(btRigidBody& rbA, btRigidBody& rbB, const btTransform& frameInA, const btTransform& frameInB, bool useLinearReferenceFrameA);
 	btGeneric6DofConstraint(btRigidBody& rbB, const btTransform& frameInB, bool useLinearReferenceFrameB);
+
+	virtual void debugDraw(btIDebugDraw *drawer);
 	
 	//! Calcs global transform of the offsets
 	/*!

@@ -23,6 +23,7 @@ http://gimpact.sf.net
 #include "BulletDynamics/Dynamics/btRigidBody.h"
 #include "LinearMath/btTransformUtil.h"
 #include "LinearMath/btTransformUtil.h"
+#include "LinearMath/btIDebugDraw.h"
 #include <new>
 
 
@@ -66,6 +67,8 @@ btScalar btGetMatrixElem(const btMatrix3x3& mat, int index)
 {
 	int i = index % 3; // Row
 	int j = index / 3; // Column
+	btAssert(i < 3 && j < 3); // Validity check
+
 	return mat[i][j];
 }
 
@@ -110,35 +113,35 @@ bool	matrixToEulerXYZ(const btMatrix3x3& mat, btVector3& xyz)
 
 int btRotationalLimitMotor::testLimitValue(btScalar test_value)
 {
+	// Invalid! Don't apply any forces.
 	if(m_loLimit>m_hiLimit)
 	{
 		m_currentLimit = 0;//Free from violation
 		return 0;
 	}
+
+	m_currentLimit = 0; // Free from violation
+
 	if (test_value < m_loLimit)
 	{
-		m_currentLimit = 1;//low limit violation
+		m_currentLimit = 1; // low limit violation
 		m_currentLimitError =  test_value - m_loLimit;
-		if(m_currentLimitError>SIMD_PI) 
-			m_currentLimitError-=SIMD_2_PI;
-		else if(m_currentLimitError<-SIMD_PI) 
-			m_currentLimitError+=SIMD_2_PI;
-		return 1;
 	}
-	else if (test_value> m_hiLimit)
+	else if (test_value > m_hiLimit)
 	{
-		m_currentLimit = 2;//High limit violation
+		m_currentLimit = 2; // High limit violation
 		m_currentLimitError = test_value - m_hiLimit;
-		if(m_currentLimitError>SIMD_PI) 
-			m_currentLimitError-=SIMD_2_PI;
-		else if(m_currentLimitError<-SIMD_PI) 
-			m_currentLimitError+=SIMD_2_PI;
-		return 2;
-	};
+	}
 
-	m_currentLimit = 0;//Free from violation
-	return 0;
+	// Normalize it
+	if (m_currentLimit) {
+		if (m_currentLimitError > SIMD_PI)
+			m_currentLimitError -= SIMD_2_PI;
+		else if (m_currentLimitError < -SIMD_PI)
+			m_currentLimitError += SIMD_2_PI;
+	}
 
+	return m_currentLimit;
 }
 
 
@@ -334,51 +337,133 @@ btScalar btTranslationalLimitMotor::solveLinearAxis(
 
 //////////////////////////// End btTranslationalLimitMotor ////////////////////////////////////
 
-void btGeneric6DofConstraint::calculateAngleInfo()
+// This code is adapted from http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+void quatToEulerXYZ(const btQuaternion &quat, btVector3 &vec) {
+	btScalar sqw = quat.w() * quat.w();
+	btScalar sqx = quat.x() * quat.x();
+	btScalar sqy = quat.y() * quat.y();
+	btScalar sqz = quat.z() * quat.z();
+
+	btScalar len = quat.length2();
+	btScalar test = -quat.z() * quat.y() + -quat.x() * quat.w();
+	if (test > 0.499 * len) { // Singularity at north pole
+		vec.m_floats[0] = 0;
+		vec.m_floats[1] = SIMD_HALF_PI;
+		vec.m_floats[2] = -2 * btAtan2(-quat.z(), quat.w());
+		return;
+	}
+
+	if (test < -0.499 * len) { // Singularity at south pole
+		vec.m_floats[0] = 0;
+		vec.m_floats[1] = -SIMD_HALF_PI;
+		vec.m_floats[2] = 2 * btAtan2(-quat.z(), quat.w());
+		return;
+	}
+
+	vec.m_floats[0] = btAtan2(2 * quat.y() * quat.w() - 2 * quat.x() * -quat.x(), -sqz - sqy + sqx + sqw);
+	vec.m_floats[1] = btAsin(2 * test / len);
+	vec.m_floats[2] = btAtan2(2 * -quat.z() * quat.w() - 2 * quat.y() * -quat.x(), sqz + sqy + sqx + sqw);
+}
+
+void btGeneric6DofConstraint::debugDraw(btIDebugDraw *drawer)
 {
-	// Calculate swing axes
-	// TODO: Use quaternions, get angle diff in each axis separately
+	bool drawFrames = (drawer->getDebugMode() & btIDebugDraw::DBG_DrawConstraints) != 0;
+	bool drawLimits = (drawer->getDebugMode() & btIDebugDraw::DBG_DrawConstraintLimits) != 0;
+
+	btTransform tr = getCalculatedTransformA();
+	if (drawFrames) drawer->drawTransform(tr, m_dbgDrawSize);
+	tr = getCalculatedTransformB();
+	if (drawFrames) drawer->drawTransform(tr, m_dbgDrawSize);
+	if (drawLimits) {
+		tr = getCalculatedTransformA();
+		const btVector3& center = getCalculatedTransformB().getOrigin();
+		btVector3 up = tr.getBasis().getColumn(2);
+		btVector3 axis = tr.getBasis().getColumn(0);
+		btScalar minTh = getRotationalLimitMotor(1)->m_loLimit;
+		btScalar maxTh = getRotationalLimitMotor(1)->m_hiLimit;
+		btScalar minPs = getRotationalLimitMotor(2)->m_loLimit;
+		btScalar maxPs = getRotationalLimitMotor(2)->m_hiLimit;
+		drawer->drawSpherePatch(center, up, axis, m_dbgDrawSize * btScalar(.9f), minTh, maxTh, minPs, maxPs, btVector3(0, 0, 0));
+		axis = tr.getBasis().getColumn(1);
+		btScalar ay = getAngle(1);
+		btScalar az = getAngle(2);
+		btScalar cy = btCos(ay);
+		btScalar sy = btSin(ay);
+		btScalar cz = btCos(az);
+		btScalar sz = btSin(az);
+		btVector3 ref;
+		ref[0] = cy*cz*axis[0] + cy*sz*axis[1] - sy*axis[2];
+		ref[1] = -sz*axis[0] + cz*axis[1];
+		ref[2] = cz*sy*axis[0] + sz*sy*axis[1] + cy*axis[2];
+		tr = getCalculatedTransformB();
+		btVector3 normal = -tr.getBasis().getColumn(0);
+		btScalar minFi = getRotationalLimitMotor(0)->m_loLimit;
+		btScalar maxFi = getRotationalLimitMotor(0)->m_hiLimit;
+		if (minFi > maxFi) {
+			drawer->drawArc(center, normal, ref, m_dbgDrawSize, m_dbgDrawSize, -SIMD_PI, SIMD_PI, btVector3(0, 0, 0), false);
+		} else if (minFi < maxFi) {
+			drawer->drawArc(center, normal, ref, m_dbgDrawSize, m_dbgDrawSize, minFi, maxFi, btVector3(0, 0, 0), true);
+		}
+		tr = getCalculatedTransformA();
+		btVector3 bbMin = getTranslationalLimitMotor()->m_lowerLimit;
+		btVector3 bbMax = getTranslationalLimitMotor()->m_upperLimit;
+		drawer->drawBox(bbMin, bbMax, tr, btVector3(0, 0, 0));
+	}
+
+	// Draw the calculated axis
 	/*
-	btMatrix3x3 relFrame = m_calculatedTransformA.getBasis().inverse() * m_calculatedTransformB.getBasis();
+	btMatrix3x3 calcAxes = m_calculatedAxis;
+	calcAxes = calcAxes.transpose(); // lol transpose to get into the right format
+	drawer->drawTransform(btTransform(calcAxes, m_calculatedTransformA.getOrigin()), m_dbgDrawSize);
+	
+	char str[512];
+	sprintf(str, "% .03f % .03f % .03f", m_calculatedAxisAngleDiff[0], m_calculatedAxisAngleDiff[1], m_calculatedAxisAngleDiff[2]);
+	drawer->draw3dText(m_calculatedTransformA.getOrigin(), str);
 
-	btVector3 axis0 = m_calculatedTransformB.getBasis().getColumn(0); // x
-	btVector3 axis2 = m_calculatedTransformA.getBasis().getColumn(2); // z
-
-	m_calculatedAxis[1] = axis2.cross(axis0);
-	m_calculatedAxis[0] = m_calculatedAxis[1].cross(axis2);
-	m_calculatedAxis[2] = axis0.cross(m_calculatedAxis[1]);
-
-	for (int i = 0; i < 3; i++)
-		m_calculatedAxis[i].normalize();
-	//*/
-
-	//*
-	btMatrix3x3 relative_frame = m_calculatedTransformA.getBasis().inverse()*m_calculatedTransformB.getBasis();
-	matrixToEulerXYZ(relative_frame, m_calculatedAxisAngleDiff);
-	// in euler angle mode we do not actually constrain the angular velocity
-	// along the axes axis[0] and axis[2] (although we do use axis[1]) :
-	//
-	//    to get			constrain w2-w1 along		...not
-	//    ------			---------------------		------
-	//    d(angle[0])/dt = 0	ax[1] x ax[2]			ax[0]
-	//    d(angle[1])/dt = 0	ax[1]
-	//    d(angle[2])/dt = 0	ax[0] x ax[1]			ax[2]
-	//
-	// constraining w2-w1 along an axis 'a' means that a'*(w2-w1)=0.
-	// to prove the result for angle[0], write the expression for angle[0] from
-	// GetInfo1 then take the derivative. to prove this for angle[2] it is
-	// easier to take the euler rate expression for d(angle[2])/dt with respect
-	// to the components of w and set that to 0.
+	// Old way to calculate axes
+	btMatrix3x3 oldAxes = btMatrix3x3::getIdentity();
 	btVector3 axis0 = m_calculatedTransformB.getBasis().getColumn(0); // B x
 	btVector3 axis2 = m_calculatedTransformA.getBasis().getColumn(2); // A z
 
-	m_calculatedAxis[1] = axis2.cross(axis0); // A z cross B x
-	m_calculatedAxis[0] = m_calculatedAxis[1].cross(axis2); // calc Y cross A z
-	m_calculatedAxis[2] = axis0.cross(m_calculatedAxis[1]); // B x cross calc Y
+	oldAxes[1] = axis2.cross(axis0); // A z cross B x
+	oldAxes[0] = oldAxes[1].cross(axis2); // calc Y cross A z
+	oldAxes[2] = axis0.cross(oldAxes[1]); // B x cross calc Y
 
 	for (int i = 0; i < 3; i++)
+		oldAxes[i].normalize();
+
+	oldAxes = oldAxes.transpose();
+	//drawer->drawTransform(btTransform(oldAxes, m_calculatedTransformA.getOrigin()), m_dbgDrawSize * 0.5);
+	*/
+}
+
+void btGeneric6DofConstraint::calculateAngleInfo()
+{
+	// Calculate swing axes
+	btQuaternion qA = m_calculatedTransformA.getRotation();
+	btQuaternion qB = m_calculatedTransformB.getRotation();
+	btTransform relAB = m_calculatedTransformA.inverse() * m_calculatedTransformB;
+	btQuaternion qAB = relAB.getRotation();
+
+	m_calculatedAxisAngleDiff.setValue(
+		btScalar(-2) * btAsin(qAB.x()),
+		btScalar(-2) * btAsin(qAB.y()),
+		btScalar(-2) * btAsin(qAB.z())
+	);
+	if (qAB.w() < btScalar(0))
+		m_calculatedAxisAngleDiff *= -1;
+
+	// Calculate the axes
+	btQuaternion qHalfAB = btQuaternion::getIdentity().slerp(qAB, 0.5);
+	btMatrix3x3 axes = m_calculatedTransformA.getBasis() * btMatrix3x3(qHalfAB);
+
+	m_calculatedAxis[0] = axes.getColumn(0);
+	m_calculatedAxis[1] = axes.getColumn(1);
+	m_calculatedAxis[2] = axes.getColumn(2);
+
+	for (int i = 0; i < 3; i++) {
 		m_calculatedAxis[i].normalize();
-	//*/
+	}
 }
 
 void btGeneric6DofConstraint::calculateTransforms()
@@ -439,12 +524,15 @@ void btGeneric6DofConstraint::buildAngularJacobian(btJacobianEntry & jacAngular,
 
 bool btGeneric6DofConstraint::testAngularLimitMotor(int axis_index)
 {
+	btRotationalLimitMotor &motor = m_angularLimits[axis_index];
+
 	btScalar angle = m_calculatedAxisAngleDiff[axis_index];
-	angle = btAdjustAngleToLimits(angle, m_angularLimits[axis_index].m_loLimit, m_angularLimits[axis_index].m_hiLimit);
-	m_angularLimits[axis_index].m_currentPosition = angle;
+	angle = btAdjustAngleToLimits(angle, motor.m_loLimit, motor.m_hiLimit);
+	motor.m_currentPosition = angle;
+
 	//test limits
-	m_angularLimits[axis_index].testLimitValue(angle);
-	return m_angularLimits[axis_index].needApplyTorques();
+	motor.testLimitValue(angle);
+	return motor.needApplyTorques();
 }
 
 void btGeneric6DofConstraint::buildJacobian()
@@ -681,7 +769,7 @@ int btGeneric6DofConstraint::setAngularLimits(btConstraintInfo2 *info, int row_o
 			{
 				m_angularLimits[i].m_stopERP = info->erp;
 			}
-			row += get_limit_motor_info2(getRotationalLimitMotor(i),
+			row += get_limit_motor_info2(&m_angularLimits[i],
 												transA, transB, linVelA, linVelB, angVelA, angVelB, info, row, axis, true);
 		}
 	}
@@ -771,7 +859,7 @@ int btGeneric6DofConstraint::get_limit_motor_info2(
 {
 	int srow = row * info->rowskip;
 	int powered = limot->m_enableMotor;
-	int limit = limot->m_currentLimit;
+	int limit = limot->m_currentLimit; // 0 = not currently limited
 	if (powered || limit)
 	{   // if the joint is powered, or has joint limits, add in the extra row
 		btScalar *J1 = rotational ? info->m_J1angularAxis : info->m_J1linearAxis;
@@ -784,6 +872,7 @@ int btGeneric6DofConstraint::get_limit_motor_info2(
 		J2[srow+1] = -ax1[1];
 		J2[srow+2] = -ax1[2];
 
+		// Linear only
 		if(!rotational)
 		{
 			if (m_useOffsetForConstraintFrame)
@@ -832,6 +921,7 @@ int btGeneric6DofConstraint::get_limit_motor_info2(
 				info->m_J2angularAxis[srow+2] = ltd[2];
 			}
 		}
+
 		// if we're limited low and high simultaneously, the joint motor is
 		// ineffective
 		if (limit && (limot->m_loLimit == limot->m_hiLimit)) powered = 0;
