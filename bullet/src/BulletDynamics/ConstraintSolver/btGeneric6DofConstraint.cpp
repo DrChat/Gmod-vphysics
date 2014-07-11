@@ -439,12 +439,11 @@ void btGeneric6DofConstraint::debugDraw(btIDebugDraw *drawer)
 
 void btGeneric6DofConstraint::calculateAngleInfo()
 {
-	// Calculate swing axes
 	btQuaternion qA = m_calculatedTransformA.getRotation();
 	btQuaternion qB = m_calculatedTransformB.getRotation();
-	btTransform relAB = m_calculatedTransformA.inverse() * m_calculatedTransformB;
-	btQuaternion qAB = relAB.getRotation();
+	btQuaternion qAB = qA.inverse() * qB;
 
+	// Get the difference in euler angles
 	m_calculatedAxisAngleDiff.setValue(
 		btScalar(-2) * btAsin(qAB.x()),
 		btScalar(-2) * btAsin(qAB.y()),
@@ -460,10 +459,6 @@ void btGeneric6DofConstraint::calculateAngleInfo()
 	m_calculatedAxis[0] = axes.getColumn(0);
 	m_calculatedAxis[1] = axes.getColumn(1);
 	m_calculatedAxis[2] = axes.getColumn(2);
-
-	for (int i = 0; i < 3; i++) {
-		m_calculatedAxis[i].normalize();
-	}
 }
 
 void btGeneric6DofConstraint::calculateTransforms()
