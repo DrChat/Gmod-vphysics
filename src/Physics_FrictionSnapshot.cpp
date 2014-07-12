@@ -67,7 +67,12 @@ int CPhysicsFrictionSnapshot::GetMaterial(int index) {
 
 void CPhysicsFrictionSnapshot::GetContactPoint(Vector &out) {
 	btManifoldPoint bullManifoldPoint = m_manifolds[m_iCurManifold]->getContactPoint(m_iCurContactPoint);
+
 	btVector3 bullPos = bullManifoldPoint.getPositionWorldOnA();
+	if (m_pObject->GetObject() == m_manifolds[m_iCurManifold]->getBody1()) {
+		bullPos = bullManifoldPoint.getPositionWorldOnB(); // Our object is object B, so get the pos for B
+	}
+
 	ConvertPosToHL(bullPos, out);
 }
 
