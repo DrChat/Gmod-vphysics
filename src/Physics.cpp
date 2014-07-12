@@ -87,21 +87,23 @@ void CPhysics::DestroyObjectPairHash(IPhysicsObjectPairHash *pHash) {
 }
 
 IPhysicsCollisionSet *CPhysics::FindOrCreateCollisionSet(unsigned int id, int maxElementCount) {
-	if (m_collisionSets.IsValidIndex(id))
-		return m_collisionSets[id];
+	if (m_colSetTable.Find(id) != m_colSetTable.InvalidHandle())
+		return m_collisionSets[m_colSetTable.Element(m_colSetTable.Find(id))];
 
 	CPhysicsCollisionSet *set = NULL;
 	if (maxElementCount < sizeof(int) * 8) { // Limit of 32 because of the way this works internally
 		set = ::CreateCollisionSet(maxElementCount);
-		m_collisionSets.AddToTail(set);
+		int vecId = m_collisionSets.AddToTail(set);
+
+		m_colSetTable.Insert(id, vecId);
 	}
 
 	return set;
 }
 
 IPhysicsCollisionSet *CPhysics::FindCollisionSet(unsigned int id) {
-	if (m_collisionSets.IsValidIndex(id))
-		return m_collisionSets[id];
+	if (m_colSetTable.Find(id) != m_colSetTable.InvalidHandle())
+		return m_collisionSets[m_colSetTable.Element(m_colSetTable.Find(id))];
 
 	return NULL;
 }

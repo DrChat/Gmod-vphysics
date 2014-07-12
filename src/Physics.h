@@ -4,6 +4,8 @@
 	#pragma once
 #endif
 
+#include <utlhashtable.h>
+
 class IPhysicsEnvironment;
 class IPhysicsCollisionSet;
 
@@ -30,6 +32,7 @@ class CPhysics : public CTier1AppSystem<IPhysics32> {
 	private:
 		CUtlVector<IPhysicsEnvironment *>	m_envList;
 		CUtlVector<IPhysicsCollisionSet *>	m_collisionSets;
+		CUtlHashtable<unsigned int, unsigned int> m_colSetTable;
 };
 
 extern CPhysics g_Physics;
