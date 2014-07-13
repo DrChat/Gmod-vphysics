@@ -113,6 +113,7 @@ void CPhysics::DestroyAllCollisionSets() {
 		delete (CPhysicsCollisionSet *)m_collisionSets[i];
 
 	m_collisionSets.RemoveAll();
+	m_colSetTable.RemoveAll();
 }
 
 CPhysics g_Physics;
