@@ -179,6 +179,8 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	// Keep the vehicle active (or it might go to sleep while a player's driving it and make it unmoveable)
 	m_pBody->GetObject()->setActivationState(DISABLE_DEACTIVATION);
 	if (m_pBody->GetVehicleController() != NULL) {
+		// Although this is a warning, it's not fatal because we can't set the vehicle controller to NULL
+		// when we're destroyed, because the game typically destroys the body before destroying the vehicle controller
 		Warning("VPhysics: Attaching a vehicle controller to an object that already has one attached!\n");
 	}
 
@@ -191,7 +193,6 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 }
 
 CPhysicsVehicleController::~CPhysicsVehicleController() {
-	m_pBody->SetVehicleController(NULL);
 	ShutdownBullVehicle();
 }
 
