@@ -638,7 +638,31 @@ void CPhysicsObject::ApplyForceCenter(const Vector &forceVector) {
 
 	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
+
+	btVector3 linVel, angVel;
+	linVel = m_pObject->getLinearVelocity();
+	angVel = m_pObject->getAngularVelocity();
 	m_pObject->applyCentralImpulse(force);
+
+	btVector3 deltaLin = m_pObject->getLinearVelocity() - linVel;
+	btVector3 deltaAng = m_pObject->getAngularVelocity() - angVel;
+
+	btVector3 maxLinVel = m_pEnv->GetMaxLinearVelocity();
+	// Clamp it.
+	for (int i = 0; i < 3; i++) {
+		if (fabs(deltaLin[i]) > maxLinVel[i])
+			deltaLin[i] = deltaLin[i] > 0 ? maxLinVel[i] : -maxLinVel[i];
+	}
+
+	btVector3 maxAngVel = m_pEnv->GetMaxAngularVelocity();
+	// Clamp it.
+	for (int i = 0; i < 3; i++) {
+		if (fabs(deltaAng[i]) > maxAngVel[i])
+			deltaAng[i] = deltaAng[i] > 0 ? maxAngVel[i] : -maxAngVel[i];
+	}
+
+	m_pObject->setLinearVelocity(linVel + deltaLin);
+	m_pObject->setAngularVelocity(angVel + deltaAng);
 }
 
 void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &worldPosition) {
@@ -653,8 +677,30 @@ void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &w
 	btVector3 force, offset;
 	ConvertForceImpulseToBull(forceVector, force);
 	ConvertPosToBull(local, offset);
+
+	btVector3 linVel, angVel;
+	linVel = m_pObject->getLinearVelocity();
+	angVel = m_pObject->getAngularVelocity();
 	m_pObject->applyImpulse(force, offset);
-	Wake();
+	btVector3 deltaLin = m_pObject->getLinearVelocity() - linVel;
+	btVector3 deltaAng = m_pObject->getAngularVelocity() - angVel;
+
+	btVector3 maxLinVel = m_pEnv->GetMaxLinearVelocity();
+	// Clamp it.
+	for (int i = 0; i < 3; i++) {
+		if (fabs(deltaLin[i]) > maxLinVel[i])
+			deltaLin[i] = deltaLin[i] > 0 ? maxLinVel[i] : -maxLinVel[i];
+	}
+
+	btVector3 maxAngVel = m_pEnv->GetMaxAngularVelocity();
+	// Clamp it.
+	for (int i = 0; i < 3; i++) {
+		if (fabs(deltaAng[i]) > maxAngVel[i])
+			deltaAng[i] = deltaAng[i] > 0 ? maxAngVel[i] : -maxAngVel[i];
+	}
+
+	m_pObject->setLinearVelocity(linVel + deltaLin);
+	m_pObject->setAngularVelocity(angVel + deltaAng);
 }
 
 // FIXME: Is this in local or world space?
@@ -1042,9 +1088,11 @@ void CPhysicsObject::Init(CPhysicsEnvironment *pEnv, btRigidBody *pObject, int m
 		if (pParams->pName) {
 			int len = strlen(pParams->pName);
 
-			m_pName = new char[len + 1];
-			strcpy(m_pName, pParams->pName);
-			m_pName[len] = 0;
+			if (len > 0) {
+				m_pName = new char[len + 1];
+				strcpy(m_pName, pParams->pName);
+				m_pName[len] = 0;
+			}
 		}
 
 		m_pObject->setDebugName(m_pName);
