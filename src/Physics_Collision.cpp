@@ -219,7 +219,7 @@ CPhysicsCollision::~CPhysicsCollision() {
 	ClearBBoxCache();
 }
 
-// FIXME: Why is it important to have a pointer to an array?
+// FIXME: Why is it important to have an array of pointers?
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **ppVerts, int vertCount) {
 	if (!ppVerts || vertCount == 0) return NULL;
 
@@ -797,7 +797,7 @@ static ConVar vphysics_visualizetraces("vphysics_visualizetraces", "0", FCVAR_CH
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
 	if (!pCollide || !ptr) return;
 
-	// Clear the trace
+	// Clear the trace (appears engine does not do this every time)
 	memset(ptr, 0, sizeof(trace_t));
 	ptr->fraction = 1.f;
 	ptr->fractionleftsolid = 0;
@@ -900,7 +900,6 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 
 				// HACK: Oh whatever, old vphysics did something just as bad
 				// We're here because the penetration distance is within tolerable levels (aka on surface of object)
-				ptr->fraction = 0.0001f;
 
 				// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
 				// FIXME: What if a separate shape is at the end of the ray?
@@ -915,12 +914,13 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 					}
 				} else {
 					// Zero-length trace.
-					ptr->fraction = 0.f;
-					ptr->startsolid = true;
-					ptr->allsolid = true;
+					ptr->fraction = 1.f;
+					ptr->startsolid = false;
+					ptr->allsolid = false;
 				}
 			} else {
-				ptr->fraction = 0.f;
+				// Trace started and ended instantly (fraction of 0). We're stuck in a solid!
+				// TODO: Need to properly hook up allsolid.
 				ptr->startsolid = true;
 				ptr->allsolid = true;
 			}
