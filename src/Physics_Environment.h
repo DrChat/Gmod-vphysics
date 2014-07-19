@@ -23,6 +23,7 @@ class CObjectTracker;
 class CCollisionEventListener;
 class CPhysicsFluidController;
 class CPhysicsDragController;
+class CPhysicsEnvironment;
 class CPhysicsConstraint;
 class CPhysicsObject;
 class CPhysicsSoftBody;
@@ -34,13 +35,14 @@ class IPhysicsSoftBody;
 
 class CCollisionSolver : public btOverlapFilterCallback {
 	public:
-		CCollisionSolver() {m_pSolver = NULL;}
+		CCollisionSolver(CPhysicsEnvironment *pEnv) {m_pEnv = pEnv; m_pSolver = NULL;}
 		void SetHandler(IPhysicsCollisionSolver *pSolver) {m_pSolver = pSolver;}
 		virtual bool needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const;
 
 		bool NeedsCollision(CPhysicsObject *pObj0, CPhysicsObject *pObj1) const;
 	private:
 		IPhysicsCollisionSolver *m_pSolver;
+		CPhysicsEnvironment *m_pEnv;
 };
 
 class CPhysicsEnvironment : public IPhysicsEnvironment32 {
@@ -170,6 +172,13 @@ public:
 	void									BulletTick(btScalar timeStep);
 	CPhysicsDragController *				GetDragController();
 	CCollisionSolver *						GetCollisionSolver();
+
+	physics_performanceparams_t &			GetPerformanceSettings() { return m_perfparams; }
+	const physics_performanceparams_t &		GetPerformanceSettings() const { return m_perfparams; }
+	btVector3								GetMaxLinearVelocity() const;
+	btVector3								GetMaxAngularVelocity() const;
+
+	btThreadPool *							GetSharedThreadPool() const { return m_pSharedThreadPool; }
 
 	void									DoCollisionEvents(float dt);
 

@@ -114,6 +114,11 @@ bool CCollisionSolver::needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroa
 	bool collides = NeedsCollision(pObject0, pObject1);
 	collides = collides && (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask);
 	collides = collides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask);
+
+	if (!collides) {
+		// Clean this pair from the cache
+		m_pEnv->GetBulletEnvironment()->getBroadphase()->getOverlappingPairCache()->removeOverlappingPair(proxy0, proxy1, m_pEnv->GetBulletEnvironment()->getDispatcher());
+	}
 			
 	return collides;
 }
@@ -139,7 +144,7 @@ bool CCollisionSolver::NeedsCollision(CPhysicsObject *pObject0, CPhysicsObject *
 		if ((pObject0->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) || (pObject1->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 		if ((pObject1->GetCallbackFlags() & CALLBACK_ENABLING_COLLISION) || (pObject0->GetCallbackFlags() & CALLBACK_MARKED_FOR_DELETE)) return false;
 
-		if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData()))
+		if (m_pSolver && !m_pSolver->ShouldCollide(pObject0, pObject1, pObject0->GetGameData(), pObject1->GetGameData())) 
 			return false;
 	} else {
 		// One of the objects has no phys object...
@@ -399,9 +404,11 @@ class CCollisionEventListener : public btSolveCallback {
 			//unsigned int flags1 = pObj1->GetCallbackFlags();
 
 			btScalar combinedInvMass = rb0->getInvMass() + rb1->getInvMass();
-			m_tmpEvent.collisionSpeed = BULL2HL(cp->m_appliedImpulse * combinedInvMass);
+			m_tmpEvent.collisionSpeed = BULL2HL(cp->m_appliedImpulse * combinedInvMass); // Speed of body 1 rel to body 2 on axis of constraint normal
 
-			m_tmpEvent.deltaCollisionTime = 10.f; // FIXME: Find a way to track the real delta time
+			// FIXME: Find a way to track the real delta time
+			// IVP tracks this delta time between object pairs
+			m_tmpEvent.deltaCollisionTime = 10.f;
 			/*
 			m_tmpEvent.isCollision = (flags0 & flags1 & CALLBACK_GLOBAL_COLLISION); // False when either one of the objects don't have CALLBACK_GLOBAL_COLLISION
 			m_tmpEvent.isShadowCollision = (flags0 ^ flags1) & CALLBACK_SHADOW_COLLISION; // True when only one of the objects is a shadow
@@ -567,7 +574,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_pBulletEnvironment = new btSoftRigidDynamicsWorld(m_pBulletDispatcher, m_pBulletBroadphase, m_pBulletSolver, m_pBulletConfiguration);
 
 	m_pBulletGhostCallback = new btGhostPairCallback;
-	m_pCollisionSolver = new CCollisionSolver;
+	m_pCollisionSolver = new CCollisionSolver(this);
 	m_pBulletEnvironment->getPairCache()->setOverlapFilterCallback(m_pCollisionSolver);
 	m_pBulletBroadphase->getOverlappingPairCache()->setInternalGhostPairCallback(m_pBulletGhostCallback);
 
@@ -1290,6 +1297,14 @@ CPhysicsDragController *CPhysicsEnvironment::GetDragController() {
 
 CCollisionSolver *CPhysicsEnvironment::GetCollisionSolver() {
 	return m_pCollisionSolver;
+}
+
+btVector3 CPhysicsEnvironment::GetMaxLinearVelocity() const {
+	return btVector3(HL2BULL(m_perfparams.maxVelocity), HL2BULL(m_perfparams.maxVelocity), HL2BULL(m_perfparams.maxVelocity));
+}
+
+btVector3 CPhysicsEnvironment::GetMaxAngularVelocity() const {
+	return btVector3(HL2BULL(m_perfparams.maxAngularVelocity), HL2BULL(m_perfparams.maxAngularVelocity), HL2BULL(m_perfparams.maxAngularVelocity));
 }
 
 // UNEXPOSED
