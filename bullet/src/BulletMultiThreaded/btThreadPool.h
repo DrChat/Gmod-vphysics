@@ -63,6 +63,7 @@ class btThreadPool {
 		int					m_numThreads;
 		bool				m_bThreadsStarted;
 		bool				m_bThreadsShouldExit;
+		bool				m_bRunningTasks;
 
 		btAlignedObjectArray<btIThreadTask *> m_taskArray; // FIXME: We don't need an aligned array.
 };

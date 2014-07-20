@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+// Entry-point function for threads. Calls back into btThreadPool.
 static void ThreadFunc(void *pArg) {
 	btThreadPoolInfo *pThreadInfo = (btThreadPoolInfo *)pArg;
 	btThreadPool *pThreadPool = pThreadInfo->pThreadPool;
@@ -75,6 +76,7 @@ void btThreadPool::startThreads(int numThreads) {
 
 void btThreadPool::stopThreads() {
 	btAssert(m_bThreadsStarted);
+	btAssert(!m_bRunningTasks); // Don't modify this if we're running tasks!!!
 
 	m_bThreadsStarted = false;
 
@@ -87,6 +89,8 @@ void btThreadPool::stopThreads() {
 void btThreadPool::resizeThreads(int numThreads) {
 	if (numThreads == m_numThreads) return;
 	btAssert(numThreads > 0); // Don't allow the user to resize the thread count to below 0 or 0 - use stopThreads instead
+
+	btAssert(!m_bRunningTasks); // Don't modify this if we're running tasks!!!
 
 	if (numThreads < m_numThreads) {
 		for (int i = m_numThreads - 1; i >= numThreads; i--) {
@@ -116,10 +120,14 @@ int btThreadPool::getNumThreads() {
 }
 
 void btThreadPool::addTask(btIThreadTask *pTask) {
+	btAssert(!m_bRunningTasks); // Don't modify this if we're running tasks!!!
+
 	m_taskArray.push_back(pTask);
 }
 
 void btThreadPool::clearTasks() {
+	btAssert(!m_bRunningTasks); // Don't modify this if we're running tasks!!!
+
 	for (int i = 0; i < m_taskArray.size(); i++) {
 		m_taskArray[i]->destroy(); // Allow the user to deallocate the task or whatever
 	}
@@ -130,6 +138,9 @@ void btThreadPool::clearTasks() {
 void btThreadPool::runTasks() {
 	btAssert(m_numThreads != 0);
 	if (m_taskArray.size() == 0) return;
+
+	btAssert(!m_bRunningTasks); // This class cannot be used recursively!
+	m_bRunningTasks = true;
 
 	if (m_taskArray.size() >= m_numThreads) {
 		int tasksPerThread = m_taskArray.size() / m_numThreads;
@@ -160,6 +171,8 @@ void btThreadPool::runTasks() {
 			m_pThreadInfo[i]->pStartEvent->trigger(); // Go!
 		}
 	}
+
+	m_bRunningTasks = false;
 
 	waitIdle();
 }
