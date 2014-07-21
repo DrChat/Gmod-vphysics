@@ -1268,7 +1268,7 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		if (surfaceheader.vphysicsID	!= VPHYSICS_ID
 		 || surfaceheader.version		!= 0x100) {
 			pOutput->solids[i] = NULL;
-			Warning("VCollideLoad: Skipped solid %d (magic: %.4s version: %d)", i+1, surfaceheader.vphysicsID, surfaceheader.version);
+			Warning("VCollideLoad: Skipped solid %d due to invalid id/version (magic: %.4s version: %d)", i+1, surfaceheader.vphysicsID, surfaceheader.version);
 			continue;
 		}
 
