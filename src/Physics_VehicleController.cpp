@@ -181,7 +181,7 @@ CPhysicsVehicleController::CPhysicsVehicleController(CPhysicsEnvironment *pEnv, 
 	if (m_pBody->GetVehicleController() != NULL) {
 		// Although this is a warning, it's not fatal because we can't set the vehicle controller to NULL
 		// when we're destroyed, because the game typically destroys the body before destroying the vehicle controller
-		Warning("VPhysics: Attaching a vehicle controller to an object that already has one attached!\n");
+		Warning("VPhysics: Attaching a vehicle controller to object \"%s\" that already has one attached!\n", pBody->GetName());
 	}
 
 	m_pBody->SetVehicleController(this);
