@@ -120,7 +120,9 @@ class btPulleyConstraint: public btTypedConstraint {
 		}
 
 		void getInfo1(btConstraintInfo1 *info) {
-
+			// 2 constraint rows, one for each object
+			info->m_numConstraintRows = 2;
+			info->nub = 4;
 		}
 
 		void getInfo2(btConstraintInfo2 *info) {
@@ -474,7 +476,7 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 	m_bNotifyBroken = true;
 
 	if (m_type == CONSTRAINT_RAGDOLL || m_type == CONSTRAINT_BALLSOCKET || m_type == CONSTRAINT_FIXED) {
-		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint, true);
+		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
 	} else {
 		m_pEnv->GetBulletEnvironment()->addConstraint(m_pConstraint);
 	}
@@ -523,19 +525,35 @@ void CPhysicsConstraint::Deactivate() {
 }
 
 void CPhysicsConstraint::SetLinearMotor(float speed, float maxLinearImpulse) {
-	NOT_IMPLEMENTED
+	switch (m_type) {
+		case CONSTRAINT_SLIDING: {
+			btSliderConstraint *pSlider = (btSliderConstraint *)m_pConstraint;
+
+			pSlider->setTargetAngMotorVelocity(HL2BULL(speed));
+			pSlider->setMaxAngMotorForce(HL2BULL(maxLinearImpulse));
+			pSlider->setPoweredLinMotor(true);
+			break;
+		}
+		default: {
+			NOT_IMPLEMENTED
+			return;
+		}
+	}
 }
 
 void CPhysicsConstraint::SetAngularMotor(float rotSpeed, float maxAngularImpulse) {
-	if (m_type == CONSTRAINT_HINGE) {
-		btHingeConstraint *pHinge = (btHingeConstraint *)m_pConstraint;
+	switch (m_type) {
+		case CONSTRAINT_HINGE: {
+			btHingeConstraint *pHinge = (btHingeConstraint *)m_pConstraint;
 
-		// FIXME: Probably not the right conversions!
-		pHinge->enableAngularMotor(true, DEG2RAD(rotSpeed), DEG2RAD(HL2BULL(maxAngularImpulse)));
+			// FIXME: Probably not the right conversions!
+			pHinge->enableAngularMotor(true, DEG2RAD(rotSpeed), HL2BULL(maxAngularImpulse));
+		}
+		default: {
+			NOT_IMPLEMENTED
+			return;
+		}
 	}
-
-	NOT_IMPLEMENTED
-	//m_pConstraint->enableAngularMotor();
 }
 
 void CPhysicsConstraint::UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached) {
@@ -774,6 +792,10 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	// Set axis limits
 	for (int i = 0; i < 3; i++) {
 		SetupAxis(i, pConstraint, ragdoll.axes[i], ragdoll.useClockwiseRotations);
+	}
+
+	if (ragdoll.onlyAngularLimits) {
+		//pConstraint->set
 	}
 	
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);
