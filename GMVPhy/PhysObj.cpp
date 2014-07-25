@@ -12,6 +12,22 @@
 using namespace GarrysMod::Lua;
 
 //
+// Name: PhysObj:ApplyTorqueCenter
+// Desc: Applies a torque to the center of an object
+// Arg1: Vector|torque|Torque impulse in kg * degrees/s
+// Ret1:
+//
+int lPhysObjApplyTorqueCenter(lua_State *state) {
+	IPhysicsObject32 *	pObject = Get_PhysObj(state, 1);
+	Vector *			pVec = Get_Vector(state, 2);
+
+	if (pObject && pVec)
+		pObject->ApplyTorqueCenter(*pVec);
+
+	return 0;
+}
+
+//
 // Name: PhysObj:SetLocalGravity
 // Desc: Sets an object's gravity. You must disable the environment's gravity with EnableGravity(false) first!
 // Arg1: Vector|gravityVec|The gravity vector
