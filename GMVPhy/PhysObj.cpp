@@ -130,6 +130,7 @@ int lPhysObjGetVehicleController(lua_State *state) {
 int Init_PhysObj(lua_State *state) {
 	LUA->PushSpecial(SPECIAL_REG);
 		LUA->GetField(-1, "PhysObj");
+			LUA->PushCFunction(lPhysObjApplyTorqueCenter);	LUA->SetField(-2, "ApplyTorqueCenter");
 			LUA->PushCFunction(lPhysObjSetLocalGravity);	LUA->SetField(-2, "SetLocalGravity");
 			LUA->PushCFunction(lPhysObjGetLocalGravity);	LUA->SetField(-2, "GetLocalGravity");
 			LUA->PushCFunction(lPhysObjSetAngleVelocity);	LUA->SetField(-2, "SetAngleVelocity");
