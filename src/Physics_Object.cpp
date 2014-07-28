@@ -304,12 +304,13 @@ void CPhysicsObject::SetMass(float mass) {
 
 	m_fMass = mass;
 
-	btVector3 inertia = m_pObject->getInvInertiaDiagLocal();
+	btVector3 inertia(0, 0, 0);
+	m_pObject->getCollisionShape()->calculateLocalInertia(mass, inertia);
 
 	// Inverse the inverse to get the not inverse (unless in the case that the not inverse is inverse, therefore you must inverse the universe)
-	inertia.setX(SAFE_DIVIDE(1.0f, inertia.x()));
-	inertia.setY(SAFE_DIVIDE(1.0f, inertia.y()));
-	inertia.setZ(SAFE_DIVIDE(1.0f, inertia.z()));
+	//inertia.setX(SAFE_DIVIDE(1.0f, inertia.x()));
+	//inertia.setY(SAFE_DIVIDE(1.0f, inertia.y()));
+	//inertia.setZ(SAFE_DIVIDE(1.0f, inertia.z()));
 
 	m_pObject->setMassProps(mass, inertia);
 }
