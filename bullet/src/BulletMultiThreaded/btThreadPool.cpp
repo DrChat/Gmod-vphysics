@@ -15,6 +15,7 @@ static void ThreadFunc(void *pArg) {
 btThreadPool::btThreadPool() {
 	m_bThreadsStarted = false;
 	m_bThreadsShouldExit = false;
+	m_bRunningTasks = false;
 
 	m_taskArray.reserve(100); // Reserve some space just to reduce some allocations
 }
@@ -160,7 +161,7 @@ void btThreadPool::runTasks() {
 			m_pThreadInfo[i]->pIdleEvent->reset(); // Reset the idle event
 			m_pThreadInfo[i]->pStartEvent->trigger(); // Start it
 		}
-	} else {
+	} else if (m_taskArray.size() >= m_numThreads / 2) {
 		// Rare case where tasks are less than num threads
 		// Probably better to just run the task on the main thread if it's only one task, but whatever.
 		for (int i = 0; i < m_taskArray.size(); i++) {
@@ -169,6 +170,11 @@ void btThreadPool::runTasks() {
 
 			m_pThreadInfo[i]->pIdleEvent->reset(); // Reset the idle event
 			m_pThreadInfo[i]->pStartEvent->trigger(); // Go!
+		}
+	} else {
+		// Not enough tasks. Run sequentially!
+		for (int i = 0; i < m_taskArray.size(); i++) {
+			m_taskArray[i]->run();
 		}
 	}
 
