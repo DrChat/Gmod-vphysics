@@ -1005,7 +1005,7 @@ bool CPhysicsCollision::IsBoxIntersectingCone(const Vector &boxAbsMins, const Ve
 	
 	// cone
 	btScalar coneHeight = ConvertDistanceToBull(truncatedCone.h);
-	btScalar coneRadius = btTan(DEG2RAD(truncatedCone.theta/2)) * coneHeight; // FIXME: Does the theta correspond to the radius or diameter of the bottom?
+	btScalar coneRadius = btTan(ConvertAngleToBull(truncatedCone.theta / 2)) * coneHeight; // FIXME: Does the theta correspond to the radius or diameter of the bottom?
 
 	btConeShape *cone = new btConeShape(coneRadius, coneHeight);
 
@@ -1031,8 +1031,13 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 
 		const ivpcompacttriangle_t *tris = (ivpcompacttriangle_t *)(ledge + 1); // Triangles start right after the ledge
 
+		// TODO: We need a new way to do this! IVP surfaces store all vertices in a large pool
+		// after the ledge array. We need to create a list of indices, create another list of unique
+		// indices, build a vertex array from the unique indices, and convert the first list
+		// of indices to refer to the vertex array made from the unique list.
+
 		// Make an index array
-		unsigned short *indexes = new unsigned short[ledge->n_triangles * 3];
+		unsigned short *indices = new unsigned short[ledge->n_triangles * 3];
 		int curIdx = 0;
 		for (int j = 0; j < ledge->n_triangles; j++) {
 			Assert(j == tris[j].tri_index);
@@ -1040,14 +1045,14 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 			for (int k = 0; k < 3; k++) {
 				// Make sure it isn't out of bounds
 				if (curIdx < ledge->n_triangles * 3)
-					indexes[curIdx++] = tris[j].c_three_edges[k].start_point_index;
+					indices[curIdx++] = tris[j].c_three_edges[k].start_point_index;
 			}
 		}
 
 		// Find the maximum index (number of vertices)
 		unsigned short maxIdx = 0;
 		for (int j = 0; j < ledge->n_triangles * 3; j++) {
-			if (indexes[j] > maxIdx) maxIdx = indexes[j];
+			if (indices[j] > maxIdx) maxIdx = indices[j];
 		}
 
 		// Convert IVP vertices
@@ -1066,7 +1071,7 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 		mesh.m_vertexStride = sizeof(btVector3);
 		mesh.m_vertexType = PHY_FLOAT;
 
-		mesh.m_triangleIndexBase = (unsigned char *)indexes;
+		mesh.m_triangleIndexBase = (unsigned char *)indices;
 		mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
 
 		pMesh->addIndexedMesh(mesh, PHY_SHORT); // And add it (with index type of PHY_SHORT)
@@ -1083,7 +1088,7 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 		// This code will find all unique indexes and add them to an array. This avoids
 		// adding duplicate points to the convex hull shape (triangle edges can share a vertex)
 		// If you find a better way you can replace this!
-		CUtlVector<uint16> indexes;
+		CUtlVector<uint16> indices;
 
 		for (int j = 0; j < ledge->n_triangles; j++) {
 			Assert((uint)j == tris[j].tri_index); // Sanity check
@@ -1091,16 +1096,14 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 			for (int k = 0; k < 3; k++) {
 				uint16 index = tris[j].c_three_edges[k].start_point_index;
 
-				bool shouldAdd = indexes.Find(index) == -1;
-
-				if (shouldAdd) {
-					indexes.AddToTail(index);
+				if (indices.Find(index) == -1) {
+					indices.AddToTail(index);
 				}
 			}
 		}
 
-		for (int j = 0; j < indexes.Count(); j++) {
-			uint16 index = indexes[j];
+		for (int j = 0; j < indices.Count(); j++) {
+			uint16 index = indices[j];
 
 			float *ivpvert = (float *)(vertices + index * 16); // 16 is sizeof(ivp aligned vector)
 

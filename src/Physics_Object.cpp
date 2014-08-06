@@ -429,7 +429,7 @@ void CPhysicsObject::SetSleepThresholds(const float *linVel, const float *angVel
 	if (!linVel && !angVel) return;
 
 	m_pObject->setSleepingThresholds(linVel ? ConvertDistanceToBull(*linVel) : m_pObject->getLinearSleepingThreshold(),
-									 angVel ? DEG2RAD(*angVel) : m_pObject->getAngularSleepingThreshold());
+									 angVel ? ConvertAngleToBull(*angVel) : m_pObject->getAngularSleepingThreshold());
 }
 
 void CPhysicsObject::GetSleepThresholds(float *linVel, float *angVel) const {
@@ -438,7 +438,7 @@ void CPhysicsObject::GetSleepThresholds(float *linVel, float *angVel) const {
 	}
 
 	if (angVel) {
-		*angVel = RAD2DEG(m_pObject->getAngularSleepingThreshold());
+		*angVel = ConvertAngleToHL(m_pObject->getAngularSleepingThreshold());
 	}
 }
 
@@ -772,7 +772,7 @@ float CPhysicsObject::CalculateLinearDrag(const Vector &unitDirection) const {
 float CPhysicsObject::CalculateAngularDrag(const Vector &objectSpaceRotationAxis) const {
 	btVector3 bull_unitDirection;
 	ConvertDirectionToBull(objectSpaceRotationAxis, bull_unitDirection);
-	return DEG2RAD(GetAngularDragInDirection(bull_unitDirection));
+	return ConvertAngleToHL(GetAngularDragInDirection(bull_unitDirection));
 }
 
 // This function is a silly hack, games should be using the friction snapshot instead.

@@ -547,7 +547,7 @@ void CPhysicsConstraint::SetAngularMotor(float rotSpeed, float maxAngularImpulse
 			btHingeConstraint *pHinge = (btHingeConstraint *)m_pConstraint;
 
 			// FIXME: Probably not the right conversions!
-			pHinge->enableAngularMotor(true, DEG2RAD(rotSpeed), HL2BULL(maxAngularImpulse));
+			pHinge->enableAngularMotor(true, ConvertAngleToBull(rotSpeed), HL2BULL(maxAngularImpulse));
 		}
 		default: {
 			NOT_IMPLEMENTED
@@ -748,22 +748,22 @@ static void SetupAxis(int axis, btGeneric6DofConstraint *pConstraint, const cons
 
 	if (axisData.torque != 0) {
 		motor->m_enableMotor = true;
-		motor->m_maxMotorForce = DEG2RAD(HL2BULL(axisData.torque));
+		motor->m_maxMotorForce = ConvertAngleToBull(HL2BULL(axisData.torque));
 	}
 
 	if (axis == 1) {
-		motor->m_hiLimit = -DEG2RAD(axisData.minRotation);
-		motor->m_loLimit = -DEG2RAD(axisData.maxRotation);
+		motor->m_hiLimit = -ConvertAngleToBull(axisData.minRotation);
+		motor->m_loLimit = -ConvertAngleToBull(axisData.maxRotation);
 
 		if (axisData.torque != 0) {
-			motor->m_targetVelocity = -DEG2RAD(axisData.angularVelocity);
+			motor->m_targetVelocity = -ConvertAngleToBull(axisData.angularVelocity);
 		}
 	} else {
-		motor->m_hiLimit = DEG2RAD(axisData.maxRotation);
-		motor->m_loLimit = DEG2RAD(axisData.minRotation);
+		motor->m_hiLimit = ConvertAngleToBull(axisData.maxRotation);
+		motor->m_loLimit = ConvertAngleToBull(axisData.minRotation);
 
 		if (axisData.torque != 0) {
-			motor->m_targetVelocity = DEG2RAD(axisData.angularVelocity);
+			motor->m_targetVelocity = ConvertAngleToBull(axisData.angularVelocity);
 		}
 	}
 
@@ -835,10 +835,10 @@ CPhysicsConstraint *CreateHingeConstraint(CPhysicsEnvironment *pEnv, IPhysicsObj
 
 	// FIXME: Are we converting the torque correctly? Bullet takes a "max motor impulse"
 	if (hinge.hingeAxis.torque)
-		pHinge->enableAngularMotor(true, DEG2RAD(hinge.hingeAxis.angularVelocity), DEG2RAD(HL2BULL(hinge.hingeAxis.torque)));
+		pHinge->enableAngularMotor(true, ConvertAngleToBull(hinge.hingeAxis.angularVelocity), ConvertAngleToBull(HL2BULL(hinge.hingeAxis.torque)));
 
 	if (hinge.hingeAxis.minRotation != hinge.hingeAxis.maxRotation)
-		pHinge->setLimit(DEG2RAD(hinge.hingeAxis.minRotation), DEG2RAD(hinge.hingeAxis.maxRotation));
+		pHinge->setLimit(ConvertAngleToBull(hinge.hingeAxis.minRotation), ConvertAngleToBull(hinge.hingeAxis.maxRotation));
 
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pHinge, CONSTRAINT_HINGE);
 }

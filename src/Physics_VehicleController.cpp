@@ -391,9 +391,9 @@ void CPhysicsVehicleController::SetWheelSteering(int wheelIndex, float steerVal)
 	}
 
 #ifdef USE_WHEELED_VEHICLE
-	m_pVehicle->getWheel(wheelIndex).steering = DEG2RAD(steerVal);
+	m_pVehicle->getWheel(wheelIndex).steering = ConvertAngleToBull(steerVal);
 #else
-	//m_pVehicle->setSteeringValue(DEG2RAD(steerVal), wheelIndex);
+	//m_pVehicle->setSteeringValue(ConvertAngleToBull(steerVal), wheelIndex);
 #endif
 }
 
@@ -437,7 +437,7 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 
 	for (int i = 0; i < m_iWheelCount; i++) {
 		if (m_pVehicle->getWheelInfo(i).m_bIsFrontWheel)
-			m_pVehicle->setSteeringValue(DEG2RAD(-steeringVal), i);
+			m_pVehicle->setSteeringValue(ConvertAngleToBull(-steeringVal), i);
 	}
 }
 
