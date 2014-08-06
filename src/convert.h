@@ -27,6 +27,8 @@ inline void ConvertForceImpulseToHL(const btVector3 &pos, Vector &hl);
 inline btScalar ConvertForceImpulseToBull(float hl);
 inline float ConvertForceImpulseToHL(btScalar bull);
 
+inline btScalar ConvertAngleToBull(const float angle);
+inline float ConvertAngleToHL(const btScalar &angle);
 inline void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull);
 inline void ConvertRotationToBull(const QAngle &angles, btQuaternion &bull);
 inline void ConvertRotationToHL(const btMatrix3x3 &matrix, QAngle &hl);
@@ -152,6 +154,14 @@ inline btScalar ConvertForceImpulseToBull(float hl) {
 
 inline float ConvertForceImpulseToHL(btScalar bull) {
 	return BULL2HL(bull);
+}
+
+inline btScalar ConvertAngleToBull(const float angle) {
+	return DEG2RAD(angle);
+}
+
+inline float ConvertAngleToHL(const btScalar &angle) {
+	return RAD2DEG(angle);
 }
 
 inline void ConvertRotationToBull(const QAngle &angles, btMatrix3x3 &bull) {
