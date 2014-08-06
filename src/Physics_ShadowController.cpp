@@ -29,8 +29,8 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	if (fraction <= 0) return secondsToArrival;
 	float scale = SAFE_DIVIDE(fraction, dt);
 
-	btTransform transform;
-	((btMassCenterMotionState *)object->getMotionState())->getGraphicTransform(transform);
+	btTransform transform = object->getWorldTransform();
+	transform *= ((btMassCenterMotionState *)object->getMotionState())->m_centerOfMassOffset.inverse();
 
 	//-------------------
 	// Translation
@@ -58,7 +58,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 	}
 
 	btVector3 speed = object->getLinearVelocity();
-	ComputeController(speed, delta_position, params.maxSpeed, scale, params.dampFactor);
+	ComputeController(speed, delta_position, btVector3(params.maxSpeed, params.maxSpeed, params.maxSpeed), scale, params.dampFactor);
 	object->setLinearVelocity(speed);
 
 	params.lastPosition = posbull + (speed * dt);
@@ -78,7 +78,7 @@ float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &p
 
 	btVector3 deltaAngles = axis * angle;
 	btVector3 rot_speed = object->getAngularVelocity();
-	ComputeController(rot_speed, deltaAngles, params.maxAngular, scale, params.dampFactor);
+	ComputeController(rot_speed, deltaAngles, btVector3(params.maxAngular, params.maxAngular, params.maxAngular), scale, params.dampFactor);
 	object->setAngularVelocity(rot_speed);
 
 	object->activate();
@@ -91,10 +91,10 @@ void ConvertShadowControllerToBull(const hlshadowcontrol_params_t &in, shadowcon
 	ConvertRotationToBull(in.targetRotation, out.targetRotation);
 	out.teleportDistance = ConvertDistanceToBull(in.teleportDistance);
 
-	ConvertForceImpulseToBull(Vector(in.maxSpeed), out.maxSpeed);
-	out.maxSpeed = out.maxSpeed.absolute();
-	ConvertAngularImpulseToBull(Vector(in.maxAngular), out.maxAngular);
-	out.maxAngular = out.maxAngular.absolute();
+	out.maxSpeed = ConvertDistanceToBull(in.maxSpeed);
+	out.maxDampSpeed = ConvertDistanceToBull(in.maxDampSpeed);
+	out.maxAngular = ConvertAngleToBull(in.maxAngular);
+	out.maxDampAngular = ConvertAngleToBull(in.maxDampAngular);
 	out.dampFactor = in.dampFactor;
 }
 
@@ -107,7 +107,8 @@ float ComputeShadowControllerHL(CPhysicsObject *pObject, const hlshadowcontrol_p
 static bool IsEqual(const btQuaternion &pt0, const btQuaternion &pt1a) {
 	btQuaternion pt1 = pt0.nearest(pt1a);
 
-	return pt0.normalized().dot(pt1.normalized()) >= 1 - SIMD_EPSILON;
+	btScalar dot = pt0.normalized().dot(pt1.normalized());
+	return dot >= 1 - SIMD_EPSILON || dot <= -1 + SIMD_EPSILON;
 }
 
 static bool IsEqual(const btVector3 &pt0, const btVector3 &pt1) {
@@ -201,7 +202,8 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 		available -= bullSpeed;
 	}
 
-	m_shadow.maxSpeed = available.absolute();
+	// FIXME: This is wrong. Rewrite this later.
+	m_shadow.maxSpeed = available.length();
 
 	//----------------
 	// Angular
@@ -220,7 +222,8 @@ void CShadowController::MaxSpeed(float maxSpeed, float maxAngularSpeed) {
 		availableAngular -= bullAngular;
 	}
 
-	m_shadow.maxAngular = availableAngular.absolute();
+	// FIXME: This is wrong. Rewrite this later.
+	m_shadow.maxAngular = availableAngular.length();
 }
 
 void CShadowController::StepUp(float height) {

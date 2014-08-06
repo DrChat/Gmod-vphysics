@@ -13,8 +13,10 @@ struct shadowcontrol_params_t {
 
 	btVector3		targetPosition;
 	btQuaternion	targetRotation;
-	btVector3		maxSpeed;
-	btVector3		maxAngular;
+	btScalar		maxSpeed;
+	btScalar		maxDampSpeed;
+	btScalar		maxAngular;
+	btScalar		maxDampAngular;
 	btVector3		lastPosition;
 	float			dampFactor;
 	float			teleportDistance;
