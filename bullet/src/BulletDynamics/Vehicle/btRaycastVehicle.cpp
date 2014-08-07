@@ -302,6 +302,7 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 
 	updateSuspension(step);
 	
+	// Apply the suspension (why not apply it in updateSuspension like updateFriction does?)
 	for (i = 0; i < m_wheelInfo.size(); i++)
 	{
 		//apply suspension force
@@ -309,15 +310,26 @@ void btRaycastVehicle::updateVehicle( btScalar step )
 		
 		btScalar suspensionForce = wheel.m_wheelsSuspensionForce;
 		
+		// Clamp it
 		if (suspensionForce > wheel.m_maxSuspensionForce)
 		{
 			suspensionForce = wheel.m_maxSuspensionForce;
 		}
 
+		btRigidBody *pGround = (btRigidBody *)wheel.m_raycastInfo.m_groundObject;
+
 		btVector3 impulse = wheel.m_raycastInfo.m_contactNormalWS * suspensionForce * step;
 		btVector3 relpos = wheel.m_raycastInfo.m_contactPointWS - getRigidBody()->getCenterOfMassPosition();
 		
-		getRigidBody()->applyImpulse(impulse, relpos);
+		m_chassisBody->applyImpulse(impulse, relpos);
+
+		if (pGround && !pGround->isStaticOrKinematicObject()) {
+			btVector3 relPosGround = wheel.m_raycastInfo.m_contactPointWS - pGround->getCenterOfMassPosition();
+			btVector3 impulseGround = impulse * m_chassisBody->getInvMass();
+			impulseGround *= 1 / pGround->getInvMass();
+
+			pGround->applyImpulse(-impulseGround, relPosGround);
+		}
 	}
 	
 	updateFriction(step);
@@ -647,17 +659,23 @@ void	btRaycastVehicle::updateFriction(btScalar	timeStep)
 
 		if (m_forwardImpulse[wheel] != btScalar(0.))
 		{
-			m_chassisBody->applyImpulse(m_forwardWS[wheel] * (m_forwardImpulse[wheel]), rel_pos);
+			btRigidBody *pGround = (btRigidBody *)m_wheelInfo[wheel].m_raycastInfo.m_groundObject;
+
+			btVector3 impulse = m_forwardWS[wheel] * m_forwardImpulse[wheel];
+			m_chassisBody->applyImpulse(impulse, rel_pos);
+
+			// Apply an equal force against the ground
+			if (pGround && !pGround->isStaticOrKinematicObject()) {
+				btVector3 relPosGround = wheelInfo.m_raycastInfo.m_contactPointWS - pGround->getCenterOfMassPosition();
+				btVector3 impulseGround = impulse * m_chassisBody->getInvMass();
+				impulseGround *= 1 / pGround->getInvMass();
+
+				pGround->applyImpulse(-impulseGround, relPosGround);
+			}
 		}
 
 		if (m_sideImpulse[wheel] != btScalar(0.))
 		{
-			class btRigidBody* groundObject = (class btRigidBody*) m_wheelInfo[wheel].m_raycastInfo.m_groundObject;
-
-			btVector3 rel_pos2 = wheelInfo.m_raycastInfo.m_contactPointWS - 
-				groundObject->getCenterOfMassPosition();
-
-					
 			btVector3 sideImp = wheelInfo.m_raycastInfo.m_wheelAxleWS * m_sideImpulse[wheel];
 
 #if defined ROLLING_INFLUENCE_FIX // fix. It only worked if car's up was along Y - VT.
@@ -668,8 +686,19 @@ void	btRaycastVehicle::updateFriction(btScalar	timeStep)
 #endif
 			m_chassisBody->applyImpulse(sideImp, rel_pos);
 
-			//apply friction impulse on the ground
-			groundObject->applyImpulse(-sideImp, rel_pos2);
+			btRigidBody* groundObject = (btRigidBody*) m_wheelInfo[wheel].m_raycastInfo.m_groundObject;
+
+			if (groundObject && !groundObject->isStaticOrKinematicObject())
+			{
+				btVector3 rel_pos2 = wheelInfo.m_raycastInfo.m_contactPointWS -
+					groundObject->getCenterOfMassPosition();
+
+				btVector3 sideImp2 = sideImp * m_chassisBody->getInvMass();
+				sideImp2 *= 1 / groundObject->getInvMass();
+
+				//apply friction impulse on the ground
+				groundObject->applyImpulse(-sideImp2, rel_pos2);
+			}
 		}
 	}
 }
