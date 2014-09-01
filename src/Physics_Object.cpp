@@ -672,12 +672,14 @@ void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &w
 	}
 	Wake();
 
-	Vector local;
-	WorldToLocal(&local, worldPosition);
+	// Calculate the offset relative to us in world space
+	btVector3 worldPos;
+	ConvertPosToBull(worldPosition, worldPos);
+	btVector3 offset = worldPos - m_pObject->getWorldTransform().getOrigin();
 
-	btVector3 force, offset;
+	// This is also in world space
+	btVector3 force;
 	ConvertForceImpulseToBull(forceVector, force);
-	ConvertPosToBull(local, offset);
 
 	btVector3 linVel, angVel;
 	linVel = m_pObject->getLinearVelocity();
