@@ -917,7 +917,7 @@ void	btDiscreteDynamicsWorld::createPredictiveContacts(btScalar timeStep)
 			
 			btScalar squareMotion = (predictedTrans.getOrigin()-body->getWorldTransform().getOrigin()).length2();
 
-			if (body->getCollisionShape()->isConvex() && getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
+			if (0 && body->getCollisionShape()->isConvex() && getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{
 				BT_PROFILE("predictive convexSweepTest");
 				gNumClampedCcdMotions++;
@@ -997,7 +997,7 @@ void	btDiscreteDynamicsWorld::integrateTransforms(btScalar timeStep)
 			
 			btScalar squareMotion = (predictedTrans.getOrigin()-body->getWorldTransform().getOrigin()).length2();
 
-			if (body->getCollisionShape()->isConvex() && getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
+			if (0 && body->getCollisionShape()->isConvex() && getDispatchInfo().m_useContinuous && body->getCcdSquareMotionThreshold() && body->getCcdSquareMotionThreshold() < squareMotion)
 			{
 				BT_PROFILE("CCD motion clamping");
 #ifdef USE_STATIC_ONLY
@@ -1254,56 +1254,6 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 					btVector3 axis1 = tr.getBasis().getColumn(1);
 					getDebugDrawer()->drawArc(pivot, normal, axis1, dbgDrawSize, dbgDrawSize, -twa-tws, -twa+tws, btVector3(0,0,0), true);
 
-				}
-			}
-			break;
-
-		case D6_SPRING_CONSTRAINT_TYPE:
-		case D6_CONSTRAINT_TYPE:
-			{
-				btGeneric6DofConstraint* p6DOF = (btGeneric6DofConstraint*)constraint;
-				btTransform tr = p6DOF->getCalculatedTransformA();
-				if(drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
-				tr = p6DOF->getCalculatedTransformB();
-				if(drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
-				if(drawLimits) 
-				{
-					tr = p6DOF->getCalculatedTransformA();
-					const btVector3& center = p6DOF->getCalculatedTransformB().getOrigin();
-					btVector3 up = tr.getBasis().getColumn(2);
-					btVector3 axis = tr.getBasis().getColumn(0);
-					btScalar minTh = p6DOF->getRotationalLimitMotor(1)->m_loLimit;
-					btScalar maxTh = p6DOF->getRotationalLimitMotor(1)->m_hiLimit;
-					btScalar minPs = p6DOF->getRotationalLimitMotor(2)->m_loLimit;
-					btScalar maxPs = p6DOF->getRotationalLimitMotor(2)->m_hiLimit;
-					getDebugDrawer()->drawSpherePatch(center, up, axis, dbgDrawSize * btScalar(.9f), minTh, maxTh, minPs, maxPs, btVector3(0,0,0));
-					axis = tr.getBasis().getColumn(1);
-					btScalar ay = p6DOF->getAngle(1);
-					btScalar az = p6DOF->getAngle(2);
-					btScalar cy = btCos(ay);
-					btScalar sy = btSin(ay);
-					btScalar cz = btCos(az);
-					btScalar sz = btSin(az);
-					btVector3 ref;
-					ref[0] = cy*cz*axis[0] + cy*sz*axis[1] - sy*axis[2];
-					ref[1] = -sz*axis[0] + cz*axis[1];
-					ref[2] = cz*sy*axis[0] + sz*sy*axis[1] + cy*axis[2];
-					tr = p6DOF->getCalculatedTransformB();
-					btVector3 normal = -tr.getBasis().getColumn(0);
-					btScalar minFi = p6DOF->getRotationalLimitMotor(0)->m_loLimit;
-					btScalar maxFi = p6DOF->getRotationalLimitMotor(0)->m_hiLimit;
-					if(minFi > maxFi)
-					{
-						getDebugDrawer()->drawArc(center, normal, ref, dbgDrawSize, dbgDrawSize, -SIMD_PI, SIMD_PI, btVector3(0,0,0), false);
-					}
-					else if(minFi < maxFi)
-					{
-						getDebugDrawer()->drawArc(center, normal, ref, dbgDrawSize, dbgDrawSize, minFi, maxFi, btVector3(0,0,0), true);
-					}
-					tr = p6DOF->getCalculatedTransformA();
-					btVector3 bbMin = p6DOF->getTranslationalLimitMotor()->m_lowerLimit;
-					btVector3 bbMax = p6DOF->getTranslationalLimitMotor()->m_upperLimit;
-					getDebugDrawer()->drawBox(bbMin, bbMax, tr, btVector3(0,0,0));
 				}
 			}
 			break;
