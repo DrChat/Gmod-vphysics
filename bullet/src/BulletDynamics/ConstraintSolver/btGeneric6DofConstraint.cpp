@@ -337,34 +337,6 @@ btScalar btTranslationalLimitMotor::solveLinearAxis(
 
 //////////////////////////// End btTranslationalLimitMotor ////////////////////////////////////
 
-// This code is adapted from http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
-void quatToEulerXYZ(const btQuaternion &quat, btVector3 &vec) {
-	btScalar sqw = quat.w() * quat.w();
-	btScalar sqx = quat.x() * quat.x();
-	btScalar sqy = quat.y() * quat.y();
-	btScalar sqz = quat.z() * quat.z();
-
-	btScalar len = quat.length2();
-	btScalar test = -quat.z() * quat.y() + -quat.x() * quat.w();
-	if (test > 0.499 * len) { // Singularity at north pole
-		vec.m_floats[0] = 0;
-		vec.m_floats[1] = SIMD_HALF_PI;
-		vec.m_floats[2] = -2 * btAtan2(-quat.z(), quat.w());
-		return;
-	}
-
-	if (test < -0.499 * len) { // Singularity at south pole
-		vec.m_floats[0] = 0;
-		vec.m_floats[1] = -SIMD_HALF_PI;
-		vec.m_floats[2] = 2 * btAtan2(-quat.z(), quat.w());
-		return;
-	}
-
-	vec.m_floats[0] = btAtan2(2 * quat.y() * quat.w() - 2 * quat.x() * -quat.x(), -sqz - sqy + sqx + sqw);
-	vec.m_floats[1] = btAsin(2 * test / len);
-	vec.m_floats[2] = btAtan2(2 * -quat.z() * quat.w() - 2 * quat.y() * -quat.x(), sqz + sqy + sqx + sqw);
-}
-
 void btGeneric6DofConstraint::debugDraw(btIDebugDraw *drawer)
 {
 	bool drawFrames = (drawer->getDebugMode() & btIDebugDraw::DBG_DrawConstraints) != 0;
@@ -409,32 +381,6 @@ void btGeneric6DofConstraint::debugDraw(btIDebugDraw *drawer)
 		btVector3 bbMax = getTranslationalLimitMotor()->m_upperLimit;
 		drawer->drawBox(bbMin, bbMax, tr, btVector3(0, 0, 0));
 	}
-
-	// Draw the calculated axis
-	/*
-	btMatrix3x3 calcAxes = m_calculatedAxis;
-	calcAxes = calcAxes.transpose(); // lol transpose to get into the right format
-	drawer->drawTransform(btTransform(calcAxes, m_calculatedTransformA.getOrigin()), m_dbgDrawSize);
-	
-	char str[512];
-	sprintf(str, "% .03f % .03f % .03f", m_calculatedAxisAngleDiff[0], m_calculatedAxisAngleDiff[1], m_calculatedAxisAngleDiff[2]);
-	drawer->draw3dText(m_calculatedTransformA.getOrigin(), str);
-
-	// Old way to calculate axes
-	btMatrix3x3 oldAxes = btMatrix3x3::getIdentity();
-	btVector3 axis0 = m_calculatedTransformB.getBasis().getColumn(0); // B x
-	btVector3 axis2 = m_calculatedTransformA.getBasis().getColumn(2); // A z
-
-	oldAxes[1] = axis2.cross(axis0); // A z cross B x
-	oldAxes[0] = oldAxes[1].cross(axis2); // calc Y cross A z
-	oldAxes[2] = axis0.cross(oldAxes[1]); // B x cross calc Y
-
-	for (int i = 0; i < 3; i++)
-		oldAxes[i].normalize();
-
-	oldAxes = oldAxes.transpose();
-	//drawer->drawTransform(btTransform(oldAxes, m_calculatedTransformA.getOrigin()), m_dbgDrawSize * 0.5);
-	*/
 }
 
 void btGeneric6DofConstraint::calculateAngleInfo()
