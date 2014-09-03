@@ -504,33 +504,35 @@ void btGeneric6DofConstraint::buildJacobian()
 
 		btVector3 normalWorld;
 		//linear part
-		for (i=0;i<3;i++)
-		{
-			if (m_linearLimits.isLimited(i))
+		if (!m_angularOnly)
+			for (i=0;i<3;i++)
 			{
-				if (m_useLinearReferenceFrameA)
-					normalWorld = m_calculatedTransformA.getBasis().getColumn(i);
-				else
-					normalWorld = m_calculatedTransformB.getBasis().getColumn(i);
+				if (m_linearLimits.isLimited(i))
+				{
+					if (m_useLinearReferenceFrameA)
+						normalWorld = m_calculatedTransformA.getBasis().getColumn(i);
+					else
+						normalWorld = m_calculatedTransformB.getBasis().getColumn(i);
 
-				buildLinearJacobian(
-					m_jacLinear[i], normalWorld ,
-					pivotAInW, pivotBInW);
+					buildLinearJacobian(
+						m_jacLinear[i], normalWorld ,
+						pivotAInW, pivotBInW);
 
+				}
 			}
-		}
 
 		// angular part
-		for (i=0;i<3;i++)
-		{
-			//calculates error angle
-			if (testAngularLimitMotor(i))
+		if (!m_linearOnly)
+			for (i=0;i<3;i++)
 			{
-				normalWorld = this->getAxis(i);
-				// Create angular atom
-				buildAngularJacobian(m_jacAng[i], normalWorld);
+				//calculates error angle
+				if (testAngularLimitMotor(i))
+				{
+					normalWorld = this->getAxis(i);
+					// Create angular atom
+					buildAngularJacobian(m_jacAng[i], normalWorld);
+				}
 			}
-		}
 
 	}
 #endif //__SPU__
@@ -551,24 +553,28 @@ void btGeneric6DofConstraint::getInfo1 (btConstraintInfo1* info)
 		info->m_numConstraintRows = 0;
 		info->nub = 6;
 		int i;
+
 		//test linear limits
-		for (i = 0; i < 3; i++)
-		{
-			if (m_linearLimits.needApplyForce(i))
+		if (!m_angularOnly)
+			for (i = 0; i < 3; i++)
 			{
-				info->m_numConstraintRows++;
-				info->nub--;
+				if (m_linearLimits.needApplyForce(i))
+				{
+					info->m_numConstraintRows++;
+					info->nub--;
+				}
 			}
-		}
+
 		//test angular limits
-		for (i = 0; i < 3; i++)
-		{
-			if (testAngularLimitMotor(i))
+		if (!m_linearOnly)
+			for (i = 0; i < 3; i++)
 			{
-				info->m_numConstraintRows++;
-				info->nub--;
+				if (testAngularLimitMotor(i))
+				{
+					info->m_numConstraintRows++;
+					info->nub--;
+				}
 			}
-		}
 	}
 }
 
@@ -600,13 +606,23 @@ void btGeneric6DofConstraint::getInfo2 (btConstraintInfo2* info)
 
 	if(m_useOffsetForConstraintFrame)
 	{ // for stability better to solve angular limits first
-		int row = setAngularLimits(info, 0, transA, transB, linVelA, linVelB, angVelA, angVelB);
-		setLinearLimits(info, row, transA, transB, linVelA, linVelB, angVelA, angVelB);
+		int row = 0;
+
+		if (!m_linearOnly)
+			row = setAngularLimits(info, 0, transA, transB, linVelA, linVelB, angVelA, angVelB);
+
+		if (!m_angularOnly)
+			row = setLinearLimits(info, row, transA, transB, linVelA, linVelB, angVelA, angVelB);
 	}
 	else
 	{ // leave old version for compatibility
-		int row = setLinearLimits(info, 0, transA, transB, linVelA, linVelB, angVelA, angVelB);
-		setAngularLimits(info, row, transA, transB, linVelA, linVelB, angVelA, angVelB);
+		int row = 0;
+
+		if (!m_linearOnly)
+			row = setLinearLimits(info, 0, transA, transB, linVelA, linVelB, angVelA, angVelB);
+
+		if (!m_angularOnly)
+			row = setAngularLimits(info, row, transA, transB, linVelA, linVelB, angVelA, angVelB);
 	}
 
 }

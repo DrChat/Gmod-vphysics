@@ -316,6 +316,10 @@ protected:
 	btScalar	m_factA;
 	btScalar	m_factB;
 	bool		m_hasStaticBody;
+
+	// Angular/Linear limits only? Cannot be both!
+	bool		m_angularOnly;
+	bool		m_linearOnly;
 	
 	btVector3 m_AnchorPos; // point betwen pivots of bodies A and B to solve linear axes
 
@@ -446,6 +450,18 @@ public:
 	btScalar getRelativePivotPosition(int axis_index) const;
 
 	void setFrames(const btTransform & frameA, const btTransform & frameB);
+
+	void setLinearOnly(bool linearOnly)
+	{
+		btAssert(!m_angularOnly); // Can't be both!
+		m_linearOnly = linearOnly;
+	}
+
+	void setAngularOnly(bool angularOnly)
+	{
+		btAssert(!m_linearOnly); // Can't be both!
+		m_angularOnly = angularOnly;
+	}
 
 	//! Test angular limit.
 	/*!
