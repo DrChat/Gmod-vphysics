@@ -795,7 +795,7 @@ CPhysicsConstraint *CreateRagdollConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	}
 
 	if (ragdoll.onlyAngularLimits) {
-		//pConstraint->set
+		pConstraint->setAngularOnly(true);
 	}
 	
 	return new CPhysicsConstraint(pEnv, pGroup, pObjRef, pObjAtt, pConstraint, CONSTRAINT_RAGDOLL);

@@ -39,7 +39,9 @@ btGeneric6DofConstraint::btGeneric6DofConstraint(btRigidBody& rbA, btRigidBody& 
 m_useLinearReferenceFrameA(useLinearReferenceFrameA),
 m_useOffsetForConstraintFrame(D6_USE_FRAME_OFFSET),
 m_flags(0),
-m_useSolveConstraintObsolete(D6_USE_OBSOLETE_METHOD)
+m_useSolveConstraintObsolete(D6_USE_OBSOLETE_METHOD),
+m_angularOnly(false),
+m_linearOnly(false)
 {
 	calculateTransforms();
 }
@@ -50,7 +52,9 @@ btGeneric6DofConstraint::btGeneric6DofConstraint(btRigidBody& rbB, const btTrans
 		m_useLinearReferenceFrameA(useLinearReferenceFrameB),
 		m_useOffsetForConstraintFrame(D6_USE_FRAME_OFFSET),
 		m_flags(0),
-		m_useSolveConstraintObsolete(false)
+		m_useSolveConstraintObsolete(false),
+		m_angularOnly(false),
+		m_linearOnly(false)
 {
 	///not providing rigidbody A means implicitly using worldspace for body A
 	m_frameInA = rbB.getCenterOfMassTransform() * m_frameInB;
