@@ -463,6 +463,16 @@ public:
 		m_angularOnly = angularOnly;
 	}
 
+	bool isLinearOnly()
+	{
+		return m_linearOnly;
+	}
+
+	bool isAngularOnly()
+	{
+		return m_angularOnly;
+	}
+
 	//! Test angular limit.
 	/*!
 	Calculates angular correction and returns true if limit needs to be corrected.
