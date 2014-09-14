@@ -101,7 +101,6 @@ class CCarRaycaster : public btVehicleRaycaster {
 
 		void *castRay(btWheelInfo *wheel, const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CIgnoreObjectRayResultCallback rayCallback(m_pController->GetBody()->GetObject(), from, to);
-			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
 			
 			m_pWorld->rayTest(from, to, rayCallback);
 			
@@ -444,6 +443,7 @@ void CPhysicsVehicleController::UpdateSteering(vehicle_controlparams_t &controls
 void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, float dt) {
 	// Update the operating params
 	// If speed is high negative, the brake will be applied!
+	// FIXME: This does not report velocity relative to the ground! Should we calculate this from wheel rotation speed?
 	float fSpeed = m_pVehicle->getCurrentSpeedKmHour();
 	m_vehicleState.speed = ConvertDistanceToHL(KMH2MS(-fSpeed));
 
@@ -470,6 +470,10 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 			m_vehicleState.wheelsInContact++;
 		else
 			m_vehicleState.wheelsNotInContact++;
+
+		// TODO: Skidding
+		// Wheel velocity at the contact point with the ground should be 0 relative to ground velocity
+		// Any delta is put into the state's skidSpeed and the surface props of the ground are put in skidMaterial
 	}
 }
 #endif
