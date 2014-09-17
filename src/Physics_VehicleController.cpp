@@ -79,9 +79,14 @@ struct CIgnoreObjectRayResultCallback : public btCollisionWorld::ClosestRayResul
 		btRigidBody *pBody = (btRigidBody *)proxy0->m_clientObject;
 		CPhysicsObject *pPhys = (CPhysicsObject *)pBody->getUserPointer();
 
+		// Cheating is allowed, right? Gonna guess this is our chassis just because.
+		CPhysicsObject *pChassis = (CPhysicsObject *)m_pIgnoreObject->getUserPointer();
+
 		if (pBody && pBody == m_pIgnoreObject) {
 			return false;
 		} else if (pPhys && !pPhys->IsCollisionEnabled()) {
+			return false;
+		} else if (!pChassis->GetVPhysicsEnvironment()->GetCollisionSolver()->NeedsCollision(pChassis, pPhys)) {
 			return false;
 		}
 
@@ -101,7 +106,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 
 		void *castRay(btWheelInfo *wheel, const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CIgnoreObjectRayResultCallback rayCallback(m_pController->GetBody()->GetObject(), from, to);
-			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
+			//rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
 			
 			m_pWorld->rayTest(from, to, rayCallback);
 			
@@ -455,6 +460,7 @@ void CPhysicsVehicleController::UpdateEngine(vehicle_controlparams_t &controls, 
 void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, float dt) {
 	m_vehicleState.wheelsInContact = 0;
 	m_vehicleState.wheelsNotInContact = 0;
+	m_vehicleState.skidSpeed = 0;
 
 	for (int i = 0; i < m_iWheelCount; i++) {
 		btTransform bullTransform = m_pVehicle->getWheelTransformWS(i);
@@ -474,7 +480,19 @@ void CPhysicsVehicleController::UpdateWheels(vehicle_controlparams_t &controls, 
 
 		// TODO: Skidding
 		// Wheel velocity at the contact point with the ground should be 0 relative to ground velocity
-		// Any delta is put into the state's skidSpeed and the surface props of the ground are put in skidMaterial
+		// Largest of the four wheel's deltas is put into the state's skidSpeed and the surface props of the ground are put in skidMaterial
+		if (wheel.m_raycastInfo.m_groundObject) {
+			btVector3 wheelRelPos = wheel.m_raycastInfo.m_hardPointWS - btVector3(0, wheel.m_raycastInfo.m_suspensionLength + wheel.m_wheelsRadius, 0);
+
+			btVector3 velAtGround = m_pBody->GetObject()->getVelocityInLocalPoint(wheelRelPos);
+
+			// We're cheating a bit here, since this is a raycast vehicle with unrealistic math the wheels absolutely cannot skid
+			// in the forward direction, so we'll only count sidewards speed as skidding
+			float skidSpeed = fabs(wheel.m_raycastInfo.m_wheelAxleWS.dot(velAtGround));
+			if (ConvertDistanceToHL(skidSpeed) > m_vehicleState.skidSpeed) {
+				m_vehicleState.skidSpeed = ConvertDistanceToHL(skidSpeed);
+			}
+		}
 	}
 }
 #endif
