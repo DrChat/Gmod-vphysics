@@ -959,17 +959,19 @@ static ConVar cvar_substeps("vphysics_substeps", "4", FCVAR_REPLICATED, "Sets th
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	Assert(m_pBulletEnvironment);
 
-	// This stuff already done before physics frame
-	//if (deltaTime > 1.0 || deltaTime < 0.0) {
-	//	deltaTime = 0;
-	//} else if (deltaTime > 0.1) {
-	//	deltaTime = 0.1f;
-	//}
+	if (deltaTime > 1.0 || deltaTime < 0.0) {
+		deltaTime = 0;
+	} else if (deltaTime > 0.1) {
+		deltaTime = 0.1f;
+	}
 
 	// sim PSI Current: How many substeps are done in a single simulation step
 	m_simPSICurrent = cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1;
 	
-	if (!btFuzzyZero(deltaTime)) {
+	// Simulate no less than 1 ms
+	if (deltaTime > 0.0001) {
+		// Now mark us as being in simulation. This is used for callbacks from bullet mid-simulation
+		// so we don't end up doing stupid things like deleting objects still in use
 		m_inSimulation = true;
 
 		// We're scaling the timestep down by the number of substeps to have a higher precision and take
@@ -979,7 +981,8 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		m_numSubSteps = m_simPSICurrent;
 		
 		// Returns the number of substeps executed
-		m_pBulletEnvironment->stepSimulation(deltaTime, cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1, timestep);
+		// Not using deltaTime for the first parameter because the simulation may slow down/speed up depending on the game's tickrate
+		m_pBulletEnvironment->stepSimulation(m_timestep, cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1, timestep);
 
 		m_inSimulation = false;
 	}
