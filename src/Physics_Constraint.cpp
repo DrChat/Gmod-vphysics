@@ -556,11 +556,13 @@ void CPhysicsConstraint::SetAngularMotor(float rotSpeed, float maxAngularImpulse
 	}
 }
 
+// Unused.
 void CPhysicsConstraint::UpdateRagdollTransforms(const matrix3x4_t &constraintToReference, const matrix3x4_t &constraintToAttached) {
 	if (m_type != CONSTRAINT_RAGDOLL) return;
 	NOT_IMPLEMENTED
 }
 
+// Appears to be only used in debugging. Returns true if we fill the matrices I guess
 bool CPhysicsConstraint::GetConstraintTransform(matrix3x4_t *pConstraintToReference, matrix3x4_t *pConstraintToAttached) const {
 	if (!pConstraintToReference && !pConstraintToAttached) return false;
 
@@ -568,6 +570,7 @@ bool CPhysicsConstraint::GetConstraintTransform(matrix3x4_t *pConstraintToRefere
 	return false;
 }
 
+// Appears to be used in debugging only. Return value ignored in single use case.
 bool CPhysicsConstraint::GetConstraintParams(constraint_breakableparams_t *pParams) const {
 	if (!pParams) return false;
 
@@ -715,7 +718,6 @@ IPhysicsObject *CPhysicsSpring::GetEndObject() {
 * CREATION FUNCTIONS
 ************************/
 
-// NOT COMPLETE
 CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject *pReferenceObject, IPhysicsObject *pAttachedObject, springparams_t *spring) {
 	if (!spring) return NULL;
 
@@ -727,13 +729,14 @@ CPhysicsSpring *CreateSpringConstraint(CPhysicsEnvironment *pEnv, IPhysicsObject
 	ConvertPosToBull(spring->endPosition, bullAttPos);
 
 	if (!spring->useLocalPositions) {
-		// TODO: Convert from world to local
 		bullRefPos = rbA->getWorldTransform().inverse() * bullRefPos;
 		bullAttPos = rbB->getWorldTransform().inverse() * bullAttPos;
 	}
 
 	btScalar length = ConvertDistanceToBull(spring->naturalLength);
 
+	// FIXME: Does spring constant come in from half life as N/m or N/in?
+	// Also how is the damping value applied?
 	btSpringConstraint *pConstraint = new btSpringConstraint(*((CPhysicsObject *)pReferenceObject)->GetObject(), *((CPhysicsObject *)pAttachedObject)->GetObject(), bullRefPos, bullAttPos,
 																length, spring->constant, spring->onlyStretch, spring->damping);
 
