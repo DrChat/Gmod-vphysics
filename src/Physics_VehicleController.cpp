@@ -106,7 +106,7 @@ class CCarRaycaster : public btVehicleRaycaster {
 
 		void *castRay(btWheelInfo *wheel, const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result) {
 			CIgnoreObjectRayResultCallback rayCallback(m_pController->GetBody()->GetObject(), from, to);
-			//rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
+			rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest; // GJK has an issue of going through triangles
 			
 			m_pWorld->rayTest(from, to, rayCallback);
 			
