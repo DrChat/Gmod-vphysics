@@ -979,19 +979,14 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		// so we don't end up doing stupid things like deleting objects still in use
 		m_inSimulation = true;
 
-		// We're scaling the timestep down by the number of substeps to have a higher precision and take
-		// the same amount of time as a simulation with the requested timestep
-		// So: More substeps, the smaller the fixed timestep is
-		float timestep = cvar_substeps.GetInt() != 0 ? m_timestep / cvar_substeps.GetInt() : m_timestep;
 		m_subStepTime = m_timestep;
-		//m_numSubSteps = m_simPSICurrent;
 		
 		// Okay, how this fixed timestep shit works:
 		// The game sends in deltaTime which is the amount of time that has passed since the last frame
 		// Bullet will add the deltaTime to its internal counter
 		// When this internal counter exceeds m_timestep (param 3 to the below), the simulation will run for fixedTimeStep seconds
 		// If the internal counter does not exceed fixedTimeStep, bullet will just interpolate objects so the game can render them nice and happy
-		m_numSubSteps = m_pBulletEnvironment->stepSimulation(deltaTime, cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1, m_timestep);
+		m_numSubSteps = m_pBulletEnvironment->stepSimulation(deltaTime, 4, m_timestep, m_simPSICurrent);
 
 		// No longer in simulation!
 		m_inSimulation = false;

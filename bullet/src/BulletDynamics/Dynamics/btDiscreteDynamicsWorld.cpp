@@ -387,7 +387,7 @@ void	btDiscreteDynamicsWorld::synchronizeMotionStates()
 }
 
 
-int	btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
+int	btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep, int fixedSubSteps)
 {
 	startProfiling(timeStep);
 
@@ -443,8 +443,17 @@ int	btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 
 		for (int i = 0; i < clampedSimulationSteps; i++)
 		{
-			internalSingleStepSimulation(fixedTimeStep);
-			synchronizeMotionStates();
+			// number of substeps within the fixed step
+			if (fixedSubSteps > 1) {
+				btScalar step = fixedTimeStep / fixedSubSteps;
+				for (int j = 0; j < fixedSubSteps; j++) {
+					internalSingleStepSimulation(step);
+					synchronizeMotionStates();
+				}
+			} else {
+				internalSingleStepSimulation(fixedTimeStep);
+				synchronizeMotionStates();
+			}
 		}
 
 	} else

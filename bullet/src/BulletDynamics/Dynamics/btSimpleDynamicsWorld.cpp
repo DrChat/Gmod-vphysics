@@ -52,10 +52,11 @@ btSimpleDynamicsWorld::~btSimpleDynamicsWorld()
 		btAlignedFree( m_constraintSolver);
 }
 
-int		btSimpleDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
+int		btSimpleDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep, btScalar fixedSubSteps)
 {
 	(void)fixedTimeStep;
 	(void)maxSubSteps;
+	(void)fixedSubSteps;
 
 
 	///apply gravity, predict motion

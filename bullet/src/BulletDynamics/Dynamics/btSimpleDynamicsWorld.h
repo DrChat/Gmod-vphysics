@@ -48,7 +48,7 @@ public:
 	virtual ~btSimpleDynamicsWorld();
 		
 	///maxSubSteps/fixedTimeStep for interpolation is currently ignored for btSimpleDynamicsWorld, use btDiscreteDynamicsWorld instead
-	virtual int	stepSimulation( btScalar timeStep, int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.));
+	virtual int	stepSimulation( btScalar timeStep, int maxSubSteps=1, btScalar fixedTimeStep=btScalar(1.)/btScalar(60.), btScalar fixedSubSteps=1);
 
 	virtual void	setGravity(const btVector3& gravity);
 
