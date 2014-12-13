@@ -959,6 +959,11 @@ static ConVar cvar_substeps("vphysics_substeps", "4", FCVAR_REPLICATED, "Sets th
 void CPhysicsEnvironment::Simulate(float deltaTime) {
 	Assert(m_pBulletEnvironment);
 
+	// Input deltaTime is how many seconds have elapsed since the previous frame
+	// phys_timescale can scale this parameter however...
+	// Can cause physics to slow down on the client environment when the game's window is not in focus
+	// Also is affected by the tickrate as well
+
 	if (deltaTime > 1.0 || deltaTime < 0.0) {
 		deltaTime = 0;
 	} else if (deltaTime > 0.1) {
@@ -976,14 +981,19 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 
 		// We're scaling the timestep down by the number of substeps to have a higher precision and take
 		// the same amount of time as a simulation with the requested timestep
+		// So: More substeps, the smaller the fixed timestep is
 		float timestep = cvar_substeps.GetInt() != 0 ? m_timestep / cvar_substeps.GetInt() : m_timestep;
-		m_subStepTime = timestep;
-		m_numSubSteps = m_simPSICurrent;
+		m_subStepTime = m_timestep;
+		//m_numSubSteps = m_simPSICurrent;
 		
-		// Returns the number of substeps executed
-		// Not using deltaTime for the first parameter because the simulation may slow down/speed up depending on the game's tickrate
-		m_pBulletEnvironment->stepSimulation(m_timestep, cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1, timestep);
+		// Okay, how this fixed timestep shit works:
+		// The game sends in deltaTime which is the amount of time that has passed since the last frame
+		// Bullet will add the deltaTime to its internal counter
+		// When this internal counter exceeds m_timestep (param 3 to the below), the simulation will run for fixedTimeStep seconds
+		// If the internal counter does not exceed fixedTimeStep, bullet will just interpolate objects so the game can render them nice and happy
+		m_numSubSteps = m_pBulletEnvironment->stepSimulation(deltaTime, cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1, m_timestep);
 
+		// No longer in simulation!
 		m_inSimulation = false;
 	}
 

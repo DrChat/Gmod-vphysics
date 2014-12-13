@@ -476,6 +476,9 @@ void CPhysicsObject::SetPosition(const Vector &worldPosition, const QAngle &angl
 
 	m_pObject->setWorldTransform(trans * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
+	// Update the motion state too...
+	((btMassCenterMotionState *)m_pObject->getMotionState())->setGraphicTransform(trans);
+
 	// Assumed this is the behavior of IVP. If you teleport an object, you don't want it to be stupidly frozen in the air.
 	// Change this if behavior of IVP is different!
 	if (isTeleport)
@@ -487,6 +490,9 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTelepor
 	ConvertMatrixToBull(matrix, trans);
 	m_pObject->setWorldTransform(trans * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset);
 
+	// Update the motion state too...
+	((btMassCenterMotionState *)m_pObject->getMotionState())->setGraphicTransform(trans);
+
 	if (isTeleport)
 		m_pObject->activate();
 }
@@ -494,7 +500,8 @@ void CPhysicsObject::SetPositionMatrix(const matrix3x4_t &matrix, bool isTelepor
 void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 	if (!worldPosition && !angles) return;
 
-	btTransform transform = m_pObject->getWorldTransform() * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset.inverse();
+	btTransform transform;
+	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
 	if (worldPosition) ConvertPosToHL(transform.getOrigin(), *worldPosition);
 	if (angles) ConvertRotationToHL(transform.getBasis(), *angles);
 }
@@ -502,7 +509,8 @@ void CPhysicsObject::GetPosition(Vector *worldPosition, QAngle *angles) const {
 void CPhysicsObject::GetPositionMatrix(matrix3x4_t *positionMatrix) const {
 	if (!positionMatrix) return;
 
-	btTransform transform = m_pObject->getWorldTransform() * ((btMassCenterMotionState *)m_pObject->getMotionState())->m_centerOfMassOffset.inverse();
+	btTransform transform;
+	((btMassCenterMotionState *)m_pObject->getMotionState())->getGraphicTransform(transform);
 	ConvertMatrixToHL(transform, *positionMatrix);
 }
 
@@ -706,7 +714,7 @@ void CPhysicsObject::ApplyForceOffset(const Vector &forceVector, const Vector &w
 	m_pObject->setAngularVelocity(angVel + deltaAng);
 }
 
-// FIXME: Is this in local or world space?
+// FIXME: Is torque in local or world space?
 void CPhysicsObject::ApplyTorqueCenter(const AngularImpulse &torque) {
 	if (!IsMoveable() || !IsMotionEnabled()) {
 		return;

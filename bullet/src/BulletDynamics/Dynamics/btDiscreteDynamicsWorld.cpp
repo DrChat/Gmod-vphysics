@@ -387,7 +387,7 @@ void	btDiscreteDynamicsWorld::synchronizeMotionStates()
 }
 
 
-int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
+int	btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
 {
 	startProfiling(timeStep);
 
@@ -397,22 +397,24 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 
 	if (maxSubSteps)
 	{
-		//fixed timestep with interpolation
+		// fixed timestep with interpolation
 		m_fixedTimeStep = fixedTimeStep;
 		m_localTime += timeStep;
 		if (m_localTime >= fixedTimeStep)
 		{
-			numSimulationSubSteps = int( m_localTime / fixedTimeStep);
-			m_localTime -= numSimulationSubSteps * fixedTimeStep;
+			numSimulationSubSteps = int(m_localTime / fixedTimeStep);
+			m_localTime -= numSimulationSubSteps * fixedTimeStep; // Subtract the amount of seconds we've simulated this frame...
 		}
 	} else
 	{
-		//variable timestep
+		// variable timestep
 		fixedTimeStep = timeStep;
 		m_localTime = m_latencyMotionStateInterpolation ? 0 : timeStep;
 		m_fixedTimeStep = 0;
+
 		if (btFuzzyZero(timeStep))
 		{
+			// Close enough to zero, so don't simulate.
 			numSimulationSubSteps = 0;
 			maxSubSteps = 0;
 		} else
@@ -432,9 +434,10 @@ int	btDiscreteDynamicsWorld::stepSimulation( btScalar timeStep, int maxSubSteps,
 	if (numSimulationSubSteps)
 	{
 		//clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
+		// Prevents some super small fixed timestep creating too many substeps
 		int clampedSimulationSteps = (numSimulationSubSteps > maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
 
-		saveKinematicState(fixedTimeStep*clampedSimulationSteps);
+		saveKinematicState(fixedTimeStep * clampedSimulationSteps);
 
 		applyGravity();
 
