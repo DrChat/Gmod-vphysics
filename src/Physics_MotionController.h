@@ -6,10 +6,11 @@
 
 #include "IController.h"
 
-class CPhysicsEnvironment;
-class CPhysicsObject;
+#include "Physics_Object.h"
 
-class CPhysicsMotionController : public IController, public IPhysicsMotionController
+class CPhysicsEnvironment;
+
+class CPhysicsMotionController : public IController, public IPhysicsMotionController, public IObjectEventListener
 {
 	public:
 										CPhysicsMotionController(IMotionEvent *pHandler, CPhysicsEnvironment *pEnv);
@@ -28,6 +29,7 @@ class CPhysicsMotionController : public IController, public IPhysicsMotionContro
 	public:
 		void							Tick(float deltaTime);
 		void							ObjectDestroyed(CPhysicsObject *pObject);
+
 	private:
 		IMotionEvent *					m_handler;
 		CUtlVector<CPhysicsObject *>	m_objectList;

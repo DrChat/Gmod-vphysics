@@ -4,12 +4,11 @@
 	#pragma once
 #endif
 
-class CPhysicsObject;
-class CPhysicsEnvironment;
-
-class CPhysicsFluidCallback;
-
 #include "IController.h"
+
+class CPhysicsEnvironment;
+class CPhysicsFluidCallback;
+class CPhysicsObject;
 
 class CPhysicsFluidController : public IPhysicsFluidController, public IController
 {
@@ -30,8 +29,6 @@ class CPhysicsFluidController : public IPhysicsFluidController, public IControll
 		void					Tick(float deltaTime);
 		void					ObjectRemoved(CPhysicsObject *pObject);
 		void					ObjectAdded(CPhysicsObject *pObject);
-
-		void					ObjectDestroyed(CPhysicsObject *pObject);
 
 		void					TransferToEnvironment(CPhysicsEnvironment *pDest);
 	private:

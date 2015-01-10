@@ -45,11 +45,12 @@ void CPhysicsMotionController::Tick(float deltaTime) {
 		Vector curVel, curAngVel;
 		pObject->GetVelocity(&curVel, &curAngVel);
 
-		switch(ret) {
+		switch (ret) {
 			case IMotionEvent::SIM_NOTHING: {
 				break;
 			}
 			case IMotionEvent::SIM_LOCAL_ACCELERATION: {
+				// Convert velocity to world space
 				Vector newVel;
 				pObject->LocalToWorldVector(&newVel, speed);
 
@@ -98,6 +99,7 @@ void CPhysicsMotionController::AttachObject(IPhysicsObject *pObject, bool checkI
 		return;
 
 	pPhys->AttachedToController(this);
+	pPhys->AttachEventListener(this);
 	m_objectList.AddToTail(pPhys);
 }
 
@@ -108,6 +110,7 @@ void CPhysicsMotionController::DetachObject(IPhysicsObject *pObject) {
 	if (!m_objectList.IsValidIndex(index)) return;
 
 	pPhys->DetachedFromController(this);
+	pPhys->DetachEventListener(this);
 	m_objectList.Remove(index);
 }
 

@@ -190,6 +190,9 @@ void CPhysicsFluidController::Tick(float dt) {
 		// Maybe have the points determined by the extents of the shape at 4 directions parallel to our surface
 		// Simulate buoyant force per convex or just on the compound?
 
+		// Simulate buoyant force per point submerged
+		// Divide it over all of the points that are submerged
+
 		// IVP calculates this force per triangle
 		btVector3 force = (m_fDensity * -body->getGravity() * vol) * pObject->GetBuoyancyRatio();
 		body->applyCentralForce(force);
@@ -211,10 +214,6 @@ void CPhysicsFluidController::ObjectRemoved(CPhysicsObject *pObject) {
 	// Don't send the callback on objects that are being removed
 	if (!pObject->IsBeingRemoved())
 		m_pEnv->HandleFluidEndTouch(this, pObject);
-}
-
-void CPhysicsFluidController::ObjectDestroyed(CPhysicsObject *) {
-	// Do nothing, our fluid callback will handle this
 }
 
 void CPhysicsFluidController::TransferToEnvironment(CPhysicsEnvironment *pDest) {

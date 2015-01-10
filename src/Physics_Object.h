@@ -29,6 +29,7 @@ struct btMassCenterMotionState : public btMotionState {
 	void setGraphicTransform(const btTransform &graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }			// HL -> Bullet
 };
 
+class CPhysicsObject;
 class IObjectEventListener {
 	public:
 		virtual void ObjectDestroyed(CPhysicsObject *pObject) {}

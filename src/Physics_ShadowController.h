@@ -6,7 +6,7 @@
 
 #include "IController.h"
 
-class CPhysicsObject;
+#include "Physics_Object.h"
 
 struct shadowcontrol_params_t {
 	shadowcontrol_params_t() {lastPosition.setZero();}
@@ -22,7 +22,7 @@ struct shadowcontrol_params_t {
 	float			teleportDistance;
 };
 
-class CShadowController : public IController, public IPhysicsShadowController
+class CShadowController : public IController, public IPhysicsShadowController, public IObjectEventListener
 {
 	public:
 		CShadowController(CPhysicsObject *pObject, bool allowTranslation, bool allowRotation);

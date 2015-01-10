@@ -15,8 +15,7 @@
 #include "tier0/memdbgon.h"
 
 float ComputeShadowControllerBull(btRigidBody *object, shadowcontrol_params_t &params, float secondsToArrival, float dt) {
-	// Compute the fraction of time we'll be operating on.
-	// This allows us to move the object within the requested time
+	// Fraction of the movement we need to complete by this tick
 	float fraction = 1;
 	if (secondsToArrival > 0) {
 		fraction = dt / secondsToArrival;
@@ -338,6 +337,8 @@ void CShadowController::AttachObject() {
 	}
 
 	body->setActivationState(DISABLE_DEACTIVATION);
+
+	m_pObject->AttachEventListener(this);
 }
 
 void CShadowController::DetachObject() {
@@ -354,6 +355,7 @@ void CShadowController::DetachObject() {
 
 	body->setActivationState(ACTIVE_TAG);
 
+	m_pObject->DetachEventListener(this);
 	m_pObject = NULL;
 }
 
