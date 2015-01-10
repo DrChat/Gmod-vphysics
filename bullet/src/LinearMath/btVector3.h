@@ -138,6 +138,17 @@ ATTRIBUTE_ALIGNED16(class) btVector3
 			m_floats[3] = btScalar(0.f);
 		}
 
+		/**@brief Construct from a single scalar
+		 * @param num Scalar value
+		 */
+		SIMD_FORCE_INLINE btVector3(const btScalar &s)
+		{
+			m_floats[0] = s;
+			m_floats[1] = s;
+			m_floats[2] = s;
+			m_floats[3] = 0;
+		}
+
 #if (defined(BT_USE_SSE_IN_API) && defined (BT_USE_SSE) )|| defined (BT_USE_NEON)
 		// Set Vector 
 		SIMD_FORCE_INLINE btVector3( btSimdFloat4 v)
