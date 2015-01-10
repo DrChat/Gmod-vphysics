@@ -85,14 +85,6 @@ CPhysicsObject::~CPhysicsObject() {
 			m_pEnv->DestroyFluidController((IPhysicsFluidController *)m_pFluidController);
 	}
 
-	for (int i = 0; i < m_pConstraintVec.Count(); i++) {
-		m_pConstraintVec[i]->ObjectDestroyed(this);
-	}
-
-	for (int i = 0; i < m_pControllers.Count(); i++) {
-		m_pControllers[i]->ObjectDestroyed(this);
-	}
-
 	for (int i = 0; i < m_pEventListeners.Count(); i++) {
 		m_pEventListeners[i]->ObjectDestroyed(this);
 	}
@@ -380,13 +372,21 @@ Vector CPhysicsObject::GetLocalGravity() const {
 void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
 	if (!speed && !rot) return;
 
-	m_pObject->setDamping(speed ? *speed : m_pObject->getLinearDamping(),
-						  rot ? *rot : m_pObject->getAngularDamping());
+	btScalar linSpeed = m_pObject->getLinearDamping();
+	btScalar angSpeed = m_pObject->getAngularDamping();
+
+	if (speed)
+		linSpeed = ConvertDistanceToBull(*speed);
+
+	if (rot)
+		angSpeed = ConvertAngleToBull(*rot);
+
+	m_pObject->setDamping(linSpeed, angSpeed);
 }
 
 void CPhysicsObject::GetDamping(float *speed, float *rot) const {
-	if (speed) *speed = m_pObject->getLinearDamping();
-	if (rot) *rot = m_pObject->getAngularDamping();
+	if (speed) *speed = ConvertDistanceToHL(m_pObject->getLinearDamping());
+	if (rot) *rot = ConvertAngleToHL(m_pObject->getAngularDamping());
 }
 
 void CPhysicsObject::SetDragCoefficient(float *pDrag, float *pAngularDrag) {
@@ -1182,7 +1182,8 @@ void CPhysicsObject::AttachEventListener(IObjectEventListener *pListener) {
 }
 
 void CPhysicsObject::DetachEventListener(IObjectEventListener *pListener) {
-	if (int listener = m_pEventListeners.Find(pListener) != -1) {
+	int listener;
+	if ((listener = m_pEventListeners.Find(pListener)) != -1) {
 		m_pEventListeners.Remove(listener);
 	}
 }
