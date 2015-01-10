@@ -7,6 +7,8 @@
 #include <vphysics/constraints.h>
 #include "vphysics/constraintsV32.h"
 
+#include "Physics_Object.h"
+
 class CPhysicsEnvironment;
 class CPhysicsConstraintGroup;
 class btSpringConstraint;
@@ -25,7 +27,7 @@ enum EConstraintType {
 	CONSTRAINT_USER
 };
 
-class CPhysicsConstraint : public IPhysicsConstraint {
+class CPhysicsConstraint : public IPhysicsConstraint, public IObjectEventListener {
 	public:
 		CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstraintGroup *pGroup, CPhysicsObject *pObject1, CPhysicsObject *pObject2, btTypedConstraint *pConstraint, EConstraintType type);
 		~CPhysicsConstraint();

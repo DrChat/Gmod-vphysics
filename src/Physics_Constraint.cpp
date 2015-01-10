@@ -326,7 +326,7 @@ class btSpringConstraint : public btPoint2PointConstraint {
 			btVector3 velB = m_rbB.getLinearVelocity();
 			btVector3 relVel = velB - velA;
 
-			// Delta
+			// Delta position
 			btVector3 del = posB - posA;
 			btScalar currDist = del.length();
 
@@ -483,11 +483,15 @@ CPhysicsConstraint::CPhysicsConstraint(CPhysicsEnvironment *pEnv, IPhysicsConstr
 
 	m_pConstraint->setUserConstraintPtr(this);
 
-	if (pReferenceObject)
+	if (pReferenceObject) {
 		pReferenceObject->AttachedToConstraint(this);
+		pReferenceObject->AttachEventListener(this);
+	}
 
-	if (pAttachedObject)
+	if (pAttachedObject) {
 		pAttachedObject->AttachedToConstraint(this);
+		pAttachedObject->AttachEventListener(this);
+	}
 
 	if (m_pGroup) {
 		m_pGroup->AddConstraint(this);
@@ -503,11 +507,15 @@ CPhysicsConstraint::~CPhysicsConstraint() {
 		m_bRemovedFromEnv = true;
 	}
 
-	if (m_pReferenceObject)
+	if (m_pReferenceObject) {
 		m_pReferenceObject->DetachedFromConstraint(this);
+		m_pReferenceObject->DetachEventListener(this);
+	}
 
-	if (m_pAttachedObject)
+	if (m_pAttachedObject) {
 		m_pAttachedObject->DetachedFromConstraint(this);
+		m_pAttachedObject->DetachEventListener(this);
+	}
 
 	if (m_pGroup) {
 		m_pGroup->RemoveConstraint(this);
@@ -596,6 +604,16 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 
 	if (pObject == m_pReferenceObject)
 		m_pReferenceObject = NULL;
+
+	if (m_pAttachedObject) {
+		m_pAttachedObject->DetachedFromConstraint(this);
+		m_pAttachedObject->DetachEventListener(this);
+	}
+
+	if (m_pReferenceObject) {
+		m_pReferenceObject->DetachedFromConstraint(this);
+		m_pReferenceObject->DetachEventListener(this);
+	}
 
 	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
 	bool notify = false; // Don't run the callback more than once!
