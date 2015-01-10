@@ -29,6 +29,11 @@ struct btMassCenterMotionState : public btMotionState {
 	void setGraphicTransform(const btTransform &graphTrans) { m_worldTrans = graphTrans * m_centerOfMassOffset; }			// HL -> Bullet
 };
 
+class IObjectEventListener {
+	public:
+		virtual void ObjectDestroyed(CPhysicsObject *pObject) {}
+};
+
 class CPhysicsObject : public IPhysicsObject32 {
 	public:
 											CPhysicsObject();
@@ -170,6 +175,9 @@ class CPhysicsObject : public IPhysicsObject32 {
 		void								AttachedToController(IController *pController);
 		void								DetachedFromController(IController *pController);
 
+		void								AttachEventListener(IObjectEventListener *pListener);
+		void								DetachEventListener(IObjectEventListener *pListener);
+
 		void								AddCallbackFlags(unsigned short flag);
 		void								RemoveCallbackFlags(unsigned short flag);
 
@@ -228,6 +236,7 @@ class CPhysicsObject : public IPhysicsObject32 {
 		CPhysicsFluidController *			m_pFluidController;
 		CUtlVector<CPhysicsConstraint *>	m_pConstraintVec;
 		CUtlVector<IController *>			m_pControllers;
+		CUtlVector<IObjectEventListener *>	m_pEventListeners;
 
 		int									m_iLastActivationState;
 };

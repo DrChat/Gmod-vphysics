@@ -92,6 +92,10 @@ CPhysicsObject::~CPhysicsObject() {
 	for (int i = 0; i < m_pControllers.Count(); i++) {
 		m_pControllers[i]->ObjectDestroyed(this);
 	}
+
+	for (int i = 0; i < m_pEventListeners.Count(); i++) {
+		m_pEventListeners[i]->ObjectDestroyed(this);
+	}
 	
 	if (m_pName)
 		delete [] m_pName;
@@ -372,6 +376,7 @@ Vector CPhysicsObject::GetLocalGravity() const {
 	return tmp;
 }
 
+// TODO: IVP interface took this as damping m/s rad/s rather than bullet's [0..1]
 void CPhysicsObject::SetDamping(const float *speed, const float *rot) {
 	if (!speed && !rot) return;
 
@@ -1170,6 +1175,16 @@ CPhysicsEnvironment *CPhysicsObject::GetVPhysicsEnvironment() {
 // UNEXPOSED
 btRigidBody *CPhysicsObject::GetObject() {
 	return m_pObject;
+}
+
+void CPhysicsObject::AttachEventListener(IObjectEventListener *pListener) {
+	m_pEventListeners.AddToTail(pListener);
+}
+
+void CPhysicsObject::DetachEventListener(IObjectEventListener *pListener) {
+	if (int listener = m_pEventListeners.Find(pListener) != -1) {
+		m_pEventListeners.Remove(listener);
+	}
 }
 
 // UNEXPOSED
