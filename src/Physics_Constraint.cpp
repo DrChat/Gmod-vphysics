@@ -605,16 +605,6 @@ void CPhysicsConstraint::ObjectDestroyed(CPhysicsObject *pObject) {
 	if (pObject == m_pReferenceObject)
 		m_pReferenceObject = NULL;
 
-	if (m_pAttachedObject) {
-		m_pAttachedObject->DetachedFromConstraint(this);
-		m_pAttachedObject->DetachEventListener(this);
-	}
-
-	if (m_pReferenceObject) {
-		m_pReferenceObject->DetachedFromConstraint(this);
-		m_pReferenceObject->DetachEventListener(this);
-	}
-
 	// Constraint is no longer valid due to one of its objects being removed, so stop simulating it.
 	bool notify = false; // Don't run the callback more than once!
 	if (!m_bRemovedFromEnv) {
