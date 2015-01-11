@@ -7,10 +7,15 @@
 #include <vphysics/player_controller.h>
 #include "IController.h"
 
+#include "Physics_Object.h"
+
 class CPhysicsEnvironment;
 class CPhysicsObject;
+class IPhysicsObject;
 
-class CPlayerController : public IController, public IPhysicsPlayerController
+class CPlayerControllerEventListener;
+
+class CPlayerController : public IController, public IPhysicsPlayerController, public IObjectEventListener
 {
 	public:
 		CPlayerController(CPhysicsEnvironment *pEnv, CPhysicsObject *pObject);
@@ -38,6 +43,8 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 	
 		// Unexposed functions
 	public:
+		CPhysicsObject *				GetGroundObject();
+
 		void							Tick(float deltaTime);
 		void							ObjectDestroyed(CPhysicsObject *pObject);
 
@@ -49,8 +56,11 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		void							CalculateVelocity(float dt);
 
 		bool							m_enable;
+
 		bool							m_onground;
 		CPhysicsObject *				m_pGround;
+		btVector3						m_groundPos;
+
 		CPhysicsObject *				m_pObject;
 		CPhysicsEnvironment *			m_pEnv;
 		btVector3						m_saveRot;
@@ -58,21 +68,23 @@ class CPlayerController : public IController, public IPhysicsPlayerController
 		float							m_maxDeltaPosition;
 		float							m_dampFactor;
 		float							m_secondsToArrival;
-		btVector3						m_maxSpeed;
+		btVector3						m_maxSpeed; // Maximum acceleration speed.
 		btVector3						m_currentSpeed;
 		btVector3						m_lastImpulse;
+		btVector3						m_inputVelocity;
+		btVector3						m_lastVel;
 		float							m_pushMassLimit;
 		float							m_pushSpeedLimit;
+		btVector3						m_targetPosition;
 
 		// Variables for future use as a kinematic controller.
 		btVector3						m_linVelocity;
 		btVector3						m_maxVelocity;
-		btVector3						m_targetPosition;
 
 		int								m_ticksSinceUpdate;
 };
 
-void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping);
+void ComputeController(btVector3 &currentSpeed, const btVector3 &delta, const btVector3 &maxSpeed, float scaleDelta, float damping, btVector3 *accelOut = NULL);
 
 CPlayerController *CreatePlayerController(CPhysicsEnvironment *pEnv, IPhysicsObject *pObject);
 
