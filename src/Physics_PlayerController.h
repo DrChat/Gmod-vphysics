@@ -72,13 +72,11 @@ class CPlayerController : public IController, public IPhysicsPlayerController, p
 		btVector3						m_currentSpeed;
 		btVector3						m_lastImpulse;
 		btVector3						m_inputVelocity;
-		btVector3						m_lastVel;
+
 		float							m_pushMassLimit;
 		float							m_pushSpeedLimit;
-		btVector3						m_targetPosition;
 
-		// Variables for future use as a kinematic controller.
-		btVector3						m_linVelocity;
+		btVector3						m_targetPosition;
 		btVector3						m_maxVelocity;
 
 		int								m_ticksSinceUpdate;

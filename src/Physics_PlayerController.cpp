@@ -44,8 +44,7 @@ CPlayerController::CPlayerController(CPhysicsEnvironment *pEnv, CPhysicsObject *
 	m_dampFactor = 1.f;
 	m_ticksSinceUpdate = 0;
 	m_lastImpulse = btVector3(0, 0, 0);
-	m_linVelocity = btVector3(0, 0, 0);
-	m_lastVel = btVector3(0, 0, 0);
+	m_secondsToArrival = 0;
 
 	AttachObject();
 }
@@ -54,11 +53,16 @@ CPlayerController::~CPlayerController() {
 	DetachObject();
 }
 
+// FIXME: Jumping does not work because as soon as the player leaves the object, the target position delta is exactly
+// zero and his velocity gets completely emptied!
 void CPlayerController::Update(const Vector &position, const Vector &velocity, float secondsToArrival, bool onground, IPhysicsObject *pGround) {
 	btVector3 bullTargetPosition, bullMaxVelocity;
 
 	ConvertPosToBull(position, bullTargetPosition);
 	ConvertPosToBull(velocity, bullMaxVelocity);
+
+	// Reset the ticks since update counter
+	m_ticksSinceUpdate = 0;
 
 	// If the targets haven't changed, abort.
 	if (bullMaxVelocity.distance2(m_maxVelocity) < FLT_EPSILON && bullTargetPosition.distance2(m_targetPosition) < FLT_EPSILON) {
@@ -94,14 +98,12 @@ void CPlayerController::Update(const Vector &position, const Vector &velocity, f
 	m_pGround = (CPhysicsObject *)pGround;
 
 	if (m_pGround) {
+		// Attach ourself to the ground so we can listen to see if it gets destroyed
 		m_pGround->AttachEventListener(this);
 
 		// Where we are relative to the ground
 		m_groundPos = m_pGround->GetObject()->getWorldTransform().inverse() * m_targetPosition;
 	}
-
-	// Reset the ticks since update counter
-	m_ticksSinceUpdate = 0;
 }
 
 void CPlayerController::SetEventHandler(IPhysicsPlayerControllerEvent *handler) {
@@ -279,8 +281,13 @@ CPhysicsObject *CPlayerController::GetGroundObject() {
 }
 
 void CPlayerController::Tick(float deltaTime) {
-	//if (!m_enable)
-	//	return;
+	if (!m_enable)
+		return;
+
+	// HACK: Only run this controller once per step (until I can figure out the math to fix per-tick simulation)
+	if (m_pEnv->GetCurSubStep() != 0)
+		return;
+	deltaTime *= m_pEnv->GetNumSubSteps();
 
 	btRigidBody *body = m_pObject->GetObject();
 	btMassCenterMotionState *motionState = (btMassCenterMotionState *)body->getMotionState();
@@ -292,6 +299,7 @@ void CPlayerController::Tick(float deltaTime) {
 
 	btScalar qdist = delta_position.length2();
 	if (qdist > m_maxDeltaPosition * m_maxDeltaPosition && TryTeleportObject()) {
+		// Teleported the controller, so no need to calculate velocity
 		return;
 	}
 
@@ -310,7 +318,9 @@ void CPlayerController::CalculateVelocity(float dt) {
 		if (fraction > 1) fraction = 1;
 	}
 
-	fraction /= m_pEnv->GetSimPSI();
+	// FIXME: We're trying to do a move in too small of a timespan, so the move completes this tick
+	// but it needed a crazy high velocity to work. 
+	float scale = SAFE_DIVIDE(fraction, dt);
 
 	m_secondsToArrival -= dt;
 	if (m_secondsToArrival < 0) m_secondsToArrival = 0;
@@ -325,34 +335,33 @@ void CPlayerController::CalculateVelocity(float dt) {
 	((btMassCenterMotionState *)body->getMotionState())->getGraphicTransform(transform);
 	btVector3 deltaPos = m_targetPosition - transform.getOrigin();
 
+	btVector3 baseVelocity(0);
+
 	// Are we walking on some sort of vphysics ground? Add their velocity in as a base then
 	// because the game doesn't do this for us!
-	// FIXME: We need to remove the ground velocity from our lin velocity and then add it back (m_pGround)
 	CPhysicsObject *pGround = GetGroundObject();
 	if (pGround) {
 		btTransform relTrans = pGround->GetObject()->getWorldTransform().inverse() * m_pObject->GetObject()->getWorldTransform();
 		btVector3 relPos = relTrans.getOrigin();
-	
-		deltaPos += pGround->GetObject()->getVelocityInLocalPoint(relPos) * dt;
 
-		btVector3 vel = pGround->GetObject()->getVelocityInLocalPoint(relPos);
+		baseVelocity = pGround->GetObject()->getVelocityInLocalPoint(relPos);
 	}
 
-	btVector3 linVel = body->getLinearVelocity();
+	btVector3 linVel = body->getLinearVelocity() - baseVelocity;
 	if (m_ticksSinceUpdate == 0) {
 		// TODO: We're applying too high acceleration when we get closer to the target position!
-		ComputeController(linVel, deltaPos, m_maxSpeed, SAFE_DIVIDE(fraction, dt), m_dampFactor, &m_lastImpulse);
+		ComputeController(linVel, deltaPos, m_maxSpeed, scale, m_dampFactor, &m_lastImpulse);
 	} else {
 		btScalar len = m_lastImpulse.length();
 		btVector3 limit(len, len, len);
 		
-		ComputeController(linVel, deltaPos, limit, SAFE_DIVIDE(fraction, dt), m_dampFactor);
+		ComputeController(linVel, deltaPos, limit, scale, m_dampFactor);
 	}
 
 	// TODO: Clamp the velocity based on collisions (using variables such as push max mass, max speed etc)
 	btScalar velLen = linVel.length2();
 
-	body->setLinearVelocity(linVel);
+	body->setLinearVelocity(linVel + baseVelocity);
 }
 
 bool CPlayerController::TryTeleportObject() {
