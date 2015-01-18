@@ -399,6 +399,10 @@ int	btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 	{
 		// fixed timestep with interpolation
 		m_fixedTimeStep = fixedTimeStep;
+
+		// Add timeStep to our local time.
+		// If localTime exceeds fixedTimeStep, we can run a simulation step! Otherwise, interpolate
+		// objects for game rendering.
 		m_localTime += timeStep;
 		if (m_localTime >= fixedTimeStep)
 		{
@@ -1266,29 +1270,6 @@ void btDiscreteDynamicsWorld::debugDrawConstraint(btTypedConstraint* constraint)
 					btVector3 axis1 = tr.getBasis().getColumn(1);
 					getDebugDrawer()->drawArc(pivot, normal, axis1, dbgDrawSize, dbgDrawSize, -twa-tws, -twa+tws, btVector3(0,0,0), true);
 
-				}
-			}
-			break;
-
-		case SLIDER_CONSTRAINT_TYPE:
-			{
-				btSliderConstraint* pSlider = (btSliderConstraint*)constraint;
-				btTransform tr = pSlider->getCalculatedTransformA();
-				if (drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
-				tr = pSlider->getCalculatedTransformB();
-				if (drawFrames) getDebugDrawer()->drawTransform(tr, dbgDrawSize);
-				if (drawLimits)
-				{
-					btTransform tr = pSlider->getUseLinearReferenceFrameA() ? pSlider->getCalculatedTransformA() : pSlider->getCalculatedTransformB();
-					btVector3 li_min = tr * btVector3(pSlider->getLowerLinLimit(), 0.f, 0.f);
-					btVector3 li_max = tr * btVector3(pSlider->getUpperLinLimit(), 0.f, 0.f);
-					getDebugDrawer()->drawLine(li_min, li_max, btVector3(0, 0, 0));
-					btVector3 normal = tr.getBasis().getColumn(0);
-					btVector3 axis = tr.getBasis().getColumn(1);
-					btScalar a_min = pSlider->getLowerAngLimit();
-					btScalar a_max = pSlider->getUpperAngLimit();
-					const btVector3& center = pSlider->getCalculatedTransformB().getOrigin();
-					getDebugDrawer()->drawArc(center, normal, axis, dbgDrawSize, dbgDrawSize, a_min, a_max, btVector3(0,0,0), true);
 				}
 			}
 			break;
