@@ -38,17 +38,17 @@ void bullAxisToMatrix(const btVector3 &axis, btMatrix3x3 &matrix) {
 	// Dot = cos(theta) (for dummies), looking for 0(1) to 180(-1) degrees difference
 	btScalar dot = wup.dot(axis);
 	if ((dot > 1.0f - SIMD_EPSILON) || (dot < -1.0f + SIMD_EPSILON)) {
-		// This part may be broken!
 		// Axis is really close to/is the up/down vector! We'll have to use a side vector as a base instead.
 		btVector3 wside(0, 0, 1);
 
-		btVector3 up = wside.cross(axis);
-		btVector3 side = up.cross(axis);
-
 		// Normalize the cross products, as they may not be unit length.
-		side.normalize();
+		btVector3 up = wside.cross(axis);
 		up.normalize();
 
+		btVector3 side = axis.cross(up);
+		side.normalize();
+
+		// Fwd Up Right
 		matrix.setValue(axis.x(), up.x(), side.x(),
 						axis.y(), up.y(), side.y(),
 						axis.z(), up.z(), side.z());
@@ -880,7 +880,7 @@ CPhysicsConstraint *CreateSlidingConstraint(CPhysicsEnvironment *pEnv, IPhysicsO
 	// Attached -> reference object transform
 	btTransform attToRefXform = objRef->getWorldTransform().inverse() * objAtt->getWorldTransform();
 
-	// Build reference matrix
+	// Build reference matrix (in reference object space)
 	btMatrix3x3 refMatrix;
 	bullAxisToMatrix(slideAxisRef, refMatrix);
 
