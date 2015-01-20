@@ -538,6 +538,7 @@ CPhysicsEnvironment::CPhysicsEnvironment() {
 	m_timestep = 0.f;
 	m_invPSIScale = 0.f;
 	m_simPSICurrent = 0;
+	m_simPSI = 0;
 
 #ifdef MULTITHREADED
 	// Maximum number of parallel tasks (number of threads in the thread support)
@@ -970,8 +971,11 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		deltaTime = 0.1f;
 	}
 
-	// sim PSI Current: How many substeps are done in a single simulation step
-	m_simPSICurrent = cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1;
+	// sim PSI: How many substeps are done in a single simulation step
+	m_simPSI = cvar_substeps.GetInt() != 0 ? cvar_substeps.GetInt() : 1;
+	m_simPSICurrent = m_simPSI; // Substeps left in this step
+	m_numSubSteps = m_simPSI;
+	m_curSubStep = 0;
 	
 	// Simulate no less than 1 ms
 	if (deltaTime > 0.0001) {
@@ -986,7 +990,7 @@ void CPhysicsEnvironment::Simulate(float deltaTime) {
 		// Bullet will add the deltaTime to its internal counter
 		// When this internal counter exceeds m_timestep (param 3 to the below), the simulation will run for fixedTimeStep seconds
 		// If the internal counter does not exceed fixedTimeStep, bullet will just interpolate objects so the game can render them nice and happy
-		m_numSubSteps = m_pBulletEnvironment->stepSimulation(deltaTime, 4, m_timestep, m_simPSICurrent);
+		m_pBulletEnvironment->stepSimulation(deltaTime, 4, m_timestep, m_simPSICurrent);
 
 		// No longer in simulation!
 		m_inSimulation = false;
@@ -1272,6 +1276,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 	}
 
 	m_pPhysicsDragController->Tick(dt);
+
 	for (int i = 0; i < m_controllers.Count(); i++)
 		m_controllers[i]->Tick(dt);
 
@@ -1296,6 +1301,7 @@ void CPhysicsEnvironment::BulletTick(btScalar dt) {
 		m_pCollisionEvent->PostSimulationFrame();
 
 	m_inSimulation = true;
+	m_curSubStep++;
 }
 
 // UNEXPOSED

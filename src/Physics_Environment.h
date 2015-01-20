@@ -166,9 +166,13 @@ public:
 public:
 	// Unexposed functions
 	btSoftRigidDynamicsWorld *				GetBulletEnvironment();
+
 	float									GetInvPSIScale();
+	int										GetSimPSI() { return m_simPSI; }
 	float									GetSubStepTime() { return m_subStepTime; }
 	int										GetNumSubSteps() { return m_numSubSteps; }
+	int										GetCurSubStep() { return m_curSubStep; }
+
 	void									BulletTick(btScalar timeStep);
 	CPhysicsDragController *				GetDragController();
 	CCollisionSolver *						GetCollisionSolver();
@@ -199,7 +203,9 @@ private:
 	float									m_timestep;
 	float									m_invPSIScale;
 	int										m_simPSICurrent;
+	int										m_simPSI;
 	int										m_numSubSteps;
+	int										m_curSubStep;
 	float									m_subStepTime;
 
 	btThreadPool *							m_pSharedThreadPool;
