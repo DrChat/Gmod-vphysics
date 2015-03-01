@@ -199,6 +199,7 @@ void CPhysicsFluidController::Tick(float dt) {
 		btVector3 offset = center - surfPos;
 		btScalar submerged = surfNorm.dot(offset);
 
+#ifdef _DEBUG
 		IVPhysicsDebugOverlay *pOverlay = m_pEnv->GetDebugOverlay();
 		if (pOverlay) {
 			Vector pos;
@@ -213,6 +214,7 @@ void CPhysicsFluidController::Tick(float dt) {
 				pOverlay->AddTextOverlay(pos, 0.f, "submerged %+04.2f", submerged);
 			}
 		}
+#endif
 
 		if (submerged < 0) {
 			btVector3 mins, maxs;
