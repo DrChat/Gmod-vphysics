@@ -4,6 +4,7 @@
 #include <cmodel.h>
 
 #include "BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
+#include "LinearMath/btConvexHull.h"
 
 #include "Physics_Collision.h"
 #include "Physics_Object.h"
@@ -223,34 +224,70 @@ CPhysicsCollision::~CPhysicsCollision() {
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **ppVerts, int vertCount) {
 	if (!ppVerts || vertCount == 0) return NULL;
 
-	btConvexHullShape *pConvex = new btConvexHullShape;
-
+	// Convert the array and call the function below
+	Vector *pVerts = new Vector[vertCount];
 	for (int i = 0; i < vertCount; i++) {
-		btVector3 vert;
-		ConvertPosToBull(*ppVerts[i], vert);
-
-		pConvex->addPoint(vert, false);
+		pVerts[i] = *ppVerts[i];
 	}
-	pConvex->recalcLocalAabb();
 
-	return (CPhysConvex *)pConvex;
+	CPhysConvex *pConvex = ConvexFromVerts(pVerts, vertCount);
+	delete[] pVerts;
+
+	return pConvex;
+}
+
+btConvexTriangleMeshShape *CreateTriFromHull(HullResult &res) {
+	btTriangleIndexVertexArray *pMesh = new btTriangleIndexVertexArray();
+	btIndexedMesh mesh;
+	mesh.m_numTriangles = res.mNumIndices / 3;
+
+	// Duplicate the output vertex array
+	mesh.m_numVertices = res.mNumOutputVertices;
+	btVector3 *pVerts = new btVector3[res.mNumOutputVertices];
+	for (int i = 0; i < res.mNumOutputVertices; i++) {
+		pVerts[i] = res.m_OutputVertices[i];
+	}
+
+	mesh.m_vertexBase = (unsigned char *)pVerts;
+	mesh.m_vertexStride = sizeof(btVector3);
+	mesh.m_vertexType = PHY_FLOAT;
+
+	// Duplicate the index array
+	unsigned short *pIndices = new unsigned short[res.mNumIndices];
+	for (int i = 0; i < res.mNumIndices; i++) {
+		pIndices[i] = res.m_Indices[i];
+	}
+
+	mesh.m_triangleIndexBase = (unsigned char *)pIndices;
+	mesh.m_triangleIndexStride = sizeof(unsigned short);
+
+	pMesh->addIndexedMesh(mesh, PHY_SHORT);
+	btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
+
+	return pShape;
 }
 
 // Newer version of the above (just an array, not an array of pointers)
 CPhysConvex *CPhysicsCollision::ConvexFromVerts(const Vector *pVerts, int vertCount) {
 	if (!pVerts || vertCount == 0) return NULL;
 
-	btConvexHullShape *pConvex = new btConvexHullShape;
+	btVector3 *pBullVerts = new btVector3[vertCount];
 
 	for (int i = 0; i < vertCount; i++) {
-		btVector3 vert;
-		ConvertPosToBull(pVerts[i], vert);
-
-		pConvex->addPoint(vert, false);
+		ConvertPosToBull(pVerts[i], pBullVerts[i]);
 	}
-	pConvex->recalcLocalAabb();
 
-	return (CPhysConvex *)pConvex;
+	HullLibrary lib;
+
+	HullResult res;
+	HullDesc desc(QF_DEFAULT, vertCount, pBullVerts);
+	HullError err = lib.CreateConvexHull(desc, res);
+
+	// Okay, create a triangle mesh with this.
+	btConvexTriangleMeshShape *pMesh = CreateTriFromHull(res);
+	lib.ReleaseResult(res);
+
+	return (CPhysConvex *)pMesh;
 }
 
 CPhysConvex *CPhysicsCollision::ConvexFromPlanes(float *pPlanes, int planeCount, float mergeDistance) {
@@ -296,13 +333,13 @@ float CPhysicsCollision::ConvexVolume(CPhysConvex *pConvex) {
 			// Shorten the var name
 			btVector3 &c = centroid;
 
-			// Okay. We have the 4 vertices we need to perform the area calculation. Now let's do it.
+			// Okay. We have the 4 vertices we need to perform the volume calculation. Now let's do it.
 			btMatrix3x3 mat(v[0][0] - c[0], v[1][0] - c[0], v[2][0] - c[0],
 							v[0][1] - c[1], v[1][1] - c[1], v[2][1] - c[1],
 							v[0][2] - c[2], v[1][2] - c[2], v[2][2] - c[2]);
 
 			// Aaand the volume is 1/6 the determinant of the matrix
-			sum += btScalar(1 / 6) * mat.determinant();
+			sum += mat.determinant() / 6;
 		}
 
 		return sum;
