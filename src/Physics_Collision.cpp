@@ -322,8 +322,10 @@ void CPhysicsCollision::ConvexFree(CPhysConvex *pConvex) {
 	}
 }
 
+// TODO: Need this to get contents of a convex in a compound shape
 void CPhysicsCollision::SetConvexGameData(CPhysConvex *pConvex, unsigned int gameData) {
-	NOT_IMPLEMENTED
+	btConvexShape *pShape = (btConvexShape *)pConvex;
+	pShape->setUserPointer((void *)gameData);
 }
 
 // Appears to use a polyhedron class from mathlib
@@ -791,9 +793,56 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide,
 	return TraceBox(ray, MASK_ALL, NULL, pCollide, collideOrigin, collideAngles, ptr);
 }
 
+class CFilteredRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
+	public:
+		CFilteredRayResultCallback(btVector3 &rayFromWorld, btVector3 &rayToWorld, int contentsMask, IConvexInfo *pConvexInfo): btCollisionWorld::ClosestRayResultCallback(rayFromWorld, rayToWorld) {
+			m_contentsMask = contentsMask;
+			m_pConvexInfo = pConvexInfo;
+		}
+
+		virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &rayResult, bool normalInWorldSpace) {
+			// Test contents...
+
+			return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
+		}
+
+	private:
+		int				m_contentsMask;
+		IConvexInfo *	m_pConvexInfo;
+};
+
+class CFilteredConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback {
+	public:
+		CFilteredConvexResultCallback(btVector3 &start, btVector3 &end, btCollisionShape *pShape, int contentsMask, IConvexInfo *pConvexInfo) : btCollisionWorld::ClosestConvexResultCallback(start, end) {
+			m_contentsMask = contentsMask;
+			m_pConvexInfo = pConvexInfo;
+			m_pShape = pShape;
+		}
+
+		virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult &convexResult, bool normalInWorldSpace) {
+			// Test the convex's contents before we do anything else.
+			// The hit convex ID comes in from convex result's local shape info's triangle ID (stupid but whatever)
+			if (convexResult.m_localShapeInfo) {
+				btConvexShape *pShape = (btConvexShape *)((btCompoundShape *)m_pShape)->getChildShape(convexResult.m_localShapeInfo->m_triangleIndex);
+				int contents = m_pConvexInfo->GetContents((int)pShape->getUserPointer());
+
+				// If none of the contents are within the mask, abort!
+				if (!(contents & m_contentsMask)) {
+					return 1;
+				}
+			}
+
+			return btCollisionWorld::ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
+		}
+
+	private:
+		int				m_contentsMask;
+		IConvexInfo *	m_pConvexInfo;
+		btCollisionShape *m_pShape;
+};
+
 static ConVar vphysics_visualizetraces("vphysics_visualizetraces", "0", FCVAR_CHEAT, "Visualize physics traces");
 
-// TODO: Use contentsMask
 void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IConvexInfo *pConvexInfo, const CPhysCollide *pCollide, const Vector &collideOrigin, const QAngle &collideAngles, trace_t *ptr) {
 	if (!pCollide || !ptr) return;
 
@@ -867,8 +916,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				g_pDebugOverlay->AddLineOverlay(hlStart, hlEnd, 0, 255, 0, false, 0.0f);
 			}
 		}
-	} else if (ray.m_IsSwept) {
-		// Box trace!
+	} else if (ray.m_IsSwept) { // Box trace!
 		if (vphysics_visualizetraces.GetBool() && g_pDebugOverlay) {
 			// Trace start box (red)
 			g_pDebugOverlay->AddBoxOverlay(ray.m_Start, -ray.m_Extents, ray.m_Extents, QAngle(0, 0, 0), 255, 0, 0, 10, 0.0f);
@@ -881,7 +929,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 		ConvertPosToBull(ray.m_Extents, btvec);
 		btBoxShape *box = new btBoxShape(btvec.absolute());
 
-		btCollisionWorld::ClosestConvexResultCallback cb(startv, endv);
+		CFilteredConvexResultCallback cb(startv, endv, shape, contentsMask, pConvexInfo);
 		btCollisionWorld::objectQuerySingle(box, startt, endt, object, shape, transform, cb, 0.f);
 
 		ptr->fraction = cb.m_closestHitFraction;
@@ -902,7 +950,7 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				// We're here because the penetration distance is within tolerable levels (aka on surface of object)
 
 				// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
-				// FIXME: What if a separate shape is at the end of the ray?
+				// FIXME: What if a separate convex is at the end of the ray?
 				btVector3 direction;
 				ConvertPosToBull(ray.m_Delta, direction);
 				if (!btFuzzyZero(direction.length2())) {
@@ -1114,6 +1162,10 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 
 		pConvexOut = pConvex;
 #endif
+
+		// Store the ledge's client data as the userdata for the bullet convex
+		// (not actually a pointer, just gonna BS it)
+		pConvexOut->setUserPointer((void *)ledge->client_data);
 	}
 
 	return pConvexOut;
