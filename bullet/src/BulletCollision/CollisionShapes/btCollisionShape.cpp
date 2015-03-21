@@ -106,7 +106,9 @@ const char*	btCollisionShape::serialize(void* dataBuffer, btSerializer* serializ
 		serializer->serializeName(name);
 	}
 	shapeData->m_shapeType = m_shapeType;
+	shapeData->m_userData = m_userData;
 	//shapeData->m_padding//??
+
 	return "btCollisionShapeData";
 }
 

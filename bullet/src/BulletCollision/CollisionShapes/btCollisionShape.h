@@ -29,6 +29,7 @@ ATTRIBUTE_ALIGNED16(class) btCollisionShape
 protected:
 	int m_shapeType;
 	void* m_userPointer;
+	int m_userData;
 
 public:
 
@@ -131,6 +132,16 @@ public:
 		return m_userPointer;
 	}
 
+	void setUserData(int userData)
+	{
+		m_userData = userData;
+	}
+
+	int getUserData() const
+	{
+		return m_userData;
+	}
+
 	virtual	int	calculateSerializeBufferSize() const;
 
 	///fills the dataBuffer and returns the struct name (and 0 on failure)
@@ -138,6 +149,7 @@ public:
 
 	virtual void	serializeSingleShape(btSerializer* serializer) const;
 
+	virtual size_t getByteSize() const { return sizeof(this); }
 };	
 
 ///do not change those serialization structures, it requires an updated sBulletDNAstr/sBulletDNAstr64
@@ -145,7 +157,8 @@ struct	btCollisionShapeData
 {
 	char	*m_name;
 	int		m_shapeType;
-	char	m_padding[4];
+	int		m_userData;
+	//char	m_padding[4];
 };
 
 SIMD_FORCE_INLINE	int	btCollisionShape::calculateSerializeBufferSize() const
