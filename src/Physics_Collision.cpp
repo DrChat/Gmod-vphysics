@@ -795,13 +795,26 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, const CPhysCollide *pCollide,
 
 class CFilteredRayResultCallback : public btCollisionWorld::ClosestRayResultCallback {
 	public:
-		CFilteredRayResultCallback(btVector3 &rayFromWorld, btVector3 &rayToWorld, int contentsMask, IConvexInfo *pConvexInfo): btCollisionWorld::ClosestRayResultCallback(rayFromWorld, rayToWorld) {
+		CFilteredRayResultCallback(btVector3 &rayFromWorld, btVector3 &rayToWorld, btCollisionShape *pShape, int contentsMask, IConvexInfo *pConvexInfo): btCollisionWorld::ClosestRayResultCallback(rayFromWorld, rayToWorld) {
 			m_contentsMask = contentsMask;
 			m_pConvexInfo = pConvexInfo;
+			m_pShape = pShape;
 		}
 
 		virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &rayResult, bool normalInWorldSpace) {
-			// Test contents...
+			// Test the convex's contents before we do anything else.
+			// The hit convex ID comes in from convex result's local shape info's triangle ID (stupid but whatever)
+			if (rayResult.m_localShapeInfo && rayResult.m_localShapeInfo->m_triangleIndex >= 0) {
+				btConvexShape *pShape = (btConvexShape *)((btCompoundShape *)m_pShape)->getChildShape(rayResult.m_localShapeInfo->m_triangleIndex);
+				if (pShape) {
+					int contents = m_pConvexInfo->GetContents(pShape->getUserData());
+
+					// If none of the contents are within the mask, abort!
+					if (!(contents & m_contentsMask)) {
+						return 1;
+					}
+				}
+			}
 
 			return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
 		}
@@ -809,6 +822,7 @@ class CFilteredRayResultCallback : public btCollisionWorld::ClosestRayResultCall
 	private:
 		int				m_contentsMask;
 		IConvexInfo *	m_pConvexInfo;
+		btCollisionShape *m_pShape;
 };
 
 class CFilteredConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback {
@@ -825,7 +839,7 @@ class CFilteredConvexResultCallback : public btCollisionWorld::ClosestConvexResu
 			if (convexResult.m_localShapeInfo && convexResult.m_localShapeInfo->m_triangleIndex >= 0) {
 				btConvexShape *pShape = (btConvexShape *)((btCompoundShape *)m_pShape)->getChildShape(convexResult.m_localShapeInfo->m_triangleIndex);
 				if (pShape) {
-					int contents = m_pConvexInfo->GetContents((int)pShape->getUserPointer());
+					int contents = m_pConvexInfo->GetContents(pShape->getUserData());
 
 					// If none of the contents are within the mask, abort!
 					if (!(contents & m_contentsMask)) {
@@ -863,27 +877,30 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 	btCollisionShape *shape = (btCollisionShape *)pCollide->GetCollisionShape();
 	object->setCollisionShape(shape);
 
+	// Set the object's transform
 	ConvertPosToBull(collideOrigin, btvec);
 	ConvertRotationToBull(collideAngles, btmatrix);
 	btTransform transform(btmatrix, btvec);
 
+	// Offset it by the mass center (bullet obj centers are at the center of mass)
 	transform *= btTransform(btMatrix3x3::getIdentity(), pCollide->GetMassCenter());
-
 	object->setWorldTransform(transform);
 
+	// Setup the start and end positions
 	btVector3 startv, endv;
 	ConvertPosToBull(ray.m_Start, startv);
 	ConvertPosToBull(ray.m_Start + ray.m_Delta, endv);
 
 	ptr->startpos = ray.m_Start + ray.m_StartOffset;
 
+	// Convert the positions to transforms (with no rotation because source doesn't support that)
 	btTransform startt(btMatrix3x3::getIdentity(), startv);
 	btTransform endt(btMatrix3x3::getIdentity(), endv);
 
 	// Single line trace must be supported in TraceBox? Yep, you betcha.
 	// FIXME: We can't use frac == 0 to determine if the trace was started in a solid! Need to detect this separately.
 	if (ray.m_IsRay) {
-		btCollisionWorld::ClosestRayResultCallback cb(startv, endv);
+		CFilteredRayResultCallback cb(startv, endv, shape, contentsMask, pConvexInfo);
 		btCollisionWorld::rayTestSingle(startt, endt, object, shape, transform, cb);
 
 		ptr->fraction = cb.m_closestHitFraction;
@@ -948,10 +965,12 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 			} else if (cb.m_closestHitFraction == 0.f && cb.m_penetrationDist >= -0.01f) {
 				ConvertDirectionToHL(cb.m_hitNormalWorld, ptr->plane.normal);
 
-				// HACK: Oh whatever, old vphysics did something just as bad
+				// HACK:
 				// We're here because the penetration distance is within tolerable levels (aka on surface of object)
 
 				// If the ray's delta is perpendicular to the hit normal, allow the fraction to be 1
+				// (AKA: If the ray isn't traveling into the object, allow it to keep going)
+
 				// FIXME: What if a separate convex is at the end of the ray?
 				btVector3 direction;
 				ConvertPosToBull(ray.m_Delta, direction);
@@ -970,7 +989,8 @@ void CPhysicsCollision::TraceBox(const Ray_t &ray, unsigned int contentsMask, IC
 				}
 			} else {
 				// Trace started and ended instantly (fraction of 0). We're stuck in a solid!
-				// TODO: Need to properly hook up allsolid.
+				// TODO: Need to properly hook up allsolid (tells source if the trace exits the solid,
+				// and if so, at what fraction it exits the solid)
 				ptr->startsolid = true;
 				ptr->allsolid = true;
 			}
@@ -1165,9 +1185,8 @@ static btConvexShape *LedgeToConvex(const ivpcompactledge_t *ledge) {
 		pConvexOut = pConvex;
 #endif
 
-		// Store the ledge's client data as the userdata for the bullet convex
-		// (not actually a pointer, just gonna BS it)
-		pConvexOut->setUserPointer((void *)ledge->client_data);
+		// Transfer over the ledge's user data (data from Source)
+		pConvexOut->setUserData(ledge->client_data);
 	}
 
 	return pConvexOut;
