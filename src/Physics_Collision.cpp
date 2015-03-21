@@ -804,7 +804,7 @@ class CFilteredRayResultCallback : public btCollisionWorld::ClosestRayResultCall
 		virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &rayResult, bool normalInWorldSpace) {
 			// Test the convex's contents before we do anything else.
 			// The hit convex ID comes in from convex result's local shape info's triangle ID (stupid but whatever)
-			if (rayResult.m_localShapeInfo && rayResult.m_localShapeInfo->m_triangleIndex >= 0) {
+			if (m_pConvexInfo && rayResult.m_localShapeInfo && rayResult.m_localShapeInfo->m_triangleIndex >= 0) {
 				btConvexShape *pShape = (btConvexShape *)((btCompoundShape *)m_pShape)->getChildShape(rayResult.m_localShapeInfo->m_triangleIndex);
 				if (pShape) {
 					int contents = m_pConvexInfo->GetContents(pShape->getUserData());
@@ -836,7 +836,7 @@ class CFilteredConvexResultCallback : public btCollisionWorld::ClosestConvexResu
 		virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult &convexResult, bool normalInWorldSpace) {
 			// Test the convex's contents before we do anything else.
 			// The hit convex ID comes in from convex result's local shape info's triangle ID (stupid but whatever)
-			if (convexResult.m_localShapeInfo && convexResult.m_localShapeInfo->m_triangleIndex >= 0) {
+			if (m_pConvexInfo && convexResult.m_localShapeInfo && convexResult.m_localShapeInfo->m_triangleIndex >= 0) {
 				btConvexShape *pShape = (btConvexShape *)((btCompoundShape *)m_pShape)->getChildShape(convexResult.m_localShapeInfo->m_triangleIndex);
 				if (pShape) {
 					int contents = m_pConvexInfo->GetContents(pShape->getUserData());
