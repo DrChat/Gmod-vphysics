@@ -89,10 +89,17 @@ public:
 
 	btCollisionShape* getChildShape(int index)
 	{
+		if (index < 0 || index > m_children.size())
+			return NULL;
+
 		return m_children[index].m_childShape;
 	}
+
 	const btCollisionShape* getChildShape(int index) const
 	{
+		if (index < 0 || index > m_children.size())
+			return NULL;
+
 		return m_children[index].m_childShape;
 	}
 

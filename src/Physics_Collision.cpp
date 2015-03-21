@@ -822,13 +822,15 @@ class CFilteredConvexResultCallback : public btCollisionWorld::ClosestConvexResu
 		virtual	btScalar addSingleResult(btCollisionWorld::LocalConvexResult &convexResult, bool normalInWorldSpace) {
 			// Test the convex's contents before we do anything else.
 			// The hit convex ID comes in from convex result's local shape info's triangle ID (stupid but whatever)
-			if (convexResult.m_localShapeInfo) {
+			if (convexResult.m_localShapeInfo && convexResult.m_localShapeInfo->m_triangleIndex >= 0) {
 				btConvexShape *pShape = (btConvexShape *)((btCompoundShape *)m_pShape)->getChildShape(convexResult.m_localShapeInfo->m_triangleIndex);
-				int contents = m_pConvexInfo->GetContents((int)pShape->getUserPointer());
+				if (pShape) {
+					int contents = m_pConvexInfo->GetContents((int)pShape->getUserPointer());
 
-				// If none of the contents are within the mask, abort!
-				if (!(contents & m_contentsMask)) {
-					return 1;
+					// If none of the contents are within the mask, abort!
+					if (!(contents & m_contentsMask)) {
+						return 1;
+					}
 				}
 			}
 
