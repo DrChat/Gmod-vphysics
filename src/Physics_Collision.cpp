@@ -352,6 +352,34 @@ float CPhysicsCollision::ConvexVolume(CPhysConvex *pConvex) {
 float CPhysicsCollision::ConvexSurfaceArea(CPhysConvex *pConvex) {
 	if (!pConvex) return 0;
 
+	btCollisionShape *pShape = (btCollisionShape *)pConvex;
+
+	if (pShape->getShapeType() == CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE) {
+		btConvexTriangleMeshShape *pTriShape = (btConvexTriangleMeshShape *)pShape;
+		btTriangleIndexVertexArray *pArr = (btTriangleIndexVertexArray *)pTriShape->getMeshInterface();
+		btIndexedMesh &pMesh = pArr->getIndexedMeshArray()[0];
+
+		btVector3 *pVertexArray = (btVector3 *)pMesh.m_vertexBase;
+		unsigned short *pIndexArray = (unsigned short *)pMesh.m_triangleIndexBase;
+
+		// Loop through all of the triangles in the shape and add up the surface areas
+		float sum = 0.f;
+
+		for (int i = 0; i < pMesh.m_numTriangles; i++) {
+			btVector3 v[3];
+			for (int j = 0; j < 3; j++) {
+				v[j] = pVertexArray[pIndexArray[i * 3 + j]];
+			}
+
+			// Area of a triangle is the length of the cross product of 2 of its sides divided by 2
+			btVector3 ab = v[1] - v[0];
+			btVector3 ac = v[2] - v[0];
+			sum += ab.cross(ac).length() / 2;
+		}
+
+		return sum;
+	}
+
 	NOT_IMPLEMENTED
 	return 0;
 }
@@ -567,8 +595,17 @@ float CPhysicsCollision::CollideVolume(CPhysCollide *pCollide) {
 }
 
 float CPhysicsCollision::CollideSurfaceArea(CPhysCollide *pCollide) {
-	NOT_IMPLEMENTED
-	return 0;
+	btCompoundShape *pCompound = pCollide->GetCompoundShape();
+
+	// Loop through the children and sum the area
+	float sum = 0.f;
+	for (int i = 0; i < pCompound->getNumChildShapes(); i++) {
+		btCollisionShape *pChild = pCompound->getChildShape(i);
+
+		sum += ConvexSurfaceArea((CPhysConvex *)pChild);
+	}
+
+	return sum;
 }
 
 // This'll return the farthest possible vector that's still within our collision mesh.
