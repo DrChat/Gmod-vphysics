@@ -236,7 +236,7 @@ CPhysConvex *CPhysicsCollision::ConvexFromVerts(Vector **ppVerts, int vertCount)
 	return pConvex;
 }
 
-btConvexTriangleMeshShape *CreateTriFromHull(HullResult &res) {
+btConvexTriangleMeshShape *CreateTriMeshFromHull(HullResult &res) {
 	btTriangleIndexVertexArray *pMesh = new btTriangleIndexVertexArray();
 	btIndexedMesh mesh;
 	mesh.m_numTriangles = res.mNumIndices / 3;
@@ -259,7 +259,7 @@ btConvexTriangleMeshShape *CreateTriFromHull(HullResult &res) {
 	}
 
 	mesh.m_triangleIndexBase = (unsigned char *)pIndices;
-	mesh.m_triangleIndexStride = sizeof(unsigned short);
+	mesh.m_triangleIndexStride = 3 * sizeof(unsigned short);
 
 	pMesh->addIndexedMesh(mesh, PHY_SHORT);
 	btConvexTriangleMeshShape *pShape = new btConvexTriangleMeshShape(pMesh);
@@ -280,11 +280,14 @@ CPhysConvex *CPhysicsCollision::ConvexFromVerts(const Vector *pVerts, int vertCo
 	HullLibrary lib;
 
 	HullResult res;
-	HullDesc desc(QF_DEFAULT, vertCount, pBullVerts);
+	HullDesc desc(QF_TRIANGLES, vertCount, pBullVerts);
 	HullError err = lib.CreateConvexHull(desc, res);
+	// A problem occurred in creating the hull :(
+	if (err != QE_OK)
+		return NULL;
 
 	// Okay, create a triangle mesh with this.
-	btConvexTriangleMeshShape *pMesh = CreateTriFromHull(res);
+	btConvexTriangleMeshShape *pMesh = CreateTriMeshFromHull(res);
 	lib.ReleaseResult(res);
 
 	return (CPhysConvex *)pMesh;
@@ -1469,7 +1472,6 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 	// Now for the fun part:
 	// We must convert all of the ivp shapes into something we can use.
 	for (int i = 0; i < solidCount; i++) {
-		// NOTE: modelType 0 is IVPS, 1 is (mostly unused) MOPP format
 		const collideheader_t &surfaceheader = *(collideheader_t *)pOutput->solids[i];
 
 		if (surfaceheader.vphysicsID	!= VPHYSICS_ID
@@ -1480,10 +1482,13 @@ void CPhysicsCollision::VCollideLoad(vcollide_t *pOutput, int solidCount, const 
 		}
 
 		CPhysCollide *pShape = NULL;
+
+		// NOTE: modelType 0 is IVPS, 1 is (mostly unused) MOPP format
 		if (surfaceheader.modelType == 0x0) {
 			pShape = LoadIVPS(pOutput->solids[i], swap);
 		} else if (surfaceheader.modelType == 0x1) {
 			// One big use of mopps is in old map displacement data
+			// The use is terribly unoptimized (each triangle is its own convex shape)
 			//pShape = LoadMOPP(pOutput->solids[i], swap);
 
 			// If we leave this as NULL, the game will use CreateVirtualMesh instead.
