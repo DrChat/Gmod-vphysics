@@ -12,13 +12,6 @@ You can download vphysics [here](http://peniscorp.com/vphysics/) (courtesy of Gr
 
 You may have to repeat these steps if the game updates!
 
-#### Donate
-Support the developer!
-
-[![Donate Via Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](http://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3UA358MF6QLZE)
-
-<sub>If you fork this repository you may want to change this to your paypal account or remove it.</sub>
-
 ## Developers
 #### Libraries Required
 * Absolutely nothing! Everything needed included in ./thirdparty
