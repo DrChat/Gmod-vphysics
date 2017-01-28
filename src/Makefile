@@ -39,9 +39,7 @@ DYNAMICLIBS = \
 	$(SOURCE_SDK)/lib/public/linux32/tier1.a 	\
 	$(SOURCE_SDK)/lib/public/linux32/tier2.a 	\
 	$(SOURCE_SDK)/lib/public/linux32/tier3.a 	\
-	$(SOURCE_SDK)/lib/public/linux32/mathlib.a 	\
-	$(SRCDS_BIN_DIR)/libvstdlib_srv.so 		\
-	$(SRCDS_BIN_DIR)/libtier0_srv.so
+	$(SOURCE_SDK)/lib/public/linux32/mathlib.a
 		
 CC = /usr/bin/g++
 LD = /usr/bin/g++
