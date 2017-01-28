@@ -31,7 +31,6 @@ DYNAMICLIBS = \
 	$(SOURCE_SDK)/lib/public/linux32/mathlib.a  \
 	-lBulletSoftBody 	\
 	-lBulletDynamics 	\
-	-lBulletMultiThreaded	\
 	-lBulletCollision	\
 	-lLinearMath
 
