@@ -9,9 +9,6 @@ CONFIGURATION = release
 SOURCE_SDK = ../thirdparty/sourcesdk/mp/src
 BULLET_SDK = ../bullet
 
-# Note: Srcds is required for a successful build because we need to link to some shared objects.
-SRCDS_BIN_DIR = ~/steamcmd/server/bin
-
 PROJECT_DIR = .
 OUT_DIR = ../build/bin/linux/$(CONFIGURATION)
 OBJ_DIR = ../build/obj/linux/$(PROJECT_NAME)/$(CONFIGURATION)
@@ -67,17 +64,12 @@ CP = cp -f
 MKDIR = mkdir -p
 MAKE = make
 
-all: dirs $(MODULE_NAME) copy
 build: dirs $(MODULE_NAME)
 
 dirs:
 	@-$(MKDIR) $(OUT_DIR)
 	@-$(MKDIR) $(OBJ_DIR)
-	
-copy: $(MODULE_NAME)
-	@echo " + Copying $(OUT_DIR)/$(MODULE_NAME) to $(SRCDS_BIN_DIR)"
-	@$(CP) $(OUT_DIR)/$(MODULE_NAME) $(SRCDS_BIN_DIR)
-		
+
 $(MODULE_NAME): $(OBJECTS)
 	@echo " + Linking..."
 	@$(LD) -o $(OUT_DIR)/$@ $(OBJECTS) $(LDFLAGS)
