@@ -1,4 +1,3 @@
-# My very first makefile!
 MODULE_NAME = vphysics_srv.so
 PROJECT_NAME = vphysics
 
